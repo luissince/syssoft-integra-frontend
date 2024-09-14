@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import CustomComponent from '../../../../model/class/custom-component';
 import ContainerWrapper from '../../../../components/Container';
 import {
@@ -14,8 +15,18 @@ import ErrorResponse from '../../../../model/class/error-response';
 import SuccessReponse from '../../../../model/class/response';
 import { addMoneda } from '../../../../network/rest/principal.network';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import { Switches } from '../../../../components/Checks';
+import Input from '../../../../components/Input';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class MonedaAgregar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {
@@ -87,97 +98,95 @@ class MonedaAgregar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Nombre: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refTxtNombre}
+
+        <Row>
+          <Column className="form-group col-md-6" formGroup={true}>
+            <Input
+              group={true}
+              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              refInput={this.refTxtNombre}
               value={this.state.nombre}
               onChange={(event) =>
                 this.setState({ nombre: event.target.value })
               }
               placeholder="Soles, dolares, etc"
             />
-          </div>
-          <div className="form-group col-md-6">
-            <label>
-              Código ISO: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refTxtCodIso}
+          </Column>
+
+          <Column className="form-group col-md-6" formGroup={true}>
+            <Input
+              group={true}
+              label={<>Código ISO: <i className="fa fa-asterisk text-danger small"></i></>}
+              refInput={this.refTxtCodIso}
               value={this.state.codIso}
               onChange={(event) =>
                 this.setState({ codIso: event.target.value })
               }
               placeholder="PEN, USD, etc"
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>Simbolo:</label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refTxtSimbolo}
+        <Row>
+          <Column className="form-group col-md-6" formGroup={true}>
+            <Input
+              group={true}
+              label={"Simbolo"}
+              refInput={this.refTxtSimbolo}
               value={this.state.simbolo}
               onChange={(event) =>
                 this.setState({ simbolo: event.target.value })
               }
               placeholder="S/, $, etc"
             />
-          </div>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label>Estado:</label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="switch1"
-                ref={this.refEstado}
-                checked={this.state.estado}
-                onChange={(value) =>
-                  this.setState({ estado: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="switch1">
-                {this.state.estado ? 'Activo' : 'Inactivo'}
-              </label>
-            </div>
-          </div>
-        </div>
+          <Column className="form-group col-md-6" formGroup={true}>
+            <Switches
+              label={"Estado:"}
+              id={"cbEstado"}
+              checked={this.state.estado}
+              onChange={(value) =>
+                this.setState({ estado: value.target.checked })
+              }
+            >
+              {this.state.estado ? "Activo" : "Inactivo"}
+            </Switches>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.handleGuardar}
-              >
-                Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-primary"
+              onClick={this.handleGuardar}
+            >
+              <i className='fa fa-save'></i> Editar
+            </Button>
+            {' '}
+            <Button
+              className="btn-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
+}
+
+MonedaAgregar.propTypes = {
+  history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+  location: PropTypes.shape({
+    search: PropTypes.string
+  }),
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string
+    })
+  })
 }
 
 const mapStateToProps = (state) => {

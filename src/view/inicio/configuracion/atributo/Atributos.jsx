@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   alertDialog,
   alertSuccess,
@@ -18,7 +17,7 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
@@ -54,8 +53,6 @@ class Atributos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-
-    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -213,11 +210,11 @@ class Atributos extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="7">
+        <TableRow>
+          <TableCell className="text-center" colSpan="7">
             ¡No hay datos registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -230,11 +227,11 @@ class Atributos extends CustomComponent {
         );
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.tipoAtributo.nombre}</td>
-          <td>{item.nombre}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.tipoAtributo.nombre}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>
             {
               item.tipoAtributo.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
                 <>
@@ -245,33 +242,31 @@ class Atributos extends CustomComponent {
             {
               item.tipoAtributo.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
                 <>
-                {item.valor}
+                  {item.valor}
                 </>
               )
             }
-          </td>
-          <td className="text-center">{estado}</td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+          </TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idAtributo)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idAtributo)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -282,6 +277,7 @@ class Atributos extends CustomComponent {
         <Title
           title='Atributos'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
@@ -307,7 +303,6 @@ class Atributos extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por nombre..."
             />
@@ -316,20 +311,24 @@ class Atributos extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">#</th>
-                  <th width="15%">Tipo</th>
-                  <th width="20%">Nombre</th>
-                  <th width="25%">Valor</th>
-                  <th width="10%" className="text-center">Estado</th>
-                  <th width="5%" className="text-center">Editar</th>
-                  <th width="5%" className="text-center">Eliminar</th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center" width="5%">#</TableHead>
+                    <TableHead width="15%">Tipo</TableHead>
+                    <TableHead width="20%">Nombre</TableHead>
+                    <TableHead width="25%">Valor</TableHead>
+                    <TableHead className="text-center" width="10%">Estado</TableHead>
+                    <TableHead className="text-center" width="5%">Editar</TableHead>
+                    <TableHead className="text-center" width="5%">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

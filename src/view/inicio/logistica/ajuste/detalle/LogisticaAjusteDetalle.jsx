@@ -13,7 +13,7 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerView } from '../../../../../components/Spinner';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 
 class LogisticaAjusteDetalle extends CustomComponent {
   constructor(props) {
@@ -113,104 +113,102 @@ class LogisticaAjusteDetalle extends CustomComponent {
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Fecha y Hora
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {fecha} - {formatTime(hora)}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Tipo de ajuste
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {tipo}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Motivo
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {motivo}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Almacen
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {almacen}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Observación
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {observacion}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Estado
-                      </th>
-                      <th
-                        className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
-                          }`}
-                      >
-                        {estado === 1 ? 'ACTIVO' : 'ANULADO'}
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
+          <Column formGroup={true}>
+            <TableResponsive>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Fecha y Hora
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {fecha} - {formatTime(hora)}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Tipo de ajuste
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {tipo}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Motivo
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {motivo}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Almacen
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {almacen}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Observación
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {observacion}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Estado
+                    </TableHead>
+                    <TableHead
+                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
+                        }`}
+                    >
+                      {estado === 1 ? 'ACTIVO' : 'ANULADO'}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              className={"table table-light table-striped"}
-              title={"Detalle"}
-              tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Producto</th>
-                  <th>Categoría</th>
-                  <th>Cantidad</th>
-                  <th>Unidad</th>
-                </tr>
-              }
-
-              tBody={
-                <>
-                  {this.state.detalle.map((item, index) => {
-                    return (
-                      <tr key={index}>
-                        <td className="text-center">{++index}</td>
-                        <td>
-                          {item.codigo}
-                          <br />
-                          {item.producto}
-                        </td>
-                        <td>{item.categoria}</td>
-                        <td>{rounded(item.cantidad)}</td>
-                        <td>{item.unidad}</td>
-                      </tr>
-                    );
-                  })}
-                </>
-              }
-            />
+            <TableResponsive>
+              <TableTitle>Detalle</TableTitle>
+              <Table className={"table-light table-striped"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Producto</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Cantidad</TableHead>
+                    <TableHead>Unidad</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {
+                    this.state.detalle.map((item, index) => {
+                      return (
+                        <TableRow key={index}>
+                          <TableCell className="text-center">{++index}</TableCell>
+                          <TableCell>
+                            {item.codigo}
+                            <br />
+                            {item.producto}
+                          </TableCell>
+                          <TableCell>{item.categoria}</TableCell>
+                          <TableCell>{rounded(item.cantidad)}</TableCell>
+                          <TableCell>{item.unidad}</TableCell>
+                        </TableRow>
+                      );
+                    })
+                  }
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
       </ContainerWrapper>

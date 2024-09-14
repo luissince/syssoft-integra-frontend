@@ -65,7 +65,7 @@ class Search extends React.Component {
 Search.propTypes = {
   refInput: PropTypes.object,
   group: PropTypes.bool,
-  label: PropTypes.string,
+  label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   onSearch: PropTypes.func.isRequired,
   iconLeft: PropTypes.element,
   placeholder: PropTypes.string,

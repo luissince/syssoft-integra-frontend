@@ -23,7 +23,7 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import printJS from 'print-js';
 import ModalImpresion from './componente/ModalImpresion';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
@@ -884,7 +884,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
         <Title
           title='Guía Remisión'
-          subTitle='Crear'
+          subTitle='CREAR'
           icon={<i className='fa fa-plus'></i>}
           handleGoBack={() => this.handleBack()}
         />
@@ -1238,30 +1238,32 @@ class GuiaRemisionCrear extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="10%">Código</th>
-                  <th width="35%">Descripción</th>
-                  <th width="15%">Und/Medida</th>
-                  <th width="15%">Cantidad</th>
-                </tr>
-              }
-              tBody={
-                this.state.detalle.map((item, index) => (
-                  <tr key={index}>
-                    <td className="text-center">{++index}</td>
-                    <td>{item.codigo}</td>
-                    <td>{item.producto}</td>
-                    <td>{item.medida}</td>
-                    <td>{item.cantidad}</td>
-                  </tr>
-                ))
-              }
-            />
+            <TableResponsive>
+              <Table className="table-bordered">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Código</TableHead>
+                    <TableHead width="35%">Descripción</TableHead>
+                    <TableHead width="15%">Und/Medida</TableHead>
+                    <TableHead width="15%">Cantidad</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {
+                    this.state.detalle.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="text-center">{++index}</TableCell>
+                        <TableCell>{item.codigo}</TableCell>
+                        <TableCell>{item.producto}</TableCell>
+                        <TableCell>{item.medida}</TableCell>
+                        <TableCell>{item.cantidad}</TableCell>
+                      </TableRow>
+                    ))
+                  }
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
       </ContainerWrapper >

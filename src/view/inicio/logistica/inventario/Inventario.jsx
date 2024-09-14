@@ -28,7 +28,7 @@ import Title from '../../../../components/Title';
 import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import CustomModalStock from './component/ModalStock';
 import Select from '../../../../components/Select';
 import Search from '../../../../components/Search';
@@ -355,9 +355,9 @@ class Inventario extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="8">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
@@ -367,23 +367,23 @@ class Inventario extends CustomComponent {
       const color = 'text-white';
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.codigo}<br /><b>{item.producto}</b></td>
-          <td>{item.almacen}</td>
-          <td>{item.cantidadMaxima} {item.medida}</td>
-          <td>{item.cantidadMinima} {item.medida}</td>
-          <td className={`${background} ${color}`}>{rounded(item.cantidad)} {item.medida}</td>
-          <td>{numberFormat(item.costo, this.state.codISO)}</td>
-          <td className="text-center">
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.codigo}<br /><b>{item.producto}</b></TableCell>
+          <TableCell>{item.almacen}</TableCell>
+          <TableCell>{item.cantidadMaxima} {item.medida}</TableCell>
+          <TableCell>{item.cantidadMinima} {item.medida}</TableCell>
+          <TableCell className={`${background} ${color}`}>{rounded(item.cantidad)} {item.medida}</TableCell>
+          <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleOpenModal(item)}
             >
               <i className="bi bi-pencil"></i>
             </Button>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -455,12 +455,12 @@ class Inventario extends CustomComponent {
           </Column>
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <button
-              className="btn btn-outline-secondary"
+            <Button
+              className="btn-outline-secondary"
               onClick={() => this.loadingInit()}
             >
               <i className="bi bi-arrow-clockwise"></i>
-            </button>
+            </Button>
           </Column>
         </Row>
 
@@ -476,23 +476,25 @@ class Inventario extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="30%">Producto</th>
-                  <th width="15%">Almacen</th>
-                  <th width="10%">Stock Máx.</th>
-                  <th width="10%">Stock Mín.</th>
-                  <th width="15%">Cantidad Actual</th>
-                  <th width="10%">Costo</th>
-                  <th width="5%">Editar</th>
-                </tr>
-              }
-              tBody={this.generarBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="30%">Producto</TableHead>
+                    <TableHead width="15%">Almacen</TableHead>
+                    <TableHead width="10%">Stock Máx.</TableHead>
+                    <TableHead width="10%">Stock Mín.</TableHead>
+                    <TableHead width="15%">Cantidad Actual</TableHead>
+                    <TableHead width="10%">Costo</TableHead>
+                    <TableHead width="5%">Editar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generarBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

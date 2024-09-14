@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   alertDialog,
   alertInfo,
@@ -20,7 +19,7 @@ import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Search from '../../../../components/Search';
 import Button from '../../../../components/Button';
@@ -43,6 +42,8 @@ class Comprobantes extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -52,8 +53,6 @@ class Comprobantes extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -70,7 +69,7 @@ class Comprobantes extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
@@ -79,7 +78,7 @@ class Comprobantes extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -92,18 +91,18 @@ class Comprobantes extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
-    await this.setStateAsync({
+  fillTable = async (opcion, buscar = '') => {
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -112,7 +111,7 @@ class Comprobantes extends CustomComponent {
     const params = {
       opcion: opcion,
       idSucursal: this.state.idSucursal,
-      buscar: buscar,
+      buscar: buscar.trim(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -127,7 +126,7 @@ class Comprobantes extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
@@ -137,7 +136,7 @@ class Comprobantes extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -198,55 +197,50 @@ class Comprobantes extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
+        <TableRow>
+          <TableCell className="text-center" colSpan="10">
             ¡No hay comprobantes registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.tipo.toUpperCase()}</td>
-          <td>{item.nombre}</td>
-          <td>{item.serie}</td>
-          <td>{item.numeracion}</td>
-          <td className="text-center">
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.tipo.toUpperCase()}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>{item.serie}</TableCell>
+          <TableCell>{item.numeracion}</TableCell>
+          <TableCell className="text-center">
             <div className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'}`}>{item.preferida === 1 ? 'Si' : 'No'}</div>
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <div className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}>
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               title="Editar"
-              onClick={() =>
-                this.handleEditar(item.idComprobante)
-              }
+              onClick={() => this.handleEditar(item.idComprobante)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
-              onClick={() =>
-                this.handleBorrar(item.idComprobante)
-              }
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
+              onClick={() => this.handleBorrar(item.idComprobante)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -257,20 +251,11 @@ class Comprobantes extends CustomComponent {
         <Title
           title='Comprobantes'
           subTitle='Lista'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              refInput={this.refTxtSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar..."
-            />
-          </Column>
-
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
+          <Column formGroup={true}>
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
@@ -288,29 +273,38 @@ class Comprobantes extends CustomComponent {
         </Row>
 
         <Row>
-          <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="15%">Tipo Comprobante</th>
-                  <th width="20%">Nombre</th>
-                  <th width="15%">Serie</th>
-                  <th width="10%">Numeración</th>
-                  <th width="10%">Preferida</th>
-                  <th width="10%">Estado</th>
-                  <th width="5%" className="text-center">
-                    Edición
-                  </th>
-                  <th width="5%" className="text-center">
-                    Anular
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar..."
             />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="15%">Tipo Comprobante</TableHead>
+                    <TableHead width="20%">Nombre</TableHead>
+                    <TableHead width="15%">Serie</TableHead>
+                    <TableHead width="10%">Numeración</TableHead>
+                    <TableHead width="10%">Preferida</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Edición</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

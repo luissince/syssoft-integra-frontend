@@ -9,7 +9,7 @@ import Button from '../../../../../components/Button';
 import CustomComponent from "../../../../../model/class/custom-component";
 import React from 'react';
 import { filtrarProductoVenta } from '../../../../../network/rest/principal.network';
-import { Table } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -278,7 +278,6 @@ class ModalProductos extends CustomComponent {
             this.refInputBuscar.current.focus();
             this.refInputBuscar.current.select();
         }
-
     }
 
     updateSelection = (children) => {
@@ -306,9 +305,9 @@ class ModalProductos extends CustomComponent {
 
         if (isEmpty(lista)) {
             return (
-                <tr>
-                    <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
-                </tr>
+                <TableRow>
+                    <TableCell className="text-center" colSpan="8">¡No hay datos registrados!</TableCell>
+                </TableRow>
             );
         }
 
@@ -354,23 +353,23 @@ class ModalProductos extends CustomComponent {
                     : item.idTipoTratamientoProducto === A_GRANEL ? "A GRANEL" : "SERVICIO"
 
             return (
-                <tr key={index} tabIndex="0">
-                    <td className={`text-center`}>{item.id || ++index}</td>
-                    <td>
+                <TableRow key={index} tabIndex="0">
+                    <TableCell className={`text-center`}>{item.id || ++index}</TableCell>
+                    <TableCell>
                         {tipo()}
-                        {tipoTratamiento}</td>
-                    <td>
+                        {tipoTratamiento}</TableCell>
+                    <TableCell>
                         {item.codigo}
                         <br />
                         <b>{item.nombreProducto}</b>{' '}
                         {item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}
-                    </td>
-                    <td className="text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                         {numberFormat(item.precio, this.props.codiso)}
-                    </td>
-                    <td>{item.medida}</td>
-                    <td>{item.categoria}</td>
-                    <td className={`${item.tipo === 'PRODUCTO' && item.cantidad <= 0 ? 'text-danger' : 'text-success'}`}>
+                    </TableCell>
+                    <TableCell>{item.medida}</TableCell>
+                    <TableCell>{item.categoria}</TableCell>
+                    <TableCell className={`${item.tipo === 'PRODUCTO' && item.cantidad <= 0 ? 'text-danger' : 'text-success'}`}>
                         {item.tipo === 'PRODUCTO' ? (
                             <>
                                 {item.almacen}
@@ -380,16 +379,16 @@ class ModalProductos extends CustomComponent {
                         ) : (
                             'SERVICIO'
                         )}
-                    </td>
-                    <td className='text-center'>
+                    </TableCell>
+                    <TableCell className='text-center'>
                         <Image
                             default={images.noImage}
                             src={item.imagen}
                             alt="Logo"
                             width={100}
                         />
-                    </td>
-                </tr>
+                    </TableCell>
+                </TableRow>
             );
         });
     }
@@ -430,10 +429,9 @@ class ModalProductos extends CustomComponent {
                                 <div className="px-3 py-3">
                                     <Row>
                                         <Column className='col-8'>
-                                            <label><i className="fa fa-search"></i> Buscar por código o nombres:</label>
-
                                             <Search
                                                 group={true}
+                                                label={"Buscar por código o nombres:"}
                                                 iconLeft={<i className="bi bi-search"></i>}
                                                 placeholder={`Buscar por código, nombres...`}
                                                 refInput={this.refInputBuscar}
@@ -450,12 +448,10 @@ class ModalProductos extends CustomComponent {
                                             />
                                         </Column>
 
-                                        <Column className='col-4'>
-                                            <label>
-                                                Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                                            </label>
+                                        <Column className='col-4' formGroup={true}>                                       
                                             <Select
-                                                title="Lista de Almacenes"
+                                                group={true}
+                                                label={<>Almacen: <i className="fa fa-asterisk text-danger small"></i></>}
                                                 refSelect={refAlmacen}
                                                 value={idAlmacen}
                                                 onChange={async (event) => handleSelectIdIdAlmacen(event, true, () => this.handleOnOpen())}>
@@ -473,24 +469,28 @@ class ModalProductos extends CustomComponent {
                                 <div
                                     className='ml-3 mr-3 h-100 overflow-auto'
                                     onKeyDown={this.handleKeyDown}>
-                                    <Table
-                                        refTable={this.refTable}
-                                        onClick={this.handleOnClick}
-                                        className="table table-bordered table-hover table-sticky"
-                                        tHead={
-                                            <tr>
-                                                <th width="5%" className="text-center">#</th>
-                                                <th width="13%">Tipo/Venta</th>
-                                                <th width="20%">Nombres</th>
-                                                <th width="7%">Precio</th>
-                                                <th width="5%">Medida</th>
-                                                <th width="5%">Categoría</th>
-                                                <th width="10%">Inventario</th>
-                                                <th width="5%">Imagen</th>
-                                            </tr>
-                                        }
-                                        tBody={this.generateBody()}
-                                    />
+                                    <TableResponsive>
+                                        <Table
+                                            ref={this.refTable}
+                                            onClick={this.handleOnClick}
+                                            className="table-bordered table-hover table-sticky">
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead width="5%" className="text-center">#</TableHead>
+                                                    <TableHead width="13%">Tipo/Venta</TableHead>
+                                                    <TableHead width="20%">Nombres</TableHead>
+                                                    <TableHead width="7%">Precio</TableHead>
+                                                    <TableHead width="5%">Medida</TableHead>
+                                                    <TableHead width="5%">Categoría</TableHead>
+                                                    <TableHead width="10%">Inventario</TableHead>
+                                                    <TableHead width="5%">Imagen</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {this.generateBody()}
+                                            </TableBody>
+                                        </Table>
+                                    </TableResponsive>
                                 </div>
                             </div>
                         </div>

@@ -31,7 +31,7 @@ import Select from '../../../../../components/Select';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -589,14 +589,14 @@ class LogisticaAjusteCrear extends CustomComponent {
           <>
             <Row>
               <Column formGroup={true}>
-                <TableResponsive
-                  tHead={
-                    <>
-                      <tr>
-                        <th className="table-secondary w-20 p-1 font-weight-normal ">
+                <TableResponsive>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                           Tipo de Ajuste:
-                        </th>
-                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        </TableHead>
+                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                           {this.state.idTipoAjuste === INCREMENTO ? (
                             <span>
                               <i className="bi bi-plus-circle-fill text-success"></i>{' '}
@@ -609,27 +609,27 @@ class LogisticaAjusteCrear extends CustomComponent {
                               Decremento
                             </span>
                           )}
-                        </th>
-                      </tr>
-                      <tr>
-                        <th className="table-secondary w-20 p-1 font-weight-normal ">
+                        </TableHead>
+                      </TableRow>
+                      <TableRow>
+                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                           Motivo de Ajuste:
-                        </th>
-                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        </TableHead>
+                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                           {this.state.nombreMotivoAjuste}
-                        </th>
-                      </tr>
-                      <tr>
-                        <th className="table-secondary w-20 p-1 font-weight-normal ">
+                        </TableHead>
+                      </TableRow>
+                      <TableRow>
+                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                           Almacen:
-                        </th>
-                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                        </TableHead>
+                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                           {this.state.nombreAlmacen}
-                        </th>
-                      </tr>
-                    </>
-                  }
-                />
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                  </Table>
+                </TableResponsive>
               </Column>
             </Row>
 
@@ -668,22 +668,24 @@ class LogisticaAjusteCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <TableResponsive
-                  title={"Lista de productos:"}
-                  tHead={
-                    <>
-                      <tr>
+                <TableResponsive>
+                  <TableTitle>Lista de productos:</TableTitle>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
                         <th width="5%">Quitar</th>
                         <th width="30%">Clave/Nombre</th>
                         <th width="15%">Nueva Existencia</th>
                         <th width="15%">Existencia Actual</th>
                         <th width="15%">Diferencia</th>
                         <th width="15%">Medida</th>
-                      </tr>
-                    </>
-                  }
-                  tBody={this.generateBody()}
-                />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {this.generateBody()}
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
               </Column>
             </Row>
 

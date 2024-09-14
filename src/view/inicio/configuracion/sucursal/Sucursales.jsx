@@ -1,10 +1,7 @@
-import React from 'react';
 import {
-  spinnerLoading,
   alertSuccess,
   alertWarning,
   alertDialog,
-  keyUpSearch,
   alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -22,7 +19,10 @@ import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
+import { SpinnerTable } from '../../../../components/Spinner';
 
 class Sucursales extends CustomComponent {
   constructor(props) {
@@ -44,13 +44,14 @@ class Sucursales extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-    this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -67,16 +68,16 @@ class Sucursales extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -89,17 +90,17 @@ class Sucursales extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -177,24 +178,23 @@ class Sucursales extends CustomComponent {
     );
   };
 
-  generarBody() {
+  generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="6">
-            {spinnerLoading('Cargando información de la tabla...', true)}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='6'
+          message={'Cargando información de la tabla...'}
+        />
       );
     }
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="6">
+        <TableRow>
+          <TableCell className="text-center" colSpan="6">
             ¡No hay datos registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -207,32 +207,30 @@ class Sucursales extends CustomComponent {
         );
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.nombre}</td>
-          <td>{item.direccion}</td>
-          <td className="text-center">{estado}</td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>{item.direccion}</TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idSucursal)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Eliminar"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idSucursal)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -242,73 +240,59 @@ class Sucursales extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Sucursales'
-          subTitle='Lista'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column className={"col-md-6 col-sm-12"}>
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </Column>
 
-          <Column className={"col-md-6 col-sm-12"}>
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              // disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleAgregar}
+            // disabled={!this.state.add}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>{' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar por nombre..."
+            />
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="20%">Nombre</th>
-                  <th width="30%">Dirección</th>
-                  <th width="10%">Estado</th>
-                  <th width="5%" className="text-center">
-                    Editar
-                  </th>
-                  <th width="5%" className="text-center">
-                    Eliminar
-                  </th>
-                </tr>
-              }
-              tBody={this.generarBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="20%">Nombre</TableHead>
+                    <TableHead width="30%">Dirección</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

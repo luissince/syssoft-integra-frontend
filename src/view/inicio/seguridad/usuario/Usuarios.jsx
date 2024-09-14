@@ -21,7 +21,7 @@ import Button from '../../../../components/Button';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 
@@ -211,11 +211,11 @@ class Usuarios extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">
+        <TableRow>
+          <TableCell className="text-center" colSpan="10">
             ¡No hay datos registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -225,21 +225,21 @@ class Usuarios extends CustomComponent {
         item.estado === 1 ? 'badge badge-info' : 'badge badge-danger';
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>
             {item.dni}
             {<br />}
             {item.nombres + ', ' + item.apellidos}
-          </td>
-          <td>{item.telefono}</td>
-          <td>{item.email}</td>
-          <td>{item.perfil}</td>
-          <td>{item.representante === 1 ? 'SI' : 'NO'}</td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell>{item.telefono}</TableCell>
+          <TableCell>{item.email}</TableCell>
+          <TableCell>{item.perfil}</TableCell>
+          <TableCell>{item.representante === 1 ? 'SI' : 'NO'}</TableCell>
+          <TableCell className="text-center">
             <span className={styleEstado}>{estado}</span>
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idUsuario)}
@@ -247,8 +247,8 @@ class Usuarios extends CustomComponent {
             >
               <i className="bi bi-pencil"></i>
             </Button>
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idUsuario)}
@@ -256,8 +256,8 @@ class Usuarios extends CustomComponent {
             >
               <i className="bi bi-trash"></i>
             </Button>
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleResetear(item.idUsuario)}
@@ -265,8 +265,8 @@ class Usuarios extends CustomComponent {
             >
               <i className="bi bi-key"></i>
             </Button>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -303,7 +303,6 @@ class Usuarios extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />
@@ -312,25 +311,27 @@ class Usuarios extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="20%">Nombre y Apellidos</th>
-                  <th width="10%">Telefono</th>
-                  <th width="10%">Email</th>
-                  <th width="10%">Perfil</th>
-                  <th width="10%">Representante</th>
-                  <th width="5%">Estado</th>
-                  <th width="5%">Editar</th>
-                  <th width="5%">Eliminar</th>
-                  <th width="5%">Resetear</th>
-                </tr>
-              }
-              tBody={this.generarBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="20%">Nombre y Apellidos</TableHead>
+                    <TableHead width="10%">Telefono</TableHead>
+                    <TableHead width="10%">Email</TableHead>
+                    <TableHead width="10%">Perfil</TableHead>
+                    <TableHead width="10%">Representante</TableHead>
+                    <TableHead width="5%">Estado</TableHead>
+                    <TableHead width="5%">Editar</TableHead>
+                    <TableHead width="5%">Eliminar</TableHead>
+                    <TableHead width="5%">Resetear</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generarBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

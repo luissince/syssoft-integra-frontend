@@ -7,7 +7,7 @@ import { CANCELED } from '../../../../../model/types/types';
 import { detailCompra } from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
@@ -163,24 +163,21 @@ class CompraDetalle extends CustomComponent {
   renderDetalles() {
     return (
       this.state.detalles.map((item, index) => (
-        <tr key={index}>
-          <td>{++index}</td>
-          <td>{item.producto}</td>
-          <td className="text-right">
-            {numberFormat(item.costo, this.state.codiso)}
-          </td>
-
-          <td>{item.categoria}</td>
-          <td className="text-right">{item.impuesto}</td>
-          <td className="text-right">{rounded(item.cantidad)}</td>
-          <td>{item.medida}</td>
-          <td className="text-right">
+        <TableRow key={index}>
+          <TableCell>{++index}</TableCell>
+          <TableCell>{item.producto}</TableCell>
+          <TableCell className="text-right">{numberFormat(item.costo, this.state.codiso)}</TableCell>
+          <TableCell>{item.categoria}</TableCell>
+          <TableCell className="text-right">{item.impuesto}</TableCell>
+          <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
+          <TableCell>{item.medida}</TableCell>
+          <TableCell className="text-right">
             {numberFormat(
               item.cantidad * item.costo,
               this.state.codiso,
             )}
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       ))
     );
   }
@@ -227,31 +224,31 @@ class CompraDetalle extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <tr key={index}>
-            <th className="text-right mb-2">{impuesto.nombre} :</th>
-            <th className="text-right mb-2">
+          <TableRow key={index}>
+            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
-            </th>
-          </tr>
+            </TableHead>
+          </TableRow>
         );
       });
     }
     return (
       <>
-        <tr>
-          <th className="text-right mb-2">SUB TOTAL :</th>
-          <th className="text-right mb-2">
+        <TableRow>
+          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
+          <TableHead className="text-right mb-2">
             {numberFormat(subTotal, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
         {impuestosGenerado()}
-        <tr className="border-bottom"></tr>
-        <tr>
-          <th className="text-right h5">TOTAL :</th>
-          <th className="text-right h5">
+        <TableRow className="border-bottom"></TableRow>
+        <TableRow>
+          <TableHead className="text-right h5">TOTAL :</TableHead>
+          <TableHead className="text-right h5">
             {numberFormat(total, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
       </>
     );
   }
@@ -259,11 +256,11 @@ class CompraDetalle extends CustomComponent {
   renderTransaciones() {
     if (isEmpty(this.state.transaccion)) {
       return (
-        <tr>
-          <td colSpan="6" className="text-center">
+        <TableRow>
+          <TableCell colSpan="6" className="text-center">
             No hay transacciones para mostrar.
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -271,41 +268,41 @@ class CompraDetalle extends CustomComponent {
       this.state.transaccion.map((item, index) => {
         return (
           <React.Fragment key={index}>
-            <tr className="table-success">
-              <td>{index + 1}</td>
-              <td>
+            <TableRow className="table-success">
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>
                 <span>{item.fecha}</span>
                 <br />
                 <span>{formatTime(item.hora)}</span>
-              </td>
-              <td>{item.concepto}</td>
-              <td>{item.nota}</td>
-              <td>{item.usuario}</td>
-            </tr>
+              </TableCell>
+              <TableCell>{item.concepto}</TableCell>
+              <TableCell>{item.nota}</TableCell>
+              <TableCell>{item.usuario}</TableCell>
+            </TableRow>
 
-            <tr>
-              <td className="text-center">#</td>
-              <td>Banco</td>
-              <td>Monto</td>
-              <td colSpan={2}>Observación</td>
-            </tr>
+            <TableRow>
+              <TableCell className="text-center">#</TableCell>
+              <TableCell>Banco</TableCell>
+              <TableCell>Monto</TableCell>
+              <TableCell colSpan={2}>Observación</TableCell>
+            </TableRow>
             {
               item.detalles.map((detalle, index) => {
                 return (
-                  <tr key={index}>
-                    <td className="text-center">{index + 1}</td>
-                    <td>{detalle.nombre}</td>
-                    <td>{numberFormat(detalle.monto, this.state.codiso)}</td>
-                    <td colSpan={2}>{detalle.observacion}</td>
-                  </tr>
+                  <TableRow key={index}>
+                    <TableCell className="text-center">{index + 1}</TableCell>
+                    <TableCell>{detalle.nombre}</TableCell>
+                    <TableCell>{numberFormat(detalle.monto, this.state.codiso)}</TableCell>
+                    <TableCell colSpan={2}>{detalle.observacion}</TableCell>
+                  </TableRow>
                 );
               })
             }
-            <tr>
-              <td colSpan="6">
+            <TableRow>
+              <TableCell colSpan="6">
                 <hr />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           </React.Fragment>
         );
       })
@@ -344,188 +341,189 @@ class CompraDetalle extends CustomComponent {
 
         <Row>
           <Column className="col-lg-6 col-md-6 col-sm-12 col-12">
-            <TableResponsive
-              className={"table table-borderless"}
-              formGroup={true}
-              tHead={
-                <>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+            <TableResponsive>
+              <Table className={"table-borderless"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Fecha Compra
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.fechaHora}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Proveedor
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.proveedor}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Telefono
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.telefono}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Celular
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.celular}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Email
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.email}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Dirección
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.direccion}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Almacen
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.almacen}
-                    </th>
-                  </tr>
-                </>
-              }
-            />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
 
           <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            <TableResponsive
-              className={"table table-borderless"}
-              formGroup={true}
-              tHead={
-                <>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+            <TableResponsive>
+              <Table className={"table-borderless"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Comprobante
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.comprobante}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Serie - Numeración
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.serieNumeracion}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Tipo
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.tipo}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Estado
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.estado}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Observación
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.observacion}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Notas
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.notas}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Total
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {numberFormat(this.state.total, this.state.codiso)}
-                    </th>
-                  </tr>
-                </>
-              }
-            />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              className="table table-light table-striped"
-              title={"Detalle"}
-              tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Descripción</th>
-                  <th>Costo</th>
-                  <th>Categoría</th>
-                  <th>Impuesto %</th>
-                  <th>Cantidad</th>
-                  <th>Medida</th>
-                  <th>Importe</th>
-                </tr>
-              }
-              tBody={this.renderDetalles()}
-            />
+            <TableResponsive>
+              <TableTitle>Transacciones</TableTitle>
+              <Table className={"table-light"}>
+                <TableHeader className="thead-dark">
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead>Costo</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Impuesto %</TableHead>
+                    <TableHead>Cantidad</TableHead>
+                    <TableHead>Medida</TableHead>
+                    <TableHead>Importe</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.renderDetalles()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table
-              formGroup={true}
-              tHead={this.renderTotal()}
-            />
+            <Table >
+              <TableHeader>{this.renderTotal()}</TableHeader>
+            </Table>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              className={"table table-light"}
-              title={"Transacciones"}
-              tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Fecha y Hora</th>
-                  <th>Concepto</th>
-                  <th>Nota</th>
-                  <th>Usuario</th>
-                </tr>
-              }
-              tBody={this.renderTransaciones()}
-            />
+            <TableResponsive>
+              <TableTitle>Transacciones</TableTitle>
+              <Table className={"table-light"}>
+                <TableHeader className="thead-dark">
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Fecha y Hora</TableHead>
+                    <TableHead>Concepto</TableHead>
+                    <TableHead>Nota</TableHead>
+                    <TableHead>Usuario</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.renderTransaciones()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
       </ContainerWrapper>

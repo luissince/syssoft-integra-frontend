@@ -1,5 +1,6 @@
 import React from 'react';
-import FileDownloader from '../../../components/FileDownloader';
+import PropTypes from 'prop-types';
+import { ExternalLink } from 'lucide-react'
 import { currentDate, isEmpty } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
@@ -13,7 +14,17 @@ import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import { VENTA } from '../../../model/types/tipo-comprobante';
+import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
+import Input from '../../../components/Input';
+import Select from '../../../components/Select';
+import Button from '../../../components/Button';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class RepCompras extends CustomComponent {
 
   constructor(props) {
@@ -183,6 +194,151 @@ class RepCompras extends CustomComponent {
         />
 
         <Title
+          title='Reporte Compras'
+          subTitle='DASHBOARD'
+          handleGoBack={() => this.props.history.goBack()}
+        />
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-warning">
+              <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
+            </Button>
+            {" "}
+            <Button
+              className="btn-outline-success">
+              <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Input
+              label={"Fecha de Inicio:"}
+              type="date"
+            />
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Input
+              label={"Fecha de Final:"}
+              type="date"
+            />
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Select
+              label={"Sucursal:"}
+            >
+              <option value="">TODOS</option>
+            </Select>
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Select
+              label={"Usuario:"}
+              value={this.state.estado}
+              onChange={this.handleSelectEstado}
+            >
+              <option value='0'>TODOS</option>
+              <option value='1'>COBRADO</option>
+              <option value='2'>POR COBRAR</option>
+              <option value='3'>ANULADO</option>
+            </Select>
+          </Column>
+        </Row>
+
+
+        <Row>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Compras Totales</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Al Contado</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Al Crédito</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Anuladas</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <Card>
+              <CardHeader>
+                <CardTitle>Lista de Compras</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <TableResponsive>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead width="5%">#</TableHead>
+                        <TableHead width="15%">Fecha</TableHead>
+                        <TableHead width="10%">Proveedor</TableHead>
+                        <TableHead width="10%">Comprobante</TableHead>
+                        <TableHead width="10%">Tipo</TableHead>
+                        <TableHead width="10%">Estado</TableHead>
+                        <TableHead width="10%">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>1</TableCell>
+                        <TableCell>10/10/2024 <br /> 10:10:10 pm </TableCell>
+                        <TableCell>Cliente</TableCell>
+                        <TableCell>
+                          <Link
+                            to={"#"}
+                            className='btn-link'
+                          >
+                            B001-000001 <ExternalLink width={18} height={18} />
+                          </Link>
+                        </TableCell>
+                        <TableCell><span className='text-success'>Contado</span></TableCell>
+                        <TableCell><span className='badge badge-success'>Estado</span></TableCell>
+                        <TableCell>10.00</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        {/* <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
+
+        <Title
           title='Reporte General de Ventas'
           subTitle='FILTRAR'
         />
@@ -320,11 +476,21 @@ class RepCompras extends CustomComponent {
           </Row>
         </div>
 
-        <FileDownloader ref={this.refUseFile} />
+        <FileDownloader ref={this.refUseFile} /> */}
       </ContainerWrapper>
     );
   }
 }
+
+RepCompras.propTypes = {
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string,
+      nombre: PropTypes.string,
+    }),
+  }),
+  history: PropTypes.object,
+};
 
 const mapStateToProps = (state) => {
   return {

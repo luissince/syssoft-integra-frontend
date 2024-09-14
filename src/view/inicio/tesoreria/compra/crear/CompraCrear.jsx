@@ -8,9 +8,11 @@ import {
   alertWarning,
   calculateTax,
   calculateTaxBruto,
+  getRowCellIndex,
   isEmpty,
   isText,
   numberFormat,
+  reorder,
   rounded,
 } from '../../../../../helper/utils.helper';
 import Title from '../../../../../components/Title';
@@ -36,7 +38,7 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
-import { Table } from '../../../../../components/Table';
+import { Table, TableBody, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import ModalProducto from './component/ModalProducto';
 import ModalProveedor from '../../common/ModalProveedor';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
@@ -419,6 +421,108 @@ class CompraCrear extends CustomComponent {
       this.updateReduxState();
     });
   };
+
+  //------------------------------------------------------------------------------------------
+  // Acciones de la tabla
+  //------------------------------------------------------------------------------------------
+  handleKeyDownTable = (event) => {
+    const table = this.refTable.current;
+    if (!table) return;
+
+    const children = table.tBodies[0].children;
+    if (children.length === 0) return;
+
+    if (event.key === 'ArrowUp') {
+      if (this.index > 0) {
+        this.index--;
+        this.updateSelection(children);
+      }
+    }
+
+    if (event.key === 'ArrowDown') {
+      if (this.index < children.length - 1) {
+        this.index++;
+        this.updateSelection(children);
+      }
+    }
+
+    if (event.key === 'Enter') {
+      if (this.index >= 0) {
+        this.handleOpenModalProducto()
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  }
+
+  handleOnClickTable = async (event) => {
+    const { rowIndex, tBody } = getRowCellIndex(event);
+
+    if (rowIndex === -1 || !tBody || !tBody.children) return;
+
+    this.index = rowIndex;
+    this.updateSelection(tBody.children);
+  }
+
+  handleOnDbClickTable = async (event) => {
+    const { rowIndex, tBody } = getRowCellIndex(event);
+
+    if (rowIndex === -1 || !tBody || !tBody.children) return;
+
+    this.index = rowIndex;
+    this.updateSelection(tBody.children);
+    this.handleOpenModalProducto();
+
+  }
+
+  handleOnDragEndTable = async (result) => {
+    const { source, destination } = result;
+    if (!destination) {
+      return;
+    }
+
+    if (source.index === destination.index &&
+      source.droppableId === destination.droppableId
+    ) {
+      return;
+    }
+
+    await this.setStateAsync(prevState => ({
+      detalles: reorder(prevState.detalles, source.index, destination.index).map((item, index) => ({ ...item, id: ++index }))
+    }))
+
+
+    this.index = destination.index;
+    this.cells = [];
+    if (this.refTaleBody.current) {
+      const tbody = this.refTaleBody.current;
+      this.updateSelection(tbody.children);
+    }
+
+    this.updateReduxState();
+  }
+
+  handleOnBeforeDragStartTable = (before) => {
+    const sourceIndex = before.source.index;
+
+    if (this.refTaleBody.current) {
+      const tbody = this.refTaleBody.current;
+      const rows = tbody.children;
+      const row = rows[sourceIndex]
+      this.cells = row.children;
+    }
+  }
+
+  updateSelection = (children) => {
+    for (const child of children) {
+      child.classList.remove("table-active");
+    }
+
+    const selectedChild = children[this.index];
+    selectedChild.classList.add("table-active");
+    selectedChild.scrollIntoView({ block: 'center' });
+    selectedChild.focus();
+  }
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
@@ -846,32 +950,32 @@ class CompraCrear extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <tr key={index}>
-            <th className="text-right mb-2">{impuesto.nombre} :</th>
-            <th className="text-right mb-2">
+          <TableRow key={index}>
+            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
-            </th>
-          </tr>
+            </TableHead>
+          </TableRow>
         );
       });
     };
 
     return (
       <>
-        <tr>
-          <th className="text-right mb-2">SUB TOTAL :</th>
-          <th className="text-right mb-2">
+        <TableRow>
+          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
+          <TableHead className="text-right mb-2">
             {numberFormat(subTotal, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
         {impuestosGenerado()}
-        <tr className="border-bottom"></tr>
-        <tr>
-          <th className="text-right h5">TOTAL :</th>
-          <th className="text-right h5">
+        <TableRow className="border-bottom"></TableRow>
+        <TableRow>
+          <TableHead className="text-right h5">TOTAL :</TableHead>
+          <TableHead className="text-right h5">
             {numberFormat(total, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
       </>
     );
   }
@@ -946,34 +1050,30 @@ class CompraCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <div className="table-responsive"
+                <TableResponsive
                   onKeyDown={this.handleKeyDownTable}>
-                  <table
+                  <Table
                     ref={this.refTable}
                     onClick={this.handleOnClickTable}
                     onDoubleClick={this.handleOnDbClickTable}
-                    className={"table table-bordered table-hover table-sticky w-100"}>
-                    <thead>
-                      <tr>
-                        <th width="5%" className="text-center">
-                          #
-                        </th>
-                        <th width="15%">Producto</th>
-                        <th width="5%">Cantidad</th>
-                        <th width="5%">Costo</th>
-                        <th width="5%">Total</th>
-                        <th width="5%" className="text-center">
-                          Quitar
-                        </th>
-                      </tr>
-                    </thead>
-                    <DragDropContext
+                    className={"table-bordered table-hover table-sticky w-100"}>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead width="5%" className="text-center">#</TableHead>
+                        <TableHead width="15%">Producto</TableHead>
+                        <TableHead width="5%">Cantidad</TableHead>
+                        <TableHead width="5%">Costo</TableHead>
+                        <TableHead width="5%">Total</TableHead>
+                        <TableHead width="5%" className="text-center">Quitar</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <DragDropContext 
                       onDragEnd={this.handleOnDragEndTable}
                       onBeforeDragStart={this.handleOnBeforeDragStartTable}
                     >
                       <Droppable droppableId="table-body">
                         {(provided) => (
-                          <tbody
+                          <TableBody
                             ref={(el) => {
                               provided.innerRef(el)
                               this.refTaleBody.current = el;
@@ -981,12 +1081,12 @@ class CompraCrear extends CustomComponent {
                             {...provided.droppableProps}>
                             {this.generateBody()}
                             {provided.placeholder}
-                          </tbody>
+                          </TableBody>
                         )}
                       </Droppable>
                     </DragDropContext>
-                  </table>
-                </div>
+                  </Table>
+                </TableResponsive>
               </Column>
             </Row>
 
@@ -1135,9 +1235,9 @@ class CompraCrear extends CustomComponent {
             </div>
 
             <div className="form-group">
-              <Table
-                tHead={this.renderTotal()}
-              />
+              <Table className="table-light">
+                <TableHeader>{this.renderTotal()}</TableHeader>
+              </Table>
             </div>
           </Column>
         </Row>

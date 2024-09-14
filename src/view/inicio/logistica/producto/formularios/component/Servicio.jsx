@@ -4,7 +4,7 @@ import Column from '../../../../../../components/Column';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import Select, { SelectActive } from '../../../../../../components/Select';
-import { TableResponsive } from '../../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
 import TextArea from '../../../../../../components/TextArea';
 import { keyNumberFloat } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
@@ -286,54 +286,56 @@ const Servicio = (props) => {
 
         <Column>
           {detalles.length !== 0 && (
-            <TableResponsive
-              refTable={refDetalles}
-              className={"table table-borderless"}
-              tHead={
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Nombre</th>
-                  <th scope="col">Valor</th>
-                  <th className="text-center">Quitar</th>
-                </tr>
-              }
-              tBody={
-                detalles.map((item, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{item.id}</td>
-                      <td>
-                        <Input
-                          placeholder="Ejemplo (Medida)"
-                          value={item.nombre}
-                          onChange={(event) =>
-                            handleInputNombreDetalles(event, item.id)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <TextArea
-                          rows={6}
-                          placeholder="Ejemplo (100m x 200m)"
-                          value={item.valor}
-                          onChange={(event) =>
-                            handleInputValorDetalles(event, item.id)
-                          }
-                        />
-                      </td>
-                      <td className="text-center">
-                        <Button
-                          className="btn-danger"
-                          onClick={() => handleRemoveDetalles(item.id)}
-                        >
-                          <i className="fa fa-remove"></i>
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })
-              }
-            />
+            <TableResponsive>
+              <Table ref={refDetalles} className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead scope="col">#</TableHead>
+                    <TableHead scope="col">Nombre</TableHead>
+                    <TableHead scope="col">Valor</TableHead>
+                    <TableHead className="text-center">Quitar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {
+                    detalles.map((item, index) => {
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>{item.id}</TableCell>
+                          <TableCell>
+                            <Input
+                              placeholder="Ejemplo (Medida)"
+                              value={item.nombre}
+                              onChange={(event) =>
+                                handleInputNombreDetalles(event, item.id)
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextArea
+                              rows={6}
+                              placeholder="Ejemplo (100m x 200m)"
+                              value={item.valor}
+                              onChange={(event) =>
+                                handleInputValorDetalles(event, item.id)
+                              }
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              className="btn-danger"
+                              onClick={() => handleRemoveDetalles(item.id)}
+                            >
+                              <i className="fa fa-remove"></i>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  }
+                </TableBody>
+              </Table>
+            </TableResponsive>
           )}
         </Column>
 

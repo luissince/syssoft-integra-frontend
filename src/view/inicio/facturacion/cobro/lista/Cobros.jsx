@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   numberFormat,
   formatTime,
@@ -23,7 +22,7 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import { SpinnerTable } from '../../../../../components/Spinner';
@@ -60,8 +59,6 @@ class Cobros extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -264,62 +261,60 @@ class Cobros extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="8">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>
             {item.fecha}
             {<br />}
             {formatTime(item.hora)}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {item.documento}
             {<br />}
             {item.informacion}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {item.comprobante}
             {<br />}
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             {
               item.estado === 1
                 ? <span className="text-success">ACTIVO</span>
                 : <span className="text-danger">ANULADO</span>
             }
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             {numberFormat(item.monto, item.codiso)}
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Detalle"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idCobro)}
             // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Eliminar"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleAnular(item.idCobro)}
             // disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -356,7 +351,6 @@ class Cobros extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />
@@ -365,27 +359,25 @@ class Cobros extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="10%">Fecha</th>
-                  <th width="15%">Cliente</th>
-                  <th width="15%">Comprobante</th>
-                  <th width="10%">Estado</th>
-                  <th width="10%" className="text-center">Monto</th>
-                  <th width="5%" className="text-center">
-                    Detalle
-                  </th>
-                  <th width="5%" className="text-center">
-                    Anular
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Fecha</TableHead>
+                    <TableHead width="15%">Cliente</TableHead>
+                    <TableHead width="15%">Comprobante</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Monto</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

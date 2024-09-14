@@ -25,10 +25,12 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Search from '../../../../../components/Search';
 import { setListaAjusteData, setListaAjustePaginacion } from '../../../../../redux/predeterminadoSlice';
 import Button from '../../../../../components/Button';
+import Input from '../../../../../components/Input';
+import Select from '../../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -144,7 +146,7 @@ class LogisticaAjuste extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
         this.fillTable(1, this.state.buscar);
@@ -156,7 +158,7 @@ class LogisticaAjuste extends CustomComponent {
         this.fillTable(3);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
@@ -286,11 +288,11 @@ class LogisticaAjuste extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
+        <TableRow>
+          <TableCell className="text-center" colSpan="8">
             ¡No hay datos registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -310,30 +312,30 @@ class LogisticaAjuste extends CustomComponent {
         );
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.fecha} <br />{formatTime(item.hora)}</td>
-          <td>{iconTipoAjuste} {item.ajuste}<br />{item.motivo}</td>
-          <td>{item.observacion}</td>
-          <td>{item.almacen}</td>
-          <td>{estado}</td>
-          <td className="text-center">
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.fecha} <br />{formatTime(item.hora)}</TableCell>
+          <TableCell>{iconTipoAjuste} {item.ajuste}<br />{item.motivo}</TableCell>
+          <TableCell>{item.observacion}</TableCell>
+          <TableCell>{item.almacen}</TableCell>
+          <TableCell>{estado}</TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idAjuste)}
             >
               <i className="bi bi-eye"></i>
             </Button>
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idAjuste)}
             >
               <i className="bi bi-trash"></i>
             </Button>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     });
   };
@@ -354,44 +356,40 @@ class LogisticaAjuste extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <button
-              className="btn btn-outline-info"
+            <Button
+              className="btn-outline-info"
               onClick={this.handleAgregar}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </button>{' '}
-            <button
-              className="btn btn-outline-secondary"
+            </Button>{' '}
+            <Button
+              className="btn-outline-secondary"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
-            </button>
+            </Button>
           </Column>
         </Row>
 
         <Row>
           <Column className="col-md-3" formGroup={true}>
-            <label>Tipo:</label>
-            <div className="input-group">
-              <select
-                className="form-control"
-                value={this.state.idTipoAjuste}
-                onChange={this.handleSelectTipoAjuste}
-              >
-                <option value="0">-- Selecciona --</option>
-                {this.state.tipoAjuste.map((item, index) => (
-                  <option key={index} value={item.idTipoAjuste}>
-                    {item.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label={"Tipo:"}
+              value={this.state.idTipoAjuste}
+              onChange={this.handleSelectTipoAjuste}
+            >
+              <option value="0">-- Selecciona --</option>
+              {this.state.tipoAjuste.map((item, index) => (
+                <option key={index} value={item.idTipoAjuste}>
+                  {item.nombre}
+                </option>
+              ))}
+            </Select>
           </Column>
 
           <Column className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12" formGroup={true}>
-            <label>Fecha Inicio:</label>
-            <input
-              className="form-control"
+            <Input
+              label={"Fecha Inicio:"}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
@@ -399,9 +397,8 @@ class LogisticaAjuste extends CustomComponent {
           </Column>
 
           <Column className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12" formGroup={true}>
-            <label>Fecha Final:</label>
-            <input
-              className="form-control"
+            <Input
+              label={"Fecha Final:"}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -422,27 +419,25 @@ class LogisticaAjuste extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="15%">Fecha y Hora</th>
-                  <th width="15%">Tipo de Movimiento</th>
-                  <th width="20%">Observación</th>
-                  <th width="15%">Almacen</th>
-                  <th width="10%">Estado</th>
-                  <th width="5%" className="text-center">
-                    Detalle
-                  </th>
-                  <th width="5%" className="text-center">
-                    Anular
-                  </th>
-                </tr>
-              }
-              tBody={this.generarBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="15%">Fecha y Hora</TableHead>
+                    <TableHead width="15%">Tipo de Movimiento</TableHead>
+                    <TableHead width="20%">Observación</TableHead>
+                    <TableHead width="15%">Almacen</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generarBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

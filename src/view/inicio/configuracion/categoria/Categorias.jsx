@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   alertDialog,
   alertSuccess,
@@ -18,7 +17,7 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
@@ -53,8 +52,6 @@ class Categorias extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-
-    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -212,11 +209,11 @@ class Categorias extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="7">
+        <TableRow>
+          <TableCell className="text-center" colSpan="7">
             ¡No hay datos registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -229,33 +226,32 @@ class Categorias extends CustomComponent {
         );
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.codigo}</td>
-          <td>{item.nombre}</td>
-          <td>{item.descripcion}</td>
-          <td className="text-center">{estado}</td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.codigo}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>{item.descripcion}</TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idCategoria)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
+              title=""
               onClick={() => this.handleDelete(item.idCategoria)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -266,6 +262,7 @@ class Categorias extends CustomComponent {
         <Title
           title='Categorias'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
@@ -291,7 +288,6 @@ class Categorias extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por cotización..."
             />
@@ -300,20 +296,24 @@ class Categorias extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">#</th>
-                  <th width="10%">Código</th>
-                  <th width="25%">Nombre</th>
-                  <th width="30%">Descripción</th>
-                  <th width="10%" className="text-center">Estado</th>
-                  <th width="5%" className="text-center">Editar</th>
-                  <th width="5%" className="text-center">Eliminar</th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Código</TableHead>
+                    <TableHead width="25%">Nombre</TableHead>
+                    <TableHead width="30%">Descripción</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

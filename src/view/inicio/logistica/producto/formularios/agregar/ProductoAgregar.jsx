@@ -1501,8 +1501,8 @@ class ProductoAgregar extends CustomComponent {
                     refPrecios={this.refPreciosProducto}
                     handleInputNombrePrecios={this.handleInputNombrePreciosProducto}
                     handleInputPrecioPrecios={this.handleInputPrecioPreciosProducto}
-                    handleAddPrecio={this.handleAddPreciosProducto}
-                    handleRemovePrecio={this.handleRemovePreciosProducto}
+                    handleAddPrecios={this.handleAddPreciosProducto}
+                    handleRemovePrecios={this.handleRemovePreciosProducto}
                     activarInventario={true}
 
                     inventarios={this.state.inventariosProducto}

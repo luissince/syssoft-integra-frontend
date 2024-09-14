@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   formatTime,
   alertDialog,
@@ -24,7 +23,7 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 
 class Conceptos extends CustomComponent {
   constructor(props) {
@@ -54,8 +53,6 @@ class Conceptos extends CustomComponent {
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -105,7 +102,7 @@ class Conceptos extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar = '') => {
-    await this.setStateAsync({
+    this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
@@ -200,53 +197,50 @@ class Conceptos extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="7">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow>
+          <TableCell className="text-center" colSpan="7">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.nombre}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>
             {item.tipo === 1
               ? 'TIPO INGRESO'
               : 'TIPO EGRESO'}
-          </td>
-          <td>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</td>
-          <td>
+          </TableCell>
+          <TableCell>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</TableCell>
+          <TableCell>
             {item.fecha}
             {<br />}
             {formatTime(item.hora)}
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idConcepto)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idConcepto)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
-
 
   render() {
     return (
@@ -280,7 +274,6 @@ class Conceptos extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />
@@ -289,26 +282,24 @@ class Conceptos extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="25%">Concepto</th>
-                  <th width="20%">Tipo Concepto</th>
-                  <th width="10%">Sistema</th>
-                  <th width="10%">Creacion</th>
-                  <th width="5%" className="text-center">
-                    Editar
-                  </th>
-                  <th width="5%" className="text-center">
-                    Eliminar
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="25%">Concepto</TableHead>
+                    <TableHead width="20%">Tipo Concepto</TableHead>
+                    <TableHead width="10%">Sistema</TableHead>
+                    <TableHead width="10%">Creacion</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

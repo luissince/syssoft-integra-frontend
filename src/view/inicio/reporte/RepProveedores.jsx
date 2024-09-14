@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CreditCard, DollarSign, Users } from 'lucide-react'
+import { XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ScatterChart, ZAxis, Scatter } from 'recharts'
+import { CreditCard, ShoppingCart, Truck } from 'lucide-react'
 import { connect } from 'react-redux';
 import {
   currentDate,
@@ -25,7 +26,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class RepClientes extends React.Component {
+class RepProveedores extends React.Component {
 
   constructor(props) {
     super(props);
@@ -285,6 +286,16 @@ class RepClientes extends React.Component {
   }
 
   render() {
+
+    const data = [
+      { proveedor: 'Proveedor A', precio: 100, rotacion: 50, producto: 'Producto 1' },
+      { proveedor: 'Proveedor B', precio: 120, rotacion: 30, producto: 'Producto 1' },
+      { proveedor: 'Proveedor C', precio: 90, rotacion: 70, producto: 'Producto 1' },
+      { proveedor: 'Proveedor A', precio: 200, rotacion: 20, producto: 'Producto 2' },
+      { proveedor: 'Proveedor B', precio: 180, rotacion: 40, producto: 'Producto 2' },
+      { proveedor: 'Proveedor C', precio: 220, rotacion: 10, producto: 'Producto 2' },
+    ];
+
     return (
       <ContainerWrapper>
         <SpinnerView
@@ -354,12 +365,12 @@ class RepClientes extends React.Component {
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Total Clientes</CardTitle>
-                <Users className='text-secondary' />
+                <CardTitle className='text-base m-0'>Total Proveedores</CardTitle>
+                <Truck className='text-secondary' />
               </CardHeader>
               <CardBody>
                 <CardText>1,234</CardText>
-                <p className="text-xs text-secondary">+20% desde el último mes</p>
+                <p className="text-xs text-secondary">+3 desde el mes pasado</p>
               </CardBody>
             </Card>
           </Column>
@@ -367,12 +378,12 @@ class RepClientes extends React.Component {
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Ingresos Totales</CardTitle>
-                <DollarSign className='text-secondary' />
+                <CardTitle className='text-base m-0'>Gastos en Proveedores</CardTitle>
+                <ShoppingCart className='text-secondary' />
               </CardHeader>
               <CardBody>
                 <CardText>$54,321</CardText>
-                <p className="text-xs text-secondary">+5.2% desde el mes pasado</p>
+                <p className="text-xs text-secondary">-2.5% desde el mes pasado</p>
               </CardBody>
             </Card>
           </Column>
@@ -380,12 +391,12 @@ class RepClientes extends React.Component {
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Clientes por Cobrar</CardTitle>
+                <CardTitle className='text-base m-0'>Proveedores por Pagar</CardTitle>
                 <CreditCard className='text-secondary' />
               </CardHeader>
               <CardBody>
-                <CardText>$12,345</CardText>
-                <p className="text-xs text-secondary">15 clientes con pagos pendientes</p>
+                <CardText>$8,765</CardText>
+                <p className="text-xs text-secondary">7 proveedores con pagos pendientes</p>
               </CardBody>
             </Card>
           </Column>
@@ -395,21 +406,44 @@ class RepClientes extends React.Component {
           <Column formGroup={true}>
             <Card>
               <CardHeader>
-                <CardTitle>Cliente Inactivos</CardTitle>
+                <CardTitle>Comparación de Proveedores: Precio vs. Rotación de Productos</CardTitle>
+                <CardDescription>El tamaño de la burbuja representa la cantidad de producto disponible</CardDescription>
+              </CardHeader>
+              <CardBody>
+                <ResponsiveContainer width="100%" height={400}>
+                  <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <XAxis dataKey="precio" name="Precio" unit="$" />
+                    <YAxis dataKey="proveedor" name="Proveedor" type="category" />
+                    <ZAxis dataKey="rotacion" range={[100, 1000]} name="Rotación" />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <Legend />
+                    <Scatter name="Productos" data={data} fill="#8884d8" />
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Proveedores Inactivos</CardTitle>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="30%">Nombre del Cliente</TableHead>
-                        <TableHead className="text-secondary" width="30%">Última Compra</TableHead>
-                        <TableHead className="text-secondary" width="35%">Total de Compras</TableHead>
+                        <TableHead className="text-secondary" width="30%">Nombre del Proveedor</TableHead>
+                        <TableHead className="text-secondary" width="30%">Última Venta</TableHead>
+                        <TableHead className="text-secondary" width="35%">Total de Ventas</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell>Cliente X</TableCell>
+                        <TableCell>Proveedor X</TableCell>
                         <TableCell>15/01/2023</TableCell>
                         <TableCell>$1,234</TableCell>
                       </TableRow>
@@ -425,22 +459,22 @@ class RepClientes extends React.Component {
           <Column className='col-xl-6 col-lg-12' formGroup={true}>
             <Card>
               <CardHeader>
-                <CardTitle>Productos Más Comprados por Cliente</CardTitle>
-                <CardDescription>Top 5 productos más comprados</CardDescription>
+                <CardTitle>Productos Más Vendidos por Proveedor</CardTitle>
+                <CardDescription>Top 5 productos más vendidos</CardDescription>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="10%">Cliente</TableHead>
+                        <TableHead className="text-secondary" width="10%">Proveedor</TableHead>
                         <TableHead className="text-secondary" width="10%">Producto</TableHead>
                         <TableHead className="text-secondary" width="15%">Cantidad</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell>Cliente X</TableCell>
+                        <TableCell>Proveedor X</TableCell>
                         <TableCell>Producto A</TableCell>
                         <TableCell>500</TableCell>
                       </TableRow>
@@ -454,8 +488,8 @@ class RepClientes extends React.Component {
           <Column className='col-xl-6 col-lg-12' formGroup={true}>
             <Card>
               <CardHeader>
-                <CardTitle>Top 5 Clientes</CardTitle>
-                <CardDescription>Clientes con mayor volumen de compras</CardDescription>
+                <CardTitle>Top 5 Proveedores</CardTitle>
+                <CardDescription>Proveedores con mayor volumen de ventas</CardDescription>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
@@ -463,12 +497,12 @@ class RepClientes extends React.Component {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-secondary" width="10%">Nombre</TableHead>
-                        <TableHead className="text-secondary" width="15%">Compras Totales</TableHead>
+                        <TableHead className="text-secondary" width="15%">Ventas Totales</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell>Empresa A</TableCell>
+                        <TableCell>Proveedor A</TableCell>
                         <TableCell>$10,234</TableCell>
                       </TableRow>
                     </TableBody>
@@ -811,7 +845,7 @@ class RepClientes extends React.Component {
   }
 }
 
-RepClientes.propTypes = {
+RepProveedores.propTypes = {
   token: PropTypes.shape({
     project: PropTypes.shape({
       idSucursal: PropTypes.string,
@@ -827,6 +861,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedRepClientes = connect(mapStateToProps, null)(RepClientes);;
+const ConnectedRepProveedores = connect(mapStateToProps, null)(RepProveedores);;
 
-export default ConnectedRepClientes;
+export default ConnectedRepProveedores;

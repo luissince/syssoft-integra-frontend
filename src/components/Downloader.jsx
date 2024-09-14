@@ -1,5 +1,5 @@
 import React from 'react';
-import '../recursos/css/download.css';
+import '../resource/css/download.css';
 import PropTypes from 'prop-types';
 import Axios from 'axios';
 import toast from 'react-hot-toast';

@@ -26,7 +26,7 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Search from '../../../../../components/Search';
 
 /**
@@ -264,60 +264,58 @@ class Gastos extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="8">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>
             {item.fecha}
             <br />
             {formatTime(item.hora)}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {item.comprobante}
             <br />
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {item.documento}
             <br />
             {item.informacion}
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             {
               item.estado === 1
                 ? <span className="text-success">ACTIVO</span>
                 : <span className="text-danger">ANULADO</span>
             }
-          </td>
-          <td className="text-right">
+          </TableCell>
+          <TableCell className="text-right">
             {numberFormat(item.monto, item.codiso)}
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Detalle"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idGasto)}
             >
               <i className="fa fa-eye"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Eliminar"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleAnular(item.idGasto)}
             >
               <i className="fa fa-remove"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -355,37 +353,33 @@ class Gastos extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o proveedor..."
             />
           </Column>
         </Row>
 
-
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="10%">Fecha</th>
-                  <th width="15%">Proveedor</th>
-                  <th width="15%">Comprobante</th>
-                  <th width="10%">Estado</th>
-                  <th width="10%" className="text-center">Monto</th>
-                  <th width="5%" className="text-center">
-                    Detalle
-                  </th>
-                  <th width="5%" className="text-center">
-                    Anular
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Fecha</TableHead>
+                    <TableHead width="15%">Proveedor</TableHead>
+                    <TableHead width="15%">Comprobante</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Monto</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

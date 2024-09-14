@@ -1,84 +1,133 @@
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 
-const Table = ({ refTable, className, title, onClick, onDoubleClick, formGroup, tHead, tBody }) => {
-    if (formGroup) {
-        return (
-            <div className='form-group'>
-                {title !== undefined && <p className="lead">{title}</p>}
-                <table ref={refTable} onClick={onClick} onDoubleClick={onDoubleClick} className={className ? className : "w-100"}>
-                    <thead>{tHead}</thead>
-                    <tbody>{tBody}</tbody>
-                </table>
-            </div>
-
-        );
-    }
+const Table = forwardRef((props, ref) => {
+    const { children, className = '', ...rest } = props;
 
     return (
-        <>
-            {title !== undefined && <p className="lead">{title}</p>}
-            <table ref={refTable} onClick={onClick} onDoubleClick={onDoubleClick} className={className ? className : "w-100"}>
-                <thead>{tHead}</thead>
-                <tbody>{tBody}</tbody>
-            </table>
-        </>
-
+        <table ref={ref} {...rest} className={`table ${className}`}>
+            {children}
+        </table>
     );
-}
+});
+
+Table.displayName = 'Table';
 
 Table.propTypes = {
-    refTable: PropTypes.object,
-    onClick: PropTypes.func,
-    onDoubleClick: PropTypes.func,
     className: PropTypes.string,
-    title: PropTypes.string,
-    formGroup: PropTypes.bool,
-    tHead: PropTypes.node,
-    tBody: PropTypes.node
+    children: PropTypes.node,
 };
 
-const TableResponsive = ({ refTable, className, title, formGroup, tHead, tBody, onKeyDown, onClick, onDoubleClick }) => {
-    if (formGroup) {
-        return (
-            <div className='form-group'>
-                {title !== undefined && <p className="lead">{title}</p>}
-                <div className="table-responsive">
-                    <table ref={refTable} onKeyDown={onKeyDown} onClick={onClick} onDoubleClick={onDoubleClick} className={className ? className : "table table-striped table-bordered rounded"}>
-                        <thead>{tHead}</thead>
-                        <tbody>{tBody}</tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    }
+const TableResponsive = forwardRef((props, ref) => {
+    const { children, className = '', ...rest } = props;
 
     return (
-        <>
-            {title !== undefined && <p className="lead">{title}</p>}
-            <div className="table-responsive">
-                <table ref={refTable} onKeyDown={onKeyDown} onClick={onClick} onDoubleClick={onDoubleClick} className={className ? className : "table table-striped table-bordered rounded"}>
-                    <thead>{tHead}</thead>
-                    <tbody>{tBody}</tbody>
-                </table>
-            </div>
-        </>
+        <div ref={ref} {...rest} className={`table-responsive ${className}`}>
+            {children}
+        </div>
+    );
+});
 
+TableResponsive.displayName = 'TableResponsive';
+
+TableResponsive.propTypes = {
+    className: PropTypes.string,
+    children: PropTypes.node,
+};
+
+const TableTitle = ({ children }) => {
+    return (
+        <p className="lead">{children}</p>
     );
 }
 
-TableResponsive.propTypes = {
-    refTable: PropTypes.object,
-    className: PropTypes.string,
-    title: PropTypes.string,
-    formGroup: PropTypes.bool,
-    tHead: PropTypes.element,
-    tBody: PropTypes.node,
-    onKeyDown: PropTypes.func,
-    onClick: PropTypes.func,
-    onDoubleClick: PropTypes.func
+TableTitle.propTypes = {
+    children: PropTypes.node,
+};
+
+const TableHeader = forwardRef((props, ref) => {
+    const { children, ...rest } = props;
+
+    return (
+        <thead ref={ref} {...rest}>
+            {children}
+        </thead>
+    );
+});
+
+TableHeader.displayName = 'TableHeader';
+
+TableHeader.propTypes = {
+    children: PropTypes.node,
+};
+
+const TableBody = forwardRef((props, ref) => {
+    const { children, ...rest } = props;
+
+    return (
+        <tbody ref={ref} {...rest}>
+            {children}
+        </tbody>
+    );
+});
+
+TableBody.displayName = 'TableBody';
+
+TableBody.propTypes = {
+    children: PropTypes.node,
+};
+
+const TableRow = forwardRef((props, ref) => {
+    const { children, ...rest } = props;
+
+    return (
+        <tr ref={ref} {...rest}>
+            {children}
+        </tr>
+    );
+});
+
+TableRow.displayName = 'TableRow';
+
+TableRow.propTypes = {
+    children: PropTypes.node,
+};
+
+const TableHead = (props) => {
+    const { children, ...rest } = props;
+
+    return (
+        <th {...rest}>
+            {children}
+        </th>
+    );
+}
+
+TableHead.propTypes = {
+    children: PropTypes.node,
+};
+
+const TableCell = (props) => {
+    const { children, ...rest } = props;
+
+    return (
+        <td {...rest}>
+            {children}
+        </td>
+    );
+}
+
+TableCell.propTypes = {
+    children: PropTypes.node,
 };
 
 export {
     Table,
-    TableResponsive
+    TableResponsive,
+    TableHeader,
+    TableTitle,
+    TableBody,
+    TableRow,
+    TableHead,
+    TableCell
 }

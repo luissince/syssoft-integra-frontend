@@ -24,7 +24,7 @@ import printJS from "print-js";
 import { SpinnerView } from "../../../../../components/Spinner";
 import Row from "../../../../../components/Row";
 import Column from "../../../../../components/Column";
-import { TableResponsive } from "../../../../../components/Table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from "../../../../../components/Table";
 import { connect } from "react-redux";
 import Title from "../../../../../components/Title";
 import Button from "../../../../../components/Button";
@@ -340,23 +340,21 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   renderDetalle() {
     return (
       this.state.detalles.map((item, index) => (
-        <tr key={index}>
-          <td>{++index}</td>
-          <td>{item.producto}</td>
-          <td>{item.medida}</td>
-          <td>{item.categoria}</td>
-          <td className="text-right">{rounded(item.cantidad)}</td>
-          <td className="text-right">{item.impuesto}</td>
-          <td className="text-right">
-            {numberFormat(item.precio, this.state.codiso)}
-          </td>
-          <td className="text-right">
+        <TableRow key={index}>
+          <TableCell>{++index}</TableCell>
+          <TableCell>{item.producto}</TableCell>
+          <TableCell>{item.medida}</TableCell>
+          <TableCell>{item.categoria}</TableCell>
+          <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
+          <TableCell className="text-right">{item.impuesto}</TableCell>
+          <TableCell className="text-right">{numberFormat(item.precio, this.state.codiso)}</TableCell>
+          <TableCell className="text-right">
             {numberFormat(
               item.cantidad * item.precio,
               this.state.codiso,
             )}
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       ))
     );
   }
@@ -403,32 +401,32 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <tr key={index}>
-            <th className="text-right mb-2">{impuesto.nombre} :</th>
-            <th className="text-right mb-2">
+          <TableRow key={index}>
+            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
-            </th>
-          </tr>
+            </TableHead>
+          </TableRow>
         );
       });
     }
 
     return (
       <>
-        <tr>
-          <th className="text-right mb-2">SUB TOTAL :</th>
-          <th className="text-right mb-2">
+        <TableRow>
+          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
+          <TableHead className="text-right mb-2">
             {numberFormat(subTotal, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
         {impuestosGenerado()}
-        <tr className="border-bottom"></tr>
-        <tr>
-          <th className="text-right h5">TOTAL :</th>
-          <th className="text-right h5">
+        <TableRow className="border-bottom"></TableRow>
+        <TableRow>
+          <TableHead className="text-right h5">TOTAL :</TableHead>
+          <TableHead className="text-right h5">
             {numberFormat(total, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
       </>
     );
   }
@@ -439,13 +437,13 @@ class CuentasPorCobrarAbonar extends CustomComponent {
         let montoActual = cuota.monto;
 
         return <React.Fragment key={index}>
-          <tr className="table-success">
-            <td className="text-center">{index + 1}</td>
-            <td>{cuota.fecha}</td>
-            <td>{"CUOTA " + cuota.cuota}</td>
-            <td className={`${cuota.estado === 0 ? "text-danger" : "text-success"}`}>{cuota.estado === 0 ? "Por Cobrar" : "Cobrado"}</td>
-            <td>{numberFormat(cuota.monto, this.state.codiso)}</td>
-            <td className="text-center">
+          <TableRow className="table-success">
+            <TableCell className="text-center">{index + 1}</TableCell>
+            <TableCell>{cuota.fecha}</TableCell>
+            <TableCell>{"CUOTA " + cuota.cuota}</TableCell>
+            <TableCell className={`${cuota.estado === 0 ? "text-danger" : "text-success"}`}>{cuota.estado === 0 ? "Por Cobrar" : "Cobrado"}</TableCell>
+            <TableCell>{numberFormat(cuota.monto, this.state.codiso)}</TableCell>
+            <TableCell className="text-center">
               <Button
                 className="btn-warning btn-sm"
                 onClick={() => this.handleOpenModalProceso(cuota)}
@@ -453,67 +451,67 @@ class CuentasPorCobrarAbonar extends CustomComponent {
               >
                 <i className="fa fa-money"></i>
               </Button>
-            </td>
-            <td className="text-center">
+            </TableCell>
+            <TableCell className="text-center">
               <Button
                 className="btn-light btn-sm"
               >
                 <i className="fa fa-print"></i>
               </Button>
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
 
-          <tr><td colSpan="7" className="pb-0">Cobros Asociados</td></tr>
-          <tr>
-            <th>#</th>
-            <th>Fecha y Hora</th>
-            <th>Concepto</th>
-            <th colSpan={2}>Nota</th>
-            <th>Usuario</th>
-            <th className="text-center">Anular</th>
-          </tr>
+          <TableRow><TableCell colSpan="7" className="pb-0">Cobros Asociados</TableCell></TableRow>
+          <TableRow>
+            <TableHead>#</TableHead>
+            <TableHead>Fecha y Hora</TableHead>
+            <TableHead>Concepto</TableHead>
+            <TableHead colSpan={2}>Nota</TableHead>
+            <TableHead>Usuario</TableHead>
+            <TableHead className="text-center">Anular</TableHead>
+          </TableRow>
           {
             cuota.transacciones.map((item, index) => {
               return (
                 <React.Fragment key={index}>
-                  <tr className="table-secondary">
-                    <td>{index + 1}</td>
-                    <td>
+                  <TableRow className="table-secondary">
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
                       <span>{item.fecha}</span>
                       <br />
                       <span>{formatTime(item.hora)}</span>
-                    </td>
-                    <td>{item.concepto}</td>
-                    <td colSpan={2}>{item.nota}</td>
-                    <td>{item.usuario}</td>
-                    <td className="text-center">
+                    </TableCell>
+                    <TableCell>{item.concepto}</TableCell>
+                    <TableCell colSpan={2}>{item.nota}</TableCell>
+                    <TableCell>{item.usuario}</TableCell>
+                    <TableCell className="text-center">
                       <Button
                         className="btn-danger btn-sm"
                         onClick={() => this.handleCancelSale(cuota.idCuota, item.idTransaccion)}
                       >
                         <i className="fa fa-close"></i>
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
 
-                  <tr>
-                    <td className=" text-center">#</td>
-                    <td className="">Banco</td>
-                    <td className="">Cobrado</td>
-                    <td className="">Restante</td>
-                    <td className="">Observación</td>
-                  </tr>
+                  <TableRow>
+                    <TableCell className=" text-center">#</TableCell>
+                    <TableCell className="">Banco</TableCell>
+                    <TableCell className="">Cobrado</TableCell>
+                    <TableCell className="">Restante</TableCell>
+                    <TableCell className="">Observación</TableCell>
+                  </TableRow>
                   {
                     item.detalles.map((detalle, index) => {
                       montoActual = montoActual - detalle.monto;
                       return (
-                        <tr key={index}>
-                          <td className="text-center">{index + 1}</td>
-                          <td>{detalle.nombre}</td>
-                          <td>{numberFormat(detalle.monto, this.state.codiso)}</td>
-                          <td>{numberFormat(montoActual, this.state.codiso)}</td>
-                          <td>{detalle.observacion}</td>
-                        </tr>
+                        <TableRow key={index}>
+                          <TableCell className="text-center">{index + 1}</TableCell>
+                          <TableCell>{detalle.nombre}</TableCell>
+                          <TableCell>{numberFormat(detalle.monto, this.state.codiso)}</TableCell>
+                          <TableCell>{numberFormat(montoActual, this.state.codiso)}</TableCell>
+                          <TableCell>{detalle.observacion}</TableCell>
+                        </TableRow>
                       );
                     })
                   }
@@ -521,11 +519,11 @@ class CuentasPorCobrarAbonar extends CustomComponent {
               );
             })
           }
-          <tr>
-            <td colSpan="7">
+          <TableRow>
+            <TableCell colSpan="7">
               <hr />
-            </td>
-          </tr>
+            </TableCell>
+          </TableRow>
         </React.Fragment>
       })
     );
@@ -592,171 +590,175 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
         <Row>
           <Column className="col-lg-6 col-md-12">
-            <TableResponsive
-              className={"table table-light table-striped"}
-              tHead={
-                <>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+            <TableResponsive>
+              <Table className="table-light table-striped">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Comprobante
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.comprobante}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Cliente
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.cliente}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Fecha
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.fecha}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Notas
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.notas}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Forma de venta
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.formaPago}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Estado
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.estado}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Usuario
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.usuario}
-                    </th>
-                  </tr>
-                </>
-              }
-            />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
 
           <Column className="col-lg-6 col-md-12" formGroup={true}>
-            <TableResponsive
-              className={"table table-light table-striped"}
-              tHead={
-                <>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+            <TableResponsive>
+              <Table className="table-light table-striped">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Numero de Cuotas
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.numeroCuota}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Frecuencia
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.frecuenciaPago} DÍAS
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Total
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {numberFormat(this.state.total, this.state.codiso)}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Cobrado
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
                       {numberFormat(this.state.cobrado, this.state.codiso)}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Por Cobrar
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
                       {numberFormat(this.state.total - this.state.cobrado, this.state.codiso)}
-                    </th>
-                  </tr>
-                </>
-              }
-            />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              title={"Detalle"}
-              className={"table table-light table-striped"}
-              tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Concepto</th>
-                  <th>Unidad</th>
-                  <th>Categoría</th>
-                  <th>Cantidad</th>
-                  <th>Impuesto</th>
-                  <th>Precio</th>
-                  <th>Monto</th>
-                </tr>
-              }
-              tBody={this.renderDetalle()}
-            />
+            <TableResponsive>
+              <TableTitle>Detalle</TableTitle>
+              <Table className="table-light table-striped">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Concepto</TableHead>
+                    <TableHead>Unidad</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Cantidad</TableHead>
+                    <TableHead>Impuesto</TableHead>
+                    <TableHead>Precio</TableHead>
+                    <TableHead>Monto</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.renderDetalle()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column className="col-lg-8 col-sm-12"></Column>
           <Column className="col-lg-4 col-sm-12">
-            <table width="100%">
-              <thead>{this.renderTotal()}</thead>
-            </table>
+            <Table>
+              <TableHeader>{this.renderTotal()}</TableHeader>
+            </Table>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              title={"Cuotas"}
-              className={"table table-light"}
-              tHead={
-                <tr className="table-primary">
-                  <th width={"5%"}>#</th>
-                  <th width={"10%"}>Fecha de Cobro</th>
-                  <th width={"10%"}>Cuota</th>
-                  <th width={"10%"}>Estado</th>
-                  <th width={"15%"}>Monto</th>
-                  <th width={"5%"} className="text-center">Cobrar</th>
-                  <th width={"5%"} className="text-center">Imprimir</th>
-                </tr>
-              }
-              tBody={this.renderCuotas()}
-            />
+            <TableResponsive>
+              <TableTitle>Cuotas</TableTitle>
+              <Table className="able-light">
+                <TableHeader className="table-primary">
+                  <TableRow className="table-primary">
+                    <TableHead width={"5%"}>#</TableHead>
+                    <TableHead width={"10%"}>Fecha de Cobro</TableHead>
+                    <TableHead width={"10%"}>Cuota</TableHead>
+                    <TableHead width={"10%"}>Estado</TableHead>
+                    <TableHead width={"15%"}>Monto</TableHead>
+                    <TableHead width={"5%"} className="text-center">Cobrar</TableHead>
+                    <TableHead width={"5%"} className="text-center">Imprimir</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.renderCuotas()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
       </ContainerWrapper>

@@ -17,7 +17,7 @@ import { SpinnerTable } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import Search from '../../../../../components/Search';
@@ -227,35 +227,34 @@ class CuentasPorCobrar extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow>
+          <TableCell className="text-center" colSpan="8">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className={`text-center`}>{item.id}</td>
-          <td>{item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)} </td>
-          <td>{item.documento}<br />{item.informacion}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className={`text-center`}>{item.id}</TableCell>
+          <TableCell>{item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)} </TableCell>
+          <TableCell>{item.documento}<br />{item.informacion}</TableCell>
+          <TableCell>
             {item.numeroCuota === 1 ? item.numeroCuota + " CUOTA" : item.numeroCuota + " CUOTAS"}
             <br />
             FACTURA DE {item.frecuenciaPago} DÍAS
-          </td>
-          <td>{numberFormat(item.total, item.codiso)}</td>
-          <td className='text-success'>{numberFormat(item.pagado, item.codiso)}</td>
-          <td className='text-danger'>{numberFormat(item.total - item.pagado, item.codiso)}</td>
-          <td className='text-center'>
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Detalle"
+          </TableCell>
+          <TableCell>{numberFormat(item.total, item.codiso)}</TableCell>
+          <TableCell className='text-success'>{numberFormat(item.pagado, item.codiso)}</TableCell>
+          <TableCell className='text-danger'>{numberFormat(item.total - item.pagado, item.codiso)}</TableCell>
+          <TableCell className='text-center'>
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleCobrar(item.idVenta)}>
               <i className="fa fa-calendar-check-o"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     })
   }
@@ -286,7 +285,6 @@ class CuentasPorCobrar extends CustomComponent {
               group={true}
               label={"Buscar:"}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />
@@ -307,21 +305,25 @@ class CuentasPorCobrar extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">#</th>
-                  <th width="10%">Comprobante</th>
-                  <th width="20%">Cliente</th>
-                  <th width="15%">N° Cuotas / Frecuencia</th>
-                  <th width="10%">Total</th>
-                  <th width="10%">Cobrado</th>
-                  <th width="10%">Por Cobrar</th>
-                  <th width="5%" className="text-center">Cobrar</th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Comprobante</TableHead>
+                    <TableHead width="20%">Cliente</TableHead>
+                    <TableHead width="15%">N° Cuotas / Frecuencia</TableHead>
+                    <TableHead width="10%">Total</TableHead>
+                    <TableHead width="10%">Cobrado</TableHead>
+                    <TableHead width="10%">Por Cobrar</TableHead>
+                    <TableHead width="5%" className="text-center">Cobrar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

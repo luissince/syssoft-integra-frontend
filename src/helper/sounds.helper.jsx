@@ -1,3 +1,3 @@
-import mixkit from '../recursos/sound/mixkit.wav';
+import mixkit from '../resource/sound/mixkit.wav';
 
 export { mixkit };

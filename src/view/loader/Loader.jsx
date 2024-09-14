@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../recursos/css/loader.css';
+import '../../resource/css/loader.css';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {

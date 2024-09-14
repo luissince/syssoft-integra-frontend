@@ -1,5 +1,5 @@
-import bootstrap from '../recursos/js/bootstrap';
-import Swal from '../recursos/js/sweetalert';
+import bootstrap from '../resource/js/bootstrap';
+import Swal from '../resource/js/sweetalert';
 
 /**
  *

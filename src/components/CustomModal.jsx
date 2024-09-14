@@ -1,8 +1,9 @@
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
-import '../recursos/css/customModal.css'
+import '../resource/css/customModal.css'
 import { keyNumberFloat, keyNumberInteger, keyNumberPhone } from '../helper/utils.helper';
 import React, { Component } from 'react';
+import Button from './Button';
 
 const customStyles = {
   overlay: {
@@ -118,12 +119,11 @@ export const CustomModalContent = ({
       <div className='d-flex flex-column h-100'>
         <div className="header-cm" onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
           <p className='m-0 h6'>{titleHeader}</p>
-          <button
-            type="button"
-            className='close'
+          <Button
+            contentClassName='close'
             onClick={async () => await contentRef.current.handleOnClose()}>
             <span aria-hidden="true">×</span>
-          </button>
+          </Button>
         </div>
         <div className={`body-cm ${classNameBody}`}>
           <div className='d-flex w-100 h-100'>
@@ -200,12 +200,11 @@ export const CustomModalForm = ({
       >
         <div className="header-cm" onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
           <p className='m-0 h6'>{titleHeader}</p>
-          <button
-            type="button"
-            className='close'
+          <Button
+            contentClassName='close'
             onClick={async () => await contentRef.current.handleOnClose()}>
             <span aria-hidden="true">×</span>
-          </button>
+          </Button>
         </div>
         <div className="body-cm">
           {body}

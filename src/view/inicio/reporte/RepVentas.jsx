@@ -1,5 +1,7 @@
 import React from 'react';
-import FileDownloader from '../../../components/FileDownloader';
+import PropTypes from 'prop-types';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { ExternalLink } from 'lucide-react'
 import { currentDate, isEmpty } from '../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
@@ -13,7 +15,17 @@ import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import { VENTA } from '../../../model/types/tipo-comprobante';
+import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
+import Select from '../../../components/Select';
+import Input from '../../../components/Input';
+import Button from '../../../components/Button';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class RepVentas extends CustomComponent {
 
   constructor(props) {
@@ -175,9 +187,214 @@ class RepVentas extends CustomComponent {
   }
 
   render() {
+    const flujoCaja = [
+      { mes: 'Ene', ahora: 450000, atras: 320000 },
+      { mes: 'Feb', ahora: 480000, atras: 340000 },
+      { mes: 'Mar', ahora: 520000, atras: 360000 },
+      { mes: 'Abr', ahora: 490000, atras: 345000 },
+      { mes: 'May', ahora: 500000, atras: 350000 },
+      { mes: 'Jun', ahora: 500000, atras: 350000 },
+      { mes: 'Jul', ahora: 500000, atras: 350000 },
+      { mes: 'Ago', ahora: 500000, atras: 350000 },
+      { mes: 'Set', ahora: 500000, atras: 350000 },
+      { mes: 'Otc', ahora: 500000, atras: 350000 },
+      { mes: 'Nov', ahora: 500000, atras: 350000 },
+      { mes: 'Dic', ahora: 500000, atras: 350000 },
+    ]
+
+    const gastosPorCategoria = [
+      { categoria: 'Facturas', monto: 150000 },
+      { categoria: 'Boletas', monto: 100000 },
+      { categoria: 'Ticket', monto: 50000 },
+    ]
+
     return (
       <ContainerWrapper>
         <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
+
+        <Title
+          title='Reporte Ventas'
+          subTitle='DASHBOARD'
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-warning">
+              <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
+            </Button>
+            {" "}
+            <Button
+              className="btn-outline-success">
+              <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Input
+              label={"Fecha de Inicio:"}
+              type="date"
+            />
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Input
+              label={"Fecha de Final:"}
+              type="date"
+            />
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Select
+              label={"Sucursal:"}
+            >
+              <option value="">TODOS</option>
+            </Select>
+          </Column>
+
+          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+            <Select
+              label={"Usuario:"}
+              value={this.state.estado}
+              onChange={this.handleSelectEstado}
+            >
+              <option value='0'>TODOS</option>
+              <option value='1'>COBRADO</option>
+              <option value='2'>POR COBRAR</option>
+              <option value='3'>ANULADO</option>
+            </Select>
+          </Column>
+        </Row>
+
+
+        <Row>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Ventas Totales</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Al Contado</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Al Crédito</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Anuladas</CardTitle>
+                <CardText>$500,000.</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Tendencia de Ventas</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart width={300} height={300} data={flujoCaja}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mes" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" name='Año Actual' dataKey="ahora" stroke="#8884d8" />
+                    <Line type="monotone" name='Años Pasado' dataKey="atras" stroke="#82ca9d" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Ventas por Comprobante</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={gastosPorCategoria}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="categoria" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar name="Total" dataKey="monto" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <Card>
+              <CardHeader>
+                <CardTitle>Lista de Ventas</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <TableResponsive>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead width="5%">#</TableHead>
+                        <TableHead width="15%">Fecha</TableHead>
+                        <TableHead width="10%">Cliente</TableHead>
+                        <TableHead width="10%">Comprobante</TableHead>
+                        <TableHead width="10%">Tipo</TableHead>
+                        <TableHead width="10%">Estado</TableHead>
+                        <TableHead width="10%">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>1</TableCell>
+                        <TableCell>10/10/2024 <br /> 10:10:10 pm </TableCell>
+                        <TableCell>Cliente</TableCell>
+                        <TableCell>
+                          <Link
+                            to={"#"}
+                            className='btn-link'
+                          >
+                            B001-000001 <ExternalLink width={18} height={18} />
+                          </Link>
+                        </TableCell>
+                        <TableCell><span className='text-success'>Contado</span></TableCell>
+                        <TableCell><span className='badge badge-success'>Estado</span></TableCell>
+                        <TableCell>10.00</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+        {/* <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
@@ -320,11 +537,21 @@ class RepVentas extends CustomComponent {
           </Row>
         </div>
 
-        <FileDownloader ref={this.refUseFile} />
+        <FileDownloader ref={this.refUseFile} /> */}
       </ContainerWrapper>
     );
   }
 }
+
+RepVentas.propTypes = {
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string,
+      nombre: PropTypes.string,
+    })
+  }),
+  history: PropTypes.object,
+};
 
 const mapStateToProps = (state) => {
   return {

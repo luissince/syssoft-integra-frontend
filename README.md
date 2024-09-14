@@ -1,7 +1,7 @@
 # SOFTWARE DE PUNTO DE VENTA
 
 <!-- ![IMAGES DE GO LANG](images/ladder.svg) -->
-<img src="src/recursos/images/syssoftintegra.png" alt="Imagen SysSoft Integra" width="200" />
+<img src="src/resource/images/syssoftintegra.png" alt="Imagen SysSoft Integra" width="200" />
 
 <font size="5" face="Qwitcher Grypen">
 Aplicación para el control de puntos de ventas.

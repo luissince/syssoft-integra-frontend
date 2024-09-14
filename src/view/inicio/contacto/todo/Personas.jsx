@@ -1,11 +1,9 @@
-import React from 'react';
 import { connect } from 'react-redux';
 import {
   alertInfo,
   alertSuccess,
   alertWarning,
   alertDialog,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
@@ -21,8 +19,10 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
 
 class Personas extends CustomComponent {
 
@@ -35,6 +35,8 @@ class Personas extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -42,7 +44,6 @@ class Personas extends CustomComponent {
       messageTable: 'Cargando información...',
     };
 
-    this.refTxtSearch = React.createRef();
 
     this.idCodigo = '';
     this.abortControllerTable = new AbortController();
@@ -64,12 +65,12 @@ class Personas extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -82,17 +83,17 @@ class Personas extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -101,7 +102,7 @@ class Personas extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: buscar.trim(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -187,76 +188,73 @@ class Personas extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="10">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="10">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>
             {item.tipoDocumento}
             {<br />}
             {item.documento}
-          </td>
-          <td>{item.informacion}</td>
-          <td>
+          </TableCell>
+          <TableCell>{item.informacion}</TableCell>
+          <TableCell>
             {item.celular}
             {<br />}
             {item.telefono}
-          </td>
-          <td>{item.direccion}</td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell>{item.direccion}</TableCell>
+          <TableCell className="text-center">
             <div
               className={`badge ${item.predeterminado === 1 ? 'badge-success' : 'badge-warning'}`}
             >
               {item.predeterminado === 1 ? 'SI' : 'NO'}
             </div>
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <div
               className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Editar"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() =>
                 this.handleDetalleCliente(item.idPersona)
               }
             >
               <i className="bi bi-eye"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() =>
                 this.handleEditarCliente(item.idPersona)
               }
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Editar"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() =>
                 this.handleRemoverCliente(item.idPersona)
               }
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -267,77 +265,60 @@ class Personas extends CustomComponent {
         <Title
           title='Contatos'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={() => this.handleAgregarCliente()}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>{' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={() => this.loadInit()}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
+          </Column>
+        </Row>
 
-          <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={() => this.handleAgregarCliente()}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+            />
+          </Column>
+        </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="10%">DNI / RUC</th>
-                  <th width="20%">Cliente</th>
-                  <th width="10%">Cel. / Tel.</th>
-                  <th width="15%">Dirección</th>
-                  <th width="7%">Predeterminado</th>
-                  <th width="7%">Estado</th>
-                  <th width="5%" className="text-center">
-                    Detalle
-                  </th>
-                  <th width="5%" className="text-center">
-                    Editar
-                  </th>
-                  <th width="5%" className="text-center">
-                    Eliminar
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">DNI / RUC</TableHead>
+                    <TableHead width="20%">Cliente</TableHead>
+                    <TableHead width="10%">Cel. / Tel.</TableHead>
+                    <TableHead width="15%">Dirección</TableHead>
+                    <TableHead width="7%">Predeterminado</TableHead>
+                    <TableHead width="7%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

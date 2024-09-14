@@ -22,7 +22,7 @@ import Title from '../../../../components/Title';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 
@@ -200,44 +200,43 @@ class Perfiles extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="6">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="6">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.descripcion}</td>
-          <td>{item.empresa}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.descripcion}</TableCell>
+          <TableCell>{item.empresa}</TableCell>
+          <TableCell>
             {item.fecha}
             {<br />}
             {formatTime(item.hora)}
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idPerfil)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idPerfil)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -274,7 +273,6 @@ class Perfiles extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />
@@ -283,25 +281,23 @@ class Perfiles extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="30%">Descripción</th>
-                  <th width="30%">Empresa</th>
-                  <th width="20%">Creación</th>
-                  <th width="5%" className="text-center">
-                    Editar
-                  </th>
-                  <th width="5%" className="text-center">
-                    Eliminar
-                  </th>
-                </tr>
-              }
-              tBody={this.generarBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="30%">Descripción</TableHead>
+                    <TableHead width="30%">Empresa</TableHead>
+                    <TableHead width="20%">Creación</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generarBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

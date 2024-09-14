@@ -24,7 +24,7 @@ import Title from '../../../../../components/Title';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
@@ -256,9 +256,9 @@ class Productos extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="10">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="10">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
@@ -307,23 +307,23 @@ class Productos extends CustomComponent {
         );
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{tipo()}</td>
-          <td>{item.codigo}<br /><b>{item.nombre}</b>{' '}{item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}</td>
-          <td className="text-right">{numberFormat(item.precio, this.state.codISO)}</td>
-          <td>{item.medida}</td>
-          <td>{item.categoria}</td>
-          <td className="text-center">{estado}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{tipo()}</TableCell>
+          <TableCell>{item.codigo}<br /><b>{item.nombre}</b>{' '}{item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}</TableCell>
+          <TableCell className="text-right">{numberFormat(item.precio, this.state.codISO)}</TableCell>
+          <TableCell>{item.medida}</TableCell>
+          <TableCell>{item.categoria}</TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell>
             <Image
               default={images.noImage}
               src={item.imagen}
               alt="Logo"
               width={100}
             />
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <Button
               className='btn-outline-warning btn-sm'
               title="Editar"
@@ -331,8 +331,8 @@ class Productos extends CustomComponent {
               // disabled={!this.state.edit}
               onClick={() => this.handleEditar(item.idProducto)}
             />
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <Button
               className='btn-outline-danger btn-sm'
               title="Anular"
@@ -340,8 +340,8 @@ class Productos extends CustomComponent {
               // disabled={!this.state.remove}
               onClick={() => this.handleEliminar(item.idProducto)}
             />
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -384,33 +384,27 @@ class Productos extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="15%">Tipo/Venta</th>
-                  <th width="25%">Nombre</th>
-                  <th width="15%">Precio</th>
-                  <th width="10%">Medida</th>
-                  <th width="10%">Categoría</th>
-                  <th width="10%" className="text-center">
-                    Estado
-                  </th>
-                  <th width="10%" className="text-center">
-                    Imagen
-                  </th>
-                  <th width="5%" className="text-center">
-                    Editar
-                  </th>
-                  <th width="5%" className="text-center">
-                    Eliminar
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="15%">Tipo/Venta</TableHead>
+                    <TableHead width="25%">Nombre</TableHead>
+                    <TableHead width="15%">Precio</TableHead>
+                    <TableHead width="10%">Medida</TableHead>
+                    <TableHead width="10%">Categoría</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Imagen</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

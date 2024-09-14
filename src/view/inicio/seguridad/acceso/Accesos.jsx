@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Tree from '../../../../recursos/js/treeone.js';
+import Tree from '../../../../resource/js/treeone.js';
 import {
   alertDialog,
   alertInfo,

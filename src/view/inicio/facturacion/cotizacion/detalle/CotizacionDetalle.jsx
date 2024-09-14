@@ -7,7 +7,7 @@ import { CANCELED } from '../../../../../model/types/types';
 import { detailCotizacion, obtenerCotizacionPdf, obtenerPedidoCotizacionPdf } from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import printJS from 'print-js';
@@ -346,227 +346,222 @@ class CotizacionDetalle extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12">
-            <TableResponsive
-              className={"table table-borderless"}
-              formGroup={true}
-              tHead={
-                <>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
+            <TableResponsive>
+              <Table className="table-borderless">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Fecha Compra
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.fechaHora}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Cliente
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.cliente}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Telefono
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.telefono}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Celular
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.celular}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Email
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.email}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Dirección
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.direccion}
-                    </th>
-                  </tr>
-                </>
-              }
-            />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
 
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            <TableResponsive
-              className={"table table-borderless"}
-              formGroup={true}
-              tHead={
-                <>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+          <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12" formGroup={true}>
+            <TableResponsive>
+              <Table className="table-borderless">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Comprobante
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.comprobante}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Serie - Numeración
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.serieNumeracion}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Estado
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.estado}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Observación
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.observacion}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Nota
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.notas}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th className="table-secondary w-25 p-1 font-weight-normal ">
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Total
-                    </th>
-                    <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {numberFormat(this.state.total, this.state.codiso)}
-                    </th>
-                  </tr>
-                </>
-              }
-            />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              className="table table-light table-striped"
-              title={"Detalle"}
-              tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Descripción</th>
-                  <th>Precio</th>
-                  <th>Categoría</th>
-                  <th>Impuesto %</th>
-                  <th>Cantidad</th>
-                  <th>Medida</th>
-                  <th>Importe</th>
-                </tr>
-              }
-              tBody={
-                <>
-                  {this.state.detalles.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.id}</td>
-                      <td>
-                        {item.codigo}
-                        <br />
-                        {item.producto}
-                      </td>
-                      <td className="text-right">
-                        {numberFormat(item.precio, this.state.codiso)}
-                      </td>
+            <TableResponsive>
+              <TableTitle>Detalle</TableTitle>
+              <Table className="table-light table-striped">
+                <TableHeader className="table-dark">
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead>Precio</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Impuesto %</TableHead>
+                    <TableHead>Cantidad</TableHead>
+                    <TableHead>Medida</TableHead>
+                    <TableHead>Importe</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {
+                    this.state.detalles.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>
+                          {item.codigo}
+                          <br />
+                          {item.producto}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {numberFormat(item.precio, this.state.codiso)}
+                        </TableCell>
 
-                      <td>{item.categoria}</td>
-                      <td className="text-right">{item.impuesto}</td>
-                      <td className="text-right">{rounded(item.cantidad)}</td>
-                      <td>{item.medida}</td>
-                      <td className="text-right">
-                        {numberFormat(
-                          item.cantidad * item.precio,
-                          this.state.codiso,
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              }
-            />
+                        <TableCell>{item.categoria}</TableCell>
+                        <TableCell className="text-right">{item.impuesto}</TableCell>
+                        <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
+                        <TableCell>{item.medida}</TableCell>
+                        <TableCell className="text-right">
+                          {numberFormat(
+                            item.cantidad * item.precio,
+                            this.state.codiso,
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  }
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table
-              formGroup={true}
-              tHead={this.renderTotal()}
-            />
+            <Table>
+              <TableHeader>{this.renderTotal()}</TableHeader>
+            </Table>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              className="table table-light table-striped"
-              title={"Ventas Asociadas"}
-              tHead={
-                <tr>
-                  <th>#</th>
-                  <th>Fecha</th>
-                  <th>Comprobante</th>
-                  <th>Estado</th>
-                </tr>
-              }
-              tBody={
-                <>
+            <TableResponsive>
+              <TableTitle>Ventas Asociadas</TableTitle>
+              <Table className="table-light table-striped">
+                <TableHeader className="table-dark">
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Comprobante</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {isEmpty(this.state.ventas) && (
-                    <tr>
+                    <TableRow>
                       <td className="text-center" colSpan="4">¡No hay ventas asociadas!</td>
-                    </tr>
+                    </TableRow>
                   )}
 
                   {this.state.ventas.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.id}</td>
-                      <td>{item.fecha} <br /> {formatTime(item.hora)} </td>
-                      <td>
+                    <TableRow key={index}>
+                      <TableCell>{item.id}</TableCell>
+                      <TableCell>{item.fecha} <br /> {formatTime(item.hora)} </TableCell>
+                      <TableCell>
                         <Link className="btn-link" to={getPathNavigation("venta", item.idVenta)}>
                           {item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)}
                         </Link>
-                      </td>
-                      <td>
+                      </TableCell>
+                      <TableCell>
                         <React.Fragment>
                           {item.estado === 1 && <span className="text-success">COBRADO</span>}
                           {item.estado === 2 && <span className="text-warning">POR COBRAR</span>}
                           {item.estado === 3 && <span className="text-danger">ANULADO</span>}
                           {item.estado !== 1 && item.estado !== 2 && item.estado !== 3 && <span className="text-primary">POR LLEVAR</span>}
                         </React.Fragment>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </>
-              }
-            />
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

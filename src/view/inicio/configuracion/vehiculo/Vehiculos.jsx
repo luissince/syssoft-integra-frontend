@@ -1,10 +1,8 @@
-import React from 'react';
 import {
   alertDialog,
   alertInfo,
   alertSuccess,
   alertWarning,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -22,7 +20,9 @@ import Title from '../../../../components/Title';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
 
 class Vehiculo extends CustomComponent {
 
@@ -33,6 +33,8 @@ class Vehiculo extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -41,8 +43,6 @@ class Vehiculo extends CustomComponent {
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.refTxtSearch = React.createRef();
 
     this.idCodigo = '';
     this.abortControllerTable = new AbortController();
@@ -60,16 +60,16 @@ class Vehiculo extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -82,17 +82,17 @@ class Vehiculo extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     await this.setStateAsync({
       loading: true,
       lista: [],
@@ -101,7 +101,7 @@ class Vehiculo extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: buscar.trim(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -183,53 +183,52 @@ class Vehiculo extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
+        <TableRow>
+          <TableCell className="text-center" colSpan="8">
             ¡No hay comprobantes registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.marca}</td>
-          <td>{item.numeroPlaca}</td>
-          <td className="text-center">
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.marca}</TableCell>
+          <TableCell>{item.numeroPlaca}</TableCell>
+          <TableCell className="text-center">
             <div
               className={`badge ${item.preferido == 1 ? 'badge-success' : 'badge-warning'}`}
             >
               {item.preferido === 1 ? 'SI' : 'NO'}
             </div>
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <div
               className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idVehiculo)}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idVehiculo)}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -239,73 +238,59 @@ class Vehiculo extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Vehiculos'
-          subTitle='Lista'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </Column>
-
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={this.loadInit}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleAgregar}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>{' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+            </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="25%">Marca</th>
-                  <th width="25%">Número Placa</th>
-                  <th width="15%">Preferida</th>
-                  <th width="15%">Estado</th>
-                  <th width="5%" className="text-center">
-                    Editar
-                  </th>
-                  <th width="5%" className="text-center">
-                    Eliminar
-                  </th>
-                </tr>
-              }
-              tBody={this.generarBody()}
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
             />
+          </Column>
+        </Row>
+
+
+        <Row>
+          <Column>
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="25%">Marca</TableHead>
+                    <TableHead width="25%">Número Placa</TableHead>
+                    <TableHead width="15%">Preferida</TableHead>
+                    <TableHead width="15%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generarBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

@@ -28,7 +28,7 @@ import Row from '../../../../../components/Row';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import Input from '../../../../../components/Input';
 import Button from '../../../../../components/Button';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import Search from '../../../../../components/Search';
 import { setListaTrasladoData, setListaTrasladoPaginacion } from '../../../../../redux/predeterminadoSlice';
@@ -341,11 +341,11 @@ class Traslado extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="9">
+        <TableRow>
+          <TableCell className="text-center" colSpan="9">
             ¡No hay datos registrados!
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -358,31 +358,31 @@ class Traslado extends CustomComponent {
         );
 
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.fecha} <br />{formatTime(item.hora)}</td>
-          <td>{item.tipo}<br />{item.motivo}</td>
-          <td>{item.almacenOrigen}</td>
-          <td>{item.almacenDestino}</td>
-          <td>{item.observacion}</td>
-          <td>{estado}</td>
-          <td className='text-center'>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.fecha} <br />{formatTime(item.hora)}</TableCell>
+          <TableCell>{item.tipo}<br />{item.motivo}</TableCell>
+          <TableCell>{item.almacenOrigen}</TableCell>
+          <TableCell>{item.almacenDestino}</TableCell>
+          <TableCell>{item.observacion}</TableCell>
+          <TableCell>{estado}</TableCell>
+          <TableCell className='text-center'>
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idTraslado)}
             >
               <i className="bi bi-eye"></i>
             </Button>
-          </td>
-          <td className='text-center'>
+          </TableCell>
+          <TableCell className='text-center'>
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idTraslado)}
             >
               <i className="bi bi-trash"></i>
             </Button>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -489,30 +489,27 @@ class Traslado extends CustomComponent {
         </Row>
 
         <Row>
-          <Column>
-            <TableResponsive
-              className={"table table-striped table-bordered rounded"}
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">
-                    #
-                  </th>
-                  <th width="15%">Fecha y Hora</th>
-                  <th width="15%">Tipo / Motivo</th>
-                  <th width="15%">Almacen Origen</th>
-                  <th width="15%">Almacen Destino</th>
-                  <th width="20%">Observación</th>
-                  <th width="10%">Estado</th>
-                  <th width="5%" className="text-center">
-                    Detalle
-                  </th>
-                  <th width="5%" className="text-center">
-                    Anular
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+          <Column>          
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="15%">Fecha y Hora</TableHead>
+                    <TableHead width="15%">Tipo / Motivo</TableHead>
+                    <TableHead width="15%">Almacen Origen</TableHead>
+                    <TableHead width="15%">Almacen Destino</TableHead>
+                    <TableHead width="20%">Observación</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

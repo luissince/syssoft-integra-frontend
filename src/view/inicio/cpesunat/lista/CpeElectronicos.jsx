@@ -39,7 +39,7 @@ import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Select from '../../../../components/Select';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
@@ -592,9 +592,9 @@ class CpeElectronicos extends CustomComponent {
 
     if (isEmpty(lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow>
+          <TableCell className="text-center" colSpan="8">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
@@ -602,9 +602,9 @@ class CpeElectronicos extends CustomComponent {
       const descripcion = item.xmlDescripcion === '' ? 'Por Generar Xml' : limitarCadena(item.xmlDescripcion, 90, '...');
 
       return (
-        <tr key={index}>
-          <td className={`text-center`}>{item.id}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className={`text-center`}>{item.id}</TableCell>
+          <TableCell>
             <div className="dropdown">
               <a
                 className="btn btn-primary dropdown-toggle"
@@ -633,27 +633,27 @@ class CpeElectronicos extends CustomComponent {
                 }
               </ul>
             </div>
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             <span>{item.fecha}<br />{formatTime(item.hora)}</span>
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {`${item.tipoDocumento} - ${item.documento}`}<br />{item.informacion}
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             {item.estado !== 3
               ? <span className="text-success">DECLARAR</span>
               : <span className="text-danger">DAR DE BAJA</span>
             }
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             {this.renderEstado(item)}
-          </td>
-          <td>{descripcion}</td>
-        </tr>
+          </TableCell>
+          <TableCell>{descripcion}</TableCell>
+        </TableRow>
       );
     });
   }
@@ -679,6 +679,7 @@ class CpeElectronicos extends CustomComponent {
         <Title
           title='Comprobante de Pago Electrónico'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
@@ -800,22 +801,25 @@ class CpeElectronicos extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              className={"table table-striped table-bordered rounded"}
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">#</th>
-                  <th width="5%">Opciones</th>
-                  <th width="10%">Fecha</th>
-                  <th width="10%">Comprobante</th>
-                  <th width="15%">Cliente</th>
-                  <th width="10%">Estado</th>
-                  <th width="5%">Estado </th>
-                  <th width="15%">Observación SUNAT</th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%">Opciones</TableHead>
+                    <TableHead width="10%">Fecha</TableHead>
+                    <TableHead width="10%">Comprobante</TableHead>
+                    <TableHead width="15%">Cliente</TableHead>
+                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="5%">Estado </TableHead>
+                    <TableHead width="15%">Observación SUNAT</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

@@ -44,7 +44,7 @@ import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
 import TextArea from '../../../../../../components/TextArea';
-import { Table } from '../../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
 import { Draggable } from 'react-beautiful-dnd';
@@ -815,9 +815,9 @@ class CotizaciónEditar extends CustomComponent {
 
     if (isEmpty(detalles)) {
       return (
-        <tr className="text-center">
-          <td colSpan="7"> Agregar datos a la tabla </td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="7"> Agregar datos a la tabla </TableCell>
+        </TableRow>
       );
     }
 
@@ -833,31 +833,30 @@ class CotizaciónEditar extends CustomComponent {
       <Draggable key={item.idProducto} draggableId={item.idProducto} index={index}>
         {(provided) => {
           return (
-            <tr
+            <TableRow
               {...provided.draggableProps}
               ref={provided.innerRef}
               {...provided.dragHandleProps}
               className='bg-white'
               tabIndex="0">
-              <td className="text-center" style={{ width: widthCell1 }}>{item.id}</td>
-              <td style={{ width: widthCell2 }}>
+              <TableCell className="text-center" style={{ width: widthCell1 }}>{item.id}</TableCell>
+              <TableCell style={{ width: widthCell2 }}>
                 {item.codigo}
                 <br />
                 {item.nombre}
-              </td>
-              <td style={{ width: widthCell3 }}>{rounded(item.cantidad)}</td>
-              <td style={{ width: widthCell4 }}>{item.nombreMedida}</td>
-              <td style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</td>
-              <td style={{ width: widthCell6 }}>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</td>
-              <td className="text-center" style={{ width: widthCell7 }}>
-                <button
-                  className="btn btn-outline-danger btn-sm"
-                  title="Eliminar"
+              </TableCell>
+              <TableCell style={{ width: widthCell3 }}>{rounded(item.cantidad)}</TableCell>
+              <TableCell style={{ width: widthCell4 }}>{item.nombreMedida}</TableCell>
+              <TableCell style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</TableCell>
+              <TableCell style={{ width: widthCell6 }}>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
+              <TableCell className="text-center" style={{ width: widthCell7 }}>
+                <Button
+                  className="btn-outline-danger btn-sm"
                   onClick={() => this.handleRemoverProducto(item.idProducto)}>
                   <i className="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
+                </Button>
+              </TableCell>
+            </TableRow>
           );
         }}
       </Draggable>
@@ -906,32 +905,32 @@ class CotizaciónEditar extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <tr key={index}>
-            <th className="text-right mb-2">{impuesto.nombre} :</th>
-            <th className="text-right mb-2">
+          <TableRow key={index}>
+            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codISO)}
-            </th>
-          </tr>
+            </TableHead>
+          </TableRow>
         );
       });
     };
 
     return (
       <>
-        <tr>
-          <th className="text-right mb-2">SUB TOTAL :</th>
-          <th className="text-right mb-2">
+        <TableRow>
+          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
+          <TableHead className="text-right mb-2">
             {numberFormat(subTotal, this.state.codISO)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
         {impuestosGenerado()}
-        <tr className="border-bottom"></tr>
-        <tr>
-          <th className="text-right h5">TOTAL :</th>
-          <th className="text-right h5">
+        <TableRow className="border-bottom"></TableRow>
+        <TableRow>
+          <TableHead className="text-right h5">TOTAL :</TableHead>
+          <TableHead className="text-right h5">
             {numberFormat(total, this.state.codISO)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
       </>
     );
   }
@@ -1015,34 +1014,30 @@ class CotizaciónEditar extends CustomComponent {
 
             <Row>
               <Column>
-                <div
-                  className="table-responsive"
-                  onKeyDown={this.handleKeyDownTable}>
-                  <table
+                <TableResponsive onKeyDown={this.handleKeyDownTable}>
+                  <Table
                     ref={this.refTable}
                     onClick={this.handleOnClickTable}
                     onDoubleClick={this.handleOnDbClickTable}
-                    className={"table table-bordered table-hover table-sticky w-100"}>
-                    <thead>
-                      <tr>
-                        <th width="5%" className="text-center">#</th>
-                        <th width="15%">Producto</th>
-                        <th width="5%">Cantidad</th>
-                        <th width="5%">Medida</th>
-                        <th width="5%">Precio</th>
-                        <th width="5%">Total</th>
-                        <th width="5%" className="text-center">
-                          Quitar
-                        </th>
-                      </tr>
-                    </thead>
+                    className={"table-bordered table-hover table-sticky"}>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead width="5%" className="text-center">#</TableHead>
+                        <TableHead width="15%">Producto</TableHead>
+                        <TableHead width="5%">Cantidad</TableHead>
+                        <TableHead width="5%">Medida</TableHead>
+                        <TableHead width="5%">Precio</TableHead>
+                        <TableHead width="5%">Total</TableHead>
+                        <TableHead width="5%" className="text-center">Quitar</TableHead>
+                      </TableRow>
+                    </TableHeader>
                     <DragDropContext
                       onDragEnd={this.handleOnDragEndTable}
                       onBeforeDragStart={this.handleOnBeforeDragStartTable}
                     >
                       <Droppable droppableId="table-body">
                         {(provided) => (
-                          <tbody
+                          <TableBody
                             ref={(el) => {
                               provided.innerRef(el)
                               this.refTableBody.current = el;
@@ -1050,31 +1045,12 @@ class CotizaciónEditar extends CustomComponent {
                             {...provided.droppableProps}>
                             {this.generateBody()}
                             {provided.placeholder}
-                          </tbody>
+                          </TableBody>
                         )}
                       </Droppable>
                     </DragDropContext>
-                  </table>
-                </div>
-                {/* <TableResponsive
-                  className={"table table-bordered table-hover table-sticky w-100"}
-                  tHead={
-                    <tr>
-                      <th width="5%" className="text-center">
-                        #
-                      </th>
-                      <th width="15%">Producto</th>
-                      <th width="5%">Cantidad</th>
-                      <th width="5%">Medida</th>
-                      <th width="5%">Precio</th>
-                      <th width="5%">Total</th>
-                      <th width="5%" className="text-center">
-                        Quitar
-                      </th>
-                    </tr>
-                  }
-                  tBody={this.generateBody()}
-                /> */}
+                  </Table>
+                </TableResponsive>
               </Column>
             </Row>
 
@@ -1085,7 +1061,7 @@ class CotizaciónEditar extends CustomComponent {
                     className='btn-warning'
                     onClick={this.handleGuardar}>
                     <i className="fa fa-edit"></i> Editar (F1)
-                  </Button>                  
+                  </Button>
                   {' '}
                   <Button
                     className=" btn-outline-primary"
@@ -1209,9 +1185,9 @@ class CotizaciónEditar extends CustomComponent {
             </div>
 
             <div className="form-group">
-              <Table
-                tHead={this.renderTotal()}
-              />
+              <Table>
+                <TableHeader>{this.renderTotal()}</TableHeader>
+              </Table>
             </div>
           </Column>
         </Row>

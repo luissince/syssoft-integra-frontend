@@ -27,7 +27,7 @@ import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/ty
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { TableResponsive } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
 import ModalElegirInterfaz from './component/ModalElejirInterfaz';
@@ -399,9 +399,9 @@ class Ventas extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr>
-          <td className="text-center" colSpan="10">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow>
+          <TableCell className="text-center" colSpan="10">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
@@ -412,38 +412,33 @@ class Ventas extends CustomComponent {
       const tipo = item.idFormaPago === CONTADO ? "CONTADO" : item.idFormaPago === CREDITO_FIJO ? "CREDITO FIJO" : item.idFormaPago === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
 
       return (
-        <tr key={index}>
-          <td className={`text-center`}>{item.id}</td>
-          <td>{item.fecha}<br />{formatTime(item.hora)}
-          </td>
-          <td>{item.documento}<br />{item.informacion}
-          </td>
-          <td>{item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </td>
-          <td>{tipo}</td>
-          <td className="text-center">{estado}</td>
-          <td className="text-center"> {numberFormat(item.total, item.codiso)} </td>
-          <td className="text-center">
+        <TableRow key={index}>
+          <TableCell className={`text-center`}>{item.id}</TableCell>
+          <TableCell>{item.fecha}<br />{formatTime(item.hora)}</TableCell>
+          <TableCell>{item.documento}<br />{item.informacion}</TableCell>
+          <TableCell>{item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}</TableCell>
+          <TableCell>{tipo}</TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-center"> {numberFormat(item.total, item.codiso)} </TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-primary btn-sm"
-              title="Detalle"
               onClick={() => this.handleDetalle(item.idVenta)}
             // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
-          </td>
-          <td className="text-center">
+          </TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
-              title="Anular"
               onClick={() => this.handleCancelar(item.idVenta)}
             // disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
             </Button>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -572,26 +567,26 @@ class Ventas extends CustomComponent {
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">#</th>
-                  <th width="10%">Fecha</th>
-                  <th width="15%">Cliente</th>
-                  <th width="10%">Comprobante</th>
-                  <th width="10%">Forma de Cobro</th>
-                  <th width="10%" className="text-center">Estado</th>
-                  <th width="10%" className="text-center">Total</th>
-                  <th width="5%" className="text-center">
-                    Detalle
-                  </th>
-                  <th width="5%" className="text-center">
-                    Anular
-                  </th>
-                </tr>
-              }
-              tBody={this.generateBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Fecha</TableHead>
+                    <TableHead width="15%">Cliente</TableHead>
+                    <TableHead width="10%">Comprobante</TableHead>
+                    <TableHead width="10%">Forma de Cobro</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Total</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 

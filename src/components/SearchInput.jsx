@@ -1,5 +1,5 @@
 import React from 'react';
-import '../recursos/css/searchbar.css';
+import '../resource/css/searchbar.css';
 import { isEmpty } from '../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Input from './Input';

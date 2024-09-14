@@ -1,11 +1,10 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import {
   numberFormat,
   alertDialog,
   alertInfo,
   alertSuccess,
   alertWarning,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -22,9 +21,15 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { TableResponsive } from '../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Bancos extends CustomComponent {
 
   constructor(props) {
@@ -47,6 +52,8 @@ class Bancos extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -56,8 +63,6 @@ class Bancos extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.refTxtSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -74,16 +79,16 @@ class Bancos extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -96,17 +101,17 @@ class Bancos extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -115,7 +120,7 @@ class Bancos extends CustomComponent {
 
     const data = {
       opcion: opcion,
-      buscar: buscar.trim().toUpperCase(),
+      buscar: buscar.trim(),
       idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -187,10 +192,9 @@ class Bancos extends CustomComponent {
     );
   };
 
-  generarBody() {
+  generateBody() {
     if (this.state.loading) {
       return (
-
         <SpinnerTable
           colSpan='9'
           message={'Cargando información de la tabla...'}
@@ -200,56 +204,51 @@ class Bancos extends CustomComponent {
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="9">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>{item.nombre}</td>
-          <td>{item.tipoCuenta.toUpperCase()}</td>
-          <td>{item.moneda}</td>
-          <td>{item.numCuenta}</td>
-          <td className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}>
-            {numberFormat(item.saldo, item.codiso)}
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Detalle"
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>{item.tipoCuenta.toUpperCase()}</TableCell>
+          <TableCell>{item.moneda}</TableCell>
+          <TableCell>{item.numCuenta}</TableCell>
+          <TableCell className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}>{numberFormat(item.saldo, item.codiso)}</TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idBanco)}
             // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
-            </button>
-          </td>
+            </Button>
+          </TableCell>
 
-          <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idBanco)}
             // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
-            </button>
-          </td>
+            </Button>
+          </TableCell>
 
-          <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idBanco)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -259,71 +258,62 @@ class Bancos extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Bancos'
-          subTitle='Lista'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleAgregar}
+            // disabled={!this.state.add}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={() => this.loadingData()}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
           </Column>
+        </Row>
 
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              // disabled={!this.state.add}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadingData()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar por nombre..."
+            />
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <TableResponsive
-              tHead={
-                <tr>
-                  <th width="5%" className="text-center">#</th>
-                  <th width="10%">Nombre</th>
-                  <th width="15%">Tipo Cuenta</th>
-                  <th width="10%">Moneda</th>
-                  <th width="20%">Número Cuenta</th>
-                  <th width="10%">Saldo</th>
-                  <th width="5%" className="text-center"> Detalle </th>
-                  <th width="5%" className="text-center">Editar </th>
-                  <th width="5%" className="text-center">Eliminar</th>
-                </tr>
-              }
-              tBody={this.generarBody()}
-            />
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">Nombre</TableHead>
+                    <TableHead width="15%">Tipo Cuenta</TableHead>
+                    <TableHead width="10%">Moneda</TableHead>
+                    <TableHead width="20%">Número Cuenta</TableHead>
+                    <TableHead width="10%">Saldo</TableHead>
+                    <TableHead width="5%" className="text-center"> Detalle </TableHead>
+                    <TableHead width="5%" className="text-center">Editar </TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
@@ -339,6 +329,21 @@ class Bancos extends CustomComponent {
     );
   }
 }
+
+Bancos.propTypes = {
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string,
+    }),
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string,
+    }),
+  }),
+  history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+  location: PropTypes.shape({
+    pathname: PropTypes.string,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {
