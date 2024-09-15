@@ -1421,9 +1421,9 @@ const Swal = () => {
           input.value = params.inputValue;
           input.placeholder = params.inputPlaceholder;
           input.type = params.input;
-          if(params.onKeyDown){
+          if (params.onKeyDown) {
             input.addEventListener("keydown", params.onKeyDown)
-          }          
+          }
           show(input);
           break;
         case 'file':
@@ -2264,3 +2264,7 @@ const Swal = () => {
 };
 
 export default Swal();
+
+export {
+  Swal
+}

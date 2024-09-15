@@ -47,6 +47,7 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
 import ModalCliente from '../component/ModalCliente';
 import { clearCrearCotizacion, setCrearCotizacionLocal, setCrearCotizacionState } from '../../../../../../redux/predeterminadoSlice';
+import SweetAlert from '../../../../../../model/class/sweet-alert';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -113,6 +114,8 @@ class CotizaciónCrear extends CustomComponent {
 
     this.initial = { ...this.state };
 
+    this.alert = new SweetAlert();
+
     // Referencia principales
     this.refComprobante = React.createRef();
     this.refIdMoneda = React.createRef();
@@ -169,6 +172,8 @@ class CotizaciónCrear extends CustomComponent {
     document.removeEventListener('keydown', this.handleDocumentKeyDown)
 
     this.abortController.abort();
+
+    this.alert.close();
   }
 
   /*
@@ -228,12 +233,11 @@ class CotizaciónCrear extends CustomComponent {
     })
   }
 
-  clearView = () => {
+  clearView = async () => {
     this.setState(this.initial, async () => {
       await this.refProducto.current.restart();
       await this.refCliente.current.restart();
       await this.props.clearCrearCotizacion();
-      console.log(this.props.cotizacionCrear)
       await this.loadingData();
 
       this.refValueProducto.current.focus();
@@ -648,6 +652,11 @@ class CotizaciónCrear extends CustomComponent {
   // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
+
+    this.alert.success("ss","",()=>{
+      console.log("dd")
+    })
+    return ;
     const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
@@ -704,8 +713,8 @@ class CotizaciónCrear extends CustomComponent {
         const response = await createCotizacion(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cotización', response.data.message, () => {
-            this.handleOpenImpresion(response.data.idCotizacion)
+          this.handleOpenImpresion(response.data.idCotizacion, () => {
+            this.clearView();
           });
         }
 
@@ -732,14 +741,12 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
-  handleOpenImpresion = (idCotizacion) => {
-    this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion })
+  handleOpenImpresion = (idCotizacion, callback = function () { }) => {
+    this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion }, callback)
   }
 
   handleCloseImpresion = () => {
-    this.setState({ isOpenImpresion: false }, () => {
-      this.clearView();
-    });
+    this.setState({ isOpenImpresion: false });
   }
 
   handleOpenImpresionA4 = () => {

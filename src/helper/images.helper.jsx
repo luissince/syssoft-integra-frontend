@@ -37,6 +37,7 @@ import linea from '../resource/images/linea.png';
 import money from '../resource/images/money.png';
 import cash_movement from '../resource/images/cash_movement.png';
 import ticket from '../resource/images/ticket.png';
+import filea4 from '../resource/images/filea4.png';
 import escoba from '../resource/images/escoba.png';
 import view from '../resource/images/view.png';
 import cotizacion from '../resource/images/cotizacion.png';
@@ -89,6 +90,7 @@ export {
   money,
   cash_movement,
   ticket,
+  filea4,
   escoba,
   view,
   cotizacion,

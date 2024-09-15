@@ -92,6 +92,17 @@ class CustomModal extends Component {
   }
 }
 
+CustomModal.propTypes = {
+  contentRef: PropTypes.object,
+  isOpen: PropTypes.bool.isRequired,
+  onOpen: PropTypes.func,
+  onHidden: PropTypes.func,
+  onClose: PropTypes.func.isRequired,
+  contentLabel: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
+}
+
 export const CustomModalContent = ({
   contentRef,
   isOpen,
@@ -146,6 +157,21 @@ export const CustomModalContent = ({
       </div>
     </CustomModal>
   );
+}
+
+CustomModalContent.propTypes = {
+  contentRef: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onOpen: PropTypes.func,
+  onHidden: PropTypes.func,
+  onClose: PropTypes.func.isRequired,
+  contentLabel: PropTypes.string.isRequired,
+  titleHeader: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
+  classNameBody: PropTypes.string,
+  footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
+  classNameFooter: PropTypes.string
 }
 
 export const CustomModalForm = ({
@@ -219,32 +245,6 @@ export const CustomModalForm = ({
       </form>
     </CustomModal>
   );
-}
-
-CustomModal.propTypes = {
-  contentRef: PropTypes.object,
-  isOpen: PropTypes.bool.isRequired,
-  onOpen: PropTypes.func,
-  onHidden: PropTypes.func,
-  onClose: PropTypes.func.isRequired,
-  contentLabel: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
-}
-
-CustomModalContent.propTypes = {
-  contentRef: PropTypes.object.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  onOpen: PropTypes.func,
-  onHidden: PropTypes.func,
-  onClose: PropTypes.func.isRequired,
-  contentLabel: PropTypes.string.isRequired,
-  titleHeader: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
-  classNameBody: PropTypes.string,
-  footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
-  classNameFooter: PropTypes.string
 }
 
 CustomModalForm.propTypes = {

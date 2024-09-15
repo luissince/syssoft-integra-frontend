@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { CustomModalContent } from '../../../../../../components/CustomModal';
 import Button from '../../../../../../components/Button';
+import { images } from '../../../../../../helper';
 
 const ModalImpresion = ({
     refModal,
@@ -21,26 +22,36 @@ const ModalImpresion = ({
             titleHeader="SysSoft Integra"
             body={
                 <>
-                    <h5 className='text-center'>Opciones de impresión</h5>
-                    <div className='d-flex justify-content-center align-items-center gap-2_5 mt-3'>
-                        <Button className="btn-outline-info"
+                    <div className='text-center'>
+                        <img src={images.accept} width={64} height={64} className='mb-2' />
+                    </div>
+                    <h5 className='text-center '>Proceso Completado Correctamente</h5>
+
+                    <div className="dropdown-divider mb-3"></div>
+
+                    <div className='alert alert-primary text-center'>
+                        Se guardaron correctamente los datos.
+                    </div>
+                    <div className='d-flex justify-content-center'>
+                        <Button
+                            autoFocus={true}
+                            className='btn-danger'
+                            onClick={async () => await refModal.current.handleOnClose()}>
+                            <img src={images.escoba} width={22} /> Realizar otra Operación.
+                        </Button>
+                    </div>
+                    <div className='d-flex justify-content-center align-items-center flex-wrap gap-2_5 mt-3'>
+                        <Button className="btn-outline-secondary"
                             onClick={handlePrintA4}>
-                            <i className="fa fa-file-pdf-o"></i> A4
+                            <img src={images.filea4} width={22} /> Imprimir A4
                         </Button>
                         {" "}
-                        <Button className="btn-outline-info"
+                        <Button className="btn-outline-secondary"
                             onClick={handlePrintTicket}>
-                            <i className="fa fa-sticky-note"></i> Ticket
+                            <img src={images.ticket} width={22} /> Imprimit Ticket
                         </Button>
                     </div>
                 </>
-            }
-            footer={
-                <Button
-                    className="btn-danger"
-                    onClick={async () => await refModal.current.handleOnClose()}>
-                    <i className="fa fa-close"></i> Cerrar
-                </Button>
             }
         />
     );
