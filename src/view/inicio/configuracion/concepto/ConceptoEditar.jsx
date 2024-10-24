@@ -139,8 +139,8 @@ class ConceptoEditar extends CustomComponent {
         />
 
         <Title
-          title='Concepo'
-          subTitle='Editar'
+          title='Concepto'
+          subTitle='EDITAR'
           icon={<i className="bi bi-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

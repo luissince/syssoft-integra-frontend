@@ -160,7 +160,7 @@ class MedidaEditar extends CustomComponent {
 
         <Title
           title='Medida'
-          subTitle='Editar'
+          subTitle='EDITAR'
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

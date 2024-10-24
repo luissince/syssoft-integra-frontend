@@ -2,16 +2,12 @@ import React from 'react';
 import ContainerWrapper from '../../../../../../components/Container';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   getRowCellIndex,
   isEmpty,
   numberFormat,
-  reorder,
+  readDataFile,
   rounded,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -21,9 +17,10 @@ import {
   comboImpuesto,
   comboMoneda,
   createCotizacion,
+  documentsPdfInvoicesCotizacion,
   filtrarPersona,
   filtrarProducto,
-  obtenerCotizacionPdf,
+  obtenerPreCotizacionPdf,
 } from '../../../../../../network/rest/principal.network';
 import Title from '../../../../../../components/Title';
 import Row from '../../../../../../components/Row';
@@ -33,8 +30,6 @@ import { CANCELED } from '../../../../../../model/types/types';
 import SearchInput from '../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 import ModalProducto from '../component/ModalProducto';
-import ModalImpresion from '../component/ModalImpresion';
-import ModalPreImpresion from '../component/ModalPreImpresion';
 import Column from '../../../../../../components/Column';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import printJS from 'print-js';
@@ -42,18 +37,15 @@ import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
 import TextArea from '../../../../../../components/TextArea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
-import { Draggable } from 'react-beautiful-dnd';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Droppable } from 'react-beautiful-dnd';
-import ModalCliente from '../component/ModalCliente';
 import { clearCrearCotizacion, setCrearCotizacionLocal, setCrearCotizacionState } from '../../../../../../redux/predeterminadoSlice';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
+import { ModalImpresion, ModalPersona, ModalPreImpresion } from '../../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class CotizaciónCrear extends CustomComponent {
+class CotizacionCrear extends CustomComponent {
   /**
    *
    * Constructor
@@ -65,10 +57,8 @@ class CotizaciónCrear extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      // Atributo principal
-      idCotizacion: '',
-
       // Atributos principales
+      idCotizacion: '',
       idComprobante: '',
       idMoneda: '',
       idImpuesto: '',
@@ -99,7 +89,7 @@ class CotizaciónCrear extends CustomComponent {
       isOpenProducto: false,
 
       // Atributos del modal cliente
-      isOpenCliente: false,
+      isOpenPersona: false,
 
       // Atributos del modal impresión
       isOpenImpresion: false,
@@ -143,9 +133,7 @@ class CotizaciónCrear extends CustomComponent {
     this.abortController = new AbortController();
 
     this.refTable = React.createRef();
-    this.refTaleBody = React.createRef();
     this.index = -1;
-    this.cells = [];
   }
 
   /*
@@ -197,7 +185,6 @@ class CotizaciónCrear extends CustomComponent {
           this.handleSelectItemCliente(this.props.cotizacionCrear.state.cliente);
         }
         this.index = this.props.cotizacionCrear.local.index;
-        this.cells = this.props.cotizacionCrear.local.cells;
       });
     } else {
       const [comprobantes, monedas, impuestos] = await Promise.all([
@@ -229,7 +216,6 @@ class CotizaciónCrear extends CustomComponent {
     this.props.setCrearCotizacionState(this.state)
     this.props.setCrearCotizacionLocal({
       index: this.index,
-      cells: this.cells,
     })
   }
 
@@ -242,7 +228,6 @@ class CotizaciónCrear extends CustomComponent {
 
       this.refValueProducto.current.focus();
       this.index = -1;
-      this.cells = [];
 
       this.updateReduxState();
     });
@@ -422,21 +407,21 @@ class CotizaciónCrear extends CustomComponent {
     const table = this.refTable.current;
     if (!table) return;
 
-    const children = table.tBodies[0].children;
+    const children = Array.from(table.tBodies[0].children);
     if (children.length === 0) return;
 
     if (event.key === 'ArrowUp') {
-      if (this.index > 0) {
-        this.index--;
-        this.updateSelection(children);
-      }
+      this.index = (this.index - 1 + children.length) % children.length;
+      this.updateSelection(children);
+      this.updateReduxState();
+      event.preventDefault();
     }
 
     if (event.key === 'ArrowDown') {
-      if (this.index < children.length - 1) {
-        this.index++;
-        this.updateSelection(children);
-      }
+      this.index = (this.index + 1) % children.length;
+      this.updateSelection(children);
+      this.updateReduxState();
+      event.preventDefault();
     }
 
     if (event.key === 'Enter') {
@@ -449,72 +434,30 @@ class CotizaciónCrear extends CustomComponent {
   }
 
   handleOnClickTable = async (event) => {
-    const { rowIndex, tBody } = getRowCellIndex(event);
+    const { rowIndex, children } = getRowCellIndex(event);
 
-    if (rowIndex === -1 || !tBody || !tBody.children) return;
+    if (rowIndex === -1) return;
 
     this.index = rowIndex;
-    this.updateSelection(tBody.children);
+    this.updateSelection(children);
   }
 
   handleOnDbClickTable = async (event) => {
-    const { rowIndex, tBody } = getRowCellIndex(event);
+    const { rowIndex, children } = getRowCellIndex(event);
 
-    if (rowIndex === -1 || !tBody || !tBody.children) return;
+    if (rowIndex === -1) return;
 
     this.index = rowIndex;
-    this.updateSelection(tBody.children);
+    this.updateSelection(children);
     this.handleOpenModalProducto();
-
-  }
-
-  handleOnDragEndTable = async (result) => {
-    const { source, destination } = result;
-    if (!destination) {
-      return;
-    }
-
-    if (source.index === destination.index &&
-      source.droppableId === destination.droppableId
-    ) {
-      return;
-    }
-
-    await this.setStateAsync(prevState => ({
-      detalles: reorder(prevState.detalles, source.index, destination.index).map((item, index) => ({ ...item, id: ++index }))
-    }))
-
-
-    this.index = destination.index;
-    this.cells = [];
-    if (this.refTaleBody.current) {
-      const tbody = this.refTaleBody.current;
-      this.updateSelection(tbody.children);
-    }
-
-    this.updateReduxState();
-  }
-
-  handleOnBeforeDragStartTable = (before) => {
-    const sourceIndex = before.source.index;
-
-    if (this.refTaleBody.current) {
-      const tbody = this.refTaleBody.current;
-      const rows = tbody.children;
-      const row = rows[sourceIndex]
-      this.cells = row.children;
-    }
   }
 
   updateSelection = (children) => {
-    for (const child of children) {
-      child.classList.remove("table-active");
-    }
+    children.forEach(row => row.classList.remove("table-active"));
 
     const selectedChild = children[this.index];
     selectedChild.classList.add("table-active");
     selectedChild.scrollIntoView({ block: 'center' });
-    selectedChild.focus();
   }
 
 
@@ -525,7 +468,7 @@ class CotizaciónCrear extends CustomComponent {
     const { idImpuesto, detalles } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione un impuesto para continuar.', () => {
+      this.alert.warning('Cotización', 'Seleccione un impuesto para continuar.', () => {
         this.refIdImpuesto.current.focus();
       });
       return;
@@ -554,13 +497,12 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
-
-  handleOpenModalCliente = () => {
-    this.setState({ isOpenCliente: true });
+  handleOpenModalPersona = () => {
+    this.setState({ isOpenPersona: true });
   }
 
-  handleCloseCliente = async () => {
-    this.setState({ isOpenCliente: false });
+  handleCloseModalPersona = async () => {
+    this.setState({ isOpenPersona: false });
   }
 
   //------------------------------------------------------------------------------------------
@@ -652,49 +594,44 @@ class CotizaciónCrear extends CustomComponent {
   // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-
-    this.alert.success("ss","",()=>{
-      console.log("dd")
-    })
-    return ;
     const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
-      alertWarning('Cotización', 'Seleccione su comprobante.', () =>
+      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
         this.refComprobante.current.focus(),
       );
       return;
     }
 
     if (isEmpty(cliente)) {
-      alertWarning('Cotización', 'Seleccione un cliente.', () =>
+      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
         this.refValueCliente.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      alertWarning('Cotización', 'Seleccione su moneda.', () =>
+      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
         this.refIdMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione el impuesto', () =>
+      this.alert.warning('Cotización', 'Seleccione el impuesto', () =>
         this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalles)) {
-      alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
+      this.alert.warning('Cotización', 'Agregar algún producto a la lista.', () =>
         this.refValueProducto.current.focus(),
       );
       return;
     }
 
-    alertDialog('Cotización', '¿Está seguro de continuar?', async (accept) => {
+    this.alert.dialog('Cotización', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
@@ -708,20 +645,19 @@ class CotizaciónCrear extends CustomComponent {
           detalle: detalles
         };
 
-        alertInfo('Cotización', 'Procesando información...');
+        this.alert.information('Cotización', 'Procesando información...');
 
         const response = await createCotizacion(data);
 
         if (response instanceof SuccessReponse) {
-          this.handleOpenImpresion(response.data.idCotizacion, () => {
-            this.clearView();
-          });
+          this.alert.close();
+          this.handleOpenImpresion(response.data.idCotizacion);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Cotización', response.getMessage());
+          this.alert.warning('Cotización', response.getMessage());
         }
       }
     });
@@ -731,7 +667,7 @@ class CotizaciónCrear extends CustomComponent {
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    alertDialog("Cotización", "¿Está seguro de limpiar la cotización?", (accept) => {
+    this.alert.dialog("Cotización", "¿Está seguro de limpiar la cotización?", (accept) => {
       if (accept) {
         this.clearView();
       }
@@ -741,75 +677,63 @@ class CotizaciónCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
-  handleOpenImpresion = (idCotizacion, callback = function () { }) => {
-    this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion }, callback)
+  handleOpenImpresion = (idCotizacion) => {
+    this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion })
   }
 
-  handleCloseImpresion = () => {
+  handlePrinterImpresion = (size) => {
+    printJS({
+      printable: documentsPdfInvoicesCotizacion(this.state.idCotizacion, size),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.clearView();
+        this.handleCloseImpresion();
+      }
+    })
+  }
+
+  handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false });
-  }
-
-  handleOpenImpresionA4 = () => {
-    printJS({
-      printable: obtenerCotizacionPdf(this.state.idCotizacion, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        this.handleCloseImpresion()
-      }
-    })
-  }
-
-  handleOpenImpresionTicket = () => {
-    printJS({
-      printable: obtenerCotizacionPdf(this.state.idCotizacion, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        this.handleCloseImpresion()
-      }
-    })
   }
 
   //------------------------------------------------------------------------------------------
   // Opciones de pre impresión
   //------------------------------------------------------------------------------------------
-
   handleOpenPreImpresion = () => {
     const { idComprobante, cliente, idMoneda, idImpuesto, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
-      alertWarning('Cotización', 'Seleccione su comprobante.', () =>
+      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
         this.refComprobante.current.focus(),
       );
       return;
     }
 
     if (isEmpty(cliente)) {
-      alertWarning('Cotización', 'Seleccione un cliente.', () =>
+      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
         this.refValueCliente.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      alertWarning('Cotización', 'Seleccione su moneda.', () =>
+      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
         this.refIdMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione un impuesto', () =>
+      this.alert.warning('Cotización', 'Seleccione un impuesto', () =>
         this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalles)) {
-      alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
+      this.alert.warning('Cotización', 'Agregar algún producto a la lista.', () =>
         this.refValueProducto.current.focus(),
       );
       return;
@@ -818,16 +742,50 @@ class CotizaciónCrear extends CustomComponent {
     this.setState({ isOpenPreImpresion: true })
   }
 
-  handleClosePreImpresion = () => {
-    if (this.state.loadingPreImpresion) return;
+  handleProcessPreImpresion = async (type, abort, success, error) => {
+    const { idComprobante, cliente: { idPersona }, idMoneda, idUsuario, idSucursal, nota, detalles } = this.state;
 
+    const response = await obtenerPreCotizacionPdf({
+      idComprobante: idComprobante,
+      idCliente: idPersona,
+
+      idMoneda: idMoneda,
+      idUsuario: idUsuario,
+      idSucursal: idSucursal,
+      nota: nota,
+
+      detalle: detalles
+    }, type, abort.signal);
+
+    if (response instanceof SuccessReponse) {
+      const base64 = await readDataFile(response.data);
+
+      success();
+
+      printJS({
+        printable: base64,
+        type: 'pdf',
+        base64: true,
+        onPrintDialogClose: this.handleClosePreImpresion
+      })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      error();
+
+      this.alert.warning("Cotización", response.getMessage())
+    }
+  }
+
+  handleClosePreImpresion = () => {
     this.setState({ isOpenPreImpresion: false })
   }
 
   //------------------------------------------------------------------------------------------
   // Procesos cerrar
   //------------------------------------------------------------------------------------------
-
   handleCerrar = () => {
     this.props.history.goBack();
   };
@@ -858,44 +816,28 @@ class CotizaciónCrear extends CustomComponent {
       );
     }
 
-    const widthCell1 = isEmpty(this.cells) ? "auto" : this.cells[0].offsetWidth + "px";
-    const widthCell2 = isEmpty(this.cells) ? "auto" : this.cells[1].offsetWidth + "px";
-    const widthCell3 = isEmpty(this.cells) ? "auto" : this.cells[2].offsetWidth + "px";
-    const widthCell4 = isEmpty(this.cells) ? "auto" : this.cells[3].offsetWidth + "px";
-    const widthCell5 = isEmpty(this.cells) ? "auto" : this.cells[4].offsetWidth + "px";
-    const widthCell6 = isEmpty(this.cells) ? "auto" : this.cells[5].offsetWidth + "px";
-    const widthCell7 = isEmpty(this.cells) ? "auto" : this.cells[6].offsetWidth + "px";
-
     return detalles.map((item, index) => (
-      <Draggable key={item.idProducto} draggableId={item.idProducto} index={index}>
-        {(provided) => {
-          return (
-            <TableRow
-              {...provided.draggableProps}
-              ref={provided.innerRef}
-              {...provided.dragHandleProps}
-              className='bg-white'>
-              <TableCell className="text-center" style={{ width: widthCell1 }}>{item.id}</TableCell>
-              <TableCell style={{ width: widthCell2 }}>
-                {item.codigo}
-                <br />
-                {item.nombre}
-              </TableCell>
-              <TableCell style={{ width: widthCell3 }}>{rounded(item.cantidad)}</TableCell>
-              <TableCell style={{ width: widthCell4 }}>{item.nombreMedida}</TableCell>
-              <TableCell style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</TableCell>
-              <TableCell style={{ width: widthCell6 }}>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
-              <TableCell className="text-center" style={{ width: widthCell7 }}>
-                <Button
-                  className="btn-outline-danger btn-sm"
-                  onClick={() => this.handleRemoverProducto(item.idProducto)}>
-                  <i className="bi bi-trash"></i>
-                </Button>
-              </TableCell>
-            </TableRow>
-          );
-        }}
-      </Draggable>
+      <TableRow
+        key={index}
+        className='bg-white'>
+        <TableCell className="text-center">{item.id}</TableCell>
+        <TableCell>
+          {item.codigo}
+          <br />
+          {item.nombre}
+        </TableCell>
+        <TableCell>{rounded(item.cantidad)}</TableCell>
+        <TableCell>{item.nombreMedida}</TableCell>
+        <TableCell>{numberFormat(item.precio, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
+        <TableCell className="text-center">
+          <Button
+            className="btn-outline-danger btn-sm"
+            onClick={() => this.handleRemoverProducto(item.idProducto)}>
+            <i className="bi bi-trash"></i>
+          </Button>
+        </TableCell>
+      </TableRow>
     ));
   }
 
@@ -981,7 +923,8 @@ class CotizaciónCrear extends CustomComponent {
 
         <Title
           title='Cotización'
-          subTitle='Crear'
+          subTitle='CREAR'
+          icon={<i className='fa fa-plus'></i>}
           handleGoBack={this.handleCerrar}
         />
 
@@ -997,9 +940,9 @@ class CotizaciónCrear extends CustomComponent {
           handleSave={this.handleSaveProducto}
         />
 
-        <ModalCliente
-          isOpen={this.state.isOpenCliente}
-          onClose={this.handleCloseCliente}
+        <ModalPersona
+          isOpen={this.state.isOpenPersona}
+          onClose={this.handleCloseModalPersona}
 
           idUsuario={this.state.idUsuario}
         />
@@ -1007,30 +950,26 @@ class CotizaciónCrear extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-          handleClose={this.handleCloseImpresion}
 
-          handlePrintA4={this.handleOpenImpresionA4}
-          handlePrintTicket={this.handleOpenImpresionTicket}
+          clear={this.clearView}
+
+          handleClose={this.handleCloseImpresion}
+          handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
+          handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
+          handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
         <ModalPreImpresion
           isOpen={this.state.isOpenPreImpresion}
 
-          idComprobante={this.state.idComprobante}
-          idCliente={this.state.cliente === null ? '' : this.state.cliente.idPersona}
-          idMoneda={this.state.idMoneda}
-          idUsuario={this.state.idUsuario}
-          idSucursal={this.state.idSucursal}
-          nota={this.state.nota}
-          detalles={this.state.detalles}
-
           handleClose={this.handleClosePreImpresion}
+          handleProcess={this.handleProcessPreImpresion}
         />
 
         <Row>
           <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
             <Row>
-              <Column>
+              <Column formGroup={true}>
                 <SearchInput
                   ref={this.refProducto}
                   autoFocus={true}
@@ -1047,10 +986,11 @@ class CotizaciónCrear extends CustomComponent {
             </Row>
 
             <Row>
-              <Column>
+              <Column formGroup={true}>
                 <TableResponsive onKeyDown={this.handleKeyDownTable}>
                   <Table
                     ref={this.refTable}
+                    tabIndex="0"
                     onClick={this.handleOnClickTable}
                     onDoubleClick={this.handleOnDbClickTable}
                     className={"table-bordered table-hover table-sticky"}>
@@ -1065,56 +1005,39 @@ class CotizaciónCrear extends CustomComponent {
                         <TableHead width="5%" className="text-center">Quitar</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <DragDropContext
-                      onDragEnd={this.handleOnDragEndTable}
-                      onBeforeDragStart={this.handleOnBeforeDragStartTable}
-                    >
-                      <Droppable droppableId="table-body">
-                        {(provided) => (
-                          <TableBody
-                            ref={(el) => {
-                              provided.innerRef(el)
-                              this.refTaleBody.current = el;
-                            }}
-                            {...provided.droppableProps}>
-                            {this.generateBody()}
-                            {provided.placeholder}
-                          </TableBody>
-                        )}
-                      </Droppable>
-                    </DragDropContext>
+                    <TableBody>
+                      {this.generateBody()}
+                    </TableBody>
                   </Table>
                 </TableResponsive>
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
-                  <Button
-                    className='btn-success'
-                    onClick={this.handleGuardar}>
-                    <i className="fa fa-save"></i> Guardar (F1)
-                  </Button>
-                  {' '}
-                  <Button
-                    className='btn-outline-info'
-                    onClick={this.handleLimpiar}>
-                    <i className="fa fa-trash"></i> Limpiar (F2)
-                  </Button>
-                  {' '}
-                  <Button
+              <Column formGroup={true}>
+                <Button
+                  className='btn-success'
+                  onClick={this.handleGuardar}>
+                  <i className="fa fa-save"></i> Guardar (F1)
+                </Button>
+                {' '}
+                <Button
+                  className='btn-outline-info'
+                  onClick={this.handleLimpiar}>
+                  <i className="fa fa-trash"></i> Limpiar (F2)
+                </Button>
+                {' '}
+                {/* <Button
                     className=" btn-outline-primary"
                     onClick={this.handleOpenPreImpresion}>
                     <i className="bi bi-printer"></i> Pre Impresión (F3)
                   </Button>
-                  {' '}
-                  <Button
-                    className=" btn-outline-danger"
-                    onClick={this.handleCerrar}>
-                    <i className="fa fa-close"></i> Cerrar
-                  </Button>
-                </div>
+                  {' '} */}
+                <Button
+                  className=" btn-outline-danger"
+                  onClick={this.handleCerrar}>
+                  <i className="fa fa-close"></i> Cerrar
+                </Button>
               </Column>
             </Row>
 
@@ -1131,7 +1054,6 @@ class CotizaciónCrear extends CustomComponent {
               <Select
                 group={true}
                 iconLeft={<i className="bi bi-receipt"></i>}
-                title="Comprobantes de venta"
                 refSelect={this.refComprobante}
                 value={this.state.idComprobante}
                 onChange={this.handleSelectComprobante}
@@ -1159,7 +1081,7 @@ class CotizaciónCrear extends CustomComponent {
                 customButton={
                   <Button
                     className="btn-outline-success d-flex align-items-center"
-                    onClick={this.handleOpenModalCliente}>
+                    onClick={this.handleOpenModalPersona}>
                     <i className='fa fa-plus'></i>
                     <span className="ml-2">Nuevo</span>
                   </Button>
@@ -1224,7 +1146,7 @@ class CotizaciónCrear extends CustomComponent {
             </div>
 
             <div className="form-group">
-              <Table>
+              <Table classNameContent='w-100'>
                 <TableHeader>{this.renderTotal()}</TableHeader>
               </Table>
             </div>
@@ -1235,7 +1157,7 @@ class CotizaciónCrear extends CustomComponent {
   }
 }
 
-CotizaciónCrear.propTypes = {
+CotizacionCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       idUsuario: PropTypes.string.isRequired,
@@ -1274,6 +1196,6 @@ const mapDispatchToProps = { setCrearCotizacionState, setCrearCotizacionLocal, c
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedCotizaciónCrear = connect(mapStateToProps, mapDispatchToProps)(CotizaciónCrear);
+const ConnectedCotizacionCrear = connect(mapStateToProps, mapDispatchToProps)(CotizacionCrear);
 
-export default ConnectedCotizaciónCrear;
+export default ConnectedCotizacionCrear;

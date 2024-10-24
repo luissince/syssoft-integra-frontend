@@ -90,7 +90,7 @@ class MarcaAgregar extends React.Component {
       <ContainerWrapper>
         <Title
           title='Marca'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

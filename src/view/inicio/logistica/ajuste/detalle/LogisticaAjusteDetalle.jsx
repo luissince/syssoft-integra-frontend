@@ -107,8 +107,8 @@ class LogisticaAjusteDetalle extends CustomComponent {
         />
 
         <Title
-          title={"Ajuste"}
-          subTitle={"DETALLE"}
+          title="Ajuste"
+          subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 

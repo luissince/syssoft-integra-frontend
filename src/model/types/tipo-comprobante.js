@@ -7,3 +7,4 @@ export const COMPROBANTE_DE_INGRESO = 'TC0006';
 export const COMPROBANTE_DE_SALIDA = 'TC0007';
 export const COTIZACION = 'TC0008';
 export const GUIA_DE_REMISION = 'TC0009';
+export const PEDIDO = 'TC0010';

@@ -346,7 +346,7 @@ class EmpresaProceso extends CustomComponent {
 
         <Title
           title='Empresa'
-          subTitle='Editar'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

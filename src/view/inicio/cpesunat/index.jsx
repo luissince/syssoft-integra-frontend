@@ -2,6 +2,13 @@ import { ContainerMenu } from "../../../components/Container";
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 
+import CpeElectronicos from './lista/CpeElectronicos.jsx';
+import CpeConsultar from './consulta/CpeConsultar.jsx';
+
+export {
+    CpeElectronicos,
+    CpeConsultar,
+}
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component

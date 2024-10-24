@@ -13,7 +13,6 @@ import './resource/css/footerbar.css';
 
 import './resource/js/bootstrap.js';
 import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
-import '../node_modules/react-notifications/lib/notifications.css';
 import './network/rest/apisperu.network.js';
 import './network/rest/principal.network.js';
 

@@ -86,7 +86,7 @@ class ImpuestoAgregar extends CustomComponent {
 
         <Title
           title='Impuesto'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

@@ -6,7 +6,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailCobro, obtenerVentaPdf } from '../../../../../network/rest/principal.network';
+import { detailCobro, documentsPdfInvoicesCobro } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -17,9 +17,9 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
-import printJS from 'print-js';
 import PropTypes from 'prop-types';
 import React from 'react';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -110,6 +110,7 @@ class CobroDetalle extends CustomComponent {
     const suma = cobro.detalles.reduce((acumulador, item) => acumulador + item.monto * item.cantidad, 0);
 
     this.setState({
+      idCobro: id,
       comprobante: cobro.cabecera.comprobante + ' ' + cobro.cabecera.serie + '-' + cobro.cabecera.numeracion,
       cliente: cobro.cabecera.documento + ' ' + cobro.cabecera.informacion,
       fecha: cobro.cabecera.fecha + ' ' + formatTime(cobro.cabecera.hora),
@@ -161,28 +162,13 @@ class CobroDetalle extends CustomComponent {
   |
   */
 
-  handlePrintA4 = () => {
-    printJS({
-      printable: obtenerVentaPdf(this.state.idVenta, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
-  }
-
-  handlePrintTicket = () => {
-    printJS({
-      printable: obtenerVentaPdf(this.state.idVenta, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
+  handlePrint = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfInvoicesCobro(this.state.idCobro, size),
+      title: 'Cobro',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
   /*
@@ -200,7 +186,6 @@ class CobroDetalle extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
    */
-
 
   renderDetalles() {
     return (
@@ -311,20 +296,28 @@ class CobroDetalle extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
+
         <Row>
           <Column formGroup={true}>
             <Button
               className="btn-light"
-              onClick={this.handlePrintA4}
+              onClick={this.handlePrint.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
             </Button>
             {' '}
             <Button
               className="btn-light"
-              onClick={this.handlePrintTicket}
+              onClick={this.handlePrint.bind(this, '80mm')}
             >
-              <i className="fa fa-print"></i> Ticket
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrint.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
             </Button>
           </Column>
         </Row>
@@ -412,7 +405,7 @@ class CobroDetalle extends CustomComponent {
                     <TableHead>#</TableHead>
                     <TableHead>Concepto</TableHead>
                     <TableHead>Cantidad</TableHead>
-                    <TableHead>Precio</TableHead>
+                    <TableHead>Monto</TableHead>
                     <TableHead>Total</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -427,7 +420,7 @@ class CobroDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-8 col-md-8 col-sm-12 col-12"></Column>
           <Column className="col-lg-4 col-md-4 col-sm-12 col-12">
-            <Table>
+            <Table classNameContent='w-100'>
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>

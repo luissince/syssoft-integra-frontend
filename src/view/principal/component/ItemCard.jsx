@@ -4,7 +4,7 @@ import Image from '../../../components/Image';
 
 const ItemCard = ({ item, handleIngresar }) => {
   return (
-    <div className="col-lg-4 col-md-4 col-sm-12 col-12">
+    <div className="col-lg-4 col-md-5 col-sm-12 col-12">
       <div className="form-group">
         <div className="card">
           <Image

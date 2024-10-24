@@ -2,10 +2,6 @@ import React from 'react';
 import {
   keyNumberFloat,
   isNumeric,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isText,
 } from '../../../../../helper/utils.helper';
@@ -15,6 +11,7 @@ import {
   comboComprobante,
   comboMoneda,
   createGasto,
+  documentsPdfInvoicesGasto,
   filtrarGastoConcepto,
   filtrarPersona,
 } from '../../../../../network/rest/principal.network';
@@ -34,6 +31,9 @@ import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
+import SweetAlert from '../../../../../model/class/sweet-alert';
+import { ModalImpresion } from '../../../../../components/MultiModal';
+import printJS from 'print-js';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
@@ -51,14 +51,19 @@ class GastoCrear extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       // Atributos principales
+      idGasto: '',
       idComprobante: '',
       idMoneda: '',
       idConcepto: '',
       observacion: '',
+      nota: '',
       monto: '',
 
       // Atributos del modal cobrar
       isOpenTerminal: false,
+
+      // Atributos del modal impresión
+      isOpenImpresion: false,
 
       // Lista de datos
       comprobantes: [],
@@ -68,9 +73,9 @@ class GastoCrear extends CustomComponent {
       concepto: null,
       conceptos: [],
 
-      // Filtrar cliente
-      cliente: null,
-      clientes: [],
+      // Filtrar proveedor
+      proveedor: null,
+      proveedores: [],
 
       // Atributos libres
       codISO: '',
@@ -80,7 +85,9 @@ class GastoCrear extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.initial = { ...this.state }
+    this.initial = { ...this.state };
+
+    this.alert = new SweetAlert();
 
     // Filtrar concepto
     this.refConcepto = React.createRef();
@@ -91,28 +98,32 @@ class GastoCrear extends CustomComponent {
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
     this.refObservacion = React.createRef();
+    this.refONota = React.createRef();
 
-    // Filtrar cliente
-    this.refCliente = React.createRef();
-    this.refValueCliente = React.createRef();
+    // Filtrar proveedor
+    this.refProveedor = React.createRef();
+    this.refValueProveedor = React.createRef();
+
+    // Referencia para el modal impresión
+    this.refModalImpresion = React.createRef();
 
     //Anular las peticiones
     this.abortController = new AbortController();
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de cliclo de vida
-    |--------------------------------------------------------------------------
-    |
-    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
-    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
-    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
-    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
-    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
-    | de la aplicación y optimizar el rendimiento del componente.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     await this.loadData();
@@ -123,18 +134,18 @@ class GastoCrear extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Métodos de acción
-    |--------------------------------------------------------------------------
-    |
-    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
   loadData = async () => {
     const [comprobantes, monedas] = await Promise.all([
@@ -219,21 +230,29 @@ class GastoCrear extends CustomComponent {
     }
   }
 
+  clearView = async () => {
+    this.setState(this.initial, async () => {
+      await this.refProveedor.current.restart();
+      await this.refConcepto.current.restart();
+      await this.loadData();
+    });
+  };
+
   /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleInputMonto = (event) => {
     this.setState({ monto: event.target.value });
@@ -249,6 +268,10 @@ class GastoCrear extends CustomComponent {
 
   handleInputObservacion = (event) => {
     this.setState({ observacion: event.target.value });
+  };
+
+  handleInputNota = (event) => {
+    this.setState({ nota: event.target.value });
   };
 
   //------------------------------------------------------------------------------------------
@@ -291,22 +314,22 @@ class GastoCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Filtrar cliente
+  // Filtrar proveedor
   //------------------------------------------------------------------------------------------
 
-  handleClearInputCliente = () => {
+  handleClearInputProveedor = () => {
     this.setState({
-      clientes: [],
-      cliente: null,
+      proveedores: [],
+      proveedor: null,
     });
   };
 
-  handleFilterCliente = async (text) => {
+  handleFilterProveedor = async (text) => {
     const searchWord = text;
-    this.setState({ cliente: null });
+    this.setState({ proveedor: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ clientes: [] });
+      this.setState({ proveedores: [] });
       return;
     }
 
@@ -316,16 +339,16 @@ class GastoCrear extends CustomComponent {
       proveedor: true,
     };
 
-    const clientes = await this.fetchFiltrarCliente(params);
+    const proveedores = await this.fetchFiltrarCliente(params);
 
-    this.setState({ clientes });
+    this.setState({ proveedores });
   };
 
-  handleSelectItemCliente = (value) => {
-    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
+  handleSelectItemProveedor = (value) => {
+    this.refProveedor.current.initialize(value.documento + ' - ' + value.informacion);
     this.setState({
-      cliente: value,
-      clientes: [],
+      proveedor: value,
+      proveedores: [],
     });
   };
 
@@ -334,30 +357,30 @@ class GastoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { concepto, idComprobante, monto, cliente, idMoneda } = this.state;
+    const { concepto, idComprobante, monto, proveedor, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      alertWarning('Gasto', 'Seleccione su concepto.', () => this.refValueConcepto.current.focus());
+      this.alert.warning('Gasto', 'Seleccione su concepto.', () => this.refValueConcepto.current.focus());
       return;
     }
 
     if (!isNumeric(monto)) {
-      alertWarning('Gasto', 'Ingrese el monto.', () => this.refMonto.current.focus());
+      this.alert.warning('Gasto', 'Ingrese el monto.', () => this.refMonto.current.focus());
       return;
     }
 
     if (!isText(idComprobante)) {
-      alertWarning('Gasto', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
+      this.alert.warning('Gasto', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
       return;
     }
 
-    if (isEmpty(cliente)) {
-      alertWarning('Gasto', 'Seleccione un cliente.', () => this.refValueCliente.current.focus());
+    if (isEmpty(proveedor)) {
+      this.alert.warning('Gasto', 'Seleccione un proveedor.', () => this.refValueProveedor.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      alertWarning('Gasto', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
+      this.alert.warning('Gasto', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
       return;
     }
 
@@ -365,10 +388,10 @@ class GastoCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.setState(this.initial, async () => {
-      await this.refCliente.current.restart();
-      await this.refConcepto.current.restart();
-      await this.loadData();
+    this.alert.dialog("Gasto", "¿Está seguro de limpiar el gasto?", (accept) => {
+      if (accept) {
+        this.clearView();
+      }
     });
   };
 
@@ -386,21 +409,22 @@ class GastoCrear extends CustomComponent {
 
   handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
     const {
-      cliente,
+      proveedor,
       idUsuario,
       idMoneda,
       idSucursal,
       idComprobante,
       observacion,
+      nota,
       concepto,
       monto
     } = this.state;
 
-    alertDialog('Gasto', '¿Estás seguro de continuar?', async (accept) => {
+    this.alert.dialog('Gasto', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idFormaPago: idFormaPago,
-          idPersona: cliente.idPersona,
+          idPersona: proveedor.idPersona,
           idUsuario: idUsuario,
           idMoneda: idMoneda,
           idSucursal: idSucursal,
@@ -408,26 +432,26 @@ class GastoCrear extends CustomComponent {
           idConcepto: concepto.idConcepto,
           monto: monto,
           estado: 1,
-          observacion: observacion,
+          observacion,
+          nota,
           notaTransacion,
           bancosAgregados: metodoPagosLista,
         };
 
         await callback();
-        alertInfo('Gasto', 'Procesando información...');
+        this.alert.information('Gasto', 'Procesando información...');
 
         const response = await createGasto(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Gasto', response.data, () => {
-            this.handleLimpiar();
-          });
+          this.alert.close();
+          this.handleOpenImpresion(response.data.idGasto);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Gasto', response.getMessage());
+          this.alert.warning('Gasto', response.getMessage());
         }
       }
     });
@@ -437,21 +461,45 @@ class GastoCrear extends CustomComponent {
     this.setState({ isOpenTerminal: false })
   }
 
+  //------------------------------------------------------------------------------------------
+  // Procesos impresión
+  //------------------------------------------------------------------------------------------
+  handleOpenImpresion = (idGasto) => {
+    this.setState({ isOpenImpresion: true, idGasto: idGasto })
+  }
+
+  handleCloseImpresion = async () => {
+    this.setState({ isOpenImpresion: false });
+  }
+
+  handlePrinterImpresion = (size) => {
+    printJS({
+      printable: documentsPdfInvoicesGasto(this.state.idGasto, size),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.clearView();
+        this.handleCloseImpresion();
+      }
+    })
+  }
+
   /*
-    |--------------------------------------------------------------------------
-    | Método de renderización
-    |--------------------------------------------------------------------------
-    |
-    | El método render() es esencial en los componentes de React y se encarga de determinar
-    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-    | actuales del componente para determinar lo que se mostrará.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
     return (
@@ -476,10 +524,22 @@ class GastoCrear extends CustomComponent {
           handleProcessCredito={() => { }}
         />
 
+        <ModalImpresion
+          refModal={this.refModalImpresion}
+          isOpen={this.state.isOpenImpresion}
+
+          clear={this.clearView}
+
+          handleClose={this.handleCloseImpresion}
+          handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
+          handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
+          handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
+        />
+
         <Title
           title='Gasto'
-          subTitle='Crear'
-          handleGoBack={() => this.props.history.goBack()}
+          subTitle='AGREGAR'
+          handleGoBack={() => this.handleCerrar()}
         />
 
         <Row>
@@ -502,19 +562,21 @@ class GastoCrear extends CustomComponent {
           </Column>
 
           <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <SearchInput
+            <Select
               group={true}
-              label={"Cliente:"}
-              ref={this.refCliente}
-              placeholder="Filtrar clientes..."
-              refValue={this.refValueCliente}
-              data={this.state.clientes}
-              handleClearInput={this.handleClearInputCliente}
-              handleFilter={this.handleFilterCliente}
-              handleSelectItem={this.handleSelectItemCliente}
-              renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
-              renderIconLeft={<i className="bi bi-person-circle"></i>}
-            />
+              label={"Tipo de Moneda:"}
+              iconLeft={<i className="bi bi-cash"></i>}
+              refSelect={this.refMoneda}
+              value={this.state.idMoneda}
+              onChange={this.handleSelectMoneda}
+            >
+              <option value="">-- Moneda --</option>
+              {this.state.monedas.map((item, index) => (
+                <option key={index} value={item.idMoneda}>
+                  {item.nombre}
+                </option>
+              ))}
+            </Select>
           </Column>
         </Row>
 
@@ -534,21 +596,19 @@ class GastoCrear extends CustomComponent {
           </Column>
 
           <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <Select
+            <SearchInput
               group={true}
-              label={"Tipo de Moneda:"}
-              iconLeft={<i className="bi bi-cash"></i>}
-              refSelect={this.refMoneda}
-              value={this.state.idMoneda}
-              onChange={this.handleSelectMoneda}
-            >
-              <option value="">-- Moneda --</option>
-              {this.state.monedas.map((item, index) => (
-                <option key={index} value={item.idMoneda}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
+              label={"Proveedor:"}
+              ref={this.refProveedor}
+              placeholder="Filtrar proveedores..."
+              refValue={this.refValueProveedor}
+              data={this.state.proveedores}
+              handleClearInput={this.handleClearInputProveedor}
+              handleFilter={this.handleFilterProveedor}
+              handleSelectItem={this.handleSelectItemProveedor}
+              renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
+              renderIconLeft={<i className="bi bi-person-circle"></i>}
+            />
           </Column>
         </Row>
 
@@ -576,12 +636,26 @@ class GastoCrear extends CustomComponent {
           <Column formGroup={true}>
             <TextArea
               group={true}
-              label={"Observación:"}
+              label={"Observación (Visible en el sistema):"}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
               refInput={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <TextArea
+              group={true}
+              label={"Nota (Visible el los reportes):"}
+              iconLeft={<i className="bi bi-card-text"></i>}
+              refInput={this.refONota}
+              value={this.state.nota}
+              onChange={this.handleInputNota}
+              placeholder="Ingrese alguna nota"
             />
           </Column>
         </Row>

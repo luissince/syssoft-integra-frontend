@@ -222,7 +222,7 @@ class BancoDetalle extends CustomComponent {
         
         <Title
           title='Banco'
-          subTitle='detalle'
+          subTitle='DETALLE'
           handleGoBack={() => this.props.history.goBack()}
         />
 

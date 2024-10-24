@@ -5,17 +5,32 @@ import {
   formatTime,
   rounded,
   formatNumberWithZeros,
-  spinnerLoading,
+  alertWarning,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { detailGuiaRemision, obtenerGuiaRemisionPdf } from '../../../../../network/rest/principal.network';
+import { detailGuiaRemision, documentsPdfInvoicesGuiaRemision } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import printJS from 'print-js';
+import PropTypes from 'prop-types';
+import { SpinnerView } from '../../../../../components/Spinner';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import Button from '../../../../../components/Button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import pdfVisualizer from 'pdf-visualizer';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class GuiaRemisionDetalle extends CustomComponent {
 
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -54,13 +69,27 @@ class GuiaRemisionDetalle extends CustomComponent {
     this.abortControllerView = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   async componentDidMount() {
     const url = this.props.location.search;
     const idGuiaRemision = new URLSearchParams(url).get('idGuiaRemision');
     if (isText(idGuiaRemision)) {
       await this.loadingData(idGuiaRemision);
     } else {
-      this.props.history.goBack();
+      this.close();
     }
   }
 
@@ -68,12 +97,38 @@ class GuiaRemisionDetalle extends CustomComponent {
     this.abortControllerView.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   async loadingData(id) {
-    const [guiaRemision] = await Promise.all([
-      this.fetchIdFactura(id)
-    ]);
-    
-    console.log(guiaRemision)
+    const params = {
+      idGuiaRemision: id,
+    };
+
+    const response = await detailGuiaRemision(params, this.abortControllerView.signal);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertWarning('Guia de Remision', response.getMessage(), () => {
+        this.close();
+      });
+      return;
+    }
+
+    response instanceof SuccessReponse;
+    const guiaRemision = response.data;
 
     const {
       fecha,
@@ -136,259 +191,268 @@ class GuiaRemisionDetalle extends CustomComponent {
     });
   }
 
-  async fetchIdFactura(id) {
-    const params = {
-      idGuiaRemision: id,
-    };
-
-    const response = await detailGuiaRemision(params, this.abortControllerView.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return false;
-    }
+  close = () => {
+    this.props.history.goBack();
   }
 
-  handlePrintA4 = () => {
-    printJS({
-      printable: obtenerGuiaRemisionPdf(this.state.idGuiaRemision,"a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+  handlePrintInvoices = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfInvoicesGuiaRemision(this.state.idGuiaRemision, size),
+      title: 'Guía de Remision',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
-  handlePrintTicket = () => {
-    printJS({
-      printable: obtenerGuiaRemisionPdf(this.state.idGuiaRemision,"ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col-12">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Guía Remisión
-                <small className="text-secondary"> Detalle </small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Guía Remisión'
+          subTitle='DETALLE'
+          handleGoBack={() => this.close()}
+        />
 
-        <div className="row">
-          <div className="col-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handlePrintA4}
-              >
-                <i className="fa fa-print"></i> A4
-              </button>
-              {" "}
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={this.handlePrintTicket}
-              >
-                <i className="fa fa-print"></i> Ticket
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, 'A4')}
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, '80mm')}
+            >
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
+            </Button>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-lg-6 col-md-12">
-            <div className="form-group">
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Fecha
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.fecha} {formatTime(this.state.hora)}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Comprobante
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.serie}-{formatNumberWithZeros(this.state.numeracion)}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Fecha Traslado
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.fechaTraslado}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Cliente
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.cliente}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Motivo Traslado
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.motivoTraslado}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Modalidad Traslado
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.modalidadTraslado}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Peso (KGM o TNE)
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.tipoPeso}  {this.state.peso}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Comprobante Asociado
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.comprobanteRef}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Serie y Numeración
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.serieRef}-{formatNumberWithZeros(this.state.numeracionRef)}
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-6 col-md-12">
-            <div className="form-group">
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Conductor
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.documentoConductor},  {this.state.informacionConductor}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Número de Licencia
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.licenciaConducir}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Número de Placa
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.numeroPlaca}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Dirección de Partida
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.direccionPartida}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-35 p-1 font-weight-normal ">
-                        Dirección de Llegada
-                      </th>
-                      <th className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {this.state.direccionLlegada}
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-lg-6 col-md-12">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    Fecha
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.fecha} {formatTime(this.state.hora)}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Comprobante
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.serie}-{formatNumberWithZeros(this.state.numeracion)}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Fecha Traslado
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.fechaTraslado}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Cliente
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.cliente}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Motivo Traslado
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.motivoTraslado}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Modalidad Traslado
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.modalidadTraslado}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Peso (KGM o TNE)
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.tipoPeso}  {this.state.peso}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Comprobante Asociado
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.comprobanteRef}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Serie y Numeración
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.serieRef}-{formatNumberWithZeros(this.state.numeracionRef)}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+            </Table>
+          </Column>
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <p className="lead">Detalle</p>
-            <div className="table-responsive">
-              <table className="table table-light table-striped">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Descripción</th>
-                    <th>Código</th>
-                    <th>Und/Medida</th>
-                    <th>Cantidad</th>
-                  </tr>
-                </thead>
-                <tbody>
+          <Column className="col-lg-6 col-md-12">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Conductor
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.documentoConductor},  {this.state.informacionConductor}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Número de Licencia
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.licenciaConducir}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Número de Placa
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.numeroPlaca}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Dirección de Partida
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.direccionPartida}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Dirección de Llegada
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.direccionLlegada}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+            </Table>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <TableResponsive>
+              <TableTitle>Detalle</TableTitle>
+              <Table className="table-light table-striped">
+                <TableHeader className="table-dark">
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead>Unid. Medida</TableHead>
+                    <TableHead>Cantidad</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {
                     this.state.detalle.map((item, index) => (
-                      <tr key={index}>
-                        <td>{++index}</td>
-                        <td>{item.nombre}</td>
-                        <td>{item.codigo}</td>
-                        <td>{item.medida}</td>
-                        <td>{rounded(item.cantidad)}</td>
-                      </tr>
+                      <TableRow key={index}>
+                        <TableCell>{++index}</TableCell>
+                        <TableCell>{item.codigo}<br/>{item.nombre}</TableCell>
+                        <TableCell>{item.medida}</TableCell>
+                        <TableCell>{rounded(item.cantidad)}</TableCell>
+                      </TableRow>
                     ))
                   }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+                </TableBody>
+              </Table>
+            </TableResponsive>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
 }
+
+GuiaRemisionDetalle.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string
+  }),
+};
 
 /**
  *

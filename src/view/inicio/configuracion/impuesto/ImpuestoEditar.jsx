@@ -144,7 +144,7 @@ class ImpuestoEditar extends CustomComponent {
 
         <Title
           title='Impuesto'
-          subTitle='Editar'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

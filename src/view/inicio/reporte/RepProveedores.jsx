@@ -1,17 +1,8 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ScatterChart, ZAxis, Scatter } from 'recharts'
 import { CreditCard, ShoppingCart, Truck } from 'lucide-react'
 import { connect } from 'react-redux';
-import {
-  currentDate,
-  getCurrentYear,
-} from '../../../helper/utils.helper';
-// import SearchBarClient from '../../../components/SearchBarClient';
 import ContainerWrapper from '../../../components/Container';
-import { filtrarPersona } from '../../../network/rest/principal.network';
-import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error-response';
 import { SpinnerView } from '../../../components/Spinner';
 import Title from '../../../components/Title';
 import Row from '../../../components/Row';
@@ -21,269 +12,114 @@ import Input from '../../../components/Input';
 import Select from '../../../components/Select';
 import { Card, CardBody, CardDescription, CardHeader, CardText, CardTitle } from '../../../components/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import CustomComponent from '../../../model/class/custom-component';
+import pdfVisualizer from 'pdf-visualizer';
+import { documentsExcelPersonaProveedor, documentsPdfReportsPersonaProveedor } from '../../../network/rest/principal.network';
+import { guId } from '../../../helper/utils.helper';
+import { downloadFileAsync } from '../../../redux/downloadSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class RepProveedores extends React.Component {
+class RepProveedores extends CustomComponent {
 
+  /**
+   * 
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
-      msgLoading: "Cargando información...",
-
-      idSucursal: this.props.token.project.idSucursal,
-      nombreSucursal: this.props.token.project.nombre,
-
-      fechaIni: '',
-      fechaFin: '',
-      isFechaActive: false,
-
-      idPersona: '',
-      clientes: [],
-      cliente: '',
-
-      frecuenciaCheck: true,
-
-      cada: 0,
-
-      yearPago: getCurrentYear(),
-      year: [
-        2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-        2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2020, 2021, 2022,
-        2023,
-      ],
-      yearCheck: true,
-
-      porSucursal: '0',
-      sucursalCkeck: true,
-    };
-
-    this.refFechaIni = React.createRef();
-    this.refCliente = React.createRef();
-    this.refUseFile = React.createRef();
-    this.refFrecuencia = React.createRef();
-    this.refYearPago = React.createRef();
-
-    this.selectItem = false;
-  }
-
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
-  componentDidMount() {
-    this.loadData();
-  }
-
-  componentWillUnmount() { }
-
-  loadData = async () => {
-    await this.setStateAsync({
-      // clientes: cliente.data,
       loading: false,
-      // cambiar
-      // fechaIni: '2022-07-19',
-      fechaIni: currentDate(),
-      fechaFin: currentDate(),
-    });
-  };
-
-  onEventClearInput = async () => {
-    await this.setStateAsync({ clientes: [], idPersona: '', cliente: '' });
-    this.selectItem = false;
-  };
-
-  handleFilter = async (event) => {
-    const searchWord = this.selectItem ? '' : event.target.value;
-    await this.setStateAsync({
-      idPersona: '',
-      cliente: searchWord,
-      idProducto: '',
-      productos: [],
-    });
-    this.selectItem = false;
-    if (searchWord.length === 0) {
-      await this.setStateAsync({ clientes: [] });
-      return;
-    }
-
-    if (this.state.filter) return;
-
-    await this.setStateAsync({ filter: true });
-
-    const params = {
-      opcion: 1,
-      filter: searchWord,
-      cliente: true,
+      msgLoading: "Cargando información...",
     };
+  }
 
-    const response = await filtrarPersona(params);
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
-    if (response instanceof SuccessReponse) {
-      await this.setStateAsync({ filter: false, clientes: response.data });
-    }
+  async componentDidMount() {
 
-    if (response instanceof ErrorResponse) {
-      await this.setStateAsync({ filter: false, clientes: [] });
-    }
-  };
+  }
 
-  onEventSelectItem = async (value) => {
-    await this.setStateAsync({
-      cliente: value.documento + ' - ' + value.informacion,
-      clientes: [],
-      idPersona: value.idPersona,
+  componentWillUnmount() {
+
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+
+  handleOpenPdf = async () => {
+    await pdfVisualizer.init({
+      url: documentsPdfReportsPersonaProveedor(),
+      title: 'Reporte de Proveedores',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
     });
-    this.selectItem = true;
-  };
-
-  async onEventRepCobro() {
-    // if (this.state.fechaFin < this.state.fechaIni) {
-    //   this.setState({
-    //     messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-    //   });
-    //   this.refFechaIni.current.focus();
-    //   return;
-    // }
-
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   fechaIni: this.state.fechaIni,
-    //   fechaFin: this.state.fechaFin,
-    //   idPersona: this.state.idPersona,
-    //   cliente: this.state.cliente,
-    // };
-
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-    // let params = new URLSearchParams({ params: ciphertext });
-    // window.open('/api/cliente/repcliente?' + params, '_blank');
   }
 
-  async onEventExcelCobro() {
-    // if (this.state.fechaFin < this.state.fechaIni) {
-    //   this.setState({
-    //     messageWarning: 'La Fecha inicial no puede ser mayor a la fecha final.',
-    //   });
-    //   this.refFechaIni.current.focus();
-    //   return;
-    // }
-
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   fechaIni: this.state.fechaIni,
-    //   fechaFin: this.state.fechaFin,
-    //   idPersona: this.state.idPersona,
-    //   cliente: this.state.cliente,
-    // };
-
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-
-    // this.refUseFile.current.download({
-    //   name: 'Reporte Cliente Aportaciones',
-    //   file: '/api/cliente/excelcliente',
-    //   filename: 'aportaciones.xlsx',
-    //   params: ciphertext,
-    // });
+  handleDownloadExcel = async () => {
+    const id = guId();
+    const url = documentsExcelPersonaProveedor();
+    this.props.downloadFileAsync({ id, url });
   }
 
-  async onEventRepDeudas() {
-    // if (!this.state.frecuenciaCheck && this.state.cada == 0) {
-    //   this.setState({ messageWarning: 'Seleccione una frecuencia de pago' });
-    //   this.refFrecuencia.current.focus();
-    //   return;
-    // }
-
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   idSucursal: this.state.idSucursal,
-    //   nombreSucursal: this.state.nombreSucursal,
-    //   seleccionado: this.state.frecuenciaCheck,
-    //   frecuencia: this.state.cada,
-    // };
-
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-    // let params = new URLSearchParams({ params: ciphertext });
-    // window.open('/api/cliente/repdeudas?' + params, '_blank');
-  }
-
-  async onEventExcelDeudas() {
-    // if (!this.state.frecuenciaCheck && this.state.cada == 0) {
-    //   this.setState({ messageWarning: 'Seleccione una frecuencia de pago' });
-    //   this.refFrecuencia.current.focus();
-    //   return;
-    // }
-
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   idSucursal: this.state.idSucursal,
-    //   nombreSucursal: this.state.nombreSucursal,
-    //   seleccionado: this.state.frecuenciaCheck,
-    //   frecuencia: this.state.cada,
-    // };
-
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-
-    // this.refUseFile.current.download({
-    //   name: 'Reporte Deudas',
-    //   file: '/api/cliente/exceldeudas',
-    //   filename: 'Lista de Dudas por Cliente.xlsx',
-    //   params: ciphertext,
-    // });
-  }
-
-  async onEventPdfRegistro() {
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   idSucursal: this.state.idSucursal,
-    //   nombreSucursal: this.state.nombreSucursal,
-    //   yearPago: this.state.yearPago,
-    //   porSucursal: this.state.porSucursal,
-    // };
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-    // let params = new URLSearchParams({ params: ciphertext });
-    // window.open('/api/cliente/replistarsociosporfecha?' + params, '_blank');
-  }
-
-  async onEventExcelRegistro() {
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   idSucursal: this.state.idSucursal,
-    //   nombreSucursal: this.state.nombreSucursal,
-    //   yearPago: this.state.yearPago,
-    //   porSucursal: this.state.porSucursal,
-    // };
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-
-    // this.refUseFile.current.download({
-    //   name: 'Listar de Cliente Por Fecha',
-    //   file: '/api/cliente/exacellistarsociosporfecha',
-    //   filename: 'Listar de Cliente Por Fecha.xlsx',
-    //   params: ciphertext,
-    // });
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
 
@@ -312,17 +148,24 @@ class RepProveedores extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Button
-              className="btn-outline-warning">
+              className="btn-outline-warning"
+              onClick={this.handleOpenPdf}>
               <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
             </Button>
             {" "}
             <Button
-              className="btn-outline-success">
+              className="btn-outline-success"
+              onClick={this.handleDownloadExcel}>
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
+            </Button>
+            {" "}
+            <Button
+              className="btn-outline-light"
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
-
         <Row>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
             <Input
@@ -359,7 +202,6 @@ class RepProveedores extends React.Component {
             </Select>
           </Column>
         </Row>
-
 
         <Row>
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
@@ -512,334 +354,6 @@ class RepProveedores extends React.Component {
             </Card>
           </Column>
         </Row>
-
-        {/* {this.state.loading && spinnerLoading(this.state.msgLoading)}
-
-        <div className="card my-1">
-          <h6 className="card-header">Reporte de Cliente(s)</h6>
-          <div className="card-body">
-            {this.state.messageWarning === '' ? null : (
-              <div className="alert alert-warning" role="alert">
-                <i className="bi bi-exclamation-diamond-fill"></i>{' '}
-                {this.state.messageWarning}
-              </div>
-            )}
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <label>Filtro por fechas</label>
-                  <div className="custom-control custom-switch">
-                    <input
-                      type="checkbox"
-                      className="custom-control-input"
-                      id="customSwitch1"
-                      checked={this.state.isFechaActive}
-                      onChange={(event) => {
-                        this.setState({
-                          isFechaActive: event.target.checked,
-                          fechaIni: currentDate(),
-                          fechaFin: currentDate(),
-                          messageWarning: '',
-                        });
-                      }}
-                    ></input>
-                    <label
-                      className="custom-control-label"
-                      htmlFor="customSwitch1"
-                    >
-                      {this.state.isFechaActive ? 'Activo' : 'Inactivo'}
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col">
-                <div className="form-group">
-                  <label>
-                    Fecha inicial{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <input
-                      type="date"
-                      className="form-control"
-                      disabled={!this.state.isFechaActive}
-                      ref={this.refFechaIni}
-                      value={this.state.fechaIni}
-                      onChange={(event) => {
-                        if (event.target.value <= this.state.fechaFin) {
-                          this.setState({
-                            fechaIni: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            fechaIni: event.target.value,
-                            messageWarning:
-                              'La Fecha inicial no puede ser mayor a la fecha final.',
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col">
-                <div className="form-group">
-                  <label>
-                    Fecha final{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <input
-                      type="date"
-                      className="form-control"
-                      disabled={!this.state.isFechaActive}
-                      value={this.state.fechaFin}
-                      onChange={(event) =>
-                        this.setState({ fechaFin: event.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-                <div className="form-group">
-                  <label>Cliente(s)</label>
-                  <SearchBarClient
-                    desing={false}
-                    placeholder="Filtrar clientes..."
-                    refCliente={this.refCliente}
-                    cliente={this.state.cliente}
-                    clientes={this.state.clientes}
-                    onEventClearInput={this.onEventClearInput}
-                    handleFilter={this.handleFilter}
-                    onEventSelectItem={this.onEventSelectItem}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="row mt-3">
-              <div className="col"></div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventRepCobro()}
-                >
-                  <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-success btn-sm"
-                  onClick={() => this.onEventExcelCobro()}
-                >
-                  <i className="bi bi-file-earmark-excel-fill"></i> Reporte
-                  Excel
-                </button>
-              </div>
-              <div className="col"></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card my-1">
-          <h6 className="card-header">Lista de Deudas por Cliente</h6>
-          <div className="card-body">
-            <div className="row">
-              <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-                <div className="form-group">
-                  <label>Seleccione segun frecuencia de pago</label>
-                  <div className="input-group">
-                    <select
-                      title="frecuencia de deuda"
-                      className="form-control"
-                      ref={this.refFrecuencia}
-                      value={this.state.cada}
-                      disabled={this.state.frecuenciaCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({ cada: event.target.value });
-                        if (this.state.cada === 0) {
-                          await this.setStateAsync({ frecuenciaCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="0">- Seleccione</option>
-                      <option value="15">Listar Ventas de cada 15</option>
-                      <option value="30">Listar Ventas de cada 30</option>
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.frecuenciaCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                frecuenciaCheck: event.target.checked,
-                              });
-                              if (this.state.frecuenciaCheck) {
-                                await this.setStateAsync({ cada: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="row mt-3">
-              <div className="col"></div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventRepDeudas()}
-                >
-                  <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-success btn-sm"
-                  onClick={() => this.onEventExcelDeudas()}
-                >
-                  <i className="bi bi-file-earmark-excel-fill"></i> Reporte
-                  Excel
-                </button>
-              </div>
-              <div className="col"></div>
-            </div>
-          </div>
-        </div>
-
-
-        <div className="card my-1">
-          <h6 className="card-header">
-            Listar de Clientes Registrados por Fecha
-          </h6>
-          <div className="card-body">
-            <div className="row">
-              <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-                <div className="form-group">
-                  <label>
-                    Año de inicio
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <select
-                      title="Año"
-                      className="form-control"
-                      disabled={this.state.yearCheck}
-                      ref={this.refYearPago}
-                      value={this.state.yearPago}
-                      onChange={(event) =>
-                        this.setState({ yearPago: event.target.value })
-                      }
-                    >
-                      {this.state.year.map((item, index) => (
-                        <option key={index} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.yearCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                yearCheck: event.target.checked,
-                              });
-                              if (this.state.yearCheck) {
-                                await this.setStateAsync({
-                                  yearPago: getCurrentYear(),
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-                <div className="form-group">
-                  <label>
-                    Sucursal<i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <select
-                      title="Año"
-                      className="form-control"
-                      disabled={this.state.sucursalCkeck}
-                      value={this.state.porSucursal}
-                      onChange={(event) =>
-                        this.setState({ porSucursal: event.target.value })
-                      }
-                    >
-                      <option value={'0'}>{'Por sucursal'}</option>
-                      <option value={'1'}>{'Todos'}</option>
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.sucursalCkeck}
-                            onChange={async (event) =>
-                              await this.setStateAsync({
-                                sucursalCkeck: event.target.checked,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="row mt-3">
-              <div className="col"></div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventPdfRegistro()}
-                >
-                  <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-success btn-sm"
-                  onClick={() => this.onEventExcelRegistro()}
-                >
-                  <i className="bi bi-file-earmark-excel-fill"></i> Reporte
-                  Excel
-                </button>
-              </div>
-              <div className="col"></div>
-            </div>
-          </div>
-        </div>
-
-        <FileDownloader ref={this.refUseFile} /> */}
       </ContainerWrapper>
     );
   }
@@ -853,14 +367,18 @@ RepProveedores.propTypes = {
     }),
   }),
   history: PropTypes.object,
+  downloadFileAsync: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    moneda: state.predeterminado.moneda,
   };
 };
 
-const ConnectedRepProveedores = connect(mapStateToProps, null)(RepProveedores);;
+const mapDispatchToProps = { downloadFileAsync };
+
+const ConnectedRepProveedores = connect(mapStateToProps, mapDispatchToProps)(RepProveedores);;
 
 export default ConnectedRepProveedores;

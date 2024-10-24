@@ -226,7 +226,11 @@ class Compras extends CustomComponent {
 
     return this.state.lista.map((item, index) => {
 
-      const estado = item.estado === 1 ? <span className="text-success">PAGADO</span> : item.estado === 2 ? <span className="text-warning">POR PAGAR</span> : <span className="text-danger">ANULADO</span>;
+      const estado = item.estado === 1
+        ? <span className="badge badge-success">PAGADO</span>
+        : item.estado === 2
+          ? <span className="badge badge-warning">POR PAGAR</span>
+          : <span className="badge badge-danger">ANULADO</span>;
 
       return (
         <TableRow key={index}>
@@ -266,27 +270,29 @@ class Compras extends CustomComponent {
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-info"
+              onClick={this.handleCrear}>
+              <i className="bi bi-file-plus"></i> Crear Compra
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadingInit}>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />
-          </Column>
-
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleCrear}>
-              <i className="bi bi-file-plus"></i> Crear compra
-            </Button>
-            {' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadingInit}>
-              <i className="bi bi-arrow-clockwise"></i>
-            </Button>
           </Column>
         </Row>
 

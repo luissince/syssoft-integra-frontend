@@ -1,5 +1,5 @@
 import Column from './Column';
-import { CustomModalForm } from './CustomModal';
+import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader } from './CustomModal';
 import Row from './Row';
 import { SpinnerView } from './Spinner';
 import {
@@ -55,20 +55,6 @@ class ModalTransaccion extends CustomComponent {
     this.refMetodoContado = React.createRef();
     this.abortControllerView = new AbortController();
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Método de cliclo de vida
-  |--------------------------------------------------------------------------
-  |
-  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
-  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
-  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
-  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
-  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
-  | de la aplicación y optimizar el rendimiento del componente.
-  |
-  */
 
   /*
   |--------------------------------------------------------------------------
@@ -705,17 +691,22 @@ class ModalTransaccion extends CustomComponent {
     } = this.state;
 
     return (
-      <CustomModalForm
-        contentRef={this.refModal}
+      <CustomModal
+        ref={this.refModal}
         isOpen={isOpen}
         onOpen={this.onOpen}
         onHidden={this.onHidden}
         onClose={onClose}
         contentLabel={this.state.title}
-        titleHeader={this.state.title}
-        onSubmit={this.handleCobrar}
-        body={
-          <>
+      >
+        <CustomModalContentForm
+          onSubmit={this.handleCobrar}
+        >
+          <CustomModalContentHeader contentRef={this.refModal}>
+            {this.state.title}
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody>
             <SpinnerView
               loading={loading}
               message={'Cargando datos...'}
@@ -828,20 +819,18 @@ class ModalTransaccion extends CustomComponent {
             {/* contado detalle */}
             {formaPago === CONTADO && (
               <Row >
-                <Column refChildren={this.refMetodoPagoContenedor}>
-                  <div className="form-group">
-                    <h6>Lista de métodos:</h6>
-                    {bancosAgregados.map((item, index) => (
-                      <MetodoPago
-                        key={index}
-                        idBanco={item.idBanco}
-                        name={item.nombre}
-                        monto={item.monto}
-                        handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
-                        handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
-                      />
-                    ))}
-                  </div>
+                <Column refChildren={this.refMetodoPagoContenedor} formGroup={true}>
+                  <h6>Lista de métodos:</h6>
+                  {bancosAgregados.map((item, index) => (
+                    <MetodoPago
+                      key={index}
+                      idBanco={item.idBanco}
+                      name={item.nombre}
+                      monto={item.monto}
+                      handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
+                      handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+                    />
+                  ))}
                 </Column>
 
                 <Column className="col-12" formGroup={true}>
@@ -883,7 +872,7 @@ class ModalTransaccion extends CustomComponent {
                 <Column>
 
                   <div className="form-group">
-                    <span className="text-md">
+                    <span className="text-sm">
                       <i className="bi bi-info-circle text-success text-lg"></i>{' '}
                       Los pagos se efectúan en función del número de
                       cuotas, con una alerta que indica la frecuencia de
@@ -895,9 +884,9 @@ class ModalTransaccion extends CustomComponent {
                     <Input
                       group={true}
                       iconLeft={<i className="bi bi-hourglass-split"></i>}
-                      title="Número de cuotas"
+                      role={"float"}
                       placeholder="Número de cuotas"
-                      reduce={this.refNumeroCuotas}
+                      refInput={this.refNumeroCuotas}
                       value={numeroCuotas}
                       onChange={this.handleSelectNumeroCuotas}
                       onKeyDown={keyNumberInteger}
@@ -936,7 +925,7 @@ class ModalTransaccion extends CustomComponent {
               <Row>
                 <Column>
                   <div className="form-group">
-                    <span className="text-md">
+                    <span className="text-sm">
                       <i className="bi bi-info-circle text-success text-lg"></i>{' '}
                       Los pagos se realizan de acuerdo con la frecuencia
                       establecida, con alertas programadas para recordar
@@ -988,10 +977,9 @@ class ModalTransaccion extends CustomComponent {
               </div>
             </div>
           )} */}
-          </>
-        }
-        footer={
-          <>
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
             <Button
               type="submit"
               className="btn-primary"
@@ -1005,44 +993,11 @@ class ModalTransaccion extends CustomComponent {
             >
               <i className='fa fa-close'></i> Cancelar
             </Button>
-          </>
-        }
-      />
+          </CustomModalContentFooter>
+        </CustomModalContentForm>
+      </CustomModal>
     );
   }
-};
-
-const MetodoPago = ({
-  idBanco,
-  name,
-  monto,
-  handleInputMontoBancosAgregados,
-  handleRemoveItemBancosAgregados,
-}) => {
-  return (
-    <div className="input-group mb-2">
-      <Input
-        autoFocus={true}
-        role={"float"}
-        placeholder="Monto"
-        value={monto}
-        onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
-      />
-      <div className="input-group-prepend">
-        <div className="input-group-text">
-          <span>{name}</span>
-        </div>
-      </div>
-      <div className="input-group-append">
-        <Button
-          className="btn-outline-danger d-flex"
-          title="Agregar Pago"
-          onClick={() => handleRemoveItemBancosAgregados(idBanco)}
-          icono={<i className="bi bi-trash3-fill"></i>}
-        />
-      </div>
-    </div>
-  );
 };
 
 ModalTransaccion.propTypes = {
@@ -1059,6 +1014,42 @@ ModalTransaccion.propTypes = {
   handleProcessContado: PropTypes.func,
   handleProcessCredito: PropTypes.func
 }
+
+const MetodoPago = ({
+  idBanco,
+  name,
+  monto,
+  handleInputMontoBancosAgregados,
+  handleRemoveItemBancosAgregados,
+}) => {
+  return (
+    <Input
+      autoFocus={true}
+      group={true}
+      role={"float"}
+      placeholder="Monto"
+      value={monto}
+      onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
+      contentRight={
+        <>
+          <div className="input-group-prepend">
+            <div className="input-group-text">
+              <span>{name}</span>
+            </div>
+          </div>
+          <div className="input-group-append">
+            <Button
+              className="btn-outline-danger d-flex"
+              title="Agregar Pago"
+              onClick={() => handleRemoveItemBancosAgregados(idBanco)}
+              icono={<i className="bi bi-trash3-fill"></i>}
+            />
+          </div>
+        </>
+      }
+    />
+  );
+};
 
 MetodoPago.propTypes = {
   idBanco: PropTypes.string.isRequired,

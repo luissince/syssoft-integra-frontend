@@ -41,9 +41,9 @@ CardBody.propTypes = {
 
 export const CardTitle = ({ className, children }) => {
     return (
-        <h4 className={`card-title ${className}`}>
+        <h5 className={`card-title ${className}`}>
             {children}
-        </h4>
+        </h5>
     );
 }
 
@@ -67,9 +67,9 @@ CardDescription.propTypes = {
 
 export const CardText = ({ className, children }) => {
     return (
-        <h5 className={`card-text ${className}`}>
+        <h3 className={`card-text ${className}`}>
             {children}
-        </h5>
+        </h3>
     );
 }
 

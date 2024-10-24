@@ -1,8 +1,6 @@
-import React from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import {
-  spinnerLoading,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
@@ -14,9 +12,24 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
+import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import { SpinnerTable } from '../../../../components/Spinner';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Proveedores extends CustomComponent {
 
+  /**
+  *
+  * Constructor
+  */
   constructor(props) {
     super(props);
     this.state = {
@@ -26,6 +39,8 @@ class Proveedores extends CustomComponent {
       lista: [],
       restart: false,
 
+      buscar: '',
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -33,11 +48,23 @@ class Proveedores extends CustomComponent {
       messageTable: 'Cargando información...',
     };
 
-    this.refTxtSearch = React.createRef();
-
     this.idCodigo = '';
     this.abortControllerTable = new AbortController();
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     this.loadInit();
@@ -47,20 +74,34 @@ class Proveedores extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -73,17 +114,17 @@ class Proveedores extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = '') => {
     this.setState({
       loading: true,
       lista: [],
@@ -92,7 +133,7 @@ class Proveedores extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: buscar.trim(),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -121,6 +162,23 @@ class Proveedores extends CustomComponent {
     }
   };
 
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
   handleDetalleCliente(idPersona) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
@@ -128,70 +186,79 @@ class Proveedores extends CustomComponent {
     });
   }
 
-  generarBody() {
+  /*
+ |--------------------------------------------------------------------------
+ | Método de renderización
+ |--------------------------------------------------------------------------
+ |
+ | El método render() es esencial en los componentes de React y se encarga de determinar
+ | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+ | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+ | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+ | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+ | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+ | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+ | actuales del componente para determinar lo que se mostrará.
+ |
+ */
+
+  generateBody() {
     if (this.state.loading) {
       return (
-        <tr>
-          <td className="text-center" colSpan="8">
-            {spinnerLoading(
-              'Cargando información de la tabla...',
-              true,
-            )}
-          </td>
-        </tr>
+        <SpinnerTable
+          colSpan='8'
+          message='Cargando información de la tabla...'
+        />
       );
     }
 
     if (isEmpty(this.state.lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="8">¡No hay datos registrados!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+        </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
       return (
-        <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>
+        <TableRow key={index}>
+          <TableCell className="text-center">{item.id}</TableCell>
+          <TableCell>
             {item.tipoDocumento}
             {<br />}
             {item.documento}
-          </td>
-          <td>{item.informacion}</td>
-          <td>
+          </TableCell>
+          <TableCell>{item.informacion}</TableCell>
+          <TableCell>
             {item.celular}
             {<br />}
             {item.telefono}
-          </td>
-          <td>{item.direccion}</td>
-          <td className="text-center">
-            <div
+          </TableCell>
+          <TableCell>{item.direccion}</TableCell>
+          <TableCell className="text-center">
+            <span
               className={`badge ${item.predeterminado === 1 ? 'badge-success' : 'badge-warning'}`}
             >
               {item.predeterminado === 1 ? 'SI' : 'NO'}
-            </div>
-          </td>
-          <td className="text-center">
-            <div
+            </span>
+          </TableCell>
+          <TableCell className="text-center">
+            <span
               className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
-            </div>
-          </td>
-          <td className="text-center">
-            <button
-              className="btn btn-outline-info btn-sm"
-              title="Editar"
-              onClick={() =>
-                this.handleDetalleCliente(item.idPersona)
-              }
+            </span>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
+              onClick={() =>this.handleDetalleCliente(item.idPersona)}
             >
               <i className="bi bi-eye"></i>
-            </button>
-          </td>
-        </tr>
+            </Button>
+          </TableCell>
+        </TableRow>
       );
     });
   }
@@ -199,79 +266,57 @@ class Proveedores extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Proveedores <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Proveedores'
+          subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
 
-          <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar proveedores..."
+            />
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="10%">DNI / RUC</th>
-                    <th width="20%">Cliente</th>
-                    <th width="10%">Cel. / Tel.</th>
-                    <th width="15%">Dirección</th>
-                    <th width="7%">Predeterminado</th>
-                    <th width="7%">Estado</th>
-                    <th width="5%" className="text-center">
-                      Detalle
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.generarBody()}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <TableResponsive>
+              <Table className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="10%">DNI / RUC</TableHead>
+                    <TableHead width="20%">Cliente</TableHead>
+                    <TableHead width="10%">Cel. / Tel.</TableHead>
+                    <TableHead width="15%">Dirección</TableHead>
+                    <TableHead width="7%">Predeterminado</TableHead>
+                    <TableHead width="7%">Estado</TableHead>
+                    <TableHead width="5%" className="text-center"> Detalle</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
+          </Column>
+        </Row>
 
         <Paginacion
           loading={this.state.loading}
@@ -284,6 +329,24 @@ class Proveedores extends CustomComponent {
       </ContainerWrapper>
     );
   }
+}
+
+Proveedores.propTypes = {
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      idUsuario: PropTypes.string.isRequired,
+    }).isRequired,
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string.isRequired,
+    }).isRequired,
+  }),
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string
+  }),
 }
 
 const mapStateToProps = (state) => {

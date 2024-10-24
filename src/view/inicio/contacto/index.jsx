@@ -2,6 +2,24 @@ import { ContainerMenu } from "../../../components/Container";
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 
+import Personas from './todo/Personas.jsx';
+import PersonaAgregar from './formularios/crear/PersonaAgregar.jsx';
+import PersonaEditar from './formularios/editar/PersonaEditar.jsx';
+import PersonaDetalle from './formularios/detalle/PersonaDetalle.jsx';
+import Clientes from './cliente/Clientes.jsx';
+import Proveedores from './proveedor/Proveedores.jsx';
+import Conductores from './conductor/Conductores.jsx';
+
+export {
+    Personas,
+    PersonaAgregar,
+    PersonaEditar,
+    PersonaDetalle,
+    Clientes,
+    Proveedores,
+    Conductores,
+}
+
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component

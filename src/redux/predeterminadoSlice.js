@@ -3,6 +3,20 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { establecerPreferidoProducto, preferidosProducto } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 
+export const starProduct = createAsyncThunk('productos/starProduct', async (data) => {
+  await establecerPreferidoProducto({
+    preferido: data.producto.preferido,
+    idProducto: data.producto.idProducto,
+  });
+
+  const response = await preferidosProducto(data.params);
+  if (response instanceof SuccessReponse) {
+    return response.data;
+  }
+
+  throw new Error('Hubo un error al obtener los productos preferidos');
+});
+
 const initialState = {
   moneda: null,
   empresa: null,
@@ -51,25 +65,19 @@ const initialState = {
     state: null,
     local: null
   },
+  pedidoLista: {
+    data: null,
+    paginacion: null
+  },
+  pedidoCrear: {
+    state: null,
+    local: null
+  },
   cpeSunatLista: {
     data: null,
     paginacion: null
   },
 };
-
-export const starProduct = createAsyncThunk('productos/starProduct', async (data) => {
-  await establecerPreferidoProducto({
-    preferido: data.producto.preferido,
-    idProducto: data.producto.idProducto,
-  });
-
-  const response = await preferidosProducto(data.params);
-  if (response instanceof SuccessReponse) {
-    return response.data;
-  }
-
-  throw new Error('Hubo un error al obtener los productos preferidos');
-});
 
 const predeterminadoSlice = createSlice({
   name: 'predeterminado',
@@ -228,6 +236,31 @@ const predeterminadoSlice = createSlice({
       };
     },
 
+    setListaPedidoData: (state, action) => {
+      state.pedidoLista.data = action.payload;
+    },
+    setListaPedidoPaginacion: (state, action) => {
+      state.pedidoLista.paginacion = action.payload;
+    },
+    clearListaPedido: (state) => {
+      state.pedidoLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
+    setCrearPedidoState: (state, action) => {
+      state.pedidoCrear.state = action.payload;
+    },
+    setCrearPedidoLocal: (state, action) => {
+      state.pedidoCrear.local = action.payload;
+    },
+    clearCrearPedido: (state) => {
+      state.pedidoCrear = {
+        state: null,
+        local: null
+      };
+    },
 
     setListaCpeSunatData: (state, action) => {
       state.cpeSunatLista.data = action.payload;
@@ -287,6 +320,14 @@ const predeterminadoSlice = createSlice({
         state: null,
         local: null
       };
+      state.pedidoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.pedidoCrear = {
+        state: null,
+        local: null
+      };
       state.cpeSunatLista = {
         data: null,
         paginacion: null
@@ -341,6 +382,14 @@ const predeterminadoSlice = createSlice({
         state: null,
         local: null
       };
+      state.pedidoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.pedidoCrear = {
+        state: null,
+        local: null
+      };
       state.cpeSunatLista = {
         data: null,
         paginacion: null
@@ -363,7 +412,8 @@ const predeterminadoSlice = createSlice({
   },
 });
 
-export const { setMonedaNacional,
+export const {
+  setMonedaNacional,
   setProductosFavoritos,
   setEmpresa,
 
@@ -415,7 +465,16 @@ export const { setMonedaNacional,
   setCrearCompraLocal,
   clearCrearCompra,
 
+  setListaPedidoData,
+  setListaPedidoPaginacion,
+  clearListaPedido,
+
+  setCrearPedidoState,
+  setCrearPedidoLocal,
+  clearCrearPedido,
+
   clearSucursal,
   clearPredeterminado
 } = predeterminadoSlice.actions;
+
 export default predeterminadoSlice.reducer;

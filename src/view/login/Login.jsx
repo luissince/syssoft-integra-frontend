@@ -70,7 +70,7 @@ class Login extends CustomComponent {
 
     if (isEmpty(this.state.usuario)) {
       this.usuarioInput.current.focus();
-      await this.setStateAsync({
+      this.setState({
         message: 'Ingrese su usuario para iniciar sesión.',
       });
       return;
@@ -78,7 +78,7 @@ class Login extends CustomComponent {
 
     if (isEmpty(this.state.password)) {
       this.passwordInput.current.focus();
-      await this.setStateAsync({
+      this.setState({
         message: 'Ingrese su contraseña para iniciar sesión.',
       });
       return;
@@ -86,7 +86,7 @@ class Login extends CustomComponent {
 
     document.activeElement.blur();
 
-    await this.setStateAsync({ loading: true });
+    this.setState({ loading: true });
 
     const data = {
       usuario: this.state.usuario,
@@ -104,7 +104,7 @@ class Login extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      await this.setStateAsync({
+      this.setState({
         loading: false,
         message: response.getMessage(),
       });

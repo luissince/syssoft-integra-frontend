@@ -480,8 +480,8 @@ class LogisticaAjusteCrear extends CustomComponent {
         />
 
         <Title
-          title={"Ajuste de inventario"}
-          subTitle={"CREAR"}
+          title="Ajuste de inventario"
+          subTitle="CREAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 

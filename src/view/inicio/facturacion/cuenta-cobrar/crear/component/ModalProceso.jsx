@@ -28,7 +28,6 @@ class ModalProceso extends React.Component {
 
   handleOnOpen = () => {
     const cobrado = this.props.cuota.transacciones.flatMap(transaccion=> transaccion.detalles).reduce((acc, detalle) => acc + detalle.monto, 0);
-    console.log(this.props.cuota.transacciones.flatMap(transaccion=> transaccion.detalles))
     this.setState({ cobro: this.props.cuota.monto, cobrado });
   }
 

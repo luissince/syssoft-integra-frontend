@@ -1,20 +1,20 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, getPathNavigation, isEmpty, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import { alertWarning, calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, getPathNavigation, isEmpty, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { detailCotizacion, obtenerCotizacionPdf, obtenerPedidoCotizacionPdf } from '../../../../../network/rest/principal.network';
+import { detailCotizacion, documentsPdfInvoicesCotizacion, documentsPdfListsCotizacion } from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
-import printJS from 'print-js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -77,7 +77,7 @@ class CotizacionDetalle extends CustomComponent {
     if (isText(idCotizacion)) {
       this.loadingData(idCotizacion);
     } else {
-      this.props.history.goBack();
+      this.close();
     }
   }
 
@@ -86,23 +86,37 @@ class CotizacionDetalle extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Métodos de acción
-    |--------------------------------------------------------------------------
-    |
-    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
   async loadingData(id) {
-    const [cotizacion] = await Promise.all([
-      this.fetchDetailCotizacion(id)
-    ]);
+    const params = {
+      idCotizacion: id,
+    };
+
+    const response = await detailCotizacion(params, this.abortControllerView.signal);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertWarning('Cotización', response.getMessage(), () => {
+        this.close();
+      });
+      return;
+    }
+
+    response instanceof SuccessReponse;
+    const cotizacion = response.data;
 
     const {
       fecha,
@@ -153,22 +167,8 @@ class CotizacionDetalle extends CustomComponent {
     });
   }
 
-  async fetchDetailCotizacion(id) {
-    const params = {
-      idCotizacion: id,
-    };
-
-    const response = await detailCotizacion(params, this.abortControllerView.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return false;
-    }
+  close = () => {
+    this.props.history.goBack();
   }
 
   /*
@@ -191,33 +191,23 @@ class CotizacionDetalle extends CustomComponent {
   // Procesos impresión
   //------------------------------------------------------------------------------------------
 
-  handleOpenImpresionA4 = () => {
-    printJS({
-      printable: obtenerCotizacionPdf(this.state.idCotizacion, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento..."
+  handlePrintInvoices = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfInvoicesCotizacion(this.state.idCotizacion, size),
+      title: 'Cotización',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
     });
   }
 
-  handleOpenImpresionTicket = () => {
-    printJS({
-      printable: obtenerCotizacionPdf(this.state.idCotizacion, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento..."
+  handlePrintList = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfListsCotizacion(this.state.idCotizacion, size),
+      title: 'Cotización',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
     });
   }
-
-  handleOpenImpresionPedido = () => {
-    printJS({
-      printable: obtenerPedidoCotizacionPdf(this.state.idCotizacion),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento..."
-    });
-  }
-
 
   /*
   |--------------------------------------------------------------------------
@@ -277,31 +267,31 @@ class CotizacionDetalle extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <tr key={index}>
-            <th className="text-right mb-2">{impuesto.nombre} :</th>
-            <th className="text-right mb-2">
+          <TableRow key={index}>
+            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
-            </th>
-          </tr>
+            </TableHead>
+          </TableRow>
         );
       });
     }
     return (
       <>
-        <tr>
-          <th className="text-right mb-2">SUB TOTAL :</th>
-          <th className="text-right mb-2">
+        <TableRow>
+          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
+          <TableHead className="text-right mb-2">
             {numberFormat(subTotal, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
         {impuestosGenerado()}
-        <tr className="border-bottom"></tr>
-        <tr>
-          <th className="text-right h5">TOTAL :</th>
-          <th className="text-right h5">
+        <TableRow className="border-bottom"></TableRow>
+        <TableRow>
+          <TableHead className="text-right h5">TOTAL :</TableHead>
+          <TableHead className="text-right h5">
             {numberFormat(total, this.state.codiso)}
-          </th>
-        </tr>
+          </TableHead>
+        </TableRow>
       </>
     );
   }
@@ -316,43 +306,51 @@ class CotizacionDetalle extends CustomComponent {
 
         <Title
           title='Cotización'
-          subTitle='Detalle'
-          handleGoBack={() => this.props.history.goBack()}
+          subTitle='DETALLE'
+          handleGoBack={() => this.close()}
         />
 
         <Row>
           <Column formGroup={true}>
             <Button
               className="btn-light"
-              onClick={this.handleOpenImpresionA4}
+              onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
             </Button>
             {' '}
             <Button
               className="btn-light"
-              onClick={this.handleOpenImpresionTicket}
+              onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
-              <i className="fa fa-print"></i> Ticket
+              <i className="fa fa-print"></i> 80MM
             </Button>
-
+            {' '}
             <Button
               className="btn-light"
-              onClick={this.handleOpenImpresionPedido}
+              onClick={this.handlePrintInvoices.bind(this, '58mm')}
             >
-              <i className="fa fa-print"></i> Pedido
+              <i className="fa fa-print"></i> 58MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintList.bind(this, 'A4')}
+            >
+              <i className="fa fa-print"></i> Lista
             </Button>
           </Column>
         </Row>
 
+
         <Row>
           <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
             <TableResponsive>
-              <Table className="table-borderless">
+              <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha Compra
+                      Fecha
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.fechaHora}
@@ -403,9 +401,9 @@ class CotizacionDetalle extends CustomComponent {
             </TableResponsive>
           </Column>
 
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12" formGroup={true}>
+          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
             <TableResponsive>
-              <Table className="table-borderless">
+              <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
@@ -514,7 +512,7 @@ class CotizacionDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table>
+            <Table classNameContent='w-100'>
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>

@@ -1,5 +1,21 @@
 import PropTypes from 'prop-types';
 
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ * Example:
+    <Switches
+        label={"Preferido:"}
+        id={"cbPreferido"}
+        checked={this.state.predefinido}
+        onChange={(value) =>
+            this.setState({ predefinido: value.target.checked })
+        }
+    >
+        {this.state.predefinido ? "Si" : "No"}
+    </Switches>
+ */
 export const Switches = ({
     autoFocus,
     id,
@@ -87,6 +103,20 @@ Switches.propTypes = {
     children: PropTypes.node,
 };
 
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ * Example:
+    <CheckBox
+        id="checkboxPnCliente"
+        checked={this.state.cliente}
+        onChange={(event) => {
+            this.setState({ cliente: event.target.checked })
+        }}>
+        Cliente
+    </CheckBox>
+ */
 const CheckBox = ({
     autoFocus,
     id,

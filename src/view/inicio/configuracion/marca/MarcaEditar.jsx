@@ -158,7 +158,7 @@ class MarcaEditar extends CustomComponent {
 
         <Title
           title='Marca'
-          subTitle='Editar'
+          subTitle='EDITAR'
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

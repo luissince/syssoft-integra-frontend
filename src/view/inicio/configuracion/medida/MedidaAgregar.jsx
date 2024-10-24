@@ -94,7 +94,7 @@ class MedidaAgregar extends React.Component {
       <ContainerWrapper>
         <Title
           title='Medida'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

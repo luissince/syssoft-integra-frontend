@@ -1,8 +1,6 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
-import { Toaster } from 'react-hot-toast';
 // import { io } from "socket.io-client";
-// import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { addNotification, clearNoticacion } from '../../redux/noticacionSlice.js';
@@ -16,172 +14,184 @@ import Menu from '../../components/menu/Menu.jsx';
 import Head from '../../components/head/Head.jsx';
 
 import Notifications from './notificacion/Notifications.jsx';
-import Dashboard from './dashboard/Dashboard.jsx';
+// import Dashboard from './dashboard/Dashboard.jsx';
 
-import Facturacion from './facturacion/index.jsx';
+const Dashboard = React.lazy(() => import('./dashboard/Dashboard.jsx'));
 
-import Ventas from './facturacion/venta/listar/Ventas.jsx';
-import VentaCrear from './facturacion/venta/crear/VentaCrear.jsx';
-import VentaCrearEscritorio from './facturacion/venta/crear-clasico/VentaCrearEscritorio.jsx';
+import
+Seguridad, {
+  Perfiles,
+  PerfilAgregar,
+  PerfilEditar,
 
-import VentaDetalle from './facturacion/venta/detalle/VentaDetalle.jsx';
+  Usuarios,
+  UsuarioAgregar,
+  UsuarioEditar,
+  UsuarioResetear,
 
-import Cobros from './facturacion/cobro/lista/Cobros';
-import CobroCrear from './facturacion/cobro/crear/CobroCrear';
-import CobroDetalle from './facturacion/cobro/detalle/CobroDetalle';
+  Accesos,
+} from './seguridad/index.jsx';
 
-import Cotizaciones from './facturacion/cotizacion/lista/Cotizaciones.jsx';
-import CotizacioneCrear from './facturacion/cotizacion/formularios/crear/CotizacionCrear.jsx';
-import CotizacioneEditar from './facturacion/cotizacion/formularios/editar/CotizacionEditar.jsx';
-import CotizacionDetalle from './facturacion/cotizacion/detalle/CotizacionDetalle.jsx';
+import Facturacion, {
+  Ventas,
+  VentaCrear,
+  VentaCrearEscritorio,
+  VentaDetalle,
 
-import GuiaRemision from './facturacion/guiaremision/listar/GuiaRemision.jsx';
-import GuiaRemisionCrear from './facturacion/guiaremision/crear/GuiaRemisionCrear.jsx';
-import GuiaRemisionEditar from './facturacion/guiaremision/editar/GuiaRemisionEditar.jsx';
-import GuiaRemisionDetalle from './facturacion/guiaremision/detalle/GuiaRemisionDetalle.jsx';
+  Cobros,
+  CobroCrear,
+  CobroDetalle,
 
-import NotaCredito from './facturacion/notacredito/NotaCredito';
-import NotaCreditoProceso from './facturacion/notacredito/NotaCreditoProceso';
-import NotaCreditoDetalle from './facturacion/notacredito/NotaCreditoDetalle';
+  Cotizaciones,
+  CotizacioneCrear,
+  CotizacioneEditar,
+  CotizacionDetalle,
 
-import CuentasPorCobrar from './facturacion/cuenta-cobrar/lista/CuentasPorCobrar.jsx';
-import CuentasPorCobrarAbonar from './facturacion/cuenta-cobrar/crear/CuentasPorCobrarAbonar.jsx';
+  GuiaRemision,
+  GuiaRemisionCrear,
+  GuiaRemisionEditar,
+  GuiaRemisionDetalle,
 
-import Logistica from './logistica/index.jsx';
+  NotaCredito,
+  NotaCreditoProceso,
+  NotaCreditoDetalle,
 
-import Productos from './logistica/producto/lista/Productos';
-import ProductoAgregar from './logistica/producto/formularios/agregar/ProductoAgregar';
-import ProductoEditar from './logistica/producto/formularios/editar/ProductoEditar';
-import ProductoDetalle from './logistica/producto/detalle/ProductoDetalle';
+  CuentasPorCobrar,
+  CuentasPorCobrarAbonar,
+} from './facturacion/index.jsx';
 
-import LogisticaAjuste from './logistica/ajuste/lista/LogisticaAjuste.jsx';
-import LogisticaAjusteCrear from './logistica/ajuste/crear/LogisticaAjusteCrear.jsx';
-import LogisticaAjusteDetalle from './logistica/ajuste/detalle/LogisticaAjusteDetalle.jsx';
+import Logistica, {
+  Productos,
+  ProductoAgregar,
+  ProductoEditar,
+  ProductoDetalle,
 
-import Traslado from './logistica/traslado/listar/Traslado.jsx';
-import TrasladoCrear from './logistica/traslado/crear/TrasladoCrear.jsx';
-import TrasladoDetalle from './logistica/traslado/detalle/TrasladoDetalle.jsx';
+  LogisticaAjuste,
+  LogisticaAjusteCrear,
+  LogisticaAjusteDetalle,
 
-import Inventario from './logistica/inventario/Inventario.jsx';
+  Traslado,
+  TrasladoCrear,
+  TrasladoDetalle,
 
-import Kardex from './logistica/kardex/Kardex.jsx';
+  Inventario,
 
-import Tesoreria from './tesoreria/index.jsx';
+  Kardex,
+} from './logistica/index.jsx';
 
-import Gastos from './tesoreria/gasto/lista/Gastos.jsx';
-import GastoCrear from './tesoreria/gasto/crear/GastoCrear.jsx';
-import GastoDetalle from './tesoreria/gasto/detalle/GastoDetalle.jsx';
+import Tesoreria, {
+  Gastos,
+  GastoCrear,
+  GastoDetalle,
 
-import Compras from './tesoreria/compra/lista/Compras.jsx';
-import CompraCrear from './tesoreria/compra/crear/CompraCrear.jsx';
-import CompraDetalle from './tesoreria/compra/detalle/CompraDetalle.jsx';
+  Compras,
+  CompraCrear,
+  CompraDetalle,
 
-import CuentasPorPagar from './tesoreria/cuenta-pagar/lista/CuentasPorPagar.jsx';
-import CuentasPorPagarAmortizar from './tesoreria/cuenta-pagar/crear/CuentasPorPagarAmortizar.jsx';
+  CuentasPorPagar,
+  CuentasPorPagarAmortizar,
 
-import Seguridad from './seguridad/index.jsx';
+  Pedidos,
+  PedidoCrear,
+  PedidoEditar,
+  PedidoDetalle,
+} from './tesoreria/index.jsx';
 
-import Perfiles from './seguridad/perfil/Perfiles.jsx';
-import PerfilAgregar from './seguridad/perfil/PerfilAgregar.jsx';
-import PerfilEditar from './seguridad/perfil/PerfilEditar.jsx';
+import Contacto, {
+  Personas,
+  PersonaAgregar,
+  PersonaEditar,
+  PersonaDetalle,
+  Clientes,
+  Proveedores,
+  Conductores,
+} from './contacto/index.jsx';
 
-import Usuarios from './seguridad/usuario/Usuarios.jsx';
-import UsuarioAgregar from './seguridad/usuario/UsuarioAgregar.jsx';
-import UsuarioEditar from './seguridad/usuario/UsuarioEditar.jsx';
-import UsuarioResetear from './seguridad/usuario/UsuarioResetear.jsx';
+import Configuracion, {
+  Almacenes,
+  AlmacenAgregar,
+  AlmacenEditar,
 
-import Accesos from './seguridad/acceso/Accesos.jsx';
+  Categorias,
+  CategoriaAgregar,
+  CategoriaEditar,
 
-import Contacto from './contacto/index.jsx';
+  Medidas,
+  MedidaAgregar,
+  MedidaEditar,
 
-import Personas from './contacto/todo/Personas.jsx';
-import PersonaAgregar from './contacto/agregar/PersonaAgregar.jsx';
-import PersonaEditar from './contacto/editar/PersonaEditar.jsx';
-import PersonaDetalle from './contacto/detalle/PersonaDetalle.jsx';
-import Clientes from './contacto/cliente/Clientes.jsx';
-import Proveedores from './contacto/proveedor/Proveedores.jsx';
-import Conductores from './contacto/conductor/Conductores.jsx';
+  Monedas,
+  MonedaAgregar,
+  MonedaEditar,
 
-import Configuracion from './configuracion/index.jsx';
+  Comprobantes,
+  ComprobanteAgregar,
+  ComprobanteEditar,
 
-import Almacenes from './configuracion/almacen/Almacenes.jsx';
-import AlmacenAgregar from './configuracion/almacen/AlmacenAgregar.jsx';
-import AlmacenEditar from './configuracion/almacen/AlmacenEditar.jsx';
+  Impuestos,
+  ImpuestoAgregar,
+  ImpuestoEditar,
 
-import Categorias from './configuracion/categoria/Categorias';
-import CategoriaAgregar from './configuracion/categoria/CategoriaAgregar';
-import CategoriaEditar from './configuracion/categoria/CategoriaEditar';
+  Vehiculos,
+  VehiculoAgregar,
+  VehiculoEditar,
 
-import Medidas from './configuracion/medida/Medidas.jsx';
-import MedidaAgregar from './configuracion/medida/MedidaAgregar.jsx';
-import MedidaEditar from './configuracion/medida/MedidaEditar.jsx';
+  Bancos,
+  BancoDetalle,
+  BancoAgregar,
+  BancoEditar,
 
-import Monedas from './configuracion/moneda/Monedas.jsx';
-import MonedaAgregar from './configuracion/moneda/MonedaAgregar.jsx';
-import MonedaEditar from './configuracion/moneda/MonedaEditar.jsx';
+  Empresa,
+  EmpresaEditar,
 
-import Comprobantes from './configuracion/comprobante/Comprobantes.jsx';
-import ComprobanteAgregar from './configuracion/comprobante/ComprobanteAgregar.jsx';
-import ComprobanteEditar from './configuracion/comprobante/ComprobanteEditar.jsx';
+  Sucursales,
+  SucursalAgregar,
+  SucursalEditar,
 
-import Impuestos from './configuracion/impuesto/Impuestos.jsx';
-import ImpuestoAgregar from './configuracion/impuesto/ImpuestoAgregar.jsx';
-import ImpuestoEditar from './configuracion/impuesto/ImpuestoEditar.jsx';
+  Conceptos,
+  ConceptoAgregar,
+  ConceptoEditar,
 
-import Vehiculos from './configuracion/vehiculo/Vehiculos.jsx';
-import VehiculoAgregar from './configuracion/vehiculo/VehiculoAgregar.jsx';
-import VehiculoEditar from './configuracion/vehiculo/VehiculoEditar.jsx';
+  Marcas,
+  MarcaAgregar,
+  MarcaEditar,
 
-import Bancos from './configuracion/banco/Bancos.jsx';
-import BancoDetalle from './configuracion/banco/BancoDetalle.jsx';
-import BancoAgregar from './configuracion/banco/BancoAgregar.jsx';
-import BancoEditar from './configuracion/banco/BancoEditar.jsx';
+  Atributos,
+  AtributosAgregar,
+  AtributosEditar,
+} from './configuracion/index.jsx';
 
-import Empresa from './configuracion/empresa/Empresa.jsx';
-import EmpresaEditar from './configuracion/empresa/EmpresaEditar.jsx';
+import Reporte, {
+  RepVentas,
+  RepCompras,
+  RepFinanciero,
+  RepProductos,
+  RepClientes,
+  RepProveedores,
+  RepCpeSunat,
+} from './reporte/index.jsx';
 
-import Sucursales from './configuracion/sucursal/Sucursales.jsx';
-import SucursalAgregar from './configuracion/sucursal/SucursalAgregar.jsx';
-import SucursalEditar from './configuracion/sucursal/SucursalEditar.jsx';
-
-import Conceptos from './configuracion/concepto/Conceptos.jsx';
-import ConceptoAgregar from './configuracion/concepto/ConceptoAgregar.jsx';
-import ConceptoEditar from './configuracion/concepto/ConceptoEditar.jsx';
-
-import Marcas from './configuracion/marca/Marcas.jsx';
-import MarcaAgregar from './configuracion/marca/MarcaAgregar.jsx';
-import MarcaEditar from './configuracion/marca/MarcaEditar.jsx';
-
-import Atributos from './configuracion/atributo/Atributos.jsx';
-import AtributosAgregar from './configuracion/atributo/AtributosAgregar.jsx';
-import AtributosEditar from './configuracion/atributo/AtributosEditar.jsx';
-
-import Reporte from './reporte/index.jsx';
-
-import RepVentas from './reporte/RepVentas.jsx';
-import RepCompras from './reporte/RepCompras.jsx';
-import RepFinanciero from './reporte/RepFinanciero.jsx';
-import RepProductos from './reporte/RepProductos.jsx';
-import RepClientes from './reporte/RepClientes.jsx';
-import RepProveedores from './reporte/RepProveedores.jsx';
-import RepCpeSunat from './reporte/RepCpeSunat.jsx';
-
-import CpeSunat from './cpesunat/index.jsx';
-
-import CpeElectronicos from './cpesunat/lista/CpeElectronicos.jsx';
-import CpeConsultar from './cpesunat/consulta/CpeConsultar.jsx';
+import CpeSunat, {
+  CpeElectronicos,
+  CpeConsultar,
+} from './cpesunat/index.jsx';
 
 import { listNotificacion } from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';
 import ErrorResponse from '../../model/class/error-response.js';
 import { CANCELED } from '../../model/types/types.js';
-
+import FileDownloader from '../../components/FileDownloader.jsx';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class Inicio extends React.Component {
+
+  /**
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -196,9 +206,23 @@ class Inicio extends React.Component {
     // this.audio = new Audio(mixkit);
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   async componentDidMount() {
-    window.addEventListener('focus', this.onEventFocused);
-    window.addEventListener('resize', this.onEventResize);
+    window.addEventListener('focus', this.onWindowFocused);
+    window.addEventListener('resize', this.onWindowResize);
     this.loadSideBar();
     this.loadNotifications();
 
@@ -209,14 +233,88 @@ class Inicio extends React.Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('focus', this.onEventFocused);
-    window.removeEventListener('resize', this.onEventResize);
+    window.removeEventListener('focus', this.onWindowFocused);
+    window.removeEventListener('resize', this.onWindowResize);
 
     this.abortNotificacion.abort();
     // this.socket.disconnect();
   }
 
-  onEventFocused = () => {
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
+  // ------------------------------------------------------------------------
+  // Carga los datos del sidebar
+  // ------------------------------------------------------------------------
+  loadSideBar() {
+    const { refSideBar } = this;
+
+    if (!refSideBar || !refSideBar.current) return;
+
+    const collapsibleItems = refSideBar.current.querySelectorAll('ul li .pro-inner-item[data-bs-toggle="collapse"]',);
+
+    collapsibleItems.forEach((element) => {
+      element.parentNode
+        .querySelector('ul')
+        .addEventListener('shown.bs.collapse', function (event) {
+          collapsibleItems.forEach((item) => {
+            if (
+              event.target.getAttribute('id') !==
+              item.parentNode.querySelector('ul').getAttribute('id')
+            ) {
+              item.setAttribute('aria-expanded', 'false');
+              item.parentNode.querySelector('ul').classList.remove('show');
+            }
+          });
+        });
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // Carga los datos de las notificaciones
+  // ------------------------------------------------------------------------
+  async loadNotifications() {
+    const response = await listNotificacion(this.abortNotificacion.signal);
+    if (response instanceof SuccessReponse) {
+      this.setState({ notificaciones: response.data });
+    } else if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ notificaciones: [] });
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+  // ------------------------------------------------------------------------
+  // Evento de foco en la ventana
+  // ------------------------------------------------------------------------
+  onWindowFocused = () => {
     const userToken = window.localStorage.getItem('login');
     if (userToken === null) {
       this.props.signOut();
@@ -243,10 +341,12 @@ class Inicio extends React.Component {
     if (projectToken === null) {
       this.props.projectClose();
     }
-
   };
 
-  onEventResize() {
+  // ------------------------------------------------------------------------
+  // Evento de redimension de la ventana
+  // ------------------------------------------------------------------------
+  onWindowResize() {
     const { refSideBar } = this;
 
     if (!refSideBar || !refSideBar.current) return;
@@ -259,7 +359,10 @@ class Inicio extends React.Component {
     }
   }
 
-  openAndClose = () => {
+  // ------------------------------------------------------------------------
+  // Evento para abrir y cerrar el sidebar
+  // ------------------------------------------------------------------------
+  onToggleSidebar = () => {
     const { refSideBar } = this;
 
     if (!refSideBar || !refSideBar.current) return;
@@ -274,40 +377,21 @@ class Inicio extends React.Component {
     }
   };
 
-  loadSideBar() {
-    const { refSideBar } = this;
-
-    if (!refSideBar || !refSideBar.current) return;
-
-    const collapsibleItems = refSideBar.current.querySelectorAll('ul li .pro-inner-item[data-bs-toggle="collapse"]',);
-
-    collapsibleItems.forEach((element) => {
-      element.parentNode
-        .querySelector('ul')
-        .addEventListener('shown.bs.collapse', function (event) {
-          collapsibleItems.forEach((item) => {
-            if (
-              event.target.getAttribute('id') !==
-              item.parentNode.querySelector('ul').getAttribute('id')
-            ) {
-              item.setAttribute('aria-expanded', 'false');
-              item.parentNode.querySelector('ul').classList.remove('show');
-            }
-          });
-        });
-    });
-  }
-
-  async loadNotifications() {
-    const response = await listNotificacion(this.abortNotificacion.signal);
-    if (response instanceof SuccessReponse) {
-      this.setState({ notificaciones: response.data });
-    } else if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      this.setState({ notificaciones: [] });
-    }
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
     if (this.props.token.userToken == null) {
@@ -336,7 +420,7 @@ class Inicio extends React.Component {
 
         <Head
           {...this.props}
-          openAndClose={this.openAndClose}
+          onToggleSidebar={this.onToggleSidebar}
           notificaciones={this.state.notificaciones}
         />
 
@@ -355,7 +439,11 @@ class Inicio extends React.Component {
           />
           <Route
             path={`${path}/dashboard`}
-            render={(props) => <Dashboard {...props} />}
+            render={(props) => (
+              <Suspense fallback={<div>Loading...</div>}>
+                <Dashboard {...props} />
+              </Suspense>
+            )}
           />
           <Route
             path={`${path}/notifications`}
@@ -661,6 +749,27 @@ class Inicio extends React.Component {
             path={`${path}/tesoreria/cuentapagar/detalle`}
             exact={true}
             render={(props) => <CuentasPorPagarAmortizar {...props} />}
+          />
+
+          <Route
+            path={`${path}/tesoreria/pedidos`}
+            exact={true}
+            render={(props) => <Pedidos {...props} />}
+          />
+          <Route
+            path={`${path}/tesoreria/pedidos/crear`}
+            exact={true}
+            render={(props) => <PedidoCrear {...props} />}
+          />
+          <Route
+            path={`${path}/tesoreria/pedidos/editar`}
+            exact={true}
+            render={(props) => <PedidoEditar {...props} />}
+          />
+          <Route
+            path={`${path}/tesoreria/pedidos/detalle`}
+            exact={true}
+            render={(props) => <PedidoDetalle {...props} />}
           />
 
           {/* 
@@ -996,11 +1105,7 @@ class Inicio extends React.Component {
           <Route component={NotFoundMain} />
         </Switch>
         {/* <NotificationContainer /> */}
-        <Toaster
-          position="top-right"
-          reverseOrder={false}
-        />
-
+        <FileDownloader />
       </div>
     );
   }

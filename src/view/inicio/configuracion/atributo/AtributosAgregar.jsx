@@ -80,7 +80,6 @@ class AtributosAgregar extends React.Component {
   }
 
   handleSelectTipoAtributo = (event) => {
-    console.log(event.target.value)
     this.setState({ idTipoAtributo: event.target.value });
   };
 
@@ -155,7 +154,7 @@ class AtributosAgregar extends React.Component {
       <ContainerWrapper>
         <Title
           title='Atributo'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

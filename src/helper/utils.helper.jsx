@@ -10,16 +10,6 @@ export function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-export function makeid(length) {
-  let result = '';
-  const characters = '0123456789';
-  for (let i = 0; i < length; i++) {
-    result += characters[Math.floor(Math.random() * characters.length)];
-  }
-  result = result.match(/\d{1,4}/g).join('');
-  return result;
-}
-
 /**
  * Obtiene el estado de un privilegio específico dentro de un menú, submenú y privilegio dados.
  * 
@@ -235,6 +225,73 @@ export function currentTime() {
     time.getSeconds() > 9 ? time.getSeconds() : '0' + time.getSeconds();
   const formatted_time = `${hours}:${minutes}:${seconds}`;
   return formatted_time;
+}
+
+export function months() {
+  return [
+    {
+      value: 1,
+      label: 'Enero',
+    },
+    {
+      value: 2,
+      label: 'Febrero',
+    },
+    {
+      value: 3,
+      label: 'Marzo',
+    },
+    {
+      value: 4,
+      label: 'Abril',
+    },
+    {
+      value: 5,
+      label: 'Mayo',
+    },
+    {
+      value: 6,
+      label: 'Junio',
+    },
+    {
+      value: 7,
+      label: 'Julio',
+    },
+    {
+      value: 8,
+      label: 'Agosto',
+    },
+    {
+      value: 9,
+      label: 'Septiembre',
+    },
+    {
+      value: 10,
+      label: 'Octubre',
+    },
+    {
+      value: 11,
+      label: 'Noviembre',
+    },
+    {
+      value: 12,
+      label: 'Diciembre',
+    }
+  ];
+}
+
+export function years(yearOld = 5) {
+  const currentYear = new Date().getFullYear();
+
+  const years = [];
+  for (let i = currentYear - yearOld; i <= currentYear; i++) {
+    years.push({
+      value: i,
+      label: i,
+    });
+  }
+
+  return years;
 }
 
 export function getCurrentMonth() {
@@ -508,26 +565,25 @@ export function reorder(list, startIndex, endIndex) {
   return result;
 }
 
+
+export const formatBytes = (bytes) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
 export function getRowCellIndex(event) {
   const target = event.target;
   const cell = target.closest('td, th');
-
   if (!cell) {
     return -1;
   }
 
   const row = cell.parentElement;
-  const tBody = row.parentElement;
+  const tBody = row.closest('tbody');
+  if (!tBody) return -1;
 
-  if (!row || !tBody || tBody.tagName.toLowerCase() !== 'tbody') {
-    return -1;
-  }
+  const rowIndex = Array.prototype.indexOf.call(tBody.children, row);
+  const cellIndex = Array.prototype.indexOf.call(row.children, cell);
+  const children = Array.from(tBody.children);
 
-  const rowIndex = Array.from(tBody.children).indexOf(row);
-  const cellIndex = Array.from(row.children).indexOf(cell);
-
-  return { rowIndex, cellIndex, tBody };
-
+  return { rowIndex, cellIndex, tBody , children};
 }
 
 export function getExtension(filename) {
@@ -715,17 +771,13 @@ export function imageSizeData(data) {
   });
 }
 
-export function alertInfo(title, message) {
-  Swal({
-    title: title,
-    text: message,
-    type: 'info',
-    confirmButtonText: 'Aceptar',
-    cancelButtonText: 'Cancelar',
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-  });
+export function guId() {
+  const s4 = () => {
+    return ((1 + crypto.getRandomValues(new Uint16Array(1))[0] / 0x10000) * 0x10000)
+      .toString(16)
+      .substring(1);
+  };
+  return (s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4());
 }
 
 export function getPathNavigation(opcion, idNavegacion) {
@@ -754,8 +806,21 @@ export function getPathNavigation(opcion, idNavegacion) {
   }
 
   if (opcion == "cpe") {
-    return `/inicio/cpe/cpeelectronicos?comprobante=${idNavegacion}`
+    return `/inicio/cpesunat/cpeelectronicos?comprobante=${idNavegacion}`
   }
+}
+
+export function alertInfo(title, message) {
+  Swal({
+    title: title,
+    text: message,
+    type: 'info',
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+  });
 }
 
 export function alertHTML(title, html, callback = function () { }) {

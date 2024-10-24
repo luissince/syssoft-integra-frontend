@@ -4,7 +4,7 @@ import { calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, isE
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { detailCompra } from '../../../../../network/rest/principal.network';
+import { detailCompra, documentsPdfInvoicesCompra } from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
@@ -13,6 +13,7 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
 import Button from '../../../../../components/Button';
 import React from 'react';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -21,9 +22,9 @@ import React from 'react';
 class CompraDetalle extends CustomComponent {
 
   /**
-    *
-    * Constructor
-    */
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
 
@@ -61,6 +62,20 @@ class CompraDetalle extends CustomComponent {
     this.abortControllerView = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   async componentDidMount() {
     const url = this.props.location.search;
     const idCompra = new URLSearchParams(url).get('idCompra');
@@ -74,6 +89,10 @@ class CompraDetalle extends CustomComponent {
 
   componentWillUnmount() {
     this.abortControllerView.abort();
+
+    if (pdfVisualizer.isOpen()) {
+      pdfVisualizer.close();
+    }
   }
 
   async loadingData(id) {
@@ -159,6 +178,47 @@ class CompraDetalle extends CustomComponent {
       return false;
     }
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+  handlePrintInvoices = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfInvoicesCompra(this.state.idCompra, size),
+      title: 'Compra',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   renderDetalles() {
     return (
@@ -327,14 +387,23 @@ class CompraDetalle extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
             </Button>
             {' '}
             <Button
               className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
-              <i className="fa fa-print"></i> Ticket
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
             </Button>
           </Column>
         </Row>
@@ -342,7 +411,7 @@ class CompraDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-6 col-md-6 col-sm-12 col-12">
             <TableResponsive>
-              <Table className={"table-borderless"}>
+              <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
@@ -407,7 +476,7 @@ class CompraDetalle extends CustomComponent {
 
           <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
             <TableResponsive>
-              <Table className={"table-borderless"}>
+              <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
@@ -499,7 +568,7 @@ class CompraDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table >
+            <Table classNameContent='w-100'>
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>

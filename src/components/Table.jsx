@@ -2,7 +2,15 @@ import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 
 const Table = forwardRef((props, ref) => {
-    const { children, className = '', ...rest } = props;
+    const { children, className = '', classNameContent, ...rest } = props;
+
+    if (classNameContent) {
+        return (
+            <table ref={ref} {...rest} className={classNameContent}>
+                {children}
+            </table>
+        );
+    }
 
     return (
         <table ref={ref} {...rest} className={`table ${className}`}>
@@ -15,6 +23,7 @@ Table.displayName = 'Table';
 
 Table.propTypes = {
     className: PropTypes.string,
+    classNameContent: PropTypes.string,
     children: PropTypes.node,
 };
 

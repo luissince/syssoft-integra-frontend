@@ -158,7 +158,7 @@ class CategoriaEditar extends CustomComponent {
 
         <Title
           title='Categoría'
-          subTitle='Editar'
+          subTitle='EDITAR'
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

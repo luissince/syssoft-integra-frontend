@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { Box, DollarSign, ShoppingBag, Tag } from 'lucide-react'
@@ -13,132 +12,114 @@ import Select from '../../../components/Select';
 import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import Title from '../../../components/Title';
+import CustomComponent from '../../../model/class/custom-component';
+import pdfVisualizer from 'pdf-visualizer';
+import { documentsExcelProducto, documentsPdfReportsProducto } from '../../../network/rest/principal.network';
+import { guId } from '../../../helper/utils.helper';
+import { downloadFileAsync } from '../../../redux/downloadSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class RepProductos extends React.Component {
+class RepProductos extends CustomComponent {
 
+  /**
+   * 
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
-      idSucursal: this.props.token.project.idSucursal,
-      nombreSucursal: this.props.token.project.nombre,
-
-      producto: '',
-      productoCheck: true,
-
-      loading: true,
-      msgLoading: '',
-
-      porSucursal: '0',
-      sucursalCkeck: true,
+      loading: false,
+      msgLoading: "Cargando información...",
     };
-    this.refUseFile = React.createRef();
 
     this.abortControllerView = new AbortController();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
-  componentDidMount() {
-    this.loadData();
+  async componentDidMount() {
   }
 
   componentWillUnmount() {
     this.abortControllerView.abort();
   }
 
-  loadData = async () => {
-    try {
-      await this.setStateAsync({
-        loading: false,
-      });
-    } catch (error) {
-      if (error.message !== 'canceled') {
-        await this.setStateAsync({
-          msgLoading: 'Se produjo un error interno, intente nuevamente.',
-        });
-      }
-    }
-  };
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
-  async onEventImprimir() {
-    // const data = {
-    //   idSucursal: this.state.idSucursal,
-    //   estadoProducto: this.state.producto === '' ? 0 : this.state.producto,
-    //   idEmpresa: 'EM0001',
-    // };
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-    // let params = new URLSearchParams({ params: ciphertext });
-    // window.open('/api/producto/reptipoProductos?' + params, '_blank');
 
-    //Despliegue
-    // window.open("/api/producto/repproductodetalle?idProducto=" + this.state.idProducto + "&idEmpresa=EM0001", "_blank");
-
-    //Desarrollo
-    // try {
-
-    //     let result = await axios.get("/api/producto/repproductodetalle", {
-    //         responseType: "blob",
-    //         params: {
-    //             "idProducto": this.state.idProducto,
-    //             "idEmpresa": 'EM0001'
-    //         }
-    //     });
-
-    //     const file = new Blob([result.data], { type: "application/pdf" });
-    //     const fileURL = URL.createObjectURL(file);
-    //     window.open(fileURL, "_blank");
-
-    // } catch (error) {
-    //     console.log(error)
-    // }
+  handleOpenPdf = async () => {
+    await pdfVisualizer.init({
+      url: documentsPdfReportsProducto(),
+      title: 'Reporte de Productos',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
-  async onEventPdfProductoCobrar() {
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   idSucursal: this.state.idSucursal,
-    //   nombreSucursal: this.state.nombreSucursal,
-    //   porSucursal: this.state.porSucursal,
-    // };
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-    // let params = new URLSearchParams({ params: ciphertext });
-    // window.open('/api/producto/replistardeudasproducto?' + params, '_blank');
+  handleDownloadExcel = async () => {
+    const id = guId();
+    const url = documentsExcelProducto();
+    this.props.downloadFileAsync({ id, url });
   }
 
-  async onEventExcelProductoCobrar() {
-    // const data = {
-    //   idEmpresa: 'EM0001',
-    //   idSucursal: this.state.idSucursal,
-    //   nombreSucursal: this.state.nombreSucursal,
-    //   porSucursal: this.state.porSucursal,
-    // };
-    // let ciphertext = CryptoJS.AES.encrypt(
-    //   JSON.stringify(data),
-    //   'key-report-inmobiliaria',
-    // ).toString();
-
-    // this.refUseFile.current.download({
-    //   name: 'Listar de Productos con Deuda',
-    //   file: '/api/producto/exacellistardeudasproducto',
-    //   filename: 'Listar de Productos con Deuda.xlsx',
-    //   params: ciphertext,
-    // });
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
     const flujoCaja = [
@@ -174,13 +155,21 @@ class RepProductos extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Button
-              className="btn-outline-warning">
+              className="btn-outline-warning"
+              onClick={this.handleOpenPdf}>
               <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
             </Button>
             {" "}
             <Button
-              className="btn-outline-success">
+              className="btn-outline-success"
+              onClick={this.handleDownloadExcel}>
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
+            </Button>
+            {" "}
+            <Button
+              className="btn-outline-light"
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
@@ -354,7 +343,6 @@ class RepProductos extends React.Component {
           </Column>
         </Row>
 
-
         <Row>
           <Column>
             <Card>
@@ -393,141 +381,6 @@ class RepProductos extends React.Component {
             </Card>
           </Column>
         </Row>
-
-        {/* {this.state.loading && spinnerLoading(this.state.msgLoading)}
-
-        <div className="card my-1">
-          <h6 className="card-header">Reporte de Productos</h6>
-          <div className="card-body">
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <div className="input-group">
-                    <select
-                      title="Lista de productos"
-                      className="form-control"
-                      value={this.state.producto}
-                      disabled={this.state.productoCheck}
-                      onChange={async (event) => {
-                        await this.setStateAsync({
-                          producto: event.target.value,
-                        });
-                        if (this.state.producto === '') {
-                          await this.setStateAsync({ productoCheck: true });
-                        }
-                      }}
-                    >
-                      <option value="">Todos los Productos</option>
-                      <option value="1">PRODUCTOS DISPONIBLES</option>
-                      <option value="2">PRODUCTOS RESERVADOS</option>
-                      <option value="3">PRODUCTOS VENDIDOS</option>
-                      <option value="4">PRODUCTOS INACTIVOS</option>
-                    </select>
-
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.productoCheck}
-                            onChange={async (event) => {
-                              await this.setStateAsync({
-                                productoCheck: event.target.checked,
-                              });
-                              if (this.state.productoCheck) {
-                                await this.setStateAsync({ producto: '' });
-                              }
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col text-center">
-                <button
-                  className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventImprimir()}
-                >
-                  <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card my-1">
-          <h6 className="card-header">Reporte de Productos por Cobrar</h6>
-          <div className="card-body">
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <label>
-                    Sucursal<i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <div className="input-group">
-                    <select
-                      title="Año"
-                      className="form-control"
-                      disabled={this.state.sucursalCkeck}
-                      value={this.state.porSucursal}
-                      onChange={(event) =>
-                        this.setState({ porSucursal: event.target.value })
-                      }
-                    >
-                      <option value={'0'}>{'Por sucursal'}</option>
-                      <option value={'1'}>{'Todos'}</option>
-                    </select>
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <div className="form-check form-check-inline m-0">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={this.state.sucursalCkeck}
-                            onChange={async (event) =>
-                              await this.setStateAsync({
-                                sucursalCkeck: event.target.checked,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col"></div>
-            </div>
-
-            <div className="row">
-              <div className="col"></div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-warning btn-sm"
-                  onClick={() => this.onEventPdfProductoCobrar()}
-                >
-                  <i className="bi bi-file-earmark-pdf-fill"></i> Reporte Pdf
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  className="btn btn-outline-success btn-sm"
-                  onClick={() => this.onEventExcelProductoCobrar()}
-                >
-                  <i className="bi bi-file-earmark-excel-fill"></i> Reporte
-                  Excel
-                </button>
-              </div>
-              <div className="col"></div>
-            </div>
-          </div>
-        </div>
-
-        <FileDownloader ref={this.refUseFile} /> */}
       </ContainerWrapper>
     );
   }
@@ -541,14 +394,18 @@ RepProductos.propTypes = {
     })
   }),
   history: PropTypes.object,
+  downloadFileAsync: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    moneda: state.predeterminado.moneda,
   };
 };
 
-const ConnectedRepProductos = connect(mapStateToProps, null)(RepProductos);
+const mapDispatchToProps = { downloadFileAsync };
+
+const ConnectedRepProductos = connect(mapStateToProps, mapDispatchToProps)(RepProductos);
 
 export default ConnectedRepProductos;

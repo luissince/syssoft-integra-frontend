@@ -65,6 +65,7 @@ SelectActive.propTypes = {
 const Select = ({
     autoFocus = false,
     label,
+    id,
     group = false,
     iconLeft,
     title,
@@ -79,7 +80,7 @@ const Select = ({
     if (group) {
         return (
             <>
-                {label && <label>{label} </label>}
+                {label && <label htmlFor={id}>{label} </label>}
 
                 <div className="input-group">
                     {iconLeft && <div className="input-group-prepend">
@@ -91,6 +92,7 @@ const Select = ({
                     <select
                         autoFocus={autoFocus}
                         title={title}
+                        id={id}
                         className={`form-control ${className}`}
                         ref={refSelect}
                         value={value}
@@ -112,6 +114,7 @@ const Select = ({
             <select
                 autoFocus={autoFocus}
                 title={title}
+                id={id}
                 className={`form-control ${className}`}
                 ref={refSelect}
                 value={value}
@@ -126,6 +129,7 @@ const Select = ({
 Select.propTypes = {
     autoFocus: PropTypes.bool,
     label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+    id: PropTypes.string,
     group: PropTypes.bool,
     iconLeft: PropTypes.element,
     title: PropTypes.string,

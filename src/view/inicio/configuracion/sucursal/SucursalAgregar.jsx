@@ -204,7 +204,7 @@ class SucursalAgregar extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Sucursal'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

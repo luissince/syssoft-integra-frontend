@@ -165,6 +165,11 @@ class Principal extends CustomComponent {
               handleIngresar={this.handleIngresar}
             />
           ))}
+          {isEmpty(this.state.sucursales) && (
+            <div className="col-12 d-flex justify-content-center">
+              <p className="text-center">No hay datos para mostrar.</p>
+            </div>
+          )}
         </Row>
       </div>
     );

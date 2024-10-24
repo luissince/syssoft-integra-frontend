@@ -108,8 +108,8 @@ class TrasladoDetalle extends CustomComponent {
         />
 
         <Title
-          title={"Traslado"}
-          subTitle={"DETALLE"}
+          title="Traslado"
+          subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 

@@ -2,6 +2,42 @@ import { ContainerMenu } from "../../../components/Container";
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 
+import Productos from './producto/lista/Productos';
+import ProductoAgregar from './producto/formularios/agregar/ProductoAgregar';
+import ProductoEditar from './producto/formularios/editar/ProductoEditar';
+import ProductoDetalle from './producto/detalle/ProductoDetalle';
+
+import LogisticaAjuste from './ajuste/lista/LogisticaAjuste.jsx';
+import LogisticaAjusteCrear from './ajuste/crear/LogisticaAjusteCrear.jsx';
+import LogisticaAjusteDetalle from './ajuste/detalle/LogisticaAjusteDetalle.jsx';
+
+import Traslado from './traslado/listar/Traslado.jsx';
+import TrasladoCrear from './traslado/crear/TrasladoCrear.jsx';
+import TrasladoDetalle from './traslado/detalle/TrasladoDetalle.jsx';
+
+import Inventario from './inventario/Inventario.jsx';
+
+import Kardex from './kardex/Kardex.jsx';
+
+export {
+    Productos,
+    ProductoAgregar,
+    ProductoEditar,
+    ProductoDetalle,
+
+    LogisticaAjuste,
+    LogisticaAjusteCrear,
+    LogisticaAjusteDetalle,
+
+    Traslado,
+    TrasladoCrear,
+    TrasladoDetalle,
+
+    Inventario,
+
+    Kardex,
+}
+
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component

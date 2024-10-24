@@ -2,17 +2,13 @@ import React from 'react';
 import ContainerWrapper from '../../../../../../components/Container';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   getRowCellIndex,
   isEmpty,
   isText,
   numberFormat,
-  reorder,
+  readDataFile,
   rounded,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -21,10 +17,11 @@ import {
   comboComprobante,
   comboImpuesto,
   comboMoneda,
+  documentsPdfInvoicesCotizacion,
   filtrarPersona,
   filtrarProducto,
   idCotizacion,
-  obtenerCotizacionPdf,
+  obtenerPreCotizacionPdf,
   updateCotizacion,
 } from '../../../../../../network/rest/principal.network';
 import Title from '../../../../../../components/Title';
@@ -36,8 +33,6 @@ import SearchInput from '../../../../../../components/SearchInput';
 // import ModalSale from './component/ModalSale';
 import PropTypes from 'prop-types';
 import ModalProducto from '../component/ModalProducto';
-import ModalImpresion from '../component/ModalImpresion';
-import ModalPreImpresion from '../component/ModalPreImpresion';
 import Column from '../../../../../../components/Column';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import printJS from 'print-js';
@@ -45,16 +40,14 @@ import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
 import TextArea from '../../../../../../components/TextArea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Droppable } from 'react-beautiful-dnd';
-import { Draggable } from 'react-beautiful-dnd';
-import ModalCliente from '../component/ModalCliente';
+import SweetAlert from '../../../../../../model/class/sweet-alert';
+import { ModalImpresion, ModalPersona, ModalPreImpresion } from '../../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class CotizaciónEditar extends CustomComponent {
+class CotizacionEditar extends CustomComponent {
   /**
    *
    * Constructor
@@ -101,7 +94,7 @@ class CotizaciónEditar extends CustomComponent {
       isOpenProducto: false,
 
       // Atributos del modal cliente
-      isOpenCliente: false,
+      isOpenPersona: false,
 
       // Atributos del modal impresión
       isOpenImpresion: false,
@@ -116,7 +109,7 @@ class CotizaciónEditar extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
     };
 
-    this.initial = { ...this.state };
+    this.alert = new SweetAlert();
 
     // Referencia principales
     this.refComprobante = React.createRef();
@@ -134,9 +127,6 @@ class CotizaciónEditar extends CustomComponent {
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
-
-    // Referencia para el modal cliente
-    this.refModalCliente = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -176,7 +166,7 @@ class CotizaciónEditar extends CustomComponent {
     if (isText(idCotizacion)) {
       this.loadingData(idCotizacion);
     } else {
-      this.props.history.goBack();
+      this.close();
     }
   }
 
@@ -328,6 +318,10 @@ class CotizaciónEditar extends CustomComponent {
     }
   }
 
+  close = () => {
+    this.props.history.goBack();
+  }
+
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -412,21 +406,19 @@ class CotizaciónEditar extends CustomComponent {
     const table = this.refTable.current;
     if (!table) return;
 
-    const children = table.tBodies[0].children;
+    const children = Array.from(table.tBodies[0].children);
     if (children.length === 0) return;
 
     if (event.key === 'ArrowUp') {
-      if (this.index > 0) {
-        this.index--;
-        this.updateSelection(children);
-      }
+      this.index = (this.index - 1 + children.length) % children.length;
+      this.updateSelection(children);
+      event.preventDefault();
     }
 
     if (event.key === 'ArrowDown') {
-      if (this.index < children.length - 1) {
-        this.index++;
-        this.updateSelection(children);
-      }
+      this.index = (this.index + 1) % children.length;
+      this.updateSelection(children);
+      event.preventDefault();
     }
 
     if (event.key === 'Enter') {
@@ -439,80 +431,40 @@ class CotizaciónEditar extends CustomComponent {
   }
 
   handleOnClickTable = async (event) => {
-    const { rowIndex, tBody } = getRowCellIndex(event);
+    const { rowIndex, children } = getRowCellIndex(event);
 
-    if (rowIndex === -1 || !tBody || !tBody.children) return;
+    if (rowIndex === -1) return;
 
     this.index = rowIndex;
-    this.updateSelection(tBody.children);
+    this.updateSelection(children);
   }
 
   handleOnDbClickTable = async (event) => {
-    const { rowIndex, tBody } = getRowCellIndex(event);
+    const { rowIndex, children } = getRowCellIndex(event);
 
-    if (rowIndex === -1 || !tBody || !tBody.children) return;
+    if (rowIndex === -1) return;
 
     this.index = rowIndex;
-    this.updateSelection(tBody.children);
+    this.updateSelection(children);
     this.handleOpenModalProducto();
-
-  }
-
-  handleOnDragEndTable = async (result) => {
-    const { source, destination } = result;
-    if (!destination) {
-      return;
-    }
-
-    if (source.index === destination.index &&
-      source.droppableId === destination.droppableId
-    ) {
-      return;
-    }
-
-    await this.setStateAsync(prevState => ({
-      detalles: reorder(prevState.detalles, source.index, destination.index).map((item, index) => ({ ...item, id: ++index }))
-    }))
-
-    this.index = destination.index;
-    this.cells = [];
-    if (this.refTableBody.current) {
-      const tbody = this.refTableBody.current;
-      this.updateSelection(tbody.children);
-    }
-  }
-
-  handleOnBeforeDragStartTable = (before) => {
-    const sourceIndex = before.source.index;
-
-    if (this.refTableBody.current) {
-      const tbody = this.refTableBody.current;
-      const rows = tbody.children;
-      const row = rows[sourceIndex]
-      this.cells = row.children;
-    }
   }
 
   updateSelection = (children) => {
-    for (const child of children) {
-      child.classList.remove("table-active");
-    }
+    children.forEach(row => row.classList.remove("table-active"));
 
     const selectedChild = children[this.index];
     selectedChild.classList.add("table-active");
     selectedChild.scrollIntoView({ block: 'center' });
-    selectedChild.focus();
   }
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
   //------------------------------------------------------------------------------------------
-
   handleOpenModalProducto = (producto) => {
     const { idImpuesto, detalles } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione un impuesto para continuar.', () => {
+      this.alert.warning('Cotización', 'Seleccione un impuesto para continuar.', () => {
         this.refIdImpuesto.current.focus();
       });
       return;
@@ -538,19 +490,17 @@ class CotizaciónEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
-
-  handleOpenModalCliente = () => {
-    this.setState({ isOpenCliente: true });
+  handleOpenModalPersona = () => {
+    this.setState({ isOpenPersona: true });
   }
 
-  handleCloseCliente = async () => {
-    this.setState({ isOpenCliente: false });
+  handleCloseModalPersona = async () => {
+    this.setState({ isOpenPersona: false });
   }
 
   //------------------------------------------------------------------------------------------
   // Filtrar productos
   //------------------------------------------------------------------------------------------
-
   handleClearInputProducto = () => {
     this.setState({
       productos: [],
@@ -588,7 +538,6 @@ class CotizaciónEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
-
   handleClearInputCliente = () => {
     this.setState({
       clientes: [],
@@ -628,46 +577,45 @@ class CotizaciónEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos guardar
   //------------------------------------------------------------------------------------------
-
   handleGuardar = async () => {
     const { idCotizacion, idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
-      alertWarning('Cotización', 'Seleccione su comprobante.', () =>
+      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
         this.refComprobante.current.focus(),
       );
       return;
     }
 
     if (isEmpty(cliente)) {
-      alertWarning('Cotización', 'Seleccione un cliente.', () =>
+      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
         this.refValueCliente.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      alertWarning('Cotización', 'Seleccione su moneda.', () =>
+      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
         this.refIdMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione el impuesto', () =>
+      this.alert.warning('Cotización', 'Seleccione el impuesto', () =>
         this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalles)) {
-      alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
+      this.alert.warning('Cotización', 'Agregar algún producto a la lista.', () =>
         this.refValueProducto.current.focus(),
       );
       return;
     }
 
-    alertDialog('Cotización', '¿Está seguro de continuar?', async (accept) => {
+    this.alert.dialog('Cotización', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idCotizacion: idCotizacion,
@@ -682,20 +630,19 @@ class CotizaciónEditar extends CustomComponent {
           detalle: detalles
         };
 
-        alertInfo('Cotización', 'Procesando información...');
+        this.alert.information('Cotización', 'Procesando información...');
 
         const response = await updateCotizacion(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cotización', response.data.message, () => {
-            this.handleOpenImpresion(response.data.idCotizacion)
-          });
+          this.alert.close();
+          this.handleOpenImpresion(response.data.idCotizacion);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Cotización', response.getMessage());
+          this.alert.warning('Cotización', response.getMessage());
         }
       }
     });
@@ -704,83 +651,105 @@ class CotizaciónEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
-
   handleOpenImpresion = (idCotizacion) => {
     this.setState({ isOpenImpresion: true, idCotizacion: idCotizacion })
   }
 
+  handlePrinterImpresion = (size) => {
+    printJS({
+      printable: documentsPdfInvoicesCotizacion(this.state.idCotizacion, size),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.handleCloseImpresion();
+      }
+    })
+  }
+
   handleCloseImpresion = () => {
-    this.setState({ isOpenImpresion: false }, this.handleCerrar);
-  }
-
-  handleOpenImpresionA4 = () => {
-    printJS({
-      printable: obtenerCotizacionPdf(this.state.idCotizacion, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        this.handleCloseImpresion()
-      }
-    })
-  }
-
-  handleOpenImpresionTicket = () => {
-    printJS({
-      printable: obtenerCotizacionPdf(this.state.idCotizacion, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        this.handleCloseImpresion()
-      }
-    })
+    this.setState({ isOpenImpresion: false }, this.close());
   }
 
   //------------------------------------------------------------------------------------------
   // Opciones de pre impresión
   //------------------------------------------------------------------------------------------
-
   handleOpenPreImpresion = () => {
     const { idComprobante, cliente, idMoneda, idImpuesto, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
-      alertWarning('Cotización', 'Seleccione su comprobante.', () =>
+      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
         this.refComprobante.current.focus(),
       );
       return;
     }
 
     if (isEmpty(cliente)) {
-      alertWarning('Cotización', 'Seleccione un cliente.', () =>
+      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
         this.refValueCliente.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      alertWarning('Cotización', 'Seleccione su moneda.', () =>
+      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
         this.refIdMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      alertWarning('Cotización', 'Seleccione un impuesto', () =>
+      this.alert.warning('Cotización', 'Seleccione un impuesto', () =>
         this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalles)) {
-      alertWarning('Cotización', 'Agregar algún producto a la lista.', () =>
+      this.alert.warning('Cotización', 'Agregar algún producto a la lista.', () =>
         this.refValueProducto.current.focus(),
       );
       return;
     }
 
-
     this.setState({ isOpenPreImpresion: true })
+  }
+
+  handleProcessPreImpresion = async (type, abort, success, error) => {
+    const { idComprobante, cliente: { idPersona }, idMoneda, idUsuario, idSucursal, nota, detalles } = this.state;
+
+    const response = await obtenerPreCotizacionPdf({
+      idComprobante: idComprobante,
+      idCliente: idPersona,
+
+      idMoneda: idMoneda,
+      idUsuario: idUsuario,
+      idSucursal: idSucursal,
+      nota: nota,
+
+      detalle: detalles
+    }, type, abort.signal);
+
+    if (response instanceof SuccessReponse) {
+      const base64 = await readDataFile(response.data);
+
+      success();
+
+      printJS({
+        printable: base64,
+        type: 'pdf',
+        base64: true,
+        onPrintDialogClose: this.handleClosePreImpresion
+      })
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      error();
+
+      this.alert.warning("Cotización", response.getMessage())
+    }
   }
 
   handleClosePreImpresion = () => {
@@ -789,9 +758,8 @@ class CotizaciónEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos cerrar
   //------------------------------------------------------------------------------------------
-
   handleCerrar = () => {
-    this.props.history.goBack();
+    this.close();
   };
 
   /*
@@ -821,45 +789,29 @@ class CotizaciónEditar extends CustomComponent {
       );
     }
 
-    const widthCell1 = isEmpty(this.cells) ? "auto" : this.cells[0].offsetWidth + "px";
-    const widthCell2 = isEmpty(this.cells) ? "auto" : this.cells[1].offsetWidth + "px";
-    const widthCell3 = isEmpty(this.cells) ? "auto" : this.cells[2].offsetWidth + "px";
-    const widthCell4 = isEmpty(this.cells) ? "auto" : this.cells[3].offsetWidth + "px";
-    const widthCell5 = isEmpty(this.cells) ? "auto" : this.cells[4].offsetWidth + "px";
-    const widthCell6 = isEmpty(this.cells) ? "auto" : this.cells[5].offsetWidth + "px";
-    const widthCell7 = isEmpty(this.cells) ? "auto" : this.cells[6].offsetWidth + "px";
-
     return detalles.map((item, index) => (
-      <Draggable key={item.idProducto} draggableId={item.idProducto} index={index}>
-        {(provided) => {
-          return (
-            <TableRow
-              {...provided.draggableProps}
-              ref={provided.innerRef}
-              {...provided.dragHandleProps}
-              className='bg-white'
-              tabIndex="0">
-              <TableCell className="text-center" style={{ width: widthCell1 }}>{item.id}</TableCell>
-              <TableCell style={{ width: widthCell2 }}>
-                {item.codigo}
-                <br />
-                {item.nombre}
-              </TableCell>
-              <TableCell style={{ width: widthCell3 }}>{rounded(item.cantidad)}</TableCell>
-              <TableCell style={{ width: widthCell4 }}>{item.nombreMedida}</TableCell>
-              <TableCell style={{ width: widthCell5 }}>{numberFormat(item.precio, this.state.codISO)}</TableCell>
-              <TableCell style={{ width: widthCell6 }}>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
-              <TableCell className="text-center" style={{ width: widthCell7 }}>
-                <Button
-                  className="btn-outline-danger btn-sm"
-                  onClick={() => this.handleRemoverProducto(item.idProducto)}>
-                  <i className="bi bi-trash"></i>
-                </Button>
-              </TableCell>
-            </TableRow>
-          );
-        }}
-      </Draggable>
+      <TableRow
+        key={index}
+        className='bg-white'
+        tabIndex="0">
+        <TableCell className="text-center">{item.id}</TableCell>
+        <TableCell>
+          {item.codigo}
+          <br />
+          {item.nombre}
+        </TableCell>
+        <TableCell>{rounded(item.cantidad)}</TableCell>
+        <TableCell>{item.nombreMedida}</TableCell>
+        <TableCell>{numberFormat(item.precio, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
+        <TableCell className="text-center">
+          <Button
+            className="btn-outline-danger btn-sm"
+            onClick={() => this.handleRemoverProducto(item.idProducto)}>
+            <i className="bi bi-trash"></i>
+          </Button>
+        </TableCell>
+      </TableRow>
     ));
   }
 
@@ -945,7 +897,7 @@ class CotizaciónEditar extends CustomComponent {
 
         <Title
           title='Cotización'
-          subTitle='Editar'
+          subTitle='EDITAR'
           icon={<i className='fa fa-edit'></i>}
           handleGoBack={this.handleCerrar}
         />
@@ -962,10 +914,9 @@ class CotizaciónEditar extends CustomComponent {
           handleSave={this.handleSaveProducto}
         />
 
-        <ModalCliente
-          ref={this.refModalCliente}
-          isOpen={this.state.isOpenCliente}
-          onClose={this.handleCloseCliente}
+        <ModalPersona
+          isOpen={this.state.isOpenPersona}
+          onClose={this.handleCloseModalPersona}
 
           idUsuario={this.state.idUsuario}
         />
@@ -973,10 +924,11 @@ class CotizaciónEditar extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-          handleClose={this.handleCloseImpresion}
 
-          handlePrintA4={this.handleOpenImpresionA4}
-          handlePrintTicket={this.handleOpenImpresionTicket}
+          handleClose={this.handleCloseImpresion}
+          handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
+          handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
+          handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
         <ModalPreImpresion
@@ -991,12 +943,13 @@ class CotizaciónEditar extends CustomComponent {
           detalles={this.state.detalles}
 
           handleClose={this.handleClosePreImpresion}
+          handleProcess={this.handleProcessPreImpresion}
         />
 
         <Row>
           <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
             <Row>
-              <Column>
+              <Column formGroup={true}>
                 <SearchInput
                   ref={this.refProducto}
                   autoFocus={true}
@@ -1013,10 +966,11 @@ class CotizaciónEditar extends CustomComponent {
             </Row>
 
             <Row>
-              <Column>
+              <Column formGroup={true}>
                 <TableResponsive onKeyDown={this.handleKeyDownTable}>
                   <Table
                     ref={this.refTable}
+                    tabIndex="0"
                     onClick={this.handleOnClickTable}
                     onDoubleClick={this.handleOnDbClickTable}
                     className={"table-bordered table-hover table-sticky"}>
@@ -1031,50 +985,33 @@ class CotizaciónEditar extends CustomComponent {
                         <TableHead width="5%" className="text-center">Quitar</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <DragDropContext
-                      onDragEnd={this.handleOnDragEndTable}
-                      onBeforeDragStart={this.handleOnBeforeDragStartTable}
-                    >
-                      <Droppable droppableId="table-body">
-                        {(provided) => (
-                          <TableBody
-                            ref={(el) => {
-                              provided.innerRef(el)
-                              this.refTableBody.current = el;
-                            }}
-                            {...provided.droppableProps}>
-                            {this.generateBody()}
-                            {provided.placeholder}
-                          </TableBody>
-                        )}
-                      </Droppable>
-                    </DragDropContext>
+                    <TableBody>
+                      {this.generateBody()}
+                    </TableBody>
                   </Table>
                 </TableResponsive>
               </Column>
             </Row>
 
             <Row>
-              <Column>
-                <div className="form-group">
+              <Column formGroup={true}>
                   <Button
                     className='btn-warning'
                     onClick={this.handleGuardar}>
                     <i className="fa fa-edit"></i> Editar (F1)
                   </Button>
                   {' '}
-                  <Button
+                  {/* <Button
                     className=" btn-outline-primary"
                     onClick={this.handleOpenPreImpresion}>
                     <i className="bi bi-printer"></i> Pre Impresión (F3)
                   </Button>
-                  {' '}
+                  {' '} */}
                   <Button
                     className=" btn-outline-danger"
                     onClick={this.handleCerrar}>
                     <i className="fa fa-close"></i> Cerrar
                   </Button>
-                </div>
               </Column>
             </Row>
 
@@ -1091,7 +1028,6 @@ class CotizaciónEditar extends CustomComponent {
               <Select
                 group={true}
                 iconLeft={<i className="bi bi-receipt"></i>}
-                title="Comprobantes de venta"
                 refSelect={this.refComprobante}
                 value={this.state.idComprobante}
                 disabled={true}
@@ -1120,7 +1056,7 @@ class CotizaciónEditar extends CustomComponent {
                 customButton={
                   <Button
                     className="btn-outline-success d-flex align-items-center"
-                    onClick={this.handleOpenModalCliente}>
+                    onClick={this.handleOpenModalPersona}>
                     <i className='fa fa-plus'></i>
                     <span className="ml-2">Nuevo</span>
                   </Button>
@@ -1185,7 +1121,7 @@ class CotizaciónEditar extends CustomComponent {
             </div>
 
             <div className="form-group">
-              <Table>
+              <Table classNameContent='w-100'>
                 <TableHeader>{this.renderTotal()}</TableHeader>
               </Table>
             </div>
@@ -1196,7 +1132,7 @@ class CotizaciónEditar extends CustomComponent {
   }
 }
 
-CotizaciónEditar.propTypes = {
+CotizacionEditar.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string
   }),
@@ -1228,6 +1164,6 @@ const mapStateToProps = (state) => {
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedCotizaciónEditar = connect(mapStateToProps, null)(CotizaciónEditar);
+const ConnectedCotizacionEditar = connect(mapStateToProps, null)(CotizacionEditar);
 
-export default ConnectedCotizaciónEditar;
+export default ConnectedCotizacionEditar;

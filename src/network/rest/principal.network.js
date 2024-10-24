@@ -18,21 +18,6 @@ instancePrincipal.interceptors.request.use((config) => {
   return config;
 });
 
-export async function loginApi(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/login/createsession', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-
-export async function validTokenApi() {
-  return await Resolve.create(
-    instancePrincipal.get('/api/login/validtoken'),
-  );
-}
-
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE SUCURSAL
@@ -47,7 +32,7 @@ export async function listSucursales(params, signal) {
   );
 }
 
-export async function initSucursales(params,signal) {
+export async function initSucursales(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/sucursal/inicio', {
       params: params,
@@ -196,6 +181,22 @@ export async function getPersonaPredeterminado(signal) {
     }),
   );
 }
+
+export function documentsPdfReportsPersonaCliente() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/cliente/documents/pdf/reports`
+}
+
+export function documentsExcelPersonaCliente() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/cliente/documents/excel`
+}
+
+export function documentsPdfReportsPersonaProveedor() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/proveedor/documents/pdf/reports`
+}
+
+export function documentsExcelPersonaProveedor() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/proveedor/documents/excel`
+}
 // ------------------------------------------------------------------------
 // FIN PARA CLIENTE
 // ------------------------------------------------------------------------
@@ -328,11 +329,11 @@ export async function establecerPreferidoProducto(data) {
 }
 
 export async function addProducto(data) {
-  return await Resolve.create(instancePrincipal.post('/api/producto', data));
+  return await Resolve.create(instancePrincipal.post('/api/producto', data),);
 }
 
 export async function updateProducto(data) {
-  return await Resolve.create(instancePrincipal.put('/api/producto', data));
+  return await Resolve.create(instancePrincipal.put('/api/producto', data),);
 }
 
 export async function deleteProducto(params) {
@@ -341,6 +342,14 @@ export async function deleteProducto(params) {
       params: params,
     }),
   );
+}
+
+export function documentsPdfReportsProducto() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/reports`
+}
+
+export function documentsExcelProducto() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/excel`
 }
 // ------------------------------------------------------------------------
 // FIN PARA PRODUCTO
@@ -413,14 +422,6 @@ export async function listVenta(params, signal) {
   );
 }
 
-export async function listCpeSunat(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/factura/list/cpesunat', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
 
 export async function listFiltrarVenta(params, signal) {
   return await Resolve.create(
@@ -433,7 +434,8 @@ export async function listFiltrarVenta(params, signal) {
 
 export async function createVenta(data) {
   return await Resolve.create(
-    instancePrincipal.post('/api/factura/create', data));
+    instancePrincipal.post('/api/factura/create', data)
+  );
 }
 
 export async function detailVenta(params, signal) {
@@ -506,8 +508,52 @@ export async function cancelAccountsReceivableVenta(params, signal) {
   );
 }
 
+export async function dashboardVenta(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/factura/dashboard', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export function documentsPdfInvoicesVenta(idVenta, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/pdf/invoices/${idVenta}/${size}`
+}
+
+export function documentsPdfAccountReceivableVenta(idCuota, idVenta, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/pdf/account/receivable/${idCuota}/${idVenta}/${size}`
+}
+
+export function documentsPdfReportsVenta() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/pdf/reports`
+}
+
+export function documentsExcelVenta() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/excel`
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA VENTA
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE TRANSACCION
+|--------------------------------------------------------------------------
+*/
+
+export async function dashboardTransaccion(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/transaccion/dashboard', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA TRANSACCION
 // ------------------------------------------------------------------------
 
 /*
@@ -853,6 +899,31 @@ export async function cancelAccountsPayableCompra(params, signal) {
     }),
   );
 }
+
+export async function dashboardCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/compra/dashboard', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export function documentsPdfInvoicesCompra(idCompra, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/pdf/invoices/${idCompra}/${size}`
+}
+
+export function documentsPdfAccountPayableCompra(idPlazo, idCompra, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/pdf/account/payable/${idPlazo}/${idCompra}/${size}`
+}
+
+export function documentsPdfReportsCompra() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/pdf/reports`
+}
+
+export function documentsExcelCompra() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/excel`
+}
 // ------------------------------------------------------------------------
 // FIN PARA COMPRA
 // ------------------------------------------------------------------------
@@ -922,6 +993,10 @@ export async function cancelGuiaRemision(params, signal) {
     }),
   );
 }
+
+export function documentsPdfInvoicesGuiaRemision(idGuiaRemision, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`
+}
 // ------------------------------------------------------------------------
 // FIN PARA GUÍA DE REMISIÓN
 // ------------------------------------------------------------------------
@@ -958,9 +1033,9 @@ export async function detailCotizacion(params, signal) {
   );
 }
 
-export async function detailCotizacionVenta(params, signal) {
+export async function forSaleCotizacion(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/cotizacion/detail/venta', {
+    instancePrincipal.get('/api/cotizacion/for-sale', {
       params: params,
       signal: signal,
     }),
@@ -990,6 +1065,92 @@ export async function cancelCotizacion(params, signal) {
       signal: signal,
     }),
   );
+}
+
+export function documentsPdfInvoicesCotizacion(idCotizacion, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`
+}
+
+export function documentsPdfListsCotizacion(idCotizacion) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/cotizacion/documents/pdf/lists/${idCotizacion}`
+}
+// ------------------------------------------------------------------------
+// FIN PARA COTIZACION
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE COTIZACION
+|--------------------------------------------------------------------------
+*/
+export async function listPedido(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/pedido/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function idPedido(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/pedido/id', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailPedido(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/pedido/detail', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function forPurchasePedido(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/pedido/for-purchase', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+
+export async function createPedido(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/pedido/create', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function updatePedido(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.put('/api/pedido/update', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelPedido(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/pedido/cancel', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export function documentsPdfInvoicesPedido(idPedido, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/invoices/${idPedido}/${size}`
+}
+
+export function documentsPdfListsPedido(idPedido) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/lists/${idPedido}`
 }
 // ------------------------------------------------------------------------
 // FIN PARA COTIZACION
@@ -1035,12 +1196,8 @@ export async function cancelCobro(params, signal) {
   );
 }
 
-export async function sendEmailBoleta(params) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/cobro/email', {
-      params: params,
-    }),
-  );
+export function documentsPdfInvoicesCobro(idCobro, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/cobro/documents/pdf/invoices/${idCobro}/${size}`
 }
 
 // ------------------------------------------------------------------------
@@ -1085,6 +1242,10 @@ export async function cancelGasto(params, signal) {
       params: params,
     }),
   );
+}
+
+export function documentsPdfInvoicesGasto(idGasto, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/gasto/documents/pdf/invoices/${idGasto}/${size}`
 }
 // ------------------------------------------------------------------------
 // FIN PARA GASTO
@@ -1878,6 +2039,21 @@ export async function removeUsuario(params, signal) {
     }),
   );
 }
+
+export async function loginApi(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/usuario/login', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function validTokenApi() {
+  return await Resolve.create(
+    instancePrincipal.get('/api/usuario/valid/token'),
+  );
+}
 // ------------------------------------------------------------------------
 // FIN PARA USUARIO
 // ------------------------------------------------------------------------
@@ -1942,9 +2118,18 @@ export async function detailNotifications(params, signal) {
 
 /*
 |--------------------------------------------------------------------------
-| ENDPOINTS DE DECLARAR COMPROBANTES
+| ENDPOINTS DE SUNAT
 |--------------------------------------------------------------------------
 */
+
+export async function listCpeSunat(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/sunat/list/cpesunat', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
 
 export async function facturarCpeSunat(idVenta) {
   return await Resolve.create(
@@ -1976,9 +2161,21 @@ export async function consultarCpeSunat(ruc, usuario, clave, tipoComprobante, se
   );
 }
 
+export function obtenerXmlSunat(idComprobante) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`
+}
+
+export async function dashboardSunat(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/sunat/dashboard', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
 
 // ------------------------------------------------------------------------
-// FIN PARA REPORTES PDF, EXCEL
+// FIN PARA SUNAT
 // ------------------------------------------------------------------------
 
 /*
@@ -1987,11 +2184,6 @@ export async function consultarCpeSunat(ruc, usuario, clave, tipoComprobante, se
 |--------------------------------------------------------------------------
 */
 
-// Funciones relacionadas con la generación de PDF de documentos de facturación
-
-export function obtenerVentaPdf(idVenta, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/venta/pdf/${tipo}/${idVenta}`
-}
 
 export async function obtenerPreVentaPdf(data, tipo, signal) {
   return await Resolve.create(
@@ -2000,10 +2192,6 @@ export async function obtenerPreVentaPdf(data, tipo, signal) {
       signal: signal,
     })
   );
-}
-
-export function obtenerCotizacionPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cotizacion/pdf/${tipo}/${idCotizacion}`
 }
 
 export async function obtenerPreCotizacionPdf(data, tipo, signal) {
@@ -2015,63 +2203,6 @@ export async function obtenerPreCotizacionPdf(data, tipo, signal) {
   );
 }
 
-export function obtenerPedidoCotizacionPdf(idCotizacion) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cotizacion/pedido/pdf/a4/${idCotizacion}`
-}
-
-export function obtenerGuiaRemisionPdf(idGuiaRemision, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/guiaremision/pdf/${tipo}/${idGuiaRemision}`
-}
-
-export function obtenerCompraPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/compra/pdf/${tipo}/${idCotizacion}`
-}
-
-export function obtenerPreCompraPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/compra/pdf/${tipo}/${idCotizacion}`
-}
-
-export function obtenerCobroPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cobro/pdf/${tipo}/${idCotizacion}`
-}
-
-export function obtenerPreCobroPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/cobro/pdf/${tipo}/${idCotizacion}`
-}
-
-export function obtenerGastoPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/gasto/pdf/${tipo}/${idCotizacion}`
-}
-
-export function obtenerPreGastoPdf(idCotizacion, tipo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/facturacion/gasto/pdf/${tipo}/${idCotizacion}`
-}
-
-// Funciones relacionadas con la generación y descarga de reportes financieros
-
-export function obtenerReporteVentaPdf(idSucursalGenerado, fechaInicio, fechaFinal, idComprobante, idSucursal, idUsuario) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/venta/pdf/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idComprobante}/${idSucursal}/${idUsuario}`
-}
-
-export function obtenerReporteVentaExcel(idSucursalGenerado, fechaInicio, fechaFinal, idComprobante, idSucursal, idUsuario) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/venta/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idComprobante}/${idSucursal}/${idUsuario}`
-}
-
-export function obtenerReporteFinanzaPdf(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal, idUsuario) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/financiero/pdf/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}/${idUsuario}`
-}
-
-export function obtenerReporteFinanzaExcel(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal, idUsuario) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/financiero/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}/${idUsuario}`
-}
-
-export function obtenerReporteCpeSunatExcel(idSucursalGenerado, fechaInicio, fechaFinal, idSucursal) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/cpesunat/excel/${idSucursalGenerado}/${fechaInicio}/${fechaFinal}/${idSucursal}`
-}
-
-export function obtenerXmlSunat(idComprobante) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/reporte/cpesunat/xml/${idComprobante}`
-}
 // ------------------------------------------------------------------------
 // FIN PARA REPORTES PDF, EXCEL
 // ------------------------------------------------------------------------

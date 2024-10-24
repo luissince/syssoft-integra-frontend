@@ -83,7 +83,7 @@ class VehiculoAgregar extends CustomComponent {
 
         <Title
           title='Vehículo'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

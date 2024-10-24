@@ -2,25 +2,29 @@ import PropTypes from 'prop-types';
 import { isEmpty } from '../helper/utils.helper';
 import { NavLink } from 'react-router-dom';
 
-const Button = ({
-    refButton,
-    autoFocus,
-    type = "button",
-    contentClassName = "",
-    className = "",
-    style,
-    title,
-    text,
-    icono,
-    disabled = false,
-    onClick,
-    children
-}) => {
+const Button = (props) => {
+    const {
+        refButton,
+        autoFocus,
+        id,
+        type = "button",
+        contentClassName = "",
+        className = "",
+        style,
+        title,
+        text,
+        icono,
+        disabled = false,
+        onClick,
+        children
+    } = props;
+
     if (!isEmpty(contentClassName)) {
         return (
             <button
                 ref={refButton}
                 type={type}
+                id={id}
                 className={contentClassName}
                 style={style}
                 title={title}
@@ -37,6 +41,7 @@ const Button = ({
             <button
                 ref={refButton}
                 type={type}
+                id={id}
                 className={`btn ${className}`}
                 style={style}
                 title={title}
@@ -52,6 +57,7 @@ const Button = ({
         <button
             ref={refButton}
             type={type}
+            id={id}
             className={`btn ${className}`}
             style={style}
             title={title}
@@ -66,6 +72,7 @@ const Button = ({
 Button.propTypes = {
     refButton: PropTypes.object,
     autoFocus: PropTypes.bool,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     type: PropTypes.oneOf(["button", "submit", "reset"]),
     contentClassName: PropTypes.string,
     className: PropTypes.string,

@@ -185,7 +185,7 @@ class BancoEditar extends CustomComponent {
 
         <Title
           title='Banco'
-          subTitle='Editar'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

@@ -29,7 +29,7 @@ const Menu = (props) => {
       </div>
       <span
         className="app-sidebar__toggle"
-        onClick={props.openAndClose}
+        onClick={props.onToggleSidebar}
       ></span>
 
       <ul className="app-nav">
@@ -159,7 +159,7 @@ Menu.propTypes = {
   clearNoticacion: PropTypes.func,
 
   projectClose: PropTypes.func,
-  openAndClose: PropTypes.func,
+  onToggleSidebar: PropTypes.func,
   notificaciones: PropTypes.array,
   match: PropTypes.shape({
     url: PropTypes.string

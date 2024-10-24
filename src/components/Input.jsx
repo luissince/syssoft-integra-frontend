@@ -1,5 +1,18 @@
 import PropTypes from 'prop-types';
 
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ * Example:
+    <Input
+        label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+        placeholder="Ingrese el nombre"
+        refInput={this.refNombre}
+        value={this.state.nombre}
+        onChange={this.handleInputNombre}
+    />
+ */
 const Input = ({
     autoFocus = false,
     label,
@@ -14,6 +27,7 @@ const Input = ({
     refInput,
     value,
     buttonRight,
+    contentRight,
     onChange,
     onKeyUp,
     onKeyDown,
@@ -39,17 +53,22 @@ const Input = ({
             </div>
         );
     }
+
     if (group) {
         return (
             <>
                 {label && <label>{label} </label>}
 
                 <div className="input-group">
-                    {iconLeft && <div className="input-group-prepend">
-                        <div className="input-group-text">
-                            {iconLeft}
-                        </div>
-                    </div>}
+                    {
+                        iconLeft && (
+                            <div className="input-group-prepend">
+                                <div className="input-group-text">
+                                    {iconLeft}
+                                </div>
+                            </div>
+                        )
+                    }
 
                     <input
                         autoFocus={autoFocus}
@@ -70,13 +89,22 @@ const Input = ({
                         onBlur={onBlur}
                     />
 
-                    {buttonRight && <div className="input-group-append">
-                        {buttonRight}
-                    </div>}
+                    {
+                        contentRight 
+                    }
+
+                    {
+                        buttonRight && (
+                            <div className="input-group-append">
+                                {buttonRight}
+                            </div>
+                        )
+                    }
                 </div>
             </>
         );
     }
+
     return (
         <>
             {label && <label>{label} </label>}
@@ -115,6 +143,7 @@ Input.propTypes = {
     refInput: PropTypes.object,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     buttonRight: PropTypes.element,
+    contentRight: PropTypes.element,
     onChange: PropTypes.func,
     onKeyUp: PropTypes.func,
     onKeyDown: PropTypes.func,

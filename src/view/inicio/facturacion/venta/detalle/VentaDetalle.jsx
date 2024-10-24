@@ -1,4 +1,3 @@
-import printJS from 'print-js';
 import {
   rounded,
   numberFormat,
@@ -7,10 +6,11 @@ import {
   formatTime,
   isText,
   isEmpty,
+  alertWarning,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailVenta, obtenerVentaPdf } from '../../../../../network/rest/principal.network';
+import { detailVenta, documentsPdfInvoicesVenta } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -24,6 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,7 +52,8 @@ class VentaDetalle extends CustomComponent {
       simbolo: '',
       total: '',
       usuario: '',
-      comentario: '',
+      observacion: '',
+      nota: '',
 
       detalles: [],
       transaccion: []
@@ -80,7 +82,7 @@ class VentaDetalle extends CustomComponent {
     if (isText(idVenta)) {
       await this.loadingData(idVenta);
     } else {
-      this.props.history.goBack();
+      this.close();
     }
   }
 
@@ -100,12 +102,26 @@ class VentaDetalle extends CustomComponent {
   | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
   |
-   */
+  */
 
   async loadingData(id) {
-    const [factura] = await Promise.all([
-      this.fetchIdFactura(id)
-    ]);
+    const params = {
+      idVenta: id,
+    };
+
+    const response = await detailVenta(params, this.abortControllerView.signal);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertWarning('Venta', response.getMessage(), () => {
+        this.close();
+      });
+      return;
+    }
+
+    response instanceof SuccessReponse;
+    const venta = response.data;
 
     const {
       comprobante,
@@ -120,10 +136,11 @@ class VentaDetalle extends CustomComponent {
       simbolo,
       codiso,
       usuario,
-      comentario,
-    } = factura.cabecera;
+      observacion,
+      nota,
+    } = venta.cabecera;
 
-    const monto = factura.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
+    const monto = venta.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
 
     const nuevoEstado = estado === 1 ? <span className="text-success">COBRADO</span> : estado === 2 ? <span className="text-warning">POR COBRAR</span> : estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
 
@@ -139,32 +156,19 @@ class VentaDetalle extends CustomComponent {
       simbolo: simbolo,
       codiso: codiso,
       usuario: usuario,
-      comentario: comentario,
+      observacion: observacion,
+      nota: nota,
       total: rounded(monto),
 
-      detalles: factura.detalles,
-      transaccion: factura.transaccion,
+      detalles: venta.detalles,
+      transaccion: venta.transaccion,
 
       loading: false,
     });
   }
 
-  async fetchIdFactura(id) {
-    const params = {
-      idVenta: id,
-    };
-
-    const response = await detailVenta(params, this.abortControllerView.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return false;
-    }
+  close = () => {
+    this.props.history.goBack();
   }
 
   /*
@@ -183,28 +187,13 @@ class VentaDetalle extends CustomComponent {
   |
   */
 
-  handlePrintA4 = () => {
-    printJS({
-      printable: obtenerVentaPdf(this.state.idVenta, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
-  }
-
-  handlePrintTicket = () => {
-    printJS({
-      printable: obtenerVentaPdf(this.state.idVenta, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
+  handlePrintInvoices = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfInvoicesVenta(this.state.idVenta, size),
+      title: 'Venta',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
   /*
@@ -221,7 +210,7 @@ class VentaDetalle extends CustomComponent {
   | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
   | actuales del componente para determinar lo que se mostrará.
   |
-   */
+  */
 
   renderDetalles() {
     return (
@@ -390,23 +379,30 @@ class VentaDetalle extends CustomComponent {
         <Title
           title='Venta'
           subTitle='DETALLE'
-          handleGoBack={() => this.props.history.goBack()}
+          handleGoBack={() => this.close()}
         />
 
         <Row>
           <Column formGroup={true}>
             <Button
               className="btn-light"
-              onClick={this.handlePrintA4}
+              onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
             </Button>
             {' '}
             <Button
               className="btn-light"
-              onClick={this.handlePrintTicket}
+              onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
-              <i className="fa fa-print"></i> Ticket
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
             </Button>
           </Column>
         </Row>
@@ -441,10 +437,18 @@ class VentaDetalle extends CustomComponent {
                 </TableRow>
                 <TableRow>
                   <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Comentario
+                    Observación
                   </TableHead>
                   <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.comentario}
+                    {this.state.observacion}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    Nota
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.nota}
                   </TableHead>
                 </TableRow>
                 <TableRow>
@@ -512,7 +516,7 @@ class VentaDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-8 col-sm-12"></Column>
           <Column className="col-lg-4 col-sm-12">
-            <Table >
+            <Table classNameContent='w-100'>
               <TableHeader>
                 {this.renderTotal()}
               </TableHeader>

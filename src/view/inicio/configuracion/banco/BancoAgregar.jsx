@@ -144,8 +144,8 @@ class BancoAgregar extends CustomComponent {
         {this.state.loading && spinnerLoading(this.state.msgLoading)}
 
         <Title
-          title='Agregar'
-          subTitle='Banco'
+          title='Banco'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

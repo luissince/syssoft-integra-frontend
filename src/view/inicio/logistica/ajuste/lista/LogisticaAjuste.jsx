@@ -70,13 +70,17 @@ class LogisticaAjuste extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
+    // console.log(this.props.token.userToken.menus[3].subMenus[1])
+    // console.log(this.props.token.userToken.menus[3].subMenus[1].estado)
     this.refPaginacion = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
 
   async componentDidMount() {
+    // if (this.props.token.userToken.menus[3].subMenus[1].estado === 0) {
+    //   this.props.history.goBack();
+    // };
     await this.loadingData();
   }
 
@@ -349,8 +353,8 @@ class LogisticaAjuste extends CustomComponent {
         />
 
         <Title
-          title={"Ajustes"}
-          subTitle={"REALIZADOS"}
+          title="Ajustes"
+          subTitle="REALIZADOS"
           handleGoBack={() => this.props.history.goBack()}
         />
 

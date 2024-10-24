@@ -42,7 +42,6 @@ class Loader extends React.Component {
     if (session) {
       // TO DO:
       // la variable session trae datos que rempleza al window.localStorage.getItem('login')
-      // console.log(session)
       const login = JSON.parse(window.localStorage.getItem('login'));
       const project = JSON.parse(window.localStorage.getItem('project'));
 

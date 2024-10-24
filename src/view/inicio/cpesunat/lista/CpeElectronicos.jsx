@@ -11,10 +11,10 @@ import {
   alertError,
   alertInfo,
   isText,
+  guId,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import FileDownloader from '../../../../components/FileDownloader';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import { images } from '../../../../helper';
@@ -25,11 +25,11 @@ import {
   anularFacturaCpeSunat,
   comboComprobante,
   comboSucursal,
+  documentsPdfInvoicesGuiaRemision,
+  documentsPdfInvoicesVenta,
   facturarCpeSunat,
   guiaRemisionCpeSunat,
   listCpeSunat,
-  obtenerGuiaRemisionPdf,
-  obtenerVentaPdf,
   obtenerXmlSunat,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
@@ -45,6 +45,8 @@ import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import Search from '../../../../components/Search';
 import { setListaCpeSunatData, setListaCpeSunatPaginacion } from '../../../../redux/predeterminadoSlice';
+import pdfVisualizer from 'pdf-visualizer';
+import { downloadFileAsync } from '../../../../redux/downloadSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -103,11 +105,22 @@ class CpeElectronicos extends CustomComponent {
     };
 
     this.refPaginacion = React.createRef();
-
-    this.refUseFile = React.createRef();
-
     this.abortControllerTable = new AbortController();
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     const url = this.props.location.search;
@@ -122,6 +135,20 @@ class CpeElectronicos extends CustomComponent {
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
   loadingData = async () => {
     if (this.props.cpeSunatLista && this.props.cpeSunatLista.data && this.props.cpeSunatLista.paginacion) {
@@ -268,7 +295,7 @@ class CpeElectronicos extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: buscar.trim(),
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idComprobante: this.state.idComprobante,
@@ -305,6 +332,22 @@ class CpeElectronicos extends CustomComponent {
       });
     }
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleInputFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
@@ -474,58 +517,71 @@ class CpeElectronicos extends CustomComponent {
     });
   }
 
-  handleOpenPdfA4 = (idComprobante, tipo) => {
+  handleOpenPrinter = async (idComprobante, tipo, size) => {
+    let url = "";
     if (tipo === "fac") {
-      window.open(obtenerVentaPdf(idComprobante, "a4"), '_blank');
+      url = documentsPdfInvoicesVenta(idComprobante, size)
     } else {
-      window.open(obtenerGuiaRemisionPdf(idComprobante, "a4"), '_blank');
-    }
-  }
-
-  handleOpenPdfTicket = (idComprobante, tipo) => {
-    if (tipo === "fac") {
-      window.open(obtenerVentaPdf(idComprobante, "ticket"), '_blank');
-    } else {
-      window.open(obtenerGuiaRemisionPdf(idComprobante, "ticket"), '_blank');
+      url = documentsPdfInvoicesGuiaRemision(idComprobante, size)
     }
 
+    await pdfVisualizer.init({
+      url,
+      title: 'CPE Sunat',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
   handleDownloadXml = (idComprobante) => {
-    this.refUseFile.current.download({
-      name: 'Xml Sunat',
-      url: obtenerXmlSunat(idComprobante)
-    });
+    const id = guId();
+    const url = obtenerXmlSunat(idComprobante);
+    this.props.downloadFileAsync({ id, url });
   }
 
   handleSendEmail = () => {
     alertWarning("Cpe Sunet", "Opción en matenimiento")
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
   opcionButtonOpcion(image, title, width, alt, onClick) {
     return (
       <li>
-        <button
-          className="dropdown-item"
-          type="button"
+        <Button
+          contentClassName="dropdown-item"
           onClick={onClick}>
           <img
             src={image}
             width={width}
             alt={alt}
           />{" "} {title}
-        </button>
+        </Button>
       </li>
     );
   }
 
   opcionButtonEnvio(image, alt, onClick) {
     return (
-      <button
-        className="btn btn-light btn-sm"
+      <Button
+        className="btn-light btn-sm"
         onClick={onClick}>
         <img src={image} alt={alt} width="22" />
-      </button>
+      </Button>
     );
   }
 
@@ -618,8 +674,9 @@ class CpeElectronicos extends CustomComponent {
               </a>
 
               <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', () => this.handleOpenPdfA4(item.idComprobante, item.tipo))}
-                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPdfTicket(item.idComprobante, item.tipo))}
+                {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'))}
+                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'))}
+                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 58mm', 22, 'Pdf Ticket', () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'))}
                 {this.opcionButtonOpcion(images.xml, 'Archivo Xml', 22, 'Xml', () => this.handleDownloadXml(item.idComprobante))}
                 {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idComprobante))}
                 {
@@ -665,16 +722,15 @@ class CpeElectronicos extends CustomComponent {
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
-        // body={<>
-        //   <div className='d-flex flex-column align-items-center'>
-        //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
-        //     <Button
-        //       className='btn-danger'>
-        //       <i className='fa fa-refresh'></i> Recargar
-        //     </Button>
-        //   </div>
-        // </>}
-        />
+        >
+          {/* <div className='d-flex flex-column align-items-center'>
+            <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+            <Button
+              className='btn-danger'>
+              <i className='fa fa-refresh'></i> Recargar
+            </Button>
+          </div> */}
+        </SpinnerView>
 
         <Title
           title='Comprobante de Pago Electrónico'
@@ -832,8 +888,6 @@ class CpeElectronicos extends CustomComponent {
           fillTable={this.paginacionContext}
           restart={this.state.restart}
         />
-
-        <FileDownloader ref={this.refUseFile} />
       </ContainerWrapper>
     );
   }
@@ -855,7 +909,8 @@ CpeElectronicos.propTypes = {
   setListaCpeSunatData: PropTypes.func,
   setListaCpeSunatPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
+  location: PropTypes.object,
+  downloadFileAsync: PropTypes.func,
 }
 
 const mapStateToProps = (state) => {
@@ -865,7 +920,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = { setListaCpeSunatData, setListaCpeSunatPaginacion }
+const mapDispatchToProps = { setListaCpeSunatData, setListaCpeSunatPaginacion, downloadFileAsync }
 
 const ConnectedCpeElectronicos = connect(mapStateToProps, mapDispatchToProps)(CpeElectronicos);
 

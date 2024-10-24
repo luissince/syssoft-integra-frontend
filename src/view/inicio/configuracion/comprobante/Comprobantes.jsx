@@ -250,7 +250,7 @@ class Comprobantes extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Comprobantes'
-          subTitle='Lista'
+          subTitle='LISTA'
           handleGoBack={() => this.props.history.goBack()}
         />
 

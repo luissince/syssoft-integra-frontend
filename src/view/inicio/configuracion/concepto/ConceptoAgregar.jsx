@@ -82,8 +82,8 @@ class ConceptoAgregar extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Concepo'
-          subTitle='Agregar'
+          title='Concepto'
+          subTitle='AGREGAR'
           icon={<i className="bi bi-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

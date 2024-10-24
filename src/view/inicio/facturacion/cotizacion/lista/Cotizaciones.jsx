@@ -197,17 +197,17 @@ class Cotizaciones extends CustomComponent {
     });
   }
 
-  handleEditar = (idCompra) => {
+  handleEditar = (idCotizacion) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
-      search: '?idCotizacion=' + idCompra,
+      search: '?idCotizacion=' + idCotizacion,
     });
   }
 
-  handleDetalle = (idCompra) => {
+  handleDetalle = (idCotizacion) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idCotizacion=' + idCompra,
+      search: '?idCotizacion=' + idCotizacion,
     });
   }
 
@@ -336,13 +336,13 @@ class Cotizaciones extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleCrear}>
-              <i className="bi bi-file-plus"></i> Crear cotización
+              <i className="bi bi-file-plus"></i> Crear Cotización
             </Button>
             {' '}
             <Button
               className="btn-outline-secondary"
               onClick={this.loadingInit}>
-              <i className="bi bi-arrow-clockwise"></i>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>

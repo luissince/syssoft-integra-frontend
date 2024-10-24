@@ -117,6 +117,8 @@ A continuación, se presenta la configuración de las variables de entorno utili
 ```bash
 VITE_APP_BACK_END=http://localhost:3002
 VITE_APP_APIS_PERU=http://localhost:3002
+VITE_APP_ENV="development"
+VITE_APP_VERSION="1.0.0"
 ```
 
 ### 6.  Ejecute **npm run dev** para iniciar el Front-end

@@ -1450,7 +1450,7 @@ class ProductoEditar extends CustomComponent {
 
         <Title
           title='Producto'
-          subTitle='Editar'
+          subTitle='EDITAR'
           icon={<i className='fa fa-edit'></i>}
           handleGoBack={() => this.props.history.goBack()}
         />

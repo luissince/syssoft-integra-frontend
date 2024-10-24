@@ -58,7 +58,7 @@ class ModalProducto extends Component {
         medidas: response.data,
         idProducto: producto.idProducto,
         codigo: producto.codigo,
-        cantidad: producto.cantidad ?? 0,
+        cantidad: producto.cantidad ?? 1,
         precio: producto.precio,
         descripcion: producto.nombre,
         idMedida: producto.idMedida,

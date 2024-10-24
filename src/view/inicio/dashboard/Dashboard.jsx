@@ -1,618 +1,281 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
-import { defaults } from 'chart.js/auto';
-import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2';
-
-defaults.maintainAspectRatio = false;
-defaults.responsive = true;
-
-defaults.plugins.title.display = true;
-defaults.plugins.title.align = 'start';
-defaults.plugins.title.font.size = 20;
-defaults.plugins.title.color = 'black';
-
-const sourceData1 = [
-  {
-    label: 'ENE',
-    value: 32,
-  },
-  {
-    label: 'FEB',
-    value: 45,
-  },
-  {
-    label: 'MAR',
-    value: 23,
-  },
-  {
-    label: 'ABR',
-    value: 23,
-  },
-  {
-    label: 'MAY',
-    value: 23,
-  },
-  {
-    label: 'JUN',
-    value: 23,
-  },
-  {
-    label: 'JUL',
-    value: 23,
-  },
-  {
-    label: 'AGO',
-    value: 23,
-  },
-  {
-    label: 'SET',
-    value: 23,
-  },
-  {
-    label: 'OCT',
-    value: 23,
-  },
-  {
-    label: 'NOV',
-    value: 23,
-  },
-  {
-    label: 'DIC',
-    value: 23,
-  },
-];
-
-const sourceData2 = [
-  {
-    label: 'Ads',
-    value: 32,
-  },
-  {
-    label: 'Subscriptions',
-    value: 45,
-  },
-  {
-    label: 'Sponsorships',
-    value: 23,
-  },
-  {
-    label: 'Sponsorships',
-    value: 23,
-  },
-];
+import { SpinnerView } from '../../../components/Spinner';
+import Row from '../../../components/Row';
+import Column from '../../../components/Column';
+import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
+import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Table, TableBody, TableCell, TableResponsive, TableRow } from '../../../components/Table';
+import Title from '../../../components/Title';
+import { FileText, Package, ShoppingCart, Store } from 'lucide-react';
 
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      token: this.props.token.userToken.token,
-
-      totales: {},
-      sucursales: [],
-
-      dataBar: {
-        labels: sourceData1.map((data) => data.label),
-        datasets: [
-          {
-            label: new Date().getFullYear(),
-            data: sourceData1.map((data) => data.value),
-            backgroundColor: [
-              'rgba(43, 63, 229, 0.8)',
-              'rgba(250, 192, 19, 0.8)',
-              'rgba(253, 135, 135, 0.8)',
-            ],
-            borderRadius: 1,
-          },
-        ],
-      },
-
-      dataDoughnut: {
-        labels: sourceData2.map((data) => data.label),
-        datasets: [
-          {
-            label: 'Count',
-            data: sourceData2.map((data) => data.value),
-            backgroundColor: [
-              'rgba(43, 63, 229, 0.8)',
-              'rgba(250, 192, 19, 0.8)',
-              'rgba(253, 135, 135, 0.8)',
-            ],
-            borderColor: [
-              'rgba(43, 63, 229, 0.8)',
-              'rgba(250, 192, 19, 0.8)',
-              'rgba(253, 135, 135, 0.8)',
-            ],
-          },
-        ],
-      },
-
-      codiso: '',
-      msgLoading: 'Cargando datos...',
-      loading: true,
-    };
+      loading: false,
+      msgLoading: "Cargando información...",
+    }
 
     this.abortControllerView = new AbortController();
   }
 
-  async componentDidMount() {}
+  async componentDidMount() { 
+
+  }
 
   componentWillUnmount() {
     this.abortControllerView.abort();
   }
 
   render() {
-    const { dataBar, dataDoughnut } = this.state;
+    const ventasMensuales = [
+      { mes: 'Ene', ventas: 45000, compras: 30000 },
+      { mes: 'Feb', ventas: 52000, compras: 32000 },
+      { mes: 'Mar', ventas: 49000, compras: 31000 },
+      { mes: 'Abr', ventas: 58000, compras: 35000 },
+    ];
+
+    const inventarioPorSucursal = [
+      { sucursal: 'Principal', stock: 1200 },
+      { sucursal: 'Norte', stock: 850 },
+      { sucursal: 'Sur', stock: 920 },
+    ];
+
+    const cuentasPorCobrar = [
+      { estado: 'Al día', valor: 45000, color: '#22c55e' },
+      { estado: '1-30 días', valor: 28000, color: '#eab308' },
+      { estado: '31-60 días', valor: 15000, color: '#f97316' },
+      { estado: '> 60 días', valor: 12000, color: '#dc2626' },
+    ];
+
+    const cuentasPorPagar = [
+      { estado: 'Al día', valor: 38000, color: '#22c55e' },
+      { estado: '1-30 días', valor: 22000, color: '#eab308' },
+      { estado: '31-60 días', valor: 12000, color: '#f97316' },
+      { estado: '> 60 días', valor: 8000, color: '#dc2626' },
+    ];
+
 
     return (
       <ContainerWrapper>
-        {/* {
-                    this.state.loading && spinnerLoading(this.state.msgLoading)
-                } */}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        {/* <div className='col-lg-12 col-md-12 mt-8 mb-12'>
-                    <div className="container-fluid py-4 ">
+        <Title
+          title='DASHBOARD'
+          subTitle='RESUMEN'
+        />
 
-                        <div className="row ">
-                            <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                                <div className="card" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)', display: 'flex', position: 'relative' }}>
-                                    <div className="card-header p-3 pt-2 bg-transparent">
-                                        <div className="bg-dark position-absolute" style={{ color: 'white', marginTop: -35, borderRadius: 10, display: 'flex', fontSize: 20, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)', padding: '15px 20px 15px 20px' }}>
-                                            <i className="bi bi-boxes"></i>
-                                        </div>
-                                        <div className="text-right pt-1">
-                                            <p className="text-sm mb-0">Total de Categorias</p>
-                                            <h4 className="mb-0">{this.state.totales.totalCategorias}</h4>
-                                        </div>
-                                    </div>                                 
-                                </div>
-                            </div>
-                            <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                                <div className="card" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
-                                    <div className="card-header p-3 pt-2 bg-transparent">
-                                        <div className="position-absolute" style={{ color: 'white', marginTop: -35, borderRadius: 10, display: 'flex', background: '#ec407a', fontSize: 20, boxShadow: '0 7px 10px -5px rgba(233,30,99,.4)', padding: '15px 20px 15px 20px' }}>
-                                            <i className="bi bi-bounding-box-circles"></i>
-                                        </div>
-                                        <div className="text-right pt-1">
-                                            <p className="text-sm mb-0">Total de Productos</p>
-                                            <h4 className="mb-0">{this.state.totales.totalProductos}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                                <div className="card" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
-                                    <div className="card-header p-3 pt-2 bg-transparent">
-                                        <div className="position-absolute" style={{ color: 'white', marginTop: -35, borderRadius: 10, display: 'flex', background: '#66bb6a', fontSize: 20, boxShadow: '0 7px 10px -5px rgba(76,175,80,.4)', padding: '15px 20px 15px 20px' }}>
-                                            <i className="bi bi-people-fill" style={{ margin: 'auto' }}></i>
-                                        </div>
-                                        <div className="text-right pt-1">
-                                            <p className="text-sm mb-0">Total de clientes</p>
-                                            <h4 className="mb-0">{this.state.totales.totalClientes}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-                                <div className="card" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
-                                    <div className="card-header p-3 pt-2 bg-transparent">
-                                        <div className="position-absolute" style={{ color: 'white', marginTop: -35, borderRadius: 10, display: 'flex', background: '#49a3f1', fontSize: 20, boxShadow: '0 7px 10px -5px rgba(0,188,212,.4)', padding: '15px 20px 15px 20px' }}>
-                                            <i className="bi bi-clipboard-data-fill"></i>
-                                        </div>
-                                        <div className="text-right pt-1">
-                                            <p className="text-sm mb-0">Ventas mensuales</p>
-                                            <h4 className="mb-0">{numberFormat(this.state.totales.totalVentas, this.state.codiso)}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <Row>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Ventas Hoy</CardTitle>
+                <ShoppingCart className='text-primary' width={40} height={40}  />
+              </CardHeader>
+              <CardBody>
+                <CardText>1,234</CardText>
+                <p className="text-xs text-secondary">+12.5%</p>
+              </CardBody>
+            </Card>
+          </Column>
 
-                        <div className="row mt-4">
-                            {
-                                this.state.sucursales.length === 0 ?
-                                    (
-                                        <div className="col-lg-12 col-md-12 mt-4 mb-12">
-                                            <div className="text-center">
-                                                <span>¡No hay sucursales registrados!</span>
-                                            </div>
-                                        </div>
-                                    )
-                                    :
-                                    (
-                                        this.state.sucursales.map((item, index) => {
-                                            return (
-                                                <div className="col-lg-4 col-md-6 mt-4 mb-4" key={index}>
-                                                    <div className={`card z-index-2 border ${item.idSucursal === this.props.token.project.idSucursal ? 'border-primary' : ''}`} style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(64,64,64,.4)' }}>
-                                                        <div className="card-header p-0 position-relative mt-n4 mx-3 z-index-2 bg-light" style={{ borderRadius: 10 }}>
-                                                            <div className="shadow-primary py-1 px-1  pe-1" style={{ borderRadius: 10, boxShadow: '0 7px 10px -5px rgba(153,153,153,.4)', border: '1px solid #999' }}>
-                                                                <div className="chart">
-                                                                    <img src={item.ruta === "" ? images.noImage : "/" + item.ruta} alt="" className="img-fluid rounded" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="card-body">
-                                                            <h6 className="mb-0 ">{item.nombre}</h6>
-                                                            <p className="text-sm ">{item.ubicacion}</p>
-                                                            <hr className="dark horizontal" />
-                                                            <div className="d-flex">
-                                                                <p className="mb-0 text-sm">Area: {item.area} m²</p>
-                                                                <div className="col text-right pr-0">
-                                                                    <p className="mb-0 text-sm">
-                                                                        {item.estado === 1 ? <span className="badge badge-success">VENTA</span> : <span className="badge badge-danger">LITIGIO</span>}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col text-center mt-2">
-                                                                {item.idSucursal === this.props.token.project.idSucursal ? <span className="text-primary fs-1">Actual</span> : ''}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })
-                                    )
-                            }
-                        </div>
-                    </div>
-                </div> */}
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Facturas Pendientes</CardTitle>
+                <FileText className='text-warning' width={40} height={40} />
+              </CardHeader>
+              <CardBody>
+                <CardText>23</CardText>
+                <p className="text-xs text-secondary">4 vencidas</p>
+              </CardBody>
+            </Card>
+          </Column>
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                Dashboard <small className="text-secondary"> detalle</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className=' m-0'>Productos Bajo Stock</CardTitle>
+                <Package className='text-danger' width={40} height={40} />
+              </CardHeader>
+              <CardBody>
+                <CardText>15</CardText>
+                <p className="text-xs text-secondary">Requiere atencións</p>
+              </CardBody>
+            </Card>
+          </Column>
 
-        <div className="row">
-          <div className="col">
-            <div className="card text-white bg-primary mb-3">
-              <div className="card-body">
-                <h5 className="card-title">0.00</h5>
-                <p className="card-text">VENTAS DEL DÍA</p>
-              </div>
-            </div>
-          </div>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Sucursales Activas</CardTitle>
+                <Store className='text-success' width={40} height={40} />
+              </CardHeader>
+              <CardBody>
+                <CardText>4</CardText>
+                <p className="text-xs text-secondary">Todas operativas</p>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
 
-          <div className="col">
-            <div className="card text-white bg-danger mb-3">
-              <div className="card-body">
-                <h5 className="card-title">0.00</h5>
-                <p className="card-text">COMPRAS DEL DÍA</p>
-              </div>
-            </div>
-          </div>
+        <Row>
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Tendencia de Ventas</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={ventasMensuales}>
+                    <XAxis dataKey="mes" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="ventas" stroke="#2563eb" strokeWidth={2} />
+                    <Line type="monotone" dataKey="compras" stroke="#dc2626" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
 
-          <div className="col">
-            <div className="card text-white bg-warning mb-3">
-              <div className="card-body">
-                <h5 className="card-title">0</h5>
-                <p className="card-text">CUENTAS POR COBRAR</p>
-              </div>
-            </div>
-          </div>
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Ventas por Comprobante</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={inventarioPorSucursal}>
+                    <XAxis dataKey="sucursal" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="stock" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
 
-          <div className="col">
-            <div className="card text-white bg-success mb-3">
-              <div className="card-body">
-                <h5 className="card-title">0</h5>
-                <p className="card-text">CUENTAS POR PAGAR</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <div className="card">
-                <div className="card-body p-0">
-                  <div className="p-2" style={{ height: '400px' }}>
-                    <Bar
-                      data={dataBar}
-                      options={{
-                        plugins: {
-                          title: {
-                            align: 'center',
-                            fullSize: false,
-                            display: true,
-                            text: 'VENTAS POR AÑO',
-                            color: '#020203',
-                            font: {
-                              size: 14,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <div className="card">
-                <div className="card-body p-0">
-                  <div className="p-2" style={{ height: '400px' }}>
+        <Row>
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Cuentas por Cobrar</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
                     <Pie
-                      data={dataDoughnut}
-                      options={{
-                        plugins: {
-                          title: {
-                            align: 'center',
-                            fullSize: false,
-                            display: true,
-                            text: 'INVENTARIO',
-                            color: '#020203',
-                            font: {
-                              size: 14,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                      data={cuentasPorCobrar}
+                      dataKey="valor"
+                      nameKey="estado"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      label={({ name, value }) => `${name}: $${value}`}
+                    >
+                      {cuentasPorCobrar.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
 
-        <div className="row">
-          <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <div className="card">
-                <div className="card-body p-0">
-                  <div className="p-2" style={{ height: '400px' }}>
-                    {/* <div className='table-responsive'>
-                                        <table className='table table-striped border-0'>
-                                            <thead className='bg-white'>
-                                                <tr>
-                                                    <th>Mes</th>
-                                                    <th>Venta Sunat</th>
-                                                    <th>Venta Libre</th>
-                                                    <th>Venta Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>Enero</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Febrero</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Marzo</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Abril</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Mayo</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Junio</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Julio</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Agosto</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Setiembre</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Octubre</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Noviembre</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Diciembre</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                    <td>0.00</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div> */}
-                    <Line
-                      data={{
-                        labels: [
-                          'ENE',
-                          'FEB',
-                          'MAR',
-                          'ABR',
-                          'MAY',
-                          'JUN',
-                          'JUL',
-                          'AGO',
-                          'SET',
-                          'OCT',
-                          'NOV',
-                          'DIC',
-                        ],
-                        datasets: [
-                          {
-                            label: 'Venta Sunat',
-                            data: [
-                              0.0, 0.0, 500, 800, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0,
-                            ],
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 2,
-                            fill: false,
-                          },
-                          {
-                            label: 'Venta Libre',
-                            data: [
-                              0.0, 0.0, 300, 200, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0,
-                            ],
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2,
-                            fill: false,
-                          },
-                          {
-                            label: 'Venta Total',
-                            data: [
-                              0.0, 0.0, 900, 1000, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0,
-                            ],
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 2,
-                            fill: false,
-                          },
-                        ],
-                      }}
-                      options={{
-                        scales: {
-                          x: { stacked: true },
-                          y: { stacked: true },
-                        },
-                        plugins: {
-                          title: {
-                            align: 'center',
-                            fullSize: false,
-                            display: true,
-                            text: 'VENTAS POR AÑO',
-                            color: '#020203',
-                            font: {
-                              size: 14,
-                            },
-                          },
-                          tooltip: {
-                            callbacks: {
-                              label: (context) =>
-                                `Monto: ${context.parsed.y.toFixed(2)}`,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Ventas por Comprobante</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={cuentasPorPagar}
+                      dataKey="valor"
+                      nameKey="estado"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      label={({ name, value }) => `${name}: $${value}`}
+                    >
+                      {cuentasPorPagar.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
 
-          <div className="col-lg-6 col-md-12 col-sm-12 col-12">
-            <div className="form-group">
-              <div className="card">
-                <div className="card-body p-0">
-                  <div className="p-2" style={{ height: '400px' }}>
-                    <Doughnut
-                      data={dataDoughnut}
-                      options={{
-                        plugins: {
-                          title: {
-                            align: 'center',
-                            fullSize: false,
-                            display: true,
-                            text: 'TIPOS DE VENTA',
-                            color: '#020203',
-                            font: {
-                              size: 14,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className='col-xl-4 col-lg-12' formGroup={true}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Cotizaciones Pendientes</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <TableResponsive>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>COT-2024-001</TableCell>
+                        <TableCell className={"text-primary"}>$12,450</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </CardBody>
+            </Card>
+          </Column>
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <div className="card">
-                <div className="card-title text-center text-dark font-weight-bold text-base pt-2">
-                  Productos más veces vendidos
-                </div>
-                <div className="card-body p-0">
-                  <div className="table-responsive">
-                    <table className="table table-striped border-0">
-                      <thead className="bg-white">
-                        <tr>
-                          <th>N°</th>
-                          <th>Producto</th>
-                          <th>Categoría/Marca</th>
-                          <th>Veces</th>
-                        </tr>
-                      </thead>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Column className='col-xl-4 col-lg-12' formGroup={true}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Pedidos en Proceso</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <TableResponsive>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>COT-2024-001</TableCell>
+                        <TableCell className={"text-success"}>En preparación</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </CardBody>
+            </Card>
+          </Column>
 
-          <div className="col">
-            <div className="form-group">
-              <div className="card">
-                <div className="card-title text-center text-dark font-weight-bold text-base pt-2">
-                  Productos con más cantidades vendidas
-                </div>
-                <div className="card-body p-0">
-                  <div className="table-responsive">
-                    <table className="table table-striped border-0">
-                      <thead className="bg-white">
-                        <tr>
-                          <th>N°</th>
-                          <th>Producto</th>
-                          <th>Categoría/Marca</th>
-                          <th>Cantidad</th>
-                        </tr>
-                      </thead>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Column className='col-xl-4 col-lg-12' formGroup={true}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Últimas Facturas</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <TableResponsive>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>COT-2024-001</TableCell>
+                        <TableCell className={"text-danger"}>Pagada</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

@@ -284,7 +284,7 @@ class SucursalEditar extends CustomComponent {
 
         <Title
           title='Sucursal'
-          subTitle='Editar'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

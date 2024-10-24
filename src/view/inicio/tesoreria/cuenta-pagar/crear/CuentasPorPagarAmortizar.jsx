@@ -1,23 +1,33 @@
-import printJS from "print-js";
-import { alertDialog, alertInfo, alertSuccess, alertWarning, calculateTax, calculateTaxBruto, formatTime, isText, numberFormat, rounded } from "../../../../../helper/utils.helper";
+import {
+    calculateTax,
+    calculateTaxBruto,
+    formatTime,
+    isText,
+    numberFormat,
+    rounded
+} from "../../../../../helper/utils.helper";
 import CustomComponent from "../../../../../model/class/custom-component";
 import ErrorResponse from "../../../../../model/class/error-response";
 import SuccessReponse from "../../../../../model/class/response";
 import PropTypes from 'prop-types';
 import { CONTADO, CREDITO_FIJO } from "../../../../../model/types/forma-pago";
 import { CANCELED } from "../../../../../model/types/types";
-import { cancelAccountsPayableCompra, createAccountsPayableCompra, detailAccountsPayableCompra, obtenerVentaPdf } from "../../../../../network/rest/principal.network";
+import { cancelAccountsPayableCompra, createAccountsPayableCompra, detailAccountsPayableCompra, documentsPdfAccountPayableCompra, documentsPdfInvoicesCompra } from "../../../../../network/rest/principal.network";
 import ContainerWrapper from "../../../../../components/Container";
 import { SpinnerView } from "../../../../../components/Spinner";
 import Row from "../../../../../components/Row";
 import Column from "../../../../../components/Column";
-import { TableResponsive } from "../../../../../components/Table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from "../../../../../components/Table";
 import React from "react";
 import { connect } from "react-redux";
 import Title from "../../../../../components/Title";
 import Button from "../../../../../components/Button";
 import ModalTransaccion from "../../../../../components/ModalTransaccion";
 import ModalProceso from "./component/ModalProceso";
+import pdfVisualizer from "pdf-visualizer";
+import SweetAlert from "../../../../../model/class/sweet-alert";
+import { ModalImpresion } from "../../../../../components/MultiModal";
+import printJS from "print-js";
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -27,6 +37,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
     constructor(props) {
         super(props);
+
         this.state = {
             // Atributos de carga
             loading: true,
@@ -52,7 +63,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             detalles: [],
             plazos: [],
 
-            // Atributos del mdaol de cobro
+            // Atributos del modal de cobro
             isOpenProceso: false,
             plazo: null,
             monto: 0,
@@ -60,13 +71,22 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             // Atributos del modal cobrar
             isOpenTerminal: false,
 
+            // Atributos del modal impresión
+            isOpenImpresion: false,
+            idPlazo: '',
+
             // Id principales
             idSucursal: this.props.token.project.idSucursal,
             idUsuario: this.props.token.userToken.idUsuario,
         };
 
+        this.alert = new SweetAlert();
+
         // Referencia del modal proceso
         this.refModalProceso = React.createRef();
+
+        // Referencia para el modal impresión
+        this.refModalImpresion = React.createRef();
 
         //Anular las peticiones
         this.abortControllerView = new AbortController();
@@ -92,7 +112,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         if (isText(idCompra)) {
             await this.loadingData(idCompra);
         } else {
-            this.props.history.goBack();
+            this.close();
         }
     }
 
@@ -100,10 +120,38 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         this.abortControllerView.abort();
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Métodos de acción
+    |--------------------------------------------------------------------------
+    |
+    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+    |
+    */
+
     async loadingData(id) {
-        const [factura] = await Promise.all([
-            this.fetchIdFactura(id),
-        ]);
+        const params = {
+            idCompra: id,
+        };
+
+        const response = await detailAccountsPayableCompra(params, this.abortControllerView.signal);
+
+        if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            this.alert.warning('Cuenta por Pagar', response.getMessage(), () => {
+                this.close();
+            });
+            return;
+        }
+
+        response instanceof SuccessReponse;
+        const compra = response.data;
 
         const {
             comprobante,
@@ -120,7 +168,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             simbolo,
             codiso,
             usuario,
-        } = factura.cabecera;
+        } = compra.cabecera;
 
         const nuevoEstado = estado === 1 ? <span className="text-success">PAGADO</span> : estado === 2 ? <span className="text-warning">POR PAGAR</span> : <span className="text-danger">ANULADO</span>;
 
@@ -140,32 +188,18 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             codiso: codiso,
             usuario: usuario,
 
-            total: factura.resumen[0].total,
-            cobrado: factura.resumen[0].cobrado,
+            total: compra.resumen[0].total,
+            cobrado: compra.resumen[0].cobrado,
 
-            detalles: factura.detalles,
-            plazos: factura.plazos,
+            detalles: compra.detalles,
+            plazos: compra.plazos,
 
             loading: false,
         });
     }
 
-    async fetchIdFactura(id) {
-        const params = {
-            idCompra: id,
-        };
-
-        const response = await detailAccountsPayableCompra(params, this.abortControllerView.signal);
-
-        if (response instanceof SuccessReponse) {
-            return response.data;
-        }
-
-        if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            return false;
-        }
+    close = () => {
+        this.props.history.goBack();
     }
 
     /*
@@ -182,36 +216,32 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
     | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
     |
-     */
+    */
 
-    handlePrintA4 = () => {
-        printJS({
-            printable: obtenerVentaPdf(this.state.idCompra, "a4"),
-            type: 'pdf',
-            showModal: true,
-            modalMessage: "Recuperando documento...",
-            onPrintDialogClose: () => {
-                console.log("onPrintDialogClose")
-            }
-        })
+    //------------------------------------------------------------------------------------------
+    // Eventos para impresión
+    //------------------------------------------------------------------------------------------
+    handlePrintInvoices = async (size) => {
+        await pdfVisualizer.init({
+            url: documentsPdfInvoicesCompra(this.state.idCompra, size),
+            title: 'Cuentas Por Pagar',
+            titlePageNumber: 'Página',
+            titleLoading: 'Cargando...',
+        });
     }
 
-    handlePrintTicket = () => {
-        printJS({
-            printable: obtenerVentaPdf(this.state.idCompra, "ticket"),
-            type: 'pdf',
-            showModal: true,
-            modalMessage: "Recuperando documento...",
-            onPrintDialogClose: () => {
-                console.log("onPrintDialogClose")
-            }
-        })
+    handlePrintAccountsPayable = async (idPlazo, size) => {
+        await pdfVisualizer.init({
+            url: documentsPdfAccountPayableCompra(idPlazo, this.state.idCompra, size),
+            title: 'Cuentas Por Pagar',
+            titlePageNumber: 'Página',
+            titleLoading: 'Cargando...',
+        });
     }
 
     //------------------------------------------------------------------------------------------
     // Eventos del modal cobro
     //------------------------------------------------------------------------------------------
-
     handleOpenModalProceso = (plazo) => {
         this.setState({ isOpenProceso: true, plazo: plazo })
     }
@@ -232,12 +262,11 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     //------------------------------------------------------------------------------------------
     // Acciones del modal terminal
     //------------------------------------------------------------------------------------------
-
     handleOpenModalTerminal = () => {
         this.setState({ isOpenTerminal: true })
     }
 
-    handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
+    handleProcessContado = (_, metodoPagosLista, notaTransacion, callback = async function () { }) => {
         const {
             idCompra,
             plazo,
@@ -245,7 +274,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             monto,
         } = this.state;
 
-        alertDialog('Cuenta por Pagar', '¿Estás seguro de continuar?', async (accept) => {
+        this.alert.dialog('Cuenta por Pagar', '¿Estás seguro de continuar?', async (accept) => {
             if (accept) {
                 const data = {
                     idCompra,
@@ -257,20 +286,19 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                 };
 
                 await callback();
-                alertInfo('Cuenta por Cobrar', 'Procesando información...');
+                this.alert.information('Cuenta por Pagar', 'Procesando información...');
 
                 const response = await createAccountsPayableCompra(data);
 
                 if (response instanceof SuccessReponse) {
-                    alertSuccess('Cuenta por Pagar', response.data, () => {
-                        this.props.history.goBack()
-                    });
+                    this.alert.close();
+                    this.handleOpenImpresion(plazo.idPlazo);
                 }
 
                 if (response instanceof ErrorResponse) {
                     if (response.getType() === CANCELED) return;
 
-                    alertWarning('Cuenta por Pagar', response.getMessage());
+                    this.alert.warning('Cuenta por Pagar', response.getMessage());
                 }
             }
         });
@@ -280,8 +308,11 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         this.setState({ isOpenTerminal: false })
     }
 
-    handleCancelPurchase = async (idPlazo, idTransaccion) => {
-        alertDialog('Cuenta por Pagar', '¿Estás seguro de anular?', async (accept) => {
+    //------------------------------------------------------------------------------------------
+    // Accion para anular el pago
+    //------------------------------------------------------------------------------------------
+    handleCancelPurchase = (idPlazo, idTransaccion) => {
+        this.alert.dialog('Cuenta por Pagar', '¿Estás seguro de anular?', async (accept) => {
             if (accept) {
                 const params = {
                     idPlazo: idPlazo,
@@ -289,22 +320,47 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                     idCompra: this.state.idCompra
                 }
 
-                alertInfo('Cuenta por Pagar', 'Procesando información...');
+                this.alert.information('Cuenta por Pagar', 'Procesando información...');
 
                 const response = await cancelAccountsPayableCompra(params);
 
                 if (response instanceof SuccessReponse) {
-                    alertSuccess('Cuenta por Pagar', response.data, () => {
-                        this.props.history.goBack()
+                    this.alert.success('Cuenta por Pagar', response.data, () => {
+                        this.close();
                     });
                 }
 
                 if (response instanceof ErrorResponse) {
                     if (response.getType() === CANCELED) return;
 
-                    alertWarning('Cuenta por Pagar', response.getMessage());
+                    this.alert.warning('Cuenta por Pagar', response.getMessage());
                 }
             }
+        });
+    }
+
+    //------------------------------------------------------------------------------------------
+    // Procesos impresión
+    //------------------------------------------------------------------------------------------
+    handleOpenImpresion = (idPlazo) => {
+        this.setState({ isOpenImpresion: true, idPlazo: idPlazo });
+    }
+
+    handlePrinterImpresion = (size) => {
+        printJS({
+            printable: documentsPdfAccountPayableCompra(this.state.idPlazo, this.state.idCompra, size),
+            type: 'pdf',
+            showModal: true,
+            modalMessage: "Recuperando documento...",
+            onPrintDialogClose: () => {
+                this.handleCloseImpresion();
+            }
+        });
+    }
+
+    handleCloseImpresion = () => {
+        this.setState({ isOpenImpresion: false }, () => {
+            this.close();
         });
     }
 
@@ -322,28 +378,28 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
     | actuales del componente para determinar lo que se mostrará.
     |
-     */
+    */
 
     renderDetalle() {
         return (
             this.state.detalles.map((item, index) => (
-                <tr key={index}>
-                    <td>{++index}</td>
-                    <td>{item.producto}</td>
-                    <td>{item.medida}</td>
-                    <td>{item.categoria}</td>
-                    <td className="text-right">{rounded(item.cantidad)}</td>
-                    <td className="text-right">{item.impuesto}</td>
-                    <td className="text-right">
+                <TableRow key={index}>
+                    <TableCell>{++index}</TableCell>
+                    <TableCell>{item.producto}</TableCell>
+                    <TableCell>{item.medida}</TableCell>
+                    <TableCell>{item.categoria}</TableCell>
+                    <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
+                    <TableCell className="text-right">{item.impuesto}</TableCell>
+                    <TableCell className="text-right">
                         {numberFormat(item.costo, this.state.codiso)}
-                    </td>
-                    <td className="text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                         {numberFormat(
                             item.cantidad * item.costo,
                             this.state.codiso,
                         )}
-                    </td>
-                </tr>
+                    </TableCell>
+                </TableRow>
             ))
         );
     }
@@ -390,32 +446,32 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
             return resultado.map((impuesto, index) => {
                 return (
-                    <tr key={index}>
-                        <th className="text-right mb-2">{impuesto.nombre} :</th>
-                        <th className="text-right mb-2">
+                    <TableRow key={index}>
+                        <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+                        <TableHead className="text-right mb-2">
                             {numberFormat(impuesto.valor, this.state.codiso)}
-                        </th>
-                    </tr>
+                        </TableHead>
+                    </TableRow>
                 );
             });
         }
 
         return (
             <>
-                <tr>
-                    <th className="text-right mb-2">SUB TOTAL :</th>
-                    <th className="text-right mb-2">
+                <TableRow>
+                    <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
+                    <TableHead className="text-right mb-2">
                         {numberFormat(subTotal, this.state.codiso)}
-                    </th>
-                </tr>
+                    </TableHead>
+                </TableRow>
                 {impuestosGenerado()}
-                <tr className="border-bottom"></tr>
-                <tr>
-                    <th className="text-right h5">TOTAL :</th>
-                    <th className="text-right h5">
+                <TableRow className="border-bottom"></TableRow>
+                <TableRow>
+                    <TableHead className="text-right h5">TOTAL :</TableHead>
+                    <TableHead className="text-right h5">
                         {numberFormat(total, this.state.codiso)}
-                    </th>
-                </tr>
+                    </TableHead>
+                </TableRow>
             </>
         );
     }
@@ -426,81 +482,82 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                 let montoActual = plazo.monto;
 
                 return <React.Fragment key={index}>
-                    <tr className="table-success">
-                        <td className="text-center">{index + 1}</td>
-                        <td>{plazo.fecha}</td>
-                        <td>{"PLAZO " + plazo.plazo}</td>
-                        <td className={`${plazo.estado === 0 ? "text-danger" : "text-success"}`}>{plazo.estado === 0 ? "Por Pagar" : "Págado"}</td>
-                        <td>{numberFormat(plazo.monto, this.state.codiso)}</td>
-                        <td className="text-center">
+                    <TableRow className="table-success">
+                        <TableCell className="text-center">{index + 1}</TableCell>
+                        <TableCell>{plazo.fecha}</TableCell>
+                        <TableCell>{"PLAZO " + plazo.plazo}</TableCell>
+                        <TableCell className={`${plazo.estado === 0 ? "text-danger" : "text-success"}`}>{plazo.estado === 0 ? "Por Pagar" : "Págado"}</TableCell>
+                        <TableCell>{numberFormat(plazo.monto, this.state.codiso)}</TableCell>
+                        <TableCell className="text-center">
                             <Button
-                                className="btn-warning btn-sm"
+                                className="btn-warning"
                                 onClick={() => this.handleOpenModalProceso(plazo)}
                                 disabled={plazo.estado === 1 ? true : false}
                             >
                                 <i className="fa fa-money"></i>
                             </Button>
-                        </td>
-                        <td className="text-center">
+                        </TableCell>
+                        <TableCell className="text-center">
                             <Button
-                                className="btn-light btn-sm"
+                                className="btn-light"
+                                onClick={this.handlePrintAccountsPayable.bind(this, plazo.idPlazo, 'A4')}
                             >
                                 <i className="fa fa-print"></i>
                             </Button>
-                        </td>
-                    </tr>
+                        </TableCell>
+                    </TableRow>
 
-                    <tr><td colSpan="7" className="pb-0">Pagos Asociados</td></tr>
-                    <tr>
-                        <th>#</th>
-                        <th>Fecha y Hora</th>
-                        <th>Concepto</th>
-                        <th colSpan={2}>Nota</th>
-                        <th>Usuario</th>
-                        <th className="text-center">Anular</th>
-                    </tr>
+                    <TableRow><td colSpan="7" className="pb-0">Pagos Asociados</td></TableRow>
+                    <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Fecha y Hora</TableHead>
+                        <TableHead>Concepto</TableHead>
+                        <TableHead colSpan={2}>Nota</TableHead>
+                        <TableHead>Usuario</TableHead>
+                        <TableHead className="text-center">Anular</TableHead>
+                    </TableRow>
                     {
                         plazo.transacciones.map((item, index) => {
                             return (
                                 <React.Fragment key={index}>
-                                    <tr className="table-secondary">
-                                        <td>{index + 1}</td>
-                                        <td>
+                                    <TableRow className="table-secondary">
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>
                                             <span>{item.fecha}</span>
                                             <br />
                                             <span>{formatTime(item.hora)}</span>
-                                        </td>
-                                        <td>{item.concepto}</td>
-                                        <td colSpan={2}>{item.nota}</td>
-                                        <td>{item.usuario}</td>
-                                        <td className="text-center">
+                                        </TableCell>
+                                        <TableCell>{item.concepto}</TableCell>
+                                        <TableCell colSpan={2}>{item.nota}</TableCell>
+                                        <TableCell>{item.usuario}</TableCell>
+                                        <TableCell className="text-center">
                                             <Button
-                                                className="btn-danger btn-sm"
+                                                className="btn-danger"
                                                 onClick={() => this.handleCancelPurchase(plazo.idPlazo, item.idTransaccion)}
                                             >
                                                 <i className="fa fa-close"></i>
                                             </Button>
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
 
-                                    <tr>
-                                        <td className=" text-center">#</td>
-                                        <td className="">Banco</td>
-                                        <td className="">Págado</td>
-                                        <td className="">Restante</td>
-                                        <td className="">Observación</td>
-                                    </tr>
+                                    <TableRow>
+                                        <TableCell className=" text-center">#</TableCell>
+                                        <TableCell className="">Banco</TableCell>
+                                        <TableCell className="">Págado</TableCell>
+                                        <TableCell className="">Restante</TableCell>
+                                        <TableCell className="">Observación</TableCell>
+                                    </TableRow>
                                     {
                                         item.detalles.map((detalle, index) => {
                                             montoActual = montoActual - detalle.monto;
                                             return (
-                                                <tr key={index}>
-                                                    <td className="text-center">{index + 1}</td>
-                                                    <td>{detalle.nombre}</td>
-                                                    <td>{numberFormat(detalle.monto, this.state.codiso)}</td>
-                                                    <td>{numberFormat(montoActual, this.state.codiso)}</td>
-                                                    <td>{detalle.observacion}</td>
-                                                </tr>
+                                                <TableRow key={index}>
+                                                    <TableCell className="text-center">{index + 1}</TableCell>
+                                                    <TableCell>{detalle.nombre}</TableCell>
+                                                    <TableCell>{numberFormat(detalle.monto, this.state.codiso)}</TableCell>
+                                                    <TableCell>{numberFormat(montoActual, this.state.codiso)}</TableCell>
+                                                    <TableCell>{detalle.observacion}</TableCell>
+                                                </TableRow>
                                             );
                                         })
                                     }
@@ -508,11 +565,11 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                             );
                         })
                     }
-                    <tr>
-                        <td colSpan="7">
+                    <TableRow>
+                        <TableCell colSpan="7">
                             <hr />
-                        </td>
-                    </tr>
+                        </TableCell>
+                    </TableRow>
                 </React.Fragment>
             })
         );
@@ -552,197 +609,218 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                     handleProcessCredito={() => { }}
                 />
 
+                <ModalImpresion
+                    refModal={this.refModalImpresion}
+                    isOpen={this.state.isOpenImpresion}
+
+                    handleClose={this.handleCloseImpresion}
+                    handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
+                    handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
+                    handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
+                />
+
                 <Title
                     title='Cuentas por Pagar'
                     subTitle='DETALLE'
-                    handleGoBack={() => this.props.history.goBack()}
+                    handleGoBack={() => this.close()}
                 />
 
                 <Row>
                     <Column formGroup={true}>
                         <Button
                             className="btn-light"
-                            onClick={this.handlePrintA4}
+                            onClick={this.handlePrintInvoices.bind(this, 'A4')}
                         >
                             <i className="fa fa-print"></i> A4
                         </Button>
                         {' '}
                         <Button
                             className="btn-light"
-                            onClick={this.handlePrintTicket}
+                            onClick={this.handlePrintInvoices.bind(this, '80mm')}
                         >
-                            <i className="fa fa-print"></i> Ticket
+                            <i className="fa fa-print"></i> 80MM
+                        </Button>
+                        {' '}
+                        <Button
+                            className="btn-light"
+                            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+                        >
+                            <i className="fa fa-print"></i> 58MM
                         </Button>
                     </Column>
                 </Row>
 
                 <Row>
                     <Column className="col-lg-6 col-md-12">
-                        <TableResponsive
-                            className={"table table-light table-striped"}
-                            tHead={
-                                <>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        <TableResponsive>
+                            <Table className="table-light table-striped">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Comprobante
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.comprobante}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Proveedor
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.cliente}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Fecha
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.fecha}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Notas
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.notas}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
-                                            Forma de compra
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
+                                            Forma de pago
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.formaPago}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Estado
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.estado}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Usuario
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.usuario}
-                                        </th>
-                                    </tr>
-                                </>
-                            }
-                        />
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                            </Table>
+                        </TableResponsive>
                     </Column>
 
                     <Column className="col-lg-6 col-md-12" formGroup={true}>
-                        <TableResponsive
-                            className={"table table-light table-striped"}
-                            tHead={
-                                <>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                        <TableResponsive>
+                            <Table className="table-light table-striped">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Numero de Plazos
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.numeroCuota}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Frecuencia
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {this.state.frecuenciaPago} DÍAS
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal ">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Total
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                             {numberFormat(this.state.total, this.state.codiso)}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Págado
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
                                             {numberFormat(this.state.cobrado, this.state.codiso)}
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th className="table-secondary w-25 p-1 font-weight-normal">
+                                        </TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                                             Por Pagar
-                                        </th>
-                                        <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
+                                        </TableHead>
+                                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
                                             {numberFormat(this.state.total - this.state.cobrado, this.state.codiso)}
-                                        </th>
-                                    </tr>
-                                </>
-                            }
-                        />
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                            </Table>
+                        </TableResponsive>
                     </Column>
                 </Row>
 
                 <Row>
                     <Column>
-                        <TableResponsive
-                            title={"Detalle"}
-                            className={"table table-light table-striped"}
-                            tHead={
-                                <tr>
-                                    <th>#</th>
-                                    <th>Concepto</th>
-                                    <th>Unidad</th>
-                                    <th>Categoría</th>
-                                    <th>Cantidad</th>
-                                    <th>Impuesto</th>
-                                    <th>Costo</th>
-                                    <th>Monto</th>
-                                </tr>
-                            }
-                            tBody={this.renderDetalle()}
-                        />
+                        <TableResponsive>
+                            <TableTitle>Detalle</TableTitle>
+                            <Table className="table table-light table-striped">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>#</TableHead>
+                                        <TableHead>Concepto</TableHead>
+                                        <TableHead>Unidad</TableHead>
+                                        <TableHead>Categoría</TableHead>
+                                        <TableHead>Cantidad</TableHead>
+                                        <TableHead>Impuesto</TableHead>
+                                        <TableHead>Costo</TableHead>
+                                        <TableHead>Monto</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {this.renderDetalle()}
+                                </TableBody>
+                            </Table>
+                        </TableResponsive>
                     </Column>
                 </Row>
 
                 <Row>
                     <Column className="col-lg-8 col-sm-12"></Column>
                     <Column className="col-lg-4 col-sm-12">
-                        <table width="100%">
-                            <thead>{this.renderTotal()}</thead>
-                        </table>
+                        <Table classNameContent='w-100'>
+                            <TableHeader>{this.renderTotal()}</TableHeader>
+                        </Table>
                     </Column>
                 </Row>
 
                 <Row>
                     <Column>
-                        <TableResponsive
-                            title={"Plazos"}
-                            className={"table table-light"}
-                            tHead={
-                                <tr className="table-primary">
-                                    <th width={"5%"}>#</th>
-                                    <th width={"10%"}>Fecha de Pago</th>
-                                    <th width={"10%"}>Plazo</th>
-                                    <th width={"10%"}>Estado</th>
-                                    <th width={"15%"}>Monto</th>
-                                    <th width={"5%"} className="text-center">Pagar</th>
-                                    <th width={"5%"} className="text-center">Imprimir</th>
-                                </tr>
-                            }
-                            tBody={this.renderPlazos()}
-                        />
+                        <TableResponsive>
+                            <TableTitle>Plazos</TableTitle>
+                            <Table className="able-light">
+                                <TableHeader className="table-primary">
+                                    <TableRow className="table-primary">
+                                        <TableHead width={"5%"}>#</TableHead>
+                                        <TableHead width={"10%"}>Fecha de Pago</TableHead>
+                                        <TableHead width={"10%"}>Plazo</TableHead>
+                                        <TableHead width={"10%"}>Estado</TableHead>
+                                        <TableHead width={"15%"}>Monto</TableHead>
+                                        <TableHead width={"5%"} className="text-center">Pagar</TableHead>
+                                        <TableHead width={"5%"} className="text-center">Imprimir</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {this.renderPlazos()}
+                                </TableBody>
+                            </Table>
+                        </TableResponsive>
                     </Column>
                 </Row>
             </ContainerWrapper>
@@ -767,12 +845,20 @@ CuentasPorPagarAmbonar.propTypes = {
     })
 };
 
+/**
+ *
+ * Método encargado de traer la información de redux
+ */
 const mapStateToProps = (state) => {
     return {
         token: state.principal,
     };
 };
 
+/**
+ *
+ * Método encargado de conectar con redux y exportar la clase
+ */
 const ConnectedCuentasPorPagarAmbonar = connect(mapStateToProps, null)(CuentasPorPagarAmbonar);
 
 export default ConnectedCuentasPorPagarAmbonar;

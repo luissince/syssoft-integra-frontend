@@ -39,6 +39,11 @@
     cursor: move; 
 }
 
+.modal-custom .sub-header-cm{
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 1rem 0rem 1rem;
+}
+
 .modal-custom .body-cm {
     position: relative;
     -ms-flex: 1 1 auto;

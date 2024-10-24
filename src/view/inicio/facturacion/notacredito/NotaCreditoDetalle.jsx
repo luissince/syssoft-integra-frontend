@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import CryptoJS from 'crypto-js';
 import {
   rounded,
   numberFormat,
@@ -145,17 +144,7 @@ class NotaCreditoDetalle extends React.Component {
   }
 
   async onEventImprimir() {
-    const data = {
-      idEmpresa: 'EM0001',
-      idNotaCredito: this.state.idNotaCredito,
-    };
-
-    let ciphertext = CryptoJS.AES.encrypt(
-      JSON.stringify(data),
-      'key-report-inmobiliaria',
-    ).toString();
-    let params = new URLSearchParams({ params: ciphertext });
-    window.open('/api/notacredito/repcomprobante?' + params, '_blank');
+   
   }
 
   render() {

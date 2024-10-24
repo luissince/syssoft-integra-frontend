@@ -22,6 +22,11 @@ import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Select from '../../../../components/Select';
+import Input from '../../../../components/Input';
+import { Switches } from '../../../../components/Checks';
+import RadioButton from '../../../../components/RadioButton';
 
 class ComporbanteAgregar extends CustomComponent {
   constructor(props) {
@@ -29,7 +34,7 @@ class ComporbanteAgregar extends CustomComponent {
     this.state = {
       loading: true,
       msgLoading: 'Cargando datos...',
-      
+
       idTipoComprobante: '',
       nombre: '',
       serie: '',
@@ -40,6 +45,7 @@ class ComporbanteAgregar extends CustomComponent {
       preferida: false,
       numeroCampo: '',
       facturado: false,
+      creditoFiscal: false,
       anulacion: "0",
 
       tipoComprobante: [],
@@ -141,6 +147,7 @@ class ComporbanteAgregar extends CustomComponent {
             numeroCampo:
               this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
             facturado: this.state.facturado,
+            creditoFiscal: this.state.creditoFiscal,
             anulacion: this.state.anulacion,
             idSucursal: this.state.idSucursal,
             idUsuario: this.state.idUsuario,
@@ -174,150 +181,113 @@ class ComporbanteAgregar extends CustomComponent {
 
         <Title
           title='Comprobante'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <label htmlFor="estado">
-                Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <select
-                className="form-control"
-                id="estado"
-                ref={this.refTipo}
-                value={this.state.idTipoComprobante}
-                onChange={(event) => {
-                  this.setState({ idTipoComprobante: event.target.value });
-                }}
-              >
-                <option value="">- Seleccione -</option>
-                {this.state.tipoComprobante.map((item, index) => (
-                  <option key={index} value={item.idTipoComprobante}>
-                    {item.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <div className="form-group">
-              <label htmlFor="nombre" className="col-form-label">
-                Nombre <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Ingresar el nombre del comprobante"
-                id="nombre"
-                ref={this.refNombre}
-                value={this.state.nombre}
-                onChange={(event) =>
-                  this.setState({ nombre: event.target.value })
-                }
-              />
-            </div>
-          </Column>
-        </Row>
-
-        <Row>
-          <div className="form-group col-md-6">
-            <label htmlFor="serie">
-              Serie <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
+          <Column formGroup={true}>
+            <Select
+              group={true}
+              label={<>Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i></>}
               className="form-control"
-              id="serie"
+              id="estado"
+              refSelect={this.refTipo}
+              value={this.state.idTipoComprobante}
+              onChange={(event) => {
+                this.setState({ idTipoComprobante: event.target.value });
+              }}
+            >
+              <option value="">- Seleccione -</option>
+              {this.state.tipoComprobante.map((item, index) => (
+                <option key={index} value={item.idTipoComprobante}>
+                  {item.nombre}
+                </option>
+              ))}
+            </Select>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <Input
+              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Ingresar el nombre del comprobante"
+              refInput={this.refNombre}
+              value={this.state.nombre}
+              onChange={(event) =>
+                this.setState({ nombre: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className='col-md-6' formGroup={true}>
+            <Input
+              label={<>Serie: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder={'B001, F001'}
-              ref={this.refSerie}
+              refInput={this.refSerie}
               value={this.state.serie}
               onChange={(event) => this.setState({ serie: event.target.value })}
             />
-          </div>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label htmlFor="numeracion">
-              Numeración <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="numeracion"
+          <Column className='col-md-6' formGroup={true}>
+            <Input
+              label={<>Numeración:<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder={'1, 2, 3'}
-              ref={this.refNumeracion}
+              refInput={this.refNumeracion}
               value={this.state.numeracion}
               onChange={(event) =>
                 this.setState({ numeracion: event.target.value })
               }
               onKeyDown={keyNumberInteger}
             />
-          </div>
+          </Column>
         </Row>
 
         <Row>
-          <div className="form-group col-md-6">
-            <label htmlFor="numeracion">Caracteres a Usar</label>
-            <input
-              ref={this.refNumeroCampo}
-              type="text"
-              className="form-control"
-              id="numeracion"
+          <Column className='col-md-6' formGroup={true}>
+            <Input
+              label={<>Caracteres a Usar:</>}
               placeholder={'0, 8, 11'}
+              refInput={this.refNumeroCampo}
               value={this.state.numeroCampo}
               onChange={(event) =>
                 this.setState({ numeroCampo: event.target.value })
               }
               onKeyDown={keyNumberInteger}
             />
-          </div>
+          </Column>
         </Row>
 
         <Row>
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Estado:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbEstado"
-                checked={this.state.estado}
-                onChange={(value) =>
-                  this.setState({ estado: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="cbEstado">
-                {this.state.estado ? 'Activo' : 'Inactivo'}
-              </label>
-            </div>
-          </div>
+          <Column className='col-md-6' formGroup={true}>
+            <Switches
+              label={"Estado:"}
+              id={"cbEstado"}
+              checked={this.state.estado}
+              onChange={(value) =>
+                this.setState({ estado: value.target.checked })
+              }
+            >
+              {this.state.estado ? 'Activo' : 'Inactivo'}
+            </Switches>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Preferido:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbPreferido"
-                checked={this.state.preferida}
-                onChange={(value) =>
-                  this.setState({ preferida: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="cbPreferido">
-                {this.state.preferida ? "Si" : "No"}
-              </label>
-            </div>
-          </div>
+          <Column className='col-md-6' formGroup={true}>
+            <Switches
+              label={"Preferido:"}
+              id={"cbPreferido"}
+              checked={this.state.preferida}
+              onChange={(value) =>
+                this.setState({ preferida: value.target.checked })
+              }
+            >
+              {this.state.preferida ? "Si" : "No"}
+            </Switches>
+          </Column>
         </Row>
 
         <div className="dropdown-divider"></div>
@@ -325,135 +295,118 @@ class ComporbanteAgregar extends CustomComponent {
         <h6>Opciones de Facturación</h6>
 
         <Row>
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              El comporbante va ser enviado a Sunat:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="cbFacturado"
-                checked={this.state.facturado}
-                onChange={(value) =>
-                  this.setState({ facturado: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="cbFacturado">
-                {this.state.facturado ? "Si" : "No"}
-              </label>
-            </div>
-          </div>
+          <Column className='col-md-6' formGroup={true}>
+            <Switches
+              label={"El comprobante será declarado ante la SUNAT:"}
+              id={"cbFacturado"}
+              checked={this.state.facturado}
+              onChange={(value) =>
+                this.setState({ facturado: value.target.checked })
+              }
+            >
+              {this.state.facturado ? "Si" : "No"}
+            </Switches>
+          </Column>
 
-          <div className="form-group col-md-6">
+          <Column className='col-md-6' formGroup={true}>
+            <Switches
+              label={"El comprobante será utilizado para el calculo de Crédito Fiscal."}
+              id={"cbCreditoFiscal"}
+              checked={this.state.creditoFiscal}
+              onChange={(value) =>
+                this.setState({ creditoFiscal: value.target.checked })
+              }
+            >
+              {this.state.creditoFiscal ? "Si" : "No"}
+            </Switches>
+          </Column>
+        </Row>
+
+        <Row>
+
+          <Column className='col-md-6' formGroup={true}>
             <label htmlFor="nombre" className="col-form-label">
               Formas de anulación:
             </label>
-            
+
             <Row>
               <Column>
-                <div className="form-check form-check-inline pr-5">
-                  <input
-                    className="form-check-input checked"
-                    type="radio"
-                    name="inlineRadioOptions"
-                    id={"1"}
-                    value={"1"}
-                    checked={this.state.anulacion === "1"}
-                    onChange={(event) => {
-                      this.setState({
-                        anulacion: event.target.value
-                      })
-                    }}
-                  />
-                  <label className="form-check-label" htmlFor={"1"}>
-                    {' '}
-                    Comunicación de baja
-                  </label>
-                </div>
+                <RadioButton
+                  className='form-check-inline'
+                  name='inlineRadioOptions'
+                  id={"1"}
+                  value={"1"}
+                  checked={this.state.anulacion === "1"}
+                  onChange={(event) => {
+                    this.setState({
+                      anulacion: event.target.value
+                    })
+                  }}
+                >
+                  Comunicación de baja
+                </RadioButton>
               </Column>
 
               <Column>
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="inlineRadioOptions"
-                    id={"2"}
-                    value={"2"}
-                    checked={this.state.anulacion === "2"}
-                    onChange={(event) => {
-                      this.setState({
-                        anulacion: event.target.value
-                      })
-                    }}
-                  />
-                  <label className="form-check-label" htmlFor={"2"}>
-                    {' '}
-                    Resumen diario
-                  </label>
-                </div>
+                <RadioButton
+                  className='form-check-inline'
+                  name='inlineRadioOptions'
+                  id={"2"}
+                  value={"2"}
+                  checked={this.state.anulacion === "2"}
+                  onChange={(event) => {
+                    this.setState({
+                      anulacion: event.target.value
+                    })
+                  }}
+                >
+                  Resumen diario
+                </RadioButton>
               </Column>
             </Row>
-          </div>
-        </Row>
-
-        <Row>
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label htmlFor="impresion" className="col-form-label">
-                Nombre de Impresión:
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="impresion"
-                placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
-                value={this.state.impresion}
-                onChange={(event) =>
-                  this.setState({ impresion: event.target.value })
-                }
-              />
-            </div>
-          </Column>
-
-          <Column className={"col-md-6"}>
-            <div className="form-group">
-              <label htmlFor="codigo" className="col-form-label">
-                Código:
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="codigo"
-                placeholder='01, 06'
-                value={this.state.codigo}
-                onChange={(event) =>
-                  this.setState({ codigo: event.target.value })
-                }
-              />
-            </div>
           </Column>
         </Row>
 
         <Row>
-          <Column>
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.handleGuardar}
-              >
-                <i className='fa fa-save'></i>  Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                <i className='fa fa-close'></i>  Cerrar
-              </button>
-            </div>
+          <Column className={"col-md-6"} formGroup={true}>
+            <Input
+              label={<> Nombre de Impresión:</>}
+              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
+              value={this.state.impresion}
+              onChange={(event) =>
+                this.setState({ impresion: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6"} formGroup={true}>
+            <Input
+              label={<> Código:</>}
+              placeholder='01, 06'
+              value={this.state.codigo}
+              onChange={(event) =>
+                this.setState({ codigo: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              type="button"
+              className="btn btn-primary"
+              onClick={this.handleGuardar}
+            >
+              <i className='fa fa-save'></i>  Guardar
+            </Button>{' '}
+            <Button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i>  Cerrar
+            </Button>
           </Column>
         </Row>
       </ContainerWrapper>

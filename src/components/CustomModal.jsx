@@ -22,6 +22,9 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
+/**
+ * Clase principal encarga de mostrar el modal y su partes.
+ */
 class CustomModal extends Component {
   constructor(props) {
     super(props);
@@ -71,7 +74,7 @@ class CustomModal extends Component {
   };
 
   render() {
-    const { isOpen, onOpen, onHidden, contentLabel, className, children } = this.props;
+    const { isOpen, onOpen, onHidden, contentLabel, className, shouldCloseOnEsc, children } = this.props;
     return (
       <Modal
         contentRef={(ref) => this.modalRef.current = ref}
@@ -83,7 +86,7 @@ class CustomModal extends Component {
         className={`modal-custom ${className}`}
         shouldCloseOnOverlayClick={false}
         shouldReturnFocusAfterClose={true}
-        shouldCloseOnEsc={true}
+        shouldCloseOnEsc={shouldCloseOnEsc}
         contentLabel={contentLabel}
       >
         {children}
@@ -93,85 +96,14 @@ class CustomModal extends Component {
 }
 
 CustomModal.propTypes = {
-  contentRef: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   onOpen: PropTypes.func,
   onHidden: PropTypes.func,
   onClose: PropTypes.func.isRequired,
   contentLabel: PropTypes.string.isRequired,
   className: PropTypes.string,
+  shouldCloseOnEsc: PropTypes.bool,
   children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
-}
-
-export const CustomModalContent = ({
-  contentRef,
-  isOpen,
-  onOpen,
-  onHidden,
-  onClose,
-  contentLabel,
-  titleHeader,
-  className,
-  body,
-  classNameBody,
-  footer,
-  classNameFooter
-}) => {
-  return (
-    <CustomModal
-      ref={contentRef}
-      isOpen={isOpen}
-      onOpen={onOpen}
-      onHidden={onHidden}
-      onClose={onClose}
-      contentLabel={contentLabel}
-      className={className}
-    >
-      <div className='d-flex flex-column h-100'>
-        <div className="header-cm" onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
-          <p className='m-0 h6'>{titleHeader}</p>
-          <Button
-            contentClassName='close'
-            onClick={async () => await contentRef.current.handleOnClose()}>
-            <span aria-hidden="true">×</span>
-          </Button>
-        </div>
-        <div className={`body-cm ${classNameBody}`}>
-          <div className='d-flex w-100 h-100'>
-            <div className='d-flex flex-column' style={{ flex: "1 1 0%" }}>
-              <div className='h-100 overflow-auto'>
-                <div className='h-100'>
-                  {body}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {
-          footer && (
-            <div className={`${classNameFooter ? classNameFooter : "footer-cm"}`}>
-              {footer}
-            </div>
-          )
-        }
-      </div>
-    </CustomModal>
-  );
-}
-
-CustomModalContent.propTypes = {
-  contentRef: PropTypes.object.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  onOpen: PropTypes.func,
-  onHidden: PropTypes.func,
-  onClose: PropTypes.func.isRequired,
-  contentLabel: PropTypes.string.isRequired,
-  titleHeader: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
-  classNameBody: PropTypes.string,
-  footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
-  classNameFooter: PropTypes.string
 }
 
 export const CustomModalForm = ({
@@ -182,7 +114,9 @@ export const CustomModalForm = ({
   onClose,
   contentLabel,
   titleHeader,
+  showClose = true,
   className,
+  isCloseOnEsc,
   body,
   footer,
   classNameFooter,
@@ -197,6 +131,7 @@ export const CustomModalForm = ({
       onClose={onClose}
       contentLabel={contentLabel}
       className={className}
+      shouldCloseOnEsc={isCloseOnEsc}
     >
       <form
         className='d-flex flex-column h-100'
@@ -224,13 +159,13 @@ export const CustomModalForm = ({
           }
         }}
       >
-        <div className="header-cm" onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
+        <div className={`header-cm ${!showClose ? 'py-3' : ''}`} onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
           <p className='m-0 h6'>{titleHeader}</p>
-          <Button
+          {showClose && <Button
             contentClassName='close'
             onClick={async () => await contentRef.current.handleOnClose()}>
-            <span aria-hidden="true">×</span>
-          </Button>
+            <span>×</span>
+          </Button>}
         </div>
         <div className="body-cm">
           {body}
@@ -255,11 +190,184 @@ CustomModalForm.propTypes = {
   onClose: PropTypes.func.isRequired,
   contentLabel: PropTypes.string.isRequired,
   titleHeader: PropTypes.string.isRequired,
+  showClose: PropTypes.bool,
   onSubmit: PropTypes.func,
   className: PropTypes.string,
+  isCloseOnEsc: PropTypes.bool,
   body: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
   footer: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]),
   classNameFooter: PropTypes.string
+}
+
+export const CustomModalContentForm = (props) => {
+  const { className = '', onSubmit, children } = props;
+
+  return (
+    <form
+      className={`d-flex flex-column h-100 ${className}`}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+      onKeyDown={(event) => {
+        if (event.target.role === 'float') {
+          keyNumberFloat(event, () => {
+            onSubmit();
+          });
+        }
+
+        if (event.target.role === 'integer') {
+          keyNumberInteger(event, () => {
+            onSubmit();
+          });
+        }
+
+        if (event.target.role === 'phone') {
+          keyNumberPhone(event, () => {
+            onSubmit();
+          });
+        }
+      }}
+    >
+      {children}
+    </form>
+  );
+}
+
+CustomModalContentForm.propTypes = {
+  className: PropTypes.string,
+  onSubmit: PropTypes.func,
+  children: PropTypes.node
+}
+
+export const CustomModalContentScroll = (props) => {
+  const { className = '', children } = props;
+
+  return (
+    <div className={`d-flex flex-column h-100 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+CustomModalContentScroll.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node
+}
+
+/**
+ * Ubicación: Parte supeior del modal.
+ * Cotenido: Normalmente incluye el título en el lado izquierdo y un bitón de cerrar (iconode "X") en el lado derecho.
+ * @param {*} props 
+ * @returns 
+ */
+export const CustomModalContentHeader = (props) => {
+  const { showClose = true, className = '', contentRef, children } = props;
+  return (
+    <div
+      className={`header-cm ${className}`}
+      onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
+      <p className='m-0 h6'>{children}</p>
+      {
+        showClose && <Button
+          contentClassName='close'
+          onClick={async () => await contentRef.current.handleOnClose()}>
+          <span>×</span>
+        </Button>
+      }
+    </div>
+  );
+}
+
+CustomModalContentHeader.propTypes = {
+  contentRef: PropTypes.object.isRequired,
+  className: PropTypes.string,
+  showClose: PropTypes.bool,
+  children: PropTypes.node,
+}
+
+/**
+ * Ubicación: Debajo del header principal, si es necesario.
+ * Contenido: Aquí puedes poner filtros, campos de búsqueda, o campos de opciones como inputs o selectores.
+ * @param {*} props 
+ * @returns 
+ */
+export const CustomModalContentSubHeader = (props) => {
+  const { className = '', children } = props;
+  return (
+    <div
+      className={`sub-header-cm ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+CustomModalContentSubHeader.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+}
+
+/**
+ * Ubicación: Parte central o principal del modal.
+ * Contenido: Generalmente contiene el formulario, una tabla, o el contenido principal que el modal necesita mostrar.
+ * @param {*} props 
+ * @returns 
+ */
+export const CustomModalContentBody = (props) => {
+  const { className = '', children } = props;
+
+  return (
+    <div className={`body-cm ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+CustomModalContentBody.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+}
+
+export const CustomModalContentOverflow = (props) => {
+  const { className = '', children } = props;
+
+  return (
+    <div className={`d-flex w-100 h-100 ${className}`}>
+      <div className='d-flex flex-column' style={{ flex: "1 1 0%" }}>
+        <div className='h-100 overflow-auto'>
+          <div className='h-100'>
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+CustomModalContentOverflow.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node
+}
+
+/**
+ * Ubicación: Parte inferior del modal.
+ * Contenido: Botones de acción, como "Aceptar", "Cancelar", "Guardar", o cualquier otra acción relevante.
+ * @param {*} props 
+ * @returns 
+ */
+export const CustomModalContentFooter = (props) => {
+  const { className = '', children } = props;
+
+  return (
+    <div className={`${className ? className : "footer-cm"}`}>
+      {children}
+    </div>
+  );
+}
+
+CustomModalContentFooter.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node
 }
 
 export default CustomModal;

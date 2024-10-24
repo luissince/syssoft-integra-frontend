@@ -134,15 +134,19 @@ export class ContainerMenu extends React.Component {
               "rowGap": "20px"
             }}>
             {
-              this.state.subMenus.map((item, index) => (
-                <ButtonMenu
-                  key={index}
-                  title={item.nombre}
-                  icon={item.icon}
-                  category={"Módulo"}
-                  path={`${this.props.url}/${item.ruta}`}
-                />
-              ))
+              this.state.subMenus.map((item, index) => {
+                if (item.estado === 0) return null;
+
+                return (
+                  <ButtonMenu
+                    key={index}
+                    title={item.nombre}
+                    icon={item.icon}
+                    category={"Módulo"}
+                    path={`${this.props.url}/${item.ruta}`}
+                  />
+                );
+              })
             }
           </div>
         </div>

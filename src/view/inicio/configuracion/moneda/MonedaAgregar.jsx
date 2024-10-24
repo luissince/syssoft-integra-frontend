@@ -94,7 +94,7 @@ class MonedaAgregar extends CustomComponent {
 
         <Title
           title='Moneda'
-          subTitle='Agregar'
+          subTitle='AGREGAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

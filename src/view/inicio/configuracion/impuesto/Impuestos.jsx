@@ -247,7 +247,7 @@ class Impuestos extends CustomComponent {
       <ContainerWrapper>
         <Title
           title='Impuestos'
-          subTitle='Lista'
+          subTitle='LISTA'
         />
 
         <div className="row">

@@ -2,6 +2,25 @@ import { ContainerMenu } from "../../../components/Container";
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 
+import RepVentas from './RepVentas.jsx';
+import RepCompras from './RepCompras.jsx';
+import RepFinanciero from './RepFinanciero.jsx';
+import RepProductos from './RepProductos.jsx';
+import RepClientes from './RepClientes.jsx';
+import RepProveedores from './RepProveedores.jsx';
+import RepCpeSunat from './RepCpeSunat.jsx';
+
+export {
+    RepVentas,
+    RepCompras,
+    RepFinanciero,
+    RepProductos,
+    RepClientes,
+    RepProveedores,
+    RepCpeSunat,
+}
+
+
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component

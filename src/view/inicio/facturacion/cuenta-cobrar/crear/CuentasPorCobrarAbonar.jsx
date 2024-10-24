@@ -1,10 +1,6 @@
 import ContainerWrapper from "../../../../../components/Container";
 import CustomComponent from "../../../../../model/class/custom-component";
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   formatTime,
@@ -13,7 +9,7 @@ import {
   rounded
 } from "../../../../../helper/utils.helper";
 import PropTypes from 'prop-types';
-import { cancelAccountsReceivableVenta, createAccountsReceivableVenta, detailAccountsReceivableVenta, obtenerVentaPdf } from "../../../../../network/rest/principal.network";
+import { cancelAccountsReceivableVenta, createAccountsReceivableVenta, detailAccountsReceivableVenta, documentsPdfAccountReceivableVenta, documentsPdfInvoicesVenta } from "../../../../../network/rest/principal.network";
 import SuccessReponse from "../../../../../model/class/response";
 import ErrorResponse from "../../../../../model/class/error-response";
 import { CANCELED } from "../../../../../model/types/types";
@@ -29,6 +25,9 @@ import { connect } from "react-redux";
 import Title from "../../../../../components/Title";
 import Button from "../../../../../components/Button";
 import ModalTransaccion from "../../../../../components/ModalTransaccion";
+import SweetAlert from "../../../../../model/class/sweet-alert";
+import pdfVisualizer from "pdf-visualizer";
+import { ModalImpresion } from "../../../../../components/MultiModal";
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -64,7 +63,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       detalles: [],
       cuotas: [],
 
-      // Atributos del mdaol de cobro
+      // Atributos del modal de cobro
       isOpenProceso: false,
       cuota: null,
       monto: 0,
@@ -72,13 +71,22 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       // Atributos del modal cobrar
       isOpenTerminal: false,
 
+      // Atributos del modal impresión
+      isOpenImpresion: false,
+      idCuota: '',
+
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.alert = new SweetAlert();
+
     // Referencia del modal proceso
     this.refModalProceso = React.createRef();
+
+    // Referencia para el modal impresión
+    this.refModalImpresion = React.createRef();
 
     //Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -104,7 +112,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     if (isText(idVenta)) {
       await this.loadingData(idVenta);
     } else {
-      this.props.history.goBack();
+      this.close();
     }
   }
 
@@ -112,10 +120,38 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     this.abortControllerView.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   async loadingData(id) {
-    const [factura] = await Promise.all([
-      this.fetchIdFactura(id),
-    ]);
+    const params = {
+      idVenta: id,
+    };
+
+    const response = await detailAccountsReceivableVenta(params, this.abortControllerView.signal);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.alert.warning('Cuenta por Cobrar', response.getMessage(), () => {
+        this.close();
+      });
+      return;
+    }
+
+    response instanceof SuccessReponse;
+    const venta = response.data;
 
     const {
       comprobante,
@@ -132,7 +168,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       simbolo,
       codiso,
       usuario,
-    } = factura.cabecera;
+    } = venta.cabecera;
 
     const nuevoEstado = estado === 1 ? <span className="text-success">COBRADO</span> : estado === 2 ? <span className="text-warning">POR COBRAR</span> : estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
 
@@ -152,32 +188,18 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       codiso: codiso,
       usuario: usuario,
 
-      total: factura.resumen[0].total,
-      cobrado: factura.resumen[0].cobrado,
+      total: venta.resumen[0].total,
+      cobrado: venta.resumen[0].cobrado,
 
-      detalles: factura.detalles,
-      cuotas: factura.cuotas,
+      detalles: venta.detalles,
+      cuotas: venta.cuotas,
 
       loading: false,
     });
   }
 
-  async fetchIdFactura(id) {
-    const params = {
-      idVenta: id,
-    };
-
-    const response = await detailAccountsReceivableVenta(params, this.abortControllerView.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return false;
-    }
+  close = () => {
+    this.props.history.goBack();
   }
 
   /*
@@ -196,28 +218,26 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   |
    */
 
-  handlePrintA4 = () => {
-    printJS({
-      printable: obtenerVentaPdf(this.state.idVenta, "a4"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
+
+  //------------------------------------------------------------------------------------------
+  // Eventos para impresión
+  //------------------------------------------------------------------------------------------
+  handlePrintInvoices = async (size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfInvoicesVenta(this.state.idVenta, size),
+      title: 'Cuentas Por Cobrar',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
-  handlePrintTicket = () => {
-    printJS({
-      printable: obtenerVentaPdf(this.state.idVenta, "ticket"),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: "Recuperando documento...",
-      onPrintDialogClose: () => {
-        console.log("onPrintDialogClose")
-      }
-    })
+  handlePrintAccountsPayable = async (idCuota, size) => {
+    await pdfVisualizer.init({
+      url: documentsPdfAccountReceivableVenta(idCuota, this.state.idVenta, size),
+      title: 'Cuentas Por Cobrar',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -249,7 +269,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     this.setState({ isOpenTerminal: true })
   }
 
-  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
+  handleProcessContado = (_, metodoPagosLista, notaTransacion, callback = async function () { }) => {
     const {
       idVenta,
       cuota,
@@ -257,7 +277,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       monto,
     } = this.state;
 
-    alertDialog('Cuenta por Cobrar', '¿Estás seguro de continuar?', async (accept) => {
+    this.alert.dialog('Cuenta por Cobrar', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
 
@@ -270,20 +290,19 @@ class CuentasPorCobrarAbonar extends CustomComponent {
         };
 
         await callback();
-        alertInfo('Cuenta por Cobrar', 'Procesando información...');
+        this.alert.information('Cuenta por Cobrar', 'Procesando información...');
 
         const response = await createAccountsReceivableVenta(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cuenta por Cobrar', response.data, () => {
-            this.props.history.goBack()
-          });
+          this.alert.close();
+          this.handleOpenImpresion(cuota.idCuota);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Cuenta por Cobrar', response.getMessage());
+          this.alert.warning('Cuenta por Cobrar', response.getMessage());
         }
       }
     });
@@ -293,8 +312,11 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     this.setState({ isOpenTerminal: false })
   }
 
+  //------------------------------------------------------------------------------------------
+  // Accion para anular el cobro
+  //------------------------------------------------------------------------------------------
   handleCancelSale = async (idCuota, idTransaccion) => {
-    alertDialog('Cuenta por Cobrar', '¿Estás seguro de anular?', async (accept) => {
+    this.alert.dialog('Cuenta por Cobrar', '¿Estás seguro de anular?', async (accept) => {
       if (accept) {
         const params = {
           idCuota: idCuota,
@@ -302,22 +324,47 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           idVenta: this.state.idVenta
         }
 
-        alertInfo('Cuenta por Cobrar', 'Procesando información...');
+        this.alert.information('Cuenta por Cobrar', 'Procesando información...');
 
         const response = await cancelAccountsReceivableVenta(params);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Cuenta por Cobrar', response.data, () => {
-            this.props.history.goBack()
+          this.alert.success('Cuenta por Cobrar', response.data, () => {
+            this.close();
           });
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Cuenta por Cobrar', response.getMessage());
+          this.alert.warning('Cuenta por Cobrar', response.getMessage());
         }
       }
+    });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Procesos impresión
+  //------------------------------------------------------------------------------------------
+  handleOpenImpresion = (idCuota) => {
+    this.setState({ isOpenImpresion: true, idCuota: idCuota });
+  }
+
+  handlePrinterImpresion = (size) => {
+    printJS({
+      printable: documentsPdfAccountReceivableVenta(this.state.idCuota, this.state.idVenta, size),
+      type: 'pdf',
+      showModal: true,
+      modalMessage: "Recuperando documento...",
+      onPrintDialogClose: () => {
+        this.handleCloseImpresion();
+      }
+    });
+  }
+
+  handleCloseImpresion = () => {
+    this.setState({ isOpenImpresion: false }, () => {
+      this.close();
     });
   }
 
@@ -445,7 +492,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
             <TableCell>{numberFormat(cuota.monto, this.state.codiso)}</TableCell>
             <TableCell className="text-center">
               <Button
-                className="btn-warning btn-sm"
+                className="btn-warning"
                 onClick={() => this.handleOpenModalProceso(cuota)}
                 disabled={cuota.estado === 1 ? true : false}
               >
@@ -454,7 +501,8 @@ class CuentasPorCobrarAbonar extends CustomComponent {
             </TableCell>
             <TableCell className="text-center">
               <Button
-                className="btn-light btn-sm"
+                className="btn-light"
+                onClick={this.handlePrintAccountsPayable.bind(this, cuota.idCuota, 'A4')}
               >
                 <i className="fa fa-print"></i>
               </Button>
@@ -486,7 +534,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
                     <TableCell>{item.usuario}</TableCell>
                     <TableCell className="text-center">
                       <Button
-                        className="btn-danger btn-sm"
+                        className="btn-danger"
                         onClick={() => this.handleCancelSale(cuota.idCuota, item.idTransaccion)}
                       >
                         <i className="fa fa-close"></i>
@@ -564,26 +612,43 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           handleProcessCredito={() => { }}
         />
 
+        <ModalImpresion
+          refModal={this.refModalImpresion}
+          isOpen={this.state.isOpenImpresion}
+
+          handleClose={this.handleCloseImpresion}
+          handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
+          handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
+          handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
+        />
+
         <Title
           title='Cuentas por Cobrar'
           subTitle='DETALLE'
-          handleGoBack={() => this.props.history.goBack()}
+          handleGoBack={() => this.close()}
         />
 
         <Row>
           <Column formGroup={true}>
             <Button
               className="btn-light"
-              onClick={this.handlePrintA4}
+              onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
             </Button>
             {' '}
             <Button
               className="btn-light"
-              onClick={this.handlePrintTicket}
+              onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
-              <i className="fa fa-print"></i> Ticket
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handlePrintInvoices.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
             </Button>
           </Column>
         </Row>
@@ -594,7 +659,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
               <Table className="table-light table-striped">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Comprobante
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
@@ -732,7 +797,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
         <Row>
           <Column className="col-lg-8 col-sm-12"></Column>
           <Column className="col-lg-4 col-sm-12">
-            <Table>
+            <Table classNameContent='w-100'>
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>

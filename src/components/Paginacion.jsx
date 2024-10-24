@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Row from './Row';
+import Column from './Column';
+import Button from './Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -124,13 +127,13 @@ class Paginacion extends React.Component {
                 {number}
               </span>
             ) : (
-              <button
+              <Button
                 id={number}
-                className="page-link"
+                contentClassName="page-link"
                 onClick={this.handleClick}
               >
                 {number}
-              </button>
+              </Button>
             )}
           </li>
         );
@@ -143,10 +146,10 @@ class Paginacion extends React.Component {
     if (this.lowerPageBound >= 1) {
       pageDecrementBtn = (
         <li className="page-item">
-          <button className="page-link" onClick={this.btnDecrementClick}>
+          <Button contentClassName="page-link" onClick={this.btnDecrementClick}>
             {' '}
             &hellip;{' '}
-          </button>
+          </Button>
         </li>
       );
     }
@@ -155,10 +158,10 @@ class Paginacion extends React.Component {
     if (pageNumbers.length > this.upperPageBound) {
       pageIncrementBtn = (
         <li className="page-item">
-          <button className="page-link" onClick={this.btnIncrementClick}>
+          <Button contentClassName="page-link" onClick={this.btnIncrementClick}>
             {' '}
             &hellip;{' '}
-          </button>
+          </Button>
         </li>
       );
     }
@@ -173,10 +176,10 @@ class Paginacion extends React.Component {
     } else {
       renderPrevBtn = (
         <li className="page-item">
-          <button className="page-link" onClick={this.btnPrevClick}>
+          <Button contentClassName="page-link" onClick={this.btnPrevClick}>
             {' '}
             Ante.{' '}
-          </button>
+          </Button>
         </li>
       );
     }
@@ -191,24 +194,22 @@ class Paginacion extends React.Component {
     } else {
       renderNextBtn = (
         <li className="page-item">
-          <button className="page-link" onClick={this.btnNextClick}>
+          <Button contentClassName="page-link" onClick={this.btnNextClick}>
             {' '}
             Sigui.{' '}
-          </button>
+          </Button>
         </li>
       );
     }
 
     return (
-      <div className={`row ${className}`}>
-        <div className="col-sm-12 col-md-5">
-          <div
-            className="d-flex h-100 align-items-center"
-          >
-            {this.messagePaginacion}
+      <Row className={`${className}`}>
+        <Column className="col-sm-12 col-md-5">
+          <div className="d-flex h-100 align-items-center">
+            <span className='text-sm'>{this.messagePaginacion}</span>
           </div>
-        </div>
-        <div className="col-sm-12 col-md-7">
+        </Column>
+        <Column className="col-sm-12 col-md-7">
           <div className="d-flex justify-content-end">
             <nav aria-label="Page">
               <ul className="pagination m-0">
@@ -220,8 +221,8 @@ class Paginacion extends React.Component {
               </ul>
             </nav>
           </div>
-        </div>
-      </div>
+        </Column>
+      </Row>
     );
   }
 }

@@ -140,7 +140,7 @@ class VehiculoEditar extends CustomComponent {
 
         <Title
           title='Vehículo'
-          subTitle='Editar'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 

@@ -1,5 +1,21 @@
 import PropTypes from 'prop-types';
 
+/**
+ * 
+ * @param {*} param0 
+ * @returns 
+ * Example:
+    <RadioButton
+        className='form-check-inline'
+        name='ckTipoCliente'
+        id={CLIENTE_NATURAL}
+        value={CLIENTE_NATURAL}
+        checked={idTipoCliente === CLIENTE_NATURAL}
+        onChange={this.handleTipoCliente}
+    >
+        <i className="bi bi-person"></i> Persona Natural
+    </RadioButton>
+ */
 const RadioButton = ({
     autoFocus,
     id,

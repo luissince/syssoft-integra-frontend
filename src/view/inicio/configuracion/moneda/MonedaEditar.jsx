@@ -158,7 +158,7 @@ class MonedaEditar extends CustomComponent {
 
         <Title
           title='Moneda'
-          subTitle='Editar'
+          subTitle='EDITAR'
           handleGoBack={() => this.props.history.goBack()}
         />
 
