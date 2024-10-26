@@ -11,6 +11,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         include:
           # Producción (master)
           - environment: legrand-tiquepos
@@ -39,7 +40,7 @@ jobs:
           - environment: desarrollo
             service: sysintegra-services
             branch: test
-
+    
     environment: ${{ matrix.environment }}
       
     env:  
@@ -52,10 +53,10 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v3
       
-      - if: github.ref == 'refs/heads/test'
-        name: Probando if
-        run: echo "Hola mundo ${{ github.ref}} refs/heads/${{ matrix.branch }}"
-      
+      - name: Deploy if Node.js 16 and Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: echo "Deploying with Node.js 16 on Ubuntu"
+
       - name: Crear archivo .env
         if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
