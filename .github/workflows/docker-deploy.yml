@@ -40,7 +40,6 @@ jobs:
             service: sysintegra-services
             branch: test
 
-    if: github.ref == 'refs/heads/${{ matrix.branch }}'
     environment: ${{ matrix.environment }}
       
     env:  
@@ -48,12 +47,13 @@ jobs:
       VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
       VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
       VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
-      
+    
     steps:
       - name: Checkout código
         uses: actions/checkout@v3
       
       - name: Crear archivo .env
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
@@ -63,4 +63,5 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker compose -f docker-compose.yml up --build ${{ matrix.service}} -d
