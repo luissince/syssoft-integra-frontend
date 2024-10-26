@@ -52,6 +52,10 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v3
       
+      - if: github.ref == 'refs/heads/${{ matrix.branch }}'
+        name: Probando if
+        run: echo "Hola mundo ${{ github.ref}} refs/heads/${{ matrix.branch }}"
+      
       - name: Crear archivo .env
         if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
@@ -64,5 +68,5 @@ jobs:
       
       - name: Creando y ejecutando contenedor
         if: github.ref == 'refs/heads/${{ matrix.branch }}'
-        run: echo "Hola mundo ${{ github.ref}} 'refs/heads/${{ matrix.branch }}'"
+        run: echo "Hola mundo ${{ github.ref}} refs/heads/${{ matrix.branch }}"
         # run: docker compose -f docker-compose.yml up --build ${{ matrix.service}} -d
