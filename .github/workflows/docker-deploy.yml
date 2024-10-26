@@ -39,9 +39,6 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v3
-      
-      - name: Validando rama
-        run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
 
       - name: Crear archivo .env
         run: |
@@ -53,8 +50,7 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        run: echo "Hola mundo ${{ github.ref }} refs/heads/master"
-        # run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
+        run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
 
   build-and-deploy-test:
     if: github.ref == 'refs/heads/test'
@@ -76,9 +72,6 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v3
-      
-      - name: Validando rama
-        run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
 
       - name: Crear archivo .env
         run: |
@@ -90,5 +83,4 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        run: echo "Hola mundo ${{ github.ref }} refs/heads/test"
-        # run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
+        run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
