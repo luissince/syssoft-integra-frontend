@@ -53,9 +53,9 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v3
       
-      - name: Deploy if Node.js 16 and Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: echo "Deploying with Node.js 16 on Ubuntu"
+      - name: Validando rana
+        if: ${{ matrix.branch == 'test' }}
+        run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
 
       - name: Crear archivo .env
         if: github.ref == 'refs/heads/${{ matrix.branch }}'
