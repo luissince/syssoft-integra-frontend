@@ -7,38 +7,26 @@ on:
       - "test"
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-master:
+    if: github.ref == 'refs/heads/master'
     runs-on: self-hosted
     strategy:
       matrix:
         include:
-          # Producción (master)
           - environment: legrand-tiquepos
             service: legrand-tiquepos-services
-            branch: master
           - environment: raices
             service: raices-services
-            branch: master
           - environment: felicitygirls-tiquepos
             service: felicitygirls-tiquepos-services
-            branch: master
           - environment: bodega-modelo
             service: bodega-modelo-services
-            branch: master
           - environment: unnagro
             service: unnagro-services
-            branch: master
           - environment: leatsac
             service: leatsac-services
-            branch: master
           - environment: ferreteria-rym
             service: ferreteria-rym-services
-            branch: master
-
-          # Test (test)
-          - environment: desarrollo
-            service: sysintegra-services
-            branch: test
     
     environment: ${{ matrix.environment }}
       
@@ -53,11 +41,9 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Validando rama
-        if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
         run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
 
       - name: Crear archivo .env
-        if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
@@ -67,6 +53,42 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
-        run: echo "Hola mundo ${{ github.ref}} refs/heads/${{ matrix.branch }}"
-        # run: docker compose -f docker-compose.yml up --build ${{ matrix.service}} -d
+        run: echo "Hola mundo ${{ github.ref }} refs/heads/master"
+        # run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
+
+  build-and-deploy-test:
+    if: github.ref == 'refs/heads/test'
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        include:
+          - environment: desarrollo
+            service: sysintegra-services
+    
+    environment: ${{ matrix.environment }}
+      
+    env:  
+      VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
+      VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+      
+      - name: Validando rama
+        run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
+
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
+          EOL
+      
+      - name: Creando y ejecutando contenedor
+        run: echo "Hola mundo ${{ github.ref }} refs/heads/test"
+        # run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
