@@ -11,7 +11,6 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
         include:
           # Producción (master)
           - environment: legrand-tiquepos
@@ -53,7 +52,7 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v3
       
-      - name: Validando rana
+      - name: Validando rama
         if: ${{ matrix.branch == 'test' }}
         run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
 
