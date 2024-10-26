@@ -1,0 +1,66 @@
+name: Docker Image CI - SysSoftIntegra FrontEnd
+
+on:
+  push:
+    branches: 
+      - "master"
+      - "test"
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        confing:
+          # Producción (master)
+          - environment: legrand-tiquepos
+            service: legrand-tiquepos-services
+            branch: master
+          - environment: raices
+            service: raices-services
+            branch: master
+          - environment: felicitygirls-tiquepos
+            service: felicitygirls-tiquepos-services
+            branch: master
+          - environment: bodega-modelo
+            service: bodega-modelo-services
+            branch: master
+          - environment: unnagro
+            service: unnagro-services
+            branch: master
+          - environment: leatsac
+            service: leatsac-services
+            branch: master
+          - environment: ferreteria-rym
+            service: ferreteria-rym-services
+            branch: master
+
+          # Test (test)
+          - environment: desarrollo
+            service: sysintegra-services
+            branch: test
+
+    if: github.ref == 'refs/heads/${{ matrix.config.branch }}'
+    environment: ${{ matrix.config.environment }}
+      
+    env:  
+      VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
+      VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
+      
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+      
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
+          EOL
+      
+      - name: Creando y ejecutando contenedor
+        run: docker compose -f docker-compose.yml up --build ${{ matrix.config.service }} -d
