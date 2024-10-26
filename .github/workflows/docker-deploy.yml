@@ -11,7 +11,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        confing:
+        include:
           # Producción (master)
           - environment: legrand-tiquepos
             service: legrand-tiquepos-services
@@ -40,8 +40,8 @@ jobs:
             service: sysintegra-services
             branch: test
 
-    if: github.ref == format('refs/heads/{0}', matrix.config.branch)
-    environment: ${{ matrix.config.environment }}
+    if: github.ref == 'refs/heads/${{ matrix.branch }}'
+    environment: ${{ matrix.environment }}
       
     env:  
       VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
@@ -63,4 +63,4 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        run: docker compose -f docker-compose.yml up --build ${{ matrix.config.service }} -d
+        run: docker compose -f docker-compose.yml up --build ${{ matrix.service}} -d
