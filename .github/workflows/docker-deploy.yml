@@ -64,5 +64,5 @@ jobs:
       
       - name: Creando y ejecutando contenedor
         if: github.ref == 'refs/heads/${{ matrix.branch }}'
-        run: echo "Hola mundo ${{ matrix.service}} ${{ matrix.branch}} ${{ matrix.environment}}" 
+        run: echo "Hola mundo ${{ matrix.service}} ${{ matrix.branch}} ${{ matrix.environment}} ${{ github.ref}}"
         # run: docker compose -f docker-compose.yml up --build ${{ matrix.service}} -d
