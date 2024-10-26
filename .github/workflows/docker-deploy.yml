@@ -53,11 +53,11 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Validando rama
-        if: ${{ github.ref  == 'refs/heads/${{ matrix.branch }}'}}
+        if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
         run: echo "Deploying with Node.js 16 on service ${{ matrix.service }}"
 
       - name: Crear archivo .env
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
+        if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
@@ -67,6 +67,6 @@ jobs:
           EOL
       
       - name: Creando y ejecutando contenedor
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
+        if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
         run: echo "Hola mundo ${{ github.ref}} refs/heads/${{ matrix.branch }}"
         # run: docker compose -f docker-compose.yml up --build ${{ matrix.service}} -d
