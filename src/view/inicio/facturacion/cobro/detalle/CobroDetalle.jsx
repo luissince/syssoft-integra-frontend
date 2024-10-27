@@ -319,6 +319,13 @@ class CobroDetalle extends CustomComponent {
             >
               <i className="fa fa-print"></i> 58MM
             </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              // onClick={this.handleOpenSendWhatsapp}
+            >
+              <i className="fa fa-whatsapp"></i> Whatsapp
+            </Button>
           </Column>
         </Row>
 

@@ -8,6 +8,7 @@ import {
   isEmpty,
   keyNumberPhone,
   imageBase64,
+  guId,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -31,6 +32,7 @@ import Image from '../../../../components/Image';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
+import { downloadFileAsync } from '../../../../redux/downloadSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -164,6 +166,13 @@ class SucursalEditar extends CustomComponent {
   handleClearImage = () => {
     this.setState({ imagen: images.noImage });
     this.refFileImagen.current.value = ''
+  }
+
+  handleDownload(url) {
+    if (isEmpty(url)) return;
+
+    const id = guId();
+    this.props.downloadFileAsync({ id, url });
   }
 
   //------------------------------------------------------------------------------------------
@@ -443,13 +452,20 @@ class SucursalEditar extends CustomComponent {
                   <i className="bi bi-image"></i>
                   <span></span>
                 </div>
-              </label>{' '}
-
+              </label>
+              {' '}
               <Button
                 className='btn-outline-secondary'
                 onClick={this.handleClearImage}
                 icono={<i className="bi bi-trash"></i>}
               />
+              {' '}
+              <Button
+                className="btn-outline-secondary"
+                onClick={this.handleDownload.bind(this, this.state.imagen)}
+              >
+                <i className="bi bi-download"></i>
+              </Button>
             </div>
           </Column>
         </Row>
@@ -488,7 +504,8 @@ SucursalEditar.propTypes = {
   }).isRequired,
   location: PropTypes.shape({
     search: PropTypes.string
-  })
+  }),
+  downloadFileAsync: PropTypes.func,
 };
 
 
@@ -498,6 +515,8 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedSucursalEditar = connect(mapStateToProps, null)(SucursalEditar);
+const mapDispatchToProps = { downloadFileAsync };
+
+const ConnectedSucursalEditar = connect(mapStateToProps, mapDispatchToProps)(SucursalEditar);
 
 export default ConnectedSucursalEditar;

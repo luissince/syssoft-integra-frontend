@@ -339,9 +339,15 @@ class CotizacionDetalle extends CustomComponent {
             >
               <i className="fa fa-print"></i> Lista
             </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              // onClick={this.handleOpenSendWhatsapp}
+            >
+              <i className="fa fa-whatsapp"></i> Whatsapp
+            </Button>
           </Column>
         </Row>
-
 
         <Row>
           <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>

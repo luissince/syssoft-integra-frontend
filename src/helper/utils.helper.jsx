@@ -568,6 +568,12 @@ export function formatTime(time, addSeconds = false) {
   return `${formattedHour}:${mm} ${ampm}`;
 }
 
+export function getUrlFileExtension(url) {
+  const urlParts = url.split('/');
+  const extension = urlParts[urlParts.length - 1];
+  return extension ?? null;
+}
+
 export function reorder(list, startIndex, endIndex) {
   const result = [...list];
   const [removed] = result.splice(startIndex, 1);
@@ -575,7 +581,6 @@ export function reorder(list, startIndex, endIndex) {
 
   return result;
 }
-
 
 export const formatBytes = (bytes) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 

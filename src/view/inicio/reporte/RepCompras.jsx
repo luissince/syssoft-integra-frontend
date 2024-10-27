@@ -140,25 +140,6 @@ class RepCompras extends CustomComponent {
       return;
     }
 
-    // const params = {
-    //   "tipo": COMPRA,
-    //   "idSucursal": this.state.idSucursal
-    // };
-
-    // const comprobanteResponse = await comboComprobante(
-    //   params,
-    //   this.abortControllerView.signal,
-    // );
-
-    // if (comprobanteResponse instanceof ErrorResponse) {
-    //   if (comprobanteResponse.getType() === CANCELED) return;
-
-    //   alertWarning('Reporte Compra', comprobanteResponse.getMessage(), async () => {
-    //     await this.loadingInit();
-    //   });
-    //   return;
-    // }
-
     await this.setStateAsync({
       sucursales: sucursalResponse.data,
       usuarios: usuarioResponse.data,

@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { sleep } from '../helper/utils.helper';
+import { getUrlFileExtension, isEmpty, sleep } from '../helper/utils.helper';
 
 // Definimos el thunk asíncrono para manejar las descargas
 export const downloadFileAsync = createAsyncThunk('downloads/downloadFile', async (
-    { id, url }, { dispatch, rejectWithValue }
+    { id, url, name }, { dispatch, rejectWithValue }
 ) => {
     try {
         // Obtener el objeto blob
@@ -13,13 +13,28 @@ export const downloadFileAsync = createAsyncThunk('downloads/downloadFile', asyn
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        const contentType = response.headers.get('content-type');
+        const isImage = contentType?.startsWith('image/');
+
         // Verificar las cabeceras de la respuesta
         const contentDisposition = response.headers.get('Content-Disposition');
-        const fileName = contentDisposition ?
-            contentDisposition.split(';')
-                .find(n => n.includes('filename='))
-                ?.split('=')[1]
-                .replaceAll('"', '') : 'Reporte.xlsx';
+        let fileName = "";
+        if (!isEmpty(name)) {
+            fileName = name;
+        } else {
+            if (isImage) {
+                const extension = getUrlFileExtension(contentType);
+                const timestamp = new Date().getTime();
+                fileName = `imagen_${timestamp}.${extension}`;
+            } else if (contentDisposition) {
+                fileName = contentDisposition.split(';')
+                    .find(n => n.includes('filename='))
+                    ?.split('=')[1]
+                    .replaceAll('"', '');
+            } else {
+                return rejectWithValue({ id, error: "Falta el nombre del archivo." });
+            }
+        }
 
         const reader = response.body.getReader();
         const contentLength = +response.headers.get('Content-Length');
@@ -45,7 +60,7 @@ export const downloadFileAsync = createAsyncThunk('downloads/downloadFile', asyn
 
         // const blob = new Blob(chunks);
         const blob = new Blob(chunks, {
-            type: response.headers.get('content-type')
+            type: contentType || 'application/octet-stream'
         });
 
         // Crear un objeto URL temporal
@@ -55,7 +70,9 @@ export const downloadFileAsync = createAsyncThunk('downloads/downloadFile', asyn
         const link = document.createElement('a');
         link.href = blobUrl;
         link.download = fileName;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
 
         // Limpiar el objeto URL temporal
         window.URL.revokeObjectURL(blobUrl);

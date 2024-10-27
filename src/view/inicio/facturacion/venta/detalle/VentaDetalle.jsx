@@ -230,7 +230,7 @@ class VentaDetalle extends CustomComponent {
   const message = `
     Hola! Somos *${companyInfo.name}*
     
-    Le enviamos el comprobante:
+    Le enviamos su comprobante de venta:
     ${documentUrl}
     
     Para cualquier consulta, puede contactarnos:
