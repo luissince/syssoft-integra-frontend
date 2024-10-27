@@ -236,7 +236,8 @@ class ModalVenta extends CustomComponent {
                 className={"modal-custom-lg"}
             >
                 <CustomModalContentScroll>
-                    <CustomModalContentHeader contentRef={refModal}>
+                    <CustomModalContentHeader
+                        contentRef={refModal}>
                         Ventas
                     </CustomModalContentHeader>
 

@@ -396,6 +396,17 @@ export function getNumber(value) {
   return Number(value);
 }
 
+/**
+ * Valida un número de teléfono de WhatsApp.
+ *
+ * @param {string} phone - El número de teléfono que se va a validar.
+ * @returns {boolean} `true` si el número de teléfono es válido, de lo contrario, `false`.
+ */
+export function validateNumberWhatsApp(phone) {
+  const regex = /^\+\d{1,3}\d{7,12}$/;
+  return regex.test(phone);
+}
+
 export function keyNumberInteger(event, enterCallback) {
   const key = event.key;
   const isDigit = /\d/.test(key);

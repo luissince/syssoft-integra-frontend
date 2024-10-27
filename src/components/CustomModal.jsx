@@ -74,7 +74,7 @@ class CustomModal extends Component {
   };
 
   render() {
-    const { isOpen, onOpen, onHidden, contentLabel, className, shouldCloseOnEsc, children } = this.props;
+    const { isOpen, onOpen, onHidden, contentLabel, className, shouldCloseOnOverlayClick = false, shouldCloseOnEsc, children } = this.props;
     return (
       <Modal
         contentRef={(ref) => this.modalRef.current = ref}
@@ -84,7 +84,7 @@ class CustomModal extends Component {
         onAfterClose={onHidden}
         style={customStyles}
         className={`modal-custom ${className}`}
-        shouldCloseOnOverlayClick={false}
+        shouldCloseOnOverlayClick={shouldCloseOnOverlayClick}
         shouldReturnFocusAfterClose={true}
         shouldCloseOnEsc={shouldCloseOnEsc}
         contentLabel={contentLabel}
@@ -102,6 +102,7 @@ CustomModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   contentLabel: PropTypes.string.isRequired,
   className: PropTypes.string,
+  shouldCloseOnOverlayClick: PropTypes.bool,
   shouldCloseOnEsc: PropTypes.bool,
   children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired
 }
@@ -262,11 +263,11 @@ CustomModalContentScroll.propTypes = {
  * @returns 
  */
 export const CustomModalContentHeader = (props) => {
-  const { showClose = true, className = '', contentRef, children } = props;
+  const { showClose = true, isMoveable = true, className = '', contentRef, children } = props;
   return (
     <div
-      className={`header-cm ${className}`}
-      onMouseDown={(event) => contentRef.current.handleMouseDown(event)}>
+      className={`header-cm ${className} ${!showClose ? 'py-3' : ''} ${isMoveable ? 'cursor-move' : 'cursor-default'}`}
+      onMouseDown={(event) => isMoveable && contentRef.current.handleMouseDown(event)}>
       <p className='m-0 h6'>{children}</p>
       {
         showClose && <Button
@@ -283,6 +284,7 @@ CustomModalContentHeader.propTypes = {
   contentRef: PropTypes.object.isRequired,
   className: PropTypes.string,
   showClose: PropTypes.bool,
+  isMoveable: PropTypes.bool,
   children: PropTypes.node,
 }
 

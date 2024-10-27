@@ -9,7 +9,7 @@ import { comboTipoDocumento, createPersona, getUbigeo } from '../network/rest/pr
 import SuccessReponse from '../model/class/response';
 import ErrorResponse from '../model/class/error-response';
 import { CANCELED } from '../model/types/types';
-import { alertDialog, alertInfo, alertSuccess, alertWarning, convertNullText, currentDate, isEmpty } from '../helper/utils.helper';
+import { alertDialog, alertInfo, alertSuccess, alertWarning, convertNullText, currentDate, isEmpty, keyNumberPhone, validateNumberWhatsApp } from '../helper/utils.helper';
 import { getDni, getRuc } from '../network/rest/apisperu.network';
 import Row from './Row';
 import Column from './Column';
@@ -19,7 +19,7 @@ import Input from './Input';
 import SearchInput from './SearchInput';
 
 /**
- * Componente de Modal Impresión.
+ * Modal para mostrar del impresión.
  */
 const ModalImpresion = ({
     refModal,
@@ -42,7 +42,6 @@ const ModalImpresion = ({
             shouldCloseOnEsc={false}>
             <CustomModalContentHeader
                 contentRef={refModal}
-                className={'py-3'}
                 showClose={false}>
                 SysSoft Integra
             </CustomModalContentHeader>
@@ -103,7 +102,7 @@ ModalImpresion.propTypes = {
 }
 
 /**
- * Componente que representa una funcionalidad específica.
+ * Modal para mostrar el modal de pre impresión.
  * @extends React.Component
  */
 class ModalPreImpresion extends Component {
@@ -119,6 +118,10 @@ class ModalPreImpresion extends Component {
         this.abortController = null;
 
         this.refModal = React.createRef();
+    }
+
+    handleOpen = async () => {
+        this.refPhone.current.focus();
     }
 
     handleOnHidden = async () => {
@@ -221,6 +224,10 @@ ModalPreImpresion.propTypes = {
     handleProcess: PropTypes.func.isRequired,
 };
 
+/**
+ * Modal para registrar de personas.
+ * @extends React.Component
+ */
 class ModalPersona extends Component {
     constructor(props) {
         super(props);
@@ -754,8 +761,113 @@ ModalPersona.propTypes = {
     idUsuario: PropTypes.string.isRequired
 };
 
+/**
+ * Modal para enviar mensaje por Whatsapp.
+ */
+class ModalSendWhatsapp extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            phone: '',
+        }
+
+        this.refPhone = React.createRef();
+    }
+
+    handleOpen = async () => {
+        this.refPhone.current.focus();
+        this.setState({ phone: this.props.phone ?? '' })
+    }
+
+    handleInputPhone = (event) => {
+        this.setState({ phone: event.target.value })
+    }
+
+    handleSendWhatsapp = async () => {
+        if (!validateNumberWhatsApp(this.state.phone)) {
+            alertWarning("WhatsApp", "El número de teléfono no es válido.",()=>{
+                this.refPhone.current.focus();
+            });
+            return;
+        }
+
+        this.props.handleProcess(this.state.phone, async () =>{
+            await this.props.refModal.current.handleOnClose()
+        });
+    }
+
+
+    render() {
+        const {
+            refModal,
+            isOpen,
+            handleClose,
+            handleHidden,
+        } = this.props;
+
+        return (
+            <CustomModal
+                ref={refModal}
+                isOpen={isOpen}
+                onOpen={this.handleOpen}
+                onClose={handleClose}
+                onHidden={handleHidden}
+                contentLabel={"Modal de Enviar Whatsapp"}
+                shouldCloseOnOverlayClick={true}
+                shouldCloseOnEsc={true}>
+                <CustomModalContentHeader
+                    contentRef={refModal}
+                    showClose={true}
+                    isMoveable={true}>
+                    SysSoft Integra
+                </CustomModalContentHeader>
+
+                <CustomModalContentBody>
+                    <h4>Enviar Mensaje WhatsApp</h4>
+
+                    <Row>
+                        <Column formGroup={true}>
+                            <Input
+                                autoFocus={true}
+                                label={"Número de teléfono (con código de país)"}
+                                placeholder={"Ej: +51966750883"}
+                                refInput={this.refPhone}
+                                value={this.state.phone}
+                                onChange={this.handleInputPhone}
+                                onKeyDown={keyNumberPhone}
+                            />
+                        </Column>
+                    </Row>
+
+                    <Row>
+                        <Column formGroup={true}>
+                            <Button
+                                autoFocus={true}
+                                className='btn-dark'
+                                onClick={this.handleSendWhatsapp}>
+                                <img src={images.whatsapp} width={22} /> Enviar mensaje
+                            </Button>
+                        </Column>
+                    </Row>
+                </CustomModalContentBody>
+            </CustomModal>
+        );
+    }
+}
+
+ModalSendWhatsapp.propTypes = {
+    refModal: PropTypes.object,
+    isOpen: PropTypes.bool.isRequired,
+    phone: PropTypes.string,
+    handleHidden: PropTypes.func,
+    handleClose: PropTypes.func.isRequired,
+    handleProcess: PropTypes.func.isRequired,
+}
+
 export {
     ModalImpresion,
     ModalPreImpresion,
-    ModalPersona
+    ModalPersona,
+    ModalSendWhatsapp
 }

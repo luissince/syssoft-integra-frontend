@@ -702,7 +702,8 @@ class ModalTransaccion extends CustomComponent {
         <CustomModalContentForm
           onSubmit={this.handleCobrar}
         >
-          <CustomModalContentHeader contentRef={this.refModal}>
+          <CustomModalContentHeader
+            contentRef={this.refModal}>
             {this.state.title}
           </CustomModalContentHeader>
 

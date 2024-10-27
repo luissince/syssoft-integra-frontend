@@ -60,6 +60,7 @@ class Principal extends CustomComponent {
     const response = await initSucursales(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
+      console.log(response.data);
       this.setState({
         sucursales: response.data,
         cache: response.data,
@@ -105,11 +106,7 @@ class Principal extends CustomComponent {
   };
 
   handleIngresar = (item) => {
-    const proyect = {
-      idSucursal: item.idSucursal,
-      nombre: item.nombre,
-      direccion: item.direccion,
-    };
+    const proyect = item;
 
     window.localStorage.setItem('project', JSON.stringify(proyect));
     this.props.projectActive({

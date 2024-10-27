@@ -25,6 +25,7 @@ import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
+import { ModalSendWhatsapp } from '../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -45,6 +46,8 @@ class VentaDetalle extends CustomComponent {
       idVenta: '',
       comprobante: '',
       cliente: '',
+      celular: '',
+      email: '',
       fecha: '',
       formaPago: '',
       estado: '',
@@ -55,10 +58,13 @@ class VentaDetalle extends CustomComponent {
       observacion: '',
       nota: '',
 
+      isOpenSendWhatsapp: false,
+
       detalles: [],
       transaccion: []
     };
 
+    this.refModalSendWhatsapp = React.createRef();
     this.abortControllerView = new AbortController();
   }
 
@@ -129,6 +135,8 @@ class VentaDetalle extends CustomComponent {
       numeracion,
       documento,
       informacion,
+      celular,
+      email,
       fecha,
       hora,
       idFormaPago,
@@ -150,6 +158,8 @@ class VentaDetalle extends CustomComponent {
       idVenta: id,
       comprobante: comprobante + '  ' + serie + '-' + numeracion,
       cliente: documento + ' - ' + informacion,
+      celular: celular,
+      email: email,
       fecha: fecha + ' ' + formatTime(hora),
       formaPago: tipo,
       estado: nuevoEstado,
@@ -194,6 +204,65 @@ class VentaDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  }
+
+  handleProcessSendWhatsapp = async (phone, callback = async function () { } ) => {
+    const { razonSocial  } = this.props.predeterminado.empresa;
+    const { paginaWeb, email } = this.props.token.project;
+
+    const companyInfo = {
+      name: razonSocial,
+      website: paginaWeb,
+      email: email
+  };
+
+  const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, "A4");
+
+  // Crear mensaje con formato
+  const message = `
+    Hola! Somos *${companyInfo.name}*
+    
+    Le enviamos el comprobante:
+    ${documentUrl}
+    
+    Para cualquier consulta, puede contactarnos:
+    ${companyInfo.website}
+    ${companyInfo.email}
+
+    o escribiendo a nuestro whatsapp
+    
+    Gracias por su preferencia! :D`.trim();
+
+  // Limpiar y formatear el número de teléfono
+  const cleanPhone = phone.replace(/\D/g, '');
+
+  // Crear la URL de WhatsApp
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+  await callback();
+
+  // Abrir en una nueva ventana
+  window.open(whatsappUrl, '_blank');
+  }
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar email
+  //------------------------------------------------------------------------------------------
+
+  handleSendEmail = async () => {
+    // await sendEmail(this.state.idVenta);
   }
 
   /*
@@ -382,6 +451,14 @@ class VentaDetalle extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
+        <ModalSendWhatsapp 
+          refModal={this.refModalSendWhatsapp}
+          isOpen={this.state.isOpenSendWhatsapp}
+          phone={this.state.celular}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
+        />
+
         <Row>
           <Column formGroup={true}>
             <Button
@@ -404,6 +481,20 @@ class VentaDetalle extends CustomComponent {
             >
               <i className="fa fa-print"></i> 58MM
             </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handleOpenSendWhatsapp}
+            >
+              <i className="fa fa-whatsapp"></i> Whatsapp
+            </Button>
+            {/* {' '}
+            <Button
+              className="btn-light"
+              onClick={this.handleSendEmail}
+            >
+              <i className="fa fa-email"></i> Email
+            </Button> */}
           </Column>
         </Row>
 
@@ -425,6 +516,14 @@ class VentaDetalle extends CustomComponent {
                   </TableHead>
                   <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                     {this.state.cliente}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    N° de celular y correo electrónico
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.celular} - {this.state.email}
                   </TableHead>
                 </TableRow>
                 <TableRow>
@@ -556,12 +655,24 @@ VentaDetalle.propTypes = {
   }).isRequired,
   location: PropTypes.shape({
     search: PropTypes.string
-  })
+  }),
+  predeterminado: PropTypes.shape({
+    empresa: PropTypes.shape({
+      razonSocial: PropTypes.string,
+    })
+  }),
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      paginaWeb: PropTypes.string,
+      email: PropTypes.string,
+    })  
+  }),
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    predeterminado: state.predeterminado,
   };
 };
 

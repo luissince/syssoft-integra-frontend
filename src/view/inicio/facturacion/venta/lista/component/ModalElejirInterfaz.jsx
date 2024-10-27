@@ -17,7 +17,8 @@ const ModalElegirInterfaz = ({
             onClose={handleClose}
             contentLabel="Elegir Interfaz"
         >
-            <CustomModalContentHeader contentRef={refModal}>
+            <CustomModalContentHeader
+                contentRef={refModal}>
                 SysSoft Integr
             </CustomModalContentHeader>
 

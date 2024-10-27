@@ -50,6 +50,7 @@ import phone from '../resource/images/phone.png';
 // import email from '../resource/images/email.png';
 import directory from '../resource/images/directory.png';
 import configuracion from '../resource/images/configuracion.png';
+import whatsapp from '../resource/images/whatsapp.png';
 
 export {
   icono,
@@ -100,5 +101,6 @@ export {
   client,
   phone,
   directory,
-  configuracion
+  configuracion,
+  whatsapp
 };

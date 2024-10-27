@@ -240,7 +240,8 @@ class ModalCotizacion extends CustomComponent {
                 className={"modal-custom-lg"}
             >
                 <CustomModalContentScroll>
-                    <CustomModalContentHeader contentRef={refModal}>
+                    <CustomModalContentHeader
+                        contentRef={refModal}>
                         Cotizaciones
                     </CustomModalContentHeader>
 

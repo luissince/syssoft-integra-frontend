@@ -416,7 +416,8 @@ class ModalProductos extends CustomComponent {
                 className={"modal-custom-lg"}
             >
                 <CustomModalContentScroll>
-                    <CustomModalContentHeader contentRef={refModal}>
+                    <CustomModalContentHeader
+                        contentRef={refModal}>
                         Productos
                     </CustomModalContentHeader>
 
