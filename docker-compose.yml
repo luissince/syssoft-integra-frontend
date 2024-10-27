@@ -164,6 +164,24 @@ services:
     container_name: asiaticos-pcl-frontend
     # Configuración para reiniciar siempre el contenedor
     restart: always
+  
+  principal-services:
+    # Configuración para construir la imagen del contenedor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Nombre de la imagen resultante
+    image: principal-frontend-image
+    # Conexión a la red llamada 'luis'
+    networks:
+      - luis
+    # Mapeo de puertos: Mapea el puerto 6038 del host al puerto 80 del contenedor
+    ports:
+      - 6038:80
+    # Nombre del contenedor
+    container_name: principal-frontend
+    # Configuración para reiniciar siempre el contenedor
+    restart: always
 
 # Definición de redes
 networks:
