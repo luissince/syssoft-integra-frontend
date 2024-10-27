@@ -1,4 +1,6 @@
-FROM node:18-alpine as builder
+# Dockerfile
+# Imagen base para compilar el proyecto
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
@@ -8,18 +10,23 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build 
+RUN npm run build
 
-FROM nginx:1.25.3-alpine-slim
+# Imagen final para producción
+FROM node:18-alpine AS production 
 
-COPY config.conf /etc/nginx/conf.d/
+WORKDIR /app
 
-COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html/
+COPY --from=build /app/dist ./dist
 
-RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
-    && touch /var/run/nginx.pid \
-    && chown -R nginx:nginx /var/run/nginx.pid
+# Instalar serve globalmente
+RUN npm install -g serve
 
-USER nginx
+# El usuario node ya viene en la imagen de node:alpine
+USER node
 
+# serve usa el puerto 80 por defecto
 EXPOSE 80
+
+# Servir los archivos estáticos
+CMD ["serve", "-s", "dist", "-l", "80"]
