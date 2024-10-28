@@ -27,7 +27,7 @@ class ModalProceso extends React.Component {
   }
 
   handleOnOpen = () => {
-    const pagado = this.props.plazo.transacciones.flatMap(transaccion=> transaccion.detalles).reduce((acc, detalle) => acc + detalle.monto, 0);
+    const pagado = this.props.plazo.transacciones.flatMap(transaccion => transaccion.detalles).reduce((acc, detalle) => acc + detalle.monto, 0);
     this.setState({ pago: this.props.plazo.monto, pagado });
   }
 
@@ -100,15 +100,15 @@ class ModalProceso extends React.Component {
 
             <Row>
               <Column formGroup={true}>
-                <p className='text-left m-0'>Pago Total: {numberFormat(this.state.pago, this.props.codISO)}</p>
-                <p className='text-left text-success  m-0'>Monto Pagado: {numberFormat(this.state.pagado, this.props.codISO)}</p>
+                <p className='text-left m-1'>Pago Total: {numberFormat(this.state.pago, this.props.codISO)}</p>
+                <p className='text-left text-success  m-1'>Monto Pagado: {numberFormat(this.state.pagado, this.props.codISO)}</p>
               </Column>
 
               <Column formGroup={true}>
-                <p className='text-left text-secondary  m-0'>Monto a Pagar: {numberFormat((getNumber(this.state.monto)), this.props.codISO)}</p>
-                <p className='text-left text-secondary  m-0'>Monto por Pagar: {numberFormat(this.state.pago - this.state.pagado, this.props.codISO)}</p>
-                <hr className='m-0' />
-                <p className='text-left text-danger  m-0'>Saldo Restante: {numberFormat(this.state.pago - this.state.pagado - getNumber(this.state.monto), this.props.codISO)}</p>
+                <p className='text-left text-secondary  m-1'>Monto por Pagar: {numberFormat(this.state.pago - this.state.pagado, this.props.codISO)}</p>
+                <p className='text-left text-secondary  m-1'>Monto a Pagar: {numberFormat((getNumber(this.state.monto)), this.props.codISO)}</p>
+                <hr className='m-1' />
+                <p className='text-left text-danger  m-1'>Saldo Restante: {numberFormat(this.state.pago - this.state.pagado - getNumber(this.state.monto), this.props.codISO)}</p>
               </Column>
             </Row>
           </>

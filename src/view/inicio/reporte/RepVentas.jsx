@@ -287,6 +287,7 @@ class RepVentas extends CustomComponent {
     let rows = [];
 
     const newRows = this.state.lista.map((item, index) => {
+      console.log(item)
       const estado = item.estado === 1
         ? <span className="badge badge-success">COBRADO</span>
         : item.estado === 2
@@ -310,7 +311,7 @@ class RepVentas extends CustomComponent {
           </TableCell>
           <TableCell>{item.tipo}</TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell>{numberFormat(item.total, item.codIso)} </TableCell>
+          <TableCell>{numberFormat(item.total, item.codiso)} </TableCell>
         </TableRow>
       );
     });

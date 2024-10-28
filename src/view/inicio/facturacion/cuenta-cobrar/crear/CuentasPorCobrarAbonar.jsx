@@ -28,6 +28,7 @@ import ModalTransaccion from "../../../../../components/ModalTransaccion";
 import SweetAlert from "../../../../../model/class/sweet-alert";
 import pdfVisualizer from "pdf-visualizer";
 import { ModalImpresion } from "../../../../../components/MultiModal";
+import { images } from "../../../../../helper";
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -63,6 +64,9 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       detalles: [],
       cuotas: [],
 
+      // Atributos del modal enviar WhatsApp
+      isOpenSendWhatsapp: false,
+
       // Atributos del modal de cobro
       isOpenProceso: false,
       cuota: null,
@@ -75,9 +79,11 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       isOpenImpresion: false,
       idCuota: '',
 
+
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
+
     };
 
     this.alert = new SweetAlert();
@@ -87,6 +93,9 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
+
+    // Referencia para el modal enviar WhatsApp
+    this.refModalSendWhatsapp = React.createRef();
 
     //Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -218,7 +227,6 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   |
    */
 
-
   //------------------------------------------------------------------------------------------
   // Eventos para impresión
   //------------------------------------------------------------------------------------------
@@ -238,6 +246,57 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  }
+
+  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+    const { razonSocial } = this.props.predeterminado.empresa;
+    const { paginaWeb, email } = this.props.token.project;
+
+    const companyInfo = {
+      name: razonSocial,
+      website: paginaWeb,
+      email: email
+    };
+
+    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, "A4");
+
+    // Crear mensaje con formato
+    const message = `
+    Hola! Somos *${companyInfo.name}*
+    
+    Le enviamos su comprobante de venta:
+    ${documentUrl}
+    
+    Para cualquier consulta, puede contactarnos:
+    ${companyInfo.website}
+    ${companyInfo.email}
+
+    o escribiendo a nuestro whatsapp
+    
+    Gracias por su preferencia! :D`.trim();
+
+    // Limpiar y formatear el número de teléfono
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // Crear la URL de WhatsApp
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+    await callback();
+
+    // Abrir en una nueva ventana
+    window.open(whatsappUrl, '_blank');
+  }
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
   }
 
   //------------------------------------------------------------------------------------------
@@ -384,6 +443,22 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   |
    */
 
+  opcionButtonOpcion(image, title, width, alt, onClick) {
+    return (
+      <li>
+        <Button
+          contentClassName="dropdown-item"
+          onClick={onClick}>
+          <img
+            src={image}
+            width={width}
+            alt={alt}
+          />{" "} {title}
+        </Button>
+      </li>
+    );
+  }
+
   renderDetalle() {
     return (
       this.state.detalles.map((item, index) => (
@@ -500,12 +575,24 @@ class CuentasPorCobrarAbonar extends CustomComponent {
               </Button>
             </TableCell>
             <TableCell className="text-center">
-              <Button
-                className="btn-light"
-                onClick={this.handlePrintAccountsPayable.bind(this, cuota.idCuota, 'A4')}
-              >
-                <i className="fa fa-print"></i>
-              </Button>
+              <div className="dropdown">
+                <a
+                  className="btn btn-light dropdown-toggle"
+                  href="#"
+                  role="button"
+                  id="dropdownMenuLink"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i className="fa fa-th-list"></i>
+                </a>
+
+                <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', this.handlePrintAccountsPayable.bind(this, cuota.idCuota, 'A4'))}
+                  {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', this.handlePrintAccountsPayable.bind(this, cuota.idCuota, '80mm'))}
+                  {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 58mm', 22, 'Pdf Ticket', this.handlePrintAccountsPayable.bind(this, cuota.idCuota, '54mm'))}
+                </ul>
+              </div>
             </TableCell>
           </TableRow>
 
@@ -845,6 +932,8 @@ CuentasPorCobrarAbonar.propTypes = {
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
+      paginaWeb: PropTypes.string,
+      email: PropTypes.string,
     }).isRequired,
   }).isRequired,
   history: PropTypes.shape({
@@ -852,12 +941,18 @@ CuentasPorCobrarAbonar.propTypes = {
   }).isRequired,
   location: PropTypes.shape({
     search: PropTypes.string
-  })
+  }),
+  predeterminado: PropTypes.shape({
+    empresa: PropTypes.shape({
+      razonSocial: PropTypes.string,
+    })
+  }),
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    predeterminado: state.predeterminado,
   };
 };
 

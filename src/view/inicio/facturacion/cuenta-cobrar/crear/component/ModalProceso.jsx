@@ -100,15 +100,15 @@ class ModalProceso extends React.Component {
 
             <Row>
               <Column formGroup={true}>
-                <p className='text-left m-0'>Cobro Total: {numberFormat(this.state.cobro, this.props.codISO)}</p>
-                <p className='text-left text-success  m-0'>Monto Cobrado: {numberFormat(this.state.cobrado, this.props.codISO)}</p>
+                <p className='text-left m-1'>Cobro Total: {numberFormat(this.state.cobro, this.props.codISO)}</p>
+                <p className='text-left text-success m-1'>Monto Cobrado: {numberFormat(this.state.cobrado, this.props.codISO)}</p>
               </Column>
 
               <Column formGroup={true}>
-                <p className='text-left text-secondary  m-0'>Monto a Cobrar: {numberFormat((getNumber(this.state.monto)), this.props.codISO)}</p>
-                <p className='text-left text-secondary  m-0'>Monto por Cobrar: {numberFormat(this.state.cobro - this.state.cobrado, this.props.codISO)}</p>
-                <hr className='m-0' />
-                <p className='text-left text-danger  m-0'>Saldo Restante: {numberFormat(this.state.cobro - this.state.cobrado - getNumber(this.state.monto), this.props.codISO)}</p>
+                <p className='text-left text-secondary m-1'>Monto por Cobrar: {numberFormat(this.state.cobro - this.state.cobrado, this.props.codISO)}</p>
+                <p className='text-left text-secondary m-1'>Monto a Cobrar: {numberFormat((getNumber(this.state.monto)), this.props.codISO)}</p>
+                <hr className='m-1' />
+                <p className='text-left text-danger m-1'>Saldo Restante: {numberFormat(this.state.cobro - this.state.cobrado - getNumber(this.state.monto), this.props.codISO)}</p>
               </Column>
             </Row>
           </>

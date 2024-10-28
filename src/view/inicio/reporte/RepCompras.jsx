@@ -301,7 +301,7 @@ class RepCompras extends CustomComponent {
           </TableCell>
           <TableCell>{item.tipo}</TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell>{numberFormat(item.total, item.codIso)} </TableCell>
+          <TableCell>{numberFormat(item.total, item.codiso)} </TableCell>
         </TableRow>
       );
     });

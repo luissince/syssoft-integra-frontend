@@ -64,7 +64,10 @@ class VentaDetalle extends CustomComponent {
       transaccion: []
     };
 
+    // Referencia para el modal enviar WhatsApp
     this.refModalSendWhatsapp = React.createRef();
+
+    // Anular las peticiones
     this.abortControllerView = new AbortController();
   }
 
@@ -197,6 +200,10 @@ class VentaDetalle extends CustomComponent {
   |
   */
 
+  //------------------------------------------------------------------------------------------
+  // Eventos para impresión
+  //------------------------------------------------------------------------------------------
+
   handlePrintInvoices = async (size) => {
     await pdfVisualizer.init({
       url: documentsPdfInvoicesVenta(this.state.idVenta, size),
@@ -214,20 +221,20 @@ class VentaDetalle extends CustomComponent {
     this.setState({ isOpenSendWhatsapp: true });
   }
 
-  handleProcessSendWhatsapp = async (phone, callback = async function () { } ) => {
-    const { razonSocial  } = this.props.predeterminado.empresa;
+  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+    const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
       website: paginaWeb,
       email: email
-  };
+    };
 
-  const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, "A4");
+    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, "A4");
 
-  // Crear mensaje con formato
-  const message = `
+    // Crear mensaje con formato
+    const message = `
     Hola! Somos *${companyInfo.name}*
     
     Le enviamos su comprobante de venta:
@@ -241,16 +248,16 @@ class VentaDetalle extends CustomComponent {
     
     Gracias por su preferencia! :D`.trim();
 
-  // Limpiar y formatear el número de teléfono
-  const cleanPhone = phone.replace(/\D/g, '');
+    // Limpiar y formatear el número de teléfono
+    const cleanPhone = phone.replace(/\D/g, '');
 
-  // Crear la URL de WhatsApp
-  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    // Crear la URL de WhatsApp
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 
-  await callback();
+    await callback();
 
-  // Abrir en una nueva ventana
-  window.open(whatsappUrl, '_blank');
+    // Abrir en una nueva ventana
+    window.open(whatsappUrl, '_blank');
   }
 
   handleCloseSendWhatsapp = () => {
@@ -451,7 +458,7 @@ class VentaDetalle extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
-        <ModalSendWhatsapp 
+        <ModalSendWhatsapp
           refModal={this.refModalSendWhatsapp}
           isOpen={this.state.isOpenSendWhatsapp}
           phone={this.state.celular}
@@ -665,7 +672,7 @@ VentaDetalle.propTypes = {
     project: PropTypes.shape({
       paginaWeb: PropTypes.string,
       email: PropTypes.string,
-    })  
+    })
   }),
 };
 

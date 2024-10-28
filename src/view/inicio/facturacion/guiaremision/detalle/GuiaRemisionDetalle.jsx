@@ -20,6 +20,7 @@ import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import pdfVisualizer from 'pdf-visualizer';
+import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -63,9 +64,15 @@ class GuiaRemisionDetalle extends CustomComponent {
       numeracionRef: "",
       cliente: "",
 
-      detalle: []
+      detalle: [],
+
+      isOpenSendWhatsapp: false,
     };
 
+    // Referencia para el modal enviar WhatsApp
+    this.refModalSendWhatsapp = React.createRef();
+
+    //Anular las peticiones
     this.abortControllerView = new AbortController();
   }
 
@@ -211,6 +218,10 @@ class GuiaRemisionDetalle extends CustomComponent {
   |
   */
 
+  //------------------------------------------------------------------------------------------
+  // Eventos para impresión
+  //------------------------------------------------------------------------------------------
+
   handlePrintInvoices = async (size) => {
     await pdfVisualizer.init({
       url: documentsPdfInvoicesGuiaRemision(this.state.idGuiaRemision, size),
@@ -218,6 +229,57 @@ class GuiaRemisionDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  }
+
+  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+    const { razonSocial } = this.props.predeterminado.empresa;
+    const { paginaWeb, email } = this.props.token.project;
+
+    const companyInfo = {
+      name: razonSocial,
+      website: paginaWeb,
+      email: email
+    };
+
+    const documentUrl = documentsPdfInvoicesGuiaRemision(this.state.idVenta, "A4");
+
+    // Crear mensaje con formato
+    const message = `
+    Hola! Somos *${companyInfo.name}*
+    
+    Le enviamos su comprobante de venta:
+    ${documentUrl}
+    
+    Para cualquier consulta, puede contactarnos:
+    ${companyInfo.website}
+    ${companyInfo.email}
+
+    o escribiendo a nuestro whatsapp
+    
+    Gracias por su preferencia! :D`.trim();
+
+    // Limpiar y formatear el número de teléfono
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // Crear la URL de WhatsApp
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+    await callback();
+
+    // Abrir en una nueva ventana
+    window.open(whatsappUrl, '_blank');
+  }
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
   }
 
   /*
@@ -275,7 +337,7 @@ class GuiaRemisionDetalle extends CustomComponent {
             {' '}
             <Button
               className="btn-light"
-              // onClick={this.handleOpenSendWhatsapp}
+            // onClick={this.handleOpenSendWhatsapp}
             >
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>
@@ -428,7 +490,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                     this.state.detalle.map((item, index) => (
                       <TableRow key={index}>
                         <TableCell>{++index}</TableCell>
-                        <TableCell>{item.codigo}<br/>{item.nombre}</TableCell>
+                        <TableCell>{item.codigo}<br />{item.nombre}</TableCell>
                         <TableCell>{item.medida}</TableCell>
                         <TableCell>{rounded(item.cantidad)}</TableCell>
                       </TableRow>
@@ -451,6 +513,8 @@ GuiaRemisionDetalle.propTypes = {
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
+      paginaWeb: PropTypes.string,
+      email: PropTypes.string,
     }).isRequired,
   }).isRequired,
   history: PropTypes.shape({
@@ -458,6 +522,11 @@ GuiaRemisionDetalle.propTypes = {
   }).isRequired,
   location: PropTypes.shape({
     search: PropTypes.string
+  }),
+  predeterminado: PropTypes.shape({
+    empresa: PropTypes.shape({
+      razonSocial: PropTypes.string,
+    })
   }),
 };
 
@@ -468,6 +537,7 @@ GuiaRemisionDetalle.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    predeterminado: state.predeterminado,
   };
 };
 

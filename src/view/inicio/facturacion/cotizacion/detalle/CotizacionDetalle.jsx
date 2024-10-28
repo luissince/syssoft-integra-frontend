@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
+import { connect } from 'react-redux';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -50,9 +51,15 @@ class CotizacionDetalle extends CustomComponent {
       total: 0,
 
       detalles: [],
-      ventas: []
+      ventas: [],
+
+      isOpenSendWhatsapp: false,
     };
 
+    // Referencia para el modal enviar WhatsApp
+    this.refModalSendWhatsapp = React.createRef();
+
+    //Anular las peticiones
     this.abortControllerView = new AbortController();
   }
 
@@ -209,6 +216,57 @@ class CotizacionDetalle extends CustomComponent {
     });
   }
 
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  }
+
+  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+    const { razonSocial } = this.props.predeterminado.empresa;
+    const { paginaWeb, email } = this.props.token.project;
+
+    const companyInfo = {
+      name: razonSocial,
+      website: paginaWeb,
+      email: email
+    };
+
+    const documentUrl = documentsPdfInvoicesCotizacion(this.state.idVenta, "A4");
+
+    // Crear mensaje con formato
+    const message = `
+    Hola! Somos *${companyInfo.name}*
+    
+    Le enviamos su comprobante de venta:
+    ${documentUrl}
+    
+    Para cualquier consulta, puede contactarnos:
+    ${companyInfo.website}
+    ${companyInfo.email}
+
+    o escribiendo a nuestro whatsapp
+    
+    Gracias por su preferencia! :D`.trim();
+
+    // Limpiar y formatear el número de teléfono
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // Crear la URL de WhatsApp
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+    await callback();
+
+    // Abrir en una nueva ventana
+    window.open(whatsappUrl, '_blank');
+  }
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
+  }
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -342,7 +400,7 @@ class CotizacionDetalle extends CustomComponent {
             {' '}
             <Button
               className="btn-light"
-              // onClick={this.handleOpenSendWhatsapp}
+            // onClick={this.handleOpenSendWhatsapp}
             >
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>
@@ -580,8 +638,27 @@ CotizacionDetalle.propTypes = {
   }).isRequired,
   location: PropTypes.shape({
     search: PropTypes.string
-  })
+  }),
+  predeterminado: PropTypes.shape({
+    empresa: PropTypes.shape({
+      razonSocial: PropTypes.string,
+    })
+  }),
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      paginaWeb: PropTypes.string,
+      email: PropTypes.string,
+    })
+  }),
 };
 
+const mapStateToProps = (state) => {
+  return {
+    token: state.principal,
+    predeterminado: state.predeterminado,
+  };
+};
 
-export default CotizacionDetalle;
+const ConnectedCotizacionDetalle = connect(mapStateToProps, null)(CotizacionDetalle);
+
+export default ConnectedCotizacionDetalle;

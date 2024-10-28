@@ -20,6 +20,25 @@ instancePrincipal.interceptors.request.use((config) => {
 
 /*
 |--------------------------------------------------------------------------
+| ENDPOINTS DE DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+export async function dashboardInit(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/dashboard/init', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA DASHBOARD
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
 | ENDPOINTS DE SUCURSAL
 |--------------------------------------------------------------------------
 */

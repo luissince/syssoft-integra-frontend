@@ -41,7 +41,7 @@ CardBody.propTypes = {
 
 export const CardTitle = ({ className, children }) => {
     return (
-        <h5 className={`card-title ${className}`}>
+        <h5 className={`card-title m-0 ${className}`}>
             {children}
         </h5>
     );

@@ -301,8 +301,8 @@ class RepFinanciero extends CustomComponent {
               {item.serie}-{formatNumberWithZeros(item.numeracion)} <ExternalLink width={18} height={18} />
             </Link>
           </TableCell>
-          <TableCell>{numberFormat(item.total, item.codIso)}</TableCell>
-          <TableCell>{numberFormat(item.total, item.codIso)}</TableCell>
+          <TableCell>{item.credito == 0 ? "" : numberFormat(item.credito, item.codiso)}</TableCell>
+          <TableCell>{ item.debito == 0 ? "" : numberFormat(item.debito, item.codiso)}</TableCell>
         </TableRow>
       );
     });
@@ -550,8 +550,8 @@ class RepFinanciero extends CustomComponent {
                         <TableHead className="text-secondary" width="5%">#</TableHead>
                         <TableHead className="text-secondary" width="10%">Estado</TableHead>
                         <TableHead className="text-secondary" width="15%">Fecha</TableHead>
-                        <TableHead className="text-secondary" width="10%">Concepto</TableHead>
-                        <TableHead className="text-secondary" width="10%">Referencia</TableHead>
+                        <TableHead className="text-secondary" width="20%">Concepto</TableHead>
+                        <TableHead className="text-secondary" width="15%">Referencia</TableHead>
                         <TableHead className="text-secondary" width="5%">Débito</TableHead>
                         <TableHead className="text-secondary" width="5%">Crédito</TableHead>
                       </TableRow>

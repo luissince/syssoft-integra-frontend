@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import { SpinnerView } from '../../../components/Spinner';
@@ -6,27 +7,149 @@ import Row from '../../../components/Row';
 import Column from '../../../components/Column';
 import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
 import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Table, TableBody, TableCell, TableResponsive, TableRow } from '../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import Title from '../../../components/Title';
-import { FileText, Package, ShoppingCart, Store } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText, ShoppingCart, Store } from 'lucide-react';
+import { dashboardInit } from '../../../network/rest/principal.network';
+import { formatDecimal, isEmpty, numberFormat } from '../../../helper/utils.helper';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class Dashboard extends React.Component {
+
+  /**
+   * 
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
       msgLoading: "Cargando información...",
-    }
 
+      codIso: this.props.moneda.codiso ?? '',
+      idSucursal: this.props.token.project.idSucursal,
+
+      totalVentas: 0,
+      totalCompras: 0,
+      totalCuentasPorCobrar: 0,
+      totalCuentasPorPagar: 0,
+      totalComprobantes: 0,
+      totalInventario: 0,
+      totalSucursales: 0,
+      inventarios: [],
+    }
     this.abortControllerView = new AbortController();
   }
 
-  async componentDidMount() { 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
+  async componentDidMount() {
+    await this.loadingInit();
   }
 
   componentWillUnmount() {
     this.abortControllerView.abort();
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
+  loadingInit = async () => {
+    const params = {
+      idSucursal: this.state.idSucursal,
+    }
+
+    const responde = await dashboardInit(
+      params,
+      this.abortControllerView.signal,
+    );
+
+    this.setState(responde.data);
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
+  renderLista() {
+    if (isEmpty(this.state.inventarios)) {
+      return (
+        <TableRow>
+          <TableCell className="text-center" colSpan="4">¡No hay datos para mostrar!</TableCell>
+        </TableRow>
+      );
+    }
+
+    let rows = [];
+
+    const newRows = this.state.inventarios.map((item, index) => {   
+      return (
+        <TableRow key={index}>
+          <TableCell>{item.id}</TableCell>
+          <TableCell>{item.almacen}</TableCell>
+          <TableCell>{item.sucursal}</TableCell>
+          <TableCell>{formatDecimal(item.total)} </TableCell>
+        </TableRow>
+      );
+    });
+
+    rows.push(newRows);
+    return rows;
   }
 
   render() {
@@ -74,12 +197,12 @@ class Dashboard extends React.Component {
           <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Ventas Hoy</CardTitle>
-                <ShoppingCart className='text-primary' width={40} height={40}  />
+                <CardTitle className='text-sm m-0'>Ventas Total de Hoy</CardTitle>
+                <DollarSign width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>1,234</CardText>
-                <p className="text-xs text-secondary">+12.5%</p>
+                <CardText>{numberFormat(this.state.totalVentas, this.state.codIso)}</CardText>
+                <p className="text-xs text-secondary">+20.1% del mes anterior</p>
               </CardBody>
             </Card>
           </Column>
@@ -87,12 +210,12 @@ class Dashboard extends React.Component {
           <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Facturas Pendientes</CardTitle>
-                <FileText className='text-warning' width={40} height={40} />
+                <CardTitle className='text-sm m-0'>Compras Pendientes</CardTitle>
+                <DollarSign width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>23</CardText>
-                <p className="text-xs text-secondary">4 vencidas</p>
+                <CardText>{numberFormat(this.state.totalCompras, this.state.codIso)}</CardText>
+                <p className="text-xs text-secondary">+20.1% del mes anterior</p>
               </CardBody>
             </Card>
           </Column>
@@ -100,12 +223,12 @@ class Dashboard extends React.Component {
           <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className=' m-0'>Productos Bajo Stock</CardTitle>
-                <Package className='text-danger' width={40} height={40} />
+                <CardTitle className='text-sm m-0'>Cuentas por Cobrar</CardTitle>
+                <ArrowDownIcon width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>15</CardText>
-                <p className="text-xs text-secondary">Requiere atencións</p>
+                <CardText>{numberFormat(this.state.totalCuentasPorCobrar, this.state.codIso)}</CardText>
+                <p className="text-xs text-secondary">+8.2% del mes anterior</p>
               </CardBody>
             </Card>
           </Column>
@@ -113,18 +236,92 @@ class Dashboard extends React.Component {
           <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Sucursales Activas</CardTitle>
-                <Store className='text-success' width={40} height={40} />
+                <CardTitle className='text-sm m-0'>Cuentas por Pagar</CardTitle>
+                <ArrowUpIcon width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>4</CardText>
-                <p className="text-xs text-secondary">Todas operativas</p>
+                <CardText>{numberFormat(this.state.totalCuentasPorPagar, this.state.codIso)}</CardText>
+                <p className="text-xs text-secondary">+20.1% del mes anterior</p>
               </CardBody>
             </Card>
           </Column>
         </Row>
 
         <Row>
+          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Comprobantes Electrónicos</CardTitle>
+
+              </CardHeader>
+              <CardBody>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <p className='text-lg m-0'><FileText width={20} height={20} /> Emitodos hoy:</p>
+                  <p className='text-lg m-0'>{this.state.totalComprobantes}</p>
+                </div>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Productos sin Inventario</CardTitle>
+                <ShoppingCart width={20} height={20} />
+              </CardHeader>
+              <CardBody>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <p className='text-lg m-0'><FileText width={20} height={20} /> Cantidad:</p>
+                  <p className='text-lg m-0'>{this.state.totalInventario}</p>
+                </div>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Total de Sucursales</CardTitle>
+                <Store width={20} height={20} />
+              </CardHeader>
+              <CardBody>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <p className='text-lg m-0'><FileText width={20} height={20} /> Total:</p>
+                  <p className='text-lg m-0'>{this.state.totalSucursales}</p>
+                </div>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
+            <Card>
+              <CardHeader>
+                <CardTitle>Inventario con cantidades faltantes</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <TableResponsive>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead width="5%">#</TableHead>
+                        <TableHead width="50%">Almacen</TableHead>
+                        <TableHead width="30%">Sucursal</TableHead>
+                        <TableHead width="20%">Cantidad</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {this.renderLista()}
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        {/* <Row>
           <Column className='col-xl-6 col-lg-12' formGroup={true}>
             <Card>
               <CardBody>
@@ -157,9 +354,9 @@ class Dashboard extends React.Component {
               </CardBody>
             </Card>
           </Column>
-        </Row>
+        </Row> */}
 
-        <Row>
+        {/* <Row>
           <Column className='col-xl-6 col-lg-12' formGroup={true}>
             <Card>
               <CardBody>
@@ -213,9 +410,9 @@ class Dashboard extends React.Component {
               </CardBody>
             </Card>
           </Column>
-        </Row>
+        </Row> */}
 
-        <Row>
+        {/* <Row>
           <Column className='col-xl-4 col-lg-12' formGroup={true}>
             <Card>
               <CardHeader>
@@ -275,15 +472,27 @@ class Dashboard extends React.Component {
               </CardBody>
             </Card>
           </Column>
-        </Row>
+        </Row> */}
       </ContainerWrapper>
     );
   }
 }
 
+Dashboard.propTypes = {
+  token: PropTypes.shape({
+    project: PropTypes.shape({
+      idSucursal: PropTypes.string,
+    })
+  }),
+  moneda: PropTypes.shape({
+    codiso: PropTypes.string,
+  }),
+};
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    moneda: state.predeterminado.moneda,
   };
 };
 
