@@ -3,65 +3,77 @@ import { getUrlFileExtension, isEmpty, sleep } from '../helper/utils.helper';
 
 // Definimos el thunk asíncrono para manejar las descargas
 export const downloadFileAsync = createAsyncThunk('downloads/downloadFile', async (
-    { id, url, name }, { dispatch, rejectWithValue }
+    { id, url, name, isFile, content }, { dispatch, rejectWithValue }
 ) => {
     try {
-        // Obtener el objeto blob
-        const response = await fetch(url);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-        const isImage = contentType?.startsWith('image/');
-
-        // Verificar las cabeceras de la respuesta
-        const contentDisposition = response.headers.get('Content-Disposition');
+        let blob;
         let fileName = "";
-        if (!isEmpty(name)) {
+
+        if (isFile) {
             fileName = name;
+            dispatch(progressDownload({ id, fileName, progress : 100, received: 1, total: 1 }));
+            blob = new Blob([content], {
+                type: 'application/xml'
+            });
         } else {
-            if (isImage) {
-                const extension = getUrlFileExtension(contentType);
-                const timestamp = new Date().getTime();
-                fileName = `imagen_${timestamp}.${extension}`;
-            } else if (contentDisposition) {
-                fileName = contentDisposition.split(';')
-                    .find(n => n.includes('filename='))
-                    ?.split('=')[1]
-                    .replaceAll('"', '');
+            // Obtener el objeto blob
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            const isImage = contentType?.startsWith('image/');
+
+            // Verificar las cabeceras de la respuesta
+            const contentDisposition = response.headers.get('Content-Disposition');
+
+            if (!isEmpty(name)) {
+                fileName = name;
             } else {
-                return rejectWithValue({ id, error: "Falta el nombre del archivo." });
+                if (isImage) {
+                    const extension = getUrlFileExtension(contentType);
+                    const timestamp = new Date().getTime();
+                    fileName = `imagen_${timestamp}.${extension}`;
+                } else if (contentDisposition) {
+                    fileName = contentDisposition.split(';')
+                        .find(n => n.includes('filename='))
+                        ?.split('=')[1]
+                        .replaceAll('"', '');
+                } else {
+                    return rejectWithValue({ id, error: "Falta el nombre del archivo." });
+                }
             }
-        }
 
-        const reader = response.body.getReader();
-        const contentLength = +response.headers.get('Content-Length');
+            const reader = response.body.getReader();
+            const contentLength = +response.headers.get('Content-Length');
 
-        let receivedLength = 0;
-        let chunks = [];
+            let receivedLength = 0;
+            let chunks = [];
 
-        const process = true;
+            const process = true;
 
-        while (process) {
-            const { done, value } = await reader.read();
+            while (process) {
+                const { done, value } = await reader.read();
 
-            if (done) {
-                break;
+                if (done) {
+                    break;
+                }
+                chunks.push(value);
+                receivedLength += value.length;
+
+                const progress = Math.round((receivedLength / contentLength) * 100);
+                await sleep(500)
+                dispatch(progressDownload({ id, fileName, progress, received: receivedLength, total: contentLength }));
             }
-            chunks.push(value);
-            receivedLength += value.length;
 
-            const progress = Math.round((receivedLength / contentLength) * 100);
-            await sleep(500)
-            dispatch(progressDownload({ id, fileName, progress, received: receivedLength, total: contentLength }));
+            // const blob = new Blob(chunks);
+            blob = new Blob(chunks, {
+                type: contentType || 'application/octet-stream'
+            });
         }
-
-        // const blob = new Blob(chunks);
-        const blob = new Blob(chunks, {
-            type: contentType || 'application/octet-stream'
-        });
 
         // Crear un objeto URL temporal
         const blobUrl = window.URL.createObjectURL(blob);

@@ -764,7 +764,7 @@ ModalPersona.propTypes = {
 /**
  * Modal para enviar mensaje por Whatsapp.
  */
-class ModalSendWhatsapp extends React.Component {
+class ModalSendWhatsApp extends React.Component {
 
     constructor(props) {
         super(props);
@@ -856,7 +856,7 @@ class ModalSendWhatsapp extends React.Component {
     }
 }
 
-ModalSendWhatsapp.propTypes = {
+ModalSendWhatsApp.propTypes = {
     refModal: PropTypes.object,
     isOpen: PropTypes.bool.isRequired,
     phone: PropTypes.string,
@@ -869,5 +869,5 @@ export {
     ModalImpresion,
     ModalPreImpresion,
     ModalPersona,
-    ModalSendWhatsapp
+    ModalSendWhatsApp
 }

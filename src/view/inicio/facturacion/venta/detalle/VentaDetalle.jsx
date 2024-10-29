@@ -25,7 +25,7 @@ import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
-import { ModalSendWhatsapp } from '../../../../../components/MultiModal';
+import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -65,7 +65,7 @@ class VentaDetalle extends CustomComponent {
     };
 
     // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsapp = React.createRef();
+    this.refModalSendWhatsApp = React.createRef();
 
     // Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -458,8 +458,8 @@ class VentaDetalle extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
-        <ModalSendWhatsapp
-          refModal={this.refModalSendWhatsapp}
+        <ModalSendWhatsApp
+          refModal={this.refModalSendWhatsApp}
           isOpen={this.state.isOpenSendWhatsapp}
           phone={this.state.celular}
           handleClose={this.handleCloseSendWhatsapp}

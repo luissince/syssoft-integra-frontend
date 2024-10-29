@@ -60,7 +60,6 @@ class Principal extends CustomComponent {
     const response = await initSucursales(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
-      console.log(response.data);
       this.setState({
         sucursales: response.data,
         cache: response.data,

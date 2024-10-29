@@ -27,7 +27,7 @@ import Button from "../../../../../components/Button";
 import ModalTransaccion from "../../../../../components/ModalTransaccion";
 import SweetAlert from "../../../../../model/class/sweet-alert";
 import pdfVisualizer from "pdf-visualizer";
-import { ModalImpresion } from "../../../../../components/MultiModal";
+import { ModalImpresion, ModalSendWhatsApp } from "../../../../../components/MultiModal";
 import { images } from "../../../../../helper";
 
 /**
@@ -95,7 +95,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     this.refModalImpresion = React.createRef();
 
     // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsapp = React.createRef();
+    this.refModalSendWhatsApp = React.createRef();
 
     //Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -707,6 +707,14 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
+        />
+
+        <ModalSendWhatsApp
+          refModal={this.refModalSendWhatsApp}
+          isOpen={this.state.isOpenSendWhatsapp}
+          phone={this.state.celular}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
         />
 
         <Title

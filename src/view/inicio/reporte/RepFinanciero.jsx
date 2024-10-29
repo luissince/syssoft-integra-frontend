@@ -302,7 +302,7 @@ class RepFinanciero extends CustomComponent {
             </Link>
           </TableCell>
           <TableCell>{item.credito == 0 ? "" : numberFormat(item.credito, item.codiso)}</TableCell>
-          <TableCell>{ item.debito == 0 ? "" : numberFormat(item.debito, item.codiso)}</TableCell>
+          <TableCell>{item.debito == 0 ? "" : numberFormat(item.debito, item.codiso)}</TableCell>
         </TableRow>
       );
     });
@@ -403,6 +403,7 @@ class RepFinanciero extends CustomComponent {
               value={this.state.idUsuario}
               onChange={this.handleSelectUsuario}
             >
+              <option value="">TODOS</option>
               {
                 this.state.usuarios.map((item, index) => (
                   <option key={index} value={item.idUsuario}>

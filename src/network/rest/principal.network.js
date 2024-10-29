@@ -2180,6 +2180,13 @@ export async function consultarCpeSunat(ruc, usuario, clave, tipoComprobante, se
   );
 }
 
+export async function cdrCpeSunat(ruc, usuario, clave, tipoComprobante, serie, numeracion) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/cdr/${ruc}/${usuario}/${clave}/${tipoComprobante}/${serie}/${numeracion}`),
+  );
+}
+
+
 export function obtenerXmlSunat(idComprobante) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`
 }

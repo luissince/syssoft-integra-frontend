@@ -20,6 +20,7 @@ import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
+import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -55,7 +56,7 @@ class CobroDetalle extends CustomComponent {
     };
 
     // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsapp = React.createRef();
+    this.refModalSendWhatsApp = React.createRef();
 
     // Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -199,13 +200,13 @@ class CobroDetalle extends CustomComponent {
       email: email
     };
 
-    const documentUrl = documentsPdfInvoicesCobro(this.state.idVenta, "A4");
+    const documentUrl = documentsPdfInvoicesCobro(this.state.idCobro, "A4");
 
     // Crear mensaje con formato
     const message = `
     Hola! Somos *${companyInfo.name}*
     
-    Le enviamos su comprobante de venta:
+    Le enviamos su comprobante de cobro:
     ${documentUrl}
     
     Para cualquier consulta, puede contactarnos:
@@ -357,6 +358,13 @@ class CobroDetalle extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
+        <ModalSendWhatsApp
+          refModal={this.refModalSendWhatsApp}
+          isOpen={this.state.isOpenSendWhatsapp}
+          phone={this.state.celular}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
+        />
 
         <Row>
           <Column formGroup={true}>
@@ -383,7 +391,7 @@ class CobroDetalle extends CustomComponent {
             {' '}
             <Button
               className="btn-light"
-            // onClick={this.handleOpenSendWhatsapp}
+              onClick={this.handleOpenSendWhatsapp}
             >
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>

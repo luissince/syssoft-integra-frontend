@@ -21,6 +21,7 @@ import Button from '../../../../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import pdfVisualizer from 'pdf-visualizer';
 import React from 'react';
+import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -70,7 +71,7 @@ class GuiaRemisionDetalle extends CustomComponent {
     };
 
     // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsapp = React.createRef();
+    this.refModalSendWhatsApp = React.createRef();
 
     //Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -249,13 +250,13 @@ class GuiaRemisionDetalle extends CustomComponent {
       email: email
     };
 
-    const documentUrl = documentsPdfInvoicesGuiaRemision(this.state.idVenta, "A4");
+    const documentUrl = documentsPdfInvoicesGuiaRemision(this.state.idGuiaRemision, "A4");
 
     // Crear mensaje con formato
     const message = `
     Hola! Somos *${companyInfo.name}*
     
-    Le enviamos su comprobante de venta:
+    Le enviamos su comprobante de guía de remisión:
     ${documentUrl}
     
     Para cualquier consulta, puede contactarnos:
@@ -312,6 +313,14 @@ class GuiaRemisionDetalle extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
+        <ModalSendWhatsApp
+          refModal={this.refModalSendWhatsApp}
+          isOpen={this.state.isOpenSendWhatsapp}
+          phone={this.state.celular}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
+        />
+
         <Row>
           <Column formGroup={true}>
             <Button
@@ -337,7 +346,7 @@ class GuiaRemisionDetalle extends CustomComponent {
             {' '}
             <Button
               className="btn-light"
-            // onClick={this.handleOpenSendWhatsapp}
+              onClick={this.handleOpenSendWhatsapp}
             >
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>

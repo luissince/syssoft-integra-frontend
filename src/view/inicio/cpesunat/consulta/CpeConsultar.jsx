@@ -1,20 +1,35 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   alertDialog,
   alertInfo,
   alertSuccess,
   alertWarning,
+  guId,
   isEmpty,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { consultarCpeSunat, loadEmpresa } from '../../../../network/rest/principal.network';
+import { cdrCpeSunat, consultarCpeSunat, loadEmpresa } from '../../../../network/rest/principal.network';
+import { downloadFileAsync } from '../../../../redux/downloadSlice';
+import { SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Title from '../../../../components/Title';
+import Button from '../../../../components/Button';
 
-
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class CpeElectronicos extends React.Component {
+
+  /**
+   * 
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -32,8 +47,6 @@ class CpeElectronicos extends React.Component {
 
       codigo: '',
       respuesta: '',
-      descarga: '',
-      file: '',
     };
 
     this.refRuc = React.createRef();
@@ -124,15 +137,6 @@ class CpeElectronicos extends React.Component {
     alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
       if (value) {
 
-        // const data = {
-        //   rucSol: this.state.ruc,
-        //   userSol: this.state.usuario,
-        //   passSol: this.state.clave,
-        //   tipo: this.state.tipo,
-        //   serie: this.state.serie.toUpperCase(),
-        //   correlativo: this.state.correlativo,
-        // };
-
         alertInfo("Consulta", "Precesanso...")
 
         const response = await consultarCpeSunat(
@@ -153,20 +157,20 @@ class CpeElectronicos extends React.Component {
                 'Consultar Comprobante',
                 'Resultado: Código ' + result.code + ' ' + result.message,
               );
-              // if (cdr != "") {
-              //     // $("#lblRutaDescarga").append('<a onclick="descargarCdr(\'' + result.file + '\')"" style="cursor:pointer">' + result.file + '</a>');
-              // }
+              this.setState({ codigo: result.code , respuesta: result.message });
             } else {
               alertWarning(
                 'Consultar Comprobante',
                 'Resultado: Código ' + result.code + ' ' + result.message,
               );
+              this.setState({ codigo: result.code , respuesta: result.message });
             }
           } else {
             alertWarning(
               'Consultar Comprobante',
               'Resultado: Código ' + result.code + ' ' + result.message,
             );
+            this.setState({ codigo: result.code , respuesta: result.message });
           }
         }
 
@@ -178,92 +182,100 @@ class CpeElectronicos extends React.Component {
   }
 
   async onEventConsultarCdr() {
-    // if (this.state.ruc === '') {
-    //   await this.setStateAsync({
-    //     messageWarning: 'Ingrese el número ruc de la empresa.',
-    //   });
-    //   return;
-    // }
+    if (isEmpty(this.state.ruc)) {
+      alertWarning('Empressa', 'Ingrese el número ruc de la empresa.', () => {
+        this.refRuc.current.focus();
+      });
+      return;
+    }
 
-    // if (this.state.usuario === '') {
-    //   await this.setStateAsync({
-    //     messageWarning: 'El campo usuario es requerido.',
-    //   });
-    //   return;
-    // }
+    if (isEmpty(this.state.usuario)) {
+      alertWarning('Empressa', 'El campo usuario es requerido.', () => {
+        this.refUsuario.current.focus();
+      });
+      return;
+    }
 
-    // if (this.state.clave === '') {
-    //   await this.setStateAsync({
-    //     messageWarning: 'El campo contraseña es requerido.',
-    //   });
-    //   return;
-    // }
+    if (isEmpty(this.state.clave)) {
+      alertWarning('Empressa', 'El campo contraseña es requerido.', () => {
+        this.refClave.current.focus();
+      });
+      return;
 
-    // if (this.state.tipo === '') {
-    //   await this.setStateAsync({
-    //     messageWarning: 'Seleccione tipo de documento.',
-    //   });
-    //   return;
-    // }
+    }
 
-    // if (this.state.serie === '') {
-    //   await this.setStateAsync({
-    //     messageWarning: 'Ingrese una serie correcta.',
-    //   });
-    //   return;
-    // }
 
-    // if (this.state.correlativo === '') {
-    //   await this.setStateAsync({ messageWarning: 'Ingrese un correlativo.' });
-    //   return;
-    // }
+    if (isEmpty(this.state.tipo)) {
+      alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
+        this.refTipo.current.focus();
+      });
+      return;
 
-    // alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
-    //   if (value) {
-    //     const data = {
-    //       rucSol: this.state.ruc,
-    //       userSol: this.state.usuario,
-    //       passSol: this.state.clave,
-    //       ruc: this.state.ruc,
-    //       tipo: this.state.tipo,
-    //       serie: this.state.serie.toUpperCase(),
-    //       numero: this.state.correlativo,
-    //       cdr: 'cdr',
-    //     };
+    }
 
-    //     const response = await cdrStatus(data);
+    if (isEmpty(this.state.serie)) {
+      alertWarning('Empressa', 'Ingrese una serie correcta.', () => {
+        this.refSerie.current.focus();
+      });
+      return;
 
-    //     if (response instanceof SuccessReponse) {
-    //       const result = response.data;
+    }
 
-    //       if (result.state === true) {
-    //         if (result.accepted === true) {
-    //           alertSuccess(
-    //             'Consultar Comprobante',
-    //             'Resultado: Código ' + result.code + ' ' + result.message,
-    //           );
-    //           // if (cdr != "") {
-    //           //     // $("#lblRutaDescarga").append('<a onclick="descargarCdr(\'' + result.file + '\')"" style="cursor:pointer">' + result.file + '</a>');
-    //           // }
-    //         } else {
-    //           alertWarning(
-    //             'Consultar Comprobante',
-    //             'Resultado: Código ' + result.code + ' ' + result.message,
-    //           );
-    //         }
-    //       } else {
-    //         alertWarning(
-    //           'Consultar Comprobante',
-    //           'Resultado: Código ' + result.code + ' ' + result.message,
-    //         );
-    //       }
-    //     }
+    if (isEmpty(this.state.correlativo)) {
+      alertWarning('Empressa', 'Ingrese un correlativo.', () => {
+        this.refCorrelativo.current.focus();
+      });
+      return;
+    }
 
-    //     if (response instanceof ErrorResponse) {
-    //       alertWarning('Consultar Comprobante', response.getMessage());
-    //     }
-    //   }
-    // });
+    alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
+      if (value) {
+
+        alertInfo("Consulta", "Precesanso...")
+
+        const response = await cdrCpeSunat(
+          this.state.ruc,
+          this.state.usuario,
+          this.state.clave,
+          this.state.tipo,
+          this.state.serie.toUpperCase(),
+          this.state.correlativo,
+        );
+
+        if (response instanceof SuccessReponse) {
+          const result = response.data;
+
+          if (result.state === true) {
+            if (result.accepted === true) {
+              alertSuccess(
+                'Consultar Comprobante',
+                'Resultado: Código ' + result.code + ' ' + result.message,
+              );
+
+              const id = guId();
+              this.props.downloadFileAsync({ id, url: "", name: result.fileName + ".xml", isFile: true, content: result.xml });
+              this.setState({ codigo: result.code , respuesta: result.message });
+            } else {
+              alertWarning(
+                'Consultar Comprobante',
+                'Resultado: Código ' + result.code + ' ' + result.message,
+              );
+              this.setState({ codigo: result.code , respuesta: result.message });
+            }
+          } else {
+            alertWarning(
+              'Consultar Comprobante',
+              'Resultado: Código ' + result.code + ' ' + result.message,
+            );
+            this.setState({ codigo: result.code , respuesta: result.message });
+          }
+        }
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Consultar Comprobante', response.getMessage());
+        }
+      }
+    });
   }
 
   async onEventLimpiar() {
@@ -274,33 +286,25 @@ class CpeElectronicos extends React.Component {
 
       codigo: '',
       respuesta: '',
-      descarga: '',
-      file: '',
+
     });
 
     this.refTipo.current.focus();
   }
 
-  onEventDownload() {
-    // let ruta_completa = `${process.env.REACT_APP_URL}/app/files/${this.state.file}`;
-    // window.open(ruta_completa, 'Download');
-  }
-
   render() {
     return (
       <ContainerWrapper>
-        {this.state.msgLoading && spinnerLoading(this.state.msgMessage)}
+        <SpinnerView
+          loading={this.state.msgLoading}
+          message={this.state.msgMessage}
+        />
 
-        <div className="row">
-          <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <h5>
-                Consultar Comprobantes{' '}
-                <small className="text-secondary">LISTA</small>
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Consultar Comprobantes'
+          subTitle='FORMULARIO'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         {this.state.messageWarning === '' ? null : (
           <div className="alert alert-warning" role="alert">
@@ -309,196 +313,168 @@ class CpeElectronicos extends React.Component {
           </div>
         )}
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <h6>Credenciales </h6>
-            </div>
-          </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <h6>Credenciales </h6>
+          </Column>
 
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <h6>Datos del Comprobante </h6>
-            </div>
-          </div>
-        </div>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <h6>Datos del Comprobante </h6>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>Ruc: </label>
-            <div className="form-group">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="Ingrese su RUC"
-                ref={this.refRuc}
-                value={this.state.ruc}
-                onChange={(value) => this.setState({ ruc: value.target.value })}
-              />
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
+            <input
+              className="form-control"
+              type="text"
+              placeholder="Ingrese su RUC"
+              ref={this.refRuc}
+              value={this.state.ruc}
+              onChange={(value) => this.setState({ ruc: value.target.value })}
+            />
+          </Column>
+
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>Tipo: </label>
-            <div className="form-group">
-              <select
-                ref={this.refTipo}
-                className="form-control"
-                value={this.state.tipo}
-                onChange={(value) =>
-                  this.setState({ tipo: value.target.value })
-                }
-              >
-                <option value=""> -- Seleccione -- </option>
-                <option value="01">01 - Factura</option>
-                <option value="03">03 - Boleta De Venta</option>
-                <option value="07">07 - Nota de Crédito</option>
-                <option value="08">08 - Nota de Débito</option>
-                <option value="R1">R1 - Recibo por Honorarios</option>
-                <option value="R7">
-                  R7 - Nota Crédito Recibo por Honorarios{' '}
-                </option>
-                <option value="04">04 - Liquidación de Compra</option>
-                <option value="23">
-                  23 - Póliza de Adjudicación Electrónica
-                </option>
-              </select>
-            </div>
-          </div>
+            <select
+              ref={this.refTipo}
+              className="form-control"
+              value={this.state.tipo}
+              onChange={(value) =>
+                this.setState({ tipo: value.target.value })
+              }
+            >
+              <option value=""> -- Seleccione -- </option>
+              <option value="01">01 - Factura</option>
+              <option value="03">03 - Boleta De Venta</option>
+              <option value="07">07 - Nota de Crédito</option>
+              <option value="08">08 - Nota de Débito</option>
+              <option value="R1">R1 - Recibo por Honorarios</option>
+              <option value="R7">
+                R7 - Nota Crédito Recibo por Honorarios{' '}
+              </option>
+              <option value="04">04 - Liquidación de Compra</option>
+              <option value="23">
+                23 - Póliza de Adjudicación Electrónica
+              </option>
+            </select>
+          </Column>
+        </Row>
 
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>usuario: </label>
-            <div className="form-group">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="Ingrese su Usuario"
-                ref={this.refUsuario}
-                value={this.state.usuario}
-                onChange={(value) =>
-                  this.setState({ usuario: value.target.value })
-                }
-              />
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
+            <input
+              className="form-control"
+              type="text"
+              placeholder="Ingrese su Usuario"
+              ref={this.refUsuario}
+              value={this.state.usuario}
+              onChange={(value) =>
+                this.setState({ usuario: value.target.value })
+              }
+            />
+          </Column>
+
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>Serie: </label>
-            <div className="form-group">
-              <input
-                ref={this.refSerie}
-                className="form-control"
-                type="text"
-                placeholder="F001 / B001 / etc"
-                maxLength="4"
-                value={this.state.serie}
-                onChange={(value) =>
-                  this.setState({ serie: value.target.value })
-                }
-              />
-            </div>
-          </div>
+            <input
+              ref={this.refSerie}
+              className="form-control"
+              type="text"
+              placeholder="F001 / B001 / etc"
+              maxLength="4"
+              value={this.state.serie}
+              onChange={(value) =>
+                this.setState({ serie: value.target.value })
+              }
+            />
+          </Column>
+        </Row>
 
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>Contraseña: </label>
-            <div className="form-group">
-              <input
-                className="form-control"
-                type="password"
-                placeholder="Ingrese Contraseña"
-                autoComplete="off"
-                ref={this.refClave}
-                value={this.state.clave}
-                onChange={(value) =>
-                  this.setState({ clave: value.target.value })
-                }
-              />
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
+            <input
+              className="form-control"
+              type="password"
+              placeholder="Ingrese Contraseña"
+              autoComplete="off"
+              ref={this.refClave}
+              value={this.state.clave}
+              onChange={(value) =>
+                this.setState({ clave: value.target.value })
+              }
+            />
+          </Column>
+
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>Correlativo: </label>
-            <div className="form-group">
-              <input
-                ref={this.refCorrelativo}
-                className="form-control"
-                type="number"
-                placeholder="ingrese correlativo (1,2,3...)"
-                value={this.state.correlativo}
-                onChange={(value) =>
-                  this.setState({ correlativo: value.target.value })
-                }
-              />
-            </div>
-          </div>
+            <input
+              ref={this.refCorrelativo}
+              className="form-control"
+              type="number"
+              placeholder="ingrese correlativo (1,2,3...)"
+              value={this.state.correlativo}
+              onChange={(value) =>
+                this.setState({ correlativo: value.target.value })
+              }
+            />
+          </Column>
+        </Row>
 
-        </div>
-
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-success"
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+              <Button
+                className="btn-success"
                 onClick={() => this.onEventConsultarEstado()}
               >
-                Consultar Estado{' '}
-              </button>{' '}
-              <button
-                className="btn btn-primary"
+                Consultar Estado
+              </Button>
+              {' '}
+              <Button
+                className="btn-primary"
                 onClick={() => this.onEventConsultarCdr()}
               >
-                Consultar CDR{' '}
-              </button>{' '}
-              <button
-                className="btn btn-danger"
+                Consultar CDR
+              </Button>
+              {' '}
+              <Button
+                className="btn-danger"
                 onClick={() => this.onEventLimpiar()}
               >
-                Limpiar{' '}
-              </button>
-            </div>
-          </div>
+                Limpiar
+              </Button>
+          </Column>
           <div className="col-md-6 col-sm-12"></div>
-        </div>
+        </Row>
 
-        <div className="row">
-          <div className="col-sm-12">
+        <Row>
+          <Column className="col-sm-12">
             <div className="form-group">
               <h6>Resultado</h6>
             </div>
-          </div>
-          <div className="col-sm-12">
-            <label>Codigo: </label>
-            <label>{this.state.codigo}</label>
-          </div>
-          <div className="col-sm-12">
-            <label>Respuesta: </label>
-            <label>{this.state.respuesta}</label>
-          </div>
-          <div className="col-sm-12">
-            <label>Ruta de descarga: </label>{' '}
-            <span>
-              {this.state.descarga !== '' ? (
-                <button
-                  className="btn btn-link"
-                  onClick={() => {
-                    this.onEventDownload();
-                  }}
-                  type="button"
-                >
-                  {' '}
-                  {this.state.file}
-                </button>
-              ) : null}
-            </span>
-          </div>
-        </div>
+          </Column>
+          <Column className="col-sm-12">
+            <label>Codigo: {this.state.codigo}</label>
+          </Column>
+          <Column className="col-sm-12">
+            <label>Respuesta: {this.state.respuesta}</label>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }
 }
+
+CpeElectronicos.propTypes = {
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
+  downloadFileAsync: PropTypes.func,
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -506,6 +482,8 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedCpeElectronicos = connect(mapStateToProps, null)(CpeElectronicos);
+const mapDispatchToProps = { downloadFileAsync };
+
+const ConnectedCpeElectronicos = connect(mapStateToProps, mapDispatchToProps)(CpeElectronicos);
 
 export default ConnectedCpeElectronicos;
