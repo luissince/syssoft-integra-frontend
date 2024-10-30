@@ -14,6 +14,8 @@ import PropTypes from 'prop-types';
 import Button from '../../../../../components/Button';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
+import Image from '../../../../../components/Image';
+import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -224,7 +226,15 @@ class CompraDetalle extends CustomComponent {
     return (
       this.state.detalles.map((item, index) => (
         <TableRow key={index}>
-          <TableCell>{++index}</TableCell>
+          <TableCell>{item.id}</TableCell>
+          <TableCell className="text-center">
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.producto}
+              width={100}
+            />
+          </TableCell>
           <TableCell>{item.producto}</TableCell>
           <TableCell className="text-right">{numberFormat(item.costo, this.state.codiso)}</TableCell>
           <TableCell>{item.categoria}</TableCell>
@@ -548,7 +558,8 @@ class CompraDetalle extends CustomComponent {
                 <TableHeader className="thead-dark">
                   <TableRow>
                     <TableHead>#</TableHead>
-                    <TableHead>Descripción</TableHead>
+                    <TableHead className="text-center">Imagen</TableHead>
+                    <TableHead>Producto</TableHead>
                     <TableHead>Costo</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Impuesto %</TableHead>

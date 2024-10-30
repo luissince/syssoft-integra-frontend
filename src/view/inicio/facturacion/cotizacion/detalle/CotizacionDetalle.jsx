@@ -17,6 +17,8 @@ import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import { connect } from 'react-redux';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
+import Image from '../../../../../components/Image';
+import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -540,7 +542,8 @@ class CotizacionDetalle extends CustomComponent {
                 <TableHeader className="table-dark">
                   <TableRow>
                     <TableHead>#</TableHead>
-                    <TableHead>Descripción</TableHead>
+                    <TableHead className="text-center">Imagen</TableHead>
+                    <TableHead>Producto</TableHead>
                     <TableHead>Precio</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Impuesto %</TableHead>
@@ -554,6 +557,14 @@ class CotizacionDetalle extends CustomComponent {
                     this.state.detalles.map((item, index) => (
                       <TableRow key={index}>
                         <TableCell>{item.id}</TableCell>
+                        <TableCell className="text-center">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            width={100}
+                          />
+                        </TableCell>
                         <TableCell>
                           {item.codigo}
                           <br />

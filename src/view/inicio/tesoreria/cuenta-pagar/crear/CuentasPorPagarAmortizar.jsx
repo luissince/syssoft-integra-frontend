@@ -28,6 +28,8 @@ import pdfVisualizer from "pdf-visualizer";
 import SweetAlert from "../../../../../model/class/sweet-alert";
 import { ModalImpresion } from "../../../../../components/MultiModal";
 import printJS from "print-js";
+import Image from "../../../../../components/Image";
+import { images } from "../../../../../helper";
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -384,7 +386,15 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         return (
             this.state.detalles.map((item, index) => (
                 <TableRow key={index}>
-                    <TableCell>{++index}</TableCell>
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell className="text-center">
+                        <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            width={100}
+                        />
+                    </TableCell>
                     <TableCell>{item.producto}</TableCell>
                     <TableCell>{item.medida}</TableCell>
                     <TableCell>{item.categoria}</TableCell>
@@ -774,7 +784,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>#</TableHead>
-                                        <TableHead>Concepto</TableHead>
+                                        <TableHead>Producto</TableHead>
                                         <TableHead>Unidad</TableHead>
                                         <TableHead>Categoría</TableHead>
                                         <TableHead>Cantidad</TableHead>

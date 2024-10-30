@@ -9,7 +9,7 @@ import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../compon
 import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import Title from '../../../components/Title';
-import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText, ShoppingCart, Store } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, ClipboardList, DollarSign, FileText, ShoppingCart, Store, Truck } from 'lucide-react';
 import { dashboardInit } from '../../../network/rest/principal.network';
 import { formatDecimal, isEmpty, numberFormat } from '../../../helper/utils.helper';
 
@@ -137,7 +137,7 @@ class Dashboard extends React.Component {
 
     let rows = [];
 
-    const newRows = this.state.inventarios.map((item, index) => {   
+    const newRows = this.state.inventarios.map((item, index) => {
       return (
         <TableRow key={index}>
           <TableCell>{item.id}</TableCell>
@@ -201,7 +201,7 @@ class Dashboard extends React.Component {
                 <DollarSign width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>{numberFormat(this.state.totalVentas, this.state.codIso)}</CardText>
+                <CardText className={"text-primary"}>{numberFormat(this.state.totalVentas, this.state.codIso)}</CardText>
                 <p className="text-xs text-secondary">+20.1% del mes anterior</p>
               </CardBody>
             </Card>
@@ -210,7 +210,7 @@ class Dashboard extends React.Component {
           <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-sm m-0'>Compras Pendientes</CardTitle>
+                <CardTitle className='text-sm m-0'>Compras Total de Hoy</CardTitle>
                 <DollarSign width={20} height={20} />
               </CardHeader>
               <CardBody>
@@ -227,7 +227,7 @@ class Dashboard extends React.Component {
                 <ArrowDownIcon width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>{numberFormat(this.state.totalCuentasPorCobrar, this.state.codIso)}</CardText>
+                <CardText className={"text-success"}>{numberFormat(this.state.totalCuentasPorCobrar, this.state.codIso)}</CardText>
                 <p className="text-xs text-secondary">+8.2% del mes anterior</p>
               </CardBody>
             </Card>
@@ -240,7 +240,7 @@ class Dashboard extends React.Component {
                 <ArrowUpIcon width={20} height={20} />
               </CardHeader>
               <CardBody>
-                <CardText>{numberFormat(this.state.totalCuentasPorPagar, this.state.codIso)}</CardText>
+                <CardText className={"text-danger"}>{numberFormat(this.state.totalCuentasPorPagar, this.state.codIso)}</CardText>
                 <p className="text-xs text-secondary">+20.1% del mes anterior</p>
               </CardBody>
             </Card>
@@ -256,8 +256,16 @@ class Dashboard extends React.Component {
               </CardHeader>
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
-                  <p className='text-lg m-0'><FileText width={20} height={20} /> Emitodos hoy:</p>
-                  <p className='text-lg m-0'>{this.state.totalComprobantes}</p>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos hoy:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                </div>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
                 </div>
               </CardBody>
             </Card>
@@ -266,13 +274,20 @@ class Dashboard extends React.Component {
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Productos sin Inventario</CardTitle>
-                <ShoppingCart width={20} height={20} />
+                <CardTitle className='m-0'>Cotizaciones</CardTitle>
               </CardHeader>
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
-                  <p className='text-lg m-0'><FileText width={20} height={20} /> Cantidad:</p>
-                  <p className='text-lg m-0'>{this.state.totalInventario}</p>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos hoy:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                </div>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
                 </div>
               </CardBody>
             </Card>
@@ -281,13 +296,20 @@ class Dashboard extends React.Component {
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Total de Sucursales</CardTitle>
-                <Store width={20} height={20} />
+                <CardTitle className='m-0'>Pedidos</CardTitle>
               </CardHeader>
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
-                  <p className='text-lg m-0'><FileText width={20} height={20} /> Total:</p>
-                  <p className='text-lg m-0'>{this.state.totalSucursales}</p>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos hoy:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                </div>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
                 </div>
               </CardBody>
             </Card>
@@ -298,7 +320,7 @@ class Dashboard extends React.Component {
           <Column>
             <Card>
               <CardHeader>
-                <CardTitle>Inventario con cantidades faltantes</CardTitle>
+                <CardTitle>Rendimiento por Sucursal</CardTitle>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
@@ -306,13 +328,13 @@ class Dashboard extends React.Component {
                     <TableHeader>
                       <TableRow>
                         <TableHead width="5%">#</TableHead>
-                        <TableHead width="50%">Almacen</TableHead>
-                        <TableHead width="30%">Sucursal</TableHead>
-                        <TableHead width="20%">Cantidad</TableHead>
+                        <TableHead width="50%">Ventas</TableHead>
+                        <TableHead width="30%">Inventario</TableHead>
+                        <TableHead width="20%">Rendimiento</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {this.renderLista()}
+                      {this.renderLista()}
                     </TableBody>
                   </Table>
                 </TableResponsive>

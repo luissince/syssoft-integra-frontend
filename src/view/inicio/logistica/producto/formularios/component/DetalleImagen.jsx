@@ -1,7 +1,9 @@
 import Button from '../../../../../../components/Button';
 import { Switches } from '../../../../../../components/Checks';
 import Column from '../../../../../../components/Column';
+import Image from '../../../../../../components/Image';
 import Row from '../../../../../../components/Row';
+import { images } from '../../../../../../helper';
 import { formatDecimal } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 
@@ -26,7 +28,8 @@ const DetalleImagen = (props) => {
     <>
       <Row>
         <Column className="col-12 text-center" formGroup={true}>
-          <img
+          <Image
+            default={images.noImage}
             src={imagen.url}
             alt="Logo"
             className="img-fluid border border-primary rounded"

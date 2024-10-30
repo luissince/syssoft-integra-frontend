@@ -26,6 +26,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
+import Image from '../../../../../components/Image';
+import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -292,7 +294,15 @@ class VentaDetalle extends CustomComponent {
     return (
       this.state.detalles.map((item, index) => (
         <TableRow key={index}>
-          <TableCell>{++index}</TableCell>
+          <TableCell>{item.id}</TableCell>
+          <TableCell className="text-center">
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.producto}
+              width={100}
+            />
+          </TableCell>
           <TableCell>
             {item.codigo}
             <br />
@@ -602,6 +612,7 @@ class VentaDetalle extends CustomComponent {
                 <TableHeader className="table-dark">
                   <TableRow>
                     <TableHead>#</TableHead>
+                    <TableHead className="text-center">Imagen</TableHead>
                     <TableHead>Descripción</TableHead>
                     <TableHead>Unidad</TableHead>
                     <TableHead>Categoría</TableHead>

@@ -22,6 +22,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import pdfVisualizer from 'pdf-visualizer';
 import React from 'react';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
+import Image from '../../../../../components/Image';
+import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -65,7 +67,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       numeracionRef: "",
       cliente: "",
 
-      detalle: [],
+      detalles: [],
 
       isOpenSendWhatsapp: false,
     };
@@ -193,7 +195,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       numeracionRef,
       cliente,
 
-      detalle: guiaRemision.detalle,
+      detalles: guiaRemision.detalles,
 
       loading: false,
     });
@@ -488,17 +490,26 @@ class GuiaRemisionDetalle extends CustomComponent {
               <Table className="table-light table-striped">
                 <TableHeader className="table-dark">
                   <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Descripción</TableHead>
+                    <TableHead className="text-center">#</TableHead>
+                    <TableHead className="text-center">Imagen</TableHead>
+                    <TableHead>Producto</TableHead>
                     <TableHead>Unid. Medida</TableHead>
                     <TableHead>Cantidad</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {
-                    this.state.detalle.map((item, index) => (
+                    this.state.detalles.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{++index}</TableCell>
+                        <TableCell className="text-center">{++index}</TableCell>
+                        <TableCell className="text-center">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.nombre}
+                            width={100}
+                          />
+                        </TableCell>
                         <TableCell>{item.codigo}<br />{item.nombre}</TableCell>
                         <TableCell>{item.medida}</TableCell>
                         <TableCell>{rounded(item.cantidad)}</TableCell>

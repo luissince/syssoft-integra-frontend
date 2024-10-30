@@ -319,7 +319,7 @@ class Productos extends CustomComponent {
             <Image
               default={images.noImage}
               src={item.imagen}
-              alt="Logo"
+              alt={item.nombre}
               width={100}
             />
           </TableCell>

@@ -29,6 +29,7 @@ import SweetAlert from "../../../../../model/class/sweet-alert";
 import pdfVisualizer from "pdf-visualizer";
 import { ModalImpresion, ModalSendWhatsApp } from "../../../../../components/MultiModal";
 import { images } from "../../../../../helper";
+import Image from "../../../../../components/Image";
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -463,7 +464,15 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     return (
       this.state.detalles.map((item, index) => (
         <TableRow key={index}>
-          <TableCell>{++index}</TableCell>
+          <TableCell>{item.id}</TableCell>
+          <TableCell className="text-center">
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.producto}
+              width={70}
+            />
+          </TableCell>
           <TableCell>{item.producto}</TableCell>
           <TableCell>{item.medida}</TableCell>
           <TableCell>{item.categoria}</TableCell>
@@ -879,7 +888,8 @@ class CuentasPorCobrarAbonar extends CustomComponent {
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
-                    <TableHead>Concepto</TableHead>
+                    <TableHead className="text-center">Imagen</TableHead>
+                    <TableHead>Producto</TableHead>
                     <TableHead>Unidad</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Cantidad</TableHead>
