@@ -613,7 +613,7 @@ class VentaDetalle extends CustomComponent {
                   <TableRow>
                     <TableHead>#</TableHead>
                     <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Descripción</TableHead>
+                    <TableHead>Producto</TableHead>
                     <TableHead>Unidad</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Cantidad</TableHead>

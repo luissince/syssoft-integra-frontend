@@ -43,7 +43,7 @@ class CobroDetalle extends CustomComponent {
       cliente: '',
       fecha: '',
       observacion: '',
-      estado: '',
+      estado: 0,
       usuario: '',
       total: '',
       codiso: '',

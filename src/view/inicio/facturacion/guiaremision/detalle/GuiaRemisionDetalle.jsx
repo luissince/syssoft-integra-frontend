@@ -62,6 +62,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       direccionLlegada: "",
       ubigeoLlegada: "",
       usuario: "",
+      estado: 0,
       comprobanteRef: "",
       serieRef: "",
       numeracionRef: "",
@@ -161,6 +162,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       direccionLlegada,
       ubigeoLlegada,
       usuario,
+      estado,
       comprobanteRef,
       serieRef,
       numeracionRef,
@@ -190,6 +192,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       direccionLlegada,
       ubigeoLlegada,
       usuario,
+      estado,
       comprobanteRef,
       serieRef,
       numeracionRef,
@@ -476,6 +479,22 @@ class GuiaRemisionDetalle extends CustomComponent {
                   </TableHead>
                   <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                     {this.state.direccionLlegada}
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
+                    Estado:
+                  </TableHead>
+                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                    {this.state.estado === 1 ? (
+                      <span className="text-success font-weight-bold">
+                        ACTIVO
+                      </span>
+                    ) : (
+                      <span className="text-danger font-weight-bold">
+                        ANULADO
+                      </span>
+                    )}
                   </TableHead>
                 </TableRow>
               </TableHeader>

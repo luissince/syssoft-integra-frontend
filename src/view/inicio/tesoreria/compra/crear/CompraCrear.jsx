@@ -41,6 +41,8 @@ import { clearCrearCompra, setCrearCompraLocal, setCrearCompraState } from '../.
 import { ModalImpresion, ModalPersona } from '../../../../../components/MultiModal';
 import printJS from 'print-js';
 import SweetAlert from '../../../../../model/class/sweet-alert';
+import Image from '../../../../../components/Image';
+import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -180,7 +182,7 @@ class CompraCrear extends CustomComponent {
 
   loadData = async () => {
     if (this.props.compraCrear && this.props.compraCrear.state && this.props.compraCrear.local) {
-      await this.setState(this.props.compraCrear.state);
+      await this.setStateAsync(this.props.compraCrear.state);
       if (this.props.compraCrear.state.persona) {
         this.handleSelectItemPersona(this.props.compraCrear.state.persona);
       }
@@ -801,7 +803,6 @@ class CompraCrear extends CustomComponent {
   // Procesos impresión
   //------------------------------------------------------------------------------------------
   handleOpenImpresion = (idCompra) => {
-    console.log(idCompra);
     this.setState({ isOpenImpresion: true, idCompra: idCompra })
   }
 
@@ -810,7 +811,6 @@ class CompraCrear extends CustomComponent {
   }
 
   handlePrinterImpresion = (size) => {
-    console.log(this.state.idCompra);
     printJS({
       printable: documentsPdfInvoicesCompra(this.state.idCompra, size),
       type: 'pdf',
@@ -845,15 +845,23 @@ class CompraCrear extends CustomComponent {
     if (isEmpty(detalles)) {
       return (
         <tr className="text-center">
-          <td colSpan="6"> Agregar datos a la tabla </td>
+          <td colSpan="7"> Agregar datos a la tabla </td>
         </tr>
       );
     }
-
+    
     return detalles.map((item, index) => (
       <TableRow
         key={index}>
         <TableCell className="text-center">{item.id}</TableCell>
+        <TableCell className="text-center">
+          <Image
+            default={images.noImage}
+            src={item.imagen}
+            alt={item.nombre}
+            width={100}
+          />
+        </TableCell>
         <TableCell>
           {item.codigo}
           <br />
@@ -1019,7 +1027,21 @@ class CompraCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre}
+                      </div>
+                    </div>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
@@ -1038,6 +1060,7 @@ class CompraCrear extends CustomComponent {
                     <TableHeader>
                       <TableRow>
                         <TableHead width="5%" className="text-center">#</TableHead>
+                        <TableHead width="10%" className="text-center">Imagen</TableHead>
                         <TableHead width="15%">Producto</TableHead>
                         <TableHead width="5%">Cantidad</TableHead>
                         <TableHead width="5%">Costo</TableHead>
@@ -1060,13 +1083,29 @@ class CompraCrear extends CustomComponent {
                   onClick={this.handleGuardar}
                 >
                   <i className="fa fa-arrow-right"></i> Registrar (F1)
-                </Button>{' '}
+                </Button>
+                {' '}
                 <Button
                   className="btn-outline-info"
                   onClick={this.handleLimpiar}
                 >
-                  <i className="fa fa-trash"></i> Limpiar (F2)
-                </Button>{' '}
+                  <i className="fa fa-search"></i> Pedido (F2)
+                </Button>
+                {' '}
+                <Button
+                  className="btn-outline-info"
+                  onClick={this.handleLimpiar}
+                >
+                  <i className="fa fa-shopping-cart"></i> Compra (F3)
+                </Button>
+                {' '}
+                <Button
+                  className="btn-outline-info"
+                  onClick={this.handleLimpiar}
+                >
+                  <i className="fa fa-trash"></i> Limpiar (F4)
+                </Button>
+                {' '}
                 <Button
                   className="btn-outline-danger"
                   onClick={this.handleCerrar}

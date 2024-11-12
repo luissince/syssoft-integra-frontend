@@ -27,6 +27,9 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { setKardexData, setKardexPaginacion } from '../../../../redux/predeterminadoSlice';
 import Select from '../../../../components/Select';
+import Image from '../../../../components/Image';
+import { images } from '../../../../helper';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -78,6 +81,20 @@ class Kardex extends CustomComponent {
 
     this.abortControllerTable = new AbortController();
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     await this.loadingData();
@@ -198,6 +215,22 @@ class Kardex extends CustomComponent {
     });
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
   //------------------------------------------------------------------------------------------
   // Filtrar producto
   //------------------------------------------------------------------------------------------
@@ -249,6 +282,22 @@ class Kardex extends CustomComponent {
     });
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
   //------------------------------------------------------------------------------------------
   // Generar Body HTML
   //------------------------------------------------------------------------------------------
@@ -267,9 +316,9 @@ class Kardex extends CustomComponent {
 
     if (isEmpty(lista)) {
       return (
-        <tr className="text-center">
-          <td colSpan="12">¡No hay datos para mostrar!</td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="12">¡No hay datos para mostrar!</TableCell>
+        </TableRow>
       );
     }
 
@@ -289,27 +338,40 @@ class Kardex extends CustomComponent {
           : -parseFloat(item.costo * item.cantidad));
 
       return (
-        <tr key={index}>
-          <td>{++index}</td>
-          <td>{item.fecha}<br />{formatTime(item.hora)}</td>
-          <td>
+        <TableRow key={index}>
+          {/* <TableCell>{++index}</TableCell> */}
+          <TableCell>{item.fecha}<br />{formatTime(item.hora)}</TableCell>
+          <TableCell>
             <Link className="btn-link" to={getPathNavigation(item.opcion, item.idNavegacion)}>
               {item.detalle} <i className='bi bi-hand-index-fill'></i>
             </Link>
-          </td>
-          <td className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</td>
-          <td className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</td>
-          <td className="font-weight-bold">{rounded(cantidad)}</td>
-          <td>{numberFormat(item.costo, this.state.codISO)}</td>
-          <td>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</td>
-          <td>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</td>
-          <td>{numberFormat(costo, this.state.codISO)}</td>
-          <td>{item.almacen}</td>
-          <td>{item.apellidos}{<br />}{item.nombres}</td>
-        </tr>
+          </TableCell>
+          <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
+          <TableCell>{item.tipo === 'INGRESO' ? numberFormat(item.costo, this.state.codISO) : ''}</TableCell>
+          <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
+
+          <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
+          <TableCell>{item.tipo === 'SALIDA' ? numberFormat(item.costo, this.state.codISO) : ''}</TableCell>
+          <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
+
+          <TableCell>{numberFormat(cantidad, this.state.codISO)}</TableCell>
+          <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell>{numberFormat(costo, this.state.codISO)}</TableCell>
+          {/* 
+          <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
+          <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
+          <TableCell className="font-weight-bold">{rounded(cantidad)}</TableCell>
+          <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
+          <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
+          <TableCell>{numberFormat(costo, this.state.codISO)}</TableCell>
+          <TableCell>{item.almacen}</TableCell>
+          <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> */}
+        </TableRow>
       );
     });
   }
+
 
   //------------------------------------------------------------------------------------------
   // Render
@@ -327,7 +389,7 @@ class Kardex extends CustomComponent {
 
         <Title
           title='Kardex'
-          subTitle='LISTA'
+          subTitle='Método Promedio Ponderado'
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -343,11 +405,21 @@ class Kardex extends CustomComponent {
               handleClearInput={this.handleClearInputProducto}
               handleFilter={this.handleFilterProducto}
               handleSelectItem={this.handleSelectItemProducto}
-              renderItem={(value) => (
-                <>
-                  {value.codigo} / {value.nombre} <small>({value.categoria})</small>
-                </>
-              )}
+              renderItem={(value) =>
+                <div className="d-flex align-items-center">
+                  <Image
+                    default={images.noImage}
+                    src={value.imagen}
+                    alt={value.nombre}
+                    width={60}
+                  />
+
+                  <div className='ml-2'>
+                    {value.codigo}
+                    <br />
+                    {value.nombre}
+                  </div>
+                </div>}
               renderIconLeft={<i className="bi bi-search"></i>}
             />
           </Column>
@@ -388,19 +460,64 @@ class Kardex extends CustomComponent {
               <strong>Almacen:</strong> {this.state.nombreAlmacen}
             </p>
             <p>
-              <strong>Cantidad Actual:</strong> {cantidad}{' '}
-              {producto && producto.medida}
+              <strong>Unidades Disponibles:</strong> {cantidad}{' '}
+              {producto && producto.unidad}
             </p>
             <p>
-              <strong>Valor del Producto:</strong>{' '}
+              <strong>Costo Promedio Ponderado:</strong>{' '}
               {numberFormat(costo, this.state.codISO)}
             </p>
+            <p>
+              <strong>Valor Total Inventario:</strong>{' '}
+              {numberFormat(costo, this.state.codISO)}
+            </p>
+          </Column>
+
+          <Column formGroup={true}>
+            <div className='d-flex align-items-center justify-content-end'>
+              <Image
+                default={images.noImage}
+                src={producto && producto.imagen || null}
+                alt={producto && producto.nombre || "Producto sin imagen"}
+                width={160}
+              />
+            </div>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <div className="table-responsive">
+            <TableResponsive>
+              <Table className="table table-bordered rounded">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Fecha</TableHead>
+                    <TableHead width="21%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Descripción</TableHead>
+                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3} >Ingreso</TableHead>
+                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3} >Salidas</TableHead>
+                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3} >Saldos</TableHead>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableHead className="text-center">Cantidad</TableHead>
+                    <TableHead className="text-center">Costo Unitario</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
+
+                    <TableHead className="text-center">Cantidad</TableHead>
+                    <TableHead className="text-center">Costo Unitario</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
+
+                    <TableHead className="text-center">Cantidad</TableHead>
+                    <TableHead className="text-center">Costo Unitario</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
+              </Table>
+            </TableResponsive>
+            {/* <div className="table-responsive">
               <table className="table table-bordered rounded">
                 <thead>
                   <tr>
@@ -466,7 +583,7 @@ class Kardex extends CustomComponent {
 
                 <tbody>{this.generateBody()}</tbody>
               </table>
-            </div>
+            </div> */}
           </Column>
         </Row>
       </ContainerWrapper>

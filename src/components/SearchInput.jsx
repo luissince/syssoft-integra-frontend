@@ -214,7 +214,7 @@ class SearchInput extends React.Component {
   handleInputChange = (event) => {
     const value = this.selectItem ? '' : event.target.value;
     this.setState({ searchTerm: value });
-    if(this.props.handleSetValue){
+    if (this.props.handleSetValue) {
       this.props.handleSetValue(value);
     }
     this.selectItem = false;

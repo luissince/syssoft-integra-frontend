@@ -119,7 +119,7 @@ const ButtonsOpciones = ({
             >
                 <img className='mb-2' src={images.cotizacion} width={22} />
                 <p className='p-0 m-0'>
-                    Cotizacione(F12)
+                    Cotización(F12)
                 </p>
             </Button>
             <Button

@@ -9,9 +9,9 @@ import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../compon
 import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import Title from '../../../components/Title';
-import { ArrowDownIcon, ArrowUpIcon, ClipboardList, DollarSign, FileText, ShoppingCart, Store, Truck } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText } from 'lucide-react';
 import { dashboardInit } from '../../../network/rest/principal.network';
-import { formatDecimal, isEmpty, numberFormat } from '../../../helper/utils.helper';
+import { isEmpty, months, numberFormat, rounded } from '../../../helper/utils.helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -37,7 +37,13 @@ class Dashboard extends React.Component {
       totalCuentasPorCobrar: 0,
       totalCuentasPorPagar: 0,
       totalComprobantes: 0,
-      totalInventario: 0,
+      totalComprobantesPorDeclarar: 0,
+      totalCotizaciones: 0,
+      totalCotizacionesLigadas: 0,
+      totalPedidos: 0,
+      totalPedidosLigadas: 0,
+      sucursales: [],
+
       totalSucursales: 0,
       inventarios: [],
     }
@@ -89,7 +95,6 @@ class Dashboard extends React.Component {
       params,
       this.abortControllerView.signal,
     );
-
     this.setState(responde.data);
   }
 
@@ -127,7 +132,7 @@ class Dashboard extends React.Component {
   */
 
   renderLista() {
-    if (isEmpty(this.state.inventarios)) {
+    if (isEmpty(this.state.sucursales)) {
       return (
         <TableRow>
           <TableCell className="text-center" colSpan="4">¡No hay datos para mostrar!</TableCell>
@@ -137,13 +142,13 @@ class Dashboard extends React.Component {
 
     let rows = [];
 
-    const newRows = this.state.inventarios.map((item, index) => {
+    const newRows = this.state.sucursales.map((item, index) => {
       return (
         <TableRow key={index}>
           <TableCell>{item.id}</TableCell>
-          <TableCell>{item.almacen}</TableCell>
           <TableCell>{item.sucursal}</TableCell>
-          <TableCell>{formatDecimal(item.total)} </TableCell>
+          <TableCell>{numberFormat(item.total, this.state.codIso)} </TableCell>
+          <TableCell className={`text-center`}>{rounded(item.rendimiento, 0)} %</TableCell>
         </TableRow>
       );
     });
@@ -257,7 +262,7 @@ class Dashboard extends React.Component {
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
-                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos hoy:</span>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos:</span>
                   </div>
                   <span className='text-base'>{this.state.totalComprobantes}</span>
                 </div>
@@ -265,7 +270,7 @@ class Dashboard extends React.Component {
                   <div className='d-flex align-items-center'>
                     <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                  <span className='text-base'>{this.state.totalComprobantesPorDeclarar}</span>
                 </div>
               </CardBody>
             </Card>
@@ -279,15 +284,15 @@ class Dashboard extends React.Component {
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
-                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos hoy:</span>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                  <span className='text-base'>{this.state.totalCotizaciones}</span>
                 </div>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
                     <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                  <span className='text-base'>{this.state.totalCotizaciones - this.state.totalCotizacionesLigadas}</span>
                 </div>
               </CardBody>
             </Card>
@@ -301,15 +306,15 @@ class Dashboard extends React.Component {
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
-                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos hoy:</span>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                  <span className='text-base'>{this.state.totalPedidos}</span>
                 </div>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
                     <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                  <span className='text-base'>{this.state.totalPedidos - this.state.totalPedidosLigadas}</span>
                 </div>
               </CardBody>
             </Card>
@@ -320,7 +325,7 @@ class Dashboard extends React.Component {
           <Column>
             <Card>
               <CardHeader>
-                <CardTitle>Rendimiento por Sucursal</CardTitle>
+                <CardTitle>Rendimiento por Sucursal - Mes {months()[new Date().getMonth()].label}</CardTitle>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
@@ -328,9 +333,9 @@ class Dashboard extends React.Component {
                     <TableHeader>
                       <TableRow>
                         <TableHead width="5%">#</TableHead>
-                        <TableHead width="50%">Ventas</TableHead>
-                        <TableHead width="30%">Inventario</TableHead>
-                        <TableHead width="20%">Rendimiento</TableHead>
+                        <TableHead width="30%">Sucursal</TableHead>
+                        <TableHead width="30%">Ventas</TableHead>
+                        <TableHead width="15%" className="text-center">Rendimiento</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

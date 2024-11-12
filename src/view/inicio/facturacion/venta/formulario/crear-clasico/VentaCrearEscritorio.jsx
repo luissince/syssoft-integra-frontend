@@ -65,6 +65,7 @@ import ModalTransaccion from '../../../../../../components/ModalTransaccion';
 import { ModalImpresion, ModalPreImpresion } from '../../../../../../components/MultiModal';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../../../../components/Table';
+import Image from '../../../../../../components/Image';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -534,6 +535,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idProducto: producto.idProducto,
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
+          imagen: producto.imagen,
           idImpuesto: this.state.idImpuesto,
           precio: Number(producto.precio),
           medida: producto.medida,
@@ -588,6 +590,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idProducto: producto.idProducto,
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
+          imagen: producto.imagen,
           idImpuesto: this.state.idImpuesto,
           precio: Number(precio),
           medida: producto.medida,
@@ -626,6 +629,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idProducto: producto.idProducto,
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
+          imagen: producto.imagen,
           idImpuesto: this.state.idImpuesto,
           precio: Number(producto.precio),
           medida: producto.medida,
@@ -670,6 +674,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idProducto: producto.idProducto,
           codigo: producto.codigo,
           nombreProducto: producto.nombreProducto,
+          imagen: producto.imagen,
           idImpuesto: this.state.idImpuesto,
           precio: precio ? Number(precio) : Number(producto.precio),
           medida: producto.medida,
@@ -1871,6 +1876,14 @@ class VentaCrearEscritorio extends CustomComponent {
               icono={<i className="bi bi-trash"></i>}
               onClick={() => this.handleRemoveItem(producto)} />
           </TableCell>
+          <TableCell className="text-center">
+            <Image
+              default={images.noImage}
+              src={producto.imagen}
+              alt={producto.nombreProducto}
+              width={70}
+            />
+          </TableCell>
           <TableCell className='text-center'>
             {producto.idTipoTratamientoProducto === SERVICIO && (
               <p>{rounded(producto.cantidad)}</p>
@@ -2111,8 +2124,9 @@ class VentaCrearEscritorio extends CustomComponent {
                       className={"table table-bordered table-hover table-sticky"}>
                       <TableHeader>
                         <TableRow>
-                          <TableHead width="5%">#</TableHead>
-                          <TableHead width="5%">Quitar</TableHead>
+                          <TableHead className="text-center" width="5%">#</TableHead>
+                          <TableHead className="text-center" width="5%">Quitar</TableHead>
+                          <TableHead className="text-center" width="5%">Imagen</TableHead>
                           <TableHead width="10%">Almacen/Cantidad</TableHead>
                           <TableHead width="20%">Descripción</TableHead>
                           <TableHead width="10%">Precio</TableHead>
