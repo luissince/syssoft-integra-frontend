@@ -1819,15 +1819,15 @@ class VentaCrearEscritorio extends CustomComponent {
     this.index = rowIndex;
     this.updateSelection(children);
 
-    if (cellIndex === 2) {
+    if (cellIndex === 3) {
       this.handleOpenCantidad();
     }
 
-    if (cellIndex === 3) {
+    if (cellIndex === 4) {
       this.handleOpenDatos();
     }
 
-    if (cellIndex === 4) {
+    if (cellIndex === 5) {
       this.handleOpenPrecios();
     }
   }

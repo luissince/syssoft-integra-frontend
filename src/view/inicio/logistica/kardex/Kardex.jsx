@@ -51,6 +51,7 @@ class Kardex extends CustomComponent {
       producto: null,
       cantidad: 0,
       costo: 0,
+      valor: 0,
 
       productos: [],
 
@@ -197,7 +198,7 @@ class Kardex extends CustomComponent {
       return accumlate;
     }, 0);
 
-    const costo = kardex.reduce((accumlate, item) => {
+    const valor = kardex.reduce((accumlate, item) => {
       accumlate +=
         item.tipo === 'INGRESO'
           ? parseFloat(item.costo * item.cantidad)
@@ -205,10 +206,13 @@ class Kardex extends CustomComponent {
       return accumlate;
     }, 0);
 
+    const costo = isEmpty(kardex) ? 0 : kardex[kardex.length - 1].costo;
+
     this.setState({
       lista: kardex,
       cantidad: cantidad,
       costo: costo,
+      valor: valor,
       loading: false,
     }, () => {
       this.updateReduxState();
@@ -355,8 +359,11 @@ class Kardex extends CustomComponent {
           <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
 
           <TableCell>{numberFormat(cantidad, this.state.codISO)}</TableCell>
-          <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell>{numberFormat(costo / cantidad, this.state.codISO)}</TableCell>
           <TableCell>{numberFormat(costo, this.state.codISO)}</TableCell>
+
+          <TableCell>{item.almacen}</TableCell>
+          <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> 
           {/* 
           <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
           <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
@@ -365,7 +372,7 @@ class Kardex extends CustomComponent {
           <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
           <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
           <TableCell>{numberFormat(costo, this.state.codISO)}</TableCell>
-          <TableCell>{item.almacen}</TableCell>
+          
           <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> */}
         </TableRow>
       );
@@ -378,7 +385,7 @@ class Kardex extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   render() {
-    const { producto, cantidad, costo } = this.state;
+    const { producto, cantidad, costo, valor } = this.state;
 
     return (
       <ContainerWrapper>
@@ -469,7 +476,7 @@ class Kardex extends CustomComponent {
             </p>
             <p>
               <strong>Valor Total Inventario:</strong>{' '}
-              {numberFormat(costo, this.state.codISO)}
+              {numberFormat(valor, this.state.codISO)}
             </p>
           </Column>
 
@@ -493,9 +500,11 @@ class Kardex extends CustomComponent {
                   <TableRow>
                     <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Fecha</TableHead>
                     <TableHead width="21%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Descripción</TableHead>
-                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3} >Ingreso</TableHead>
-                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3} >Salidas</TableHead>
-                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3} >Saldos</TableHead>
+                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3}>Ingreso</TableHead>
+                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3}>Salidas</TableHead>
+                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3}>Saldos</TableHead>
+                    <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Almacen</TableHead>
+                    <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Usuario</TableHead>
                   </TableRow>
 
                   <TableRow>
