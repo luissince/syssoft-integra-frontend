@@ -444,7 +444,7 @@ class GuiaRemision extends CustomComponent {
             >
               <option value='-1'>TODOS</option>
               <option value='1'>ACTIVO</option>
-              <option value='0'>ANULADO</option>
+              <option value='3'>ANULADO</option>
             </Select>
           </Column>
         </Row>
