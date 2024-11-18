@@ -111,6 +111,7 @@ class SucursalEditar extends CustomComponent {
       email: sucursal.email,
       paginaWeb: sucursal.paginaWeb,
       direcion: sucursal.direccion,
+      principal: sucursal.principal === 1 ? true : false,
       estado: sucursal.estado === 1 ? true : false,
       idUbigeo: sucursal.idUbigeo.toString(),
       imagen: sucursal.ruta,
