@@ -26,6 +26,7 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
+import Image from '../../../../components/Image';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -43,6 +44,7 @@ class SucursalAgregar extends CustomComponent {
       paginaWeb: '',
       direcion: '',
       idUbigeo: '',
+      principal: false,
       estado: true,
 
       imagen: images.noImage,
@@ -174,6 +176,7 @@ class SucursalAgregar extends CustomComponent {
           nombre: this.state.nombre.trim().toUpperCase(),
           direccion: this.state.direcion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
+          principal: this.state.principal,
           estado: this.state.estado,
           //imagen
           imagen: logoSend.base64String ?? "",
@@ -209,168 +212,180 @@ class SucursalAgregar extends CustomComponent {
         />
 
         <Row>
-          <Column formGroup={true}>
-            <Input
-              autoFocus={true}
-              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
-              refInput={this.refNombre}
-              value={this.state.nombre}
-              onChange={(event) =>
-                this.setState({ nombre: event.target.value })
-              }
-              placeholder="Ingrese el nombre ..."
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className={"col-md-6"} formGroup={true}>
-            <Input
-              label={"N° de Teléfono:"}
-              refInput={this.refTelefono}
-              value={this.state.telefono}
-              onChange={(event) =>
-                this.setState({ telefono: event.target.value })
-              }
-              onKeyDown={keyNumberPhone}
-              placeholder="Ingrese su n° de teléfono ..."
-            />
-          </Column>
-
-          <Column className={"col-md-6"} formGroup={true}>
-            <Input
-              label={"N° de Celular:"}
-              refInput={this.refCelular}
-              value={this.state.celular}
-              onChange={(event) =>
-                this.setState({ celular: event.target.value })
-              }
-              onKeyDown={keyNumberPhone}
-              placeholder="Ingrese su n° de celular ..."
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className={"col-md-6"} formGroup={true}>
-            <Input
-              label={"Correo Electrónico:"}
-              refInput={this.refEmail}
-              value={this.state.email}
-              onChange={(event) =>
-                this.setState({ email: event.target.value })
-              }
-              placeholder="Ingrese su correo electrónico ..."
-            />
-          </Column>
-
-          <Column className={"col-md-6"} formGroup={true}>
-            <Input
-              label={"Página Web:"}
-              refInput={this.refPaginWeb}
-              value={this.state.paginaWeb}
-              onChange={(event) =>
-                this.setState({ paginaWeb: event.target.value })
-              }
-              placeholder="Ingrese su página web ..."
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column formGroup={true}>
-            <Input
-              label={<>Dirección: <i className="fa fa-asterisk text-danger small"></i></>}
-              refInput={this.refDireccion}
-              value={this.state.direcion}
-              onChange={(event) =>
-                this.setState({ direcion: event.target.value })
-              }
-              placeholder="Ingrese su dirección ..."
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column formGroup={true}>         
-            <SearchInput
-              ref={this.refUbigeo}
-              label={<>Ubigeo: <i className="fa fa-asterisk text-danger small"></i></>}
-              placeholder="Filtrar productos..."
-              refValue={this.refValueUbigeo}
-              data={this.state.ubigeos}
-              handleClearInput={this.handleClearInputaUbigeo}
-              handleFilter={this.handleFilterUbigeo}
-              handleSelectItem={this.handleSelectItemUbigeo}
-              renderItem={(value) =>
-                <>
-                  {value.departamento} - {value.provincia} - {value.distrito} ({value.ubigeo})
-                </>
-              }
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className={"col-md-6"} formGroup={true}>
-            <Switches
-              label={<>Estado: <i className="fa fa-asterisk text-danger small"></i></>}
-              id={"stEstado"}
-              checked={this.state.estado}
-              onChange={(value) =>
-                this.setState({ estado: value.target.checked })
-              }
-            >
-              {this.state.estado ? 'Habilitado' : 'Inactivo'}
-            </Switches>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <div className='form-group text-center'>
-              <label className='p-0 m-0'>Logo</label>
-              <p className='p-0 m-0'>Imagen de portada 1024 x 629 pixeles </p>
-              <br />
-              <small>Usuado como portada para cada sucursal</small>
-              <div className="text-center mb-2 ">
-                <img
-                  src={this.state.imagen}
-                  alt=""
-                  className="img-fluid border border-primary rounded"
-                  width={450}
+          <Column className="col-lg-8 col-md-6 col-12" formGroup={true}>
+            <Row>
+              <Column formGroup={true}>
+                <Input
+                  autoFocus={true}
+                  label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+                  refInput={this.refNombre}
+                  value={this.state.nombre}
+                  onChange={(event) =>
+                    this.setState({ nombre: event.target.value })
+                  }
+                  placeholder="Ingrese el nombre ..."
                 />
-              </div>
-            </div>
-          </Column>
-        </Row>
+              </Column>
+            </Row>
 
-        <Row>
-          <Column>
-            <div className="form-group text-center">
-              <input
-                className="d-none"
-                type="file"
-                id="fileImage"
-                accept="image/png, image/jpeg, image/gif, image/svg"
-                ref={this.refFileImagen}
-                onChange={this.handleFileImage}
-              />
-              <label
-                htmlFor="fileImage"
-                className="btn btn-outline-secondary m-0"
-              >
-                <div className="content-button">
-                  <i className="bi bi-image"></i>
-                  <span></span>
-                </div>
-              </label>{' '}
-              <Button
-                className='btn-outline-secondary'
-                onClick={this.handleClearImage}
-                icono={<i className="bi bi-trash"></i>}
-              />
-            </div>
+            <Row>
+              <Column className={"col-md-6"} formGroup={true}>
+                <Input
+                  label={"N° de Teléfono:"}
+                  refInput={this.refTelefono}
+                  value={this.state.telefono}
+                  onChange={(event) =>
+                    this.setState({ telefono: event.target.value })
+                  }
+                  onKeyDown={keyNumberPhone}
+                  placeholder="Ingrese su n° de teléfono ..."
+                />
+              </Column>
+
+              <Column className={"col-md-6"} formGroup={true}>
+                <Input
+                  label={"N° de Celular:"}
+                  refInput={this.refCelular}
+                  value={this.state.celular}
+                  onChange={(event) =>
+                    this.setState({ celular: event.target.value })
+                  }
+                  onKeyDown={keyNumberPhone}
+                  placeholder="Ingrese su n° de celular ..."
+                />
+              </Column>
+            </Row>
+
+            <Row>
+              <Column className={"col-md-6"} formGroup={true}>
+                <Input
+                  label={"Correo Electrónico:"}
+                  refInput={this.refEmail}
+                  value={this.state.email}
+                  onChange={(event) =>
+                    this.setState({ email: event.target.value })
+                  }
+                  placeholder="Ingrese su correo electrónico ..."
+                />
+              </Column>
+
+              <Column className={"col-md-6"} formGroup={true}>
+                <Input
+                  label={"Página Web:"}
+                  refInput={this.refPaginWeb}
+                  value={this.state.paginaWeb}
+                  onChange={(event) =>
+                    this.setState({ paginaWeb: event.target.value })
+                  }
+                  placeholder="Ingrese su página web ..."
+                />
+              </Column>
+            </Row>
+
+            <Row>
+              <Column formGroup={true}>
+                <Input
+                  label={<>Dirección: <i className="fa fa-asterisk text-danger small"></i></>}
+                  refInput={this.refDireccion}
+                  value={this.state.direcion}
+                  onChange={(event) =>
+                    this.setState({ direcion: event.target.value })
+                  }
+                  placeholder="Ingrese su dirección ..."
+                />
+              </Column>
+            </Row>
+
+            <Row>
+              <Column formGroup={true}>
+                <SearchInput
+                  ref={this.refUbigeo}
+                  label={<>Ubigeo: <i className="fa fa-asterisk text-danger small"></i></>}
+                  placeholder="Filtrar productos..."
+                  refValue={this.refValueUbigeo}
+                  data={this.state.ubigeos}
+                  handleClearInput={this.handleClearInputaUbigeo}
+                  handleFilter={this.handleFilterUbigeo}
+                  handleSelectItem={this.handleSelectItemUbigeo}
+                  renderItem={(value) =>
+                    <>
+                      {value.departamento} - {value.provincia} - {value.distrito} ({value.ubigeo})
+                    </>
+                  }
+                />
+              </Column>
+            </Row>
+
+            <Row>
+              <Column className={"col-md-6 col-12"} formGroup={true}>
+                <Switches
+                  label={<>Principal: <i className="fa fa-asterisk text-danger small"></i></>}
+                  id={"stPrincipal"}
+                  checked={this.state.principal}
+                  onChange={(value) =>
+                    this.setState({ principal: value.target.checked })
+                  }
+                >
+                  {this.state.principal ? 'Si' : 'No'}
+                </Switches>
+              </Column>
+
+              <Column className={"col-md-6 col-12"} formGroup={true}>
+                <Switches
+                  label={<>Estado: <i className="fa fa-asterisk text-danger small"></i></>}
+                  id={"stEstado"}
+                  checked={this.state.estado}
+                  onChange={(value) =>
+                    this.setState({ estado: value.target.checked })
+                  }
+                >
+                  {this.state.estado ? 'Habilitado' : 'Inactivo'}
+                </Switches>
+              </Column>
+            </Row>
+          </Column>
+
+          <Column className="col-lg-4 col-md-6 col-12" formGroup={true}>
+            <Row>
+              <Column className='col-12 text-center' formGroup={true}>
+                <p className='p-0 m-0'>Imagen de portada 1024 x 629 pixeles </p>
+                <small>Usuado como portada para cada sucursal</small>
+
+                <Image
+                  default={images.noImage}
+                  src={this.state.imagen}
+                  alt="Portada de la sucursal"
+                  className="img-fluid border border-primary rounded"
+                />
+              </Column>
+            </Row>
+
+            <Row>
+              <Column className='col-12 text-center' formGroup={true}>
+                <input
+                  className="d-none"
+                  type="file"
+                  id="fileImage"
+                  accept="image/png, image/jpeg, image/gif, image/svg"
+                  ref={this.refFileImagen}
+                  onChange={this.handleFileImage}
+                />
+                <label
+                  htmlFor="fileImage"
+                  className="btn btn-outline-secondary m-0"
+                >
+                  <div className="content-button">
+                    <i className="bi bi-image"></i>
+                    <span></span>
+                  </div>
+                </label>{' '}
+                <Button
+                  className='btn-outline-secondary'
+                  onClick={this.handleClearImage}
+                  icono={<i className="bi bi-trash"></i>}
+                />
+              </Column>
+            </Row>
           </Column>
         </Row>
 
@@ -379,23 +394,22 @@ class SucursalAgregar extends CustomComponent {
             <Button
               className='btn-primary'
               onClick={this.handleSave}
-              icono={<i className="fa fa-save"></i>}
-              text={"Guardar"}
-            />
+            >
+              <i className="fa fa-save"></i> Guardar
+            </Button>
 
             <Button
               className='btn-danger ml-2'
               onClick={() => this.props.history.goBack()}
-              icono={<i className="fa fa-close"></i>}
-              text={"Cerrar"}
-            />
+            >
+              <i className="fa fa-close"></i> Cerrar
+            </Button>
           </Column>
         </Row>
       </ContainerWrapper>
     );
   }
 }
-
 
 SucursalAgregar.propTypes = {
   token: PropTypes.shape({
@@ -408,7 +422,6 @@ SucursalAgregar.propTypes = {
   }).isRequired,
 };
 
-
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
@@ -418,4 +431,3 @@ const mapStateToProps = (state) => {
 const ConnectedSucursalAgregar = connect(mapStateToProps, null)(SucursalAgregar);
 
 export default ConnectedSucursalAgregar;
-

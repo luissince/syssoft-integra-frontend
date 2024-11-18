@@ -182,7 +182,7 @@ class Sucursales extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='6'
+          colSpan='7'
           message={'Cargando información de la tabla...'}
         />
       );
@@ -191,7 +191,7 @@ class Sucursales extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="6">
+          <TableCell className="text-center" colSpan="7">
             ¡No hay datos registrados!
           </TableCell>
         </TableRow>
@@ -199,6 +199,13 @@ class Sucursales extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
+      const principal =
+        item.principal === 1 ? (
+          <span className="badge badge-info">Principal</span>
+        ) : (
+          <span className="badge badge-light">Secundario</span>
+        );
+
       const estado =
         item.estado === 1 ? (
           <span className="badge badge-success">Habilitado</span>
@@ -211,6 +218,7 @@ class Sucursales extends CustomComponent {
           <TableCell className="text-center">{item.id}</TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell>{item.direccion}</TableCell>
+          <TableCell className="text-center">{principal}</TableCell>
           <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-center">
             <Button
@@ -258,7 +266,7 @@ class Sucursales extends CustomComponent {
               className="btn-outline-secondary"
               onClick={this.loadInit}
             >
-              <i className="bi bi-arrow-clockwise"></i>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
@@ -282,8 +290,9 @@ class Sucursales extends CustomComponent {
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="20%">Nombre</TableHead>
-                    <TableHead width="30%">Dirección</TableHead>
-                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="40%">Dirección</TableHead>
+                    <TableHead width="10%" className="text-center">Principal</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
                     <TableHead width="5%" className="text-center">Editar</TableHead>
                     <TableHead width="5%" className="text-center">Eliminar</TableHead>
                   </TableRow>
