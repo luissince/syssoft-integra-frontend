@@ -6,7 +6,7 @@ import { SpinnerView } from '../../../components/Spinner';
 import Row from '../../../components/Row';
 import Column from '../../../components/Column';
 import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
-import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+// import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import Title from '../../../components/Title';
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText } from 'lucide-react';
@@ -40,8 +40,8 @@ class Dashboard extends React.Component {
       totalComprobantesPorDeclarar: 0,
       totalCotizaciones: 0,
       totalCotizacionesLigadas: 0,
-      totalPedidos: 0,
-      totalPedidosLigadas: 0,
+      totalOrdenCompra: 0,
+      totalOrdenCompraLigadas: 0,
       sucursales: [],
 
       totalSucursales: 0,
@@ -158,32 +158,32 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    const ventasMensuales = [
-      { mes: 'Ene', ventas: 45000, compras: 30000 },
-      { mes: 'Feb', ventas: 52000, compras: 32000 },
-      { mes: 'Mar', ventas: 49000, compras: 31000 },
-      { mes: 'Abr', ventas: 58000, compras: 35000 },
-    ];
+    // const ventasMensuales = [
+    //   { mes: 'Ene', ventas: 45000, compras: 30000 },
+    //   { mes: 'Feb', ventas: 52000, compras: 32000 },
+    //   { mes: 'Mar', ventas: 49000, compras: 31000 },
+    //   { mes: 'Abr', ventas: 58000, compras: 35000 },
+    // ];
 
-    const inventarioPorSucursal = [
-      { sucursal: 'Principal', stock: 1200 },
-      { sucursal: 'Norte', stock: 850 },
-      { sucursal: 'Sur', stock: 920 },
-    ];
+    // const inventarioPorSucursal = [
+    //   { sucursal: 'Principal', stock: 1200 },
+    //   { sucursal: 'Norte', stock: 850 },
+    //   { sucursal: 'Sur', stock: 920 },
+    // ];
 
-    const cuentasPorCobrar = [
-      { estado: 'Al día', valor: 45000, color: '#22c55e' },
-      { estado: '1-30 días', valor: 28000, color: '#eab308' },
-      { estado: '31-60 días', valor: 15000, color: '#f97316' },
-      { estado: '> 60 días', valor: 12000, color: '#dc2626' },
-    ];
+    // const cuentasPorCobrar = [
+    //   { estado: 'Al día', valor: 45000, color: '#22c55e' },
+    //   { estado: '1-30 días', valor: 28000, color: '#eab308' },
+    //   { estado: '31-60 días', valor: 15000, color: '#f97316' },
+    //   { estado: '> 60 días', valor: 12000, color: '#dc2626' },
+    // ];
 
-    const cuentasPorPagar = [
-      { estado: 'Al día', valor: 38000, color: '#22c55e' },
-      { estado: '1-30 días', valor: 22000, color: '#eab308' },
-      { estado: '31-60 días', valor: 12000, color: '#f97316' },
-      { estado: '> 60 días', valor: 8000, color: '#dc2626' },
-    ];
+    // const cuentasPorPagar = [
+    //   { estado: 'Al día', valor: 38000, color: '#22c55e' },
+    //   { estado: '1-30 días', valor: 22000, color: '#eab308' },
+    //   { estado: '31-60 días', valor: 12000, color: '#f97316' },
+    //   { estado: '> 60 días', valor: 8000, color: '#dc2626' },
+    // ];
 
 
     return (
@@ -301,20 +301,20 @@ class Dashboard extends React.Component {
           <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Pedidos</CardTitle>
+                <CardTitle className='m-0'>Orden de Compras</CardTitle>
               </CardHeader>
               <CardBody>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
                     <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalPedidos}</span>
+                  <span className='text-base'>{this.state.totalOrdenCompra}</span>
                 </div>
                 <div className='d-flex flex-row align-items-center justify-content-between'>
                   <div className='d-flex align-items-center'>
                     <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
                   </div>
-                  <span className='text-base'>{this.state.totalPedidos - this.state.totalPedidosLigadas}</span>
+                  <span className='text-base'>{this.state.totalOrdenCompra - this.state.totalOrdenCompraLigadas}</span>
                 </div>
               </CardBody>
             </Card>
@@ -463,7 +463,7 @@ class Dashboard extends React.Component {
           <Column className='col-xl-4 col-lg-12' formGroup={true}>
             <Card>
               <CardHeader>
-                <CardTitle>Pedidos en Proceso</CardTitle>
+                <CardTitle>Orden de Compra en Proceso</CardTitle>
               </CardHeader>
               <CardBody>
                 <TableResponsive>

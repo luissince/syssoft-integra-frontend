@@ -65,6 +65,14 @@ const initialState = {
     state: null,
     local: null
   },
+  ordenCompraLista: {
+    data: null,
+    paginacion: null
+  },
+  ordenCompraCrear: {
+    state: null,
+    local: null
+  },
   pedidoLista: {
     data: null,
     paginacion: null
@@ -236,6 +244,32 @@ const predeterminadoSlice = createSlice({
       };
     },
 
+    setListaOrdenCompraData: (state, action) => {
+      state.ordenCompraLista.data = action.payload;
+    },
+    setListaOrdenCompraPaginacion: (state, action) => {
+      state.ordenCompraLista.paginacion = action.payload;
+    },
+    clearListaOrdenCompra: (state) => {
+      state.ordenCompraLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
+    setCrearOrdenCompraState: (state, action) => {
+      state.ordenCompraCrear.state = action.payload;
+    },
+    setCrearOrdenCompraLocal: (state, action) => {
+      state.ordenCompraCrear.local = action.payload;
+    },
+    clearCrearOrdenCompra: (state) => {
+      state.ordenCompraCrear = {
+        state: null,
+        local: null
+      };
+    },
+
     setListaPedidoData: (state, action) => {
       state.pedidoLista.data = action.payload;
     },
@@ -274,6 +308,7 @@ const predeterminadoSlice = createSlice({
         paginacion: null
       };
     },
+    
 
     clearSucursal: (state) => {
       state.ventaLista = {
@@ -317,6 +352,14 @@ const predeterminadoSlice = createSlice({
         paginacion: null
       };
       state.compraCrear = {
+        state: null,
+        local: null
+      };
+      state.ordenCompraLista = {
+        data: null,
+        paginacion: null
+      };
+      state.ordenCompraCrear = {
         state: null,
         local: null
       };
@@ -379,6 +422,14 @@ const predeterminadoSlice = createSlice({
         paginacion: null
       };
       state.compraCrear = {
+        state: null,
+        local: null
+      };
+      state.ordenCompraLista = {
+        data: null,
+        paginacion: null
+      };
+      state.ordenCompraCrear = {
         state: null,
         local: null
       };
@@ -464,6 +515,14 @@ export const {
   setCrearCompraState,
   setCrearCompraLocal,
   clearCrearCompra,
+
+  setListaOrdenCompraData,
+  setListaOrdenCompraPaginacion,
+  clearListaOrdenCompra,
+
+  setCrearOrdenCompraState,
+  setCrearOrdenCompraLocal,
+  clearCrearOrdenCompra,
 
   setListaPedidoData,
   setListaPedidoPaginacion,

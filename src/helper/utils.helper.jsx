@@ -454,7 +454,8 @@ export function keyNumberFloat(event, enterCallback) {
 }
 
 export function handlePasteFloat(event) {
-  const clipboardData = event.clipboardData || window.clipboardData;
+  const clipboardData = event.clipboardData;
+  if (!clipboardData) return;
   const pastedData = clipboardData.getData('text');
 
   // Verificar si el texto pegado es un número decimal válido
@@ -511,6 +512,7 @@ export function keyUpSearch(event, callback) {
     callback();
   }
 }
+
 export function debounce(func, delay) {
   let timeoutId;
   return function (...args) {

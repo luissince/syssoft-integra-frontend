@@ -1099,7 +1099,85 @@ export function documentsPdfListsCotizacion(idCotizacion) {
 
 /*
 |--------------------------------------------------------------------------
-| ENDPOINTS DE COTIZACION
+| ENDPOINTS DE ORDEN DE COMPRA
+|--------------------------------------------------------------------------
+*/
+export async function listOrdenCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/ordencompra/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function idOrdenCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/ordencompra/id', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailOrdenCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/ordencompra/detail', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function forPurchaseOrdenCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/ordencompra/for-purchase', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+
+export async function createOrdenCompra(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/ordencompra/create', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function updateOrdenCompra(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.put('/api/ordencompra/update', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function cancelOrdenCompra(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/ordencompra/cancel', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`
+}
+
+export function documentsPdfListsOrdenCompra(idOrdenCompra) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`
+}
+// ------------------------------------------------------------------------
+// FIN PARA ORDEN DE COMPRA
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE PEDIDO
 |--------------------------------------------------------------------------
 */
 export async function listPedido(params, signal) {
@@ -1129,7 +1207,7 @@ export async function detailPedido(params, signal) {
   );
 }
 
-export async function forPurchasePedido(params, signal) {
+export async function forPedido(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/pedido/for-purchase', {
       params: params,
@@ -1164,15 +1242,15 @@ export async function cancelPedido(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesPedido(idPedido, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/invoices/${idPedido}/${size}`
+export function documentsPdfInvoicesPedido(idOrdenCompra, size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/invoices/${idOrdenCompra}/${size}`
 }
 
-export function documentsPdfListsPedido(idPedido) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/lists/${idPedido}`
+export function documentsPdfListsPedido(idOrdenCompra) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/lists/${idOrdenCompra}`
 }
 // ------------------------------------------------------------------------
-// FIN PARA COTIZACION
+// FIN PARA PEDIDO
 // ------------------------------------------------------------------------
 
 /*
@@ -2186,6 +2264,11 @@ export async function cdrCpeSunat(ruc, usuario, clave, tipoComprobante, serie, n
   );
 }
 
+export async function enviarEmail(idComprobante, tipo) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/sunat/email/${idComprobante}/${tipo}`),
+  );
+}
 
 export function obtenerXmlSunat(idComprobante) {
   return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`

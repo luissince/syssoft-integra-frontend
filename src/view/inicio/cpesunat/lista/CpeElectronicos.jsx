@@ -27,6 +27,7 @@ import {
   comboSucursal,
   documentsPdfInvoicesGuiaRemision,
   documentsPdfInvoicesVenta,
+  enviarEmail,
   facturarCpeSunat,
   guiaRemisionCpeSunat,
   listCpeSunat,
@@ -47,6 +48,7 @@ import Search from '../../../../components/Search';
 import { setListaCpeSunatData, setListaCpeSunatPaginacion } from '../../../../redux/predeterminadoSlice';
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
+import { toastKit, ToastStyle } from 'toast-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -539,8 +541,35 @@ class CpeElectronicos extends CustomComponent {
     this.props.downloadFileAsync({ id, url });
   }
 
-  handleSendEmail = () => {
-    alertWarning("Cpe Sunet", "Opción en matenimiento")
+  handleSendEmail = async (idComprobante, tipo) => {
+    toastKit.info({
+      title: 'Enviando...',
+      message: 'Por favor espere...',
+      duration: 5000,
+      style: ToastStyle.light,
+    });
+    
+    const response = await enviarEmail(idComprobante, tipo);
+
+    if (response instanceof SuccessReponse) {
+      toastKit.success({
+        title: 'Excelente!',
+        message: response.data,
+        duration: 5000,
+        style: ToastStyle.light,
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      toastKit.warning({
+        title: 'Que mal!',
+        message: response.getMessage(),
+        duration: 5000,
+        style: ToastStyle.light,
+      });
+    }
   }
 
   /*
@@ -678,7 +707,7 @@ class CpeElectronicos extends CustomComponent {
                 {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'))}
                 {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 58mm', 22, 'Pdf Ticket', () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'))}
                 {this.opcionButtonOpcion(images.xml, 'Archivo Xml', 22, 'Xml', () => this.handleDownloadXml(item.idComprobante))}
-                {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idComprobante))}
+                {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idComprobante, item.tipo))}
                 {
                   item.tipo === "fac" && item.anulacion !== 0 && this.opcionButtonOpcion(images.error, item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario', 22, 'Error', () => {
                     if (item.anulacion === 1) {

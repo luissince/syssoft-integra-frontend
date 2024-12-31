@@ -33,6 +33,7 @@ import Image from '../../../../components/Image';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
+import TextArea from '../../../../components/TextArea';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -48,10 +49,16 @@ class EmpresaProceso extends CustomComponent {
     super(props);
 
     this.state = {
+      loading: true,
+      messageWarning: '',
+      msgLoading: 'Cargando datos...',
+
       idEmpresa: '',
       documento: '',
       razonSocial: '',
       nombreEmpresa: '',
+      email: '',
+      paginaWeb: '',
 
       usuarioEmail: '',
       claveEmail: '',
@@ -70,20 +77,24 @@ class EmpresaProceso extends CustomComponent {
       logo: images.noImage,
       image: images.noImage,
 
+      horarioAtencion: '',
+      acercaNosotros: '',
+      politicasPrivacidad: '',
+      terminosCondiciones: '',
+
       lookPasswordEmail: false,
       lookPasswordSol: false,
       lookPasswordClave: false,
       lookPasswordClaveCertificado: false,
 
-      loading: true,
-      messageWarning: '',
-      msgLoading: 'Cargando datos...',
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refDocumento = React.createRef();
     this.refRazonSocial = React.createRef();
+    this.refEmail = React.createRef();
+    this.refPaginaWeb = React.createRef();
 
     this.refPasswordEmail = React.createRef();
     this.refPasswordSol = React.createRef();
@@ -159,6 +170,8 @@ class EmpresaProceso extends CustomComponent {
         documento: empresa.documento,
         razonSocial: empresa.razonSocial,
         nombreEmpresa: empresa.nombreEmpresa,
+        email: empresa.email,
+        paginaWeb: empresa.paginaWeb,
 
         usuarioSolSunat: empresa.usuarioSolSunat ?? "",
         claveSolSunat: empresa.claveSolSunat ?? "",
@@ -174,6 +187,11 @@ class EmpresaProceso extends CustomComponent {
 
         logo: empresa.rutaLogo,
         image: empresa.rutaImage,
+
+        horarioAtencion: empresa.horarioAtencion ?? "",
+        acercaNosotros: empresa.acercaNosotros ?? "",
+        politicasPrivacidad: empresa.politicasPrivacidad ?? "",
+        terminosCondiciones: empresa.terminosCondiciones ?? "",
 
         loading: false,
       });
@@ -364,6 +382,8 @@ class EmpresaProceso extends CustomComponent {
         documento: this.state.documento.trim(),
         razonSocial: this.state.razonSocial.trim(),
         nombreEmpresa: this.state.nombreEmpresa.trim(),
+        email: this.state.email.trim(),
+        paginaWeb: this.state.paginaWeb.trim(),
 
         usuarioSolSunat: this.state.usuarioSolSunat.trim(),
         claveSolSunat: this.state.claveSolSunat.trim(),
@@ -386,6 +406,11 @@ class EmpresaProceso extends CustomComponent {
 
         image: imageSend.base64String ?? "",
         extimage: imageSend.extension ?? "",
+
+        horarioAtencion: this.state.horarioAtencion.trim(),
+        acercaNosotros: this.state.acercaNosotros.trim(),
+        politicasPrivacidad: this.state.politicasPrivacidad.trim(),
+        terminosCondiciones: this.state.terminosCondiciones.trim(),
 
         idUsuario: this.state.idUsuario,
         idEmpresa: this.state.idEmpresa,
@@ -452,7 +477,6 @@ class EmpresaProceso extends CustomComponent {
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
-                  title="Sunat"
                   onClick={() => this.handleGetApiSunat()}
                 >
                   <img src={images.sunat} alt="Sunat" width="12" />
@@ -462,169 +486,163 @@ class EmpresaProceso extends CustomComponent {
           </Column>
 
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Razón Social: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              ref={this.refRazonSocial}
+            <Input
+              label={<>Razón Social: <i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Ingrese la razón social"
+              refInput={this.refRazonSocial}
               value={this.state.razonSocial}
               onChange={(event) =>
                 this.setState({ razonSocial: event.target.value })
               }
-              placeholder="Ingrese la razón social"
             />
           </Column>
         </Row>
 
         <Row>
           <Column className={"col-md-6"} formGroup={true}>
-            <label>Nombre Comercial: </label>
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={<>Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Ingrese el nombre comercial"
+              refInput={this.refNombreEmpresa}
               value={this.state.nombreEmpresa}
               onChange={(event) =>
                 this.setState({ nombreEmpresa: event.target.value })
               }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Email:</>}
               placeholder="Ingrese el nombre comercial"
+              refInput={this.refEmail}
+              value={this.state.email}
+              onChange={(event) =>
+                this.setState({ email: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Página Web:</>}
+              placeholder="Ingrese el nombre comercial"
+              refInput={this.refPaginaWeb}
+              value={this.state.paginaWeb}
+              onChange={(event) =>
+                this.setState({ paginaWeb: event.target.value })
+              }
             />
           </Column>
         </Row>
 
         <Row>
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Usuario Email (<small>Para el envío del correo</small>):{' '}
-            </label>
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={<>Usuario Email(<small>Para el envío del correo, solo activo para cuentas de gmail</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Email de Envío"
+              refInput={this.refEmail}
               value={this.state.usuarioEmail}
               onChange={(event) =>
                 this.setState({ usuarioEmail: event.target.value })
               }
-              placeholder="Email de Envío"
             />
           </Column>
 
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Contraseña Email (<small>Para el envío del correo</small>):{' '}
-            </label>
-            <div className="input-group">
-              <input
-                ref={this.refPasswordEmail}
-                type={this.state.lookPasswordEmail ? 'text' : 'password'}
-                className="form-control"
-                value={this.state.claveEmail}
-                onChange={(event) =>
-                  this.setState({ claveEmail: event.target.value })
-                }
-                placeholder="********"
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Email"
+            <Input
+              group={true}
+              label={<>Contraseña Email (<small>Para el envío del correo, solo activo para cuentas de gmail</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="********"
+              refInput={this.refPasswordEmail}
+              value={this.state.claveEmail}
+              onChange={(event) =>
+                this.setState({ claveEmail: event.target.value })
+              }
+              type={this.state.lookPasswordEmail ? 'text' : 'password'}
+              buttonRight={
+                <Button
+                  className="btn-outline-secondary"
                   onClick={this.handleLookPasswordEmail}
                 >
                   <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
-              </div>
-            </div>
+                </Button>
+              }
+            />
           </Column>
         </Row>
 
         <Row>
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Usuario Sol(<small>Para el envío a Sunat</small>):{' '}
-            </label>
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={<>Usuario Sol(<small>Para el envío a Sunat</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Usurio secundario"
+              refInput={this.refUserSolSunat}
               value={this.state.usuarioSolSunat}
               onChange={(event) =>
                 this.setState({ usuarioSolSunat: event.target.value })
               }
-              placeholder="usuario"
             />
           </Column>
 
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Clave Sol(<small>Para el envío a Sunat</small>):{' '}
-            </label>
-            <div className="input-group">
-              <input
-                ref={this.refPasswordSol}
-                type={this.state.refPasswordSol ? 'text' : 'password'}
-                className="form-control"
-                value={this.state.claveSolSunat}
-                onChange={(event) =>
-                  this.setState({ claveSolSunat: event.target.value })
-                }
-                placeholder="********"
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Sunat"
+            <Input
+              group={true}
+              label={<>Clave Sol(<small>Para el envío a Sunat</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="********"
+              refInput={this.refPasswordSol}
+              value={this.state.claveSolSunat}
+              onChange={(event) =>
+                this.setState({ claveSolSunat: event.target.value })
+              }
+              type={this.state.refPasswordSol ? 'text' : 'password'}
+              buttonRight={
+                <Button
+                  className="btn-outline-secondary"
                   onClick={this.handleLookPasswordSol}
                 >
                   <i className={this.state.refPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
-              </div>
-            </div>
+                </Button>
+              }
+            />
           </Column>
         </Row>
 
         <Row>
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Id Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
-            </label>
-            <input
-              type="text"
-              className="form-control"
+            <Input
+              label={<>Id Api Sunat(<small>Para el envío de guía de remisión</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Usurio Api Sunat"
+              refInput={this.refIdApiSunat}
               value={this.state.idApiSunat}
               onChange={(event) =>
                 this.setState({ idApiSunat: event.target.value })
               }
-              placeholder="usuario"
             />
           </Column>
 
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Clave Api Sunat(<small>Para el envío de guía de remisión</small>):{' '}
-            </label>
-            <div className="input-group">
-              <input
-                ref={this.refPasswordClave}
-                type={this.state.lookPasswordClave ? 'text' : 'password'}
-                className="form-control"
-                value={this.state.claveApiSunat}
-                onChange={(event) =>
-                  this.setState({ claveApiSunat: event.target.value })
-                }
-                placeholder="********"
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Sunat"
+            <Input
+              group={true}
+              label={<>Clave Api Sunat(<small>Para el envío de guía de remisión</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="********"
+              refInput={this.refPasswordClave}
+              value={this.state.claveApiSunat}
+              onChange={(event) =>
+                this.setState({ claveApiSunat: event.target.value })
+              }
+              type={this.state.lookPasswordClave ? 'text' : 'password'}
+              buttonRight={
+                <Button
+                  className="btn-outline-secondary"
                   onClick={this.handleLookPasswordApiSunat}
                 >
                   <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
-              </div>
-            </div>
+                </Button>
+              }
+            />
           </Column>
         </Row>
 
@@ -647,31 +665,25 @@ class EmpresaProceso extends CustomComponent {
           </Column>
 
           <Column className={"col-md-6"} formGroup={true}>
-            <label>
-              Contraseña de tu Certificado:
-            </label>
-            <div className="input-group">
-              <input
-                ref={this.refPasswordClaveCertificado}
-                type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
-                className="form-control"
-                value={this.state.claveCertificado}
-                onChange={(event) =>
-                  this.setState({ claveCertificado: event.target.value })
-                }
-                placeholder="********"
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary"
-                  type="button"
-                  title="Email"
+            <Input
+              group={true}
+              label={<>Contraseña de tu Certificado:<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="********"
+              refInput={this.refPasswordClaveCertificado}
+              value={this.state.claveCertificado}
+              onChange={(event) =>
+                this.setState({ claveCertificado: event.target.value })
+              }
+              type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
+              buttonRight={
+                <Button
+                  className="btn-outline-secondary"
                   onClick={this.handleLookPasswordCertificado}
                 >
                   <i className={this.state.lookPasswordClaveCertificado ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </button>
-              </div>
-            </div>
+                </Button>
+              }
+            />
           </Column>
         </Row>
         <Row>
@@ -789,18 +801,70 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
+          <Column className={"col-12"} formGroup={true}>
+            <TextArea
+              label={<>Horario de Atención:</>}
+              rows={4}
+              placeholder="Ingrese el horario de atención"
+              value={this.state.horarioAtencion}
+              onChange={(event) =>
+                this.setState({ horarioAtencion: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-12"} formGroup={true}>
+            <TextArea
+              label={<>Acerca de Nosotros:</>}
+              rows={8}
+              placeholder="Ingrese la información de Acerca de Nosotros"
+              value={this.state.acercaNosotros}
+              onChange={(event) =>
+                this.setState({ acercaNosotros: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <TextArea
+              label={<>Políticas de Privacidad:</>}
+              rows={8}
+              placeholder="Ingrese su políticas de privacidad"
+              value={this.state.politicasPrivacidad}
+              onChange={(event) =>
+                this.setState({ politicasPrivacidad: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <TextArea
+              label={<>Terminos y Condiciones:</>}
+              rows={8}
+              placeholder="Ingrese sus terminos y condiciones"
+              value={this.state.terminosCondiciones}
+              onChange={(event) =>
+                this.setState({ terminosCondiciones: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
           <Column formGroup={true}>
             <Button
               className="btn-primary"
               onClick={() => this.handleGuardar()}
             >
-              Guardar
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-danger"
               onClick={() => this.props.history.goBack()}
             >
-              Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

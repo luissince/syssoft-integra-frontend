@@ -28,6 +28,11 @@ import NotaCreditoDetalle from './notacredito/NotaCreditoDetalle';
 import CuentasPorCobrar from './cuenta-cobrar/lista/CuentasPorCobrar.jsx';
 import CuentasPorCobrarAbonar from './cuenta-cobrar/crear/CuentasPorCobrarAbonar.jsx';
 
+import Pedidos from './pedido/lista/Pedidos.jsx';
+import PedidoCrear from './pedido/formularios/crear/PedidoCrear.jsx';
+import PedidoEditar from './pedido/formularios/editar/PedidoEditar.jsx';
+import PedidoDetalle from './pedido/detalle/PedidoDetalle.jsx'; 
+
 export {
     Ventas,
     VentaCrear,
@@ -54,6 +59,11 @@ export {
 
     CuentasPorCobrar,        
     CuentasPorCobrarAbonar,
+
+    Pedidos,
+    PedidoCrear,
+    PedidoEditar,    
+    PedidoDetalle,
 }
 
 /**

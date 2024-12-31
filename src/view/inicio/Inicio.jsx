@@ -58,6 +58,11 @@ import Facturacion, {
 
   CuentasPorCobrar,
   CuentasPorCobrarAbonar,
+
+  Pedidos,
+  PedidoCrear,
+  PedidoEditar,
+  PedidoDetalle,
 } from './facturacion/index.jsx';
 
 import Logistica, {
@@ -91,10 +96,10 @@ import Tesoreria, {
   CuentasPorPagar,
   CuentasPorPagarAmortizar,
 
-  Pedidos,
-  PedidoCrear,
-  PedidoEditar,
-  PedidoDetalle,
+  OrdenCompras,
+  OrdenCompraCrear,
+  OrdenCompraEditar,
+  OrdenCompraDetalle,
 } from './tesoreria/index.jsx';
 
 import Contacto, {
@@ -406,6 +411,8 @@ class Inicio extends React.Component {
 
     const pathname = this.props.location.pathname;
 
+    console.log(this.props.token.userToken.menus);
+
     return (
       <div className="app">
         <Menu
@@ -621,6 +628,27 @@ class Inicio extends React.Component {
             render={(props) => <CuentasPorCobrarAbonar {...props} />}
           />
 
+          <Route
+            path={`${path}/facturacion/pedidos`}
+            exact={true}
+            render={(props) => <Pedidos {...props} />}
+          />
+          <Route
+            path={`${path}/facturacion/pedido/crear`}
+            exact={true}
+            render={(props) => <PedidoCrear {...props} />}
+          />
+          <Route
+            path={`${path}/facturacion/pedido/editar`}
+            exact={true}
+            render={(props) => <PedidoEditar {...props} />}
+          />
+          <Route
+            path={`${path}/facturacion/pedido/detalle`}
+            exact={true}
+            render={(props) => <PedidoDetalle {...props} />}
+          />
+
           {/* 
           --------------------------------------------------------
           | LOGISTICA
@@ -752,24 +780,24 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/tesoreria/pedidos`}
+            path={`${path}/tesoreria/ordencompras`}
             exact={true}
-            render={(props) => <Pedidos {...props} />}
+            render={(props) => <OrdenCompras {...props} />}
           />
           <Route
-            path={`${path}/tesoreria/pedidos/crear`}
+            path={`${path}/tesoreria/ordencompras/crear`}
             exact={true}
-            render={(props) => <PedidoCrear {...props} />}
+            render={(props) => <OrdenCompraCrear {...props} />}
           />
           <Route
-            path={`${path}/tesoreria/pedidos/editar`}
+            path={`${path}/tesoreria/ordencompras/editar`}
             exact={true}
-            render={(props) => <PedidoEditar {...props} />}
+            render={(props) => <OrdenCompraEditar {...props} />}
           />
           <Route
-            path={`${path}/tesoreria/pedidos/detalle`}
+            path={`${path}/tesoreria/ordencompras/detalle`}
             exact={true}
-            render={(props) => <PedidoDetalle {...props} />}
+            render={(props) => <OrdenCompraDetalle {...props} />}
           />
 
           {/* 

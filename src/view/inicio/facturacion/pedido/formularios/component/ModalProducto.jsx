@@ -132,42 +132,42 @@ class ModalProducto extends Component {
     const { detalles, idImpuesto, impuestos } = this.props;
 
     if (!isNumeric(cantidad)) {
-      alertWarning('Pedido', 'Ingrese la cantidad.', () => {
+      alertWarning('Orden de Compra', 'Ingrese la cantidad.', () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
     if (parseFloat(cantidad) <= 0) {
-      alertWarning('Pedido', 'La cantidad no puede ser menor a cero.', () => {
+      alertWarning('Orden de Compra', 'La cantidad no puede ser menor a cero.', () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
     if (!isNumeric(costo)) {
-      alertWarning('Pedido', 'Ingrese el costo.', () => {
+      alertWarning('Orden de Compra', 'Ingrese el costo.', () => {
         this.refCosto.current.focus();
       });
       return;
     }
 
     if (parseFloat(costo) <= 0) {
-      alertWarning('Pedido', 'El costo no puede ser menor a cero.', () => {
+      alertWarning('Orden de Compra', 'El costo no puede ser menor a cero.', () => {
         this.refCosto.current.focus();
       });
       return;
     }
 
     if (isEmpty(descripcion)) {
-      alertWarning('Pedido', 'Ingrese la descripción del producto.', () => {
+      alertWarning('Orden de Compra', 'Ingrese la descripción del producto.', () => {
         this.refDescripcion.current.focus();
       });
       return;
     }
 
     if (isEmpty(idMedida)) {
-      alertWarning('Pedido', 'Ingrese la unidad de medida', () => {
+      alertWarning('Orden de Compra', 'Ingrese la unidad de medida', () => {
         this.refMedida.current.focus();
       });
       return;

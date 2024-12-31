@@ -13,10 +13,10 @@ import CompraDetalle from './compra/detalle/CompraDetalle.jsx';
 import CuentasPorPagar from './cuenta-pagar/lista/CuentasPorPagar.jsx';
 import CuentasPorPagarAmortizar from './cuenta-pagar/crear/CuentasPorPagarAmortizar.jsx';
 
-import Pedidos from './pedido/lista/Pedidos.jsx';
-import PedidoCrear from './pedido/formularios/crear/PedidoCrear.jsx';
-import PedidoEditar from './pedido/formularios/editar/PedidoEditar.jsx';
-import PedidoDetalle from './pedido/detalle/PedidoDetalle.jsx';
+import OrdenCompras from './orden-compra/lista/OrdenCompra.jsx';
+import OrdenCompraCrear from './orden-compra/formularios/crear/OrdenCompraCrear.jsx';
+import OrdenCompraEditar from './orden-compra/formularios/editar/OrdenCompraEditar.jsx';
+import OrdenCompraDetalle from './orden-compra/detalle/OrdenCompraDetalle.jsx';
 
 export {
     Gastos,
@@ -30,10 +30,10 @@ export {
     CuentasPorPagar,
     CuentasPorPagarAmortizar,
 
-    Pedidos,
-    PedidoCrear,
-    PedidoEditar,    
-    PedidoDetalle,
+    OrdenCompras,
+    OrdenCompraCrear,
+    OrdenCompraEditar,    
+    OrdenCompraDetalle,
 }
 
 /**

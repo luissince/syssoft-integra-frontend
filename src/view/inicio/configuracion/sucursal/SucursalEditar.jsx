@@ -54,6 +54,7 @@ class SucursalEditar extends CustomComponent {
       paginaWeb: '',
       direcion: '',
       idUbigeo: '',
+      googleMaps: '',
       principal: false,
       estado: true,
 
@@ -111,6 +112,7 @@ class SucursalEditar extends CustomComponent {
       email: sucursal.email,
       paginaWeb: sucursal.paginaWeb,
       direcion: sucursal.direccion,
+      googleMaps: sucursal.googleMaps,
       principal: sucursal.principal === 1 ? true : false,
       estado: sucursal.estado === 1 ? true : false,
       idUbigeo: sucursal.idUbigeo.toString(),
@@ -258,6 +260,7 @@ class SucursalEditar extends CustomComponent {
           paginaWeb: this.state.paginaWeb.trim(),
           direccion: this.state.direcion.trim(),
           idUbigeo: this.state.idUbigeo,
+          googleMaps: this.state.googleMaps,
           principal: this.state.principal,
           estado: this.state.estado,
           //imagen
@@ -401,6 +404,19 @@ class SucursalEditar extends CustomComponent {
                       {value.departamento} - {value.provincia} - {value.distrito} ({value.ubigeo})
                     </>
                   }
+                />
+              </Column>
+            </Row>
+
+            <Row>
+              <Column formGroup={true}>
+                <Input
+                  label={<>Url de Google Maps <a href='https://embed-googlemap.com/' target='blank' className='btn btn-link'>Puedes obtenerla en esta web</a>: <i className="fa fa-asterisk text-danger small"></i></>}
+                  value={this.state.googleMaps}
+                  onChange={(event) =>
+                    this.setState({ googleMaps: event.target.value })
+                  }
+                  placeholder="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=Alisios 221-197, Lima 15034..."
                 />
               </Column>
             </Row>

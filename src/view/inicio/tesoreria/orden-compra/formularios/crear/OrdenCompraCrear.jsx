@@ -1,55 +1,49 @@
 import React from 'react';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../../components/Container';
+import CustomComponent from '../../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
   getRowCellIndex,
   isEmpty,
-  isText,
   numberFormat,
   rounded,
-} from '../../../../../helper/utils.helper';
-import Title from '../../../../../components/Title';
+} from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { COMPRA } from '../../../../../model/types/tipo-comprobante';
+import { ORDEN_DE_COMPRA } from '../../../../../../model/types/tipo-comprobante';
 import {
-  comboAlmacen,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
-  createCompra,
-  documentsPdfInvoicesCompra,
+  createOrdenCompra,
+  documentsPdfInvoicesOrdenCompra,
   filtrarPersona,
   filtrarProducto,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import SearchInput from '../../../../../components/SearchInput';
+} from '../../../../../../network/rest/principal.network';
+import Title from '../../../../../../components/Title';
+import Row from '../../../../../../components/Row';
+import SuccessReponse from '../../../../../../model/class/response';
+import ErrorResponse from '../../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../../model/types/types';
+import SearchInput from '../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
-import Select from '../../../../../components/Select';
-import TextArea from '../../../../../components/TextArea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
-import ModalProducto from './component/ModalProducto';
-import ModalTransaccion from '../../../../../components/ModalTransaccion';
-import { clearCrearCompra, setCrearCompraLocal, setCrearCompraState } from '../../../../../redux/predeterminadoSlice';
-import { ModalImpresion, ModalPersona } from '../../../../../components/MultiModal';
+import ModalProducto from '../component/ModalProducto';
+import Column from '../../../../../../components/Column';
+import { SpinnerView } from '../../../../../../components/Spinner';
 import printJS from 'print-js';
-import SweetAlert from '../../../../../model/class/sweet-alert';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import Button from '../../../../../../components/Button';
+import Select from '../../../../../../components/Select';
+import TextArea from '../../../../../../components/TextArea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
+import { clearCrearOrdenCompra, setCrearOrdenCompraLocal, setCrearOrdenCompraState } from '../../../../../../redux/predeterminadoSlice';
+import SweetAlert from '../../../../../../model/class/sweet-alert';
+import { ModalImpresion, ModalPersona } from '../../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class CompraCrear extends CustomComponent {
-
+class OrdenCompraCrear extends CustomComponent {
   /**
    *
    * Constructor
@@ -62,10 +56,9 @@ class CompraCrear extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       // Atributos principales
-      idCompra: '',
+      idOrdenCompra: '',
       idComprobante: '',
       idMoneda: '',
-      idAlmacen: '',
       idImpuesto: '',
       observacion: '',
       nota: '',
@@ -76,36 +69,32 @@ class CompraCrear extends CustomComponent {
       // Lista de datos
       comprobantes: [],
       monedas: [],
-      almacenes: [],
       impuestos: [],
+      medidas: [],
 
       // Filtrar producto
-      producto: null,
       productos: [],
 
-      // Filtrar persona
-      persona: null,
-      personas: [],
+      // Filtrar proveedor
+      proveedor: null,
+      proveedores: [],
 
       // Atributos libres
-      codiso: '',
+      codISO: '',
       total: 0,
-
-      // Atributos del modal sale
-      isOpenTerminal: false,
 
       // Atributos del modal producto
       isOpenProducto: false,
 
+      // Atributos del modal proveedor
+      isOpenPersona: false,
+
       // Atributos del modal impresión
       isOpenImpresion: false,
 
-      // Atributos del modal persona
-      isOpenPersona: false,
-
       // Id principales
-      idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
+      idSucursal: this.props.token.project.idSucursal,
     };
 
     this.initial = { ...this.state };
@@ -114,20 +103,19 @@ class CompraCrear extends CustomComponent {
 
     // Referencia principales
     this.refComprobante = React.createRef();
-    this.refMoneda = React.createRef();
-    this.refAlmacen = React.createRef();
-    this.refImpuesto = React.createRef();
+    this.refIdMoneda = React.createRef();
+    this.refIdImpuesto = React.createRef();
     this.refObservacion = React.createRef();
 
     // Filtrar producto
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
 
-    // Filtrar persona
-    this.refPersona = React.createRef();
-    this.refValuePersona = React.createRef();
+    // Filtrar proveedor
+    this.refProveedor = React.createRef();
+    this.refValueProveedor = React.createRef();
 
-    // Referencia para el custom modal producto
+    // Referencia para el modal producto
     this.refModalProducto = React.createRef();
 
     // Referencia para el modal impresión
@@ -157,13 +145,15 @@ class CompraCrear extends CustomComponent {
   async componentDidMount() {
     document.addEventListener('keydown', this.handleDocumentKeyDown)
 
-    await this.loadData();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleDocumentKeyDown)
 
     this.abortController.abort();
+
+    this.alert.close();
   }
 
   /*
@@ -180,25 +170,20 @@ class CompraCrear extends CustomComponent {
   |
   */
 
-  loadData = async () => {
-    if (this.props.compraCrear && this.props.compraCrear.state && this.props.compraCrear.local) {
-      await this.setStateAsync(this.props.compraCrear.state);
-      if (this.props.compraCrear.state.persona) {
-        this.handleSelectItemPersona(this.props.compraCrear.state.persona);
-      }
-      this.index = this.props.compraCrear.local.index;
-      const children = Array.from(this.refTable.current.tBodies[0].closest('tbody').children);
-      if (this.index != -1 && children) {
-        this.updateSelection(children);
-      }
+  loadingData = async () => {
+    if (this.props.ordenCompraCrear && this.props.ordenCompraCrear.state && this.props.ordenCompraCrear.local) {
+      this.setState(this.props.ordenCompraCrear.state, () => {
+        if (this.props.ordenCompraCrear.state.proveedor) {
+          this.handleSelectItemProveedor(this.props.ordenCompraCrear.state.proveedor);
+        }
+        this.index = this.props.ordenCompraCrear.local.index;
+      });
     } else {
-      const [comprobantes, monedas, almacenes, impuestos] =
-        await Promise.all([
-          this.fetchComprobante(COMPRA),
-          this.fetchMoneda(),
-          this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-          this.fetchImpuesto(),
-        ]);
+      const [comprobantes, monedas, impuestos] = await Promise.all([
+        this.fetchComprobante(ORDEN_DE_COMPRA),
+        this.fetchMoneda(),
+        this.fetchImpuesto(),
+      ]);
 
       const comprobante = comprobantes.find((item) => item.preferida === 1);
       const moneda = monedas.find((item) => item.nacional === 1);
@@ -207,12 +192,11 @@ class CompraCrear extends CustomComponent {
       this.setState({
         comprobantes,
         monedas,
-        almacenes,
         impuestos,
         idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
         idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
         idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-        codiso: isEmpty(moneda) ? '' : moneda.codiso,
+        codISO: isEmpty(moneda) ? '' : moneda.codiso,
         loading: false,
       }, () => {
         this.updateReduxState();
@@ -221,18 +205,18 @@ class CompraCrear extends CustomComponent {
   };
 
   updateReduxState() {
-    this.props.setCrearCompraState(this.state)
-    this.props.setCrearCompraLocal({
+    this.props.setCrearOrdenCompraState(this.state)
+    this.props.setCrearOrdenCompraLocal({
       index: this.index,
     })
   }
 
-  clearView = () => {
+  clearView = async () => {
     this.setState(this.initial, async () => {
       await this.refProducto.current.restart();
-      await this.refPersona.current.restart();
-      await this.props.clearCrearCompra();
-      await this.loadData();
+      await this.refProveedor.current.restart();
+      await this.props.clearCrearOrdenCompra();
+      await this.loadingData();
 
       this.refValueProducto.current.focus();
       this.index = -1;
@@ -244,6 +228,7 @@ class CompraCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
+
   async fetchFiltrarProductos(params) {
     const response = await filtrarProducto(params);
 
@@ -256,7 +241,7 @@ class CompraCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarCliente(params) {
+  async fetchFiltrarProveedor(params) {
     const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
@@ -304,22 +289,8 @@ class CompraCrear extends CustomComponent {
     }
   }
 
-  async fetchComboAlmacen(params) {
-    const response = await comboAlmacen(params, this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
   async fetchImpuesto() {
-    const response = await comboImpuesto(this.abortController.signal);
+    const response = await comboImpuesto();
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -349,14 +320,14 @@ class CompraCrear extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenProducto && !this.state.isOpenTerminal) {
+    if (event.key === 'F1') {
       this.handleGuardar();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenProducto && !this.state.isOpenTerminal) {
+    if (event.key === 'F2') {
       this.handleLimpiar();
     }
-  };
+  }
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value }, () => {
@@ -382,18 +353,14 @@ class CompraCrear extends CustomComponent {
     });
   };
 
-  handleSelectAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
   handleSelectImpuesto = (event) => {
     const idImpuesto = event.target.value;
 
     const impuesto = this.state.impuestos.find((item) => item.idImpuesto === idImpuesto);
 
-    this.setState({ idImpuesto: event.target.value });
+    this.setState({ idImpuesto: event.target.value }, () => {
+      this.updateReduxState();
+    });
 
     if (idImpuesto !== "") {
       this.setState(prevState => ({
@@ -438,14 +405,12 @@ class CompraCrear extends CustomComponent {
     if (event.key === 'ArrowUp') {
       this.index = (this.index - 1 + children.length) % children.length;
       this.updateSelection(children);
-      this.updateReduxState();
       event.preventDefault();
     }
 
     if (event.key === 'ArrowDown') {
       this.index = (this.index + 1) % children.length;
       this.updateSelection(children);
-      this.updateReduxState();
       event.preventDefault();
     }
 
@@ -465,7 +430,6 @@ class CompraCrear extends CustomComponent {
 
     this.index = rowIndex;
     this.updateSelection(children);
-    this.updateReduxState();
   }
 
   handleOnDbClickTable = async (event) => {
@@ -475,7 +439,6 @@ class CompraCrear extends CustomComponent {
 
     this.index = rowIndex;
     this.updateSelection(children);
-    this.updateReduxState();
     this.handleOpenModalProducto();
   }
 
@@ -494,8 +457,8 @@ class CompraCrear extends CustomComponent {
     const { idImpuesto, detalles } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Compra', 'Seleccione un impuesto para continuar.', async () => {
-        this.refImpuesto.current.focus();
+      this.alert.warning('Orden de Compra', 'Seleccione un impuesto para continuar.', () => {
+        this.refIdImpuesto.current.focus();
       });
       return;
     }
@@ -508,7 +471,7 @@ class CompraCrear extends CustomComponent {
   }
 
   handleCloseProducto = async () => {
-    this.setState({ isOpenProducto: false })
+    this.setState({ isOpenProducto: false });
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
@@ -521,8 +484,9 @@ class CompraCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal persona
+  // Acciones del modal proveedor
   //------------------------------------------------------------------------------------------
+
   handleOpenModalPersona = () => {
     this.setState({ isOpenPersona: true });
   }
@@ -537,7 +501,6 @@ class CompraCrear extends CustomComponent {
   handleClearInputProducto = () => {
     this.setState({
       productos: [],
-      producto: null,
     }, () => {
       this.updateReduxState();
     });
@@ -545,7 +508,6 @@ class CompraCrear extends CustomComponent {
 
   handleFilterProducto = async (text) => {
     const searchWord = text;
-    this.setState({ producto: null });
 
     if (isEmpty(searchWord)) {
       this.setState({ productos: [] });
@@ -558,44 +520,41 @@ class CompraCrear extends CustomComponent {
 
     const productos = await this.fetchFiltrarProductos(params);
 
-    // Filtrar productos por tipoProducto !== "SERVICIO"
-    const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
-
     this.setState({
-      productos: filteredProductos,
+      productos: productos,
     });
   };
 
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
+
     this.setState({
-      producto: value,
       productos: [],
     }, () => {
       this.updateReduxState();
-
-      this.handleOpenModalProducto(value);
     });
+
+    this.handleOpenModalProducto(value);
   };
 
   //------------------------------------------------------------------------------------------
-  // Filtrar persona
+  // Filtrar proveedor
   //------------------------------------------------------------------------------------------
-  handleClearInputPersona = () => {
+  handleClearInputProveedor = () => {
     this.setState({
-      personas: [],
-      persona: null,
+      proveedores: [],
+      proveedor: null,
     }, () => {
       this.updateReduxState();
     });
   };
 
-  handleFilterPersona = async (text) => {
+  handleFilterProveedor = async (text) => {
     const searchWord = text;
-    this.setState({ persona: null, });
+    this.setState({ proveedor: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ personas: [] });
+      this.setState({ proveedores: [] });
       return;
     }
 
@@ -605,214 +564,116 @@ class CompraCrear extends CustomComponent {
       proveedor: 1,
     };
 
-    const personas = await this.fetchFiltrarCliente(params);
+    const proveedores = await this.fetchFiltrarProveedor(params);
 
-    this.setState({ personas });
+    this.setState({ proveedores });
   };
 
-  handleSelectItemPersona = async (value) => {
-    this.refPersona.current.initialize(value.documento + ' - ' + value.informacion);
+  handleSelectItemProveedor = async (value) => {
+    this.refProveedor.current.initialize(value.documento + ' - ' + value.informacion);
+
     this.setState({
-      persona: value,
-      personas: [],
+      proveedor: value,
+      proveedores: [],
     }, () => {
       this.updateReduxState();
     });
   };
 
   //------------------------------------------------------------------------------------------
-  // Procesos guardar, limpiar y cerrar
+  // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idComprobante, persona, idMoneda, idImpuesto, idAlmacen, detalles } = this.state;
+    const { idComprobante, proveedor, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
-    if (!isText(idComprobante)) {
-      this.alert.warning('Compra', 'Seleccione su comprobante.', () =>
+    if (isEmpty(idComprobante)) {
+      this.alert.warning('Orden de Compra', 'Seleccione su comprobante.', () =>
         this.refComprobante.current.focus(),
       );
       return;
     }
 
-    if (isEmpty(persona)) {
-      this.alert.warning('Compra', 'Seleccione un proveedor.', () =>
-        this.refValuePersona.current.focus(),
+    if (isEmpty(proveedor)) {
+      this.alert.warning('Orden de Compra', 'Seleccione un proveedor.', () =>
+        this.refValueProveedor.current.focus(),
       );
       return;
     }
 
-    if (!isText(idMoneda)) {
-      this.alert.warning('Compra', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
-      return;
-    }
-    if (!isText(idImpuesto)) {
-      this.alert.warning('Compra', 'Seleccione el impuesto', () =>
-        this.refMoneda.current.focus(),
+    if (isEmpty(idMoneda)) {
+      this.alert.warning('Orden de Compra', 'Seleccione su moneda.', () =>
+        this.refIdMoneda.current.focus(),
       );
       return;
     }
 
-    if (!isText(idAlmacen)) {
-      this.alert.warning('Compra', 'Seleccione su almacen.', () =>
-        this.refAlmacen.current.focus(),
+    if (isEmpty(idImpuesto)) {
+      this.alert.warning('Orden de Compra', 'Seleccione el impuesto', () =>
+        this.refIdImpuesto.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning('Compra', 'Agregar algún producto a la lista.', () =>
+      this.alert.warning('Orden de Compra', 'Agregar algún producto a la lista.', () =>
         this.refValueProducto.current.focus(),
       );
       return;
     }
 
-    this.handleOpenModalTerminal();
+    this.alert.dialog('Orden de Compra', '¿Está seguro de continuar?', async (accept) => {
+      if (accept) {
+        const data = {
+          idComprobante: idComprobante,
+          idProveedor: proveedor.idPersona,
+          idMoneda: idMoneda,
+          idSucursal: this.state.idSucursal,
+          idUsuario: this.state.idUsuario,
+          estado: 1,
+          observacion: observacion,
+          nota: nota,
+          detalle: detalles
+        };
+
+        this.alert.information('Orden de Compra', 'Procesando información...');
+
+        const response = await createOrdenCompra(data);
+
+        if (response instanceof SuccessReponse) {
+          this.alert.close();
+          this.handleOpenImpresion(response.data.idOrdenCompra);
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          this.alert.warning('Orden de Compra', response.getMessage());
+        }
+      }
+    });
   };
 
+  //------------------------------------------------------------------------------------------
+  // Procesos limpiar
+  //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    this.alert.dialog("Compra", "¿Está seguro de limpiar la compra?", (accept) => {
+    this.alert.dialog("Orden de Compra", "¿Está seguro de limpiar la orden de compra?", (accept) => {
       if (accept) {
         this.clearView();
       }
     })
   };
 
-  handleCerrar = () => {
-    this.props.history.goBack();
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal terminal
-  //------------------------------------------------------------------------------------------
-  handleOpenModalTerminal = () => {
-    this.setState({ isOpenTerminal: true })
-  }
-
-  handleCloseModalTerminal = () => {
-    this.setState({ isOpenTerminal: false })
-  }
-
-  handleProcessContado = async (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
-    const {
-      idComprobante,
-      persona,
-      idImpuesto,
-      idAlmacen,
-      idMoneda,
-      observacion,
-      nota,
-      detalles,
-      idUsuario,
-      idSucursal
-    } = this.state;
-
-    this.alert.dialog('Compra', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: idFormaPago,
-          idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
-          idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
-          idMoneda: idMoneda,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          idSucursal: idSucursal,
-          estado: 1,
-          detalles: detalles,
-          notaTransacion,
-          bancosAgregados: metodoPagosLista,
-        };
-
-        await callback();
-        this.alert.information('Compra', 'Procesando información...');
-
-        const response = await createCompra(data);
-
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idCompra);
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          this.alert.warning('Compra', response.getMessage());
-        }
-      }
-    });
-  };
-
-  handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPago, total, notaTransacion, callback = async function () { }) => {
-    const {
-      idComprobante,
-      persona,
-      idImpuesto,
-      idAlmacen,
-      idMoneda,
-      observacion,
-      nota,
-      detalles,
-      idUsuario,
-      idSucursal,
-    } = this.state;
-
-    this.alert.dialog('Compra', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: idFormaPago,
-          idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
-          idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
-          idMoneda: idMoneda,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          idSucursal: idSucursal,
-          estado: 2,
-          numeroCuotas: numeroCuotas,
-          frecuenciaPago: frecuenciaPago,
-          detalles: detalles,
-          notaTransacion,
-          importeTotal: total
-        };
-
-        await callback();
-        this.alert.information('Compra', 'Procesando información...');
-
-        const response = await createCompra(data);
-
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idCompra);
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          this.alert.warning('Compra', response.getMessage());
-        }
-      }
-    });
-  };
-
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
-  handleOpenImpresion = (idCompra) => {
-    this.setState({ isOpenImpresion: true, idCompra: idCompra })
-  }
-
-  handleCloseImpresion = async () => {
-    this.setState({ isOpenImpresion: false });
+  handleOpenImpresion = (idOrdenCompra) => {
+    this.setState({ isOpenImpresion: true, idOrdenCompra: idOrdenCompra })
   }
 
   handlePrinterImpresion = (size) => {
     printJS({
-      printable: documentsPdfInvoicesCompra(this.state.idCompra, size),
+      printable: documentsPdfInvoicesOrdenCompra(this.state.idOrdenCompra, size),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -822,6 +683,17 @@ class CompraCrear extends CustomComponent {
       }
     })
   }
+
+  handleCloseImpresion = async () => {
+    this.setState({ isOpenImpresion: false });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Procesos cerrar
+  //------------------------------------------------------------------------------------------
+  handleCerrar = () => {
+    this.props.history.goBack();
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -841,39 +713,31 @@ class CompraCrear extends CustomComponent {
 
   generateBody() {
     const { detalles } = this.state;
-
     if (isEmpty(detalles)) {
       return (
-        <tr className="text-center">
-          <td colSpan="7"> Agregar datos a la tabla </td>
-        </tr>
+        <TableRow className="text-center">
+          <TableCell colSpan="7"> Agregar datos a la tabla </TableCell>
+        </TableRow>
       );
     }
-    
+
     return detalles.map((item, index) => (
       <TableRow
-        key={index}>
+        key={index}
+        className='bg-white'>
         <TableCell className="text-center">{item.id}</TableCell>
-        <TableCell className="text-center">
-          <Image
-            default={images.noImage}
-            src={item.imagen}
-            alt={item.nombre}
-            width={100}
-          />
-        </TableCell>
         <TableCell>
           {item.codigo}
           <br />
           {item.nombre}
         </TableCell>
         <TableCell>{rounded(item.cantidad)}</TableCell>
-        <TableCell>{numberFormat(item.costo, this.state.codiso)}</TableCell>
-        <TableCell>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</TableCell>
+        <TableCell>{item.nombreMedida}</TableCell>
+        <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.cantidad * item.costo, this.state.codISO)}</TableCell>
         <TableCell className="text-center">
           <Button
             className="btn-outline-danger btn-sm"
-            title="Eliminar"
             onClick={() => this.handleRemoverProducto(item.idProducto)}>
             <i className="bi bi-trash"></i>
           </Button>
@@ -927,7 +791,7 @@ class CompraCrear extends CustomComponent {
           <TableRow key={index}>
             <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
             <TableHead className="text-right mb-2">
-              {numberFormat(impuesto.valor, this.state.codiso)}
+              {numberFormat(impuesto.valor, this.state.codISO)}
             </TableHead>
           </TableRow>
         );
@@ -939,7 +803,7 @@ class CompraCrear extends CustomComponent {
         <TableRow>
           <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
           <TableHead className="text-right mb-2">
-            {numberFormat(subTotal, this.state.codiso)}
+            {numberFormat(subTotal, this.state.codISO)}
           </TableHead>
         </TableRow>
         {impuestosGenerado()}
@@ -947,7 +811,7 @@ class CompraCrear extends CustomComponent {
         <TableRow>
           <TableHead className="text-right h5">TOTAL :</TableHead>
           <TableHead className="text-right h5">
-            {numberFormat(total, this.state.codiso)}
+            {numberFormat(total, this.state.codISO)}
           </TableHead>
         </TableRow>
       </>
@@ -957,19 +821,16 @@ class CompraCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <ModalTransaccion
-          tipo={"Compra"}
-          title={"Completar Compra"}
-          isOpen={this.state.isOpenTerminal}
-
-          idSucursal={this.state.idSucursal}
-          codiso={this.state.codiso}
-          importeTotal={this.state.total}
-
-          onClose={this.handleCloseModalTerminal}
-          handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={this.handleProcessCredito}
+        <Title
+          title='Orden de Compra'
+          subTitle='CREAR'
+          icon={<i className='fa fa-plus'></i>}
+          handleGoBack={this.handleCerrar}
         />
 
         <ModalProducto
@@ -1003,17 +864,6 @@ class CompraCrear extends CustomComponent {
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
-        <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
-        />
-
-        <Title
-          title='Compra'
-          subTitle='Crear'
-          handleGoBack={this.handleCerrar}
-        />
-
         <Row>
           <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
             <Row>
@@ -1027,21 +877,7 @@ class CompraCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) =>
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={value.imagen}
-                        alt={value.nombre}
-                        width={60}
-                      />
-
-                      <div className='ml-2'>
-                        {value.codigo}
-                        <br />
-                        {value.nombre}
-                      </div>
-                    </div>}
+                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
@@ -1049,20 +885,19 @@ class CompraCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <TableResponsive
-                  onKeyDown={this.handleKeyDownTable}>
+                <TableResponsive onKeyDown={this.handleKeyDownTable}>
                   <Table
                     ref={this.refTable}
                     tabIndex="0"
                     onClick={this.handleOnClickTable}
                     onDoubleClick={this.handleOnDbClickTable}
-                    className={"table-bordered table-hover table-sticky w-100"}>
+                    className={"table-bordered table-hover table-sticky"}>
                     <TableHeader>
                       <TableRow>
                         <TableHead width="5%" className="text-center">#</TableHead>
-                        <TableHead width="10%" className="text-center">Imagen</TableHead>
                         <TableHead width="15%">Producto</TableHead>
                         <TableHead width="5%">Cantidad</TableHead>
+                        <TableHead width="5%">Medida</TableHead>
                         <TableHead width="5%">Costo</TableHead>
                         <TableHead width="5%">Total</TableHead>
                         <TableHead width="5%" className="text-center">Quitar</TableHead>
@@ -1077,41 +912,39 @@ class CompraCrear extends CustomComponent {
             </Row>
 
             <Row>
+              <Column>
+                <div className="form-group">
+                  <Button
+                    className='btn-success'
+                    onClick={this.handleGuardar}>
+                    <i className="fa fa-save"></i> Guardar (F1)
+                  </Button>
+                  {' '}
+                  <Button
+                    className='btn-outline-info'
+                    onClick={this.handleLimpiar}>
+                    <i className="fa fa-trash"></i> Limpiar (F2)
+                  </Button>
+                  {' '}
+                  {/* <Button
+                    className=" btn-outline-primary"
+                    onClick={this.handleOpenPreImpresion}>
+                    <i className="bi bi-printer"></i> Pre Impresión (F3)
+                  </Button>
+                  {' '} */}
+                  <Button
+                    className=" btn-outline-danger"
+                    onClick={this.handleCerrar}>
+                    <i className="fa fa-close"></i> Cerrar
+                  </Button>
+                </div>
+              </Column>
+            </Row>
+
+            <Row>
               <Column formGroup={true}>
-                <Button
-                  className="btn-primary"
-                  onClick={this.handleGuardar}
-                >
-                  <i className="fa fa-arrow-right"></i> Registrar (F1)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-search"></i> Orden de Compra (F2)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-shopping-cart"></i> Compra (F3)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-trash"></i> Limpiar (F4)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-danger"
-                  onClick={this.handleCerrar}
-                >
-                  <i className="fa fa-close"></i> Cerrar
-                </Button>
+                <p><span className='text-danger'>*</span> <i className="bi bi-chat-dots-fill text-danger"></i> Observación, se utiliza para agregar información importante. No son visible en la impresión.</p>
+                <p><span className='text-danger'>*</span> <i className="bi bi-card-text text-danger"></i> Nota, visible en la impresión del documento.</p>
               </Column>
             </Row>
           </Column>
@@ -1121,7 +954,6 @@ class CompraCrear extends CustomComponent {
               <Select
                 group={true}
                 iconLeft={<i className="bi bi-receipt"></i>}
-                title="Comprobantes de venta"
                 refSelect={this.refComprobante}
                 value={this.state.idComprobante}
                 onChange={this.handleSelectComprobante}
@@ -1137,13 +969,13 @@ class CompraCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                ref={this.refPersona}
+                ref={this.refProveedor}
                 placeholder="Filtrar proveedores..."
-                refValue={this.refValuePersona}
-                data={this.state.personas}
-                handleClearInput={this.handleClearInputPersona}
-                handleFilter={this.handleFilterPersona}
-                handleSelectItem={this.handleSelectItemPersona}
+                refValue={this.refValueProveedor}
+                data={this.state.proveedores}
+                handleClearInput={this.handleClearInputProveedor}
+                handleFilter={this.handleFilterProveedor}
+                handleSelectItem={this.handleSelectItemProveedor}
                 renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
                 renderIconLeft={<i className="bi bi-person-circle"></i>}
                 customButton={
@@ -1161,37 +993,17 @@ class CompraCrear extends CustomComponent {
               <Select
                 group={true}
                 iconLeft={<i className="bi bi-percent"></i>}
-                refSelect={this.refImpuesto}
+                refSelect={this.refIdImpuesto}
                 value={this.state.idImpuesto}
                 onChange={this.handleSelectImpuesto}
               >
                 <option value={''}>-- Impuesto --</option>
-                {this.state.impuestos.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idImpuesto}>
-                      {item.nombre}
-                    </option>
-                  );
-                })}
-              </Select>
-            </div>
-
-            <div className="form-group">
-              <Select
-                group={true}
-                iconLeft={<i className="fa fa-building"></i>}
-                refSelect={this.refAlmacen}
-                value={this.state.idAlmacen}
-                onChange={this.handleSelectAlmacen}
-              >
-                <option value={''}>-- Almacen --</option>
-                {this.state.almacenes.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idAlmacen}>
-                      {item.nombre}
-                    </option>
-                  );
-                })}
+                {this.state.impuestos.map((item, index) => (
+                  <option key={index} value={item.idImpuesto}>
+                    {item.nombre}
+                  </option>
+                )
+                )}
               </Select>
             </div>
 
@@ -1199,8 +1011,7 @@ class CompraCrear extends CustomComponent {
               <Select
                 group={true}
                 iconLeft={<i className="bi bi-cash"></i>}
-                title="Lista metodo de pago"
-                refSelect={this.refMoneda}
+                refSelect={this.refIdMoneda}
                 value={this.state.idMoneda}
                 onChange={this.handleSelectMoneda}
               >
@@ -1217,27 +1028,25 @@ class CompraCrear extends CustomComponent {
               <TextArea
                 group={true}
                 iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-                title="Observaciones..."
                 refInput={this.refObservacion}
                 value={this.state.observacion}
                 onChange={this.handleInputObservacion}
-                placeholder="Ingrese alguna observación">
-              </TextArea>
+                placeholder="Ingrese alguna observación"
+              />
             </div>
 
             <div className="form-group">
               <TextArea
                 group={true}
                 iconLeft={<i className="bi bi-card-text"></i>}
-                title="Observaciones..."
                 value={this.state.nota}
                 onChange={this.handleInputNota}
-                placeholder="Ingrese alguna nota">
-              </TextArea>
+                placeholder="Ingrese alguna nota"
+              />
             </div>
 
             <div className="form-group">
-              <Table classNameContent="w-100">
+              <Table classNameContent='w-100'>
                 <TableHeader>{this.renderTotal()}</TableHeader>
               </Table>
             </div>
@@ -1248,7 +1057,7 @@ class CompraCrear extends CustomComponent {
   }
 }
 
-CompraCrear.propTypes = {
+OrdenCompraCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       idUsuario: PropTypes.string.isRequired,
@@ -1260,13 +1069,13 @@ CompraCrear.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
-  compraCrear: PropTypes.shape({
+  ordenCompraCrear: PropTypes.shape({
     state: PropTypes.object,
     local: PropTypes.object,
   }),
-  setCrearCompraState: PropTypes.func,
-  setCrearCompraLocal: PropTypes.func,
-  clearCrearCompra: PropTypes.func,
+  setCrearOrdenCompraState: PropTypes.func,
+  setCrearOrdenCompraLocal: PropTypes.func,
+  clearCrearOrdenCompra: PropTypes.func,
 };
 
 /**
@@ -1276,17 +1085,17 @@ CompraCrear.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    compraCrear: state.predeterminado.compraCrear
+    ordenCompraCrear: state.predeterminado.ordenCompraCrear
   };
 };
 
-const mapDispatchToProps = { setCrearCompraState, setCrearCompraLocal, clearCrearCompra }
+const mapDispatchToProps = { clearCrearOrdenCompra, setCrearOrdenCompraLocal, setCrearOrdenCompraState }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedComprasCrear = connect(mapStateToProps, mapDispatchToProps)(CompraCrear);
+const ConnectedOrdenCompraCrear = connect(mapStateToProps, mapDispatchToProps)(OrdenCompraCrear);
 
-export default ConnectedComprasCrear;
+export default ConnectedOrdenCompraCrear;
