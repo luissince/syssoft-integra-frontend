@@ -168,8 +168,6 @@ class EmpresaProceso extends CustomComponent {
     if (response instanceof SuccessReponse) {
       const empresa = response.data;
 
-      console.log(empresa);
-
       this.setState({
         idEmpresa: empresa.idEmpresa,
 
@@ -373,8 +371,7 @@ class EmpresaProceso extends CustomComponent {
   };
 
   handleFileIcon = async (event) => {
-    try{
-      const files = event.currentTarget.files;
+    const files = event.currentTarget.files;
 
     if (!isEmpty(files)) {
       const file = files[0];
@@ -400,9 +397,6 @@ class EmpresaProceso extends CustomComponent {
     }
 
     event.target.value = null;
-    }catch(error){
-      console.log(error);
-    }
   };
 
   handleClearLogo = () => {
