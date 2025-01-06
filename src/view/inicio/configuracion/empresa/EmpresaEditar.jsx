@@ -373,7 +373,8 @@ class EmpresaProceso extends CustomComponent {
   };
 
   handleFileIcon = async (event) => {
-    const files = event.currentTarget.files;
+    try{
+      const files = event.currentTarget.files;
 
     if (!isEmpty(files)) {
       const file = files[0];
@@ -399,6 +400,9 @@ class EmpresaProceso extends CustomComponent {
     }
 
     event.target.value = null;
+    }catch(error){
+      console.log(error);
+    }
   };
 
   handleClearLogo = () => {
@@ -783,7 +787,6 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
-
         <Row>
           <Column className={"col-md-4 col-12"} formGroup={true}>
             <div className="text-center">
@@ -802,7 +805,7 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileLogo"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg+xml, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
                 className="display-none"
                 onChange={this.handleFileLogo}
               />
@@ -846,7 +849,7 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileImage"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg+xml, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
                 className="display-none"
                 onChange={this.handleFileImage}
               />
@@ -892,7 +895,7 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileIcon"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg+xml, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp, image/x-icon"
                 className="display-none"
                 onChange={this.handleFileIcon}
               />
