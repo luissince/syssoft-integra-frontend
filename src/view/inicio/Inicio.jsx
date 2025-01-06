@@ -411,8 +411,6 @@ class Inicio extends React.Component {
 
     const pathname = this.props.location.pathname;
 
-    console.log(this.props.token.userToken.menus);
-
     return (
       <div className="app">
         <Menu

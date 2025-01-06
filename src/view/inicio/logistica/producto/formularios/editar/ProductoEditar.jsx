@@ -323,11 +323,10 @@ class ProductoEditar extends CustomComponent {
       colores,
       tallas,
       sabores,
-      imagen: producto.imagen
-        ? producto.imagen
-        : {
-          url: images.noImage
-        },
+      imagen: producto.imagen ??
+      {
+        url: images.noImage
+      },
       idProducto: idProducto,
       loading: false,
     });
@@ -965,7 +964,7 @@ class ProductoEditar extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
-      if(logoSend.size > 50){
+      if (logoSend.size > 50) {
         alertWarning("Producto", "La imagen a subir tiene que ser menor a 50 KB.")
         return;
       }

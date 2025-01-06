@@ -74,8 +74,15 @@ class EmpresaProceso extends CustomComponent {
 
       fireBaseCertificado: 'Hacer click para seleccionar su archivo.',
 
-      logo: images.noImage,
-      image: images.noImage,
+      logo: {
+        src: images.noImage,
+      },
+      image: {
+        src: images.noImage,
+      },
+      icon: {
+        src: images.noImage,
+      },
 
       horarioAtencion: '',
       acercaNosotros: '',
@@ -103,9 +110,6 @@ class EmpresaProceso extends CustomComponent {
 
     this.refFileCertificado = React.createRef();
     this.refFileFireBase = React.createRef();
-
-    this.refFileLogo = React.createRef();
-    this.refFileImagen = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -164,6 +168,8 @@ class EmpresaProceso extends CustomComponent {
     if (response instanceof SuccessReponse) {
       const empresa = response.data;
 
+      console.log(empresa);
+
       this.setState({
         idEmpresa: empresa.idEmpresa,
 
@@ -185,8 +191,9 @@ class EmpresaProceso extends CustomComponent {
         usuarioEmail: empresa.usuarioEmail ?? "",
         claveEmail: empresa.claveEmail ?? "",
 
-        logo: empresa.rutaLogo,
-        image: empresa.rutaImage,
+        logo: empresa.rutaLogo ?? { src: images.noImage },
+        image: empresa.rutaImage ?? { src: images.noImage },
+        icon: empresa.rutaIcon ?? { src: images.noImage },
 
         horarioAtencion: empresa.horarioAtencion ?? "",
         acercaNosotros: empresa.acercaNosotros ?? "",
@@ -307,38 +314,115 @@ class EmpresaProceso extends CustomComponent {
   // Eventos para manejo de imagenes
   // ------------------------------------------------------------------------
 
-  handleFileLogo = (event) => {
-    if (!isEmpty(event.target.files)) {
-      this.setState({ logo: URL.createObjectURL(event.target.files[0]) });
+  handleFileLogo = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+
+      this.setState({
+        logo: {
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
     } else {
-      this.setState({ logo: images.noImage }, () => {
-        this.refFileLogo.current.value = '';
+      this.setState({
+        logo: {
+          url: images.noImage
+        }
       });
     }
+
+    event.target.value = null;
   };
 
-  handleFileImage = (event) => {
-    if (!isEmpty(event.target.files)) {
-      this.setState({ image: URL.createObjectURL(event.target.files[0]) });
+  handleFileImage = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+
+      this.setState({
+        image: {
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
     } else {
-      this.setState({ image: images.noImage, }, () => {
-        this.refFileImagen.current.value = '';
+      this.setState({
+        image: {
+          url: images.noImage
+        }
       });
     }
+
+    event.target.value = null;
   };
 
-  async handleClearLogo() {
-    await this.setStateAsync({
-      logo: images.noImage,
+  handleFileIcon = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+
+      this.setState({
+        icon: {
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
+    } else {
+      this.setState({
+        icon: {
+          url: images.noImage
+        }
+      });
+    }
+
+    event.target.value = null;
+  };
+
+  handleClearLogo = () => {
+    this.setState({
+      logo: {
+        url: images.noImage
+      }
     });
-    this.refFileLogo.current.value = '';
   }
 
-  async handleClearImage() {
-    await this.setStateAsync({
-      image: images.noImage,
+  handleClearImage = () => {
+    this.setState({
+      image: {
+        url: images.noImage
+      }
     });
-    this.refFileImagen.current.value = '';
+  };
+
+  handleClearIcono = () => {
+    this.setState({
+      icon: {
+        url: images.noImage
+      }
+    });
   };
 
   handleDownload(url) {
@@ -370,10 +454,6 @@ class EmpresaProceso extends CustomComponent {
     alertDialog('Empresa', '¿Está seguro de continuar?', async () => {
       alertInfo('Empresa', 'Procesando información...');
 
-      const logoSend = await imageBase64(this.refFileLogo.current.files[0]);
-
-      const imageSend = await imageBase64(this.refFileImagen.current.files[0]);
-
       const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
 
       const fireBaseSend = await convertFileBase64(this.refFileFireBase.current.files);
@@ -401,11 +481,9 @@ class EmpresaProceso extends CustomComponent {
         fireBase: fireBaseSend.data ?? "",
         extFireBase: fireBaseSend.extension ?? "",
 
-        logo: logoSend.base64String ?? "",
-        extlogo: logoSend.extension ?? "",
-
-        image: imageSend.base64String ?? "",
-        extimage: imageSend.extension ?? "",
+        logo: this.state.logo,
+        image: this.state.image,
+        icon: this.state.icon,
 
         horarioAtencion: this.state.horarioAtencion.trim(),
         acercaNosotros: this.state.acercaNosotros.trim(),
@@ -707,14 +785,14 @@ class EmpresaProceso extends CustomComponent {
 
 
         <Row>
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={"col-md-4 col-12"} formGroup={true}>
             <div className="text-center">
               <label>Logo</label>
               <br />
-              <small>Usuado para los reportes</small>
+              <small>Para mostrar en los reportes</small>
               <div className="text-center mb-2">
                 <Image
-                  src={this.state.logo}
+                  src={this.state.logo.url}
                   alt={"Logo de la empresa"}
                   className={"img-fluid border border-primary rounded"}
                   width={250}
@@ -724,9 +802,8 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileLogo"
-                accept="image/png, image/jpeg, image/gif, image/svg, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg, image/webp"
                 className="display-none"
-                ref={this.refFileLogo}
                 onChange={this.handleFileLogo}
               />
               <label htmlFor="fileLogo" className="btn btn-outline-secondary m-0">
@@ -745,22 +822,22 @@ class EmpresaProceso extends CustomComponent {
               {' '}
               <Button
                 className="btn-outline-secondary"
-                onClick={this.handleDownload.bind(this, this.state.logo)}
+                onClick={this.handleDownload.bind(this, this.state.logo.src)}
               >
                 <i className="bi bi-download"></i>
               </Button>
             </div>
           </Column>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={"col-md-4 col-12"} formGroup={true}>
             <div className="text-center">
               <label>Imagen</label>
               <br />
-              <small>Usuado para mostrar el logo en sistema</small>
+              <small>Para mostrar el logo en sistema en la página web</small>
               <div className="text-center mb-2">
                 <Image
-                  src={this.state.image}
-                  alt={"Logo de la empresa"}
+                  src={this.state.image.url}
+                  alt={"Imagen de la empresa"}
                   className={"img-fluid border border-primary rounded"}
                   width={250}
                 />
@@ -769,9 +846,8 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileImage"
-                accept="image/png, image/jpeg, image/gif, image/svg"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg, image/webp"
                 className="display-none"
-                ref={this.refFileImagen}
                 onChange={this.handleFileImage}
               />
               <label
@@ -792,7 +868,53 @@ class EmpresaProceso extends CustomComponent {
               {' '}
               <Button
                 className="btn-outline-secondary"
-                onClick={this.handleDownload.bind(this, this.state.image)}
+                onClick={this.handleDownload.bind(this, this.state.image.url)}
+              >
+                <i className="bi bi-download"></i>
+              </Button>
+            </div>
+          </Column>
+
+          <Column className={"col-md-4 col-12"} formGroup={true}>
+            <div className="text-center">
+              <label>Icono</label>
+              <br />
+              <small>Usuado como favicon de la página web</small>
+              <div className="text-center mb-2">
+                <Image
+                  src={this.state.icon.url}
+                  alt={"Icono de la empresa"}
+                  className={"img-fluid border border-primary rounded"}
+                  width={250}
+                />
+              </div>
+
+              <input
+                type="file"
+                id="fileIcon"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg, image/webp"
+                className="display-none"
+                onChange={this.handleFileIcon}
+              />
+              <label
+                htmlFor="fileIcon"
+                className="btn btn-outline-secondary m-0"
+              >
+                <div className="content-button">
+                  <i className="bi bi-image"></i>
+                  <span></span>
+                </div>
+              </label>{' '}
+              <Button
+                className="btn-outline-secondary"
+                onClick={this.handleClearIcono}
+              >
+                <i className="bi bi-trash"></i>
+              </Button>
+              {' '}
+              <Button
+                className="btn-outline-secondary"
+                onClick={this.handleDownload.bind(this, this.state.icon.url)}
               >
                 <i className="bi bi-download"></i>
               </Button>
