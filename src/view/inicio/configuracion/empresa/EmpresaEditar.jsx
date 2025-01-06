@@ -802,7 +802,7 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileLogo"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg+xml, image/webp"
                 className="display-none"
                 onChange={this.handleFileLogo}
               />
@@ -846,7 +846,7 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileImage"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg+xml, image/webp"
                 className="display-none"
                 onChange={this.handleFileImage}
               />
@@ -892,7 +892,7 @@ class EmpresaProceso extends CustomComponent {
               <input
                 type="file"
                 id="fileIcon"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg, image/webp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/svg+xml, image/webp"
                 className="display-none"
                 onChange={this.handleFileIcon}
               />
