@@ -15,6 +15,8 @@ import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import SearchInput from '../../../../../../components/SearchInput';
 import CustomComponent from '../../../../../../model/class/custom-component';
+import Image from '../../../../../../components/Image';
+import { images } from '../../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -204,11 +206,26 @@ class ModalProducto extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => (
-                    <>
-                      {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                    </>
-                  )}
+                  // renderItem={(value) => (
+                  //   <>
+                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
+                  //   </>
+                  // )}
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre} <small>({value.categoria})</small>
+                      </div>
+                    </div>}
                 />
               </Column>
             </Row>

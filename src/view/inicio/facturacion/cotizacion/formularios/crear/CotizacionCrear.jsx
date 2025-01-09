@@ -40,6 +40,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import { clearCrearCotizacion, setCrearCotizacionLocal, setCrearCotizacionState } from '../../../../../../redux/predeterminadoSlice';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { ModalImpresion, ModalPersona, ModalPreImpresion } from '../../../../../../components/MultiModal';
+import Image from '../../../../../../components/Image';
+import { images } from '../../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -979,7 +981,22 @@ class CotizacionCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  // renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre}
+                      </div>
+                    </div>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>

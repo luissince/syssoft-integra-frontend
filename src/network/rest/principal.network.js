@@ -1209,7 +1209,7 @@ export async function detailPedido(params, signal) {
 
 export async function forPedido(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/pedido/for-purchase', {
+    instancePrincipal.get('/api/pedido/for-sale', {
       params: params,
       signal: signal,
     }),

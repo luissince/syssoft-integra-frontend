@@ -112,7 +112,7 @@ class OrdenCompraDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Pedido', response.getMessage(), () => {
+      alertWarning('Orden de Compra', response.getMessage(), () => {
         this.close();
       });
       return;
@@ -196,7 +196,7 @@ class OrdenCompraDetalle extends CustomComponent {
   handlePrintInvoices = async (size) => {
     await pdfVisualizer.init({
       url: documentsPdfInvoicesOrdenCompra(this.state.idOrdenCompra, size),
-      title: 'Pedido',
+      title: 'Orden de Compra',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
@@ -205,7 +205,7 @@ class OrdenCompraDetalle extends CustomComponent {
   handlePrintList = async (size) => {
     await pdfVisualizer.init({
       url: documentsPdfListsOrdenCompra(this.state.idOrdenCompra, size),
-      title: 'Pedido',
+      title: 'Orden de Compra',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
@@ -307,7 +307,7 @@ class OrdenCompraDetalle extends CustomComponent {
         />
 
         <Title
-          title='Pedido'
+          title='Orden de Compra'
           subTitle='DETALLE'
           handleGoBack={() => this.close()}
         />

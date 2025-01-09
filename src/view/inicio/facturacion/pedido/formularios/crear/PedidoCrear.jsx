@@ -38,6 +38,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import { clearCrearPedido, setCrearPedidoLocal, setCrearPedidoState } from '../../../../../../redux/predeterminadoSlice';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { ModalImpresion, ModalPersona } from '../../../../../../components/MultiModal';
+import Image from '../../../../../../components/Image';
+import { images } from '../../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -75,9 +77,9 @@ class PedidoCrear extends CustomComponent {
       // Filtrar producto
       productos: [],
 
-      // Filtrar proveedor
-      proveedor: null,
-      proveedores: [],
+      // Filtrar cliente
+      cliente: null,
+      clientes: [],
 
       // Atributos libres
       codISO: '',
@@ -86,7 +88,7 @@ class PedidoCrear extends CustomComponent {
       // Atributos del modal producto
       isOpenProducto: false,
 
-      // Atributos del modal proveedor
+      // Atributos del modal cliente
       isOpenPersona: false,
 
       // Atributos del modal impresión
@@ -111,9 +113,9 @@ class PedidoCrear extends CustomComponent {
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
 
-    // Filtrar proveedor
-    this.refProveedor = React.createRef();
-    this.refValueProveedor = React.createRef();
+    // Filtrar cliente
+    this.refCliente = React.createRef();
+    this.refValueCliente = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -173,8 +175,8 @@ class PedidoCrear extends CustomComponent {
   loadingData = async () => {
     if (this.props.pedidoCrear && this.props.pedidoCrear.state && this.props.pedidoCrear.local) {
       this.setState(this.props.pedidoCrear.state, () => {
-        if (this.props.pedidoCrear.state.proveedor) {
-          this.handleSelectItemProveedor(this.props.pedidoCrear.state.proveedor);
+        if (this.props.pedidoCrear.state.cliente) {
+          this.handleSelectItemCliente(this.props.pedidoCrear.state.cliente);
         }
         this.index = this.props.pedidoCrear.local.index;
       });
@@ -214,7 +216,7 @@ class PedidoCrear extends CustomComponent {
   clearView = async () => {
     this.setState(this.initial, async () => {
       await this.refProducto.current.restart();
-      await this.refProveedor.current.restart();
+      await this.refCliente.current.restart();
       await this.props.clearCrearPedido();
       await this.loadingData();
 
@@ -241,7 +243,7 @@ class PedidoCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarProveedor(params) {
+  async fetchFiltrarCliente(params) {
     const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
@@ -386,7 +388,7 @@ class PedidoCrear extends CustomComponent {
       this.index = -1;
     }
 
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
@@ -475,7 +477,7 @@ class PedidoCrear extends CustomComponent {
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
@@ -484,7 +486,7 @@ class PedidoCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal proveedor
+  // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
 
   handleOpenModalPersona = () => {
@@ -538,43 +540,43 @@ class PedidoCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Filtrar proveedor
+  // Filtrar cliente
   //------------------------------------------------------------------------------------------
-  handleClearInputProveedor = () => {
+  handleClearInputCliente = () => {
     this.setState({
-      proveedores: [],
-      proveedor: null,
+      clientes: [],
+      cliente: null,
     }, () => {
       this.updateReduxState();
     });
   };
 
-  handleFilterProveedor = async (text) => {
+  handleFilterCliente = async (text) => {
     const searchWord = text;
-    this.setState({ proveedor: null });
+    this.setState({ cliente: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ proveedores: [] });
+      this.setState({ clientes: [] });
       return;
     }
 
     const params = {
       opcion: 1,
       filter: searchWord,
-      proveedor: 1,
+      cliente: 1,
     };
 
-    const proveedores = await this.fetchFiltrarProveedor(params);
+    const clientes = await this.fetchFiltrarCliente(params);
 
-    this.setState({ proveedores });
+    this.setState({ clientes });
   };
 
-  handleSelectItemProveedor = async (value) => {
-    this.refProveedor.current.initialize(value.documento + ' - ' + value.informacion);
+  handleSelectItemCliente = async (value) => {
+    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
 
     this.setState({
-      proveedor: value,
-      proveedores: [],
+      cliente: value,
+      clientes: [],
     }, () => {
       this.updateReduxState();
     });
@@ -584,7 +586,7 @@ class PedidoCrear extends CustomComponent {
   // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idComprobante, proveedor, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
+    const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
       this.alert.warning('Pedido', 'Seleccione su comprobante.', () =>
@@ -593,9 +595,9 @@ class PedidoCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(proveedor)) {
-      this.alert.warning('Pedido', 'Seleccione un proveedor.', () =>
-        this.refValueProveedor.current.focus(),
+    if (isEmpty(cliente)) {
+      this.alert.warning('Pedido', 'Seleccione un cliente.', () =>
+        this.refValueCliente.current.focus(),
       );
       return;
     }
@@ -625,7 +627,7 @@ class PedidoCrear extends CustomComponent {
       if (accept) {
         const data = {
           idComprobante: idComprobante,
-          idProveedor: proveedor.idPersona,
+          idCliente: cliente.idPersona,
           idMoneda: idMoneda,
           idSucursal: this.state.idSucursal,
           idUsuario: this.state.idUsuario,
@@ -733,8 +735,8 @@ class PedidoCrear extends CustomComponent {
         </TableCell>
         <TableCell>{rounded(item.cantidad)}</TableCell>
         <TableCell>{item.nombreMedida}</TableCell>
-        <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
-        <TableCell>{numberFormat(item.cantidad * item.costo, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.precio, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
         <TableCell className="text-center">
           <Button
             className="btn-outline-danger btn-sm"
@@ -752,7 +754,7 @@ class PedidoCrear extends CustomComponent {
 
     for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
-      const valor = item.costo;
+      const valor = item.precio;
 
       const porcentaje = item.porcentajeImpuesto;
 
@@ -767,7 +769,7 @@ class PedidoCrear extends CustomComponent {
 
     const impuestosGenerado = () => {
       const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.costo;
+        const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
 
@@ -877,7 +879,22 @@ class PedidoCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  // renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre}
+                      </div>
+                    </div>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
@@ -969,13 +986,13 @@ class PedidoCrear extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                ref={this.refProveedor}
-                placeholder="Filtrar proveedores..."
-                refValue={this.refValueProveedor}
-                data={this.state.proveedores}
-                handleClearInput={this.handleClearInputProveedor}
-                handleFilter={this.handleFilterProveedor}
-                handleSelectItem={this.handleSelectItemProveedor}
+                ref={this.refCliente}
+                placeholder="Filtrar clientes..."
+                refValue={this.refValueCliente}
+                data={this.state.clientes}
+                handleClearInput={this.handleClearInputCliente}
+                handleFilter={this.handleFilterCliente}
+                handleSelectItem={this.handleSelectItemCliente}
                 renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
                 renderIconLeft={<i className="bi bi-person-circle"></i>}
                 customButton={

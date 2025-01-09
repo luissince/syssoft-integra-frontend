@@ -42,6 +42,8 @@ import TextArea from '../../../../../../components/TextArea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { ModalImpresion, ModalPersona, ModalPreImpresion } from '../../../../../../components/MultiModal';
+import Image from '../../../../../../components/Image';
+import { images } from '../../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -959,7 +961,22 @@ class CotizacionEditar extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  // renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre}
+                      </div>
+                    </div>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
@@ -995,23 +1012,23 @@ class CotizacionEditar extends CustomComponent {
 
             <Row>
               <Column formGroup={true}>
-                  <Button
-                    className='btn-warning'
-                    onClick={this.handleGuardar}>
-                    <i className="fa fa-edit"></i> Editar (F1)
-                  </Button>
-                  {' '}
-                  {/* <Button
+                <Button
+                  className='btn-warning'
+                  onClick={this.handleGuardar}>
+                  <i className="fa fa-edit"></i> Editar (F1)
+                </Button>
+                {' '}
+                {/* <Button
                     className=" btn-outline-primary"
                     onClick={this.handleOpenPreImpresion}>
                     <i className="bi bi-printer"></i> Pre Impresión (F3)
                   </Button>
                   {' '} */}
-                  <Button
-                    className=" btn-outline-danger"
-                    onClick={this.handleCerrar}>
-                    <i className="fa fa-close"></i> Cerrar
-                  </Button>
+                <Button
+                  className=" btn-outline-danger"
+                  onClick={this.handleCerrar}>
+                  <i className="fa fa-close"></i> Cerrar
+                </Button>
               </Column>
             </Row>
 

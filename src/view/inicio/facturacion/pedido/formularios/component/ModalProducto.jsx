@@ -27,7 +27,7 @@ class ModalProducto extends Component {
       idProducto: '',
       codigo: '',
       cantidad: '',
-      costo: '',
+      precio: '',
       descripcion: '',
       idMedida: '',
       tipoProducto: '',
@@ -37,7 +37,7 @@ class ModalProducto extends Component {
 
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
-    this.refCosto = React.createRef();
+    this.refPrecio = React.createRef();
     this.refDescripcion = React.createRef();
     this.refMedida = React.createRef();
 
@@ -59,15 +59,15 @@ class ModalProducto extends Component {
         idProducto: producto.idProducto,
         codigo: producto.codigo,
         cantidad: producto.cantidad ?? 1,
-        costo: producto.costo,
+        precio: producto.precio,
         descripcion: producto.nombre,
         idMedida: producto.idMedida,
         tipoProducto: producto.tipoProducto,
         loading: false
       }, () => {
         if (producto.tipoProducto === "SERVICIO") {
-          this.refCosto.current.focus();
-          this.refCosto.current.select();
+          this.refPrecio.current.focus();
+          this.refPrecio.current.select();
         } else {
           this.refCantidad.current.focus();
           this.refCantidad.current.select();
@@ -99,7 +99,7 @@ class ModalProducto extends Component {
       idProducto: '',
       codigo: '',
       cantidad: '',
-      costo: '',
+      precio: '',
       descripcion: '',
       idMedida: '',
       tipoProducto: '',
@@ -114,8 +114,8 @@ class ModalProducto extends Component {
     this.setState({ cantidad: event.target.value });
   };
 
-  handleInputCosto = (event) => {
-    this.setState({ costo: event.target.value });
+  handleInputPrecio = (event) => {
+    this.setState({ precio: event.target.value });
   };
 
   handleInputDescripcion = (event) => {
@@ -127,47 +127,47 @@ class ModalProducto extends Component {
   }
 
   handleOnSubmit = async () => {
-    const { idProducto, codigo, descripcion, cantidad, tipoProducto, costo, idMedida } = this.state;
+    const { idProducto, codigo, descripcion, cantidad, tipoProducto, precio, idMedida } = this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
     if (!isNumeric(cantidad)) {
-      alertWarning('Orden de Compra', 'Ingrese la cantidad.', () => {
+      alertWarning('Pedido', 'Ingrese la cantidad.', () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
     if (parseFloat(cantidad) <= 0) {
-      alertWarning('Orden de Compra', 'La cantidad no puede ser menor a cero.', () => {
+      alertWarning('Pedido', 'La cantidad no puede ser menor a cero.', () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
-    if (!isNumeric(costo)) {
-      alertWarning('Orden de Compra', 'Ingrese el costo.', () => {
-        this.refCosto.current.focus();
+    if (!isNumeric(precio)) {
+      alertWarning('Pedido', 'Ingrese el precio.', () => {
+        this.refPrecio.current.focus();
       });
       return;
     }
 
-    if (parseFloat(costo) <= 0) {
-      alertWarning('Orden de Compra', 'El costo no puede ser menor a cero.', () => {
-        this.refCosto.current.focus();
+    if (parseFloat(precio) <= 0) {
+      alertWarning('Pedido', 'El precio no puede ser menor a cero.', () => {
+        this.refPrecio.current.focus();
       });
       return;
     }
 
     if (isEmpty(descripcion)) {
-      alertWarning('Orden de Compra', 'Ingrese la descripción del producto.', () => {
+      alertWarning('Pedido', 'Ingrese la descripción del producto.', () => {
         this.refDescripcion.current.focus();
       });
       return;
     }
 
     if (isEmpty(idMedida)) {
-      alertWarning('Orden de Compra', 'Ingrese la unidad de medida', () => {
+      alertWarning('Pedido', 'Ingrese la unidad de medida', () => {
         this.refMedida.current.focus();
       });
       return;
@@ -183,10 +183,10 @@ class ModalProducto extends Component {
 
     if (existeDetalle) {
       if (tipoProducto === "SERVICIO") {
-        existeDetalle.costo = Number(costo);
+        existeDetalle.precio = Number(precio);
       } else {
         existeDetalle.cantidad = Number(cantidad);
-        existeDetalle.costo = Number(costo);
+        existeDetalle.precio = Number(precio);
       }
 
       existeDetalle.nombre = descripcion;
@@ -199,7 +199,7 @@ class ModalProducto extends Component {
         codigo: codigo,
         nombre: descripcion,
         cantidad: Number(cantidad),
-        costo: Number(costo),
+        precio: Number(precio),
         idMedida: medida.idMedida,
         nombreMedida: medida.nombre,
         idImpuesto: impuesto.idImpuesto,
@@ -217,7 +217,7 @@ class ModalProducto extends Component {
     const {
       loading,
       cantidad,
-      costo,
+      precio,
       descripcion,
       idMedida,
       tipoProducto
@@ -260,12 +260,12 @@ class ModalProducto extends Component {
 
               <Column formGroup={true}>
                 <Input
-                  label={"Costo:"}
+                  label={"Precio:"}
                   placeholder={"0.00"}
                   role={"float"}
-                  refInput={this.refCosto}
-                  value={costo}
-                  onChange={this.handleInputCosto}
+                  refInput={this.refPrecio}
+                  value={precio}
+                  onChange={this.handleInputPrecio}
                   onPaste={handlePasteFloat}
                 />
               </Column>

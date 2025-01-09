@@ -632,17 +632,17 @@ class Inicio extends React.Component {
             render={(props) => <Pedidos {...props} />}
           />
           <Route
-            path={`${path}/facturacion/pedido/crear`}
+            path={`${path}/facturacion/pedidos/crear`}
             exact={true}
             render={(props) => <PedidoCrear {...props} />}
           />
           <Route
-            path={`${path}/facturacion/pedido/editar`}
+            path={`${path}/facturacion/pedidos/editar`}
             exact={true}
             render={(props) => <PedidoEditar {...props} />}
           />
           <Route
-            path={`${path}/facturacion/pedido/detalle`}
+            path={`${path}/facturacion/pedidos/detalle`}
             exact={true}
             render={(props) => <PedidoDetalle {...props} />}
           />

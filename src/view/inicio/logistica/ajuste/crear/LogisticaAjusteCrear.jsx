@@ -32,6 +32,8 @@ import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
 import { Table, TableBody, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import Image from '../../../../../components/Image';
+import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -645,11 +647,27 @@ class LogisticaAjusteCrear extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => (
-                    <>
-                      {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                    </>
-                  )}
+                  // renderItem={(value) => (
+                  //   <>
+                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
+                  //   </>
+                  // )}
+
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre} <small>({value.categoria})</small>
+                      </div>
+                    </div>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>

@@ -139,7 +139,7 @@ class PedidoDetalle extends CustomComponent {
 
     } = pedido.cabecera;
 
-    const monto = pedido.detalles.reduce((accumlate, item) => accumlate + (item.costo * item.cantidad), 0,);
+    const monto = pedido.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
 
     this.setState({
       idPedido: id,
@@ -229,7 +229,7 @@ class PedidoDetalle extends CustomComponent {
 
     for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
-      const valor = item.costo;
+      const valor = item.precio;
 
       const impuesto = item.porcentaje;
 
@@ -244,7 +244,7 @@ class PedidoDetalle extends CustomComponent {
 
     const impuestosGenerado = () => {
       const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.costo;
+        const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
 
@@ -494,7 +494,7 @@ class PedidoDetalle extends CustomComponent {
                           {item.producto}
                         </TableCell>
                         <TableCell className="text-right">
-                          {numberFormat(item.costo, this.state.codiso)}
+                          {numberFormat(item.precio, this.state.codiso)}
                         </TableCell>
 
                         <TableCell>{item.categoria}</TableCell>
@@ -503,7 +503,7 @@ class PedidoDetalle extends CustomComponent {
                         <TableCell>{item.medida}</TableCell>
                         <TableCell className="text-right">
                           {numberFormat(
-                            item.cantidad * item.costo,
+                            item.cantidad * item.precio,
                             this.state.codiso,
                           )}
                         </TableCell>

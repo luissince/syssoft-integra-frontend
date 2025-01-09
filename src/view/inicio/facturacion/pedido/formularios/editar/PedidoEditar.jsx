@@ -39,6 +39,8 @@ import TextArea from '../../../../../../components/TextArea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { ModalImpresion, ModalPersona } from '../../../../../../components/MultiModal';
+import Image from '../../../../../../components/Image';
+import { images } from '../../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -76,9 +78,9 @@ class PedidoEditar extends CustomComponent {
       // Filtrar producto
       productos: [],
 
-      // Filtrar proveedor
-      proveedor: null,
-      proveedores: [],
+      // Filtrar cliente
+      cliente: null,
+      clientes: [],
 
       // Atributos libres
       codISO: '',
@@ -87,7 +89,7 @@ class PedidoEditar extends CustomComponent {
       // Atributos del modal producto
       isOpenProducto: false,
 
-      // Atributos del modal proveedor
+      // Atributos del modal cliente
       isOpenPersona: false,
 
       // Atributos del modal impresión
@@ -112,9 +114,9 @@ class PedidoEditar extends CustomComponent {
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
 
-    // Filtrar proveedor
-    this.refProveedor = React.createRef();
-    this.refValueProveedor = React.createRef();
+    // Filtrar cliente
+    this.refCliente = React.createRef();
+    this.refValueCliente = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -190,7 +192,7 @@ class PedidoEditar extends CustomComponent {
 
     const moneda = monedas.find((item) => item.nacional === 1);
 
-    this.handleSelectItemProveedor({
+    this.handleSelectItemCliente({
       celular: cabecera.celular,
       direccion: cabecera.direccion,
       email: cabecera.email,
@@ -247,7 +249,7 @@ class PedidoEditar extends CustomComponent {
     }
   }
 
-  async fetchFiltrarProveedor(params) {
+  async fetchFiltrarCliente(params) {
     const response = await filtrarPersona(params);
 
     if (response instanceof SuccessReponse) {
@@ -376,7 +378,7 @@ class PedidoEditar extends CustomComponent {
       this.index = -1;
     }
 
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total });
   };
 
@@ -462,14 +464,14 @@ class PedidoEditar extends CustomComponent {
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
     this.setState({ detalles, total });
     await callback();
     this.refValueProducto.current.focus();
   }
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal proveedor
+  // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
 
   handleOpenModalPersona = () => {
@@ -519,41 +521,41 @@ class PedidoEditar extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Filtrar proveedor
+  // Filtrar cliente
   //------------------------------------------------------------------------------------------
-  handleClearInputProveedor = () => {
+  handleClearInputCliente = () => {
     this.setState({
-      proveedores: [],
-      proveedor: null,
+      clientes: [],
+      cliente: null,
     });
   };
 
-  handleFilterProveedor = async (text) => {
+  handleFilterCliente = async (text) => {
     const searchWord = text;
-    this.setState({ proveedor: null });
+    this.setState({ cliente: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ proveedores: [] });
+      this.setState({ clientes: [] });
       return;
     }
 
     const params = {
       opcion: 1,
       filter: searchWord,
-      proveedor: 1,
+      cliente: 1,
     };
 
-    const proveedores = await this.fetchFiltrarProveedor(params);
+    const clientes = await this.fetchFiltrarCliente(params);
 
-    this.setState({ proveedores });
+    this.setState({ clientes });
   };
 
-  handleSelectItemProveedor = async (value) => {
-    this.refProveedor.current.initialize(value.documento + ' - ' + value.informacion);
+  handleSelectItemCliente = async (value) => {
+    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
 
     this.setState({
-      proveedor: value,
-      proveedores: [],
+      cliente: value,
+      clientes: [],
     });
   };
 
@@ -561,7 +563,7 @@ class PedidoEditar extends CustomComponent {
   // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idPedido, idComprobante, proveedor, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
+    const { idPedido, idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
 
     if (isEmpty(idComprobante)) {
       this.alert.warning('Pedido', 'Seleccione su comprobante.', () =>
@@ -570,9 +572,9 @@ class PedidoEditar extends CustomComponent {
       return;
     }
 
-    if (isEmpty(proveedor)) {
-      this.alert.warning('Pedido', 'Seleccione un proveedor.', () =>
-        this.refValueProveedor.current.focus(),
+    if (isEmpty(cliente)) {
+      this.alert.warning('Pedido', 'Seleccione un cliente.', () =>
+        this.refValueCliente.current.focus(),
       );
       return;
     }
@@ -603,7 +605,7 @@ class PedidoEditar extends CustomComponent {
         const data = {
           idPedido: idPedido,
           idComprobante: idComprobante,
-          idProveedor: proveedor.idPersona,
+          idCliente: cliente.idPersona,
           idMoneda: idMoneda,
           idSucursal: this.state.idSucursal,
           idUsuario: this.state.idUsuario,
@@ -699,8 +701,8 @@ class PedidoEditar extends CustomComponent {
         </TableCell>
         <TableCell>{rounded(item.cantidad)}</TableCell>
         <TableCell>{item.nombreMedida}</TableCell>
-        <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
-        <TableCell>{numberFormat(item.cantidad * item.costo, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.precio, this.state.codISO)}</TableCell>
+        <TableCell>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</TableCell>
         <TableCell className="text-center">
           <Button
             className="btn-outline-danger btn-sm"
@@ -718,7 +720,7 @@ class PedidoEditar extends CustomComponent {
 
     for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
-      const valor = item.costo;
+      const valor = item.precio;
 
       const porcentaje = item.porcentajeImpuesto;
 
@@ -733,7 +735,7 @@ class PedidoEditar extends CustomComponent {
 
     const impuestosGenerado = () => {
       const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.costo;
+        const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
 
@@ -841,7 +843,22 @@ class PedidoEditar extends CustomComponent {
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
                   handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  // renderItem={(value) => <>{value.codigo} / {value.nombre}</>}
+                  renderItem={(value) =>
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
+
+                      <div className='ml-2'>
+                        {value.codigo}
+                        <br />
+                        {value.nombre}
+                      </div>
+                    </div>}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
@@ -928,13 +945,13 @@ class PedidoEditar extends CustomComponent {
 
             <div className="form-group">
               <SearchInput
-                ref={this.refProveedor}
-                placeholder="Filtrar proveedores..."
-                refValue={this.refValueProveedor}
-                data={this.state.proveedores}
-                handleClearInput={this.handleClearInputProveedor}
-                handleFilter={this.handleFilterProveedor}
-                handleSelectItem={this.handleSelectItemProveedor}
+                ref={this.refCliente}
+                placeholder="Filtrar clientes..."
+                refValue={this.refValueCliente}
+                data={this.state.clientes}
+                handleClearInput={this.handleClearInputCliente}
+                handleFilter={this.handleFilterCliente}
+                handleSelectItem={this.handleSelectItemCliente}
                 renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
                 renderIconLeft={<i className="bi bi-person-circle"></i>}
                 customButton={
