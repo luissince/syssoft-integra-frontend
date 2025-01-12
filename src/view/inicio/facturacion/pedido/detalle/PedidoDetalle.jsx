@@ -467,7 +467,7 @@ class PedidoDetalle extends CustomComponent {
                     <TableHead>#</TableHead>
                     <TableHead className="text-center">Imagen</TableHead>
                     <TableHead>Producto</TableHead>
-                    <TableHead>Costo</TableHead>
+                    <TableHead>Precio</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Impuesto %</TableHead>
                     <TableHead>Cantidad</TableHead>

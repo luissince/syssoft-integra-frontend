@@ -45,9 +45,11 @@ const TextArea = ({
                         onKeyDown={onKeyDown}
                         onPaste={onPaste}
                     />
-                    <div className="input-group-append">
-                        {buttonRight}
-                    </div>
+                    {buttonRight &&
+                        <div className="input-group-append">
+                            {buttonRight}
+                        </div>
+                    }
                 </div>
             </>
         );

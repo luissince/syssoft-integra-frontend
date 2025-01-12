@@ -50,7 +50,7 @@ import { ModalImpresion, ModalPreImpresion } from '../../../../../../components/
 import ModalAgregar from '../common/ModalAgregar';
 import ModalCotizacion from '../common/ModalCotizacion';
 import ModalVenta from '../common/ModalVenta';
-import SidebarConfiguration from '../common/SidebarConfiguration';
+import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import ModalTransaccion from '../../../../../../components/ModalTransaccion';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import SidebarProducto from './component/SidebarProducto';
@@ -131,6 +131,7 @@ class VentaCrear extends CustomComponent {
       // Atributos del modal producto
       loadingProducto: true,
 
+      // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -167,7 +168,7 @@ class VentaCrear extends CustomComponent {
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
-    this.refONota = React.createRef();
+    this.refNota = React.createRef();
 
     // Atributos para el modal producto
     this.idSidebarProducto = 'idSidebarProducto';
@@ -1836,7 +1837,7 @@ class VentaCrear extends CustomComponent {
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
 
-          refONota={this.refONota}
+          refNota={this.refNota}
           nota={this.state.nota}
           handleInputNota={this.handleInputNota}
 

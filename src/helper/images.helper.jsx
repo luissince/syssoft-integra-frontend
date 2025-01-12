@@ -1,5 +1,5 @@
 import icono from '../resource/images/logo.png';
-import noImage from '../resource/images/noimage.jpg';
+import noImage from '../resource/images/noimage.png';
 import imagen from '../resource/images/imagen.svg';
 import sunat from '../resource/images/sunat.png';
 import reniec from '../resource/images/reniec.png';

@@ -920,6 +920,10 @@ img {
   border-style: none;
 }
 
+.object-contain {
+  object-fit: contain;
+}
+
 svg {
   overflow: hidden;
   vertical-align: middle;
@@ -1261,6 +1265,22 @@ h6,
   font-size: 8rem !important;
   /* 128px */
   line-height: 1 !important;
+}
+
+.top-0 {
+  top: 0px;
+}
+
+.right-0 {
+  right: 0px;
+}
+
+.bottom-0 {
+  bottom: 0px;
+}
+
+.left-0 {
+  left: 0px;
 }
 
 .cursor-auto {
@@ -8467,7 +8487,7 @@ a.close.disabled {
   height: 4rem;
   vertical-align: -0.125em;
   border: 0.4em solid #f3f3f3;
-  border-top: 0.4em  solid currentColor;
+  border-top: 0.4em solid currentColor;
   border-radius: 50%;
   -webkit-animation: 1s linear infinite spinner-border;
   animation: 1s linear infinite spinner-border;
@@ -8833,6 +8853,10 @@ button.bg-dark:focus {
 .d-flex {
   display: -ms-flexbox !important;
   display: flex !important;
+}
+
+.d-grid {
+  display: grid !important;
 }
 
 .d-inline-flex {

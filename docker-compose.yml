@@ -21,13 +21,13 @@ services:
     # Configuración para reiniciar siempre el contenedor
     restart: always
 
-  legrand-tiquepos-services:
+  importmuneli-services:
     # Configuración para construir la imagen del contenedor
     build:
       context: .
       dockerfile: Dockerfile
     # Nombre de la imagen resultante
-    image: legrand-tiquepos-frontend-image
+    image: importmuneli-frontend-image
     # Conexión a la red llamada 'luis'
     networks:
       - luis
@@ -35,7 +35,7 @@ services:
     ports:
       - 6010:80
     # Nombre del contenedor
-    container_name: legrand-tiquepos-frontend
+    container_name: importmuneli-frontend
     # Configuración para reiniciar siempre el contenedor
     restart: always
 

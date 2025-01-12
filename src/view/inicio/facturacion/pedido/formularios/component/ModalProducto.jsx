@@ -29,6 +29,7 @@ class ModalProducto extends Component {
       cantidad: '',
       precio: '',
       descripcion: '',
+      imagen: null,
       idMedida: '',
       tipoProducto: '',
 
@@ -61,6 +62,7 @@ class ModalProducto extends Component {
         cantidad: producto.cantidad ?? 1,
         precio: producto.precio,
         descripcion: producto.nombre,
+        imagen: producto.imagen,
         idMedida: producto.idMedida,
         tipoProducto: producto.tipoProducto,
         loading: false
@@ -101,6 +103,7 @@ class ModalProducto extends Component {
       cantidad: '',
       precio: '',
       descripcion: '',
+      imagen: null,
       idMedida: '',
       tipoProducto: '',
 
@@ -127,7 +130,7 @@ class ModalProducto extends Component {
   }
 
   handleOnSubmit = async () => {
-    const { idProducto, codigo, descripcion, cantidad, tipoProducto, precio, idMedida } = this.state;
+    const { idProducto, codigo, descripcion, cantidad, imagen,tipoProducto, precio, idMedida } = this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
@@ -202,6 +205,7 @@ class ModalProducto extends Component {
         precio: Number(precio),
         idMedida: medida.idMedida,
         nombreMedida: medida.nombre,
+        imagen: imagen,
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,

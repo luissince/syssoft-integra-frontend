@@ -54,7 +54,7 @@ import SearchInput from '../../../../../../components/SearchInput';
 import ModalVenta from '../common/ModalVenta';
 import ModalCotizacion from '../common/ModalCotizacion';
 import { SpinnerView } from '../../../../../../components/Spinner';
-import SidebarConfiguration from '../common/SidebarConfiguration';
+import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import ModalAgregar from '../common/ModalAgregar';
 import printJS from 'print-js';
 import ButtonsOpciones from './component/ButtonsOpciones';
@@ -158,6 +158,7 @@ class VentaCrearEscritorio extends CustomComponent {
       email: '',
       direccion: '',
 
+      // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -202,7 +203,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
-    this.refONota = React.createRef();
+    this.refNota = React.createRef();
 
     // Atributos para el modal cliente
     this.refIdTipoDocumento = React.createRef();
@@ -764,7 +765,7 @@ class VentaCrearEscritorio extends CustomComponent {
       <div className='h-100 overflow-auto p-2' style={{ borderTop: '1px solid #cbd5e1' }}>
         <div className='w-100' style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
           <div className='d-flex justify-content-between'>
-            <span className='text-sm'>Subtotal:</span>
+            <span className='text-sm'>Sub Total:</span>
             <span className='text-sm text-right'>{numberFormat(subTotal, codiso)}</span>
           </div>
 
@@ -2018,7 +2019,7 @@ class VentaCrearEscritorio extends CustomComponent {
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
 
-          refONota={this.refONota}
+          refNota={this.refNota}
           nota={this.state.nota}
           handleInputNota={this.handleInputNota}
 
@@ -2083,6 +2084,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     <img src={images.barcode} width={22} className='mr-1' />
                     <label className='m-0'> CTRL+D</label>
                   </div>
+
                   <Input
                     refInput={this.redCodigoBarras}
                     value={this.state.codigoBarras}
@@ -2147,7 +2149,9 @@ class VentaCrearEscritorio extends CustomComponent {
             <div
               className='d-flex flex-column position-relative ml-1'
               style={{
-                flex: '0 0 40%', width: '450px', maxWidth: '450px',
+                flex: '0 0 40%',
+                width: '450px',
+                maxWidth: '450px',
                 border: '1px solid #cbd5e1',
               }}>
 
