@@ -13,6 +13,7 @@ import { addPerfil } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
+import Title from '../../../../components/Title';
 
 class PerfilAgregar extends CustomComponent {
   constructor(props) {
@@ -68,18 +69,11 @@ class PerfilAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Agregar Perfil
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Perfil'
+          subTitle='AGREGAR'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="form-group col">

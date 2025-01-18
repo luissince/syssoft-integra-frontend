@@ -13,6 +13,7 @@ import CustomComponent from '../../../../model/class/custom-component';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { resetUsuario } from '../../../../network/rest/principal.network';
+import Title from '../../../../components/Title';
 
 class UsuarioResetear extends CustomComponent {
   constructor(props) {
@@ -75,18 +76,11 @@ class UsuarioResetear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>
-                Cambiar contraseña - Usuario
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Usuario'
+          subTitle='CAMBIAR CONTRASEÑA'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">

@@ -363,6 +363,20 @@ export async function deleteProducto(params) {
   );
 }
 
+export async function createCatalogProducto(data) {
+  return await Resolve.create(instancePrincipal.post('/api/producto/catalog', data),);
+}
+
+export async function filtrarCatalogProductos(params,signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/producto/combo/catalog', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+
 export function documentsPdfReportsProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/reports`
 }
@@ -370,6 +384,11 @@ export function documentsPdfReportsProducto() {
 export function documentsExcelProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/excel`
 }
+
+export function documentsPdfCatalogProducto(idCatalogo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/catalog/${idCatalogo}`
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA PRODUCTO
 // ------------------------------------------------------------------------

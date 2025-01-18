@@ -6,7 +6,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -19,8 +18,11 @@ import {
   comboPerfil,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
+import { SpinnerView } from '../../../../components/Spinner';
+import Title from '../../../../components/Title';
 
 class UsuarioAgregar extends CustomComponent {
+
   constructor(props) {
     super(props);
 
@@ -237,20 +239,17 @@ class UsuarioAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>{' '}
-                Registrar Usuario
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Usuario'
+          subTitle='AGREGAR'
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
         <div className="row">
           <div className="col">
             <ul className="nav nav-tabs" id="myTab" role="tablist">

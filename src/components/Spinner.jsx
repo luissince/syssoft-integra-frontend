@@ -37,9 +37,9 @@ const SpinnerView = ({ loading, message, children }) => {
     );
 }
 
-const SpinnerTransparent = ({ loading, message, children }) => {
+const SpinnerTransparent = ({ loading, message, isAbsolute = false, children }) => {
     return (
-        <div className={`${loading ? 'd-block ' : 'd-none'} clearfix absolute-all`}>
+        <div className={`${loading ? 'd-block ' : 'd-none'} clearfix ${isAbsolute ? 'absolute-all' : ''}`}>
             <div className="d-flex flex-column justify-content-center align-items-center h-100">
                 <div>
                     <div className="spinner-grow text-danger" role="status"></div>
@@ -70,6 +70,7 @@ SpinnerView.propTypes = {
 SpinnerTransparent.propTypes = {
     loading: PropTypes.bool.isRequired,
     message: PropTypes.string.isRequired,
+    isAbsolute: PropTypes.bool,
     children: PropTypes.node,
 };
 

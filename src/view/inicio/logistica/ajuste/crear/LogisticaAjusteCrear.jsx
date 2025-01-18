@@ -31,7 +31,7 @@ import Select from '../../../../../components/Select';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
-import { Table, TableBody, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 
@@ -236,7 +236,6 @@ class LogisticaAjusteCrear extends CustomComponent {
       productos: [],
       producto: null,
     });
-
   }
 
   handleFilterProducto = async (value) => {
@@ -440,8 +439,8 @@ class LogisticaAjusteCrear extends CustomComponent {
       }
 
       return (
-        <tr key={index}>
-          <td>
+        <TableRow key={index}>
+          <TableCell>
             <Button
               className="btn-outline-danger btn-sm"
               title="Anular"
@@ -449,13 +448,13 @@ class LogisticaAjusteCrear extends CustomComponent {
             >
               <i className="bi bi-trash"></i>
             </Button>
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             {item.codigo}
             <br />
             {item.nombre}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             <Input
               value={item.cantidad}
               onChange={(event) =>
@@ -464,11 +463,11 @@ class LogisticaAjusteCrear extends CustomComponent {
               onKeyDown={keyNumberFloat}
               onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
             />
-          </td>
-          <td>{rounded(item.actual)}</td>
-          <td>{rounded(diferencia)}</td>
-          <td>{item.unidad}</td>
-        </tr>
+          </TableCell>
+          <TableCell>{rounded(item.actual)}</TableCell>
+          <TableCell>{rounded(diferencia)}</TableCell>
+          <tTableCelld>{item.unidad}</tTableCelld>
+        </TableRow>
       );
     });
   }

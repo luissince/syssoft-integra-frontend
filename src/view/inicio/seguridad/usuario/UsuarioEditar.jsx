@@ -6,7 +6,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
   isEmpty,
   isText,
 } from '../../../../helper/utils.helper';
@@ -21,8 +20,11 @@ import {
   updateUsuario,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
+import { SpinnerView } from '../../../../components/Spinner';
+import Title from '../../../../components/Title';
 
 class UsuarioEditar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -247,20 +249,16 @@ class UsuarioEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <h5>
-                <span role="button" onClick={() => this.props.history.goBack()}>
-                  <i className="bi bi-arrow-left-short"></i>
-                </span>
-                Editar Usuario
-              </h5>
-            </div>
-          </div>
-        </div>
+        <Title
+          title='Usuario'
+          subTitle='EDITAR'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
         <div className="row">
           <div className="col">
@@ -465,7 +463,7 @@ class UsuarioEditar extends CustomComponent {
                           });
                         }
                       }}
-                      onKeyPress={keyNumberPhone}
+                      onKeyDown={keyNumberPhone}
                       placeholder="Ingrese el N° de telefono"
                     />
                   </div>

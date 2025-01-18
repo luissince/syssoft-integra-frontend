@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 /**
  * 
- * @param {*} param0 
+ * @param {*} param
  * @returns 
  * Example:
     <Input
