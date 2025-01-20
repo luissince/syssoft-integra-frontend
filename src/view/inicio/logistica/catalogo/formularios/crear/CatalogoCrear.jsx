@@ -2,46 +2,35 @@ import React from 'react';
 import { PosContainerWrapper } from '../../../../../../components/Container';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import {
-  calculateTax,
-  calculateTaxBruto,
   isEmpty,
   numberFormat,
-  rounded,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { PEDIDO } from '../../../../../../model/types/tipo-comprobante';
 import {
-  comboComprobante,
-  comboImpuesto,
-  comboMoneda,
-  createPedido,
-  documentsPdfInvoicesPedido,
-  filtrarPersona,
+  createCatalogo,
+  documentsPdfCatalogo,
   filtrarProducto,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
-import SearchInput from '../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
-import ModalProducto from '../component/ModalProducto';
 import { SpinnerTransparent, SpinnerView } from '../../../../../../components/Spinner';
-import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
-import Select from '../../../../../../components/Select';
-import { clearCrearPedido, setCrearPedidoLocal, setCrearPedidoState } from '../../../../../../redux/predeterminadoSlice';
+import { clearCrearCatalogo, setCrearCatalogoLocal, setCrearCatalogoState } from '../../../../../../redux/predeterminadoSlice';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
-import { ModalImpresion, ModalPersona } from '../../../../../../components/MultiModal';
+import { ModalImpresion } from '../../../../../../components/MultiModal';
 import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+import Input from '../../../../../../components/Input';
+import printJS from 'print-js';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class PedidoCrear extends CustomComponent {
+class CatalogoCrear extends CustomComponent {
   /**
    *
    * Constructor
@@ -54,34 +43,18 @@ class PedidoCrear extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       // Atributos principales
-      idPedido: '',
-      idComprobante: '',
-      idMoneda: '',
-      idImpuesto: '',
-      observacion: '',
-      nota: '',
-      cacheConfiguracion: null,
+      idCatalogo: '',
+      nombre: '',
 
-      // Detalle del gasto
+      // Detalle del catálogo
       detalles: [],
-
-      // Lista de datos
-      comprobantes: [],
-      monedas: [],
-      impuestos: [],
-      medidas: [],
 
       // Filtrar producto
       loadingProducto: false,
       productos: [],
 
-      // Filtrar cliente
-      cliente: null,
-      clientes: [],
-
       // Atributos libres
-      codISO: '',
-      total: 0,
+      codISO: this.props.moneda.codiso ?? '',
 
       // Atributos del modal producto
       isOpenProducto: false,
@@ -97,33 +70,21 @@ class PedidoCrear extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
     };
 
+    // Valores iniciales
     this.initial = { ...this.state };
 
+    // Objeto sweet alert
     this.alert = new SweetAlert();
 
-    // Referencia principales
-    this.refComprobante = React.createRef();
+    // Referencias
+    this.refNombre = React.createRef();
 
     // Filtrar producto
     this.refProducto = React.createRef();
     this.refProductoValue = React.createRef();
 
-    // Filtrar cliente
-    this.refCliente = React.createRef();
-    this.refValueCliente = React.createRef();
-
-    // Referencia para el modal producto
-    this.refModalProducto = React.createRef();
-
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
-
-    // Atributos para el modal configuración
-    this.idSidebarConfiguration = 'idSidebarConfiguration';
-    this.refImpuesto = React.createRef();
-    this.refMoneda = React.createRef();
-    this.refObservacion = React.createRef();
-    this.refNota = React.createRef();
 
     //Anular las peticiones
     this.abortController = new AbortController();
@@ -172,31 +133,12 @@ class PedidoCrear extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (this.props.pedidoCrear && this.props.pedidoCrear.state && this.props.pedidoCrear.local) {
-      this.setState(this.props.pedidoCrear.state, () => {
-        if (this.props.pedidoCrear.state.cliente) {
-          this.handleSelectItemCliente(this.props.pedidoCrear.state.cliente);
-        }
+    if (this.props.catalogoCrear && this.props.catalogoCrear.state && this.props.catalogoCrear.local) {
+      this.setState(this.props.catalogoCrear.state, () => {
+
       });
     } else {
-      const [comprobantes, monedas, impuestos] = await Promise.all([
-        this.fetchComprobante(PEDIDO),
-        this.fetchMoneda(),
-        this.fetchImpuesto(),
-      ]);
-
-      const comprobante = comprobantes.find((item) => item.preferida === 1);
-      const moneda = monedas.find((item) => item.nacional === 1);
-      const impuesto = impuestos.find((item) => item.preferido === 1);
-
       this.setState({
-        comprobantes,
-        monedas,
-        impuestos,
-        idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-        idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-        idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-        codISO: isEmpty(moneda) ? '' : moneda.codiso,
         loading: false,
       }, () => {
         this.updateReduxState();
@@ -205,15 +147,14 @@ class PedidoCrear extends CustomComponent {
   };
 
   updateReduxState() {
-    this.props.setCrearPedidoState(this.state)
-    this.props.setCrearPedidoLocal({})
+    this.props.setCrearCatalogoState(this.state)
+    this.props.setCrearCatalogoLocal({})
   }
 
   clearView = async () => {
     this.setState(this.initial, async () => {
       await this.refProducto.current.restart();
-      await this.refCliente.current.restart();
-      await this.props.clearCrearPedido();
+      await this.props.clearCrearCatalogo();
       await this.loadingData();
 
       this.refProductoValue.current.focus();
@@ -234,68 +175,6 @@ class PedidoCrear extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
-  async fetchFiltrarCliente(params) {
-    const response = await filtrarPersona(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
-  async fetchComprobante(tipo) {
-    const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
-    };
-
-    const response = await comboComprobante(
-      params,
-      this.abortController.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchMoneda() {
-    const response = await comboMoneda(this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchImpuesto() {
-    const response = await comboImpuesto();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
       return [];
     }
   }
@@ -326,79 +205,10 @@ class PedidoCrear extends CustomComponent {
     }
   }
 
-  handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleSelectMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleRemoverProducto = (idProducto) => {
-    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto).map((item, index) => ({
-      ...item,
-      id: ++index
-    }));
-
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
-    this.setState({ detalles, total }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal producto
-  //------------------------------------------------------------------------------------------
-
-  handleOpenModalProducto = (producto) => {
-    const { idImpuesto } = this.state;
-
-    if (isEmpty(idImpuesto)) {
-      this.alert.warning('Pedido', 'Seleccione un impuesto para continuar.', () => {
-        this.refImpuesto.current.focus();
-      });
-      return;
-    }
-
-    const item = producto;
-    if (item) {
-      this.setState({ isOpenProducto: true })
-      this.refModalProducto.current.loadDatos(item);
-    }
-  }
-
-  handleCloseProducto = async () => {
-    await this.setStateAsync({ isOpenProducto: false });
-    this.refProductoValue.current.focus();
-  }
-
-  handleSaveProducto = async (detalles, callback = async function () { }) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.precio), 0);
-    this.setState({ detalles, total }, () => {
-      this.updateReduxState();
-    });
-    await callback();
-  }
-
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal cliente
-  //------------------------------------------------------------------------------------------
-
-  handleOpenModalPersona = () => {
-    this.setState({ isOpenPersona: true });
-  }
-
-  handleCloseModalPersona = async () => {
-    this.setState({ isOpenPersona: false });
-  }
-
   //------------------------------------------------------------------------------------------
   // Filtrar productos
   //------------------------------------------------------------------------------------------
+
   handleClearInputProducto = () => {
     this.setState({
       productos: [],
@@ -430,210 +240,70 @@ class PedidoCrear extends CustomComponent {
     });
   };
 
-  handleSelectItemProducto = (value) => {
-    this.updateReduxState();
+  handleSelectItemProducto = (producto) => {
+    const exits = this.state.detalles.some(item => item.idProducto === producto.idProducto);
+    if (exits) {
+      return;
+    }
 
-    this.handleOpenModalProducto(value);
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Filtrar cliente
-  //------------------------------------------------------------------------------------------
-  handleClearInputCliente = () => {
     this.setState({
-      clientes: [],
-      cliente: null,
-    }, () => {
+      detalles: [...this.state.detalles, producto],
+    },()=>{
       this.updateReduxState();
     });
   };
 
-  handleFilterCliente = async (text) => {
-    const searchWord = text;
-    this.setState({ cliente: null });
-
-    if (isEmpty(searchWord)) {
-      this.setState({ clientes: [] });
-      return;
-    }
-
-    const params = {
-      opcion: 1,
-      filter: searchWord,
-      cliente: 1,
-    };
-
-    const clientes = await this.fetchFiltrarCliente(params);
-
-    this.setState({ clientes });
-  };
-
-  handleSelectItemCliente = async (value) => {
-    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
-
+  handleRemoverProducto = (idProducto) => {
+    const detalles = this.state.detalles.filter(item => item.idProducto !== idProducto);
     this.setState({
-      cliente: value,
-      clientes: [],
-    }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Opciones de configuración
-  //------------------------------------------------------------------------------------------
-
-  handleOpenOptions = () => {
-    const invoice = document.getElementById(this.idSidebarConfiguration);
-    invoice.classList.add('toggled');
-
-    this.setState({
-      cacheConfiguracion: {
-        idImpuesto: this.state.idImpuesto,
-        idMoneda: this.state.idMoneda,
-        observacion: this.state.observacion,
-        nota: this.state.nota,
-      }
-    });
-  }
-
-  handleCloseOptions = () => {
-    const invoice = document.getElementById(this.idSidebarConfiguration);
-
-    if (this.state.cacheConfiguracion) {
-      this.setState({
-        idImpuesto: this.state.cacheConfiguracion.idImpuesto,
-        idMoneda: this.state.cacheConfiguracion.idMoneda,
-        observacion: this.state.cacheConfiguracion.observacion,
-        nota: this.state.cacheConfiguracion.nota,
-      });
-    }
-
-    invoice.classList.remove('toggled');
-  }
-
-  handleSelectIdImpuesto = (event) => {
-    this.setState({ idImpuesto: event.target.value })
-  }
-
-  handleSelectIdMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value })
-  }
-
-  handleInputObservacion = (event) => {
-    this.setState({ observacion: event.target.value })
-  }
-
-  handleInputNota = (event) => {
-    this.setState({ nota: event.target.value })
-  }
-
-  handleSaveOptions = () => {
-    if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Pedido', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Pedido', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
-      return;
-    }
-
-    const impuesto = this.state.impuestos.find((item) => item.idImpuesto === this.state.idImpuesto);
-
-    const detalles = this.state.detalles.map((item) => ({
-      ...item,
-      idImpuesto: impuesto.idImpuesto,
-      nombreImpuesto: impuesto.nombre,
-      porcentajeImpuesto: impuesto.porcentaje,
-    }));
-
-    const moneda = this.state.monedas.find((item) => item.idMoneda === this.state.idMoneda)
-
-    this.setState({
-      idMoneda: moneda.idMoneda,
-      codISO: moneda.codiso,
       detalles,
-    }, async () => {
+    }, () => {
       this.updateReduxState();
-
-      const invoice = document.getElementById(this.idSidebarConfiguration);
-      invoice.classList.remove('toggled');
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, observacion, nota, detalles } = this.state;
+    const { nombre, detalles, idSucursal, idUsuario } = this.state;
 
-    if (isEmpty(idComprobante)) {
-      this.alert.warning('Pedido', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
-      return;
-    }
-
-    if (isEmpty(cliente)) {
-      this.alert.warning('Pedido', 'Seleccione un cliente.', () =>
-        this.refValueCliente.current.focus(),
-      );
-      return;
-    }
-
-    if (isEmpty(idMoneda)) {
-      this.alert.warning('Pedido', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
-      return;
-    }
-
-    if (isEmpty(idImpuesto)) {
-      this.alert.warning('Pedido', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus(),
+    if (isEmpty(nombre)) {
+      this.alert.warning('Catálogo', 'Ingrese el nombre del catálogo.', () =>
+        this.refNombre.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning('Pedido', 'Agregar algún producto a la lista.', () =>
+      this.alert.warning('Catálogo', 'Agregar algún producto a la lista.', () =>
         this.refProductoValue.current.focus(),
       );
       return;
     }
 
-    this.alert.dialog('Pedido', '¿Está seguro de continuar?', async (accept) => {
+    this.alert.dialog('Catálogo', '¿Está seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
-          idComprobante: idComprobante,
-          idCliente: cliente.idPersona,
-          idMoneda: idMoneda,
-          idSucursal: this.state.idSucursal,
-          idUsuario: this.state.idUsuario,
-          estado: 1,
-          observacion: observacion,
-          nota: nota,
-          detalle: detalles
+          nombre: nombre,
+          idSucursal: idSucursal,
+          idUsuario: idUsuario,
+          productos: detalles
         };
 
-        this.alert.information('Pedido', 'Procesando información...');
+        this.alert.information('Catálogo', 'Procesando información...');
 
-        const response = await createPedido(data);
+        const response = await createCatalogo(data);
 
         if (response instanceof SuccessReponse) {
           this.alert.close();
-          this.handleOpenImpresion(response.data.idPedido);
+          this.handleOpenImpresion(response.data.idCatalogo);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          this.alert.warning('Pedido', response.getMessage());
+          this.alert.warning('Catálogo', response.getMessage());
         }
       }
     });
@@ -643,9 +313,9 @@ class PedidoCrear extends CustomComponent {
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    this.alert.dialog("Pedido", "¿Está seguro de limpiar el pedido?", (accept) => {
+    this.alert.dialog("Catálogo", "¿Está seguro de limpiar el catálogo?", async (accept) => {
       if (accept) {
-        this.clearView();
+        await this.clearView();
       }
     })
   };
@@ -653,13 +323,13 @@ class PedidoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
-  handleOpenImpresion = (idPedido) => {
-    this.setState({ isOpenImpresion: true, idPedido: idPedido })
+  handleOpenImpresion = (idCatalogo) => {
+    this.setState({ isOpenImpresion: true, idCatalogo: idCatalogo })
   }
 
-  handlePrinterImpresion = (size) => {
+  handlePrinterImpresion = async () => {
     printJS({
-      printable: documentsPdfInvoicesPedido(this.state.idPedido, size),
+      printable: documentsPdfCatalogo(this.state.idCatalogo),
       type: 'pdf',
       showModal: true,
       modalMessage: "Recuperando documento...",
@@ -697,127 +367,12 @@ class PedidoCrear extends CustomComponent {
   |
   */
 
-  renderTotal() {
-    let subTotal = 0;
-    let total = 0;
-
-    for (const item of this.state.detalles) {
-      const cantidad = item.cantidad;
-      const valor = item.precio;
-
-      const porcentaje = item.porcentajeImpuesto;
-
-      const valorActual = cantidad * valor;
-      const valorSubNeto = calculateTaxBruto(porcentaje, valorActual);
-      const valorImpuesto = calculateTax(porcentaje, valorSubNeto);
-      const valorNeto = valorSubNeto + valorImpuesto;
-
-      subTotal += valorSubNeto;
-      total += valorNeto;
-    }
-
-    const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.precio;
-        const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
-        const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
-
-        const existingImpuesto = acc.find((imp) => imp.idImpuesto === item.idImpuesto);
-
-        if (existingImpuesto) {
-          existingImpuesto.valor += impuestoTotal;
-        } else {
-          acc.push({
-            idImpuesto: item.idImpuesto,
-            nombre: item.nombreImpuesto,
-            valor: impuestoTotal,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      return resultado.map((impuesto, index) => {
-        return (
-          <div
-            key={index}
-            className='d-flex justify-content-between align-items-center text-secondary'>
-            <p className='m-0 text-secondary'>{impuesto.nombre}:</p>
-            <p className='m-0 text-secondary'>{numberFormat(impuesto.valor, this.state.codISO)}</p>
-          </div>
-        );
-      });
-    };
-
-    return (
-      <>
-        <div className='d-flex justify-content-between align-items-center text-secondary'>
-          <p className='m-0 text-secondary'>Sub Total:</p>
-          <p className='m-0 text-secondary'>{numberFormat(subTotal, this.state.codISO)}</p>
-        </div>
-        {impuestosGenerado()}
-        <Button
-          className='btn-success w-100'
-          onClick={this.handleGuardar}>
-          <div className='d-flex justify-content-between align-items-center py-1'>
-            <p className='m-0 text-xl'>Total:</p>
-            <p className='m-0 text-xl'>{numberFormat(total, this.state.codISO)}</p>
-          </div>
-        </Button>
-      </>
-    );
-  }
-
   render() {
     return (
       <PosContainerWrapper className={'flex-column bg-white'}>
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
-        />
-
-        <ModalProducto
-          ref={this.refModalProducto}
-          isOpen={this.state.isOpenProducto}
-          onClose={this.handleCloseProducto}
-
-          idImpuesto={this.state.idImpuesto}
-          impuestos={this.state.impuestos}
-          detalles={this.state.detalles}
-
-          handleSave={this.handleSaveProducto}
-        />
-
-        <ModalPersona
-          isOpen={this.state.isOpenPersona}
-          onClose={this.handleCloseModalPersona}
-
-          idUsuario={this.state.idUsuario}
-        />
-
-        <SidebarConfiguration
-          idSidebarConfiguration={this.idSidebarConfiguration}
-
-          impuestos={this.state.impuestos}
-          refImpuesto={this.refImpuesto}
-          idImpuesto={this.state.idImpuesto}
-          handleSelectIdImpuesto={this.handleSelectIdImpuesto}
-
-          monedas={this.state.monedas}
-          refMoneda={this.refMoneda}
-          idMoneda={this.state.idMoneda}
-          handleSelectIdMoneda={this.handleSelectIdMoneda}
-
-          refObservacion={this.refObservacion}
-          observacion={this.state.observacion}
-          handleInputObservacion={this.handleInputObservacion}
-
-          refNota={this.refNota}
-          nota={this.state.nota}
-          handleInputNota={this.handleInputNota}
-
-          handleSaveOptions={this.handleSaveOptions}
-          handleCloseOptions={this.handleCloseOptions}
         />
 
         <ModalImpresion
@@ -827,9 +382,7 @@ class PedidoCrear extends CustomComponent {
           clear={this.clearView}
 
           handleClose={this.handleCloseImpresion}
-          handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
-          handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
-          handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
+          handlePrinterA4={this.handlePrinterImpresion}
         />
 
         <div className='bg-white w-100 h-100 d-flex flex-column overflow-auto'>
@@ -849,8 +402,9 @@ class PedidoCrear extends CustomComponent {
                   </Button>
                 </div>
 
-                <div className='py-3 d-flex align-items-center'> 
-                  <p className='h5 m-0'>Crear pedido <i className='fa fa-plus text-secondary'></i> </p>
+                <div className='py-3 d-flex align-items-center'>
+                  <p className='h5 my-0 ml-0 mr-1'>Crear catálogo</p>
+                  <i className='fa fa-plus text-secondary'></i>
                 </div>
               </div>
 
@@ -888,6 +442,7 @@ class PedidoCrear extends CustomComponent {
                   backgroundColor: '#f8fafc',
                 }}>
 
+
                 {
                   this.state.loadingProducto &&
                   <div className='position-relative w-100 h-100 text-center'>
@@ -896,12 +451,13 @@ class PedidoCrear extends CustomComponent {
                       message={"Buscando productos..."}
                     />
                   </div>
+
                 }
 
                 {
                   !this.state.loadingProducto && isEmpty(this.state.productos) &&
                   <div className='text-center position-relative'>
-                    <i className='bi bi-cart4 text-secondary text-2xl'></i>
+                    <i className='bi bi-list text-secondary text-2xl'></i>
                     <p className="text-secondary text-base text-lg mb-0">
                       Use la barra de busqueda para encontrar su producto.
                     </p>
@@ -964,50 +520,19 @@ class PedidoCrear extends CustomComponent {
                     onClick={this.handleLimpiar}>
                     <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
                   </Button>
-                  <Button
-                    className='btn btn-link'
-                    onClick={this.handleOpenOptions}>
-                    <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
-                  </Button>
                 </div>
               </div>
 
               <div className='d-flex flex-column px-3 pt-3'
                 style={{ borderBottom: '1px solid #cbd5e1' }}>
-                <div className="form-group">
-                  <Select
-                    group={false}
-                    refSelect={this.refComprobante}
-                    value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}
-                  >
-                    <option value="">-- Comprobantes --</option>
-                    {this.state.comprobantes.map((item, index) => (
-                      <option key={index} value={item.idComprobante}>
-                        {item.nombre + ' (' + item.serie + ')'}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <div>
-                  <SearchInput
-                    ref={this.refCliente}
-                    placeholder="Filtrar clientes..."
-                    refValue={this.refValueCliente}
-                    data={this.state.clientes}
-                    handleClearInput={this.handleClearInputCliente}
-                    handleFilter={this.handleFilterCliente}
-                    handleSelectItem={this.handleSelectItemCliente}
-                    renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
-                    customButton={
-                      <Button
-                        className="btn-outline-success d-flex align-items-center"
-                        onClick={this.handleOpenModalPersona}>
-                        <i className='fa fa-plus'></i>
-                        <span className="ml-2">Nuevo</span>
-                      </Button>
-                    }
+                <div className='form-group'>
+                  <Input
+                    placeholder="Ingrese el nombre del catálogo..."
+                    value={this.state.nombre}
+                    onChange={(event) => {
+                      this.setState({ nombre: event.target.value })
+                    }}
+                    refInput={this.refNombre}
                   />
                 </div>
               </div>
@@ -1026,7 +551,7 @@ class PedidoCrear extends CustomComponent {
                 {isEmpty(this.state.detalles) && <div className='text-center'>
                   <i className='fa fa-shopping-basket text-secondary text-2xl'></i>
                   <p className="text-secondary text-base text-lg mb-0">
-                    Aquí verás los productos que elijas en tu próxima pedido
+                    Aquí verás los productos que elijas para tu catálogo
                   </p>
                 </div>}
 
@@ -1036,12 +561,11 @@ class PedidoCrear extends CustomComponent {
                       key={index}
                       className='d-grid px-3 position-relative align-items-center bg-white'
                       style={{
-                        gridTemplateColumns: '60% 20% 20%',
+                        gridTemplateColumns: '80% 20%',
                         borderBottom: '1px solid #e2e8f0',
                       }}>
                       {/* Primera columna (imagen y texto) */}
-                      <div className='d-flex align-items-center'>
-
+                      <div className='d-flex align-items-center py-3'>
                         <Image
                           default={images.noImage}
                           src={item.imagen}
@@ -1056,27 +580,16 @@ class PedidoCrear extends CustomComponent {
                           <p className='m-0 text-base font-weight-bold text-break'>
                             {item.nombre}
                           </p>
-                          <p className='m-0'>{numberFormat(item.precio, this.state.codISO)} <small>x {item.nombreMedida}</small></p>
+                          <p className='m-0'>{numberFormat(item.precio, this.state.codISO)}</p>
                         </div>
                       </div>
 
-                      {/* Segundo columna (precio total) y opciones */}
+                      {/* Segunda columna para quitar */}
                       <div className='d-flex flex-column justify-content-end align-items-center'>
-                        <div className='h-100 text-xml'>{rounded(item.cantidad)}</div>
-                      </div>
-
-                      {/* Tercera columna (precio total) y opciones */}
-                      <div className='d-flex flex-column justify-content-end align-items-center'>
-                        <div className='h-100 text-lg'>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</div>
-
                         <div className='d-flex align-items-end justify-content-end gap-4'>
-                          <button className='btn btn-link'
-                            onClick={() => this.handleOpenModalProducto(item)}>
-                            <i className='fa fa-edit text-secondary text-xl'></i>
-                          </button>
-                          <button className='btn btn-link'
+                          <button className='btn btn-danger'
                             onClick={() => this.handleRemoverProducto(item.idProducto)}>
-                            <i className='fa fa-trash text-secondary text-xl'></i>
+                            <i className='fa fa-minus'></i>
                           </button>
                         </div>
                       </div>
@@ -1088,7 +601,13 @@ class PedidoCrear extends CustomComponent {
               <div className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
                 style={{ borderTop: '1px solid #e2e8f0' }}
               >
-                {this.renderTotal()}
+                <Button
+                  className='btn-success w-100'
+                  onClick={this.handleGuardar}>
+                  <div className='d-flex justify-content-center align-items-center'>
+                    <i className='fa fa-save mr-2 text-xl'></i> <p className='m-0 text-xl'>Guardar</p>
+                  </div>
+                </Button>
 
                 <div className='d-flex justify-content-between align-items-center text-secondary'>
                   <p className='m-0 text-secondary'>Cantidad:</p>
@@ -1104,7 +623,7 @@ class PedidoCrear extends CustomComponent {
   }
 }
 
-PedidoCrear.propTypes = {
+CatalogoCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       idUsuario: PropTypes.string.isRequired,
@@ -1116,13 +635,16 @@ PedidoCrear.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
-  pedidoCrear: PropTypes.shape({
+  moneda: PropTypes.shape({
+    codiso: PropTypes.string.isRequired,
+  }).isRequired,
+  catalogoCrear: PropTypes.shape({
     state: PropTypes.object,
     local: PropTypes.object,
   }),
-  setCrearPedidoState: PropTypes.func,
-  setCrearPedidoLocal: PropTypes.func,
-  clearCrearPedido: PropTypes.func,
+  setCrearCatalogoState: PropTypes.func,
+  setCrearCatalogoLocal: PropTypes.func,
+  clearCrearCatalogo: PropTypes.func,
 };
 
 /**
@@ -1132,17 +654,18 @@ PedidoCrear.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    pedidoCrear: state.predeterminado.pedidoCrear
+    catalogoCrear: state.predeterminado.catalogoCrear,
+    moneda: state.predeterminado.moneda,
   };
 };
 
-const mapDispatchToProps = { clearCrearPedido, setCrearPedidoLocal, setCrearPedidoState }
+const mapDispatchToProps = { clearCrearCatalogo, setCrearCatalogoLocal, setCrearCatalogoState }
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedPedidoCrear = connect(mapStateToProps, mapDispatchToProps)(PedidoCrear);
+const ConnectedCatalogoCrear = connect(mapStateToProps, mapDispatchToProps)(CatalogoCrear);
 
-export default ConnectedPedidoCrear;
+export default ConnectedCatalogoCrear;

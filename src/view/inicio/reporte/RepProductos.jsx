@@ -9,7 +9,6 @@ import CustomComponent from '../../../model/class/custom-component';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import { TabContent, TabHead, TabHeader, TabPane } from '../../../components/Tab';
 import Reporte from './component/Reporte';
-import Catalogo from './component/Catalogo';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -134,9 +133,9 @@ class RepProductos extends CustomComponent {
                 <Reporte />
               </TabPane>
 
-              <TabPane id='catalogo'>
+              {/* <TabPane id='catalogo'>
                 <Catalogo idUsuario={this.state.idUsuario} />
-              </TabPane>
+              </TabPane> */}
             </TabContent>
           </Column>
         </Row>

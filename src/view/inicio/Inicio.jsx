@@ -82,6 +82,11 @@ import Logistica, {
   Inventario,
 
   Kardex,
+
+  Catalogos,
+  CatalogoCrear,
+  CatalogoEditar,
+  CatalogoDetalle
 } from './logistica/index.jsx';
 
 import Tesoreria, {
@@ -721,6 +726,28 @@ class Inicio extends React.Component {
             path={`${path}/logistica/traslado/detalle`}
             exact={true}
             render={(props) => <TrasladoDetalle {...props} />}
+          />
+
+
+          <Route
+            path={`${path}/logistica/catalogo`}
+            exact={true}
+            render={(props) => <Catalogos {...props} />}
+          />
+          <Route
+            path={`${path}/logistica/catalogo/crear`}
+            exact={true}
+            render={(props) => <CatalogoCrear {...props} />}
+          />
+          <Route
+            path={`${path}/logistica/catalogo/editar`}
+            exact={true}
+            render={(props) => <CatalogoEditar {...props} />}
+          />
+          <Route
+            path={`${path}/logistica/catalogo/detalle`}
+            exact={true}
+            render={(props) => <CatalogoDetalle {...props} />}
           />
 
           {/* 

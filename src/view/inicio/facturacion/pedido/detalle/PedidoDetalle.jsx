@@ -460,7 +460,7 @@ class PedidoDetalle extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <TableTitle>Detalle</TableTitle>
+              <TableTitle>Detalles</TableTitle>
               <Table className="table-light table-striped">
                 <TableHeader className="table-dark">
                   <TableRow>

@@ -81,6 +81,14 @@ const initialState = {
     state: null,
     local: null
   },
+  catalogoLista: {
+    data: null,
+    paginacion: null
+  },
+  catalogoCrear: {
+    state: null,
+    local: null
+  },
   cpeSunatLista: {
     data: null,
     paginacion: null
@@ -296,6 +304,32 @@ const predeterminadoSlice = createSlice({
       };
     },
 
+    setListaCatalogoData: (state, action) => {
+      state.pedidoLista.data = action.payload;
+    },
+    setListaCatalogoPaginacion: (state, action) => {
+      state.pedidoLista.paginacion = action.payload;
+    },
+    clearListaCatalogo: (state) => {
+      state.pedidoLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
+    setCrearCatalogoState: (state, action) => {
+      state.catalogoCrear.state = action.payload;
+    },
+    setCrearCatalogoLocal: (state, action) => {
+      state.catalogoCrear.local = action.payload;
+    },
+    clearCrearCatalogo: (state) => {
+      state.catalogoCrear = {
+        state: null,
+        local: null
+      };
+    },
+
     setListaCpeSunatData: (state, action) => {
       state.cpeSunatLista.data = action.payload;
     },
@@ -371,6 +405,14 @@ const predeterminadoSlice = createSlice({
         state: null,
         local: null
       };
+      state.catalogoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.catalogoCrear = {
+        state: null,
+        local: null
+      };
       state.cpeSunatLista = {
         data: null,
         paginacion: null
@@ -438,6 +480,14 @@ const predeterminadoSlice = createSlice({
         paginacion: null
       };
       state.pedidoCrear = {
+        state: null,
+        local: null
+      };
+      state.catalogoLista = {
+        data: null,
+        paginacion: null
+      };
+      state.catalogoCrear = {
         state: null,
         local: null
       };
@@ -531,6 +581,14 @@ export const {
   setCrearPedidoState,
   setCrearPedidoLocal,
   clearCrearPedido,
+
+  setListaCatalogoData,
+  setListaCatalogoPaginacion,
+  clearListaCatalogo,
+
+  setCrearCatalogoState,
+  setCrearCatalogoLocal,
+  clearCrearCatalogo,
 
   clearSucursal,
   clearPredeterminado

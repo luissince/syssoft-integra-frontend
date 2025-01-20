@@ -403,7 +403,7 @@ class GastoDetalle extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <TableTitle>Detalle</TableTitle>
+              <TableTitle>Detalles</TableTitle>
               <Table className={"able-light table-striped"}>
                 <TableHeader className="thead-dark">
                   <TableRow>

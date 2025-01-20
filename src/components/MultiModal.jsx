@@ -62,27 +62,29 @@ const ModalImpresion = ({
                         autoFocus={true}
                         className='btn-danger'
                         onClick={async () => {
-                            if (clear) clear();
+                            if (clear) await clear();
                             await refModal.current.handleOnClose();
                         }}>
                         <img src={images.escoba} width={22} /> Realizar otra Operación.
                     </Button>
                 </div>
                 <div className='d-flex justify-content-center align-items-center flex-wrap gap-2_5 mt-3'>
-                    <Button className="btn-outline-secondary"
+                    {handlePrinterA4 && <Button className="btn-outline-secondary"
                         onClick={handlePrinterA4}>
                         <i className="fa fa-print"></i> A4
-                    </Button>
+                    </Button>}
                     {" "}
-                    <Button className="btn-outline-secondary"
+                    {handlePrinter80MM && <Button className="btn-outline-secondary"
                         onClick={handlePrinter80MM}>
                         <i className="fa fa-print"></i> 80MM
                     </Button>
+                    }
                     {" "}
-                    <Button className="btn-outline-secondary"
+                    {handlePrinter58MM && <Button className="btn-outline-secondary"
                         onClick={handlePrinter58MM}>
                         <i className="fa fa-print"></i> 58MM
                     </Button>
+                    }
                 </div>
             </CustomModalContentBody>
         </CustomModal>
@@ -96,9 +98,9 @@ ModalImpresion.propTypes = {
     handleClose: PropTypes.func.isRequired,
     handleHidden: PropTypes.func,
 
-    handlePrinterA4: PropTypes.func.isRequired,
-    handlePrinter80MM: PropTypes.func.isRequired,
-    handlePrinter58MM: PropTypes.func.isRequired,
+    handlePrinterA4: PropTypes.func,
+    handlePrinter80MM: PropTypes.func,
+    handlePrinter58MM: PropTypes.func,
 }
 
 /**
@@ -786,13 +788,13 @@ class ModalSendWhatsApp extends React.Component {
 
     handleSendWhatsapp = async () => {
         if (!validateNumberWhatsApp(this.state.phone)) {
-            alertWarning("WhatsApp", "El número de teléfono no es válido.",()=>{
+            alertWarning("WhatsApp", "El número de teléfono no es válido.", () => {
                 this.refPhone.current.focus();
             });
             return;
         }
 
-        this.props.handleProcess(this.state.phone, async () =>{
+        this.props.handleProcess(this.state.phone, async () => {
             await this.props.refModal.current.handleOnClose()
         });
     }

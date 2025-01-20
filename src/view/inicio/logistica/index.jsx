@@ -19,6 +19,11 @@ import Inventario from './inventario/Inventario.jsx';
 
 import Kardex from './kardex/Kardex.jsx';
 
+import Catalogos from './catalogo/lista/Catalogos.jsx';
+import CatalogoCrear from './catalogo/formularios/crear/CatalogoCrear.jsx';
+import CatalogoEditar from './catalogo/formularios/editar/CatalogoEditar.jsx';
+import CatalogoDetalle from './catalogo/detalle/CatalogoDetalle.jsx';
+
 export {
     Productos,
     ProductoAgregar,
@@ -36,6 +41,11 @@ export {
     Inventario,
 
     Kardex,
+
+    Catalogos,
+    CatalogoCrear,
+    CatalogoEditar,
+    CatalogoDetalle,
 }
 
 /**

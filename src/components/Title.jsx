@@ -18,7 +18,7 @@ const Title = ({ title, subTitle, icon, handleGoBack }) => {
                     <h5>
                         {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
                         {handleGoBack !== undefined &&
-                            <span role="button" onClick={handleGoBack}>
+                            <span className='mr-2' role="button" onClick={handleGoBack}>
                                 <i className="bi bi-arrow-left-short"></i>
                             </span>}
                         {/* Título principal */}

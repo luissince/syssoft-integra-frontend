@@ -363,19 +363,6 @@ export async function deleteProducto(params) {
   );
 }
 
-export async function createCatalogProducto(data) {
-  return await Resolve.create(instancePrincipal.post('/api/producto/catalog', data),);
-}
-
-export async function filtrarCatalogProductos(params,signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/producto/combo/catalog', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-
 
 export function documentsPdfReportsProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/reports`
@@ -385,12 +372,56 @@ export function documentsExcelProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/excel`
 }
 
-export function documentsPdfCatalogProducto(idCatalogo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/catalog/${idCatalogo}`
+// ------------------------------------------------------------------------
+// FIN PARA PRODUCTO
+// ------------------------------------------------------------------------
+
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE CATÁLOGO
+|--------------------------------------------------------------------------
+*/
+
+export async function listCatalogo(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/catalogo/list', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function getIdCatalogo(idCatalogo, signal) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/catalogo/id/${idCatalogo}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function detailCatalogo(idCatalogo, signal) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/catalogo/detail/${idCatalogo}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function createCatalogo(data) {
+  return await Resolve.create(instancePrincipal.post('/api/catalogo/create', data),);
+}
+
+export async function updateCatalogo(data) {
+  return await Resolve.create(instancePrincipal.post('/api/catalogo/update', data),);
+}
+
+export function documentsPdfCatalogo(idCatalogo) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/catalogo/documents/pdf/${idCatalogo}`
 }
 
 // ------------------------------------------------------------------------
-// FIN PARA PRODUCTO
+// FIN PARA CATÁLOGO
 // ------------------------------------------------------------------------
 
 /*
