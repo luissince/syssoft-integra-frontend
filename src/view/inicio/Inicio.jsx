@@ -5,7 +5,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { addNotification, clearNoticacion } from '../../redux/noticacionSlice.js';
 import { projectClose, signOut } from '../../redux/principalSlice.js';
-import { clearSucursal } from '../../redux/predeterminadoSlice.js';
+import { clearSucursal, setEmpresa, setMonedaNacional } from '../../redux/predeterminadoSlice.js';
 
 import Bienvenido from './bienvenido/Bienvenido.jsx';
 import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
@@ -186,11 +186,17 @@ import CpeSunat, {
   CpeConsultar,
 } from './cpesunat/index.jsx';
 
-import { listNotificacion } from '../../network/rest/principal.network.js';
+import {
+  configEmpresa,
+  listNotificacion,
+  nacionalMoneda,
+} from '../../network/rest/principal.network.js';
 import SuccessReponse from '../../model/class/response.js';
 import ErrorResponse from '../../model/class/error-response.js';
 import { CANCELED } from '../../model/types/types.js';
 import FileDownloader from '../../components/FileDownloader.jsx';
+import { images } from '../../helper/index.jsx';
+import { SpinnerView } from '../../components/Spinner.jsx';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -205,8 +211,11 @@ class Inicio extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
+      loadingMessage: 'Cargando modulos...',
       isModal: false,
       notificaciones: [],
+      rutaLogo: images.noImage,
     };
 
     this.abortNotificacion = new AbortController();
@@ -233,6 +242,7 @@ class Inicio extends React.Component {
   async componentDidMount() {
     window.addEventListener('focus', this.onWindowFocused);
     window.addEventListener('resize', this.onWindowResize);
+    this.loadingData();
     this.loadSideBar();
     this.loadNotifications();
 
@@ -263,6 +273,36 @@ class Inicio extends React.Component {
   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
   |
   */
+
+  // ------------------------------------------------------------------------
+  // Carga los datos de la empresa y moneda
+  // ------------------------------------------------------------------------
+
+  loadingData = async () => {
+    const empresa = await configEmpresa(this.abortNotificacion.signal);
+
+    if (empresa instanceof ErrorResponse) {
+      if (empresa.type === CANCELED) return;
+      this.props.signOut();
+      return;
+    }
+
+    const moneda = await nacionalMoneda(this.abortNotificacion.signal);
+
+    if (moneda instanceof ErrorResponse) {
+      if (moneda.type === CANCELED) return;
+      this.props.signOut();
+      return;
+    }
+
+    this.props.setEmpresa(empresa.data);
+    this.props.setMonedaNacional(moneda.data);
+
+    this.setState({
+      rutaLogo: empresa.data.rutaLogo,
+      loading: false,
+    })
+  }
 
   // ------------------------------------------------------------------------
   // Carga los datos del sidebar
@@ -412,6 +452,17 @@ class Inicio extends React.Component {
       return <Redirect to="/principal" />;
     }
 
+    if (this.state.loading) {
+      return (
+        <div className="container pt-5">
+          <SpinnerView
+            loading={this.state.loading}
+            message={this.state.loadingMessage}
+          />
+        </div>
+      );
+    }
+
     const { path, url } = this.props.match;
 
     const pathname = this.props.location.pathname;
@@ -425,7 +476,7 @@ class Inicio extends React.Component {
           pathname={pathname}
           project={this.props.token.project}
           userToken={this.props.token.userToken}
-          empresa={this.props.empresa}
+          rutaLogo={this.state.rutaLogo}
         />
 
         <Head
@@ -1171,7 +1222,6 @@ Inicio.propTypes = {
     userToken: PropTypes.object,
     project: PropTypes.object,
   }),
-  empresa: PropTypes.object,
   projectClose: PropTypes.func,
   match: PropTypes.object,
   location: PropTypes.shape({
@@ -1179,12 +1229,14 @@ Inicio.propTypes = {
   }),
   clearSucursal: PropTypes.func,
   clearNoticacion: PropTypes.func,
+  setMonedaNacional: PropTypes.func,
+  setEmpresa: PropTypes.func
+
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    empresa: state.predeterminado.empresa,
     notification: state.notification,
   };
 };
@@ -1194,9 +1246,11 @@ const mapDispatchToProps = {
   projectClose,
   addNotification,
   clearSucursal,
-  clearNoticacion
+  clearNoticacion,
+  setMonedaNacional,
+  setEmpresa,
 }
 
-const ConnectedInicio = connect(mapStateToProps, mapDispatchToProps)(Inicio);;
+const ConnectedInicio = connect(mapStateToProps, mapDispatchToProps)(Inicio);
 
 export default ConnectedInicio;

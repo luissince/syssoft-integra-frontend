@@ -601,7 +601,7 @@ export function getRowCellIndex(event) {
   const cellIndex = Array.prototype.indexOf.call(row.children, cell);
   const children = Array.from(tBody.children);
 
-  return { rowIndex, cellIndex, tBody , children};
+  return { rowIndex, cellIndex, tBody, children };
 }
 
 export function getExtension(filename) {
@@ -796,6 +796,57 @@ export function guId() {
       .substring(1);
   };
   return (s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4());
+}
+
+export function generar128Code() {
+  // Caracteres permitidos en el estándar Code 128
+  const caracteresPermitidos = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  // Longitud del código de barras (puedes ajustarla)
+  const longitudCodigo = 12;
+
+  let codigoBarras = "";
+
+  // Generar un código de barras aleatorio
+  for (let i = 0; i < longitudCodigo; i++) {
+    const indiceAleatorio = Math.floor(Math.random() * caracteresPermitidos.length);
+    codigoBarras += caracteresPermitidos.charAt(indiceAleatorio);
+  }
+
+  return codigoBarras;
+}
+
+export function generateEAN13Code() {
+  // Prefijo válido (2-3 dígitos según país, aquí usamos 3 aleatorios del 0 al 9)
+  let prefix = Math.floor(100 + Math.random() * 900).toString();
+
+  // Generamos 9 dígitos aleatorios más para completar 12 dígitos
+  let core = "";
+  for (let i = 0; i < 9; i++) {
+    core += Math.floor(Math.random() * 10);
+  }
+
+  // Concatenamos sin el dígito verificador aún
+  let partialCode = prefix + core;
+
+  // Calculamos el dígito verificador
+  let checkDigit = calculateEAN13CheckDigit(partialCode);
+
+  // Retornamos el código de barras completo
+  return partialCode + checkDigit;
+}
+
+// 📌 Función para calcular el dígito de control del EAN-13
+function calculateEAN13CheckDigit(code) {
+  let sum = 0;
+
+  for (let i = 0; i < code.length; i++) {
+    let digit = parseInt(code[i], 10);
+    sum += (i % 2 === 0) ? digit : digit * 3;  // Pesos alternos 1 y 3
+  }
+
+  let remainder = sum % 10;
+  return remainder === 0 ? 0 : 10 - remainder;
 }
 
 export function getPathNavigation(opcion, idNavegacion) {

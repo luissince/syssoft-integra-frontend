@@ -7,6 +7,7 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
+  generateEAN13Code,
   imageBase64,
   isEmpty,
   isNumeric,
@@ -69,6 +70,8 @@ class ProductoEditar extends CustomComponent {
       // producto
       nombreProducto: '',
       codigoProducto: '',
+      skuProducto: '',
+      codigoBarrasProducto: '',
       codigoSunatProducto: '0',
 
       idMedidaProducto: '',
@@ -94,6 +97,8 @@ class ProductoEditar extends CustomComponent {
       // servicio
       nombreServicio: '',
       codigoServicio: '',
+      skuServicio: '',
+      codigoBarrasServicio: '',
       codigoSunatServicio: '0',
 
       idMedidaServicio: '',
@@ -114,6 +119,8 @@ class ProductoEditar extends CustomComponent {
       // combo
       nombreCombo: '',
       codigoCombo: '',
+      skuCombo: '',
+      codigoBarrasCombo: '',
       codigoSunatCombo: '0',
 
       idMedidaCombo: '',
@@ -150,6 +157,8 @@ class ProductoEditar extends CustomComponent {
     // producto
     this.refNombreProducto = React.createRef();
     this.refCodigoProducto = React.createRef();
+    this.refSkuProducto = React.createRef();
+    this.refCodigoBarrasProducto = React.createRef();
     this.refCodigoSunatProducto = React.createRef();
 
     this.refIdMedidaProducto = React.createRef();
@@ -167,6 +176,8 @@ class ProductoEditar extends CustomComponent {
     // servicio
     this.refNombreServicio = React.createRef();
     this.refCodigoServicio = React.createRef();
+    this.refSkuServicio = React.createRef();
+    this.refCodigoBarrasServicio = React.createRef();
     this.refCodigoSunatServicio = React.createRef();
 
     this.refIdMedidaServicio = React.createRef();
@@ -182,6 +193,8 @@ class ProductoEditar extends CustomComponent {
     // Combo
     this.refNombreCombo = React.createRef();
     this.refCodigoCombo = React.createRef();
+    this.refSkuCombo = React.createRef();
+    this.refCodigoBarrasCombo = React.createRef();
     this.refCodigoSunatCombo = React.createRef();
 
     this.refIdMedidaCombo = React.createRef();
@@ -243,12 +256,17 @@ class ProductoEditar extends CustomComponent {
       this.fetchProducto(idProducto),
     ]);
 
+    console.log(producto.sku)
+    console.log(producto.codigoBarras)
+
     if (producto.idTipoProducto === 'TP0001') {
       this.handleFocusTab('addproducto-tab', 'addproducto');
       await this.setStateAsync({
         tipo: producto.idTipoProducto,
         nombreProducto: producto.nombre,
         codigoProducto: producto.codigo,
+        skuProducto: producto.sku,
+        codigoBarrasProducto: producto.codigoBarras,
         codigoSunatProducto: producto.idCodigoSunat,
         idMedidaProducto: producto.idMedida,
         idCategoriaProducto: producto.idCategoria,
@@ -275,6 +293,8 @@ class ProductoEditar extends CustomComponent {
         tipo: producto.idTipoProducto,
         nombreServicio: producto.nombre,
         codigoServicio: producto.codigo,
+        // skuServicio: producto.sku,
+        // codigoBarrasServicio: producto.codigoBarras,
         codigoSunatServicio: producto.idCodigoSunat,
         idMedidaServicio: producto.idMedida,
         idCategoriaServicio: producto.idCategoria,
@@ -298,6 +318,8 @@ class ProductoEditar extends CustomComponent {
         tipo: producto.idTipoProducto,
         nombreCombo: producto.nombre,
         codigoCombo: producto.codigo,
+        // skuCombo: producto.sku,
+        // codigoBarrasCombo: producto.codigoBarras,
         codigoSunatCombo: producto.idCodigoSunat,
         idMedidaCombo: producto.idMedida,
         idCategoriaCombo: producto.idCategoria,
@@ -487,6 +509,24 @@ class ProductoEditar extends CustomComponent {
   handleInputCodigoProducto = (event) => {
     this.setState({
       codigoProducto: event.target.value,
+    });
+  };
+
+  handleInputSkuProducto = (event) => {
+    this.setState({
+      skuProducto: event.target.value,
+    });
+  };
+
+  handleInputCodigoBarrasProducto = (event) => {
+    this.setState({
+      codigoBarrasProducto: event.target.value,
+    });
+  };
+
+  handleGenerateCodigoBarrasProducto = () => {
+    this.setState({
+      codigoBarrasProducto: generateEAN13Code(),
     });
   };
 
@@ -683,6 +723,24 @@ class ProductoEditar extends CustomComponent {
     });
   };
 
+  handleInputSkuServicio = (event) => {
+    this.setState({
+      skuServicio: event.target.value,
+    });
+  };
+
+  handleInputCodigoBarrasServicio = (event) => {
+    this.setState({
+      codigoBarrasServicio: event.target.value,
+    });
+  };
+
+  handleGenerateCodigoBarrasServicio = () => {
+    this.setState({
+      codigoBarrasServicio: generateEAN13Code(),
+    });
+  };
+
   handleSelectCodigoSunatServicio = (event) => {
     this.setState({
       codigoSunatServicio: event.target.value,
@@ -823,6 +881,24 @@ class ProductoEditar extends CustomComponent {
   handleInputCodigoCombo = (event) => {
     this.setState({
       codigoCombo: event.target.value,
+    });
+  };
+
+  handleInputSkuCombo = (event) => {
+    this.setState({
+      skuCombo: event.target.value,
+    });
+  };
+
+  handleInputCodigoBarrasCombo = (event) => {
+    this.setState({
+      codigoBarrasCombo: event.target.value,
+    });
+  };
+
+  handleGenerateCodigoBarrasCombo = () => {
+    this.setState({
+      codigoBarrasCombo: generateEAN13Code(),
     });
   };
 
@@ -1110,6 +1186,8 @@ class ProductoEditar extends CustomComponent {
           idProducto: this.state.idProducto,
           nombre: this.state.nombreProducto,
           codigo: this.state.codigoProducto,
+          sku: this.state.skuProducto,
+          codigoBarras: this.state.codigoBarrasProducto,
           idCodigoSunat: this.state.codigoSunatProducto,
           idMedida: this.state.idMedidaProducto,
           idCategoria: this.state.idCategoriaProducto,
@@ -1208,6 +1286,8 @@ class ProductoEditar extends CustomComponent {
           idProducto: this.state.idProducto,
           nombre: this.state.nombreServicio,
           codigo: this.state.codigoServicio,
+          sku: this.state.skuServicio,
+          codigoBarras: this.state.codigoBarrasServicio,
           idCodigoSunat: this.state.codigoSunatServicio,
           idMedida: this.state.idMedidaServicio,
           idCategoria: this.state.idCategoriaServicio,
@@ -1306,6 +1386,8 @@ class ProductoEditar extends CustomComponent {
           idProducto: this.state.idProducto,
           nombre: this.state.nombreCombo,
           codigo: this.state.codigoCombo,
+          sku: this.state.skuCombo,
+          codigoBarras: this.state.codigoBarrasCombo,
           idCodigoSunat: this.state.codigoSunatCombo,
           idMedida: this.state.idMedidaCombo,
           idCategoria: this.state.idCategoriaCombo,
@@ -1390,7 +1472,7 @@ class ProductoEditar extends CustomComponent {
 
     const { tipo } = this.state;
 
-    const { nombreProducto, codigoProducto, codigoSunatProducto } = this.state;
+    const { nombreProducto, codigoProducto, skuProducto, codigoBarrasProducto, codigoSunatProducto } = this.state;
 
     const { idMedidaProducto, idCategoriaProducto, idMarcaProducto, descripcionCortaProducto, descripcionLargaProducto } = this.state;
 
@@ -1398,13 +1480,13 @@ class ProductoEditar extends CustomComponent {
 
     const { precioProducto, costoProducto, precios } = this.state;
 
-    const { nombreServicio, codigoServicio, codigoSunatServicio } = this.state;
+    const { nombreServicio, codigoServicio, skuServicio, codigoBarrasServicio, codigoSunatServicio } = this.state;
 
     const { idMedidaServicio, idCategoriaServicio, idMarcaServicio, descripcionCortaServicio, descripcionLargaServicio } = this.state;
 
     const { precioServicio } = this.state;
 
-    const { nombreCombo, codigoCombo, codigoSunatCombo } = this.state;
+    const { nombreCombo, codigoCombo, skuCombo, codigoBarrasCombo, codigoSunatCombo } = this.state;
 
     const { idMedidaCombo, idCategoriaCombo, idMarcaCombo, descripcionCortaCombo, descripcionLargaCombo } = this.state;
 
@@ -1516,6 +1598,15 @@ class ProductoEditar extends CustomComponent {
                     refCodigo={this.refCodigoProducto}
                     handleInputCodigo={this.handleInputCodigoProducto}
 
+                    sku={skuProducto}
+                    refSku={this.refSkuProducto}
+                    handleInputSku={this.handleInputSkuProducto}
+
+                    codigoBarras={codigoBarrasProducto}
+                    refCodigoBarras={this.refCodigoBarrasProducto}
+                    handleInputCodigoBarras={this.handleInputCodigoBarrasProducto}
+                    handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasProducto}
+
                     codigoSunat={codigoSunatProducto}
                     refCodigoSunat={this.refCodigoSunatProducto}
                     handleSelectCodigoSunat={this.handleSelectCodigoSunatProducto}
@@ -1599,9 +1690,19 @@ class ProductoEditar extends CustomComponent {
                     refCodigo={this.refCodigoServicio}
                     handleInputCodigo={this.handleInputCodigoServicio}
 
+                    sku={skuServicio}
+                    refSku={this.refSkuServicio}
+                    handleInputSku={this.handleInputSkuServicio}
+
+                    codigoBarras={codigoBarrasServicio}
+                    refCodigoBarras={this.refCodigoBarrasServicio}
+                    handleInputCodigoBarras={this.handleInputCodigoBarrasServicio}
+                    handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasServicio}
+
                     codigoSunat={codigoSunatServicio}
                     refCodigoSunat={this.refCodigoSunatServicio}
                     handleSelectCodigoSunat={this.handleSelectCodigoSunatServicio}
+
                     idMedida={idMedidaServicio}
                     refIdMedida={this.refIdMedidaServicio}
                     handleSelectIdMedida={this.handleSelectIdMedidaServicio}
@@ -1661,6 +1762,15 @@ class ProductoEditar extends CustomComponent {
                     codigo={codigoCombo}
                     refCodigo={this.refCodigoCombo}
                     handleInputCodigo={this.handleInputCodigoCombo}
+
+                    sku={skuCombo}
+                    refSku={this.refSkuCombo}
+                    handleInputSku={this.handleInputSkuCombo}
+
+                    codigoBarras={codigoBarrasCombo}
+                    refCodigoBarras={this.refCodigoBarrasCombo}
+                    handleInputCodigoBarras={this.handleInputCodigoBarrasCombo}
+                    handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasCombo}
 
                     codigoSunat={codigoSunatCombo}
                     refCodigoSunat={this.refCodigoSunatCombo}

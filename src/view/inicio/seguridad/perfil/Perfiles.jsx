@@ -141,8 +141,7 @@ class Perfiles extends CustomComponent {
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable:
-          'Se produjo un error interno, intente nuevamente por favor.',
+        messageTable: response.getMessage(),
       });
     }
   };
@@ -201,7 +200,7 @@ class Perfiles extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="6">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="6">{this.state.messageTable}</TableCell>
         </TableRow>
       );
     }

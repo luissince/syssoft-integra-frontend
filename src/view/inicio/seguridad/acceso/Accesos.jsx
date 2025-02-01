@@ -359,7 +359,7 @@ class Accesos extends CustomComponent {
                   return (
                     <li key={index}>
                       <CheckBox
-                        className='form-check-inline m-1'
+                        className='form-check-inline'
                         id={`id${item.idSucursal}`}
                         value={item.idSucursal}
                         checked={item.estado === 1 ? true : false}
@@ -404,63 +404,54 @@ class Accesos extends CustomComponent {
   }
 }
 
-const OptionsList = ({ options, handleCheck }) => {
+const OptionsList = ({ options, handleCheck, hasParentUl = false }) => {
   return (
     <ul id="tree1">
       {options.map((option, index) => {
-        if (isEmpty(option.children)) {
-          const value =
-            option.idMenu +
-            (option.idSubMenu === undefined ? '' : option.idSubMenu) +
-            (option.idPrivilegio === undefined ? '' : option.idPrivilegio);
-          return (
-            <li key={index}>
-              <CheckBox
-                className='form-check-inline m-1'
-                id={`id${option.nombre}`}
-                value={value}
-                checked={option.estado === 1 ? true : false}
-                onChange={handleCheck}
-              >
-                {option.nombre}
-              </CheckBox>
-            </li>
-          );
-        } else {
-          const value =
-            option.idMenu +
-            (option.idSubMenu === undefined ? '' : option.idSubMenu) +
-            (option.idPrivilegio === undefined ? '' : option.idPrivilegio);
-          return (
-            <li key={index}>
-              <i className="cursor-pointer mr-3 mt-1 mb-1 fa fa-plus-square text-lg align-middle"></i>
-              <CheckBox
-                className='form-check-inline m-1 pl-1'
-                id={`id${option.nombre}`}
-                value={value}
-                checked={option.estado === 1 ? true : false}
-                onChange={handleCheck}
-              >
-                {option.nombre}
-              </CheckBox>
+        const value =
+          option.idMenu +
+          (option.idSubMenu === undefined ? '' : option.idSubMenu) +
+          (option.idPrivilegio === undefined ? '' : option.idPrivilegio);
 
-              {option.children.length && (
-                <OptionsList
-                  options={option.children}
-                  handleCheck={handleCheck}
-                />
-              )}
-            </li>
-          );
-        }
+        // Verifica si hay un <ul> dentro del <li> (si tiene hijos)
+        const hasChildren = option.children && option.children.length > 0;
+
+        return (
+          <li key={index}>
+            {hasChildren && (
+              <i className="cursor-pointer fa fa-plus-square text-2xl align-middle p-0 m-0"></i>
+            )}
+
+            <CheckBox
+              className={`form-check-inline ${hasChildren ? 'ml-2' : ''} ${hasParentUl ? 'ml-2' : ''}`} // Agrega clases según el contexto
+              id={`id${option.nombre}`}
+              value={value}
+              checked={option.estado === 1 ? true : false}
+              onChange={handleCheck}
+            >
+              {option.nombre}
+            </CheckBox>
+
+            {hasChildren && (
+              <OptionsList
+                options={option.children}
+                handleCheck={handleCheck}
+                hasParentUl={true} // Indica que los hijos tienen un padre con <ul>
+              />
+            )}
+          </li>
+        );
       })}
     </ul>
   );
 };
 
+
+
 OptionsList.propTypes = {
   options: PropTypes.array,
-  handleCheck: PropTypes.func
+  handleCheck: PropTypes.func,
+  hasParentUl: PropTypes.bool,
 }
 
 Accesos.propTypes = {

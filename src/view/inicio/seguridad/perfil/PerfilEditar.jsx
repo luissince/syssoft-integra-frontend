@@ -19,6 +19,10 @@ import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Input from '../../../../components/Input';
 
 class PerfilEditar extends CustomComponent {
   constructor(props) {
@@ -54,33 +58,26 @@ class PerfilEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [perfil] = await Promise.all([
-      this.fetchObtenerPerfil(id)
-    ]);
-
-    this.setState({
-      descripcion: perfil.descripcion,
-      idPerfil: perfil.idPerfil,
-      loading: false,
-    });
-  }
-
-  async fetchObtenerPerfil(id) {
     const params = {
       idPerfil: id,
     };
 
     const result = await getIdPerfil(params, this.abortController.signal);
 
-    if (result instanceof SuccessReponse) {
-      return result.data;
-    }
-
     if (result instanceof ErrorResponse) {
       if (result.getType() === CANCELED) return;
 
-      return [];
+      this.props.history.goBack();
+      return;
     }
+
+    const perfil = result.data;
+
+    this.setState({
+      descripcion: perfil.descripcion,
+      idPerfil: perfil.idPerfil,
+      loading: false,
+    });
   }
 
   handleInputDescripcion = (event) => {
@@ -126,53 +123,45 @@ class PerfilEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-           <SpinnerView
-                  loading={this.state.loading}
-                  message={this.state.msgLoading}
-                />        
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
-         <Title
-                  title='Perfil'
-                  subTitle='EDITAR'
-                  handleGoBack={() => this.props.history.goBack()}
-                />
+        <Title
+          title='Perfil'
+          subTitle='EDITAR'
+          handleGoBack={() => this.props.history.goBack()}
+        />
 
-        <div className="row">
-          <div className="form-group col">
-            <label>
-              Descripción: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
+        <Row>
+          <Column formGroup>
+            <Input
+              label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese la descripción."
-              ref={this.refDescripcion}
+              refInput={this.refDescripcion}
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={this.handleEditar}
-              >
-                <i className="fa fa-edit"></i> Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-outline-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                <i className="fa fa-close"></i> Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-12" formGroup>
+            <Button
+              className="btn-warning"
+              onClick={this.handleEditar}
+            >
+              <i className="fa fa-edit"></i> Guardar
+            </Button>{' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className="fa fa-close"></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

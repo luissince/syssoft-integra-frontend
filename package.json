@@ -16,7 +16,7 @@
     "axios": "^1.7.8",
     "bootstrap-icons": "^1.8.1",
     "lucide-react": "^0.439.0",
-    "pdf-visualizer": "^1.0.20",
+    "pdf-visualizer": "^1.0.23",
     "print-js": "^1.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

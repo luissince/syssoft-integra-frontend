@@ -9,7 +9,7 @@ const Menu = ({
   url,
   project,
   userToken,
-  empresa
+  rutaLogo
 }) => {
   const onEventOverlay = () => {
     refSideBar.current.classList.remove('toggled');
@@ -22,8 +22,8 @@ const Menu = ({
           <div className="sidebar-header">
             <Image
               default={images.icono}
-              src={`${empresa.rutaImage}`}
-              className="rounded-circle d-block mx-auto mb-2"
+              src={rutaLogo}
+              className="rounded-circle d-block mx-auto mb-2 object-contain"
               alt={"Logo"}
               width={130}
             />
@@ -255,7 +255,7 @@ Menu.propTypes = {
   pathname: PropTypes.string,
   project: PropTypes.object,
   userToken: PropTypes.object,
-  empresa: PropTypes.object,
+  rutaLogo: PropTypes.string,
 };
 
 

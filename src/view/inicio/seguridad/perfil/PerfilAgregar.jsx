@@ -14,6 +14,10 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Input from '../../../../components/Input';
+import Button from '../../../../components/Button';
 
 class PerfilAgregar extends CustomComponent {
   constructor(props) {
@@ -75,42 +79,34 @@ class PerfilAgregar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="form-group col">
-            <label>
-              Descripción: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
+        <Row>
+          <Column formGroup>
+            <Input
+              label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese la descripción."
-              ref={this.refDescripcion}
+              refInput={this.refDescripcion}
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.handleGuardar}
-              >
-                <i className="fa fa-save"></i> Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-outline-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                <i className="fa fa-close"></i> Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-12" formGroup>
+            <Button
+              className="btn-primary"
+              onClick={this.handleGuardar}
+            >
+              <i className="fa fa-edit"></i> Guardar
+            </Button>{' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className="fa fa-close"></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

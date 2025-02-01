@@ -17,6 +17,10 @@ const Producto = (props) => {
 
   const { codigo, refCodigo, handleInputCodigo } = props;
 
+  const { sku, refSku, handleInputSku } = props;
+
+  const { codigoBarras, refCodigoBarras, handleInputCodigoBarras, handleGenerateCodigoBarras } = props;
+
   const { codigoSunat, refCodigoSunat, handleSelectCodigoSunat } = props;
 
   const { idMedida, refIdMedida, handleSelectIdMedida, medidas } = props;
@@ -132,6 +136,39 @@ const Producto = (props) => {
             refInput={refCodigo}
             value={codigo}
             onChange={handleInputCodigo}
+          />
+        </Column>
+
+        <Column className="col-md-6" formGroup={true}>
+          <Input
+            label={<>
+              SKU:
+            </>}
+            placeholder="Ejemplo: CAM-NIKE-001 ..."
+            refInput={refSku}
+            value={sku}
+            onChange={handleInputSku}
+          />
+        </Column>
+
+        <Column className="col-md-6" formGroup={true}>
+          <Input
+            group
+            label={<>
+              Código de Barras: <i className="bi bi-upc-scan"></i>
+            </>}
+            placeholder="Ejemplo: 1234567890123 ..."
+            refInput={refCodigoBarras}
+            value={codigoBarras}
+            onChange={handleInputCodigoBarras}
+            buttonRight={
+              <Button
+                className="btn-outline-secondary"
+                title="Generar Código de Barras"
+                onClick={handleGenerateCodigoBarras}
+                icono={<i className="bi-arrow-clockwise"></i>}
+              />
+            }
           />
         </Column>
 
@@ -696,6 +733,15 @@ Producto.propTypes = {
   codigo: PropTypes.string,
   refCodigo: PropTypes.object,
   handleInputCodigo: PropTypes.func,
+
+  sku: PropTypes.string,
+  refSku: PropTypes.object,
+  handleInputSku: PropTypes.func,
+
+  codigoBarras: PropTypes.string,
+  refCodigoBarras: PropTypes.object,
+  handleInputCodigoBarras: PropTypes.func,
+  handleGenerateCodigoBarras: PropTypes.func,
 
   codigoSunat: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   refCodigoSunat: PropTypes.object,

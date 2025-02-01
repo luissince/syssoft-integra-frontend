@@ -3,16 +3,12 @@ import '../../resource/css/loader.css';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-  configEmpresa,
-  nacionalMoneda,
   validTokenApi,
 } from '../../network/rest/principal.network';
 
 import { CANCELED } from '../../model/types/types';
 import ErrorResponse from '../../model/class/error-response';
-import SuccessReponse from '../../model/class/response';
 import { config, restoreToken } from '../../redux/principalSlice';
-import { setEmpresa, setMonedaNacional } from '../../redux/predeterminadoSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -26,88 +22,36 @@ class Loader extends React.Component {
   }
 
   async componentDidMount() {
-    const [empresa, moneda, session] = await Promise.all([
-      this.fetchObtenerEmpresa(),
-      this.fetchMonedaNacional(),
-      this.fetchValidarToken(),
-    ]);
+    const valid = await validTokenApi(this.abortController.signal);
 
-    if (empresa === null) {
-      this.handleSignOut()
+    if (valid instanceof ErrorResponse) {
+      if (valid.type === CANCELED) return;
+      this.restoreSession();
+      return;
     }
 
-    this.props.setMonedaNacional(moneda);
-    this.props.setEmpresa(empresa)
+    // la variable session trae datos que rempleza al window.localStorage.getItem('login')
+    const login = JSON.parse(window.localStorage.getItem('login'));
+    const project = JSON.parse(window.localStorage.getItem('project'));
 
-    if (session) {
-      // TO DO:
-      // la variable session trae datos que rempleza al window.localStorage.getItem('login')
-      const login = JSON.parse(window.localStorage.getItem('login'));
-      const project = JSON.parse(window.localStorage.getItem('project'));
-
-      this.props.restoreToken({
-        token: login,
-        project: project
-      });
-    } else {
-      this.clearLocalStorage();
-      this.props.restoreToken({
-        token: null,
-        project: null
-      });
-    }
-    // this.props.config();
+    this.props.restoreToken({
+      token: login,
+      project: project
+    });
   }
 
   componentWillUnmount() {
     this.abortController.abort();
   }
 
-  async fetchValidarToken() {
-    const response = await validTokenApi();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.type === CANCELED) return;
-
-      return null;
-    }
-  }
-
-  async fetchMonedaNacional() {
-    const response = await nacionalMoneda(this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.type === CANCELED) return;
-
-      return null;
-    }
-  }
-
-  async fetchObtenerEmpresa() {
-    const response = await configEmpresa();
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.type === CANCELED) return;
-
-      return null;
-    }
-  }
-
-  clearLocalStorage() {
+  restoreSession() {
     window.localStorage.removeItem('login');
     window.localStorage.removeItem('project');
+
+    this.props.restoreToken({
+      token: null,
+      project: null
+    });
   }
 
   render() {
@@ -138,8 +82,6 @@ class Loader extends React.Component {
 Loader.propTypes = {
   restoreToken: PropTypes.func,
   config: PropTypes.func,
-  setMonedaNacional: PropTypes.func,
-  setEmpresa: PropTypes.func
 }
 
 const mapStateToProps = (state) => {
@@ -148,7 +90,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = { config, restoreToken, setMonedaNacional, setEmpresa };
+const mapDispatchToProps = { config, restoreToken };
 
 const ConnectedLoader = connect(mapStateToProps, mapDispatchToProps)(Loader);
 

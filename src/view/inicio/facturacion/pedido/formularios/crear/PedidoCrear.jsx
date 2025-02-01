@@ -110,7 +110,7 @@ class PedidoCrear extends CustomComponent {
 
     // Filtrar cliente
     this.refCliente = React.createRef();
-    this.refValueCliente = React.createRef();
+    this.refClienteValue = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -328,12 +328,6 @@ class PedidoCrear extends CustomComponent {
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleSelectMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value }, () => {
       this.updateReduxState();
     });
   };
@@ -581,7 +575,7 @@ class PedidoCrear extends CustomComponent {
 
     if (isEmpty(cliente)) {
       this.alert.warning('Pedido', 'Seleccione un cliente.', () =>
-        this.refValueCliente.current.focus(),
+        this.refClienteValue.current.focus(),
       );
       return;
     }
@@ -850,7 +844,7 @@ class PedidoCrear extends CustomComponent {
                 </div>
 
                 <div className='py-3 d-flex align-items-center'> 
-                  <p className='h5 m-0'>Crear pedido <i className='fa fa-plus text-secondary'></i> </p>
+                  <p className='h5 m-0'>Crear Pedido <i className='fa fa-plus text-secondary'></i> </p>
                 </div>
               </div>
 
@@ -994,7 +988,7 @@ class PedidoCrear extends CustomComponent {
                   <SearchInput
                     ref={this.refCliente}
                     placeholder="Filtrar clientes..."
-                    refValue={this.refValueCliente}
+                    refValue={this.refClienteValue}
                     data={this.state.clientes}
                     handleClearInput={this.handleClearInputCliente}
                     handleFilter={this.handleFilterCliente}

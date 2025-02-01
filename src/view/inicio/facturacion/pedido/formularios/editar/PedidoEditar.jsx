@@ -109,7 +109,7 @@ class PedidoEditar extends CustomComponent {
 
     // Filtrar cliente
     this.refCliente = React.createRef();
-    this.refValueCliente = React.createRef();
+    this.refClienteValue = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -332,10 +332,6 @@ class PedidoEditar extends CustomComponent {
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value });
-  };
-
-  handleSelectMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value });
   };
 
   handleRemoverProducto = (idProducto) => {
@@ -568,7 +564,7 @@ class PedidoEditar extends CustomComponent {
 
     if (isEmpty(cliente)) {
       this.alert.warning('Pedido', 'Seleccione un cliente.', () =>
-        this.refValueCliente.current.focus(),
+        this.refClienteValue.current.focus(),
       );
       return;
     }
@@ -826,7 +822,7 @@ class PedidoEditar extends CustomComponent {
                 </div>
 
                 <div className='py-3 d-flex align-items-center'>
-                  <p className='h5 m-0'>Editar pedido <i className='fa fa-edit text-secondary'></i> </p>
+                  <p className='h5 m-0'>Editar Pedido <i className='fa fa-edit text-secondary'></i> </p>
                 </div>
               </div>
 
@@ -863,7 +859,6 @@ class PedidoEditar extends CustomComponent {
                 style={{
                   backgroundColor: '#f8fafc',
                 }}>
-
 
                 {
                   this.state.loadingProducto &&
@@ -967,7 +962,7 @@ class PedidoEditar extends CustomComponent {
                   <SearchInput
                     ref={this.refCliente}
                     placeholder="Filtrar clientes..."
-                    refValue={this.refValueCliente}
+                    refValue={this.refClienteValue}
                     data={this.state.clientes}
                     handleClearInput={this.handleClearInputCliente}
                     handleFilter={this.handleFilterCliente}

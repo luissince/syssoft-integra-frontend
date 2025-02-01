@@ -27,8 +27,8 @@
 
 .tree li {
   margin: 0;
-  padding: 0 1em;
-  line-height: 2em;
+  padding: 0rem 1em 0rem 1rem;
+  /* line-height: 2em; */
   position: relative;
 }
 

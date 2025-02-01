@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { isEmpty } from '../../helper/utils.helper';
 import CustomComponent from '../../model/class/custom-component';
-import { initSucursales } from '../../network/rest/principal.network';
+import { configEmpresa, initSucursales } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
@@ -17,6 +17,7 @@ import { clearNoticacion } from '../../redux/noticacionSlice';
 import { clearPredeterminado } from '../../redux/predeterminadoSlice';
 import Column from '../../components/Column';
 import Input from '../../components/Input';
+import { images } from '../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -30,6 +31,7 @@ class Principal extends CustomComponent {
       documento: '',
       razonSocial: '',
       nombreEmpresa: '',
+      rutaLogo: images.logo,
       sucursales: [],
       cache: [],
 
@@ -53,24 +55,32 @@ class Principal extends CustomComponent {
   }
 
   async loadingData() {
-    const params = {
-      idPerfil: this.props.token.userToken.idPerfil
+    const empresa = await configEmpresa(this.abortController.signal);
+
+    if (empresa instanceof ErrorResponse) {
+      if (empresa.type === CANCELED) return;
+
+      return;
     }
 
-    const response = await initSucursales(params, this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        sucursales: response.data,
-        cache: response.data,
-        loading: false,
-      });
-    }
+    const response = await initSucursales(this.abortController.signal);
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      console.log(response)
+      return;
+    }
+
+    if (response instanceof SuccessReponse) {
+      this.setState({
+        documento: empresa.data.documento,
+        razonSocial: empresa.data.razonSocial,
+        nombreEmpresa: empresa.data.nombreEmpresa,
+        rutaLogo: empresa.data.rutaLogo,
+        sucursales: response.data,
+        cache: response.data,
+        loading: false,
+      });
     }
   }
 
@@ -114,7 +124,7 @@ class Principal extends CustomComponent {
   }
 
   render() {
-    const { token, empresa: { rutaImage, documento, razonSocial, nombreEmpresa } } = this.props;
+    const { token } = this.props;
 
     if (token.userToken == null) {
       return <Redirect to="/login" />;
@@ -122,6 +132,17 @@ class Principal extends CustomComponent {
 
     if (token.project !== null) {
       return <Redirect to="/inicio" />;
+    }
+
+    if (this.state.loading) {
+      return (
+        <div className="container pt-5">
+          <SpinnerView
+            loading={this.state.loading}
+            message={this.state.loadingMessage}
+          />
+        </div>
+      );
     }
 
     return (
@@ -132,10 +153,10 @@ class Principal extends CustomComponent {
         />
 
         <Title
-          rutaImage={rutaImage}
-          razonSocial={razonSocial}
-          nombreEmpresa={nombreEmpresa}
-          documento={"RUC: " + documento}
+          rutaImage={this.state.rutaLogo}
+          razonSocial={this.state.razonSocial}
+          nombreEmpresa={this.state.nombreEmpresa}
+          documento={"RUC: " + this.state.documento}
           handleSignOut={this.handleSignOut}
         />
 
@@ -177,12 +198,6 @@ Principal.propTypes = {
     userToken: PropTypes.object,
     project: PropTypes.object,
   }),
-  empresa: PropTypes.shape({
-    rutaImage: PropTypes.string,
-    documento: PropTypes.string,
-    razonSocial: PropTypes.string,
-    nombreEmpresa: PropTypes.string
-  }),
   signOut: PropTypes.func,
   projectActive: PropTypes.func,
   clearPredeterminado: PropTypes.func,
@@ -192,7 +207,6 @@ Principal.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    empresa: state.predeterminado.empresa
   };
 };
 

@@ -19,6 +19,7 @@ import ErrorResponse from '../../../../model/class/error-response';
 import {
   actualizarStockInventario,
   comboAlmacen,
+  documentsPdfCodbarProducto,
   listInventario,
   obtenerStockInventario,
 } from '../../../../network/rest/principal.network';
@@ -34,6 +35,7 @@ import Select from '../../../../components/Select';
 import Search from '../../../../components/Search';
 import { setListaInventarioData, setListaInventarioPaginacion } from '../../../../redux/predeterminadoSlice';
 import Button from '../../../../components/Button';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -339,6 +341,20 @@ class Inventario extends CustomComponent {
     this.setState({ idAlmacen: event.target.value }, () => this.loadingInit());
   };
 
+  //--------------------------------------------------------------------------------------------
+  // Handlers
+  //--------------------------------------------------------------------------------------------
+
+  handleOpenPrinterCodBar = async (idProducto) => {
+    console.log(idProducto);
+    await pdfVisualizer.init({
+      url: documentsPdfCodbarProducto(),
+      title: 'Lista de productos - Código de Barras',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    }); 
+  };
+
   //------------------------------------------------------------------------------------------
   // Render
   //------------------------------------------------------------------------------------------
@@ -374,13 +390,21 @@ class Inventario extends CustomComponent {
           <TableCell>{item.cantidadMaxima} {item.medida}</TableCell>
           <TableCell>{item.cantidadMinima} {item.medida}</TableCell>
           <TableCell className={`${background} ${color}`}>{rounded(item.cantidad)} {item.medida}</TableCell>
-          <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell className="text-right">{numberFormat(item.costo, this.state.codISO)}</TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleOpenModal(item)}
             >
               <i className="bi bi-pencil"></i>
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-dark btn-sm"
+              onClick={this.handleOpenPrinterCodBar.bind(this, item.idProducto)}
+            >
+              <i className="fa fa-barcode"></i>
             </Button>
           </TableCell>
         </TableRow>
@@ -423,6 +447,16 @@ class Inventario extends CustomComponent {
         />
 
         <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-outline-secondary"
+              onClick={this.loadingInit}>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
               group={true}
@@ -433,34 +467,20 @@ class Inventario extends CustomComponent {
           </Column>
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <div className="input-group">
-              <div className="input-group-prepend">
-                <div className="input-group-text">
-                  <i className="fa fa-building"></i>
-                </div>
-              </div>
-              <Select
-                value={this.state.idAlmacen}
-                onChange={this.handleSelectAlmacen}>
-                <option value={''}>-- Almacen --</option>
-                {this.state.almacenes.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idAlmacen}>
-                      {item.nombre}
-                    </option>
-                  );
-                })}
-              </Select>
-            </div>
-          </Column>
-
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-outline-secondary"
-              onClick={() => this.loadingInit()}
-            >
-              <i className="bi bi-arrow-clockwise"></i>
-            </Button>
+            <Select
+              group
+              iconLeft={<i className="fa fa-building"></i>}
+              value={this.state.idAlmacen}
+              onChange={this.handleSelectAlmacen}>
+              <option value={''}>-- Almacen --</option>
+              {this.state.almacenes.map((item, index) => {
+                return (
+                  <option key={index} value={item.idAlmacen}>
+                    {item.nombre}
+                  </option>
+                );
+              })}
+            </Select>
           </Column>
         </Row>
 
@@ -481,13 +501,14 @@ class Inventario extends CustomComponent {
                 <TableHeader>
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="30%">Producto</TableHead>
-                    <TableHead width="15%">Almacen</TableHead>
+                    <TableHead width="25%">Producto</TableHead>
+                    <TableHead width="13%">Almacen</TableHead>
                     <TableHead width="10%">Stock Máx.</TableHead>
                     <TableHead width="10%">Stock Mín.</TableHead>
-                    <TableHead width="15%">Cantidad Actual</TableHead>
-                    <TableHead width="10%">Costo</TableHead>
+                    <TableHead width="15%">Cantidad</TableHead>
+                    <TableHead width="10%" className="text-right">Costo</TableHead>
                     <TableHead width="5%">Editar</TableHead>
+                    <TableHead width="7%">Cod. Bar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

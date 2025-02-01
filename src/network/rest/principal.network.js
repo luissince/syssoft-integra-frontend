@@ -51,10 +51,9 @@ export async function listSucursales(params, signal) {
   );
 }
 
-export async function initSucursales(params, signal) {
+export async function initSucursales(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/sucursal/inicio', {
-      params: params,
       signal: signal,
     }),
   );
@@ -370,6 +369,10 @@ export function documentsPdfReportsProducto() {
 
 export function documentsExcelProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/excel`
+}
+
+export function documentsPdfCodbarProducto() {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/codbar`
 }
 
 // ------------------------------------------------------------------------
@@ -695,8 +698,12 @@ export async function deleteMoneda(params, signal) {
 | ENDPOINTS DE EMPRESA
 |--------------------------------------------------------------------------
 */
-export async function configEmpresa() {
-  return await Resolve.create(instancePrincipal.get('/api/empresa/config'));
+export async function configEmpresa(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/empresa/config', {
+      signal: signal
+    }),
+  );
 }
 
 export async function getIdEmpresa(params, signal) {

@@ -12,6 +12,8 @@ import Title from '../../../components/Title';
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText } from 'lucide-react';
 import { dashboardInit } from '../../../network/rest/principal.network';
 import { isEmpty, months, numberFormat, rounded } from '../../../helper/utils.helper';
+import ErrorResponse from '../../../model/class/error-response';
+import { CANCELED } from '../../../model/types/types';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -26,7 +28,7 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: false,
+      loading: true,
       msgLoading: "Cargando información...",
 
       codIso: this.props.moneda.codiso ?? '',
@@ -95,7 +97,18 @@ class Dashboard extends React.Component {
       params,
       this.abortControllerView.signal,
     );
+
+    if (responde instanceof ErrorResponse) {
+      if (responde.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: responde.getMessage(),
+      });
+      return;
+    }
+
     this.setState(responde.data);
+    this.setState({ loading: false });
   }
 
   /*

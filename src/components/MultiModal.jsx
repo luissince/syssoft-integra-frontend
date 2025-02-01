@@ -62,7 +62,7 @@ const ModalImpresion = ({
                         autoFocus={true}
                         className='btn-danger'
                         onClick={async () => {
-                            if (clear) await clear();
+                            if (clear) clear();
                             await refModal.current.handleOnClose();
                         }}>
                         <img src={images.escoba} width={22} /> Realizar otra Operación.

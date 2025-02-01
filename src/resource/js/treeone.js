@@ -27,9 +27,7 @@ class Tree {
           }
 
           if (li.querySelector('ul') === null) {
-            if (
-              li.querySelector('input').classList.contains('display-initial')
-            ) {
+            if (li.querySelector('input').classList.contains('display-initial')) {
               li.querySelector('input').classList.replace(
                 'display-initial',
                 'display-none',
@@ -44,13 +42,9 @@ class Tree {
         });
 
         if (elem.querySelector('input').classList.contains('display-initial')) {
-          elem
-            .querySelector('input')
-            .classList.replace('display-initial', 'display-none');
+          elem.querySelector('input').classList.replace('display-initial', 'display-none');
         } else {
-          elem
-            .querySelector('input')
-            .classList.replace('display-none', 'display-initial');
+          elem.querySelector('input').classList.replace('display-none', 'display-initial');
         }
       });
     });
@@ -65,20 +59,20 @@ class Tree {
       });
     });
 
-    const input = [].filter.call(three.querySelectorAll('li'), (elem) =>
-      elem.querySelector('input'),
-    );
+    // const input = [].filter.call(three.querySelectorAll('li'), (elem) =>
+    //   elem.querySelector('input'),
+    // );
 
-    input.forEach(function (elem) {
-      if (
-        elem.parentNode.parentNode.tagName === 'DIV' &&
-        elem.querySelector('ul') === null
-      ) {
-        elem.querySelector('input').classList.add('display-initial');
-      } else {
-        elem.querySelector('input').classList.add('display-none');
-      }
-    });
+    // input.forEach(function (elem) {
+    //   if (
+    //     elem.parentNode.parentNode.tagName === 'DIV' &&
+    //     elem.querySelector('ul') === null
+    //   ) {
+    //     elem.querySelector('input').classList.add('display-initial');
+    //   } else {
+    //     elem.querySelector('input').classList.add('display-none');
+    //   }
+    // });
   }
 
   /**
