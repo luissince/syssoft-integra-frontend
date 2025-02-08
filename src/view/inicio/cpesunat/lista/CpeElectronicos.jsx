@@ -652,6 +652,10 @@ class CpeElectronicos extends CustomComponent {
         });
       }
 
+      if (item.xmlSunat === '2987' || item.xmlSunat === '1032') {
+        return this.opcionButtonEnvio(images.error, 'Anulado');
+      }
+
       if (item.xmlSunat === '0') {
         return this.opcionButtonEnvio(images.accept, 'Aceptar');
       }

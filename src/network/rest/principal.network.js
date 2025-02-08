@@ -2203,7 +2203,7 @@ export async function loginApi(params, signal = null) {
   );
 }
 
-export async function validTokenApi() {
+export async function validToken() {
   return await Resolve.create(
     instancePrincipal.get('/api/usuario/valid/token'),
   );

@@ -762,7 +762,7 @@ class VentaCrearEscritorio extends CustomComponent {
     }, 0);
 
     return (
-      <div className='h-100 overflow-auto p-2' style={{ borderTop: '1px solid #cbd5e1' }}>
+      <div className='p-2' style={{ borderTop: '1px solid #cbd5e1' }}>
         <div className='w-100' style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
           <div className='d-flex justify-content-between'>
             <span className='text-sm'>Sub Total:</span>
@@ -2147,7 +2147,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
             {/* Lado derecho */}
             <div
-              className='d-flex flex-column position-relative ml-1'
+              className='d-flex flex-column position-relative ml-1 overflow-auto'
               style={{
                 flex: '0 0 40%',
                 width: '450px',
