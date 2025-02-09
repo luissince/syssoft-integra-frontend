@@ -372,58 +372,61 @@ const Producto = (props) => {
           />
         </Column>
 
-        {precios.length !== 0 && (
-          <TableResponsive>
-            <Table ref={refPrecios} className={"table-bordered"}>
-              <TableHeader>
-                <TableRow>
-                  <TableHead scope="col">#</TableHead>
-                  <TableHead scope="col">Nombre</TableHead>
-                  <TableHead scope="col">Precio</TableHead>
-                  <TableHead className="text-center" scope="col">Quitar</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {
-                  precios.map((item, index) => {
-                    return (
-                      <TableRow key={index}>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder="Ingrese el nombre del precio..."
-                            value={item.nombre}
-                            onChange={(event) =>
-                              handleInputNombrePrecios(event, item.id)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder="0.00"
-                            value={item.precio}
-                            onChange={(event) =>
-                              handleInputPrecioPrecios(event, item.id)
-                            }
-                            onKeyDown={keyNumberFloat}
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            className="btn-danger"
-                            onClick={() => handleRemovePrecios(item.id)}
-                          >
-                            <i className="fa fa-remove"></i>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                }
-              </TableBody>
-            </Table>
-          </TableResponsive>
-        )}
+        <Column className="col-12" formGroup={true}>
+          {precios.length !== 0 && (
+            <TableResponsive>
+              <Table ref={refPrecios} className={"table-bordered"}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead scope="col">#</TableHead>
+                    <TableHead scope="col">Nombre</TableHead>
+                    <TableHead scope="col">Precio</TableHead>
+                    <TableHead className="text-center" scope="col">Quitar</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {
+                    precios.map((item, index) => {
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>{item.id}</TableCell>
+                          <TableCell>
+                            <Input
+                              placeholder="Ingrese el nombre del precio..."
+                              value={item.nombre}
+                              onChange={(event) =>
+                                handleInputNombrePrecios(event, item.id)
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              placeholder="0.00"
+                              value={item.precio}
+                              onChange={(event) =>
+                                handleInputPrecioPrecios(event, item.id)
+                              }
+                              onKeyDown={keyNumberFloat}
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              className="btn-danger"
+                              onClick={() => handleRemovePrecios(item.id)}
+                            >
+                              <i className="fa fa-remove"></i>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  }
+                </TableBody>
+              </Table>
+            </TableResponsive>
+          )}
+        </Column>
+
         <Column className="col-12" formGroup={true}>
           <Button
             className="text-success"

@@ -205,7 +205,7 @@ class ModalCotizacion extends CustomComponent {
                             icono={<i className="fa fa-plus"></i>}
                             onClick={async () => {
                                 await this.props.refModal.current.handleOnClose()
-                                handleSeleccionar(item.idCotizacion)
+                                handleSeleccionar(item)
                             }}
                         />
                     </TableCell>

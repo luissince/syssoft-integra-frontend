@@ -2,7 +2,7 @@ import React from 'react';
 import Button from '../../../../../../../components/Button';
 import Input from '../../../../../../../components/Input';
 import { images } from '../../../../../../../helper';
-import { isEmpty, numberFormat } from '../../../../../../../helper/utils.helper';
+import { formatNumberWithZeros, isEmpty, numberFormat } from '../../../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../../../model/class/custom-component';
 import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
@@ -245,7 +245,8 @@ class InvoiceView extends CustomComponent {
       codiso,
       handleStarProduct,
       handleAddItem,
-      productos
+      productos,
+      cotizacion
     } = this.props;
 
     const {
@@ -256,7 +257,7 @@ class InvoiceView extends CustomComponent {
     } = this.state;
 
     return (
-      <div className="h-100 d-flex flex-column items">
+      <div className="h-100 d-flex flex-column items position-relative ">
         <ItemSearch
           refProducto={this.refProducto}
           refSearch={this.refSearch}
@@ -278,6 +279,21 @@ class InvoiceView extends CustomComponent {
           handleAddItem={handleAddItem}
           handleStarProduct={handleStarProduct}
         />
+
+        <div className='w-100 bottom-0 bg-white' style={{ borderTop: '1px solid #e1e7ee',flex: '1 1 3.5rem' }}>
+          <div className='px-3 py-3 d-flex align-items-center'>
+            {
+              cotizacion && <>
+                <span className='mr-1'>
+                  <img src={images.cotizacion} width={22} /> COTIZACIÓN:
+                </span>
+                <h6 className='p-0 m-0'>
+                  {cotizacion.serie}-{formatNumberWithZeros(cotizacion.numeracion)}
+                </h6>
+              </>
+            }
+          </div>
+        </div>
       </div>
     );
   }
@@ -411,7 +427,7 @@ class ListSearchItems extends React.Component {
     }
 
     return (
-      <div className="overflow-hidden">
+      <div className="overflow-hidden h-100">
         <div
           ref={this.refScroll}
           onScroll={this.handleScroll}
@@ -542,6 +558,7 @@ InvoiceView.propTypes = {
   idAlmacen: PropTypes.string.isRequired,
   codiso: PropTypes.string.isRequired,
   productos: PropTypes.array.isRequired,
+  cotizacion: PropTypes.object,
   handleUpdateProductos: PropTypes.func.isRequired,
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,

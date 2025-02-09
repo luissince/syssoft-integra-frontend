@@ -4,6 +4,7 @@ import {
   calculateTaxBruto,
   convertNullText,
   formatDecimal,
+  formatNumberWithZeros,
   getRowCellIndex,
   isEmpty,
   keyNumberPhone,
@@ -114,7 +115,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Atributos del modal cotización
       isOpenCotizacion: false,
-      idCotizacion: "",
+      cotizacion: null,
 
       // Atributos del modal venta
       isOpenVenta: false,
@@ -983,7 +984,7 @@ class VentaCrearEscritorio extends CustomComponent {
       idImpuesto,
       idMoneda,
       idComprobante,
-      idCotizacion,
+      cotizacion,
       observacion,
       nota,
       detalleVenta
@@ -1003,7 +1004,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idUsuario: idUsuario,
           estado: 1,
           nuevoCliente: nuevoCliente,
-          idCotizacion: idCotizacion,
+          idCotizacion: cotizacion.idCotizacion,
           detalleVenta: detalleVenta,
           notaTransacion,
           bancosAgregados: metodoPagosLista,
@@ -1307,19 +1308,32 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({ isOpenCotizacion: false })
   }
 
-  handleSeleccionarCotizacion = async (idCotizacion) => {
+  handleSeleccionarCotizacion = async (cotizacion) => {
     this.handleCloseCotizacion();
 
-    this.setState({ loading: true, msgLoading: "Obteniendos datos de la cotización.", detalleVenta: [] });
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos de la cotización.",
+      detalleVenta: [],
+      cotizacion: null,
+    });
 
     const params = {
-      idCotizacion: idCotizacion,
+      idCotizacion: cotizacion.idCotizacion,
       idAlmacen: this.state.idAlmacen
     };
 
     const response = await forSaleCotizacion(params, this.abortControllerCotizacion.signal);
 
     if (response instanceof SuccessReponse) {
+
+      if (isEmpty(response.data.productos)) {
+        this.alert.warning('Venta', 'La cotización no tiene productos, ya que fue utilizado para la venta.', () => {
+          this.reloadView();
+        });
+        return;
+      }
+
       this.handleSelectItemCliente(response.data.cliente);
       let index = 0;
       for (const producto of response.data.productos) {
@@ -1335,7 +1349,7 @@ class VentaCrearEscritorio extends CustomComponent {
         }
       }
 
-      this.setState({ idCotizacion, loading: false })
+      this.setState({ cotizacion, loading: false });
     }
 
     if (response instanceof ErrorResponse) {
@@ -1360,8 +1374,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleSeleccionarVenta = async (idVenta) => {
     this.handleCloseVenta();
-
-    this.setState({ loading: true, msgLoading: "Obteniendos datos de la venta.", detalleVenta: [] });
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos de la venta.",
+      detalleVenta: [],
+      cotizacion: null
+    });
 
     const params = {
       idVenta: idVenta,
@@ -2070,10 +2088,10 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         {/* Cuerpo princiapl */}
-        <div className='bg-white w-100 d-flex flex-column overflow-auto ' style={{ height: 'calc(100% - 3.5rem)' }}>
+        <div className='bg-white w-100 h-100 d-flex flex-column overflow-auto'>
           <div className='d-flex w-100 h-100 p-3'>
             {/* Lado izquierdo */}
-            <div className='w-100 d-flex flex-column position-relative mr-1' style={{
+            <div className='w-100 d-flex flex-column position-relative mr-1 overflow-auto' style={{
               flex: '1 1 100%',
               border: '1px solid #cbd5e1',
             }}>
@@ -2383,10 +2401,23 @@ class VentaCrearEscritorio extends CustomComponent {
         </div>
 
         {/* Crear mas instancias */}
-        {/* <div className='bg-white w-100 d-flex position-relative' style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}>
-          <div className='d-flex position-relative w-100 h-100' style={{ paddingRight: '4.4rem', }}>
+        <div className='bg-white w-100 d-flex position-relative' style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}>
+          <div className='px-3 d-flex justify-content-center align-items-center'>
+            {
+              this.state.cotizacion && 
+              <>
+                <span className='mr-1'>
+                  <img src={images.cotizacion} width={22} /> COTIZACIÓN:
+                </span>
+                <h6 className='p-0 m-0'>
+                  {this.state.cotizacion.serie}-{formatNumberWithZeros(this.state.cotizacion.numeracion)}
+                </h6>
+              </>
+            }
 
-            <div className='d-flex position-relative'>
+          </div>
+          {/* <div className='d-flex position-relative w-100 h-100' style={{ paddingRight: '4.4rem', }}> */}
+          {/* <div className='d-flex position-relative'>
               <div className='d-flex position-relative align-items-center justify-content-center bg-white'
                 style={{
                   borderTop: '2px solid #007bff',
@@ -2420,9 +2451,9 @@ class VentaCrearEscritorio extends CustomComponent {
                   </path>
                 </svg>
               </Button>
-            </div>
-          </div>
-        </div> */}
+            </div> */}
+          {/* </div> */}
+        </div>
       </PosContainerWrapper>
     );
   }

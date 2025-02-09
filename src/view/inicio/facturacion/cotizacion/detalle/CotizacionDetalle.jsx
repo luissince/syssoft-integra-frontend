@@ -55,6 +55,7 @@ class CotizacionDetalle extends CustomComponent {
 
       detalles: [],
       ventas: [],
+      vendidos: [],
 
       isOpenSendWhatsapp: false,
     };
@@ -173,6 +174,7 @@ class CotizacionDetalle extends CustomComponent {
 
       detalles: cotizacion.detalles,
       ventas: cotizacion.ventas,
+      vendidos: cotizacion.vendidos,
       loading: false,
     });
   }
@@ -554,38 +556,76 @@ class CotizacionDetalle extends CustomComponent {
                 </TableHeader>
                 <TableBody>
                   {
-                    this.state.detalles.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell className="text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.producto}
-                            width={100}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {item.codigo}
-                          <br />
-                          {item.producto}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {numberFormat(item.precio, this.state.codiso)}
-                        </TableCell>
+                    this.state.detalles.map((item, index) => {
 
-                        <TableCell>{item.categoria}</TableCell>
-                        <TableCell className="text-right">{item.impuesto}</TableCell>
-                        <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-                        <TableCell>{item.medida}</TableCell>
-                        <TableCell className="text-right">
-                          {numberFormat(
-                            item.cantidad * item.precio,
-                            this.state.codiso,
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                      const vendido = this.state.vendidos.find((vendido) => vendido.idProducto === item.idProducto);
+
+                      return (
+                        <React.Fragment key={index}>
+                          <TableRow key={index}>
+                            <TableCell>{item.id}</TableCell>
+                            <TableCell className="text-center">
+                              <Image
+                                default={images.noImage}
+                                src={item.imagen}
+                                alt={item.producto}
+                                width={100}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {item.codigo}
+                              <br />
+                              {item.producto}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {numberFormat(item.precio, this.state.codiso)}
+                            </TableCell>
+
+                            <TableCell>{item.categoria}</TableCell>
+                            <TableCell className="text-right">{item.impuesto}</TableCell>
+                            <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
+                            <TableCell>{item.medida}</TableCell>
+                            <TableCell className="text-right">
+                              {numberFormat(
+                                item.cantidad * item.precio,
+                                this.state.codiso,
+                              )}
+                            </TableCell>
+                          </TableRow>
+
+                          <TableRow>
+                            <TableHead></TableHead>
+                            <TableHead></TableHead>
+                            <TableHead></TableHead>
+                            <TableHead></TableHead>
+                            <TableHead></TableHead>
+                            <TableHead className="text-right">Registrados</TableHead>
+                            <TableHead className="text-right">Faltantes</TableHead>
+                            <TableHead></TableHead>
+                            <TableHead></TableHead>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="text-right">
+                              {
+                                vendido ? rounded(vendido.cantidad) : rounded(0)
+                              }
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {
+                                vendido ? rounded(item.cantidad - vendido.cantidad) : rounded(item.cantidad)
+                              }
+                            </TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </TableRow>
+                        </React.Fragment>
+                      );
+                    })
                   }
                 </TableBody>
               </Table>

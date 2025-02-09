@@ -256,9 +256,6 @@ class ProductoEditar extends CustomComponent {
       this.fetchProducto(idProducto),
     ]);
 
-    console.log(producto.sku)
-    console.log(producto.codigoBarras)
-
     if (producto.idTipoProducto === 'TP0001') {
       this.handleFocusTab('addproducto-tab', 'addproducto');
       await this.setStateAsync({

@@ -99,7 +99,7 @@ class VentaCrear extends CustomComponent {
 
       // Atributos del modal cotización
       isOpenCotizacion: false,
-      idCotizacion: "",
+      cotizacion: null,
 
       // Atributos del modal venta
       isOpenVenta: false,
@@ -995,17 +995,30 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenCotizacion: false })
   }
 
-  handleSeleccionarCotizacion = async (idCotizacion) => {
-    this.setState({ loading: true, msgLoading: "Obteniendos datos de la cotización.", detalleVenta: [] });
+  handleSeleccionarCotizacion = async (cotizacion) => {
+    this.handleCloseCotizacion();
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos de la cotización.",
+      detalleVenta: [],
+      cotizacion: null,
+    });
 
     const params = {
-      idCotizacion: idCotizacion,
+      idCotizacion: cotizacion.idCotizacion,
       idAlmacen: this.state.idAlmacen
     };
 
     const response = await forSaleCotizacion(params, this.abortControllerCotizacion.signal);
 
     if (response instanceof SuccessReponse) {
+      if (isEmpty(response.data.productos)) {
+        this.alert.warning('Venta', 'La cotización no tiene productos, ya que fue utilizado para la venta.', () => {
+          this.reloadView();
+        });
+        return;
+      }
+
       this.handleSelectItemCliente(response.data.cliente);
 
       for (const producto of response.data.productos) {
@@ -1020,7 +1033,7 @@ class VentaCrear extends CustomComponent {
         }
       }
 
-      this.setState({ idCotizacion, loading: false })
+      this.setState({ cotizacion, loading: false });
     }
 
     if (response instanceof ErrorResponse) {
@@ -1043,8 +1056,14 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenVenta: false })
   }
 
-  handleSeleccionarVenta = async (idVenta) => {
-    this.setState({ loading: true, msgLoading: "Obteniendos datos de la venta.", detalleVenta: [] });
+  handleSeleccionarVenta = async (idVenta) => {   
+    this.handleCloseVenta();
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos de la venta.",
+      detalleVenta: [],
+      cotizacion: null
+    });
 
     const params = {
       idVenta: idVenta,
@@ -1526,7 +1545,7 @@ class VentaCrear extends CustomComponent {
       idImpuesto,
       idMoneda,
       idComprobante,
-      idCotizacion,
+      cotizacion,
       observacion,
       nota,
       detalleVenta
@@ -1546,7 +1565,7 @@ class VentaCrear extends CustomComponent {
           idUsuario: idUsuario,
           estado: 1,
           nuevoCliente: nuevoCliente,
-          idCotizacion: idCotizacion,
+          idCotizacion: cotizacion.idCotizacion,
           detalleVenta: detalleVenta,
           notaTransacion,
           bancosAgregados: metodoPagosLista,
@@ -1717,6 +1736,7 @@ class VentaCrear extends CustomComponent {
             idAlmacen={this.state.idAlmacen}
             codiso={this.state.codiso}
             productos={this.state.productos}
+            cotizacion={this.state.cotizacion}
             handleUpdateProductos={this.handleUpdateProductos}
             handleAddItem={this.handleAddItem}
             handleStarProduct={this.handleStarProduct}
