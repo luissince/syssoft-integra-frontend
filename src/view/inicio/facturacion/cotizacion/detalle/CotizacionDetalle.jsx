@@ -653,6 +653,7 @@ class CotizacionDetalle extends CustomComponent {
                     <TableHead>Fecha</TableHead>
                     <TableHead>Comprobante</TableHead>
                     <TableHead>Estado</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -679,9 +680,27 @@ class CotizacionDetalle extends CustomComponent {
                           {item.estado !== 1 && item.estado !== 2 && item.estado !== 3 && <span className="text-primary">POR LLEVAR</span>}
                         </React.Fragment>
                       </TableCell>
+                      <TableCell className="text-center"> {numberFormat(item.total, item.codiso)} </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
+                {
+                  this.state.ventas.length > 0 && (
+                    <tfoot>
+                      <tr>
+                        <th className="text-left"></th>
+                        <th className="text-left"></th>
+                        <th className="text-left"></th>
+                        <th className="text-left">Suma Total:</th>
+                        <th id="total" className="text-center">
+                          {
+                            numberFormat(this.state.ventas.reduce((acumulador, item) => (acumulador += item.total), 0), this.state.codiso)
+                          }
+                        </th>
+                      </tr>
+                    </tfoot>
+                  )
+                }
               </Table>
             </TableResponsive>
           </Column>
