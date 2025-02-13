@@ -1066,6 +1066,7 @@ class VentaCrearEscritorio extends CustomComponent {
       idImpuesto,
       idMoneda,
       idComprobante,
+      cotizacion,
       observacion,
       nota,
       detalleVenta
@@ -1085,6 +1086,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idUsuario: idUsuario,
           estado: 2,
           nuevoCliente: nuevoCliente,
+          idCotizacion: cotizacion && cotizacion.idCotizacion || null,
           detalleVenta: detalleVenta,
           numeroCuotas: numeroCuotas,
           frecuenciaPago: frecuenciaPago,

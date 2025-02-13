@@ -1627,6 +1627,7 @@ class VentaCrear extends CustomComponent {
       idImpuesto,
       idMoneda,
       idComprobante,
+      cotizacion,
       observacion,
       nota,
       detalleVenta
@@ -1647,6 +1648,7 @@ class VentaCrear extends CustomComponent {
           idUsuario: idUsuario,
           estado: 2,
           nuevoCliente: nuevoCliente,
+          idCotizacion: cotizacion && cotizacion.idCotizacion || null,
           detalleVenta: detalleVenta,
           numeroCuotas: numeroCuotas,
           frecuenciaPago: frecuenciaPago,
