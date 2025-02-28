@@ -659,7 +659,7 @@ class CotizacionDetalle extends CustomComponent {
                 <TableBody>
                   {isEmpty(this.state.ventas) && (
                     <TableRow>
-                      <td className="text-center" colSpan="4">¡No hay ventas asociadas!</td>
+                      <td className="text-center" colSpan="5">¡No hay ventas asociadas!</td>
                     </TableRow>
                   )}
 

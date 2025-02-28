@@ -305,13 +305,13 @@ const predeterminadoSlice = createSlice({
     },
 
     setListaCatalogoData: (state, action) => {
-      state.pedidoLista.data = action.payload;
+      state.catalogoLista.data = action.payload;
     },
     setListaCatalogoPaginacion: (state, action) => {
-      state.pedidoLista.paginacion = action.payload;
+      state.catalogoLista.paginacion = action.payload;
     },
     clearListaCatalogo: (state) => {
-      state.pedidoLista = {
+      state.catalogoLista = {
         data: null,
         paginacion: null
       };

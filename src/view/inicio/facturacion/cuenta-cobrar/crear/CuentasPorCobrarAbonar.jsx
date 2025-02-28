@@ -686,7 +686,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           isOpen={this.state.isOpenProceso}
           onClose={this.handleCloseModalProceso}
 
-          codISO={this.state.codiso}
+          codiso={this.state.codiso}
           cuota={this.state.cuota}
           cuotas={this.state.cuotas}
 

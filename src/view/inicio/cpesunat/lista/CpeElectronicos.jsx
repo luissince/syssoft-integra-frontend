@@ -107,6 +107,9 @@ class CpeElectronicos extends CustomComponent {
     };
 
     this.refPaginacion = React.createRef();
+
+    this.refSearch = React.createRef();
+
     this.abortControllerTable = new AbortController();
   }
 
@@ -161,6 +164,8 @@ class CpeElectronicos extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.cpeSunatLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.cpeSunatLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.cpeSunatLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.cpeSunatLista.data.buscar);
     } else {
       const [
         facturado,
@@ -548,7 +553,7 @@ class CpeElectronicos extends CustomComponent {
       duration: 5000,
       style: ToastStyle.light,
     });
-    
+
     const response = await enviarEmail(idComprobante, tipo);
 
     if (response instanceof SuccessReponse) {
@@ -868,6 +873,7 @@ class CpeElectronicos extends CustomComponent {
               group={true}
               label={"Buscar:"}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Ingrese los datos requeridos...."
             />

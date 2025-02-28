@@ -75,6 +75,8 @@ class Traslado extends CustomComponent {
 
     this.refPaginacion = React.createRef();
 
+    this.refSearch = React.createRef();
+
     this.abortControllerTable = new AbortController();
   }
 
@@ -95,6 +97,8 @@ class Traslado extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.trasladoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.trasladoLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.trasladoLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.trasladoLista.data.buscar);
     } else {
       const [tipoTraslado, sucursales] = await Promise.all([
         this.fetchComboTipoTraslado(),
@@ -423,7 +427,7 @@ class Traslado extends CustomComponent {
               className="btn-outline-secondary"
               onClick={this.loadingInit}
             >
-              <i className="bi bi-arrow-clockwise"></i>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
@@ -482,6 +486,7 @@ class Traslado extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />
@@ -489,7 +494,7 @@ class Traslado extends CustomComponent {
         </Row>
 
         <Row>
-          <Column>          
+          <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
                 <TableHeader>

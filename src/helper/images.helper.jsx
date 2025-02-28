@@ -27,6 +27,7 @@ import remove from '../resource/images/remove.svg';
 import plus from '../resource/images/plus.svg';
 import minus from '../resource/images/minus.svg';
 import invoice from '../resource/images/invoice.svg';
+import invoice_gray from '../resource/images/invoice-gray.png';
 import document from '../resource/images/document.svg';
 
 import producto from '../resource/images/producto.png';
@@ -82,6 +83,7 @@ export {
   plus,
   minus,
   invoice,
+  invoice_gray,
   document,
   producto,
   prices,

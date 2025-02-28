@@ -57,6 +57,8 @@ class Cotizaciones extends CustomComponent {
 
     this.refPaginacion = React.createRef();
 
+    this.refSearch = React.createRef();
+
     this.abortControllerTable = new AbortController();
   }
 
@@ -77,6 +79,8 @@ class Cotizaciones extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.cotizacionLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.cotizacionLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.cotizacionLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.cotizacionLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -396,6 +400,7 @@ class Cotizaciones extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />

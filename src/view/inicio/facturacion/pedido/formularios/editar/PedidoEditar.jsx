@@ -79,7 +79,7 @@ class PedidoEditar extends CustomComponent {
       clientes: [],
 
       // Atributos libres
-      codISO: '',
+      codiso: '',
       total: 0,
 
       // Atributos del modal producto
@@ -206,7 +206,7 @@ class PedidoEditar extends CustomComponent {
       idImpuesto: isEmpty(cabecera.idImpuesto) ? '' : cabecera.idImpuesto,
       idComprobante: isEmpty(cabecera.idComprobante) ? '' : cabecera.idComprobante,
       idMoneda: isEmpty(cabecera.idMoneda) ? '' : cabecera.idMoneda,
-      codISO: isEmpty(moneda) ? '' : moneda.codiso,
+      codiso: isEmpty(moneda) ? '' : moneda.codiso,
       observacion: cabecera.observacion,
       nota: cabecera.nota,
       detalles: detalles,
@@ -416,8 +416,9 @@ class PedidoEditar extends CustomComponent {
     const productos = await this.fetchFiltrarProductos(params);
 
     this.setState({
+      productos,
       loadingProducto: false,
-      productos: productos,
+
     });
   };
 
@@ -541,7 +542,7 @@ class PedidoEditar extends CustomComponent {
 
     this.setState({
       idMoneda: moneda.idMoneda,
-      codISO: moneda.codiso,
+      codiso: moneda.codiso,
       detalles,
     }, async () => {
       const invoice = document.getElementById(this.idSidebarConfiguration);
@@ -715,7 +716,7 @@ class PedidoEditar extends CustomComponent {
             key={index}
             className='d-flex justify-content-between align-items-center text-secondary'>
             <p className='m-0 text-secondary'>{impuesto.nombre}:</p>
-            <p className='m-0 text-secondary'>{numberFormat(impuesto.valor, this.state.codISO)}</p>
+            <p className='m-0 text-secondary'>{numberFormat(impuesto.valor, this.state.codiso)}</p>
           </div>
         );
       });
@@ -725,7 +726,7 @@ class PedidoEditar extends CustomComponent {
       <>
         <div className='d-flex justify-content-between align-items-center text-secondary'>
           <p className='m-0 text-secondary'>Sub Total:</p>
-          <p className='m-0 text-secondary'>{numberFormat(subTotal, this.state.codISO)}</p>
+          <p className='m-0 text-secondary'>{numberFormat(subTotal, this.state.codiso)}</p>
         </div>
         {impuestosGenerado()}
         <Button
@@ -733,7 +734,7 @@ class PedidoEditar extends CustomComponent {
           onClick={this.handleGuardar}>
           <div className='d-flex justify-content-between align-items-center py-1'>
             <p className='m-0 text-xl'>Total:</p>
-            <p className='m-0 text-xl'>{numberFormat(total, this.state.codISO)}</p>
+            <p className='m-0 text-xl'>{numberFormat(total, this.state.codiso)}</p>
           </div>
         </Button>
       </>
@@ -906,7 +907,7 @@ class PedidoEditar extends CustomComponent {
                           <div className='d-flex justify-content-center align-items-center flex-column'>
                             <p className='m-0 text-lg'>{item.nombre}</p>
                             <p className='m-0 text-xl font-weight-bold'>
-                              {numberFormat(item.precio, this.state.codISO)} <small>x {item.unidad}</small>
+                              {numberFormat(item.precio, this.state.codiso)} <small>x {item.unidad}</small>
                             </p>
                           </div>
                         </div>
@@ -1024,7 +1025,7 @@ class PedidoEditar extends CustomComponent {
                           <p className='m-0 text-base font-weight-bold text-break'>
                             {item.nombre}
                           </p>
-                          <p className='m-0'>{numberFormat(item.precio, this.state.codISO)} <small>x {item.nombreMedida}</small></p>
+                          <p className='m-0'>{numberFormat(item.precio, this.state.codiso)} <small>x {item.nombreMedida}</small></p>
                         </div>
                       </div>
 
@@ -1035,7 +1036,7 @@ class PedidoEditar extends CustomComponent {
 
                       {/* Tercera columna (precio total) y opciones */}
                       <div className='d-flex flex-column justify-content-end align-items-center'>
-                        <div className='h-100 text-lg'>{numberFormat(item.cantidad * item.precio, this.state.codISO)}</div>
+                        <div className='h-100 text-lg'>{numberFormat(item.cantidad * item.precio, this.state.codiso)}</div>
 
                         <div className='d-flex align-items-end justify-content-end gap-4'>
                           <button className='btn btn-link'

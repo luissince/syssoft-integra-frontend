@@ -56,7 +56,7 @@ class GuiaRemision extends CustomComponent {
 
     this.refPaginacion = React.createRef();
 
-    this.refTxtSearch = React.createRef();
+    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -106,6 +106,8 @@ class GuiaRemision extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.guiaRemisionLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.guiaRemisionLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.guiaRemisionLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.guiaRemisionLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -454,6 +456,7 @@ class GuiaRemision extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
             />

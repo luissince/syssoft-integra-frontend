@@ -26,6 +26,7 @@ import {
   createVenta,
   obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
+  forSalePedido,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -54,6 +55,8 @@ import SidebarConfiguration from '../../../../../../components/SidebarConfigurat
 import ModalTransaccion from '../../../../../../components/ModalTransaccion';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import SidebarProducto from './component/SidebarProducto';
+import ModalPedido from '../common/ModalPedido';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -100,6 +103,10 @@ class VentaCrear extends CustomComponent {
       // Atributos del modal cotización
       isOpenCotizacion: false,
       cotizacion: null,
+
+      // Atributos del modal pedido
+      isOpenPedido: false,
+      pedido: null,
 
       // Atributos del modal venta
       isOpenVenta: false,
@@ -150,6 +157,9 @@ class VentaCrear extends CustomComponent {
     this.refModalCotizacion = React.createRef();
 
     // Referencia al modal de cotización
+    this.refModalPedido = React.createRef();
+
+    // Referencia al modal de cotización
     this.refModalVenta = React.createRef();
 
     // Referencia al tipo de comprobante
@@ -187,9 +197,8 @@ class VentaCrear extends CustomComponent {
     this.refDireccion = React.createRef();
 
     this.abortControllerView = new AbortController();
-
     this.abortControllerCotizacion = new AbortController();
-
+    this.abortControllerPedido = new AbortController();
     this.abortControllerVenta = new AbortController();
   }
 
@@ -224,6 +233,7 @@ class VentaCrear extends CustomComponent {
 
     this.abortControllerView.abort();
     this.abortControllerCotizacion.abort();
+    this.abortControllerPedido.abort();
     this.abortControllerVenta.abort();
   }
 
@@ -657,11 +667,11 @@ class VentaCrear extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenPedido && !this.state.isOpenVenta) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenPedido && !this.state.isOpenVenta) {
       this.handleClearSale();
     }
   }
@@ -1002,6 +1012,7 @@ class VentaCrear extends CustomComponent {
       msgLoading: "Obteniendos datos de la cotización.",
       detalleVenta: [],
       cotizacion: null,
+      pedido: null,
     });
 
     const params = {
@@ -1045,6 +1056,68 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
+  // Opciones de pedido
+  //------------------------------------------------------------------------------------------
+
+  handleOpenPedido = () => {
+    this.setState({ isOpenPedido: true })
+  }
+
+  handleClosePedido = () => {
+    this.setState({ isOpenPedido: false })
+  }
+
+  handleSeleccionarPedido = async (pedido) => {
+    this.handleCloseCotizacion();
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos del pedido.",
+      detalleVenta: [],
+      cotizacion: null,
+      pedido: null,
+    });
+
+    const params = {
+      idPedido: pedido.idPedido,
+      idAlmacen: this.state.idAlmacen
+    };
+
+    const response = await forSalePedido(params, this.abortControllerPedido.signal);
+
+    if (response instanceof SuccessReponse) {
+      if (isEmpty(response.data.productos)) {
+        this.alert.warning('Venta', 'El pedido no tiene productos, ya que fue utilizado para la venta.', () => {
+          this.reloadView();
+        });
+        return;
+      }
+
+      this.handleSelectItemCliente(response.data.cliente);
+
+      for (const producto of response.data.productos) {
+        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
+        }
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+      }
+
+      this.setState({ pedido, loading: false });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ loading: false });
+      this.alert.warning("Venta", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
   // Opciones de venta
   //------------------------------------------------------------------------------------------
 
@@ -1056,7 +1129,7 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenVenta: false })
   }
 
-  handleSeleccionarVenta = async (idVenta) => {   
+  handleSeleccionarVenta = async (idVenta) => {
     this.handleCloseVenta();
     this.setState({
       loading: true,
@@ -1500,20 +1573,56 @@ class VentaCrear extends CustomComponent {
 
   handleOpenSale = async () => {
     if (isEmpty(this.state.detalleVenta)) {
-      this.alert.warning('Venta', 'La lista de productos esta vacía.', () => {
-
+      alertKit.show({
+        headerTitle: 'SysSoft Integra',
+        title: 'Venta',
+        message: 'La lista de productos esta vacía.',
+        type: 'warning',
+        buttons: [
+          {
+            html: "<i class='fa fa-check'></i> Aceptar",
+            primary: true,
+            class: ['btn', 'btn-primary'],
+          },
+        ]
       });
       return;
     }
 
     if (isEmpty(this.state.idComprobante)) {
-      this.alert.warning('Venta', 'Seleccione un comprobante.');
+      alertKit.show({
+        headerTitle: 'SysSoft Integra',
+        title: 'Venta',
+        message: 'Seleccione un comprobante.',
+        type: 'warning',
+        buttons: [
+          {
+            html: "<i class='fa fa-check'></i> Aceptar",
+            primary: true,
+            class: ['btn', 'btn-primary'],
+          },
+        ]
+      });
+
       return;
     }
 
     if (isEmpty(this.state.idCliente) && this.state.nuevoCliente === null) {
-      this.alert.warning('Venta', 'Selecciona un cliente.', () => {
-        this.refValueCliente.current.focus();
+      alertKit.show({
+        headerTitle: 'SysSoft Integra',
+        title: 'Venta',
+        message: 'Selecciona un cliente.',
+        type: 'warning',
+        buttons: [
+          {
+            html: "<i class='fa fa-check'></i> Aceptar",
+            primary: true,
+            class: ['btn', 'btn-primary'],
+          },
+        ],
+        onClose: () => {
+          this.refValueCliente.current.focus();
+        },
       });
       return;
     }
@@ -1750,6 +1859,7 @@ class VentaCrear extends CustomComponent {
             handleOpenPreImpresion={this.handleOpenPreImpresion}
             handleOpenVenta={this.handleOpenVenta}
             handleOpenCotizacion={this.handleOpenCotizacion}
+            handleOpenPedido={this.handleOpenPedido}
             handleOpenOptions={this.handleOpenOptions}
           />
 
@@ -1835,6 +1945,14 @@ class VentaCrear extends CustomComponent {
           idSucursal={this.state.idSucursal}
           handleClose={this.handleCloseCotizacion}
           handleSeleccionar={this.handleSeleccionarCotizacion}
+        />
+
+        <ModalPedido
+          refModal={this.refModalPedido}
+          isOpen={this.state.isOpenPedido}
+          idSucursal={this.state.idSucursal}
+          handleClose={this.handleClosePedido}
+          handleSeleccionar={this.handleSeleccionarPedido}
         />
 
         <SidebarConfiguration

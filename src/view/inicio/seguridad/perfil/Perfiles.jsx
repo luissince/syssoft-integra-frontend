@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
 import {
   formatTime,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -25,6 +21,7 @@ import Column from '../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
+import { alertKit, AlertType } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -67,6 +64,7 @@ class Perfiles extends CustomComponent {
   }
 
   componentWillUnmount() {
+    alertKit.close();
     this.abortControllerTable.abort();
   }
 
@@ -160,31 +158,82 @@ class Perfiles extends CustomComponent {
   };
 
   handleBorrar(idPerfil) {
-    alertDialog(
-      'Perfil',
-      '¿Estás seguro de eliminar el perfil?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idPerfil: idPerfil,
-          };
+    alertKit.show({
+      type: AlertType.question,
+      headerTitle: "SysSoft Integra",
+      title: "Perfil",
+      message: '¿Estás seguro de eliminar el perfil?',
+      backdropBlur: false,
+      isMoveable: true,
+      showCloseButton: false,
+      closeOnEsc: false,
+      closeOnClickOutside: false,
+      buttons: [
+        {
+          html: "<i class='fa fa-check'></i> Aceptar",
+          primary: true,
+          class: ['btn', 'btn-primary'],
+          onClick: async () => {
+            const params = {
+              idPerfil: idPerfil,
+            };
 
-          alertInfo('Perfil', 'Procesando información...');
-
-          const response = await removePerfil(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Perfil', response.data, () => {
-              this.loadInit();
+            alertKit.show({
+              type: AlertType.loading,
+              message: 'Procesando información...',
+              backdropBlur: false,
+              showCloseButton: false,
+              closeOnEsc: false,
+              closeOnClickOutside: false,
+              autoClose: false,
+              buttons: [],
             });
-          }
 
-          if (response instanceof ErrorResponse) {
-            alertWarning('Perfil', response.getMessage());
-          }
-        }
-      },
-    );
+            const response = await removePerfil(params);
+
+            if (response instanceof SuccessReponse) {
+              alertKit.show({
+                type: AlertType.success,
+                headerTitle: "SysSoft Integra",
+                title: "Perfil",
+                backdropBlur: false,
+                message: response.data,
+                buttons: [
+                  {
+                    html: "<i class='fa fa-check'></i> Aceptar",
+                    primary: true,
+                    class: ['btn', 'btn-outline-primary'],
+                    onClick: () => this.loadInit(),
+                  },
+                ],
+              });
+            }
+
+            if (response instanceof ErrorResponse) {
+
+              alertKit.show({
+                type: AlertType.warning,
+                headerTitle: "SysSoft Integra",
+                title: "Perfil",
+                backdropBlur: false,
+                message: response.getMessage(),
+                buttons: [
+                  {
+                    html: "<i class='fa fa-check'></i> Aceptar",
+                    primary: true,
+                    class: ['btn', 'btn-outline-primary'],
+                  },
+                ],
+              });
+            }
+          },
+        },
+        {
+          html: "<i class='fa fa-close'></i> Eliminar",
+          class: ['btn', 'btn-outline-danger']
+        },
+      ],
+    });
   }
 
   generarBody() {

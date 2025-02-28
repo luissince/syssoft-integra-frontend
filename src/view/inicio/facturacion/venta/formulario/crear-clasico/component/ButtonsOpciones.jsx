@@ -9,6 +9,7 @@ const ButtonsOpciones = ({
     handleOpenDatos,
     handleOpenImpresion,
     handleClearSale,
+    handleOpenPedido,
     handleOpenVenta,
     handleOpenCotizacion,
     handleOpenOptions
@@ -95,6 +96,16 @@ const ButtonsOpciones = ({
 
             <Button
                 className='btn-light'
+                onClick={handleOpenPedido}
+            >
+                <img className='mb-2' src={images.invoice} width={22} />
+                <p className='p-0 m-0'>
+                    Pedido(F9)
+                </p>
+            </Button>
+
+            <Button
+                className='btn-light'
                 onClick={handleClearSale}
             >
                 <img className='mb-2' src={images.escoba} width={22} />
@@ -142,6 +153,7 @@ ButtonsOpciones.propTypes = {
     handleOpenDatos: PropTypes.func,
     handleOpenImpresion: PropTypes.func,
     handleClearSale: PropTypes.func,
+    handleOpenPedido: PropTypes.func,
     handleOpenVenta: PropTypes.func,
     handleOpenCotizacion: PropTypes.func,
     handleOpenOptions: PropTypes.func,

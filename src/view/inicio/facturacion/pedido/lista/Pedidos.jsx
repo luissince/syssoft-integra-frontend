@@ -56,6 +56,8 @@ class Pedidos extends CustomComponent {
 
     this.refPaginacion = React.createRef();
 
+    this.refSearch = React.createRef();
+
     this.abortControllerTable = new AbortController();
   }
 
@@ -76,6 +78,8 @@ class Pedidos extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.pedidoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.pedidoLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.pedidoLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.pedidoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -373,6 +377,7 @@ class Pedidos extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />

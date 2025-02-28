@@ -69,7 +69,7 @@ class Kardex extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      codISO: convertNullText(this.props.moneda.codiso),
+      codiso: convertNullText(this.props.moneda.codiso),
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -351,16 +351,16 @@ class Kardex extends CustomComponent {
             </Link>
           </TableCell>
           <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
-          <TableCell>{item.tipo === 'INGRESO' ? numberFormat(item.costo, this.state.codISO) : ''}</TableCell>
+          <TableCell>{item.tipo === 'INGRESO' ? numberFormat(item.costo, this.state.codiso) : ''}</TableCell>
           <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
 
           <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
-          <TableCell>{item.tipo === 'SALIDA' ? numberFormat(item.costo, this.state.codISO) : ''}</TableCell>
+          <TableCell>{item.tipo === 'SALIDA' ? numberFormat(item.costo, this.state.codiso) : ''}</TableCell>
           <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
 
-          <TableCell>{numberFormat(cantidad, this.state.codISO)}</TableCell>
-          <TableCell>{numberFormat(costo / cantidad, this.state.codISO)}</TableCell>
-          <TableCell>{numberFormat(costo, this.state.codISO)}</TableCell>
+          <TableCell>{numberFormat(cantidad, this.state.codiso)}</TableCell>
+          <TableCell>{numberFormat(costo / cantidad, this.state.codiso)}</TableCell>
+          <TableCell>{numberFormat(costo, this.state.codiso)}</TableCell>
 
           <TableCell>{item.almacen}</TableCell>
           <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> 
@@ -368,10 +368,10 @@ class Kardex extends CustomComponent {
           <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
           <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
           <TableCell className="font-weight-bold">{rounded(cantidad)}</TableCell>
-          <TableCell>{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell>{numberFormat(item.costo, this.state.codiso)}</TableCell>
           <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
           <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
-          <TableCell>{numberFormat(costo, this.state.codISO)}</TableCell>
+          <TableCell>{numberFormat(costo, this.state.codiso)}</TableCell>
           
           <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> */}
         </TableRow>
@@ -472,11 +472,11 @@ class Kardex extends CustomComponent {
             </p>
             <p>
               <strong>Costo Promedio Ponderado:</strong>{' '}
-              {numberFormat(costo, this.state.codISO)}
+              {numberFormat(costo, this.state.codiso)}
             </p>
             <p>
               <strong>Valor Total Inventario:</strong>{' '}
-              {numberFormat(valor, this.state.codISO)}
+              {numberFormat(valor, this.state.codiso)}
             </p>
           </Column>
 

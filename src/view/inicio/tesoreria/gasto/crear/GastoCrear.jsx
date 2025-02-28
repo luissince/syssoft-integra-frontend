@@ -78,7 +78,7 @@ class GastoCrear extends CustomComponent {
       proveedores: [],
 
       // Atributos libres
-      codISO: '',
+      codiso: '',
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
@@ -161,7 +161,7 @@ class GastoCrear extends CustomComponent {
       monedas,
       idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
       idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-      codISO: isEmpty(moneda) ? '' : moneda.codiso,
+      codiso: isEmpty(moneda) ? '' : moneda.codiso,
       loading: false,
     });
   };
@@ -516,7 +516,7 @@ class GastoCrear extends CustomComponent {
 
           idSucursal={this.state.idSucursal}
           disabledCreditoFijo={true}
-          codiso={this.state.codISO}
+          codiso={this.state.codiso}
           importeTotal={isNumeric(this.state.monto) ? Number(this.state.monto) : 0}
 
           onClose={this.handleCloseModalTerminal}

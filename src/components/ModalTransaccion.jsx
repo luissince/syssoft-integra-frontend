@@ -23,6 +23,7 @@ import Button from './Button';
 import Input from './Input';
 import Select from './Select';
 import TextArea from './TextArea';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -222,9 +223,26 @@ class ModalTransaccion extends CustomComponent {
     }
 
     if (metodoPagosLista.some((item) => !isNumeric(item.monto))) {
-      alertWarning(this.state.tipo, 'Hay montos del metodo de cobro que no tiene valor.', () => {
-        validateNumericInputs(this.refMetodoPagoContenedor);
+      alertKit.show({
+        headerTitle: 'SysSoft Integra',
+        title: this.state.tipo,
+        message: 'Hay montos del metodo de cobro que no tiene valor.',
+        type: 'warning',
+        buttons: [
+          {
+            html: "<i class='fa fa-check'></i> Aceptar",
+            primary: true,
+            class: ['btn', 'btn-primary'],
+          },
+        ],
+        onClose: () => {
+          validateNumericInputs(this.refMetodoPagoContenedor);
+        },
       });
+
+      // alertWarning(this.state.tipo, 'Hay montos del metodo de cobro que no tiene valor.', () => {
+      //   validateNumericInputs(this.refMetodoPagoContenedor);
+      // });
       return;
     }
 

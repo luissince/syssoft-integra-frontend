@@ -5,7 +5,13 @@ import PropTypes from 'prop-types';
 const InvoiceTicket = (props) => {
 
   const { nombreComporbante } = props;
-  const { handleOpenPreImpresion, handleOpenVenta, handleOpenCotizacion, handleOpenOptions } = props;
+  const {
+    handleOpenPreImpresion,
+    handleOpenVenta,
+    handleOpenCotizacion,
+    handleOpenPedido,
+    handleOpenOptions
+  } = props;
 
   return (
     <div className="invoice-ticket d-flex pl-3 align-items-center justify-content-between">
@@ -28,6 +34,15 @@ const InvoiceTicket = (props) => {
             onClick={handleOpenVenta}
           >
             <img src={images.basket} alt="Venta" />
+          </Button>
+        </span>
+
+        <span>
+          <Button
+            className="btn-link rounded-circle h-100"
+            onClick={handleOpenPedido}
+          >
+            <img src={images.invoice_gray} alt="Pedido" width={22} />
           </Button>
         </span>
 
@@ -58,6 +73,7 @@ InvoiceTicket.propTypes = {
   handleOpenPreImpresion: PropTypes.func,
   handleOpenVenta: PropTypes.func,
   handleOpenCotizacion: PropTypes.func,
+  handleOpenPedido: PropTypes.func,
   handleOpenOptions: PropTypes.func.isRequired,
 }
 

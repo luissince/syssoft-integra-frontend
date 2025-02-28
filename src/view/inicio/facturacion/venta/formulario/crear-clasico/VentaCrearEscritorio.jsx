@@ -31,6 +31,7 @@ import {
   createVenta,
   obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
+  forSalePedido,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -67,6 +68,7 @@ import { ModalImpresion, ModalPreImpresion } from '../../../../../../components/
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../../../../components/Table';
 import Image from '../../../../../../components/Image';
+import ModalPedido from '../common/ModalPedido';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -116,6 +118,10 @@ class VentaCrearEscritorio extends CustomComponent {
       // Atributos del modal cotización
       isOpenCotizacion: false,
       cotizacion: null,
+
+      // Atributos del modal pedido
+      isOpenPedido: false,
+      pedido: null,
 
       // Atributos del modal venta
       isOpenVenta: false,
@@ -180,6 +186,9 @@ class VentaCrearEscritorio extends CustomComponent {
     // Referencia al modal de cotizaciones
     this.refModalCotizacion = React.createRef();
 
+    // Referencia al modal de cotización
+    this.refModalPedido = React.createRef();
+
     // Referencia al modal de ventas
     this.refModalVenta = React.createRef();
 
@@ -220,6 +229,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     this.abortControllerView = new AbortController();
     this.abortControllerCotizacion = new AbortController();
+    this.abortControllerPedido = new AbortController();
     this.abortControllerVenta = new AbortController();
     this.abortControllerCliente = null;
   }
@@ -798,11 +808,11 @@ class VentaCrearEscritorio extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F1' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (event.key === 'F2' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
       this.handleOpenProductos();
     }
 
@@ -1352,6 +1362,68 @@ class VentaCrearEscritorio extends CustomComponent {
       }
 
       this.setState({ cotizacion, loading: false });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ loading: false });
+      this.alert.warning("Venta", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Opciones de pedido
+  //------------------------------------------------------------------------------------------
+
+  handleOpenPedido = () => {
+    this.setState({ isOpenPedido: true })
+  }
+
+  handleClosePedido = () => {
+    this.setState({ isOpenPedido: false })
+  }
+
+  handleSeleccionarPedido = async (pedido) => {
+    this.handleCloseCotizacion();
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos del pedido.",
+      detalleVenta: [],
+      cotizacion: null,
+      pedido: null,
+    });
+
+    const params = {
+      idPedido: pedido.idPedido,
+      idAlmacen: this.state.idAlmacen
+    };
+
+    const response = await forSalePedido(params, this.abortControllerPedido.signal);
+
+    if (response instanceof SuccessReponse) {
+      if (isEmpty(response.data.productos)) {
+        this.alert.warning('Venta', 'El pedido no tiene productos, ya que fue utilizado para la venta.', () => {
+          this.reloadView();
+        });
+        return;
+      }
+
+      this.handleSelectItemCliente(response.data.cliente);
+
+      for (const producto of response.data.productos) {
+        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
+        }
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          this.addItemDetalle(producto, null, producto.cantidad);
+        }
+      }
+
+      this.setState({ pedido, loading: false });
     }
 
     if (response instanceof ErrorResponse) {
@@ -2017,6 +2089,14 @@ class VentaCrearEscritorio extends CustomComponent {
           handleSeleccionar={this.handleSeleccionarCotizacion}
         />
 
+        <ModalPedido
+          refModal={this.refModalPedido}
+          isOpen={this.state.isOpenPedido}
+          idSucursal={this.state.idSucursal}
+          handleClose={this.handleClosePedido}
+          handleSeleccionar={this.handleSeleccionarPedido}
+        />
+
         <SidebarConfiguration
           idSidebarConfiguration={this.idSidebarConfiguration}
 
@@ -2084,6 +2164,7 @@ class VentaCrearEscritorio extends CustomComponent {
           handleOpenDatos={this.handleOpenDatos}
           handleOpenImpresion={this.handleOpenPreImpresion}
           handleClearSale={this.handleClearSale}
+          handleOpenPedido={this.handleOpenPedido}
           handleOpenVenta={this.handleOpenVenta}
           handleOpenCotizacion={this.handleOpenCotizacion}
           handleOpenOptions={this.handleOpenOptions}
@@ -2406,13 +2487,25 @@ class VentaCrearEscritorio extends CustomComponent {
         <div className='bg-white w-100 d-flex position-relative' style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}>
           <div className='px-3 d-flex justify-content-center align-items-center'>
             {
-              this.state.cotizacion && 
+              this.state.cotizacion &&
               <>
                 <span className='mr-1'>
                   <img src={images.cotizacion} width={22} /> COTIZACIÓN:
                 </span>
                 <h6 className='p-0 m-0'>
                   {this.state.cotizacion.serie}-{formatNumberWithZeros(this.state.cotizacion.numeracion)}
+                </h6>
+              </>
+            }
+
+{
+              this.state.pedido &&
+              <>
+                <span className='mr-1'>
+                  <img src={images.invoice} width={22} /> PEDIDO:
+                </span>
+                <h6 className='p-0 m-0'>
+                  {this.state.pedido.serie}-{formatNumberWithZeros(this.state.pedido.numeracion)}
                 </h6>
               </>
             }

@@ -598,7 +598,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                     isOpen={this.state.isOpenProceso}
                     onClose={this.handleCloseModalProceso}
 
-                    codISO={this.state.codiso}
+                    codiso={this.state.codiso}
                     plazo={this.state.plazo}
 
                     handleAction={this.handleActionProceso}

@@ -1,16 +1,14 @@
 import React from 'react';
-import ContainerWrapper from '../../../../../components/Container';
+import { PosContainerWrapper } from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
-  getRowCellIndex,
   isEmpty,
   isText,
   numberFormat,
   rounded,
 } from '../../../../../helper/utils.helper';
-import Title from '../../../../../components/Title';
 import { connect } from 'react-redux';
 import { COMPRA } from '../../../../../model/types/tipo-comprobante';
 import {
@@ -22,19 +20,16 @@ import {
   documentsPdfInvoicesCompra,
   filtrarPersona,
   filtrarProducto,
+  forPurchaseOrdenCompra,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SearchInput from '../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import { SpinnerView } from '../../../../../components/Spinner';
+import { SpinnerTransparent, SpinnerView } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
-import TextArea from '../../../../../components/TextArea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
 import ModalProducto from './component/ModalProducto';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import { clearCrearCompra, setCrearCompraLocal, setCrearCompraState } from '../../../../../redux/predeterminadoSlice';
@@ -43,6 +38,9 @@ import printJS from 'print-js';
 import SweetAlert from '../../../../../model/class/sweet-alert';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import Search from '../../../../../components/Search';
+import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
+import ModalOrdenCompra from './component/ModalOrdenCompra';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -69,8 +67,9 @@ class CompraCrear extends CustomComponent {
       idImpuesto: '',
       observacion: '',
       nota: '',
+      cacheConfiguracion: null,
 
-      // Detalle del gasto
+      // Detalle de la compra
       detalles: [],
 
       // Lista de datos
@@ -83,9 +82,9 @@ class CompraCrear extends CustomComponent {
       producto: null,
       productos: [],
 
-      // Filtrar persona
-      persona: null,
-      personas: [],
+      // Filtrar proveedor
+      proveedor: null,
+      proveedores: [],
 
       // Atributos libres
       codiso: '',
@@ -100,8 +99,12 @@ class CompraCrear extends CustomComponent {
       // Atributos del modal impresión
       isOpenImpresion: false,
 
-      // Atributos del modal persona
-      isOpenPersona: false,
+      // Atributos del modal proveedor
+      isOpenProveedor: false,
+
+      // Atributos del modal de orden de compra
+      isOpenOrdenCompra: false,
+      ordenCompra: null,
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
@@ -114,18 +117,14 @@ class CompraCrear extends CustomComponent {
 
     // Referencia principales
     this.refComprobante = React.createRef();
-    this.refMoneda = React.createRef();
-    this.refAlmacen = React.createRef();
-    this.refImpuesto = React.createRef();
-    this.refObservacion = React.createRef();
 
     // Filtrar producto
     this.refProducto = React.createRef();
-    this.refValueProducto = React.createRef();
+    this.refProductoValue = React.createRef();
 
-    // Filtrar persona
-    this.refPersona = React.createRef();
-    this.refValuePersona = React.createRef();
+    // Filtrar proveedor
+    this.refProveedor = React.createRef();
+    this.refProveedorValue = React.createRef();
 
     // Referencia para el custom modal producto
     this.refModalProducto = React.createRef();
@@ -133,11 +132,20 @@ class CompraCrear extends CustomComponent {
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
 
+    // Referencia al modal de orden de compra
+    this.refModalOrdenCompra = React.createRef();
+
     //Anular las peticiones
     this.abortController = new AbortController();
+    this.abortControllerOrdenCompra = new AbortController();
 
-    this.refTable = React.createRef();
-    this.index = -1;
+    // Atributos para el modal configuración
+    this.idSidebarConfiguration = 'idSidebarConfiguration';
+    this.refImpuesto = React.createRef();
+    this.refMoneda = React.createRef();
+    this.refAlmacen = React.createRef();
+    this.refObservacion = React.createRef();
+    this.refNota = React.createRef();
   }
 
   /*
@@ -164,6 +172,7 @@ class CompraCrear extends CustomComponent {
     document.removeEventListener('keydown', this.handleDocumentKeyDown)
 
     this.abortController.abort();
+    this.abortControllerOrdenCompra.abort();
   }
 
   /*
@@ -183,13 +192,8 @@ class CompraCrear extends CustomComponent {
   loadData = async () => {
     if (this.props.compraCrear && this.props.compraCrear.state && this.props.compraCrear.local) {
       await this.setStateAsync(this.props.compraCrear.state);
-      if (this.props.compraCrear.state.persona) {
-        this.handleSelectItemPersona(this.props.compraCrear.state.persona);
-      }
-      this.index = this.props.compraCrear.local.index;
-      const children = Array.from(this.refTable.current.tBodies[0].closest('tbody').children);
-      if (this.index != -1 && children) {
-        this.updateSelection(children);
+      if (this.props.compraCrear.state.proveedor) {
+        this.handleSelectItemProveedor(this.props.compraCrear.state.proveedor);
       }
     } else {
       const [comprobantes, monedas, almacenes, impuestos] =
@@ -222,20 +226,17 @@ class CompraCrear extends CustomComponent {
 
   updateReduxState() {
     this.props.setCrearCompraState(this.state)
-    this.props.setCrearCompraLocal({
-      index: this.index,
-    })
+    this.props.setCrearCompraLocal({})
   }
 
   clearView = () => {
     this.setState(this.initial, async () => {
       await this.refProducto.current.restart();
-      await this.refPersona.current.restart();
+      await this.refProveedor.current.restart();
       await this.props.clearCrearCompra();
       await this.loadData();
 
-      this.refValueProducto.current.focus();
-      this.index = -1;
+      this.refProductoValue.current.focus();
 
       this.updateReduxState();
     });
@@ -364,60 +365,11 @@ class CompraCrear extends CustomComponent {
     });
   };
 
-  handleSelectMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleInputObservacion = (event) => {
-    this.setState({ observacion: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleInputNota = (event) => {
-    this.setState({ nota: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleSelectAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value }, () => {
-      this.updateReduxState();
-    });
-  };
-
-  handleSelectImpuesto = (event) => {
-    const idImpuesto = event.target.value;
-
-    const impuesto = this.state.impuestos.find((item) => item.idImpuesto === idImpuesto);
-
-    this.setState({ idImpuesto: event.target.value });
-
-    if (idImpuesto !== "") {
-      this.setState(prevState => ({
-        detalles: prevState.detalles.map(item => ({
-          ...item,
-          idImpuesto: impuesto.idImpuesto,
-          nombreImpuesto: impuesto.nombre,
-          porcentajeImpuesto: impuesto.porcentaje,
-        }))
-      }), () => {
-        this.updateReduxState();
-      });
-    }
-  };
-
   handleRemoverProducto = (idProducto) => {
     const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto).map((item, index) => ({
       ...item,
       id: ++index
     }));
-
-    if (isEmpty(this.state.detalles)) {
-      this.index = -1;
-    }
 
     const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
     this.setState({ detalles, total }, () => {
@@ -426,72 +378,10 @@ class CompraCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Acciones de la tabla
-  //------------------------------------------------------------------------------------------
-  handleKeyDownTable = (event) => {
-    const table = this.refTable.current;
-    if (!table) return;
-
-    const children = Array.from(table.tBodies[0].children);
-    if (children.length === 0) return;
-
-    if (event.key === 'ArrowUp') {
-      this.index = (this.index - 1 + children.length) % children.length;
-      this.updateSelection(children);
-      this.updateReduxState();
-      event.preventDefault();
-    }
-
-    if (event.key === 'ArrowDown') {
-      this.index = (this.index + 1) % children.length;
-      this.updateSelection(children);
-      this.updateReduxState();
-      event.preventDefault();
-    }
-
-    if (event.key === 'Enter') {
-      if (this.index >= 0) {
-        this.handleOpenModalProducto()
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    }
-  }
-
-  handleOnClickTable = async (event) => {
-    const { rowIndex, children } = getRowCellIndex(event);
-
-    if (rowIndex === -1) return;
-
-    this.index = rowIndex;
-    this.updateSelection(children);
-    this.updateReduxState();
-  }
-
-  handleOnDbClickTable = async (event) => {
-    const { rowIndex, children } = getRowCellIndex(event);
-
-    if (rowIndex === -1) return;
-
-    this.index = rowIndex;
-    this.updateSelection(children);
-    this.updateReduxState();
-    this.handleOpenModalProducto();
-  }
-
-  updateSelection = (children) => {
-    children.forEach(row => row.classList.remove("table-active"));
-
-    const selectedChild = children[this.index];
-    selectedChild.classList.add("table-active");
-    selectedChild.scrollIntoView({ block: 'center' });
-  }
-
-  //------------------------------------------------------------------------------------------
   // Acciones del modal producto
   //------------------------------------------------------------------------------------------
-  handleOpenModalProducto = (producto) => {
-    const { idImpuesto, detalles } = this.state;
+  handleOpenModalProducto = async (producto) => {
+    const { idImpuesto } = this.state;
 
     if (isEmpty(idImpuesto)) {
       this.alert.warning('Compra', 'Seleccione un impuesto para continuar.', async () => {
@@ -500,35 +390,36 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    const item = producto ?? detalles[this.index];
+    const item = producto;
     if (item) {
       this.setState({ isOpenProducto: true })
-      this.refModalProducto.current.loadDatos(item);
+      await this.refModalProducto.current.loadDatos(item);
     }
   }
 
   handleCloseProducto = async () => {
-    this.setState({ isOpenProducto: false })
+    await this.setStateAsync({ isOpenProducto: false });
+    this.refProductoValue.current.focus();
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
+    console.log(detalles)
     const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
     await callback();
-    this.refValueProducto.current.focus();
   }
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal persona
+  // Acciones del modal proveedor
   //------------------------------------------------------------------------------------------
-  handleOpenModalPersona = () => {
-    this.setState({ isOpenPersona: true });
+  handleOpenModalProveedor = () => {
+    this.setState({ isOpenProveedor: true });
   }
 
-  handleCloseModalPersona = async () => {
-    this.setState({ isOpenPersona: false });
+  handleCloseModalProveedor = async () => {
+    this.setState({ isOpenProveedor: false });
   }
 
   //------------------------------------------------------------------------------------------
@@ -537,7 +428,7 @@ class CompraCrear extends CustomComponent {
   handleClearInputProducto = () => {
     this.setState({
       productos: [],
-      producto: null,
+      loadingProducto: false,
     }, () => {
       this.updateReduxState();
     });
@@ -545,12 +436,13 @@ class CompraCrear extends CustomComponent {
 
   handleFilterProducto = async (text) => {
     const searchWord = text;
-    this.setState({ producto: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ productos: [] });
+      this.setState({ productos: [], loadingProducto: false });
       return;
     }
+
+    this.setState({ loadingProducto: true });
 
     const params = {
       filtrar: searchWord,
@@ -563,39 +455,34 @@ class CompraCrear extends CustomComponent {
 
     this.setState({
       productos: filteredProductos,
+      loadingProducto: false,
     });
   };
 
   handleSelectItemProducto = (value) => {
-    this.refProducto.current.initialize(value.nombre);
-    this.setState({
-      producto: value,
-      productos: [],
-    }, () => {
-      this.updateReduxState();
+    this.updateReduxState();
 
-      this.handleOpenModalProducto(value);
-    });
+    this.handleOpenModalProducto(value);
   };
 
   //------------------------------------------------------------------------------------------
-  // Filtrar persona
+  // Filtrar proveedor
   //------------------------------------------------------------------------------------------
-  handleClearInputPersona = () => {
+  handleClearInputProveedor = () => {
     this.setState({
-      personas: [],
-      persona: null,
+      proveedores: [],
+      proveedor: null,
     }, () => {
       this.updateReduxState();
     });
   };
 
-  handleFilterPersona = async (text) => {
+  handleFilterProveedor = async (text) => {
     const searchWord = text;
-    this.setState({ persona: null, });
+    this.setState({ proveedor: null, });
 
     if (isEmpty(searchWord)) {
-      this.setState({ personas: [] });
+      this.setState({ proveedores: [] });
       return;
     }
 
@@ -605,26 +492,201 @@ class CompraCrear extends CustomComponent {
       proveedor: 1,
     };
 
-    const personas = await this.fetchFiltrarCliente(params);
+    const proveedores = await this.fetchFiltrarCliente(params);
 
-    this.setState({ personas });
+    this.setState({ proveedores });
   };
 
-  handleSelectItemPersona = async (value) => {
-    this.refPersona.current.initialize(value.documento + ' - ' + value.informacion);
+  handleSelectItemProveedor = async (value) => {
+    this.refProveedor.current.initialize(value.documento + ' - ' + value.informacion);
     this.setState({
-      persona: value,
-      personas: [],
+      proveedor: value,
+      proveedores: [],
     }, () => {
       this.updateReduxState();
     });
   };
 
   //------------------------------------------------------------------------------------------
+  // Opciones de orden de compra
+  //------------------------------------------------------------------------------------------
+
+  handleOpenOrdenCompra = () => {
+    if (isEmpty(this.state.idImpuesto)) {
+      this.alert.warning('Orden de Compra', 'Seleccione un impuesto.', () =>
+        this.refImpuesto.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(this.state.idMoneda)) {
+      this.alert.warning('Orden de Compra', 'Seleccione una moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    this.setState({ isOpenOrdenCompra: true })
+  }
+
+  handleCloseOrdenCompra = () => {
+    this.setState({ isOpenOrdenCompra: false })
+  }
+
+  handleSeleccionarOrdenCompra = async (ordenCompra) => {
+    this.handleCloseOrdenCompra();
+    this.setState({
+      loading: true,
+      msgLoading: "Obteniendos datos de la ordend de compra.",
+      detalles: [],
+      ordenCompra: null,
+    });
+
+    const params = {
+      idOrdenCompra: ordenCompra.idOrdenCompra,
+      idAlmacen: this.state.idAlmacen
+    };
+
+    const response = await forPurchaseOrdenCompra(params, this.abortControllerOrdenCompra.signal);
+
+    if (response instanceof SuccessReponse) {
+      if (isEmpty(response.data.productos)) {
+        this.alert.warning('Orden de Compra', 'La orden de compra no tiene productos, ya que fue utilizado para la compra.', () => {
+          this.reloadView();
+        });
+        return;
+      }
+
+      this.handleSelectItemProveedor(response.data.proveedor);
+
+      const detalles = [];
+
+      const impuesto = this.state.impuestos.find((item) => item.idImpuesto === this.state.idImpuesto);
+
+      for (const producto of response.data.productos) {
+        const data = {
+          id: response.data.productos.length + 1,
+          idProducto: producto.idProducto,
+          codigo: producto.codigo,
+          nombre: producto.nombre,
+          imagen: producto.imagen,
+          cantidad: Number(producto.cantidad),
+          costo: Number(producto.costo),
+          idImpuesto: impuesto.idImpuesto,
+          nombreImpuesto: impuesto.nombre,
+          porcentajeImpuesto: impuesto.porcentaje,
+        };
+
+        detalles.push(data);
+      }
+
+      this.setState({ ordenCompra, detalles, loading: false });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      this.setState({ loading: false });
+      this.alert.warning("Orden de Compra", response.getMessage())
+    }
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Opciones de configuración
+  //------------------------------------------------------------------------------------------
+
+  handleOpenOptions = () => {
+    const invoice = document.getElementById(this.idSidebarConfiguration);
+    invoice.classList.add('toggled');
+
+    this.setState({
+      cacheConfiguracion: {
+        idImpuesto: this.state.idImpuesto,
+        idMoneda: this.state.idMoneda,
+        observacion: this.state.observacion,
+        nota: this.state.nota,
+      }
+    });
+  }
+
+  handleCloseOptions = () => {
+    const invoice = document.getElementById(this.idSidebarConfiguration);
+
+    if (this.state.cacheConfiguracion) {
+      this.setState({
+        idImpuesto: this.state.cacheConfiguracion.idImpuesto,
+        idMoneda: this.state.cacheConfiguracion.idMoneda,
+        observacion: this.state.cacheConfiguracion.observacion,
+        nota: this.state.cacheConfiguracion.nota,
+      });
+    }
+
+    invoice.classList.remove('toggled');
+  }
+
+  handleSelectIdImpuesto = (event) => {
+    this.setState({ idImpuesto: event.target.value })
+  }
+
+  handleSelectIdMoneda = (event) => {
+    this.setState({ idMoneda: event.target.value })
+  }
+
+  handleSelectIdIdAlmacen = (event) => {
+    this.setState({ idAlmacen: event.target.value })
+  }
+
+  handleInputObservacion = (event) => {
+    this.setState({ observacion: event.target.value })
+  }
+
+  handleInputNota = (event) => {
+    this.setState({ nota: event.target.value })
+  }
+
+  handleSaveOptions = () => {
+    if (isEmpty(this.state.idImpuesto)) {
+      this.alert.warning('Orden de Compra', 'Seleccione un impuesto.', () =>
+        this.refImpuesto.current.focus(),
+      );
+      return;
+    }
+
+    if (isEmpty(this.state.idMoneda)) {
+      this.alert.warning('Orden de Compra', 'Seleccione una moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
+      return;
+    }
+
+    const impuesto = this.state.impuestos.find((item) => item.idImpuesto === this.state.idImpuesto);
+
+    const detalles = this.state.detalles.map((item) => ({
+      ...item,
+      idImpuesto: impuesto.idImpuesto,
+      nombreImpuesto: impuesto.nombre,
+      porcentajeImpuesto: impuesto.porcentaje,
+    }));
+
+    const moneda = this.state.monedas.find((item) => item.idMoneda === this.state.idMoneda)
+
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalles,
+    }, async () => {
+      this.updateReduxState();
+
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove('toggled');
+    });
+  }
+
+  //------------------------------------------------------------------------------------------
   // Procesos guardar, limpiar y cerrar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idComprobante, persona, idMoneda, idImpuesto, idAlmacen, detalles } = this.state;
+    const { idComprobante, proveedor, idMoneda, idImpuesto, idAlmacen, detalles } = this.state;
 
     if (!isText(idComprobante)) {
       this.alert.warning('Compra', 'Seleccione su comprobante.', () =>
@@ -633,9 +695,9 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(persona)) {
+    if (isEmpty(proveedor)) {
       this.alert.warning('Compra', 'Seleccione un proveedor.', () =>
-        this.refValuePersona.current.focus(),
+        this.refProveedorValue.current.focus(),
       );
       return;
     }
@@ -648,21 +710,22 @@ class CompraCrear extends CustomComponent {
     }
     if (!isText(idImpuesto)) {
       this.alert.warning('Compra', 'Seleccione el impuesto', () =>
-        this.refMoneda.current.focus(),
+        this.refImpuesto.current.focus(),
       );
       return;
     }
 
     if (!isText(idAlmacen)) {
-      this.alert.warning('Compra', 'Seleccione su almacen.', () =>
-        this.refAlmacen.current.focus(),
-      );
+      this.alert.warning('Compra', 'Seleccione su almacen.', () => {
+        this.handleOpenOptions();
+        this.refAlmacen.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
       this.alert.warning('Compra', 'Agregar algún producto a la lista.', () =>
-        this.refValueProducto.current.focus(),
+        this.refProductoValue.current.focus(),
       );
       return;
     }
@@ -696,10 +759,11 @@ class CompraCrear extends CustomComponent {
   handleProcessContado = async (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
     const {
       idComprobante,
-      persona,
+      proveedor,
       idImpuesto,
       idAlmacen,
       idMoneda,
+      ordenCompra,
       observacion,
       nota,
       detalles,
@@ -712,10 +776,11 @@ class CompraCrear extends CustomComponent {
         const data = {
           idFormaPago: idFormaPago,
           idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
+          idProveedor: proveedor.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
+          idOrdenCompra: ordenCompra && ordenCompra.idOrdenCompra  || null,
           observacion: observacion,
           nota: nota,
           idUsuario: idUsuario,
@@ -748,7 +813,7 @@ class CompraCrear extends CustomComponent {
   handleProcessCredito = async (idFormaPago, numeroCuotas, frecuenciaPago, total, notaTransacion, callback = async function () { }) => {
     const {
       idComprobante,
-      persona,
+      proveedor,
       idImpuesto,
       idAlmacen,
       idMoneda,
@@ -764,7 +829,7 @@ class CompraCrear extends CustomComponent {
         const data = {
           idFormaPago: idFormaPago,
           idComprobante: idComprobante,
-          idProveedor: persona.idPersona,
+          idProveedor: proveedor.idPersona,
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
@@ -839,49 +904,6 @@ class CompraCrear extends CustomComponent {
   |
   */
 
-  generateBody() {
-    const { detalles } = this.state;
-
-    if (isEmpty(detalles)) {
-      return (
-        <tr className="text-center">
-          <td colSpan="7"> Agregar datos a la tabla </td>
-        </tr>
-      );
-    }
-    
-    return detalles.map((item, index) => (
-      <TableRow
-        key={index}>
-        <TableCell className="text-center">{item.id}</TableCell>
-        <TableCell className="text-center">
-          <Image
-            default={images.noImage}
-            src={item.imagen}
-            alt={item.nombre}
-            width={100}
-          />
-        </TableCell>
-        <TableCell>
-          {item.codigo}
-          <br />
-          {item.nombre}
-        </TableCell>
-        <TableCell>{rounded(item.cantidad)}</TableCell>
-        <TableCell>{numberFormat(item.costo, this.state.codiso)}</TableCell>
-        <TableCell>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</TableCell>
-        <TableCell className="text-center">
-          <Button
-            className="btn-outline-danger btn-sm"
-            title="Eliminar"
-            onClick={() => this.handleRemoverProducto(item.idProducto)}>
-            <i className="bi bi-trash"></i>
-          </Button>
-        </TableCell>
-      </TableRow>
-    ));
-  }
-
   renderTotal() {
     let subTotal = 0;
     let total = 0;
@@ -924,39 +946,42 @@ class CompraCrear extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
-            <TableHead className="text-right mb-2">
-              {numberFormat(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
+          <div
+            key={index}
+            className='d-flex justify-content-between align-items-center text-secondary'>
+            <p className='m-0 text-secondary'>{impuesto.nombre}:</p>
+            <p className='m-0 text-secondary'>{numberFormat(impuesto.valor, this.state.codiso)}</p>
+          </div>
         );
       });
     };
 
     return (
       <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
-            {numberFormat(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+        <div className='d-flex justify-content-between align-items-center text-secondary'>
+          <p className='m-0 text-secondary'>Sub Total:</p>
+          <p className='m-0 text-secondary'>{numberFormat(subTotal, this.state.codiso)}</p>
+        </div>
         {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
-            {numberFormat(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+        <Button
+          className='btn-success w-100'
+          onClick={this.handleGuardar}>
+          <div className='d-flex justify-content-between align-items-center py-1'>
+            <p className='m-0 text-xl'>Total:</p>
+            <p className='m-0 text-xl'>{numberFormat(total, this.state.codiso)}</p>
+          </div>
+        </Button>
       </>
     );
   }
 
   render() {
     return (
-      <ContainerWrapper>
+      <PosContainerWrapper>
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <ModalTransaccion
           tipo={"Compra"}
@@ -985,8 +1010,8 @@ class CompraCrear extends CustomComponent {
         />
 
         <ModalPersona
-          isOpen={this.state.isOpenPersona}
-          onClose={this.handleCloseModalPersona}
+          isOpen={this.state.isOpenProveedor}
+          onClose={this.handleCloseModalProveedor}
 
           idUsuario={this.state.idUsuario}
         />
@@ -1003,247 +1028,327 @@ class CompraCrear extends CustomComponent {
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
-        <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+        <ModalOrdenCompra
+          refModal={this.refModalOrdenCompra}
+          isOpen={this.state.isOpenOrdenCompra}
+          idSucursal={this.state.idSucursal}
+          handleClose={this.handleCloseOrdenCompra}
+          handleSeleccionar={this.handleSeleccionarOrdenCompra}
         />
 
-        <Title
-          title='Compra'
-          subTitle='Crear'
-          handleGoBack={this.handleCerrar}
+        <SidebarConfiguration
+          idSidebarConfiguration={this.idSidebarConfiguration}
+
+          impuestos={this.state.impuestos}
+          refImpuesto={this.refImpuesto}
+          idImpuesto={this.state.idImpuesto}
+          handleSelectIdImpuesto={this.handleSelectIdImpuesto}
+
+          monedas={this.state.monedas}
+          refMoneda={this.refMoneda}
+          idMoneda={this.state.idMoneda}
+          handleSelectIdMoneda={this.handleSelectIdMoneda}
+
+          almacenes={this.state.almacenes}
+          refAlmacen={this.refAlmacen}
+          idAlmacen={this.state.idAlmacen}
+          handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
+
+          refObservacion={this.refObservacion}
+          observacion={this.state.observacion}
+          handleInputObservacion={this.handleInputObservacion}
+
+          refNota={this.refNota}
+          nota={this.state.nota}
+          handleInputNota={this.handleInputNota}
+
+          handleSaveOptions={this.handleSaveOptions}
+          handleCloseOptions={this.handleCloseOptions}
         />
 
-        <Row>
-          <Column className="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
-            <Row>
-              <Column>
-                <SearchInput
-                  ref={this.refProducto}
-                  autoFocus={true}
-                  placeholder="Filtrar productos..."
-                  refValue={this.refValueProducto}
-                  data={this.state.productos}
-                  handleClearInput={this.handleClearInputProducto}
-                  handleFilter={this.handleFilterProducto}
-                  handleSelectItem={this.handleSelectItemProducto}
-                  renderItem={(value) =>
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={value.imagen}
-                        alt={value.nombre}
-                        width={60}
-                      />
-
-                      <div className='ml-2'>
-                        {value.codigo}
-                        <br />
-                        {value.nombre}
-                      </div>
-                    </div>}
-                  renderIconLeft={<i className="bi bi-cart4"></i>}
-                />
-              </Column>
-            </Row>
-
-            <Row>
-              <Column>
-                <TableResponsive
-                  onKeyDown={this.handleKeyDownTable}>
-                  <Table
-                    ref={this.refTable}
-                    tabIndex="0"
-                    onClick={this.handleOnClickTable}
-                    onDoubleClick={this.handleOnDbClickTable}
-                    className={"table-bordered table-hover table-sticky w-100"}>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead width="5%" className="text-center">#</TableHead>
-                        <TableHead width="10%" className="text-center">Imagen</TableHead>
-                        <TableHead width="15%">Producto</TableHead>
-                        <TableHead width="5%">Cantidad</TableHead>
-                        <TableHead width="5%">Costo</TableHead>
-                        <TableHead width="5%">Total</TableHead>
-                        <TableHead width="5%" className="text-center">Quitar</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {this.generateBody()}
-                    </TableBody>
-                  </Table>
-                </TableResponsive>
-              </Column>
-            </Row>
-
-            <Row>
-              <Column formGroup={true}>
-                <Button
-                  className="btn-primary"
-                  onClick={this.handleGuardar}
-                >
-                  <i className="fa fa-arrow-right"></i> Registrar (F1)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-search"></i> Orden de Compra (F2)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-shopping-cart"></i> Compra (F3)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-info"
-                  onClick={this.handleLimpiar}
-                >
-                  <i className="fa fa-trash"></i> Limpiar (F4)
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-danger"
-                  onClick={this.handleCerrar}
-                >
-                  <i className="fa fa-close"></i> Cerrar
-                </Button>
-              </Column>
-            </Row>
-          </Column>
-
-          <Column className="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-            <div className="form-group">
-              <Select
-                group={true}
-                iconLeft={<i className="bi bi-receipt"></i>}
-                title="Comprobantes de venta"
-                refSelect={this.refComprobante}
-                value={this.state.idComprobante}
-                onChange={this.handleSelectComprobante}
-              >
-                <option value="">-- Comprobantes --</option>
-                {this.state.comprobantes.map((item, index) => (
-                  <option key={index} value={item.idComprobante}>
-                    {item.nombre + ' (' + item.serie + ')'}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="form-group">
-              <SearchInput
-                ref={this.refPersona}
-                placeholder="Filtrar proveedores..."
-                refValue={this.refValuePersona}
-                data={this.state.personas}
-                handleClearInput={this.handleClearInputPersona}
-                handleFilter={this.handleFilterPersona}
-                handleSelectItem={this.handleSelectItemPersona}
-                renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
-                renderIconLeft={<i className="bi bi-person-circle"></i>}
-                customButton={
+        <div className='bg-white w-100 h-100 d-flex flex-column overflow-auto'>
+          <div className='d-flex w-100 h-100'>
+            {/*  */}
+            <div className='w-100 d-flex flex-column position-relative'
+              style={{
+                flex: '0 0 60%',
+              }}>
+              <div className='d-flex align-items-center px-3'
+                style={{ borderBottom: '1px solid #cbd5e1' }}>
+                <div className='d-flex'>
                   <Button
-                    className="btn-outline-success d-flex align-items-center"
-                    onClick={this.handleOpenModalPersona}>
-                    <i className='fa fa-plus'></i>
-                    <span className="ml-2">Nuevo</span>
+                    className='btn btn-link'
+                    onClick={this.handleCerrar}>
+                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
                   </Button>
+                </div>
+
+                <div className='py-3 d-flex align-items-center'>
+                  <p className='h5 m-0'>Crear Compra <i className='fa fa-plus text-secondary'></i> </p>
+                </div>
+              </div>
+
+              <div className='px-3 py-3'
+                style={{ borderBottom: '1px solid #cbd5e1' }}>
+                <Search
+                  ref={this.refProducto}
+                  refInput={this.refProductoValue}
+                  group={true}
+                  iconLeft={<i className="bi bi-search"></i>}
+                  onSearch={this.handleFilterProducto}
+                  placeholder="Buscar..."
+                  buttonRight={
+                    <Button
+                      className="btn-outline-secondary"
+                      title="Limpiar"
+                      icono={<i className="fa fa-close"></i>}
+                      onClick={() => {
+                        this.refProducto.current.restart();
+                        this.refProductoValue.current.focus();
+                      }}
+                    />
+                  }
+                />
+              </div>
+
+              <div
+                className={
+                  !isEmpty(this.state.productos) ?
+                    'px-3 h-100 overflow-auto p-3'
+                    :
+                    'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
                 }
-              />
+                style={{
+                  backgroundColor: '#f8fafc',
+                }}>
+
+                {
+                  this.state.loadingProducto &&
+                  <div className='text-center position-relative'>
+                    <SpinnerTransparent
+                      loading={true}
+                      message={"Buscando productos..."}
+                    />
+                  </div>
+                }
+
+                {
+                  !this.state.loadingProducto && isEmpty(this.state.productos) &&
+                  <div className='text-center position-relative'>
+                    <i className='bi bi-cart4 text-secondary text-2xl'></i>
+                    <p className="text-secondary text-base text-lg mb-0">
+                      Use la barra de busqueda para encontrar su producto.
+                    </p>
+                  </div>
+                }
+
+                {
+                  !isEmpty(this.state.productos) && (
+                    <div className='d-flex justify-content-center flex-wrap gap-4'>
+                      {
+                        this.state.productos.map((item, index) => (
+                          <button
+                            key={index}
+                            className='btn btn-light bg-white'
+                            style={{
+                              border: '1px solid #e2e8f0',
+                              width: '16rem',
+                            }}
+                            onClick={() => this.handleSelectItemProducto(item)}
+                          >
+                            <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
+                              <Image
+                                default={images.noImage}
+                                src={item.imagen}
+                                alt={item.nombre}
+                                width={150}
+                                height={150}
+                                className='mb-2 object-contain'
+                              />
+
+                              <div className='d-flex justify-content-center align-items-center flex-column'>
+                                <p className='m-0 text-lg'>{item.nombre}</p>
+                                <p className='m-0 text-xl font-weight-bold'>
+                                  {numberFormat(item.costo, this.state.codiso)} <small>x {item.unidad}</small>
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      }
+                    </div>
+                  )
+                }
+              </div>
             </div>
 
-            <div className="form-group">
-              <Select
-                group={true}
-                iconLeft={<i className="bi bi-percent"></i>}
-                refSelect={this.refImpuesto}
-                value={this.state.idImpuesto}
-                onChange={this.handleSelectImpuesto}
+            {/*  */}
+            <div
+              className='d-flex flex-column position-relative bg-white'
+              style={{
+                flex: '1 1 100%',
+                borderLeft: '1px solid #cbd5e1',
+              }}>
+
+              <div className='d-flex justify-content-between align-items-center pl-3'
+                style={{ borderBottom: '1px solid #cbd5e1' }}>
+                <div className='py-3'>
+                  <p className='h5 m-0'>Resumen</p>
+                </div>
+
+                <div className='d-flex justify-content-end'>
+                  <Button
+                    className="btn-link rounded-circle h-100"
+                    onClick={this.handleOpenOrdenCompra}
+                  >
+                    <i className="bi bi-file-earmark-text text-xl text-secondary"></i>
+                  </Button>
+                  <Button
+                    className='btn btn-link'
+                    onClick={this.handleLimpiar}>
+                    <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
+                  </Button>
+                  <Button
+                    className='btn btn-link'
+                    onClick={this.handleOpenOptions}>
+                    <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
+                  </Button>
+                </div>
+              </div>
+
+              <div className='d-flex flex-column px-3 pt-3'
+                style={{ borderBottom: '1px solid #cbd5e1' }}>
+                <div className="form-group">
+                  <Select
+                    group={false}
+                    refSelect={this.refComprobante}
+                    value={this.state.idComprobante}
+                    onChange={this.handleSelectComprobante}
+                  >
+                    <option value="">-- Comprobantes --</option>
+                    {this.state.comprobantes.map((item, index) => (
+                      <option key={index} value={item.idComprobante}>
+                        {item.nombre + ' (' + item.serie + ')'}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div>
+                  <SearchInput
+                    ref={this.refProveedor}
+                    placeholder="Filtrar proveedores..."
+                    refValue={this.refProveedorValue}
+                    data={this.state.proveedores}
+                    handleClearInput={this.handleClearInputProveedor}
+                    handleFilter={this.handleFilterProveedor}
+                    handleSelectItem={this.handleSelectItemProveedor}
+                    customButton={
+                      <Button
+                        className="btn-outline-success d-flex align-items-center"
+                        onClick={this.handleOpenModalProveedor}>
+                        <i className='fa fa-user-plus'></i>
+                        <div className="ml-2">Nuevo</div>
+                      </Button>
+                    }
+                    renderItem={(value) =>
+                      <>
+                        {value.documento + ' - ' + value.informacion}
+                      </>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div
+                className={
+                  isEmpty(this.state.detalles) ?
+                    'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
+                    :
+                    'd-flex flex-column text-center rounded h-100 overflow-auto'
+                }
+                style={{
+                  backgroundColor: '#f8fafc',
+                }}>
+
+                {isEmpty(this.state.detalles) && <div className='text-center'>
+                  <i className='fa fa-shopping-basket text-secondary text-2xl'></i>
+                  <p className="text-secondary text-base text-lg mb-0">
+                    Aquí verás los productos que elijas en tu próxima pedido
+                  </p>
+                </div>}
+
+                {
+                  this.state.detalles.map((item, index) => (
+                    <div
+                      key={index}
+                      className='d-grid px-3 position-relative align-items-center bg-white'
+                      style={{
+                        gridTemplateColumns: '60% 20% 20%',
+                        borderBottom: '1px solid #e2e8f0',
+                      }}>
+                      {/* Primera columna (imagen y texto) */}
+                      <div className='d-flex align-items-center'>
+
+                        <Image
+                          default={images.noImage}
+                          src={item.imagen}
+                          alt={item.nombre}
+                          width={80}
+                          height={80}
+                          className='object-contain'
+                        />
+
+                        <div className='p-3 text-left'>
+                          <p className='m-0 text-sm'> {item.codigo}</p>
+                          <p className='m-0 text-base font-weight-bold text-break'>
+                            {item.nombre}
+                          </p>
+                          <p className='m-0'>{numberFormat(item.costo, this.state.codiso)}</p>
+                        </div>
+                      </div>
+
+                      {/* Segundo columna (costo total) y opciones */}
+                      <div className='d-flex flex-column justify-content-end align-items-center'>
+                        <div className='h-100 text-xml'>{rounded(item.cantidad)}</div>
+                      </div>
+
+                      {/* Tercera columna (costo total) y opciones */}
+                      <div className='d-flex flex-column justify-content-end align-items-center'>
+                        <div className='h-100 text-lg'>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</div>
+
+                        <div className='d-flex align-items-end justify-content-end gap-4'>
+                          <button className='btn btn-link'
+                            onClick={() => this.handleOpenModalProducto(item)}>
+                            <i className='fa fa-edit text-secondary text-xl'></i>
+                          </button>
+                          <button className='btn btn-link'
+                            onClick={() => this.handleRemoverProducto(item.idProducto)}>
+                            <i className='fa fa-trash text-secondary text-xl'></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+
+              <div className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
+                style={{ borderTop: '1px solid #e2e8f0' }}
               >
-                <option value={''}>-- Impuesto --</option>
-                {this.state.impuestos.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idImpuesto}>
-                      {item.nombre}
-                    </option>
-                  );
-                })}
-              </Select>
-            </div>
+                {this.renderTotal()}
 
-            <div className="form-group">
-              <Select
-                group={true}
-                iconLeft={<i className="fa fa-building"></i>}
-                refSelect={this.refAlmacen}
-                value={this.state.idAlmacen}
-                onChange={this.handleSelectAlmacen}
-              >
-                <option value={''}>-- Almacen --</option>
-                {this.state.almacenes.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idAlmacen}>
-                      {item.nombre}
-                    </option>
-                  );
-                })}
-              </Select>
-            </div>
+                <div className='d-flex justify-content-between align-items-center text-secondary'>
+                  <p className='m-0 text-secondary'>Cantidad:</p>
+                  <p className='m-0 text-secondary'>{this.state.detalles.length === 1 ? this.state.detalles.length + " Producto" : this.state.detalles.length + " Productos"} </p>
+                </div>
+              </div>
 
-            <div className="form-group">
-              <Select
-                group={true}
-                iconLeft={<i className="bi bi-cash"></i>}
-                title="Lista metodo de pago"
-                refSelect={this.refMoneda}
-                value={this.state.idMoneda}
-                onChange={this.handleSelectMoneda}
-              >
-                <option value="">-- Moneda --</option>
-                {this.state.monedas.map((item, index) => (
-                  <option key={index} value={item.idMoneda}>
-                    {item.nombre}
-                  </option>
-                ))}
-              </Select>
             </div>
+          </div>
+        </div>
 
-            <div className="form-group">
-              <TextArea
-                group={true}
-                iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-                title="Observaciones..."
-                refInput={this.refObservacion}
-                value={this.state.observacion}
-                onChange={this.handleInputObservacion}
-                placeholder="Ingrese alguna observación">
-              </TextArea>
-            </div>
-
-            <div className="form-group">
-              <TextArea
-                group={true}
-                iconLeft={<i className="bi bi-card-text"></i>}
-                title="Observaciones..."
-                value={this.state.nota}
-                onChange={this.handleInputNota}
-                placeholder="Ingrese alguna nota">
-              </TextArea>
-            </div>
-
-            <div className="form-group">
-              <Table classNameContent="w-100">
-                <TableHeader>{this.renderTotal()}</TableHeader>
-              </Table>
-            </div>
-          </Column>
-        </Row>
-      </ContainerWrapper>
+      </PosContainerWrapper>
     );
   }
 }

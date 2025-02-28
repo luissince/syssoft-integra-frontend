@@ -69,13 +69,15 @@ class Productos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      codISO: convertNullText(this.props.moneda.codiso),
+      codiso: convertNullText(this.props.moneda.codiso),
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
+
+    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -97,6 +99,8 @@ class Productos extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.productoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.productoLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.productoLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.productoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -311,7 +315,7 @@ class Productos extends CustomComponent {
           <TableCell className="text-center">{item.id}</TableCell>
           <TableCell>{tipo()}</TableCell>
           <TableCell>{item.codigo}<br /><b>{item.nombre}</b>{' '}{item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}</TableCell>
-          <TableCell className="text-right">{numberFormat(item.precio, this.state.codISO)}</TableCell>
+          <TableCell className="text-right">{numberFormat(item.precio, this.state.codiso)}</TableCell>
           <TableCell>{item.medida}</TableCell>
           <TableCell>{item.categoria}</TableCell>
           <TableCell className="text-center">{estado}</TableCell>
@@ -357,28 +361,30 @@ class Productos extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              onSearch={this.searchText}
-              placeholder="Buscar por código y descripción..."
-            />
-          </Column>
-
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Button
-              className="btn btn-outline-info"
+              className="btn-outline-info"
               onClick={this.handleAgregar}
-            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
             <Button
-              className="btn btn-outline-secondary"
-              onClick={() => this.loadingInit()}
+              className="btn-outline-secondary"
+              onClick={this.loadingInit}
             >
-              <i className="bi bi-arrow-clockwise"></i>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar por código y descripción..."
+            />
           </Column>
         </Row>
 

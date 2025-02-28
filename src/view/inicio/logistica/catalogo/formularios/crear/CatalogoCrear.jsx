@@ -54,7 +54,7 @@ class CatalogoCrear extends CustomComponent {
       productos: [],
 
       // Atributos libres
-      codISO: this.props.moneda.codiso ?? '',
+      codiso: this.props.moneda.codiso ?? '',
 
       // Atributos del modal producto
       isOpenProducto: false,
@@ -489,7 +489,7 @@ class CatalogoCrear extends CustomComponent {
                           <div className='d-flex justify-content-center align-items-center flex-column'>
                             <p className='m-0 text-lg'>{item.nombre}</p>
                             <p className='m-0 text-xl font-weight-bold'>
-                              {numberFormat(item.precio, this.state.codISO)} <small>x {item.unidad}</small>
+                              {numberFormat(item.precio, this.state.codiso)} <small>x {item.unidad}</small>
                             </p>
                           </div>
                         </div>
@@ -580,7 +580,7 @@ class CatalogoCrear extends CustomComponent {
                           <p className='m-0 text-base font-weight-bold text-break'>
                             {item.nombre}
                           </p>
-                          <p className='m-0'>{numberFormat(item.precio, this.state.codISO)}</p>
+                          <p className='m-0'>{numberFormat(item.precio, this.state.codiso)}</p>
                         </div>
                       </div>
 

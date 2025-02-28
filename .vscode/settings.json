@@ -1,4 +1,5 @@
 {
     "docwriter.language": "Spanish",
-    "docwriter.style": "XML"
+    "docwriter.style": "XML",
+    "svg.preview.background": "dark-transparent"
 }

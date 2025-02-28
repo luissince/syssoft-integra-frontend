@@ -74,13 +74,15 @@ class Inventario extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      codISO: convertNullText(this.props.moneda.codiso),
+      codiso: convertNullText(this.props.moneda.codiso),
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
+
+    this.refSearch = React.createRef();
 
     this.refModalStock = React.createRef();
 
@@ -109,6 +111,8 @@ class Inventario extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.inventarioLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.inventarioLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.inventarioLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.inventarioLista.data.buscar);
     } else {
       const [almacenes] = await Promise.all([
         this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
@@ -352,7 +356,7 @@ class Inventario extends CustomComponent {
       title: 'Lista de productos - Código de Barras',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
-    }); 
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -390,7 +394,7 @@ class Inventario extends CustomComponent {
           <TableCell>{item.cantidadMaxima} {item.medida}</TableCell>
           <TableCell>{item.cantidadMinima} {item.medida}</TableCell>
           <TableCell className={`${background} ${color}`}>{rounded(item.cantidad)} {item.medida}</TableCell>
-          <TableCell className="text-right">{numberFormat(item.costo, this.state.codISO)}</TableCell>
+          <TableCell className="text-right">{numberFormat(item.costo, this.state.codiso)}</TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
@@ -461,6 +465,7 @@ class Inventario extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />

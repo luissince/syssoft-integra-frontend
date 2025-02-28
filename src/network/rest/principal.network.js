@@ -1264,7 +1264,7 @@ export async function detailPedido(params, signal) {
   );
 }
 
-export async function forPedido(params, signal) {
+export async function forSalePedido(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/pedido/for-sale', {
       params: params,

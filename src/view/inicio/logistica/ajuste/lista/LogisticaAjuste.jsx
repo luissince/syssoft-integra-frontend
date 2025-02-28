@@ -70,9 +70,10 @@ class LogisticaAjuste extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-    // console.log(this.props.token.userToken.menus[3].subMenus[1])
-    // console.log(this.props.token.userToken.menus[3].subMenus[1].estado)
+
     this.refPaginacion = React.createRef();
+
+    this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -97,6 +98,8 @@ class LogisticaAjuste extends CustomComponent {
       this.refPaginacion.current.isNextBtnActive = this.props.ajusteLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = this.props.ajusteLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.ajusteLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.ajusteLista.data.buscar);
     } else {
       const [tipoAjuste] = await Promise.all([
         this.fetchComboTipoAjuste()
@@ -227,15 +230,21 @@ class LogisticaAjuste extends CustomComponent {
   }
 
   handleSelectTipoAjuste = (event) => {
-    this.setState({ idTipoAjuste: event.target.value });
+    this.setState({ idTipoAjuste: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleInputFechaInicio = (event) => {
-    this.setState({ fechaInicio: event.target.value });
+    this.setState({ fechaInicio: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value });
+    this.setState({ fechaFinal: event.target.value }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleAgregar = () => {
@@ -370,7 +379,7 @@ class LogisticaAjuste extends CustomComponent {
               className="btn-outline-secondary"
               onClick={this.loadingInit}
             >
-              <i className="bi bi-arrow-clockwise"></i>
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
@@ -415,6 +424,7 @@ class LogisticaAjuste extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar..."
             />
