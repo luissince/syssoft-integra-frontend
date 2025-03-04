@@ -403,7 +403,6 @@ class CompraCrear extends CustomComponent {
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
-    console.log(detalles)
     const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
@@ -450,7 +449,6 @@ class CompraCrear extends CustomComponent {
 
     const productos = await this.fetchFiltrarProductos(params);
 
-    // Filtrar productos por tipoProducto !== "SERVICIO"
     const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
 
     this.setState({
@@ -817,6 +815,7 @@ class CompraCrear extends CustomComponent {
       idImpuesto,
       idAlmacen,
       idMoneda,
+      ordenCompra,
       observacion,
       nota,
       detalles,
@@ -833,6 +832,7 @@ class CompraCrear extends CustomComponent {
           idImpuesto: idImpuesto,
           idAlmacen: idAlmacen,
           idMoneda: idMoneda,
+          idOrdenCompra: ordenCompra && ordenCompra.idOrdenCompra  || null,
           observacion: observacion,
           nota: nota,
           idUsuario: idUsuario,

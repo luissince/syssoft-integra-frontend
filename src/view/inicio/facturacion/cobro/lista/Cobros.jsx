@@ -277,7 +277,7 @@ class Cobros extends CustomComponent {
             {formatTime(item.hora)}
           </TableCell>
           <TableCell>
-            {item.documento}
+          {item.tipoDocumento} - {item.documento}
             {<br />}
             {item.informacion}
           </TableCell>

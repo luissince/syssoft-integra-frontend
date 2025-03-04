@@ -64,6 +64,7 @@ class ModalProducto extends Component {
       codigo: '',
       cantidad: '',
       descripcion: '',
+      imagen: null,
       tipoProducto: '',
     });
   }

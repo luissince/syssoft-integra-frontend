@@ -186,7 +186,7 @@ class OrdenCompraEditar extends CustomComponent {
       this.fetchImpuesto(),
     ]);
 
-    const { cabecera, detalle } = ordenCompra;
+    const { cabecera, detalles } = ordenCompra;
 
     const moneda = monedas.find((item) => item.nacional === 1);
 
@@ -210,7 +210,7 @@ class OrdenCompraEditar extends CustomComponent {
       codiso: isEmpty(moneda) ? '' : moneda.codiso,
       observacion: cabecera.observacion,
       nota: cabecera.nota,
-      detalles: detalle,
+      detalles: detalles,
       loading: false,
     });
   };
@@ -402,9 +402,11 @@ class OrdenCompraEditar extends CustomComponent {
     const searchWord = text;
 
     if (isEmpty(searchWord)) {
-      this.setState({ productos: [] });
+      this.setState({ productos: [], loadingProducto: false });
       return;
     }
+
+    this.setState({ loadingProducto: true });
 
     const params = {
       filtrar: searchWord,
@@ -412,18 +414,15 @@ class OrdenCompraEditar extends CustomComponent {
 
     const productos = await this.fetchFiltrarProductos(params);
 
+    const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
+
     this.setState({
-      productos: productos,
+      productos: filteredProductos,
+      loadingProducto: false,
     });
   };
 
   handleSelectItemProducto = (value) => {
-    this.refProducto.current.initialize(value.nombre);
-
-    this.setState({
-      productos: [],
-    });
-
     this.handleOpenModalProducto(value);
   };
 

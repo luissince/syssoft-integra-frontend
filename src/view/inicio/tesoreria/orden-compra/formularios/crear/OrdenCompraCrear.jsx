@@ -368,6 +368,7 @@ class OrdenCompraCrear extends CustomComponent {
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
+    console.log(detalles)
     const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
@@ -394,6 +395,7 @@ class OrdenCompraCrear extends CustomComponent {
   handleClearInputProducto = () => {
     this.setState({
       productos: [],
+      loadingProducto: false,
     }, () => {
       this.updateReduxState();
     });
@@ -403,9 +405,11 @@ class OrdenCompraCrear extends CustomComponent {
     const searchWord = text;
 
     if (isEmpty(searchWord)) {
-      this.setState({ productos: [] });
+      this.setState({ productos: [], loadingProducto: false });
       return;
     }
+
+    this.setState({ loadingProducto: true });
 
     const params = {
       filtrar: searchWord,
@@ -413,19 +417,16 @@ class OrdenCompraCrear extends CustomComponent {
 
     const productos = await this.fetchFiltrarProductos(params);
 
+    const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
+
     this.setState({
-      productos: productos,
+      productos: filteredProductos,
+      loadingProducto: false,
     });
   };
 
   handleSelectItemProducto = (value) => {
-    this.refProducto.current.initialize(value.nombre);
-
-    this.setState({
-      productos: [],
-    }, () => {
-      this.updateReduxState();
-    });
+    this.updateReduxState();
 
     this.handleOpenModalProducto(value);
   };

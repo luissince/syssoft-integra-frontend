@@ -351,7 +351,7 @@ class GuiaRemision extends CustomComponent {
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
           <TableCell>
-            {item.tipoDocumento}-{item.documento}
+            {item.tipoDocumento} - {item.documento}
             <br />
             {item.informacion}
           </TableCell>

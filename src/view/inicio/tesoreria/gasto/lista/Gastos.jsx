@@ -280,14 +280,14 @@ class Gastos extends CustomComponent {
             {formatTime(item.hora)}
           </TableCell>
           <TableCell>
+            {item.tipoDocumento} - {item.documento}
+            <br />
+            {item.informacion}
+          </TableCell>
+          <TableCell>
             {item.comprobante}
             <br />
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </TableCell>
-          <TableCell>
-            {item.documento}
-            <br />
-            {item.informacion}
           </TableCell>
           <TableCell className="text-center">
             {

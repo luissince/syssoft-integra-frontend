@@ -236,7 +236,7 @@ class Compras extends CustomComponent {
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
           <TableCell>{item.fecha}<br />{formatTime(item.hora)}</TableCell>
-          <TableCell>{item.documento}<br />{item.informacion}</TableCell>
+          <TableCell>{item.tipoDocumento} - {item.documento}<br />{item.informacion}</TableCell>
           <TableCell>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</TableCell>
           <TableCell>{item.tipo}</TableCell>
           <TableCell className='text-center'>{estado}</TableCell>
@@ -304,7 +304,7 @@ class Compras extends CustomComponent {
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
-                    <TableHead width="15%">Proveedor</TableHead>
+                    <TableHead width="18%">Proveedor</TableHead>
                     <TableHead width="15%">Comprobante</TableHead>
                     <TableHead width="10%">Tipo</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>

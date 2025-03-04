@@ -238,7 +238,7 @@ class CuentasPorCobrar extends CustomComponent {
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
           <TableCell>{item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)} </TableCell>
-          <TableCell>{item.documento}<br />{item.informacion}</TableCell>
+          <TableCell>{item.tipoDocumento} - {item.documento}<br />{item.informacion}</TableCell>
           <TableCell>
             {item.numeroCuota === 1 ? item.numeroCuota + " CUOTA" : item.numeroCuota + " CUOTAS"}
             <br />
@@ -311,8 +311,8 @@ class CuentasPorCobrar extends CustomComponent {
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Comprobante</TableHead>
-                    <TableHead width="20%">Cliente</TableHead>
-                    <TableHead width="15%">N° Cuotas / Frecuencia</TableHead>
+                    <TableHead width="18%">Cliente</TableHead>
+                    <TableHead width="17%">N° Cuotas / Frecuencia</TableHead>
                     <TableHead width="10%">Total</TableHead>
                     <TableHead width="10%">Cobrado</TableHead>
                     <TableHead width="10%">Por Cobrar</TableHead>
