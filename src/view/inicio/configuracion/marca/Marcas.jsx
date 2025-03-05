@@ -297,7 +297,7 @@ class Marcas extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Código</TableHead>

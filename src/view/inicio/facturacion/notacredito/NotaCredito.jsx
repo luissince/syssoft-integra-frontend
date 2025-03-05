@@ -43,7 +43,7 @@ class NotaCredito extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
     };
-    
+
     this.refTxtSearch = React.createRef();
     this.abortControllerTable = new AbortController();
   }
@@ -64,7 +64,7 @@ class NotaCredito extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;

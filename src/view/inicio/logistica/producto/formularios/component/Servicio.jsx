@@ -67,12 +67,7 @@ const Servicio = (props) => {
   } = props;
 
   return (
-    <div
-      className="tab-pane fade "
-      id="addservicio"
-      role="tabpanel"
-      aria-labelledby="addservicio-tab"
-    >
+    <>
       {/* SECTOR TITULO*/}
       <Row>
         <Column className="col-md-12" formGroup={true}>
@@ -508,7 +503,7 @@ const Servicio = (props) => {
           </div>
         </Column>
       </Row>
-    </div>
+    </>
   );
 };
 

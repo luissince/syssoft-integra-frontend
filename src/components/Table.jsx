@@ -55,10 +55,10 @@ TableTitle.propTypes = {
 };
 
 const TableHeader = forwardRef((props, ref) => {
-    const { children, ...rest } = props;
+    const { children, className = '', ...rest } = props;
 
     return (
-        <thead ref={ref} {...rest}>
+        <thead className={className} ref={ref} {...rest}>
             {children}
         </thead>
     );

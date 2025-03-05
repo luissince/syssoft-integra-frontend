@@ -24,6 +24,7 @@ import Column from '../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
 
 class Almacenes extends CustomComponent {
   constructor(props) {
@@ -32,6 +33,8 @@ class Almacenes extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -44,7 +47,6 @@ class Almacenes extends CustomComponent {
     };
 
     this.abortControllerTable = new AbortController();
-    this.refTxtSearch = React.createRef();
   }
 
   componentDidMount() {
@@ -86,7 +88,7 @@ class Almacenes extends CustomComponent {
         this.fillTable(0, '');
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
         this.fillTable(0, '');
@@ -156,7 +158,7 @@ class Almacenes extends CustomComponent {
    * // Ejemplo de uso:
    * searchText("Ejemplo de texto de búsqueda");
    */
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
@@ -165,7 +167,7 @@ class Almacenes extends CustomComponent {
      * Incrementa la paginación y reinicia el estado si se cumple la condición.
      * @type {number}
      */
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
 
     // Llena la tabla con el nuevo texto.
     this.fillTable(1, text.trim());
@@ -307,44 +309,31 @@ class Almacenes extends CustomComponent {
         />
 
         <Row>
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar por nombre o distrito..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleAgregar}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
           </Column>
+        </Row>
 
-          <Column className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar por nombre..."
+            />
           </Column>
         </Row>
 
@@ -352,7 +341,7 @@ class Almacenes extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead className="text-center" width="5%">#</TableHead>
                     <TableHead width="15%">Nombre</TableHead>

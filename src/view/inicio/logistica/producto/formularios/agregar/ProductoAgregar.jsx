@@ -37,6 +37,7 @@ import { SpinnerView } from '../../../../../../components/Spinner';
 import ModalInventario from '../component/ModalInventario';
 import ModalProducto from '../component/ModalProducto';
 import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_SABOR, TIPO_ATRIBUTO_TALLA } from '../../../../../../model/types/tipo-atributo';
+import { TabContent, TabHead, TabHeader, TabPane } from '../../../../../../components/Tab';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
@@ -965,7 +966,7 @@ class ProductoAgregar extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
-      if(logoSend.size > 50){
+      if (logoSend.size > 50) {
         alertWarning("Producto", "La imagen a subir tiene que ser menor a 50 KB.")
         return;
       }
@@ -1474,304 +1475,275 @@ class ProductoAgregar extends CustomComponent {
           <Column className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
             <Row>
               <Column className="col-lg-12 col-md-12 col-sm-12 col-12">
-                <ul className="nav nav-tabs" id="myTab" role="tablist">
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className="nav-link active"
-                      id="addproducto-tab"
-                      data-bs-toggle="tab"
-                      href="#addproducto"
-                      type="button"
-                      role="tab"
-                      aria-controls="addproducto"
-                      aria-selected={true}
-                      onClick={() => this.setState({ tipo: 'TP0001' })}
-                    >
-                      <i className="bi bi-info-circle"></i> Producto
-                    </button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className="nav-link"
-                      id="addservicio-tab"
-                      data-bs-toggle="tab"
-                      href="#addservicio"
-                      type="button"
-                      role="tab"
-                      aria-controls="addservicio"
-                      aria-selected={false}
-                      onClick={() => this.setState({ tipo: 'TP0002' })}
-                    >
-                      <i className="bi bi-card-checklist"></i> Servicio
-                    </button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className="nav-link"
-                      id="addcombo-tab"
-                      data-bs-toggle="tab"
-                      href="#addcombo"
-                      type="button"
-                      role="tab"
-                      aria-controls="addcombo"
-                      aria-selected={false}
-                      onClick={() => this.setState({ tipo: 'TP0003' })}
-                    >
-                      <i className="bi bi-border-all"></i> Combo
-                    </button>
-                  </li>
-                </ul>
+                <TabHeader>
+                  <TabHead id='producto' isActive={true}>
+                    <i className="bi bi-info-circle"></i> Producto
+                  </TabHead>
 
-                <div className="tab-content pt-2" id="myTabContent">
-                  <Producto
-                    nombre={nombreProducto}
-                    refNombre={this.refNombreProducto}
-                    handleSelectNombre={this.handleInputNombreProducto}
+                  <TabHead id='servicio'>
+                    <i className="bi bi-card-checklist"></i> Servicio
+                  </TabHead>
 
-                    codigo={codigoProducto}
-                    refCodigo={this.refCodigoProducto}
-                    handleInputCodigo={this.handleInputCodigoProducto}
+                  <TabHead id='combo'>
+                    <i className="bi bi-border-all"></i> Combo
+                  </TabHead>
+                </TabHeader>
 
-                    sku={skuProducto}
-                    refSku={this.refSkuProducto}
-                    handleInputSku={this.handleInputSkuProducto}
+                <TabContent>
+                  <TabPane id='producto' isActive={true}>
+                    <Producto
+                      nombre={nombreProducto}
+                      refNombre={this.refNombreProducto}
+                      handleSelectNombre={this.handleInputNombreProducto}
 
-                    codigoBarras={codigoBarrasProducto}
-                    refCodigoBarras={this.refCodigoBarrasProducto}
-                    handleInputCodigoBarras={this.handleInputCodigoBarrasProducto}
-                    handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasProducto}
+                      codigo={codigoProducto}
+                      refCodigo={this.refCodigoProducto}
+                      handleInputCodigo={this.handleInputCodigoProducto}
 
-                    codigoSunat={codigoSunatProducto}
-                    refCodigoSunat={this.refCodigoSunatProducto}
-                    handleSelectCodigoSunat={this.handleSelectCodigoSunatProducto}
+                      sku={skuProducto}
+                      refSku={this.refSkuProducto}
+                      handleInputSku={this.handleInputSkuProducto}
 
-                    idMedida={idMedidaProducto}
-                    refIdMedida={this.refIdMedidaProducto}
-                    handleSelectIdMedida={this.handleSelectIdMedidaProducto}
-                    medidas={medidas}
+                      codigoBarras={codigoBarrasProducto}
+                      refCodigoBarras={this.refCodigoBarrasProducto}
+                      handleInputCodigoBarras={this.handleInputCodigoBarrasProducto}
+                      handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasProducto}
 
-                    idCategoria={idCategoriaProducto}
-                    refIdCategoria={this.refIdCategoriaProducto}
-                    handleSelectIdCategoria={this.handleSelectIdCategoriaProducto}
-                    categorias={categorias}
+                      codigoSunat={codigoSunatProducto}
+                      refCodigoSunat={this.refCodigoSunatProducto}
+                      handleSelectCodigoSunat={this.handleSelectCodigoSunatProducto}
 
-                    idMarca={idMarcaProducto}
-                    refIdMarca={this.refIdMarcaProducto}
-                    handleSelectIdMarca={this.handleSelectIdMarcaProducto}
-                    marcas={marcas}
+                      idMedida={idMedidaProducto}
+                      refIdMedida={this.refIdMedidaProducto}
+                      handleSelectIdMedida={this.handleSelectIdMedidaProducto}
+                      medidas={medidas}
 
-                    descripcionCorta={descripcionCortaProducto}
-                    refDescripcionCorta={this.refDescripcionCortaProducto}
-                    handleInputDescripcionCorta={this.handleInputDescripcionCortaProducto}
+                      idCategoria={idCategoriaProducto}
+                      refIdCategoria={this.refIdCategoriaProducto}
+                      handleSelectIdCategoria={this.handleSelectIdCategoriaProducto}
+                      categorias={categorias}
 
-                    descripcionLarga={descripcionLargaProducto}
-                    refDescripcionLarga={this.refDescripcionLargaProducto}
-                    handleInputDescripcionLarga={this.handleInputDescripcionLargaProducto}
+                      idMarca={idMarcaProducto}
+                      refIdMarca={this.refIdMarcaProducto}
+                      handleSelectIdMarca={this.handleSelectIdMarcaProducto}
+                      marcas={marcas}
 
-                    idTipoTratamientoProducto={idTipoTratamientoProducto}
-                    handleOptionTipoTratamientoProducto={this.handleOptionTipoTratamientoProducto}
+                      descripcionCorta={descripcionCortaProducto}
+                      refDescripcionCorta={this.refDescripcionCortaProducto}
+                      handleInputDescripcionCorta={this.handleInputDescripcionCortaProducto}
 
-                    costo={costoProducto}
-                    refCosto={this.refCostoProducto}
-                    handleInputCosto={this.handleInputCostoProducto}
+                      descripcionLarga={descripcionLargaProducto}
+                      refDescripcionLarga={this.refDescripcionLargaProducto}
+                      handleInputDescripcionLarga={this.handleInputDescripcionLargaProducto}
 
-                    precio={precioProducto}
-                    refPrecio={this.refPrecioProducto}
-                    handleInputPrecio={this.handleInputPrecioProducto}
+                      idTipoTratamientoProducto={idTipoTratamientoProducto}
+                      handleOptionTipoTratamientoProducto={this.handleOptionTipoTratamientoProducto}
 
-                    precios={precios}
-                    refPrecios={this.refPreciosProducto}
-                    handleInputNombrePrecios={this.handleInputNombrePreciosProducto}
-                    handleInputPrecioPrecios={this.handleInputPrecioPreciosProducto}
-                    handleAddPrecios={this.handleAddPreciosProducto}
-                    handleRemovePrecios={this.handleRemovePreciosProducto}
-                    activarInventario={true}
+                      costo={costoProducto}
+                      refCosto={this.refCostoProducto}
+                      handleInputCosto={this.handleInputCostoProducto}
 
-                    inventarios={this.state.inventariosProducto}
-                    handleOpenModalInventario={this.handleOpenModalInventario}
-                    handleRemoveItemInventario={this.handleRemoveInventario}
+                      precio={precioProducto}
+                      refPrecio={this.refPrecioProducto}
+                      handleInputPrecio={this.handleInputPrecioProducto}
 
-                    detalles={detallesProducto}
-                    refDetalles={this.refDetallesProducto}
-                    handleInputNombreDetalles={this.handleInputNombreDetallesProducto}
-                    handleInputValorDetalles={this.handleInputValorDetallesProducto}
-                    handleAddDetalles={this.handleAddDetallesProducto}
-                    handleRemoveDetalles={this.handleRemoveDetallesProducto}
+                      precios={precios}
+                      refPrecios={this.refPreciosProducto}
+                      handleInputNombrePrecios={this.handleInputNombrePreciosProducto}
+                      handleInputPrecioPrecios={this.handleInputPrecioPreciosProducto}
+                      handleAddPrecios={this.handleAddPreciosProducto}
+                      handleRemovePrecios={this.handleRemovePreciosProducto}
+                      activarInventario={true}
 
-                    imagenes={imagenesProducto}
-                    handleSelectImagenes={this.handleSelectImagenesProducto}
-                    handleRemoveImagenes={this.handleRemoveImagenesProducto}
+                      inventarios={this.state.inventariosProducto}
+                      handleOpenModalInventario={this.handleOpenModalInventario}
+                      handleRemoveItemInventario={this.handleRemoveInventario}
 
-                    colores={colores}
-                    coloresSeleccionados={coloresProducto}
-                    handleSelectColores={this.handleSelectColoresProducto}
+                      detalles={detallesProducto}
+                      refDetalles={this.refDetallesProducto}
+                      handleInputNombreDetalles={this.handleInputNombreDetallesProducto}
+                      handleInputValorDetalles={this.handleInputValorDetallesProducto}
+                      handleAddDetalles={this.handleAddDetallesProducto}
+                      handleRemoveDetalles={this.handleRemoveDetallesProducto}
 
-                    tallas={tallas}
-                    tallasSeleccionados={tallasProducto}
-                    handleSelectTallas={this.handleSelectTallasProducto}
+                      imagenes={imagenesProducto}
+                      handleSelectImagenes={this.handleSelectImagenesProducto}
+                      handleRemoveImagenes={this.handleRemoveImagenesProducto}
 
-                    sabores={sabores}
-                    saboresSeleccionados={saboresProducto}
-                    handleSelectSabores={this.handleSelectSaboresProducto}
-                  />
+                      colores={colores}
+                      coloresSeleccionados={coloresProducto}
+                      handleSelectColores={this.handleSelectColoresProducto}
 
-                  <Servicio
-                    nombre={nombreServicio}
-                    refNombre={this.refNombreServicio}
-                    handleSelectNombre={this.handleInputNombreServicio}
+                      tallas={tallas}
+                      tallasSeleccionados={tallasProducto}
+                      handleSelectTallas={this.handleSelectTallasProducto}
 
-                    codigo={codigoServicio}
-                    refCodigo={this.refCodigoServicio}
-                    handleInputCodigo={this.handleInputCodigoServicio}
+                      sabores={sabores}
+                      saboresSeleccionados={saboresProducto}
+                      handleSelectSabores={this.handleSelectSaboresProducto}
+                    />
+                  </TabPane>
 
-                    sku={skuServicio}
-                    refSku={this.refSkuServicio}
-                    handleInputSku={this.handleInputSkuServicio}
+                  <TabPane id='servicio'>
+                    <Servicio
+                      nombre={nombreServicio}
+                      refNombre={this.refNombreServicio}
+                      handleSelectNombre={this.handleInputNombreServicio}
 
-                    codigoBarras={codigoBarrasServicio}
-                    refCodigoBarras={this.refCodigoBarrasServicio}
-                    handleInputCodigoBarras={this.handleInputCodigoBarrasServicio}
-                    handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasServicio}
+                      codigo={codigoServicio}
+                      refCodigo={this.refCodigoServicio}
+                      handleInputCodigo={this.handleInputCodigoServicio}
 
-                    codigoSunat={codigoSunatServicio}
-                    refCodigoSunat={this.refCodigoSunatServicio}
-                    handleSelectCodigoSunat={this.handleSelectCodigoSunatServicio}
+                      sku={skuServicio}
+                      refSku={this.refSkuServicio}
+                      handleInputSku={this.handleInputSkuServicio}
 
-                    idMedida={idMedidaServicio}
-                    refIdMedida={this.refIdMedidaServicio}
-                    handleSelectIdMedida={this.handleSelectIdMedidaServicio}
-                    medidas={medidas}
+                      codigoBarras={codigoBarrasServicio}
+                      refCodigoBarras={this.refCodigoBarrasServicio}
+                      handleInputCodigoBarras={this.handleInputCodigoBarrasServicio}
+                      handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasServicio}
 
-                    idCategoria={idCategoriaServicio}
-                    refIdCategoria={this.refIdCategoriaServicio}
-                    handleSelectIdCategoria={this.handleSelectIdCategoriaServicio}
-                    categorias={categorias}
+                      codigoSunat={codigoSunatServicio}
+                      refCodigoSunat={this.refCodigoSunatServicio}
+                      handleSelectCodigoSunat={this.handleSelectCodigoSunatServicio}
 
-                    idMarca={idMarcaServicio}
-                    refIdMarca={this.refIdMarcaServicio}
-                    handleSelectIdMarca={this.handleSelectIdMarcaServicio}
-                    marcas={marcas}
+                      idMedida={idMedidaServicio}
+                      refIdMedida={this.refIdMedidaServicio}
+                      handleSelectIdMedida={this.handleSelectIdMedidaServicio}
+                      medidas={medidas}
 
-                    descripcionCorta={descripcionCortaServicio}
-                    refDescripcionCorta={this.refDescripcionCortaServicio}
-                    handleInputDescripcionCorta={this.handleInpuDescripcionCortaServicio}
+                      idCategoria={idCategoriaServicio}
+                      refIdCategoria={this.refIdCategoriaServicio}
+                      handleSelectIdCategoria={this.handleSelectIdCategoriaServicio}
+                      categorias={categorias}
 
-                    descripcionLarga={descripcionLargaServicio}
-                    refDescripcionLarga={this.refDescripcionLargaServicio}
-                    handleInputDescripcionLarga={this.handleInpuDescripcionLargaServicio}
+                      idMarca={idMarcaServicio}
+                      refIdMarca={this.refIdMarcaServicio}
+                      handleSelectIdMarca={this.handleSelectIdMarcaServicio}
+                      marcas={marcas}
 
-                    precio={precioServicio}
-                    refPrecio={this.refPrecioServicio}
-                    handleInputPrecio={this.handleInpuPrecioServicio}
+                      descripcionCorta={descripcionCortaServicio}
+                      refDescripcionCorta={this.refDescripcionCortaServicio}
+                      handleInputDescripcionCorta={this.handleInpuDescripcionCortaServicio}
 
-                    detalles={detallesServicio}
-                    refDetalles={this.refDetallesServicio}
-                    handleInputNombreDetalles={this.handleInputNombreDetallesServicio}
-                    handleInputValorDetalles={this.handleInputValorDetallesServicio}
-                    handleAddDetalles={this.handleAddDetallesServicio}
-                    handleRemoveDetalles={this.handleRemoveDetallesServicio}
+                      descripcionLarga={descripcionLargaServicio}
+                      refDescripcionLarga={this.refDescripcionLargaServicio}
+                      handleInputDescripcionLarga={this.handleInpuDescripcionLargaServicio}
 
-                    imagenes={imagenesServicio}
-                    handleSelectImagenes={this.handleSelectImagenesServicio}
-                    handleRemoveImagenes={this.handleRemoveImagenesServicio}
+                      precio={precioServicio}
+                      refPrecio={this.refPrecioServicio}
+                      handleInputPrecio={this.handleInpuPrecioServicio}
 
-                    colores={colores}
-                    coloresSeleccionados={coloresServicio}
-                    handleSelectColores={this.handleSelectColoresServicio}
+                      detalles={detallesServicio}
+                      refDetalles={this.refDetallesServicio}
+                      handleInputNombreDetalles={this.handleInputNombreDetallesServicio}
+                      handleInputValorDetalles={this.handleInputValorDetallesServicio}
+                      handleAddDetalles={this.handleAddDetallesServicio}
+                      handleRemoveDetalles={this.handleRemoveDetallesServicio}
 
-                    tallas={tallas}
-                    tallasSeleccionados={tallasServicio}
-                    handleSelectTallas={this.handleSelectTallasServicio}
+                      imagenes={imagenesServicio}
+                      handleSelectImagenes={this.handleSelectImagenesServicio}
+                      handleRemoveImagenes={this.handleRemoveImagenesServicio}
 
-                    sabores={sabores}
-                    saboresSeleccionados={saboresServicio}
-                    handleSelectSabores={this.handleSelectSaboresServicio}
-                  />
+                      colores={colores}
+                      coloresSeleccionados={coloresServicio}
+                      handleSelectColores={this.handleSelectColoresServicio}
 
-                  <Combo
-                    nombre={nombreCombo}
-                    refNombre={this.refNombreCombo}
-                    handleSelectNombre={this.handleInputNombreCombo}
+                      tallas={tallas}
+                      tallasSeleccionados={tallasServicio}
+                      handleSelectTallas={this.handleSelectTallasServicio}
 
-                    codigo={codigoCombo}
-                    refCodigo={this.refCodigoCombo}
-                    handleInputCodigo={this.handleInputCodigoCombo}
+                      sabores={sabores}
+                      saboresSeleccionados={saboresServicio}
+                      handleSelectSabores={this.handleSelectSaboresServicio}
+                    />
+                  </TabPane>
 
-                    sku={skuCombo}
-                    refSku={this.refSkuCombo}
-                    handleInputSku={this.handleInputSkuCombo}
+                  <TabPane id='combo' >
+                    <Combo
+                      nombre={nombreCombo}
+                      refNombre={this.refNombreCombo}
+                      handleSelectNombre={this.handleInputNombreCombo}
 
-                    codigoBarras={codigoBarrasCombo}
-                    refCodigoBarras={this.refCodigoBarrasCombo} 
-                    handleInputCodigoBarras={this.handleInputCodigoBarrasCombo}
-                    handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasCombo}
+                      codigo={codigoCombo}
+                      refCodigo={this.refCodigoCombo}
+                      handleInputCodigo={this.handleInputCodigoCombo}
 
-                    codigoSunat={codigoSunatCombo}
-                    refCodigoSunat={this.refCodigoSunatCombo}
-                    handleSelectCodigoSunat={this.handleSelectCodigoSunatCombo}
+                      sku={skuCombo}
+                      refSku={this.refSkuCombo}
+                      handleInputSku={this.handleInputSkuCombo}
 
-                    idMedida={idMedidaCombo}
-                    refIdMedida={this.refIdMedidaCombo}
-                    handleSelectIdMedida={this.handleSelectIdMedidaCombo}
-                    medidas={medidas}
+                      codigoBarras={codigoBarrasCombo}
+                      refCodigoBarras={this.refCodigoBarrasCombo}
+                      handleInputCodigoBarras={this.handleInputCodigoBarrasCombo}
+                      handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasCombo}
 
-                    idCategoria={idCategoriaCombo}
-                    refIdCategoria={this.refIdCategoriaCombo}
-                    handleSelectIdCategoria={this.handleSelectIdCategoriaCombo}
-                    categorias={categorias}
+                      codigoSunat={codigoSunatCombo}
+                      refCodigoSunat={this.refCodigoSunatCombo}
+                      handleSelectCodigoSunat={this.handleSelectCodigoSunatCombo}
 
-                    idMarca={idMarcaCombo}
-                    refIdMarca={this.refIdMarcaCombo}
-                    handleSelectIdMarca={this.handleSelectIdMarcaCombo}
-                    marcas={marcas}
+                      idMedida={idMedidaCombo}
+                      refIdMedida={this.refIdMedidaCombo}
+                      handleSelectIdMedida={this.handleSelectIdMedidaCombo}
+                      medidas={medidas}
 
-                    descripcionCorta={descripcionCortaCombo}
-                    refDescripcionCorta={this.refDescripcionCortaCombo}
-                    handleInputDescripcionCorta={this.handleInputDescripcionCortaCombo}
+                      idCategoria={idCategoriaCombo}
+                      refIdCategoria={this.refIdCategoriaCombo}
+                      handleSelectIdCategoria={this.handleSelectIdCategoriaCombo}
+                      categorias={categorias}
 
-                    descripcionLarga={descripcionLargaCombo}
-                    refDescripcionLarga={this.refDescripcionLargaCombo}
-                    handleInputDescripcionLarga={this.handleInputDescripcionLargaCombo}
+                      idMarca={idMarcaCombo}
+                      refIdMarca={this.refIdMarcaCombo}
+                      handleSelectIdMarca={this.handleSelectIdMarcaCombo}
+                      marcas={marcas}
 
-                    precio={precioCombo}
-                    refPrecio={this.refPrecioCombo}
-                    handleInputPrecio={this.handleInputPrecioCombo}
-                    combos={combos}
+                      descripcionCorta={descripcionCortaCombo}
+                      refDescripcionCorta={this.refDescripcionCortaCombo}
+                      handleInputDescripcionCorta={this.handleInputDescripcionCortaCombo}
 
-                    handleOpenModalProducto={this.handleOpenModalProducto}
-                    handleInputCantidadCombos={this.handleInputCantidadCombos}
-                    handleRemoveItemCombo={this.handleRemoveProducto}
+                      descripcionLarga={descripcionLargaCombo}
+                      refDescripcionLarga={this.refDescripcionLargaCombo}
+                      handleInputDescripcionLarga={this.handleInputDescripcionLargaCombo}
 
-                    activarInventario={false}
-                    inventarios={this.state.inventariosCombo}
-                    handleAddItemInventario={() => { }}
-                    handleRemoveItemInventario={() => { }}
+                      precio={precioCombo}
+                      refPrecio={this.refPrecioCombo}
+                      handleInputPrecio={this.handleInputPrecioCombo}
+                      combos={combos}
 
-                    detalles={detallesCombo}
-                    refDetalles={this.refDetallesCombo}
-                    handleInputNombreDetalles={this.handleInputNombreDetallesCombo}
-                    handleInputValorDetalles={this.handleInputValorDetallesCombo}
-                    handleAddDetalles={this.handleAddDetallesCombo}
-                    handleRemoveDetalles={this.handleRemoveDetallesCombo}
+                      handleOpenModalProducto={this.handleOpenModalProducto}
+                      handleInputCantidadCombos={this.handleInputCantidadCombos}
+                      handleRemoveItemCombo={this.handleRemoveProducto}
 
-                    imagenes={imagenesCombo}
-                    handleSelectImagenes={this.handleSelectImagenesCombo}
-                    handleRemoveImagenes={this.handleRemoveImagenesCombo}
+                      activarInventario={false}
+                      inventarios={this.state.inventariosCombo}
+                      handleAddItemInventario={() => { }}
+                      handleRemoveItemInventario={() => { }}
 
-                    colores={colores}
-                    coloresSeleccionados={coloresCombo}
-                    handleSelectColores={this.handleSelectColoresCombo}
+                      detalles={detallesCombo}
+                      refDetalles={this.refDetallesCombo}
+                      handleInputNombreDetalles={this.handleInputNombreDetallesCombo}
+                      handleInputValorDetalles={this.handleInputValorDetallesCombo}
+                      handleAddDetalles={this.handleAddDetallesCombo}
+                      handleRemoveDetalles={this.handleRemoveDetallesCombo}
 
-                    tallas={tallas}
-                    tallasSeleccionados={tallasCombo}
-                    handleSelectTallas={this.handleSelectTallasCombo}
+                      imagenes={imagenesCombo}
+                      handleSelectImagenes={this.handleSelectImagenesCombo}
+                      handleRemoveImagenes={this.handleRemoveImagenesCombo}
 
-                    sabores={sabores}
-                    saboresSeleccionados={saboresCombo}
-                    handleSelectSabores={this.handleSelectSaboresCombo}
-                  />
+                      colores={colores}
+                      coloresSeleccionados={coloresCombo}
+                      handleSelectColores={this.handleSelectColoresCombo}
 
-                </div>
+                      tallas={tallas}
+                      tallasSeleccionados={tallasCombo}
+                      handleSelectTallas={this.handleSelectTallasCombo}
+
+                      sabores={sabores}
+                      saboresSeleccionados={saboresCombo}
+                      handleSelectSabores={this.handleSelectSaboresCombo}
+                    />
+                  </TabPane>
+                </TabContent>
               </Column>
             </Row>
           </Column>

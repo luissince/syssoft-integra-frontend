@@ -313,7 +313,7 @@ class Atributos extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead className="text-center" width="5%">#</TableHead>
                     <TableHead width="15%">Tipo</TableHead>

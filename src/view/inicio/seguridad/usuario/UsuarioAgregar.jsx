@@ -20,6 +20,7 @@ import {
 import { CANCELED } from '../../../../model/types/types';
 import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
+import { TabContent, TabHead, TabHeader, TabPane } from '../../../../components/Tab';
 
 class UsuarioAgregar extends CustomComponent {
 
@@ -252,42 +253,18 @@ class UsuarioAgregar extends CustomComponent {
 
         <div className="row">
           <div className="col">
-            <ul className="nav nav-tabs" id="myTab" role="tablist">
-              <li className="nav-item" role="presentation">
-                <a
-                  className="nav-link active"
-                  id="datos-tab"
-                  data-bs-toggle="tab"
-                  href="#datos"
-                  role="tab"
-                  aria-controls="datos"
-                  aria-selected={true}
-                >
-                  <i className="bi bi-info-circle"></i> Datos
-                </a>
-              </li>
-              <li className="nav-item" role="presentation">
-                <a
-                  className="nav-link"
-                  id="login-tab"
-                  data-bs-toggle="tab"
-                  href="#login"
-                  role="tab"
-                  aria-controls="login"
-                  aria-selected={false}
-                >
-                  <i className="bi bi-person-workspace"></i> Login
-                </a>
-              </li>
-            </ul>
+            <TabHeader>
+              <TabHead id='datos' isActive={true}>
+                <i className="bi bi-info-circle"></i> Datos
+              </TabHead>
 
-            <div className="tab-content pt-2" id="myTabContent">
-              <div
-                className="tab-pane fade show active"
-                id="datos"
-                role="tabpanel"
-                aria-labelledby="datos-tab"
-              >
+              <TabHead id='login'>
+                <i className="bi bi-person-workspace"></i> Login
+              </TabHead>
+            </TabHeader>
+
+            <TabContent>
+              <TabPane id='datos' isActive={true}>
                 <div className="form-group">
                   <label htmlFor="dni">
                     Dni <i className="fa fa-asterisk text-danger small"></i>
@@ -468,14 +445,9 @@ class UsuarioAgregar extends CustomComponent {
                     />
                   </div>
                 </div>
-              </div>
+              </TabPane>
 
-              <div
-                className="tab-pane fade"
-                id="login"
-                role="tabpanel"
-                aria-labelledby="login-tab"
-              >
+              <TabPane id='login'>
                 <div className="form-group">
                   <label htmlFor="perfil">Perfil</label>
                   <select
@@ -632,8 +604,8 @@ class UsuarioAgregar extends CustomComponent {
                 ) : null}
 
                 {/* End Login */}
-              </div>
-            </div>
+              </TabPane>
+            </TabContent>
           </div>
         </div>
 

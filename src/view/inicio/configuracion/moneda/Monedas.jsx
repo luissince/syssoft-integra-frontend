@@ -301,7 +301,7 @@ class Monedas extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-striped table-bordered rounded"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="25%">Moneda</TableHead>

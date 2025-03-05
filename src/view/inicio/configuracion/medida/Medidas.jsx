@@ -20,6 +20,10 @@ import { CANCELED } from '../../../../model/types/types';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Search from '../../../../components/Search';
 
 class Medidas extends CustomComponent {
   constructor(props) {
@@ -42,6 +46,8 @@ class Medidas extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
@@ -70,12 +76,12 @@ class Medidas extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  async searchText(text) {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   }
@@ -91,7 +97,7 @@ class Medidas extends CustomComponent {
         this.fillTable(0, '');
         break;
       case 1:
-        this.fillTable(1, this.refTxtSearch.current.value);
+        this.fillTable(1, this.state.buscar);
         break;
       default:
         this.fillTable(0, '');
@@ -266,48 +272,37 @@ class Medidas extends CustomComponent {
         <Title
           title='Medida'
           subTitle='LISTA'
+          handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <div className="input-group mb-2">
-                <div className="input-group-prepend">
-                  <div className="input-group-text">
-                    <i className="bi bi-search"></i>
-                  </div>
-                </div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Buscar..."
-                  ref={this.refTxtSearch}
-                  onKeyUp={(event) =>
-                    keyUpSearch(event, () =>
-                      this.searchText(event.target.value),
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 col-sm-12">
-            <div className="form-group">
-              <button
-                className="btn btn-outline-info"
-                onClick={this.handleAgregar}
-              >
-                <i className="bi bi-file-plus"></i> Nuevo Registro
-              </button>{' '}
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => this.loadInit()}
-              >
-                <i className="bi bi-arrow-clockwise"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className='btn-outline-info'
+              onClick={this.handleAgregar}
+            >
+              <i className="bi bi-file-plus"></i> Nuevo Registro
+            </Button>
+            {' '}
+            <Button
+              className='btn-outline-secondary'
+              onClick={this.loadInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              onSearch={this.searchText}
+              placeholder="Buscar por nombre..."
+            />
+          </Column>
+        </Row>
 
         <div className="row">
           <div className="col">

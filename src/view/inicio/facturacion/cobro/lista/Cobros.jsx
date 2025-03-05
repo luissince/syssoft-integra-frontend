@@ -277,7 +277,7 @@ class Cobros extends CustomComponent {
             {formatTime(item.hora)}
           </TableCell>
           <TableCell>
-          {item.tipoDocumento} - {item.documento}
+            {item.tipoDocumento} - {item.documento}
             {<br />}
             {item.informacion}
           </TableCell>
@@ -361,7 +361,7 @@ class Cobros extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>

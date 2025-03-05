@@ -254,7 +254,7 @@ class Clientes extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
-              onClick={() =>this.handleDetalleCliente(item.idPersona)}
+              onClick={() => this.handleDetalleCliente(item.idPersona)}
             >
               <i className="bi bi-eye"></i>
             </Button>
@@ -298,7 +298,7 @@ class Clientes extends CustomComponent {
         <Row>
           <Column>
             <Table className={"table-bordered"}>
-              <TableHeader>
+              <TableHeader className="thead-light">
                 <TableRow>
                   <TableHead width="5%" className="text-center">#</TableHead>
                   <TableHead width="10%">DNI / RUC</TableHead>

@@ -89,12 +89,7 @@ const Producto = (props) => {
   } = props;
 
   return (
-    <div
-      className="tab-pane fade show active"
-      id="addproducto"
-      role="tabpanel"
-      aria-labelledby="addproducto-tab"
-    >
+    <>
       {/* SECTOR TITULO*/}
       <Row>
         <Column className="col-md-12" formGroup={true}>
@@ -724,7 +719,7 @@ const Producto = (props) => {
           </div>
         </Column>
       </Row>
-    </div>
+    </>
   );
 };
 

@@ -285,6 +285,9 @@ class Pedidos extends CustomComponent {
           <TableCell>{item.tipoDocumento} - {item.documento}<br />{item.informacion}</TableCell>
           <TableCell>{item.comprobante}<br />{item.serie}-{formatNumberWithZeros(item.numeracion)}</TableCell>
           <TableCell className='text-center'>{estado}</TableCell>
+          <TableCell className='text-center'>
+            <span className={item.ligado == 0 ? 'badge badge-secondary' : 'badge badge-success'}>{item.ligado}</span>
+          </TableCell>
           <TableCell className='text-center'>{numberFormat(item.total, item.codiso)} </TableCell>
           <TableCell className="text-center">
             <Button
@@ -388,13 +391,14 @@ class Pedidos extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="20%">Cliente</TableHead>
                     <TableHead width="15%">Comprobante</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Ligado</TableHead>
                     <TableHead width="10%" className="text-center">Total</TableHead>
                     <TableHead width="5%" className="text-center">Detalle</TableHead>
                     <TableHead width="5%" className="text-center">Editar</TableHead>

@@ -503,16 +503,16 @@ class Inventario extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="25%">Producto</TableHead>
+                    <TableHead width="20%">Producto</TableHead>
                     <TableHead width="13%">Almacen</TableHead>
                     <TableHead width="10%">Stock Máx.</TableHead>
                     <TableHead width="10%">Stock Mín.</TableHead>
                     <TableHead width="15%">Cantidad</TableHead>
                     <TableHead width="10%" className="text-right">Costo</TableHead>
-                    <TableHead width="5%">Editar</TableHead>
+                    <TableHead width="7%">Editar</TableHead>
                     <TableHead width="7%">Cod. Bar</TableHead>
                   </TableRow>
                 </TableHeader>

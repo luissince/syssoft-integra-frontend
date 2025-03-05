@@ -82,12 +82,7 @@ const Combo = (props) => {
   } = props;
 
   return (
-    <div
-      className="tab-pane fade"
-      id="addcombo"
-      role="tabpanel"
-      aria-labelledby="addcombo-tab"
-    >
+    <>
       {/* SECTOR INFORMACIÓN GENERAL */}
       <Row>
         <Column className="col-md-12" formGroup={true}>
@@ -611,7 +606,7 @@ const Combo = (props) => {
           </div>
         </Column>
       </Row>
-    </div>
+    </>
   );
 };
 

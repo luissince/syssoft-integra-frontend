@@ -363,7 +363,7 @@ class Kardex extends CustomComponent {
           <TableCell>{numberFormat(costo, this.state.codiso)}</TableCell>
 
           <TableCell>{item.almacen}</TableCell>
-          <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> 
+          <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell>
           {/* 
           <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
           <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
@@ -496,7 +496,7 @@ class Kardex extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className="table table-bordered rounded">
-                <TableHeader>
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Fecha</TableHead>
                     <TableHead width="21%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Descripción</TableHead>
