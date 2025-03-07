@@ -24,6 +24,7 @@ import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import { TIPO_CONCEPTO_INGRESO } from '../../../../model/types/tipo-concepto';
 
 class Conceptos extends CustomComponent {
   constructor(props) {
@@ -204,16 +205,16 @@ class Conceptos extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
+
+      const tipoConcepto = item.idTipoConcepto === TIPO_CONCEPTO_INGRESO ? <span className='text-success'>INGRESO <i className='fa fa-arrow-down'></i></span> : <span className='text-danger'>EGRESO <i className='fa fa-arrow-up'></i></span>;
+      const sistema = item.sistema === 1 ? "SISTEMA" : "LIBRE";
+
       return (
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
           <TableCell>{item.nombre}</TableCell>
-          <TableCell>
-            {item.tipo === 1
-              ? 'TIPO INGRESO'
-              : 'TIPO EGRESO'}
-          </TableCell>
-          <TableCell>{item.sistema === 1 ? 'SISTEMA' : 'LIBRE'}</TableCell>
+          <TableCell>{tipoConcepto}</TableCell>
+          <TableCell>{sistema}</TableCell>
           <TableCell>
             {item.fecha}
             {<br />}

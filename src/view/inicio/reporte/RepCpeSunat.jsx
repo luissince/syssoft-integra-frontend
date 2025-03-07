@@ -235,7 +235,7 @@ class RepCpeSunat extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
+            {/* <Button
               className="btn-outline-warning"
               onClick={this.handleOpenPdf}>
               <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
@@ -245,7 +245,7 @@ class RepCpeSunat extends CustomComponent {
               className="btn-outline-success"
               onClick={this.handleDownloadExcel}>
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
-            </Button>
+            </Button> */}
             {" "}
             <Button
               className="btn-outline-light"

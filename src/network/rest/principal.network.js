@@ -615,6 +615,15 @@ export function documentsExcelVenta() {
 |--------------------------------------------------------------------------
 */
 
+export async function listTransaccion(params, signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/transaccion/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
 export async function dashboardTransaccion(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/transaccion/dashboard', {
@@ -622,6 +631,25 @@ export async function dashboardTransaccion(params, signal) {
       signal: signal,
     }),
   );
+}
+
+export function documentsPdfReportsTransaccion(params) {
+  const baseUrl = `${import.meta.env.VITE_APP_BACK_END}/api/transaccion/documents/pdf/reports`;
+
+  // Crear una instancia de URLSearchParams para manejar los parámetros
+  const queryParams = new URLSearchParams();
+
+  // Agregar cada parámetro a URLSearchParams
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      queryParams.append(key, params[key]);
+    }
+  }
+
+  // Construir la URL completa con los parámetros
+  const fullUrl = `${baseUrl}?${queryParams.toString()}`;
+
+  return fullUrl;
 }
 
 // ------------------------------------------------------------------------

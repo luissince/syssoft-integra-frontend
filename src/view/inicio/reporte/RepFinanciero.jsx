@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
-import { ArrowUpIcon, ExternalLink } from 'lucide-react'
+import { ArrowDownIcon, ArrowUpIcon, ExternalLink } from 'lucide-react'
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -14,14 +14,15 @@ import Button from '../../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
 import { Link } from 'react-router-dom';
-import { alertWarning, currentDate, formatNumberWithZeros, formatTime, getPathNavigation, guId, isEmpty, numberFormat } from '../../../helper/utils.helper';
-import { comboSucursal, comboUsuario, dashboardTransaccion, documentsExcelCompra, documentsPdfReportsCompra } from '../../../network/rest/principal.network';
+import { alertWarning, currentDate, formatNumberWithZeros, formatTime, getPathNavigation, getStatePrivilegio, guId, isEmpty, numberFormat } from '../../../helper/utils.helper';
+import { comboSucursal, comboUsuario, dashboardTransaccion, documentsExcelCompra, documentsPdfReportsCompra, documentsPdfReportsTransaccion } from '../../../network/rest/principal.network';
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import React from 'react';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import SuccessReponse from '../../../model/class/response';
+import { ELEGIR_SUCURSAL, ELEGIR_USUARIO, R_FINANCIERO, REPORTES } from '../../../model/types/menu';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -40,10 +41,10 @@ class RepFinanciero extends CustomComponent {
       loading: false,
       msgLoading: "Cargando información...",
 
-      fechaInicial: currentDate(),
+      fechaInicio: currentDate(),
       fechaFinal: currentDate(),
 
-      idUsuario: '',
+      idUsuario: this.props.token.userToken.idUsuario,
       usuarios: [],
 
       idSucursal: this.props.token.project.idSucursal,
@@ -52,19 +53,18 @@ class RepFinanciero extends CustomComponent {
       codIso: this.props.moneda.codiso ?? '',
 
       totalIngreso: 0,
-      totalSalida: 0,
+      totalEgreso: 0,
       bancos: [],
       ingresos: [],
-      salidas: [],
+      egresos: [],
       lista: [],
       paginacion: 1,
       totalPaginacion: 0,
       filasPorPagina: 5,
+
+      elegirSucursal: getStatePrivilegio(this.props.token.userToken.menus, REPORTES, R_FINANCIERO, ELEGIR_SUCURSAL),
+      elegirUsuario: getStatePrivilegio(this.props.token.userToken.menus, REPORTES, R_FINANCIERO, ELEGIR_USUARIO),
     };
-    this.refFechaInicial = React.createRef();
-    this.refFechaFinal = React.createRef();
-    this.refUsuario = React.createRef();
-    this.refIdSucursal = React.createRef();
 
     this.abortControllerView = new AbortController();
   }
@@ -165,12 +165,12 @@ class RepFinanciero extends CustomComponent {
     });
 
     const params = {
-      'fechaInicio': this.state.fechaInicial,
-      'fechaFinal': this.state.fechaFinal,
-      'idSucursal': this.state.idSucursal,
-      'idUsuario': this.state.idUsuario,
-      'posicionPagina': (this.state.paginacion - 1) * this.state.filasPorPagina,
-      'filasPorPagina': this.state.filasPorPagina,
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
+      idSucursal: this.state.idSucursal,
+      idUsuario: this.state.idUsuario,
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
     }
 
     const dashboard = await dashboardTransaccion(params);
@@ -188,10 +188,10 @@ class RepFinanciero extends CustomComponent {
 
     this.setState({
       totalIngreso: dashboard.data.ingreso,
-      totalSalida: dashboard.data.salida,
+      totalEgreso: dashboard.data.egreso,
       bancos: dashboard.data.bancos,
       ingresos: dashboard.data.ingresos,
-      salidas: dashboard.data.salidas,
+      egreso: dashboard.data.egreso,
       lista: [...this.state.lista, ...dashboard.data.lista],
       totalPaginacion: totalPaginacion,
       loading: false
@@ -214,8 +214,8 @@ class RepFinanciero extends CustomComponent {
   |
   */
 
-  handleDateFechaInicial = (event) => {
-    this.setState({ fechaInicial: event.target.value }, async () => {
+  handleDateFechaInicio = (event) => {
+    this.setState({ fechaInicio: event.target.value }, async () => {
       await this.loadingData(true);
     });
   }
@@ -238,9 +238,17 @@ class RepFinanciero extends CustomComponent {
     });
   }
 
-  handleOpenPdf = async () => {
+  handleOpenPdf = async (size) => {
+    const params = {
+      size: size,
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
+      idSucursal: this.state.idSucursal,
+      idUsuario: this.state.idUsuario,
+    };
+
     await pdfVisualizer.init({
-      url: documentsPdfReportsCompra(),
+      url: documentsPdfReportsTransaccion(params),
       title: 'Reporte de Financiero',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
@@ -343,15 +351,27 @@ class RepFinanciero extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-outline-warning"
-              onClick={this.handleOpenPdf}>
-              <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
+              onClick={this.handleOpenPdf.bind(this, 'A4')}>
+              <i className="bi bi-file-earmark-pdf-fill"></i> Reporte A4
             </Button>
             {" "}
+            <Button
+              className="btn-outline-warning"
+              onClick={this.handleOpenPdf.bind(this, '80mm')}>
+              <i className="bi bi-file-earmark-pdf-fill"></i> Reporte 80mm
+            </Button>
+            {" "}
+            <Button
+              className="btn-outline-warning"
+              onClick={this.handleOpenPdf.bind(this, '58mm')}>
+              <i className="bi bi-file-earmark-pdf-fill"></i> Reporte 58mm
+            </Button>
+            {/* {" "}
             <Button
               className="btn-outline-success"
               onClick={this.handleDownloadExcel}>
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
-            </Button>
+            </Button> */}
             {" "}
             <Button
               className="btn-outline-light"
@@ -366,8 +386,8 @@ class RepFinanciero extends CustomComponent {
             <Input
               label={"Fecha de Inicio:"}
               type="date"
-              value={this.state.fechaInicial}
-              onChange={this.handleDateFechaInicial}
+              value={this.state.fechaInicio}
+              onChange={this.handleDateFechaInicio}
             />
           </Column>
 
@@ -380,7 +400,7 @@ class RepFinanciero extends CustomComponent {
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          {this.state.elegirSucursal && <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
             <Select
               label={"Sucursal:"}
               value={this.state.idSucursal}
@@ -395,9 +415,9 @@ class RepFinanciero extends CustomComponent {
                 ))
               }
             </Select>
-          </Column>
+          </Column>}
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          {this.state.elegirUsuario && <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
             <Select
               label={"Usuario:"}
               value={this.state.idUsuario}
@@ -412,44 +432,42 @@ class RepFinanciero extends CustomComponent {
                 ))
               }
             </Select>
+          </Column>}
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Total Restante</CardTitle>
+                <CardText>{numberFormat(this.state.totalIngreso - this.state.totalEgreso, this.state.codIso)}</CardText>
+              </CardBody>
+            </Card>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Ingresos</CardTitle>
                 <CardText>{numberFormat(this.state.totalIngreso, this.state.codIso)}</CardText>
                 <p className="text-sm">
-                  <ArrowUpIcon className="text-green-500 mr-1" />
-                  10% vs mes anterior
+                  <ArrowDownIcon className="text-success mr-1" />
+                  Suma
                 </p>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardBody>
-                <CardTitle>Salidas</CardTitle>
-                <CardText>{numberFormat(this.state.totalSalida, this.state.codIso)}</CardText>
+                <CardTitle>Egresos</CardTitle>
+                <CardText>{numberFormat(this.state.totalEgreso, this.state.codIso)}</CardText>
                 <p className="text-sm">
-                  <ArrowUpIcon className="text-green-500 mr-1" />
-                  10% vs mes anterior
-                </p>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <Card>
-              <CardBody>
-                <CardTitle>Utilidad</CardTitle>
-                <CardText>{numberFormat(this.state.totalIngreso - this.state.totalSalida, this.state.codIso)}.</CardText>
-                <p className="text-sm">
-                  <ArrowUpIcon className="text-green-500 mr-1" />
-                  10% vs mes anterior
+                  <ArrowUpIcon className="text-danger mr-1" />
+                  Resta
                 </p>
               </CardBody>
             </Card>
@@ -521,9 +539,9 @@ class RepFinanciero extends CustomComponent {
           <Column className='col-xl-6 col-lg-12' formGroup={true}>
             <Card>
               <CardBody>
-                <CardTitle>Salidas por Concepto</CardTitle>
+                <CardTitle>Egresos por Concepto</CardTitle>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={this.state.salidas}>
+                  <BarChart data={this.state.egresos}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="nombre" />
                     <YAxis />

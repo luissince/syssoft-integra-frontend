@@ -51,10 +51,12 @@ export const MARCAS = 'SM0012';          // MN0007 Marcas
 export const ATRIBUTOS = 'SM0013';       // MN0007 Atributos
 
 export const R_VENTAS = 'SM0001';         // MN0008 R. Ventas
-export const R_FINANCIERO = 'SM0002';     // MN0008 R. Financiero
-export const R_PRODUCTOS = 'SM0003';      // MN0008 R. Productos
-export const R_CLIENTES = 'SM0004';       // MN0008 R. Clientes
-export const R_CPE_SUNAT = 'SM0005';      // MN0008 R. Cpe Sunat
+export const R_COMPRAS = 'SM0002';         // MN0008 R. Compras
+export const R_FINANCIERO = 'SM0003';     // MN0008 R. Financiero
+export const R_PRODUCTOS = 'SM0004';      // MN0008 R. Productos
+export const R_CLIENTES = 'SM0005';       // MN0008 R. Clientes
+export const R_PROVEEDOR = 'SM0006';       // MN0008 R. Proveedor
+export const R_CPE_SUNAT = 'SM0007';      // MN0008 R. Cpe Sunat
 
 export const CPE_ELECTRONICOS = 'SM0001'; // MN0009 CPE Electrónicos
 export const CPE_CONSULTAR = 'SM0002';    // MN0009 CPE Consultar
@@ -83,3 +85,7 @@ export const ELIMINAR_COBRO = 'PR0003';   // SM0002 MN0003 Eliminar cobro
 export const AGREGAR_NOTA_CREDITO = 'PR0001';  // SM0003 MN0003 Agregar nota de crédito
 export const VISUALIZAR_NOTA_CREDITO = 'PR0002'; // SM0003 MN0003 Visualizar nota de crédito
 export const ANULAR_NOTA_CREDITO = 'PR0003';     // SM0003 MN0003 Anular nota de crédito
+
+
+export const ELEGIR_SUCURSAL  = 'PR0001';  // SM0003 MN0003 Agregar nota de crédito
+export const ELEGIR_USUARIO = 'PR0002'; // SM0003 MN0003 Visualizar nota de crédito

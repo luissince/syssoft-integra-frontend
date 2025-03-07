@@ -146,11 +146,6 @@ import Configuracion, {
   VehiculoAgregar,
   VehiculoEditar,
 
-  Bancos,
-  BancoDetalle,
-  BancoAgregar,
-  BancoEditar,
-
   Empresa,
   EmpresaEditar,
 
@@ -185,6 +180,15 @@ import CpeSunat, {
   CpeElectronicos,
   CpeConsultar,
 } from './cpesunat/index.jsx';
+
+import Finanzas, {
+  Bancos,
+  BancoDetalle,
+  BancoAgregar,
+  BancoEditar,
+
+  Transacciones,
+} from './finanzas/index.jsx';
 
 import {
   configEmpresa,
@@ -1014,27 +1018,6 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/configuracion/bancos`}
-            exact={true}
-            render={(props) => <Bancos {...props} />}
-          />
-          <Route
-            path={`${path}/configuracion/bancos/detalle`}
-            exact={true}
-            render={(props) => <BancoDetalle {...props} />}
-          />
-          <Route
-            path={`${path}/configuracion/bancos/agregar`}
-            exact={true}
-            render={(props) => <BancoAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/configuracion/bancos/editar`}
-            exact={true}
-            render={(props) => <BancoEditar {...props} />}
-          />
-
-          <Route
             path={`${path}/configuracion/empresa`}
             exact={true}
             render={(props) => <Empresa {...props} />}
@@ -1204,6 +1187,45 @@ class Inicio extends React.Component {
           <Route
             path={`${path}/cpesunat/cpeconsultar`}
             render={(props) => <CpeConsultar {...props} />}
+          />
+
+          {/*
+          ----------------------------------------------------------
+          | FINANZAS
+          ----------------------------------------------------------
+          */}
+
+          <Route
+            path={`${path}/finanzas`}
+            exact={true}
+            render={(props) => <Finanzas {...props} />}
+          />
+
+          <Route
+            path={`${path}/finanzas/bancos`}
+            exact={true}
+            render={(props) => <Bancos {...props} />}
+          />
+          <Route
+            path={`${path}/finanzas/bancos/detalle`}
+            exact={true}
+            render={(props) => <BancoDetalle {...props} />}
+          />
+          <Route
+            path={`${path}/finanzas/bancos/agregar`}
+            exact={true}
+            render={(props) => <BancoAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/finanzas/bancos/editar`}
+            exact={true}
+            render={(props) => <BancoEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/finanzas/transacciones`}
+            exact={true}
+            render={(props) => <Transacciones {...props} />}
           />
 
           <Route component={NotFoundMain} />

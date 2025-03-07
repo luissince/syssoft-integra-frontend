@@ -19,20 +19,21 @@ import Select from '../../../../components/Select';
 import Title from '../../../../components/Title';
 import Input from '../../../../components/Input';
 import Button from '../../../../components/Button';
+import { TIPO_CONCEPTO_EGRESO, TIPO_CONCEPTO_INGRESO } from '../../../../model/types/tipo-concepto';
 
 class ConceptoAgregar extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
       nombre: '',
-      tipo: 0,
+      idTipoConcepto: '',
       codigo: '',
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refNombre = React.createRef();
-    this.refTipo = React.createRef();
+    this.refIdTipoConcepto = React.createRef();
   }
 
   handleGuardar = async () => {
@@ -45,7 +46,7 @@ class ConceptoAgregar extends CustomComponent {
 
     if (this.state.tipo === 0) {
       alertWarning('Concepto', 'Seleccione el tipo de concepto.', () =>
-        this.refTipo.current.focus(),
+        this.refIdTipoConcepto.current.focus(),
       );
       return;
     }
@@ -54,7 +55,7 @@ class ConceptoAgregar extends CustomComponent {
       if (event) {
         const data = {
           nombre: this.state.nombre,
-          tipo: this.state.tipo,
+          idTipoConcepto: this.state.idTipoConcepto,
           codigo: this.state.codigo,
           idUsuario: this.state.idUsuario,
         };
@@ -107,14 +108,14 @@ class ConceptoAgregar extends CustomComponent {
             <Select
               group={true}
               label={<>Tipo de Concepto: <i className="fa fa-asterisk text-danger small"></i></>}
-              value={this.state.tipo}
-              refSelect={this.refTipo}
+              value={this.state.idTipoConcepto}
+              refSelect={this.refIdTipoConcepto}
               onChange={(event) =>
-                this.setState({ tipo: event.target.value })
+                this.setState({ idTipoConcepto: event.target.value })
               }>
-              <option value={0}>-- Seleccione --</option>
-              <option value={1}>INGRESO</option>
-              <option value={2}>EGRESO</option>
+              <option value={''}>-- Seleccione --</option>
+              <option value={TIPO_CONCEPTO_INGRESO}>INGRESO</option>
+              <option value={TIPO_CONCEPTO_EGRESO}>EGRESO</option>
             </Select>
           </Column>
         </Row>

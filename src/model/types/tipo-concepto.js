@@ -1,0 +1,2 @@
+export const TIPO_CONCEPTO_INGRESO = 'TC0001';
+export const TIPO_CONCEPTO_EGRESO = 'TC0002';

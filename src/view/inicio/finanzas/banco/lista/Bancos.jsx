@@ -6,25 +6,27 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper';
+} from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
+import Paginacion from '../../../../../components/Paginacion';
 import {
   deleteBanco,
   listBancos,
-} from '../../../../network/rest/principal.network';
-import ErrorResponse from '../../../../model/class/error-response';
-import SuccessReponse from '../../../../model/class/response';
-import { CANCELED } from '../../../../model/types/types';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
-import { SpinnerTable } from '../../../../components/Spinner';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '../../../../../network/rest/principal.network';
+import ErrorResponse from '../../../../../model/class/error-response';
+import SuccessReponse from '../../../../../model/class/response';
+import { CANCELED } from '../../../../../model/types/types';
+import ContainerWrapper from '../../../../../components/Container';
+import CustomComponent from '../../../../../model/class/custom-component';
+import Title from '../../../../../components/Title';
+import Row from '../../../../../components/Row';
+import Column from '../../../../../components/Column';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import { SpinnerTable } from '../../../../../components/Spinner';
+import Button from '../../../../../components/Button';
+import Search from '../../../../../components/Search';
+import Input from '../../../../../components/Input';
+import Select from '../../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.

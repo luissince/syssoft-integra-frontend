@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../../components/Container';
+import CustomComponent from '../../../../../../model/class/custom-component';
 import {
   alertDialog,
   alertInfo,
@@ -10,16 +10,16 @@ import {
   isEmpty,
   isText,
   spinnerLoading,
-} from '../../../../helper/utils.helper';
+} from '../../../../../../helper/utils.helper';
 import {
   getIdBando,
   comboMoneda,
   updateBanco,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
+} from '../../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../../model/class/response';
+import ErrorResponse from '../../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../../model/types/types';
+import Title from '../../../../../../components/Title';
 
 class BancoEditar extends CustomComponent {
   constructor(props) {

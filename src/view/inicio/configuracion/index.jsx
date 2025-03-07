@@ -31,11 +31,6 @@ import Vehiculos from './vehiculo/Vehiculos.jsx';
 import VehiculoAgregar from './vehiculo/VehiculoAgregar.jsx';
 import VehiculoEditar from './vehiculo/VehiculoEditar.jsx';
 
-import Bancos from './banco/Bancos.jsx';
-import BancoDetalle from './banco/BancoDetalle.jsx';
-import BancoAgregar from './banco/BancoAgregar.jsx';
-import BancoEditar from './banco/BancoEditar.jsx';
-
 import Empresa from './empresa/Empresa.jsx';
 import EmpresaEditar from './empresa/EmpresaEditar.jsx';
 
@@ -83,11 +78,6 @@ export {
     Vehiculos,
     VehiculoAgregar,
     VehiculoEditar,
-
-    Bancos,
-    BancoDetalle,
-    BancoAgregar,
-    BancoEditar,
 
     Empresa,
     EmpresaEditar,

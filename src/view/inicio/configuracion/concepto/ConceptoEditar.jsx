@@ -23,6 +23,7 @@ import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import Input from '../../../../components/Input';
 import Button from '../../../../components/Button';
+import { TIPO_CONCEPTO_EGRESO, TIPO_CONCEPTO_INGRESO } from '../../../../model/types/tipo-concepto';
 
 class ConceptoEditar extends CustomComponent {
   constructor(props) {
@@ -30,7 +31,7 @@ class ConceptoEditar extends CustomComponent {
     this.state = {
       idConcepto: '',
       nombre: '',
-      tipo: 0,
+      idTipoConcepto: '',
       codigo: '',
 
       loading: true,
@@ -40,7 +41,7 @@ class ConceptoEditar extends CustomComponent {
     };
 
     this.refNombre = React.createRef();
-    this.refTipo = React.createRef();
+    this.refIdTipoConcepto = React.createRef();
   }
 
   async componentDidMount() {
@@ -62,7 +63,7 @@ class ConceptoEditar extends CustomComponent {
     this.setState({
       idConcepto: concepto.idConcepto,
       nombre: concepto.nombre,
-      tipo: concepto.tipo,
+      idTipoConcepto: concepto.idTipoConcepto,
       codigo: concepto.codigo,
       loading: false,
     });
@@ -95,8 +96,8 @@ class ConceptoEditar extends CustomComponent {
     }
 
     if (this.state.tipo === 0) {
-      alertWarning('Concepto', 'Seleccione el tipo de <concepto.', () =>
-        this.refTipo.current.focus(),
+      alertWarning('Concepto', 'Seleccione el tipo de concepto.', () =>
+        this.refIdTipoConcepto.current.focus(),
       );
       return;
     }
@@ -106,7 +107,7 @@ class ConceptoEditar extends CustomComponent {
         const data = {
           idConcepto: this.state.idConcepto,
           nombre: this.state.nombre,
-          tipo: this.state.tipo,
+          idTipoConcepto: this.state.idTipoConcepto,
           codigo: this.state.codigo,
           idUsuario: this.state.idUsuario,
         };
@@ -164,14 +165,14 @@ class ConceptoEditar extends CustomComponent {
             <Select
               group={true}
               label={<>Tipo de Concepto: <i className="fa fa-asterisk text-danger small"></i></>}
-              value={this.state.tipo}
-              refSelect={this.refTipo}
+              value={this.state.idTipoConcepto}
+              refSelect={this.refIdTipoConcepto}
               onChange={(event) =>
-                this.setState({ tipo: event.target.value })
+                this.setState({ idTipoConcepto: event.target.value })
               }>
-              <option value={0}>-- Seleccione --</option>
-              <option value={1}>INGRESO</option>
-              <option value={2}>EGRESO</option>
+              <option value={''}>-- Seleccione --</option>
+              <option value={TIPO_CONCEPTO_INGRESO}>INGRESO</option>
+              <option value={TIPO_CONCEPTO_EGRESO}>EGRESO</option>
             </Select>
           </Column>
         </Row>

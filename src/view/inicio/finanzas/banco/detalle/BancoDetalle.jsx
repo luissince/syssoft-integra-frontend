@@ -7,16 +7,16 @@ import {
   formatTime,
   formatNumberWithZeros,
   getPathNavigation,
-} from '../../../../helper/utils.helper';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
-import { detailtBanco, detailtListBanco } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
+} from '../../../../../helper/utils.helper';
+import Paginacion from '../../../../../components/Paginacion';
+import ContainerWrapper from '../../../../../components/Container';
+import { detailtBanco, detailtListBanco } from '../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../model/class/response';
+import ErrorResponse from '../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../model/types/types';
+import CustomComponent from '../../../../../model/class/custom-component';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
-import Title from '../../../../components/Title';
+import Title from '../../../../../components/Title';
 
 class BancoDetalle extends CustomComponent {
 

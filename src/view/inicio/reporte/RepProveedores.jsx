@@ -145,7 +145,7 @@ class RepProveedores extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
+        {/* <Row>
           <Column formGroup={true}>
             <Button
               className="btn-outline-warning"
@@ -165,7 +165,8 @@ class RepProveedores extends CustomComponent {
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
-        </Row>
+        </Row> */}
+
         <Row>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
             <Input
