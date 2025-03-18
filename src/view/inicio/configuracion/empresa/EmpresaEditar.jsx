@@ -84,6 +84,9 @@ class EmpresaProceso extends CustomComponent {
         src: images.noImage,
       },
 
+      numeroWhatsapp: '',
+      tituloWhatsapp: '',
+      mensajeWhatsapp: '',
       horarioAtencion: '',
       acercaNosotros: '',
       politicasPrivacidad: '',
@@ -193,6 +196,9 @@ class EmpresaProceso extends CustomComponent {
         image: empresa.rutaImage ?? { src: images.noImage },
         icon: empresa.rutaIcon ?? { src: images.noImage },
 
+        numeroWhatsapp: empresa.numeroWhatsapp ?? "",
+        tituloWhatsapp: empresa.tituloWhatsapp ?? "",
+        mensajeWhatsapp: empresa.mensajeWhatsapp ?? "",
         horarioAtencion: empresa.horarioAtencion ?? "",
         acercaNosotros: empresa.acercaNosotros ?? "",
         politicasPrivacidad: empresa.politicasPrivacidad ?? "",
@@ -483,6 +489,9 @@ class EmpresaProceso extends CustomComponent {
         image: this.state.image,
         icon: this.state.icon,
 
+        numeroWhatsapp: this.state.numeroWhatsapp.trim(),
+        tituloWhatsapp: this.state.tituloWhatsapp.trim(),
+        mensajeWhatsapp: this.state.mensajeWhatsapp,
         horarioAtencion: this.state.horarioAtencion.trim(),
         acercaNosotros: this.state.acercaNosotros.trim(),
         politicasPrivacidad: this.state.politicasPrivacidad.trim(),
@@ -920,9 +929,47 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Número de WhatsApp (<small>Usando en la página web</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="51999000999"
+              value={this.state.numeroWhatsapp}
+              onChange={(event) =>
+                this.setState({ numeroWhatsapp: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Titulo del modal WhatsApp (<small>Usando en la página web</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              placeholder="Hola, ¿podemos hacer algo?"
+              value={this.state.tituloWhatsapp}
+              onChange={(event) =>
+                this.setState({ tituloWhatsapp: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
           <Column className={"col-12"} formGroup={true}>
             <TextArea
-              label={<>Horario de Atención:</>}
+              label={<>Mensaje de WhatsApp: (<small>Usando en la página web</small>)</>}
+              rows={4}
+              placeholder="Mensaje de WhatsApp que acompañará a la solicitud"
+              value={this.state.mensajeWhatsapp}
+              onChange={(event) =>
+                this.setState({ mensajeWhatsapp: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-12"} formGroup={true}>
+            <TextArea
+              label={<>Horario de Atención: (<small>Usando en la página web</small>)</>}
               rows={4}
               placeholder="Ingrese el horario de atención"
               value={this.state.horarioAtencion}
@@ -934,7 +981,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={"col-12"} formGroup={true}>
             <TextArea
-              label={<>Acerca de Nosotros:</>}
+              label={<>Acerca de Nosotros: (<small>Usando en la página web</small>)</>}
               rows={8}
               placeholder="Ingrese la información de Acerca de Nosotros"
               value={this.state.acercaNosotros}
@@ -948,7 +995,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <TextArea
-              label={<>Políticas de Privacidad:</>}
+              label={<>Políticas de Privacidad: (<small>Usando en la página web</small>)</>}
               rows={8}
               placeholder="Ingrese su políticas de privacidad"
               value={this.state.politicasPrivacidad}
@@ -960,7 +1007,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <TextArea
-              label={<>Terminos y Condiciones:</>}
+              label={<>Terminos y Condiciones: (<small>Usando en la página web</small>)</>}
               rows={8}
               placeholder="Ingrese sus terminos y condiciones"
               value={this.state.terminosCondiciones}
