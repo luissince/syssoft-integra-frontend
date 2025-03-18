@@ -491,7 +491,7 @@ class EmpresaProceso extends CustomComponent {
 
         numeroWhatsapp: this.state.numeroWhatsapp.trim(),
         tituloWhatsapp: this.state.tituloWhatsapp.trim(),
-        mensajeWhatsapp: this.state.mensajeWhatsapp,
+        mensajeWhatsapp: this.state.mensajeWhatsapp.trim(),
         horarioAtencion: this.state.horarioAtencion.trim(),
         acercaNosotros: this.state.acercaNosotros.trim(),
         politicasPrivacidad: this.state.politicasPrivacidad.trim(),
@@ -942,7 +942,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <Input
-              label={<>Titulo del modal WhatsApp (<small>Usando en la página web</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={<>Título del modal WhatsApp (<small>Usando en la página web</small>):<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Hola, ¿podemos hacer algo?"
               value={this.state.tituloWhatsapp}
               onChange={(event) =>
