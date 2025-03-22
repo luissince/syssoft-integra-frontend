@@ -1,191 +1,93 @@
-# Versión de la configuración de Docker Compose
 version: '3'
 
-# Definición de servicios
+# Definición de un servicio base reutilizable
+x-service-template: &frontend-service
+  build:
+    context: .
+    dockerfile: Dockerfile
+  networks:
+    - luis
+  restart: always
+  deploy:
+    resources:
+      limits:
+        cpus: "0.5"   # Máximo 50% de un núcleo
+        memory: "512m" # Máximo 512MB de RAM
+      reservations:
+        cpus: "0.25"   # Reserva 25% de un núcleo
+        memory: "256m" # Reserva 256MB de RAM
+
 services:
   sysintegra-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: sysintegra-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6000 del host al puerto 80 del contenedor
+    container_name: sysintegra-frontend
     ports:
       - 6000:80
-    # Nombre del contenedor
-    container_name: sysintegra-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   importmuneli-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: importmuneli-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6010 del host al puerto 80 del contenedor
+    container_name: importmuneli-frontend
     ports:
       - 6010:80
-    # Nombre del contenedor
-    container_name: importmuneli-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   raices-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: raices-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6014 del host al puerto 80 del contenedor
+    container_name: raices-frontend
     ports:
       - 6014:80
-    # Nombre del contenedor
-    container_name: raices-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   felicitygirls-tiquepos-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: felicitygirls-tiquepos-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6018 del host al puerto 80 del contenedor
+    container_name: felicitygirls-tiquepos-frontend
     ports:
       - 6018:80
-    # Nombre del contenedor
-    container_name: felicitygirls-tiquepos-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   bodega-modelo-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: bodega-modelo-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6022 del host al puerto 80 del contenedor
+    container_name: bodega-modelo-frontend
     ports:
       - 6022:80
-    # Nombre del contenedor
-    container_name: bodega-modelo-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   unnagro-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: unnagro-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6026 del host al puerto 80 del contenedor
+    container_name: unnagro-frontend
     ports:
       - 6026:80
-    # Nombre del contenedor
-    container_name: unnagro-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   leatsac-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: leatsac-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6030 del host al puerto 80 del contenedor
+    container_name: leatsac-frontend
     ports:
       - 6030:80
-    # Nombre del contenedor
-    container_name: leatsac-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   ferreteria-rym-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: ferreteria-rym-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6034 del host al puerto 80 del contenedor
+    container_name: ferreteria-rym-frontend
     ports:
       - 6034:80
-    # Nombre del contenedor
-    container_name: ferreteria-rym-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
   asiaticos-pcl-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: asiaticos-pcl-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6036 del host al puerto 80 del contenedor
+    container_name: asiaticos-pcl-frontend
     ports:
       - 6036:80
-    # Nombre del contenedor
-    container_name: asiaticos-pcl-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
-  
+
   supermarketya-services:
-    # Configuración para construir la imagen del contenedor
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Nombre de la imagen resultante
+    <<: *frontend-service
     image: supermarketya-frontend-image
-    # Conexión a la red llamada 'luis'
-    networks:
-      - luis
-    # Mapeo de puertos: Mapea el puerto 6038 del host al puerto 80 del contenedor
+    container_name: supermarketya-frontend
     ports:
       - 6038:80
-    # Nombre del contenedor
-    container_name: supermarketya-frontend
-    # Configuración para reiniciar siempre el contenedor
-    restart: always
 
-# Definición de redes
 networks:
-  # Definición de la red llamada 'luis'
   luis:
-    # Especifica que la red es externa (puede haber sido creada fuera de este archivo)
     external: true
