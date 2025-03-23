@@ -25,15 +25,15 @@ class Login extends CustomComponent {
     super(props);
 
     this.state = {
-      usuario: '',
+      username: '',
       password: '',
       message: '',
       lookPassword: false,
       loading: false,
     };
 
-    this.usuarioInput = React.createRef();
-    this.passwordInput = React.createRef();
+    this.usernameRef = React.createRef();
+    this.passwordRef = React.createRef();
   }
 
   /*
@@ -51,8 +51,8 @@ class Login extends CustomComponent {
   */
 
   componentDidMount() {
-    if (this.usuarioInput.current !== null) {
-      this.usuarioInput.current.focus();
+    if (this.usernameRef.current !== null) {
+      this.usernameRef.current.focus();
     }
     window.addEventListener('focus', this.eventFocused);
   }
@@ -117,8 +117,8 @@ class Login extends CustomComponent {
 
     if (this.state.loading) return;
 
-    if (isEmpty(this.state.usuario)) {
-      this.usuarioInput.current.focus();
+    if (isEmpty(this.state.username)) {
+      this.usernameRef.current.focus();
       this.setState({
         message: 'Ingrese su usuario para iniciar sesión.',
       });
@@ -126,7 +126,7 @@ class Login extends CustomComponent {
     }
 
     if (isEmpty(this.state.password)) {
-      this.passwordInput.current.focus();
+      this.passwordRef.current.focus();
       this.setState({
         message: 'Ingrese su contraseña para iniciar sesión.',
       });
@@ -138,7 +138,7 @@ class Login extends CustomComponent {
     this.setState({ loading: true });
 
     const data = {
-      usuario: this.state.usuario,
+      username: this.state.username,
       password: this.state.password,
     };
 
@@ -150,29 +150,29 @@ class Login extends CustomComponent {
         message: response.getMessage(),
       });
 
-      this.usuarioInput.current.focus();
+      this.usernameRef.current.focus();
       return;
     }
 
     response instanceof SuccessReponse;
 
     window.localStorage.setItem('login', JSON.stringify(response.data));
-    
+
     this.props.signIn({
       token: response.data,
       project: null
     });
   };
 
-  handleChangeUsuario = (event) => {
+  handleChangeUsername = (event) => {
     if (event.target.value.length > 0) {
       this.setState({
-        usuario: event.target.value,
+        username: event.target.value,
         message: '',
       });
     } else {
       this.setState({
-        usuario: event.target.value,
+        username: event.target.value,
         message: 'Ingrese su usuario para iniciar sesión.',
       });
     }
@@ -196,7 +196,7 @@ class Login extends CustomComponent {
     this.setState({
       lookPassword: !this.state.lookPassword,
     });
-    this.passwordInput.current.focus();
+    this.passwordRef.current.focus();
   };
 
   /*
@@ -232,14 +232,18 @@ class Login extends CustomComponent {
             <Title />
 
             <Form
-              message={this.state.message}
-              usuario={this.state.usuario}
-              password={this.state.password}
               loading={this.state.loading}
-              usuarioInput={this.usuarioInput}
-              handleChangeUsuario={this.handleChangeUsuario}
-              passwordInput={this.passwordInput}
+
+              message={this.state.message}
+
+              username={this.state.username}
+              usernameRef={this.usernameRef}
+              handleChangeUsername={this.handleChangeUsername}
+
+              password={this.state.password}
+              passwordRef={this.passwordRef}
               handleChangePassword={this.handleChangePassword}
+              
               lookPassword={this.state.lookPassword}
               handleViewPassword={this.handleViewPassword}
               handleSendForm={this.handleSendForm}

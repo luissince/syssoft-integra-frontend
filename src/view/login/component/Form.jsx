@@ -5,16 +5,21 @@ import PropTypes from 'prop-types';
 
 const Form = (props) => {
   const {
-    message,
-    usuario,
-    password,
     loading,
-    usuarioInput,
-    handleChangeUsuario,
-    passwordInput,
+
+    message,
+    
+    username,
+    usernameRef,
+    handleChangeUsername,
+
+    password,
+    passwordRef,
     handleChangePassword,
+
     lookPassword,
     handleViewPassword,
+
     handleSendForm,
   } = props;
 
@@ -52,9 +57,9 @@ const Form = (props) => {
 
             <div className="mb-4">
               <Input
-                refInput={usuarioInput}
-                onChange={handleChangeUsuario}
-                value={usuario}
+                refInput={usernameRef}
+                value={username}
+                onChange={handleChangeUsername}
                 placeholder="Ingrese su usuario"
                 autoFocus={true}
               />
@@ -63,9 +68,9 @@ const Form = (props) => {
             <div className="mb-4">
               <Input
                 group={true}
-                refInput={passwordInput}
-                onChange={handleChangePassword}
+                refInput={passwordRef}
                 value={password}
+                onChange={handleChangePassword}
                 type={lookPassword ? 'text' : 'password'}
                 placeholder="Ingrese su contraseña"
                 buttonRight={
@@ -101,11 +106,15 @@ const Form = (props) => {
 };
 
 Form.propTypes = {
-  message: PropTypes.string,
-  usuario: PropTypes.string,
-  password: PropTypes.string,
   loading: PropTypes.bool,
-  usuarioInput: PropTypes.object,
+  message: PropTypes.string,
+  
+  username: PropTypes.string,
+  usernameRef: PropTypes.object,
+
+  password: PropTypes.string,
+  passwordRef: PropTypes.object,
+  
   handleChangeUsuario: PropTypes.func,
   passwordInput: PropTypes.object,
   handleChangePassword: PropTypes.func,

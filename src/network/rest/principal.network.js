@@ -2222,10 +2222,9 @@ export async function removeUsuario(params, signal) {
   );
 }
 
-export async function loginApi(params, signal = null) {
+export async function loginApi(data, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get('/api/usuario/login', {
-      params: params,
+    instancePrincipal.post('/api/usuario/login', data, {
       signal: signal,
     }),
   );
