@@ -12,7 +12,7 @@ import {
 import ContainerWrapper from '../../../../components/Container.jsx';
 import {
   comboPerfil,
-  getAccesos,
+  findOneAcceso,
   saveAcceso,
   updateAcceso,
 } from '../../../../network/rest/principal.network.js';
@@ -101,11 +101,7 @@ class Accesos extends CustomComponent {
       msgLoading: 'Cargando accesos...',
     });
 
-    const params = {
-      idPerfil: id,
-    };
-
-    const response = await getAccesos(params, this.abortControllerView.signal);
+    const response = await findOneAcceso(id, this.abortControllerView.signal);
 
     if (response instanceof SuccessReponse) {
       const menus = response.data.menu.map((item) => {
@@ -148,7 +144,7 @@ class Accesos extends CustomComponent {
 
       await this.setStateAsync({
         menus: menus,
-        sucursales: response.data.perfilSucursales,
+        sucursales: response.data.perfilSucursales.map(item=>({...item, estado: item.estado === 1 ? true : false})),
         loading: false,
       });
 
@@ -217,7 +213,7 @@ class Accesos extends CustomComponent {
         if (item.idSucursal === value) {
           return {
             ...item,
-            estado: item.estado === 1 ? 0 : 1
+            estado: item.estado ? false : true,
           }
         }
         return item;
@@ -362,7 +358,7 @@ class Accesos extends CustomComponent {
                         className='form-check-inline'
                         id={`id${item.idSucursal}`}
                         value={item.idSucursal}
-                        checked={item.estado === 1 ? true : false}
+                        checked={item.estado}
                         onChange={this.handleCheckSucursal}
                       >
                         {item.nombre}
@@ -445,8 +441,6 @@ const OptionsList = ({ options, handleCheck, hasParentUl = false }) => {
     </ul>
   );
 };
-
-
 
 OptionsList.propTypes = {
   options: PropTypes.array,

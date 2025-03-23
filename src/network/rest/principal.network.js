@@ -2245,10 +2245,9 @@ export async function validToken() {
 | ENDPOINTS DE ACCESO
 |--------------------------------------------------------------------------
 */
-export async function getAccesos(params, signal) {
+export async function findOneAcceso(idPerfil, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/acceso/accesos', {
-      params: params,
+    instancePrincipal.get(`/api/acceso/${idPerfil}`, {
       signal: signal,
     }),
   );
@@ -2256,7 +2255,7 @@ export async function getAccesos(params, signal) {
 
 export async function saveAcceso(data, signal) {
   return await Resolve.create(
-    instancePrincipal.post('/api/acceso/save', data, {
+    instancePrincipal.post('/api/acceso', data, {
       signal: signal,
     }),
   );
@@ -2264,7 +2263,7 @@ export async function saveAcceso(data, signal) {
 
 export async function updateAcceso(data, signal) {
   return await Resolve.create(
-    instancePrincipal.post('/api/acceso/update', data, {
+    instancePrincipal.patch('/api/acceso', data, {
       signal: signal,
     }),
   );
