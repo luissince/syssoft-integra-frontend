@@ -209,14 +209,14 @@ class Impuestos extends CustomComponent {
           <TableCell>{item.codigo}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.preferido === 1 ? 'badge-success' : 'badge-warning'}`}
+              className={`badge ${item.preferido === 1 ? 'badge-info' : 'badge-secondary'}`}
             >
               {item.preferido ? 'SI' : 'NO'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>

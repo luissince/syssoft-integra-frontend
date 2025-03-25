@@ -199,14 +199,14 @@ class Vehiculo extends CustomComponent {
           <TableCell>{item.numeroPlaca}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.preferido == 1 ? 'badge-success' : 'badge-warning'}`}
+              className={`badge ${item.preferido == 1 ? 'badge-info' : 'badge-secondary'}`}
             >
               {item.preferido === 1 ? 'SI' : 'NO'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>

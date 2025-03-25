@@ -87,7 +87,7 @@ class ConceptoEditar extends CustomComponent {
     }
   }
 
-  handleEditar = async () => {
+  handleGuardar = async () => {
     if (!isText(this.state.nombre)) {
       alertWarning('Concepto', 'Ingrese el nombre del concepto.', () =>
         this.refNombre.current.focus(),
@@ -194,13 +194,13 @@ class ConceptoEditar extends CustomComponent {
           <Column className="col-md-12" formGroup={true}>
             <Button
               className="btn-warning"
-              onClick={this.handleEditar}
+              onClick={this.handleGuardar}
             >
-              <i className='fa fa-pencil'></i> Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>
             {' '}
             <Button
-              className="btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
               <i className='fa fa-close'></i> Cerrar

@@ -222,7 +222,7 @@ class Usuarios extends CustomComponent {
     return this.state.lista.map((item, index) => {
       const estado = item.estado === 1 ? 'ACTIVO' : 'INACTIVO';
       const styleEstado =
-        item.estado === 1 ? 'badge badge-info' : 'badge badge-danger';
+        item.estado === 1 ? 'badge badge-success' : 'badge badge-danger';
 
       return (
         <TableRow key={index}>

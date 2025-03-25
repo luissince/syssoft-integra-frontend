@@ -448,7 +448,7 @@ class Configurar extends CustomComponent {
             </div>
 
             <button
-              className="btn btn-primary btn-lg btn-block"
+              className="btn btn-success btn-lg btn-block"
               type="button"
               onClick={() => this.onEventSave()}
             >

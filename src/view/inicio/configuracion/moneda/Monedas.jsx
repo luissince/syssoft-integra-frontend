@@ -222,7 +222,7 @@ class Monedas extends CustomComponent {
         );
 
       const nmEstado = item.estado === 1 ? 'ACTIVO' : 'INACTIVO';
-      const bgEstado = `badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'
+      const bgEstado = `badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
         }`;
 
       return (

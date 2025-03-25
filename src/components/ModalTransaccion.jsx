@@ -1001,9 +1001,9 @@ class ModalTransaccion extends CustomComponent {
           <CustomModalContentFooter>
             <Button
               type="submit"
-              className="btn-primary"
+              className="btn-success"
             >
-              <i className='fa fa-save'></i> Completar Transacción
+              <i className='fa fa-save'></i> Registrar
             </Button>
 
             <Button

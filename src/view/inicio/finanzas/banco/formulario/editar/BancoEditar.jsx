@@ -20,6 +20,10 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import Title from '../../../../../../components/Title';
+import Button from '../../../../../../components/Button';
+import Row from '../../../../../../components/Row';
+import Column from '../../../../../../components/Column';
+import { SpinnerView } from '../../../../../../components/Spinner';
 
 class BancoEditar extends CustomComponent {
   constructor(props) {
@@ -121,7 +125,7 @@ class BancoEditar extends CustomComponent {
     }
   }
 
-  handleEditar = () => {
+  handleGuardar = () => {
     if (isEmpty(this.state.nombre)) {
       alertWarning('Banco', 'Ingrese el nombre del banco.', () => {
         this.refTxtNombre.current.focus();
@@ -181,7 +185,10 @@ class BancoEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Banco'
@@ -362,26 +369,22 @@ class BancoEditar extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={this.handleEditar}
-              >
-                <i className='fa fa-edit'></i>  Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                <i className='fa fa-close'></i>  Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <Button
+              className="btn-warning"
+              onClick={this.handleGuardar}
+            >
+              <i className='fa fa-save'></i>  Guardar
+            </Button>{' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i>  Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

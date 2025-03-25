@@ -300,7 +300,7 @@ class PersonaAgregar extends CustomComponent {
     this.setState({ ubigeos: [], idUbigeo: '' });
   }
 
-  handleSave = () => {
+  handleGuardar = () => {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
 
     if (isEmpty(this.state.idTipoDocumento)) {
@@ -742,14 +742,14 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column>
             <Button
-              className='btn-primary mr-2'
-              onClick={this.handleSave}
+              className='btn-success'
+              onClick={this.handleGuardar}
             >
-              <i className='fa fa-plus'></i> Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>
-
+            {' '}
             <Button
-              className='btn-danger'
+              className='btn-outline-danger'
               onClick={() => this.props.history.goBack()}
             >
               <i className='fa fa-close'></i> Cancelar

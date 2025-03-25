@@ -366,7 +366,7 @@ class PersonaEditar extends CustomComponent {
     this.setState({ ubigeos: [], idUbigeo: '' });
   }
 
-  handleSave = () => {
+  handleGuardar = () => {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
 
     if (isEmpty(this.state.idTipoDocumento)) {
@@ -807,14 +807,14 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column>
             <Button
-              className='btn-warning mr-2'
-              onClick={this.handleSave}
+              className='btn-warning'
+              onClick={this.handleGuardar}
             >
-              <i className='fa fa-pencil'></i>  Editar
+              <i className='fa fa-save'></i> Guardar
             </Button>
-
+            {' '}
             <Button
-              className='btn-danger'
+              className='btn-outline-danger'
               onClick={() => this.props.history.goBack()}
             >
               <i className='fa fa-close'></i> Cancelar

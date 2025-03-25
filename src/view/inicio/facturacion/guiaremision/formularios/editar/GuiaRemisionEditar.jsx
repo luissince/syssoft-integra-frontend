@@ -905,13 +905,13 @@ class GuiaRemisionEditar extends CustomComponent {
             <Button
               className="btn-warning"
               onClick={this.handleSave}>
-              <i className='fa fa-save'></i>  Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>
             {" "}
             <Button
               className="btn-outline-danger"
               onClick={this.handleBack}>
-              <i className='fa fa-close'></i>  Cancelar
+              <i className='fa fa-close'></i> Cancelar
             </Button>
           </Column>
         </Row>

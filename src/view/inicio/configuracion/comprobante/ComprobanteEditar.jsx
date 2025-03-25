@@ -439,14 +439,14 @@ class ComporbanteEditar extends CustomComponent {
               className="btn btn-warning"
               onClick={this.handleGuardar}
             >
-              <i className='fa fa-edit'></i>  Guardar
-            </Button>{' '}
+              <i className='fa fa-save'></i> Guardar
+            </Button>
+            {' '}
             <Button
-              type="button"
-              className="btn btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className='fa fa-close'></i> Cerrar
             </Button>
           </Column>
         </Row>

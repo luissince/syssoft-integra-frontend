@@ -147,10 +147,10 @@ class PerfilAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-12" formGroup>
             <Button
-              className="btn-primary"
+              className="btn-success"
               onClick={this.handleGuardar}
             >
-              <i className="fa fa-edit"></i> Guardar
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-outline-danger"

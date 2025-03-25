@@ -19,6 +19,9 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
 
 class VehiculoEditar extends CustomComponent {
 
@@ -90,7 +93,7 @@ class VehiculoEditar extends CustomComponent {
     }
   }
 
-  handleEditar = () => {
+  handleGuardar = () => {
     if (isEmpty(this.state.marca)) {
       alertWarning('Vehículo', 'Ingrese la marca del vehículo.', () =>
         this.refMarca.current.focus(),
@@ -226,26 +229,23 @@ class VehiculoEditar extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={this.handleEditar}
-              >
-                Editar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup>
+            <Button
+              className="btn-warning"
+              onClick={this.handleGuardar}
+            >
+              <i className='fa fa-save'></i> Guardar
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

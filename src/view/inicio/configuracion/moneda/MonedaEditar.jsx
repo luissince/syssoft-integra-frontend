@@ -30,7 +30,7 @@ import { Switches } from '../../../../components/Checks';
  * @extends React.Component
  */
 class MonedaEditar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -103,7 +103,7 @@ class MonedaEditar extends CustomComponent {
     }
   }
 
-  handleEditar = () => {
+  handleGuardar = () => {
     if (!isText(this.state.nombre)) {
       alertWarning('Moneda', 'Ingres el nombre.', () =>
         this.refTxtNombre.current.focus(),
@@ -222,13 +222,13 @@ class MonedaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-warning"
-              onClick={this.handleEditar}
+              onClick={this.handleGuardar}
             >
-              <i className='fa fa-edit'></i> Editar
+              <i className='fa fa-save'></i> Guardar
             </Button>
             {' '}
             <Button
-              className="btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
               <i className='fa fa-close'></i> Cerrar

@@ -149,10 +149,10 @@ const DetalleImagen = (props) => {
       <Row>
         <Column className="col-md-6" formGroup={true}>
           <Button
-            className="btn-primary btn-block"
+            className="btn-success btn-block"
             onClick={handleRegistrar}
           >
-            <i className='fa fa-save'></i>  Guardar
+            <i className='fa fa-save'></i> Guardar
           </Button>
         </Column>
         <Column className="col-md-6" formGroup={true}>

@@ -303,7 +303,7 @@ class Accesos extends CustomComponent {
         />
 
         <Title
-          title='Perfiles'
+          title='Accesos'
           subTitle='LISTA'
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -317,7 +317,7 @@ class Accesos extends CustomComponent {
         ) : null}
 
         <Row>
-          <Column className="col-lg-12 col-md-12 col-sm-12 col-xs-12" formGroup={true}>
+          <Column className="col-12" formGroup={true}>
             <Select
               group={true}
               label={"Perfil:"}
@@ -374,7 +374,7 @@ class Accesos extends CustomComponent {
         <Row>
           <Column className="col-xl-12 col-lg-12 col-md-12 col-sm-4 col-12">
             <Button
-              className="btn-primary"
+              className="btn-success"
               onClick={() => this.onEventGuardar()}
             // disabled={!this.state.save}
             >
@@ -382,11 +382,11 @@ class Accesos extends CustomComponent {
             </Button>
             {' '}
             <Button
-              className="btn-info"
+              className="btn-warning"
               onClick={() => this.onEventUpdateData()}
             // disabled={!this.state.update}
             >
-              <i className="fa fa-refresh"></i> Actualizar
+              <i className="fa fa-refresh"></i> Resetear
             </Button>
             {' '}
             <Button

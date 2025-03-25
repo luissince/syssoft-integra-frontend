@@ -281,14 +281,14 @@ class Personas extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${item.predeterminado === 1 ? 'badge-success' : 'badge-warning'}`}
+              className={`badge ${item.predeterminado === 1 ? 'badge-info' : 'badge-secondary'}`}
             >
               {item.predeterminado === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.estado === 1 ? 'badge-info' : 'badge-danger'}`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>

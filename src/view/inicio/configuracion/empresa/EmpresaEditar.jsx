@@ -1021,10 +1021,10 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Button
-              className="btn-primary"
+              className="btn-warning"
               onClick={() => this.handleGuardar()}
             >
-              <i className="fa fa-save"></i> Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>{' '}
             <Button
               className="btn-danger"

@@ -11,15 +11,15 @@ a:focus {
   min-width: 270px;
   width: 270px;
   /* height: 100%; */
-  background: #7386d5;
-  color: #fff;
+  background: #111827;
+  color: #9ca3af;
   transition: all 0.3s;
   z-index: 1000;
   margin-top: 60px;
 }
 
 #sidebar .pro-sidebar-inner {
-  background: #7386d5;
+  background: #111827;
   height: 100%;
   position: relative;
   z-index: 101;
@@ -52,7 +52,7 @@ a:focus {
 
 #sidebar .sidebar-header {
   padding: 20px;
-  background: #6d7fcc;
+  background: #111827;
   text-align: center;
 }
 
@@ -150,8 +150,8 @@ a:focus {
 }
 
 .active-link {
-  color: #6172c0 !important;
-  background: #d9e0fc;
+  color: #ffffff !important;
+  background: #004099;
   transition: all 0.3s;
 }
 
@@ -192,7 +192,7 @@ a:focus {
   margin-bottom: 5px;
   padding: 10px;
   background: #fff;
-  color: #7386d5;
+  color: #004099;
 }
 
 @media (max-width: 768px) {

@@ -203,14 +203,14 @@ class Sucursales extends CustomComponent {
         item.principal === 1 ? (
           <span className="badge badge-info">Principal</span>
         ) : (
-          <span className="badge badge-light">Secundario</span>
+          <span className="badge badge-secondary">Secundario</span>
         );
 
       const estado =
         item.estado === 1 ? (
-          <span className="badge badge-success">Habilitado</span>
+          <span className="badge badge-success">ACTIVO</span>
         ) : (
-          <span className="badge badge-danger">Inhabilitado</span>
+          <span className="badge badge-danger">INACTIVO</span>
         );
 
       return (

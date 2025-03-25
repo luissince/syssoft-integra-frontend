@@ -233,7 +233,7 @@ class PerfilEditar extends CustomComponent {
               className="btn-warning"
               onClick={this.handleEditar}
             >
-              <i className="fa fa-edit"></i> Guardar
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-outline-danger"

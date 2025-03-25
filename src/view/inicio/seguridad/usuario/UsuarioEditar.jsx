@@ -594,7 +594,7 @@ class UsuarioEditar extends CustomComponent {
                 className="btn btn-warning"
                 onClick={() => this.handleGuardar()}
               >
-                <i className='fa fa-edit'></i> Actualizar
+                <i className='fa fa-save'></i> Guardar
               </button>
               {" "}
               <button

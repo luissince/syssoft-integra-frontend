@@ -817,7 +817,7 @@ class TrasladorCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Button
-                  className="btn-primary"
+                  className="btn-info"
                   onClick={this.handleSiguiente}>
                   <i className="fa fa-arrow-right"></i> Siguiente
                 </Button>{' '}
@@ -1005,16 +1005,16 @@ class TrasladorCrear extends CustomComponent {
                     <i className="fa fa-save"></i> Guardar
                   </Button>{' '}
                   <Button
-                    className="btn-outline-warning"
+                    className="btn-outline-secondary"
                     onClick={this.handleBack}
                   >
                     <i className="fa fa-arrow-left"></i> Atras
                   </Button>{' '}
                   <Button
-                    className="btn-outline-info"
+                    className="btn-outline-light"
                     onClick={this.handleClear}
                   >
-                    <i className="fa fa-trash"></i> Limpiar
+                    <i className="fa fa-refresh"></i> Limpiar
                   </Button>{' '}
                   <Button
                     className="btn-outline-danger"

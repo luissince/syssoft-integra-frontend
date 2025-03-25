@@ -21,6 +21,9 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
 
 class ImpuestoEditar extends CustomComponent {
   constructor(props) {
@@ -94,7 +97,7 @@ class ImpuestoEditar extends CustomComponent {
     }
   }
 
-  handleEditar = () => {
+  handleGuardar = () => {
     if (isEmpty(this.state.nombre)) {
       alertWarning('Impuesto', 'Ingrese el nombre.', () =>
         this.refNombre.current.focus(),
@@ -241,26 +244,23 @@ class ImpuestoEditar extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={this.handleEditar}
-              >
-                Editar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-warning"
+              onClick={this.handleGuardar}
+            >
+              <i className='fa fa-save'></i> Guardar
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

@@ -217,11 +217,11 @@ class MarcaEditar extends CustomComponent {
               className="btn-warning"
               onClick={() => this.handleEditar()}
             >
-              <i className='fa fa-pencil'></i> Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>
             {' '}
             <Button
-              className="btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
               <i className='fa fa-close'></i> Cerrar

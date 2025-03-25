@@ -395,17 +395,17 @@ class ComporbanteAgregar extends CustomComponent {
           <Column formGroup={true}>
             <Button
               type="button"
-              className="btn btn-primary"
+              className="btn btn-success"
               onClick={this.handleGuardar}
             >
               <i className='fa fa-save'></i>  Guardar
-            </Button>{' '}
+            </Button>
+            {' '}
             <Button
-              type="button"
-              className="btn btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className='fa fa-close'></i> Cerrar
             </Button>
           </Column>
         </Row>

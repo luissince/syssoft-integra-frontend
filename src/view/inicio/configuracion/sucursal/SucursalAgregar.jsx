@@ -145,7 +145,7 @@ class SucursalAgregar extends CustomComponent {
     });
   }
 
-  handleSave = async () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
       alertWarning('Sucursal', 'Ingrese el nombre del sucursal.', () => {
         this.refNombre.current.focus();
@@ -409,17 +409,17 @@ class SucursalAgregar extends CustomComponent {
         <Row>
           <Column>
             <Button
-              className='btn-primary'
-              onClick={this.handleSave}
+              className='btn-success'
+              onClick={this.handleGuardar}
             >
               <i className="fa fa-save"></i> Guardar
             </Button>
-
+            {' '}
             <Button
-              className='btn-danger ml-2'
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className="fa fa-close"></i> Cerrar
+              <i className='fa fa-close'></i> Cerrar
             </Button>
           </Column>
         </Row>

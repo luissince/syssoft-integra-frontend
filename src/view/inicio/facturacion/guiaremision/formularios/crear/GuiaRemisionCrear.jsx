@@ -897,7 +897,7 @@ class GuiaRemisionCrear extends CustomComponent {
         <Row>
           <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12" formGroup={true}>
             <Button
-              className="btn-primary"
+              className="btn-success"
               onClick={() => this.handleSave()}>
               <i className='fa fa-save'></i>  Guardar
             </Button>

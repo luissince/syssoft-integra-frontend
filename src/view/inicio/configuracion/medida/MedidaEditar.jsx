@@ -20,6 +20,9 @@ import CustomComponent from '../../../../model/class/custom-component';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
+import Button from '../../../../components/Button';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
 
 class MedidaEditar extends CustomComponent {
   constructor(props) {
@@ -239,26 +242,23 @@ class MedidaEditar extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-warning"
-                onClick={() => this.handleEditar()}
-              >
-                Editar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column>
+            <Button
+              className="btn-warning"
+              onClick={() => this.handleEditar()}
+            >
+              <i className='fa fa-save'></i> Guardar
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

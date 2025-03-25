@@ -146,7 +146,7 @@ class ModalPrecios extends Component {
           <>
             <Button
               type="submit"
-              className="btn-primary">
+              className="btn-success">
               <i className="fa fa-save"></i> Guardar
             </Button>
             <Button

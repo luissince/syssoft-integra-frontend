@@ -14,6 +14,9 @@ import { addVehiculo } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import Title from '../../../../components/Title';
+import Button from '../../../../components/Button';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
 
 class VehiculoAgregar extends CustomComponent {
 
@@ -169,26 +172,23 @@ class VehiculoAgregar extends CustomComponent {
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={this.handleGuardar}
-              >
-                Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup>
+            <Button
+              className="btn-success"
+              onClick={this.handleGuardar}
+            >
+              <i className="fa fa-save"></i> Guardar
+            </Button>
+            {' '}
+            <Button
+              className="btn-outline-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i> Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

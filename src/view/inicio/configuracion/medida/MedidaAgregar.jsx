@@ -13,6 +13,7 @@ import ContainerWrapper from '../../../../components/Container';
 import { addMedida } from '../../../../network/rest/principal.network';
 import PropTypes from 'prop-types';
 import Title from '../../../../components/Title';
+import Button from '../../../../components/Button';
 
 class MedidaAgregar extends React.Component {
   constructor(props) {
@@ -177,20 +178,19 @@ class MedidaAgregar extends React.Component {
         <div className="row">
           <div className="col-md-12">
             <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-primary"
+              <Button
+                className="btn-success"
                 onClick={() => this.handleGuardar()}
               >
-                Guardar
-              </button>{' '}
-              <button
-                type="button"
-                className="btn btn-danger"
+                <i className='fa fa-save'></i> Guardar
+              </Button>
+              {' '}
+              <Button
+                className="btn-outline-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                Cerrar
-              </button>
+                <i className='fa fa-close'></i> Cerrar
+              </Button>
             </div>
           </div>
         </div>

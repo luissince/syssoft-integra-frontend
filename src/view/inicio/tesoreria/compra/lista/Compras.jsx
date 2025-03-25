@@ -243,7 +243,7 @@ class Compras extends CustomComponent {
           <TableCell className='text-right'>{numberFormat(item.total, item.codiso)} </TableCell>
           <TableCell className="text-center">
             <Button
-              className="btn-outline-primary btn-sm"
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idCompra)}>
               <i className="fa fa-eye"></i>
             </Button>

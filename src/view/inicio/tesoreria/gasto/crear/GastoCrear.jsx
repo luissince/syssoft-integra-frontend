@@ -663,10 +663,10 @@ class GastoCrear extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Button
-              className="btn-primary"
+              className="btn-success"
               onClick={this.handleGuardar}
             >
-              <i className="fa fa-arrow-right"></i> Registrar
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-outline-info"

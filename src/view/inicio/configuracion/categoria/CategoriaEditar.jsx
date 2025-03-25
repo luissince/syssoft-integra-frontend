@@ -112,7 +112,7 @@ class CategoriaEditar extends CustomComponent {
     this.setState({ estado: event.target.checked });
   };
 
-  handleEditar = async () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
       alertWarning('Categoría', 'Ingrese el nombre de la categoría', () => {
         this.refNombre.current.focus();
@@ -215,16 +215,16 @@ class CategoriaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-warning"
-              onClick={() => this.handleEditar()}
+              onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-pencil'></i>   Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>
             {' '}
             <Button
-              className="btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className='fa fa-close'></i> Cerrar
             </Button>
           </Column>
         </Row>

@@ -115,7 +115,7 @@ const InvoiceFooter = (props) => {
               onClick={handleClearSale}
             >
               <div className="text-dark">{totalQuantity}</div>
-              <div className="text-success">Cancelar (F2)</div>
+              <div className="text-danger">Cancelar (F2)</div>
             </Button>
           </div>
         </div>

@@ -317,13 +317,13 @@ const ItemSearch = (props) => {
         <div className="input-group">
           <div className="input-group-prepend">
             <Button
-              className={`${tipo === 1 ? "btn-success " : "btn-outline-success"} px-3`}
+              className={`${tipo === 1 ? "btn-primary " : "btn-outline-primary"} px-3`}
               onClick={() => handleSelectTipo(1)}
               icono={<i className='fa fa-barcode'></i>}
             />
 
             <Button
-              className={`${tipo === 0 ? "btn-success" : "btn-outline-success"}`}
+              className={`${tipo === 0 ? "btn-primary" : "btn-outline-primary"}`}
               onClick={() => handleSelectTipo(0)}
               icono={<i className='fa fa-search px-1'></i>}
             />
@@ -331,7 +331,7 @@ const ItemSearch = (props) => {
           {
             tipo === 1 ?
               <Input
-                className="border border-success"
+                className="border border-primary"
                 placeholder={`Buscar código de barras...`}
                 refInput={refProducto}
                 value={buscar}
@@ -342,7 +342,7 @@ const ItemSearch = (props) => {
               :
               <Search
                 ref={refSearch}
-                className="border border-success"
+                className="border border-primary"
                 placeholder={`Buscar por código, nombres...`}
                 refInput={refProducto}
                 onSearch={handleSearchText}

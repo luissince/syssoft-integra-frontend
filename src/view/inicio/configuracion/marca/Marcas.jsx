@@ -220,9 +220,9 @@ class Marcas extends CustomComponent {
     return this.state.lista.map((item, index) => {
       const estado =
         item.estado === 1 ? (
-          <span className="badge badge-success">Activo</span>
+          <span className="badge badge-success">ACTIVO</span>
         ) : (
-          <span className="badge badge-danger">Inactivo</span>
+          <span className="badge badge-danger">INACTIVO</span>
         );
 
       return (

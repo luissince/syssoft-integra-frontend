@@ -20,7 +20,7 @@ const InvoiceClient = (props) => {
         handleSelectItem={handleSelectItem}
         customButton={
           <button
-            className="btn btn-outline-success d-flex align-items-center"
+            className="btn btn-outline-primary d-flex align-items-center"
             onClick={handleOpenCliente}>
             <i className='fa fa-user-plus'></i>
             <div className="ml-2">Nuevo</div>

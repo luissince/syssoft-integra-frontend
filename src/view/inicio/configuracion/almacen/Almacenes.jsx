@@ -273,7 +273,7 @@ class Almacenes extends CustomComponent {
           <TableCell>{item.codigoSunat}</TableCell>
           <TableCell className='text-center'>
             <div
-              className={`badge ${item.predefinido === 1 ? 'badge-success' : 'badge-warning'}`}
+              className={`badge ${item.predefinido === 1 ? 'badge-info' : 'badge-secondary'}`}
             >
               {item.predefinido === 1 ? 'SI' : 'NO'}
             </div>

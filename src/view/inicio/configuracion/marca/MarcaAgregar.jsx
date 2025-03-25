@@ -145,14 +145,14 @@ class MarcaAgregar extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Button
-              className="btn-primary"
+              className="btn-success"
               onClick={() => this.handleGuardar()}
             >
               <i className='fa fa-save'></i> Guardar
             </Button>
             {' '}
             <Button
-              className="btn-danger"
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
               <i className='fa fa-close'></i> Cerrar
