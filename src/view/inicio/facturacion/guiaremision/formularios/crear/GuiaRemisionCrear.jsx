@@ -899,19 +899,19 @@ class GuiaRemisionCrear extends CustomComponent {
             <Button
               className="btn-success"
               onClick={() => this.handleSave()}>
-              <i className='fa fa-save'></i>  Guardar
+              <i className='fa fa-save'></i> Guardar
             </Button>
             {" "}
             <Button
               className="btn-outline-info"
               onClick={() => this.handleClear()}>
-              <i className='fa fa-trash'></i>  Limiar
+              <i className='fa fa-trash'></i> Limpiar
             </Button>
             {" "}
             <Button
               className="btn-outline-danger"
               onClick={() => this.handleBack()}>
-              <i className='fa fa-close'></i>  Cancelar
+              <i className='fa fa-close'></i> Cancelar
             </Button>
           </Column>
         </Row>
