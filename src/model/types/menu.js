@@ -14,12 +14,13 @@ export const PERFILES = 'SM0001'; // MN0002 Perfiles
 export const USUARIOS = 'SM0002'; // MN0002 Usuarios
 export const ACCESOS = 'SM0003';  // MN0002 Accesos
 
-export const VENTAS = 'SM0002';              // MN0003 Ventas
-export const COBROS = 'SM0003';              // MN0003 Cobros
-export const NOTA_CREDITO = 'SM0004';        // MN0003 Nota de Crédito
-export const COTIZACION = 'SM0005';          // MN0003 Cotización
-export const GUIA_REMISION = 'SM0006';       // MN0003 Guia de Remisión
-export const CUENTAS_POR_COBRAR = 'SM0008';  // MN0003 Cuentas por Cobrar
+export const VENTAS = 'SM0001';              // SM0001 Ventas
+export const COBROS = 'SM0002';              // SM0002 Cobros
+export const NOTA_CREDITO = 'SM0003';        // SM0003 Nota de Crédito
+export const COTIZACION = 'SM0004';          // SM0004 Cotización
+export const GUIA_REMISION = 'SM0005';       // SM0005 Guia de Remisión
+export const CUENTAS_POR_COBRAR = 'SM0006';  // SM0006 Cuentas por Cobrar
+export const PEDIDOS = 'SM0007';  // SM0007 Pedidos
 
 export const PRODUCTOS = 'SM0002';   // MN0004 Productos
 export const AJUSTE = 'SM0004';      // MN0004 Ajuste

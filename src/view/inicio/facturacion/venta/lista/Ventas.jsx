@@ -10,6 +10,7 @@ import {
   alertInfo,
   currentDate,
   getPathNavigation,
+  getStatePrivilegio,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
@@ -38,6 +39,7 @@ import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
 import Search from '../../../../../components/Search';
 import { Link } from 'react-router-dom';
+import { ANULAR_VENTA, FACTURACION, REALIZAR_VENTA, VENTAS, VISUALIZAR_VENTA } from '../../../../../model/types/menu';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -55,10 +57,6 @@ class Ventas extends CustomComponent {
     this.state = {
       initialLoad: true,
       initialMessage: 'Cargando datos...',
-
-      // add: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[0].estado,),
-      // view: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[1].estado,),
-      // remove: statePrivilegio(this.props.token.userToken.menus[2].submenu[0].privilegio[2].estado,),
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
@@ -84,6 +82,11 @@ class Ventas extends CustomComponent {
 
       // Atributos del modal Elegir Interfaz
       isOpenElegirInterfaz: false,
+
+      // Atributos para privilegios
+      create: getStatePrivilegio(this.props.token.userToken.menus, FACTURACION, VENTAS, REALIZAR_VENTA),
+      view: getStatePrivilegio(this.props.token.userToken.menus, FACTURACION, VENTAS, VISUALIZAR_VENTA),
+      remove: getStatePrivilegio(this.props.token.userToken.menus, FACTURACION, VENTAS, ANULAR_VENTA),
     };
 
     this.refPaginacion = React.createRef();
@@ -198,6 +201,8 @@ class Ventas extends CustomComponent {
   }
 
   loadingInit = async () => {
+    if (!this.state.view) return;  
+
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -344,15 +349,12 @@ class Ventas extends CustomComponent {
     });
   }
 
-  handleGuiaRemision = (idVenta) => {
-    console.log(this.props)
-    // this.props.history.push({
-    //   pathname: `${this.props.location.pathname}/detalle`,
-    //   search: '?idVenta=' + idVenta,
-    // });
-  }
-
   handleCancelar(idVenta) {
+    if(!this.state.remove){
+      alertWarning("Venta", "No tiene privilegios para anular ventas");
+      return;
+    }
+
     alertDialog('Venta', '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.', async (accept) => {
       if (accept) {
         const params = {
@@ -463,7 +465,7 @@ class Ventas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idVenta)}
-            // disabled={!this.state.remove}
+              disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
             </Button>
@@ -478,6 +480,11 @@ class Ventas extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenElegirInterfaz = () => {
+    if(!this.state.create){
+      alertWarning("Venta", "No tiene privilegios para crear ventas");
+      return
+    }
+
     this.setState({ isOpenElegirInterfaz: true })
   }
 
@@ -522,6 +529,7 @@ class Ventas extends CustomComponent {
             <Button
               className='btn-outline-info'
               onClick={this.handleOpenElegirInterfaz}
+              disabled={!this.state.create}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>
