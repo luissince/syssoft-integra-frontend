@@ -69,7 +69,6 @@ class PersonaEditar extends CustomComponent {
       idUbigeo: '',
 
       estadoCivil: '',
-      predeterminado: false,
       estado: true,
       observacion: '',
 
@@ -150,7 +149,6 @@ class PersonaEditar extends CustomComponent {
       idUbigeo: cliente.idUbigeo === 0 ? '' : cliente.idUbigeo.toString(),
 
       estadoCivil: text(cliente.estadoCivil),
-      predeterminado: cliente.predeterminado === 1 ? true : false,
       estado: cliente.estado === 1 ? true : false,
       observacion: text(cliente.observacion),
 
@@ -246,10 +244,6 @@ class PersonaEditar extends CustomComponent {
 
   handleInputEstado = (value) => {
     this.setState({ estado: value.target.checked });
-  }
-
-  handleInputPredeterminado = (value) => {
-    this.setState({ predeterminado: value.target.checked });
   }
 
   handleGetApiReniec = async () => {
@@ -424,7 +418,6 @@ class PersonaEditar extends CustomComponent {
           direccion: this.state.direccion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
           estadoCivil: this.state.estadoCivil,
-          predeterminado: this.state.predeterminado,
           estado: this.state.estado,
           observacion: this.state.observacion.trim().toUpperCase(),
           idUsuario: this.state.idUsuario,
@@ -461,7 +454,6 @@ class PersonaEditar extends CustomComponent {
       email,
       direccion,
       estado,
-      predeterminado,
     } = this.state;
 
     return (
@@ -789,17 +781,6 @@ class PersonaEditar extends CustomComponent {
               onChange={this.handleInputEstado}
             >
               {estado ? 'Activo' : 'Inactivo'}
-            </Switches>
-          </Column>
-
-          <Column className='col-md-6 col-12' formGroup={true}>
-            <Switches
-              label={"Predeterminado:"}
-              id={"stPredeterminado"}
-              checked={predeterminado}
-              onChange={this.handleInputPredeterminado}
-            >
-              {predeterminado ? 'Si' : 'No'}
             </Switches>
           </Column>
         </Row>

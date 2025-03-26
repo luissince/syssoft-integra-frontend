@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../../components/Container';
 import InvoiceTicket from './component/InvoiceTicket';
 import {
-  getPersonaPredeterminado,
+  getPreferidoPersona,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
@@ -267,7 +267,7 @@ class VentaCrear extends CustomComponent {
       this.fetchComprobante(VENTA),
       this.fetchMoneda(),
       this.fetchImpuesto(),
-      this.fetchClientePredeterminado(),
+      this.fetchPersonaPredeterminado({cliente: "1"}),
       this.fetchTipoDocumento(),
       this.fetchAlmacen({ idSucursal: this.state.idSucursal })
     ]);
@@ -356,8 +356,8 @@ class VentaCrear extends CustomComponent {
     }
   }
 
-  async fetchClientePredeterminado() {
-    const response = await getPersonaPredeterminado();
+  async fetchPersonaPredeterminado(params) {
+    const response = await getPreferidoPersona(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;

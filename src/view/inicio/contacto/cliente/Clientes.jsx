@@ -1,12 +1,17 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import {
   listPersonasCliente,
+  preferredPersona,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -187,6 +192,38 @@ class Clientes extends CustomComponent {
     });
   }
 
+  handleEditar(idPersona) {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/editar`,
+      search: '?idPersona=' + idPersona,
+    });
+  }
+
+  handlePreferred(idPersona) {
+    alertDialog('Cliente', '¿Está seguro de que desea hacer el cliente preferido?', async (accept) => {
+      if (accept) {
+        alertInfo('Cliente', 'Procesando información...');
+
+        const params = {
+          idPersona: idPersona,
+          rol: "1",
+        };
+
+        const response = await preferredPersona(params);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Cliente', response.data, () => {
+            this.loadInit();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Cliente', response.getMessage());
+        }
+      }
+    });
+  }
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -207,7 +244,7 @@ class Clientes extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
+          colSpan='9'
           message='Cargando información de la tabla...'
         />
       );
@@ -216,7 +253,7 @@ class Clientes extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
@@ -239,9 +276,9 @@ class Clientes extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${item.predeterminado === 1 ? 'badge-info' : 'badge-secondary'}`}
+              className={`badge ${item.clientePreferido === 1 ? 'badge-info' : 'badge-secondary'}`}
             >
-              {item.predeterminado === 1 ? 'SI' : 'NO'}
+              {item.clientePreferido === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
@@ -253,10 +290,18 @@ class Clientes extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <Button
-              className="btn-outline-info btn-sm"
-              onClick={() => this.handleDetalleCliente(item.idPersona)}
+              className="btn-outline-warning btn-sm"
+              onClick={() => this.handleEditar(item.idPersona)}
             >
-              <i className="bi bi-eye"></i>
+              <i className="bi bi-pencil"></i>
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
+              onClick={() => this.handlePreferred(item.idPersona)}
+            >
+              <i className="bi bi-box"></i>
             </Button>
           </TableCell>
         </TableRow>
@@ -307,7 +352,8 @@ class Clientes extends CustomComponent {
                   <TableHead width="15%">Dirección</TableHead>
                   <TableHead width="7%">Predeterminado</TableHead>
                   <TableHead width="7%">Estado</TableHead>
-                  <TableHead width="5%" className="text-center">Detalle</TableHead>
+                  <TableHead width="5%" className="text-center">Editar</TableHead>
+                  <TableHead width="5%" className="text-center">Preferido</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -1,12 +1,17 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import {
   listPersonasConductor,
+  preferredPersona,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -186,6 +191,38 @@ class Conductores extends CustomComponent {
     });
   }
 
+  handleEditar(idPersona) {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/editar`,
+      search: '?idPersona=' + idPersona,
+    });
+  }
+
+  handlePreferred(idPersona) {
+    alertDialog('Conductor', '¿Está seguro de que desea hacer la conductor preferido?', async (accept) => {
+      if (accept) {
+        alertInfo('Conductor', 'Procesando información...');
+
+        const params = {
+          idPersona: idPersona,
+          rol: "3",
+        };
+
+        const response = await preferredPersona(params);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Conductor', response.data, () => {
+            this.loadInit();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Conductor', response.getMessage());
+        }
+      }
+    });
+  }
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -206,7 +243,7 @@ class Conductores extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
+          colSpan='9'
           message='Cargando información de la tabla...'
         />
       );
@@ -215,7 +252,7 @@ class Conductores extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
@@ -238,9 +275,9 @@ class Conductores extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${item.predeterminado === 1 ? 'badge-info' : 'badge-secondary'}`}
+              className={`badge ${item.conductorPreferido === 1 ? 'badge-info' : 'badge-secondary'}`}
             >
-              {item.predeterminado === 1 ? 'SI' : 'NO'}
+              {item.conductorPreferido === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
@@ -252,10 +289,18 @@ class Conductores extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <Button
-              className="btn-outline-info btn-sm"
-              onClick={() =>this.handleDetalleCliente(item.idPersona)}
+              className="btn-outline-warning btn-sm"
+              onClick={() => this.handleEditar(item.idPersona)}
             >
-              <i className="bi bi-eye"></i>
+              <i className="bi bi-pencil"></i>
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
+              onClick={() => this.handlePreferred(item.idPersona)}
+            >
+              <i className="bi bi-box"></i>
             </Button>
           </TableCell>
         </TableRow>
@@ -297,7 +342,7 @@ class Conductores extends CustomComponent {
         <Row>
           <Column>
             <Table className={"table-bordered"}>
-            <TableHeader className="thead-light">
+              <TableHeader className="thead-light">
                 <TableRow>
                   <TableHead width="5%" className="text-center">#</TableHead>
                   <TableHead width="10%">DNI / RUC</TableHead>
@@ -306,7 +351,8 @@ class Conductores extends CustomComponent {
                   <TableHead width="15%">Dirección</TableHead>
                   <TableHead width="7%">Predeterminado</TableHead>
                   <TableHead width="7%">Estado</TableHead>
-                  <TableHead width="5%" className="text-center">Detalle</TableHead>
+                  <TableHead width="5%" className="text-center">Editar</TableHead>
+                  <TableHead width="5%" className="text-center">Preferido</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

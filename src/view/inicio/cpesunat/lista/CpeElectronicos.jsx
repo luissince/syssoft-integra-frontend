@@ -12,6 +12,7 @@ import {
   alertInfo,
   isText,
   guId,
+  getPathNavigation,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -49,6 +50,7 @@ import { setListaCpeSunatData, setListaCpeSunatPaginacion } from '../../../../re
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
 import { toastKit, ToastStyle } from 'toast-kit';
+import { Link } from 'react-router-dom';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -733,7 +735,12 @@ class CpeElectronicos extends CustomComponent {
             <span>{item.fecha}<br />{formatTime(item.hora)}</span>
           </TableCell>
           <TableCell>
-            {item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}
+            <Link
+              to={getPathNavigation(item.tipo, item.idComprobante)}
+              className="btn-link"
+            >
+              {item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}
+            </Link>
           </TableCell>
           <TableCell>
             {`${item.tipoDocumento} - ${item.documento}`}<br />{item.informacion}

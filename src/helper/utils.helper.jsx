@@ -850,7 +850,7 @@ function calculateEAN13CheckDigit(code) {
 }
 
 export function getPathNavigation(opcion, idNavegacion) {
-  if (opcion == "venta") {
+  if (opcion == "venta" || opcion == "fac") {
     return `/inicio/facturacion/ventas/detalle?idVenta=${idNavegacion}`
   }
 
@@ -876,6 +876,14 @@ export function getPathNavigation(opcion, idNavegacion) {
 
   if (opcion == "cpe") {
     return `/inicio/cpesunat/cpeelectronicos?comprobante=${idNavegacion}`
+  }
+
+  if (opcion == "guia-create") {
+    return `/inicio/facturacion/guiaremision/crear?idVenta=${idNavegacion}`
+  }
+
+  if (opcion == "guia") {
+    return `/inicio/facturacion/guiaremision/detalle?idGuiaRemision=${idNavegacion}`
   }
 }
 

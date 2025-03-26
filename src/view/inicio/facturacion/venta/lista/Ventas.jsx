@@ -9,6 +9,7 @@ import {
   formatNumberWithZeros,
   alertInfo,
   currentDate,
+  getPathNavigation,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
@@ -36,6 +37,7 @@ import { setListaVentaData, setListaVentaPaginacion } from '../../../../../redux
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
 import Search from '../../../../../components/Search';
+import { Link } from 'react-router-dom';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -342,6 +344,14 @@ class Ventas extends CustomComponent {
     });
   }
 
+  handleGuiaRemision = (idVenta) => {
+    console.log(this.props)
+    // this.props.history.push({
+    //   pathname: `${this.props.location.pathname}/detalle`,
+    //   search: '?idVenta=' + idVenta,
+    // });
+  }
+
   handleCancelar(idVenta) {
     alertDialog('Venta', '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.', async (accept) => {
       if (accept) {
@@ -405,7 +415,6 @@ class Ventas extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
-
       const estado = item.estado === 1 ? <span className="text-success">COBRADO</span> : item.estado === 2 ? <span className="text-warning">POR COBRAR</span> : item.estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
 
       const tipo = item.idFormaPago === CONTADO ? "CONTADO" : item.idFormaPago === CREDITO_FIJO ? "CREDITO FIJO" : item.idFormaPago === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
@@ -421,12 +430,34 @@ class Ventas extends CustomComponent {
           <TableCell className="text-center"> {numberFormat(item.total, item.codiso)} </TableCell>
           <TableCell className="text-center">
             <Button
-              className="btn-outline-primary btn-sm"
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idVenta)}
             // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            {
+              item.guiaRemision === 1 && (
+                <span
+                  className="btn btn-outline-success btn-sm"
+                >
+                  <i className="fa fa-check"></i>
+                </span>
+              )
+            }
+
+           {
+              item.guiaRemision === 0 && (
+                <Link
+                  to={getPathNavigation("guia-create", item.idVenta)}
+                  className="btn btn-outline-secondary btn-sm"
+                >
+                  <i className="fa fa-truck"></i>
+                </Link>
+              )
+            }
           </TableCell>
           <TableCell className="text-center">
             <Button
@@ -578,6 +609,7 @@ class Ventas extends CustomComponent {
                     <TableHead width="10%" className="text-center">Estado</TableHead>
                     <TableHead width="10%" className="text-center">Total</TableHead>
                     <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Guía</TableHead>
                     <TableHead width="5%" className="text-center">Anular</TableHead>
                   </TableRow>
                 </TableHeader>

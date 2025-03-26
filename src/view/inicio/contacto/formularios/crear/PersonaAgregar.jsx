@@ -65,7 +65,6 @@ class PersonaAgregar extends CustomComponent {
       idUbigeo: '',
 
       estadoCivil: '',
-      predeterminado: false,
       estado: true,
       observacion: '',
 
@@ -182,10 +181,6 @@ class PersonaAgregar extends CustomComponent {
 
   handleInputEstado = (value) => {
     this.setState({ estado: value.target.checked });
-  }
-
-  handleInputPredeterminado = (value) => {
-    this.setState({ predeterminado: value.target.checked });
   }
 
   handleGetApiReniec = async () => {
@@ -357,7 +352,6 @@ class PersonaAgregar extends CustomComponent {
           direccion: this.state.direccion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
           estadoCivil: this.state.estadoCivil,
-          predeterminado: this.state.predeterminado,
           estado: this.state.estado,
           observacion: this.state.observacion.trim().toUpperCase(),
           idUsuario: this.state.idUsuario,
@@ -395,7 +389,6 @@ class PersonaAgregar extends CustomComponent {
       email,
       direccion,
       estado,
-      predeterminado,
     } = this.state;
 
     return (
@@ -541,7 +534,11 @@ class PersonaAgregar extends CustomComponent {
             <label>
               Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
+          </Column>
+        </Row>
 
+        <Row>
+          <Column className='col-md-4 col-12' formGroup={true}>
             <CheckBox
               id="checkboxPnCliente"
               checked={this.state.cliente}
@@ -550,7 +547,9 @@ class PersonaAgregar extends CustomComponent {
               }}>
               Cliente
             </CheckBox>
+          </Column>
 
+          <Column className='col-md-4 col-12' formGroup={true}>
             <CheckBox
               id="checkboxPnProveedor"
               checked={this.state.proveedor}
@@ -559,7 +558,9 @@ class PersonaAgregar extends CustomComponent {
               }}>
               Proveedor
             </CheckBox>
+          </Column>
 
+          <Column className='col-md-4 col-12' formGroup={true}>
             <CheckBox
               id="checkboxPnConductor"
               checked={this.state.conductor}
@@ -572,11 +573,9 @@ class PersonaAgregar extends CustomComponent {
               this.state.conductor && (
                 <Row>
                   <Column>
-                    <input
-                      type='text'
-                      className='form-control'
+                    <Input
                       placeholder='Número de licencia de conducir'
-                      ref={this.refLicenciaConducir}
+                      refInput={this.refLicenciaConducir}
                       value={this.state.licenciaConductir}
                       onChange={(event) => {
                         this.setState({ licenciaConductir: event.target.value })
@@ -724,17 +723,6 @@ class PersonaAgregar extends CustomComponent {
               onChange={this.handleInputEstado}
             >
               {estado ? 'Activo' : 'Inactivo'}
-            </Switches>
-          </Column>
-
-          <Column className='col-md-6 col-12' formGroup={true}>
-            <Switches
-              label={"Predeterminado:"}
-              id={"stPredeterminado"}
-              checked={predeterminado}
-              onChange={this.handleInputPredeterminado}
-            >
-              {predeterminado ? 'Si' : 'No'}
             </Switches>
           </Column>
         </Row>

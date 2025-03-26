@@ -1,12 +1,17 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import {
   listPersonasProveedor,
+  preferredPersona,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -186,6 +191,37 @@ class Proveedores extends CustomComponent {
     });
   }
 
+  handleEditar(idPersona) {
+    this.props.history.push({
+      pathname: `${this.props.location.pathname}/editar`,
+      search: '?idPersona=' + idPersona,
+    });
+  }
+
+  handlePreferred(idPersona) {
+    alertDialog('Proveedor', '¿Está seguro de que desea hacer el proveedor preferido?', async (accept) => {
+      if (accept) {
+        alertInfo('Proveedor', 'Procesando información...');
+
+        const params = {
+          idPersona: idPersona,
+          rol: "2",
+        };
+
+        const response = await preferredPersona(params);
+
+        if (response instanceof SuccessReponse) {
+          alertSuccess('Proveedor', response.data, () => {
+            this.loadInit();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          alertWarning('Proveedor', response.getMessage());
+        }
+      }
+    });
+  }
   /*
  |--------------------------------------------------------------------------
  | Método de renderización
@@ -206,7 +242,7 @@ class Proveedores extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
+          colSpan='9'
           message='Cargando información de la tabla...'
         />
       );
@@ -215,7 +251,7 @@ class Proveedores extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
@@ -238,9 +274,9 @@ class Proveedores extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${item.predeterminado === 1 ? 'badge-info' : 'badge-secondary'}`}
+              className={`badge ${item.proveedorPreferido === 1 ? 'badge-info' : 'badge-secondary'}`}
             >
-              {item.predeterminado === 1 ? 'SI' : 'NO'}
+              {item.proveedorPreferido === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
@@ -252,10 +288,18 @@ class Proveedores extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <Button
-              className="btn-outline-info btn-sm"
-              onClick={() =>this.handleDetalleCliente(item.idPersona)}
+              className="btn-outline-warning btn-sm"
+              onClick={() => this.handleEditar(item.idPersona)}
             >
-              <i className="bi bi-eye"></i>
+              <i className="bi bi-pencil"></i>
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-outline-info btn-sm"
+              onClick={() => this.handlePreferred(item.idPersona)}
+            >
+              <i className="bi bi-box"></i>
             </Button>
           </TableCell>
         </TableRow>
@@ -298,7 +342,7 @@ class Proveedores extends CustomComponent {
           <Column>
             <TableResponsive>
               <Table className={"table-bordered"}>
-              <TableHeader className="thead-light">
+                <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">DNI / RUC</TableHead>
@@ -307,7 +351,8 @@ class Proveedores extends CustomComponent {
                     <TableHead width="15%">Dirección</TableHead>
                     <TableHead width="7%">Predeterminado</TableHead>
                     <TableHead width="7%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center"> Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Preferido</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

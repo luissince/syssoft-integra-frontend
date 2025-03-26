@@ -201,7 +201,6 @@ class GuiaRemisionEditar extends CustomComponent {
         this.fetchObtenerDetalle(idGuiaRemision)
       ]);
 
-
     const cabecera = guiaRemision.cabecera;
 
     const comprobante = {
@@ -486,6 +485,7 @@ class GuiaRemisionEditar extends CustomComponent {
     }
 
     const params = {
+      tipo: 1,
       idSucursal: this.state.idSucursal,
       filtrar: searchWord,
     };

@@ -249,7 +249,7 @@ class Personas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='10'
+          colSpan='9'
           message='Cargando información de la tabla...'
         />
       );
@@ -258,7 +258,7 @@ class Personas extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="10">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
@@ -279,13 +279,6 @@ class Personas extends CustomComponent {
             {item.telefono}
           </TableCell>
           <TableCell>{item.direccion}</TableCell>
-          <TableCell className="text-center">
-            <span
-              className={`badge ${item.predeterminado === 1 ? 'badge-info' : 'badge-secondary'}`}
-            >
-              {item.predeterminado === 1 ? 'SI' : 'NO'}
-            </span>
-          </TableCell>
           <TableCell className="text-center">
             <div
               className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
@@ -332,7 +325,7 @@ class Personas extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Contatos'
+          title='Contactos'
           subTitle='LISTA'
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -376,7 +369,6 @@ class Personas extends CustomComponent {
                     <TableHead width="20%">Cliente</TableHead>
                     <TableHead width="10%">Cel. / Tel.</TableHead>
                     <TableHead width="15%">Dirección</TableHead>
-                    <TableHead width="7%">Predeterminado</TableHead>
                     <TableHead width="7%">Estado</TableHead>
                     <TableHead width="5%" className="text-center">Detalle</TableHead>
                     <TableHead width="5%" className="text-center">Editar</TableHead>

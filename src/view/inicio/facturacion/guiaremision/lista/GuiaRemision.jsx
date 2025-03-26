@@ -365,7 +365,7 @@ class GuiaRemision extends CustomComponent {
           </TableCell>
           <TableCell className='text-center'>
             <Button
-              className="btn-outline-primary btn-sm"
+              className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idGuiaRemision)}
             >
               <i className="fa fa-eye"></i>

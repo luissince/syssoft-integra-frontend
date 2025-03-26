@@ -16,7 +16,7 @@ import {
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../../components/Container';
 import {
-  getPersonaPredeterminado,
+  getPreferidoPersona,
   comboComprobante,
   comboMoneda,
   filtrarPersona,
@@ -301,7 +301,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.fetchComprobante(VENTA),
       this.fetchMoneda(),
       this.fetchImpuesto(),
-      this.fetchClientePredeterminado(),
+      this.fetchPersonaPredeterminado({cliente: "1"}),
       this.fetchTipoDocumento(),
       this.fetchAlmacen({ idSucursal: this.state.idSucursal })
     ]);
@@ -396,8 +396,8 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
 
-  async fetchClientePredeterminado() {
-    const response = await getPersonaPredeterminado();
+  async fetchPersonaPredeterminado(params) {
+    const response = await getPreferidoPersona(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;

@@ -183,6 +183,14 @@ export async function deletePersona(params) {
   );
 }
 
+export async function preferredPersona(params) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/persona/preferred', {
+      params: params,
+    }),
+  );
+}
+
 export async function getIdPersona(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/persona/id', {
@@ -192,9 +200,10 @@ export async function getIdPersona(params, signal) {
   );
 }
 
-export async function getPersonaPredeterminado(signal) {
+export async function getPreferidoPersona(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/persona/predeterminado', {
+      params: params,
       signal: signal,
     }),
   );
@@ -1597,6 +1606,14 @@ export async function addVehiculo(data) {
 export async function editVehiculo(data) {
   return await Resolve.create(
     instancePrincipal.post('/api/vehiculo/edit', data),
+  );
+}
+
+export async function getDefaultVehiculo(params) {
+  return await Resolve.create(
+    instancePrincipal.delete('/api/vehiculo/default', {
+      params: params,
+    }),
   );
 }
 

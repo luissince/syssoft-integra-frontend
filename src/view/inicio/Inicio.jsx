@@ -918,12 +918,31 @@ class Inicio extends React.Component {
             render={(props) => <Clientes {...props} />}
           />
           <Route
+            path={`${path}/contactos/clientes/editar`}
+            exact={true}
+            render={(props) => <PersonaEditar {...props} />}
+          />
+
+          <Route
             path={`${path}/contactos/proveedores`}
+            exact={true}
             render={(props) => <Proveedores {...props} />}
           />
           <Route
+            path={`${path}/contactos/proveedores/editar`}
+            exact={true}
+            render={(props) => <PersonaEditar {...props} />}
+          />
+
+          <Route
             path={`${path}/contactos/conductores`}
+            exact={true}
             render={(props) => <Conductores {...props} />}
+          />
+          <Route
+            path={`${path}/contactos/conductores/editar`}
+            exact={true}
+            render={(props) => <PersonaEditar {...props} />}
           />
 
           {/* 

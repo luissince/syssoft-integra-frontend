@@ -17,7 +17,9 @@ import {
   documentsPdfInvoicesGuiaRemision,
   filtrarPersona,
   filtrarVehiculo,
+  getDefaultVehiculo,
   getIdSucursal,
+  getPreferidoPersona,
   getUbigeo,
   listFiltrarVenta
 } from '../../../../../../network/rest/principal.network';
@@ -169,7 +171,23 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   async componentDidMount() {
+    const idVenta = new URLSearchParams(this.props.location.search).get('idVenta');
     await this.loadingData()
+
+    if (idVenta) {
+      this.setState({
+        loading: true
+      });
+
+      const params = {
+        tipo: 2,
+        idSucursal: this.state.idSucursal,
+        filtrar: idVenta,
+      };
+
+      const ventas = await this.fetchFiltrarVentas(params);
+      this.handleSelectItemVenta(ventas[0]);
+    }
   }
 
   componentWillUnmount() {
@@ -191,12 +209,14 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   loadingData = async () => {
-    const [comprobantes, motivoTraslado, tipoPeso, sucursal] =
+    const [comprobantes, motivoTraslado, tipoPeso, sucursal, vehiculo, conductor] =
       await Promise.all([
         this.fetchComprobante(GUIA_DE_REMISION),
         this.fetchComboMotivoTraslado(),
         this.fetchComboTipoPeso(),
-        this.fetchObtenerSucursal()
+        this.fetchObtenerSucursal(),
+        this.fetchDefaultVehiculo(),
+        this.fetchPersonaPredeterminado({ conductor: "1" })
       ]);
 
     const ubigeo = {
@@ -207,6 +227,14 @@ class GuiaRemisionCrear extends CustomComponent {
       ubigeo: sucursal.ubigeo,
     };
 
+    if (vehiculo) {
+      this.refVehiculo.current.initialize(`${vehiculo.marca}-${vehiculo.numeroPlaca}`);
+    }
+
+    if (conductor) {
+      this.refConductor.current.initialize(`${conductor.documento}, ${conductor.informacion}`);
+    }
+
     this.handleSelectItemUbigeoPartido(ubigeo);
 
     this.setState({
@@ -215,6 +243,8 @@ class GuiaRemisionCrear extends CustomComponent {
       motivoTraslado,
       tipoPeso,
       direccionPartida: sucursal.direccion,
+      vehiculo: vehiculo ? vehiculo : null,
+      conductor: conductor ? conductor : null,
       loading: false
     });
   }
@@ -352,6 +382,31 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
+  async fetchDefaultVehiculo() {
+    const response = await getDefaultVehiculo();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      return [];
+    }
+  }
+
+  async fetchPersonaPredeterminado(params) {
+    const response = await getPreferidoPersona(params);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
 
   async fetchObtenerVentaDetalle() {
     const params = {
@@ -442,6 +497,7 @@ class GuiaRemisionCrear extends CustomComponent {
     }
 
     const params = {
+      tipo: 1,
       idSucursal: this.state.idSucursal,
       filtrar: searchWord,
     };
@@ -472,7 +528,8 @@ class GuiaRemisionCrear extends CustomComponent {
 
       this.setState({
         loading: true
-      })
+      });
+
       const ventaDetalle = await this.fetchObtenerVentaDetalle();
 
       this.setState({
