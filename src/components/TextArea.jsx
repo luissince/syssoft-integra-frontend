@@ -7,7 +7,7 @@ const TextArea = ({
     group = false,
     iconLeft,
     title,
-    className = "",
+    className = "border border-primary",
     placeholder,
     disabled,
     role,

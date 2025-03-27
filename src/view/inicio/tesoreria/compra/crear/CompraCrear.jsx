@@ -4,6 +4,7 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
+  formatDecimal,
   isEmpty,
   isText,
   numberFormat,
@@ -18,6 +19,7 @@ import {
   comboMoneda,
   createCompra,
   documentsPdfInvoicesCompra,
+  filtrarAlmacenProducto,
   filtrarPersona,
   filtrarProducto,
   forPurchaseOrdenCompra,
@@ -41,6 +43,7 @@ import { images } from '../../../../../helper';
 import Search from '../../../../../components/Search';
 import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
+import { PRODUCTO } from '../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -62,6 +65,7 @@ class CompraCrear extends CustomComponent {
       // Atributos principales
       idCompra: '',
       idComprobante: '',
+      idAlmacenDestino: '',
       idMoneda: '',
       idAlmacen: '',
       idImpuesto: '',
@@ -117,6 +121,7 @@ class CompraCrear extends CustomComponent {
 
     // Referencia principales
     this.refComprobante = React.createRef();
+    this.refAlmacenDestino = React.createRef();
 
     // Filtrar producto
     this.refProducto = React.createRef();
@@ -207,16 +212,20 @@ class CompraCrear extends CustomComponent {
       const comprobante = comprobantes.find((item) => item.preferida === 1);
       const moneda = monedas.find((item) => item.nacional === 1);
       const impuesto = impuestos.find((item) => item.preferido === 1);
+      const almacen = almacenes.find((item) => item.predefinido === 1);
 
       this.setState({
         comprobantes,
         monedas,
         almacenes,
         impuestos,
+
         idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
         idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
         idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
         codiso: isEmpty(moneda) ? '' : moneda.codiso,
+        idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+
         loading: false,
       }, () => {
         this.updateReduxState();
@@ -246,7 +255,7 @@ class CompraCrear extends CustomComponent {
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
   async fetchFiltrarProductos(params) {
-    const response = await filtrarProducto(params);
+    const response = await filtrarAlmacenProducto(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -365,6 +374,12 @@ class CompraCrear extends CustomComponent {
     });
   };
 
+  handleSelectAlmacenDestino = (event) => {
+    this.setState({ idAlmacenDestino: event.target.value }, () => {
+      this.updateReduxState();
+    });
+  };
+
   handleRemoverProducto = (idProducto) => {
     const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto).map((item, index) => ({
       ...item,
@@ -444,6 +459,7 @@ class CompraCrear extends CustomComponent {
     this.setState({ loadingProducto: true });
 
     const params = {
+      idAlmacen: this.state.idAlmacen,
       filtrar: searchWord,
     };
 
@@ -535,14 +551,14 @@ class CompraCrear extends CustomComponent {
     this.handleCloseOrdenCompra();
     this.setState({
       loading: true,
-      msgLoading: "Obteniendos datos de la ordend de compra.",
+      msgLoading: "Obteniendos datos de la orden de compra.",
       detalles: [],
       ordenCompra: null,
     });
 
     const params = {
       idOrdenCompra: ordenCompra.idOrdenCompra,
-      idAlmacen: this.state.idAlmacen
+      idAlmacen: this.state.idAlmacenDestino
     };
 
     const response = await forPurchaseOrdenCompra(params, this.abortControllerOrdenCompra.signal);
@@ -684,7 +700,7 @@ class CompraCrear extends CustomComponent {
   // Procesos guardar, limpiar y cerrar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idComprobante, proveedor, idMoneda, idImpuesto, idAlmacen, detalles } = this.state;
+    const { idComprobante, proveedor, idMoneda, idImpuesto, idAlmacenDestino, detalles } = this.state;
 
     if (!isText(idComprobante)) {
       this.alert.warning('Compra', 'Seleccione su comprobante.', () =>
@@ -713,10 +729,9 @@ class CompraCrear extends CustomComponent {
       return;
     }
 
-    if (!isText(idAlmacen)) {
+    if (!isText(idAlmacenDestino)) {
       this.alert.warning('Compra', 'Seleccione su almacen.', () => {
-        this.handleOpenOptions();
-        this.refAlmacen.current.focus();
+        this.refAlmacenDestino.current.focus();
       });
       return;
     }
@@ -759,7 +774,7 @@ class CompraCrear extends CustomComponent {
       idComprobante,
       proveedor,
       idImpuesto,
-      idAlmacen,
+      idAlmacenDestino,
       idMoneda,
       ordenCompra,
       observacion,
@@ -776,9 +791,9 @@ class CompraCrear extends CustomComponent {
           idComprobante: idComprobante,
           idProveedor: proveedor.idPersona,
           idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
+          idAlmacen: idAlmacenDestino,
           idMoneda: idMoneda,
-          idOrdenCompra: ordenCompra && ordenCompra.idOrdenCompra  || null,
+          idOrdenCompra: ordenCompra && ordenCompra.idOrdenCompra || null,
           observacion: observacion,
           nota: nota,
           idUsuario: idUsuario,
@@ -813,7 +828,7 @@ class CompraCrear extends CustomComponent {
       idComprobante,
       proveedor,
       idImpuesto,
-      idAlmacen,
+      idAlmacenDestino,
       idMoneda,
       ordenCompra,
       observacion,
@@ -830,9 +845,9 @@ class CompraCrear extends CustomComponent {
           idComprobante: idComprobante,
           idProveedor: proveedor.idPersona,
           idImpuesto: idImpuesto,
-          idAlmacen: idAlmacen,
+          idAlmacen: idAlmacenDestino,
           idMoneda: idMoneda,
-          idOrdenCompra: ordenCompra && ordenCompra.idOrdenCompra  || null,
+          idOrdenCompra: ordenCompra && ordenCompra.idOrdenCompra || null,
           observacion: observacion,
           nota: nota,
           idUsuario: idUsuario,
@@ -1147,9 +1162,9 @@ class CompraCrear extends CustomComponent {
                     <div className='d-flex justify-content-center flex-wrap gap-4'>
                       {
                         this.state.productos.map((item, index) => (
-                          <button
+                          <Button
                             key={index}
-                            className='btn btn-light bg-white'
+                            className='btn-light bg-white'
                             style={{
                               border: '1px solid #e2e8f0',
                               width: '16rem',
@@ -1157,14 +1172,19 @@ class CompraCrear extends CustomComponent {
                             onClick={() => this.handleSelectItemProducto(item)}
                           >
                             <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                              <Image
-                                default={images.noImage}
-                                src={item.imagen}
-                                alt={item.nombre}
-                                width={150}
-                                height={150}
-                                className='mb-2 object-contain'
-                              />
+                              <div className='d-flex justify-content-center align-items-center flex-column'>
+                                <Image
+                                  default={images.noImage}
+                                  src={item.imagen}
+                                  alt={item.nombre}
+                                  width={150}
+                                  height={150}
+                                  className='mb-2 object-contain'
+                                />
+                                <p className={`${item.idTipoProducto === PRODUCTO && item.cantidad <= 0 ? 'badge badge-danger text-base' : 'badge badge-success text-base'} `}>
+                                  INV. {formatDecimal(item.cantidad)}
+                                </p>
+                              </div>
 
                               <div className='d-flex justify-content-center align-items-center flex-column'>
                                 <p className='m-0 text-lg'>{item.nombre}</p>
@@ -1173,7 +1193,9 @@ class CompraCrear extends CustomComponent {
                                 </p>
                               </div>
                             </div>
-                          </button>
+
+                            <div className='w-100 text-left text-sm'>Almacen: {item.almacen}</div>
+                          </Button>
                         ))
                       }
                     </div>
@@ -1245,7 +1267,7 @@ class CompraCrear extends CustomComponent {
                     handleSelectItem={this.handleSelectItemProveedor}
                     customButton={
                       <Button
-                        className="btn-outline-success d-flex align-items-center"
+                        className="btn-outline-primary d-flex align-items-center"
                         onClick={this.handleOpenModalProveedor}>
                         <i className='fa fa-user-plus'></i>
                         <div className="ml-2">Nuevo</div>
@@ -1257,6 +1279,22 @@ class CompraCrear extends CustomComponent {
                       </>
                     }
                   />
+                </div>
+
+                <div className="form-group">
+                  <Select
+                    group={false}
+                    refSelect={this.refAlmacenDestino}
+                    value={this.state.idAlmacenDestino}
+                    onChange={this.handleSelectAlmacenDestino}
+                  >
+                    <option value="">-- Almacen de destino --</option>
+                    {this.state.almacenes.map((item, index) => (
+                      <option key={index} value={item.idAlmacen}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
               </div>
 

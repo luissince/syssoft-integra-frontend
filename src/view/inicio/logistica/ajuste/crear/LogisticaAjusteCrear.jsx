@@ -34,6 +34,7 @@ import RadioButton from '../../../../../components/RadioButton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { SERVICIO } from '../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -255,7 +256,7 @@ class LogisticaAjusteCrear extends CustomComponent {
     const productos = await this.fetchFiltrarProducto(params);
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
-    const filteredProductos = productos.filter((item) => item.tipoProducto !== 'SERVICIO');
+    const filteredProductos = productos.filter((item) => item.idTipoProducto !== SERVICIO);
 
     this.setState({
       productos: filteredProductos,

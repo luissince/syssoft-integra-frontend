@@ -4,6 +4,7 @@ import CustomComponent from '../../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
+  formatDecimal,
   isEmpty,
   isText,
   numberFormat,
@@ -12,10 +13,12 @@ import {
 import { connect } from 'react-redux';
 import { PEDIDO } from '../../../../../../model/types/tipo-comprobante';
 import {
+  comboAlmacen,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
   documentsPdfInvoicesPedido,
+  filtrarAlmacenProducto,
   filtrarPersona,
   filtrarProducto,
   idPedido,
@@ -37,6 +40,7 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -58,6 +62,7 @@ class PedidoEditar extends CustomComponent {
       idPedido: '',
       idComprobante: '',
       idMoneda: '',
+      idAlmacen: '',
       idImpuesto: '',
       observacion: '',
       nota: '',
@@ -70,6 +75,7 @@ class PedidoEditar extends CustomComponent {
       monedas: [],
       impuestos: [],
       medidas: [],
+      almacenes: [],
 
       // Filtrar producto
       productos: [],
@@ -121,6 +127,7 @@ class PedidoEditar extends CustomComponent {
     this.idSidebarConfiguration = 'idSidebarConfiguration';
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
+    this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
     this.refNota = React.createRef();
 
@@ -178,16 +185,18 @@ class PedidoEditar extends CustomComponent {
   */
 
   loadingData = async (idPedido) => {
-    const [pedido, comprobantes, monedas, impuestos] = await Promise.all([
+    const [pedido, comprobantes, monedas, impuestos, almacenes] = await Promise.all([
       this.fetchIdPedido({ idPedido: idPedido }),
       this.fetchComprobante(PEDIDO),
       this.fetchMoneda(),
       this.fetchImpuesto(),
+      this.fetchAlmacen({ idSucursal: this.state.idSucursal })
     ]);
 
     const { cabecera, detalles } = pedido;
 
     const moneda = monedas.find((item) => item.nacional === 1);
+    const almacen = almacenes.find((item) => item.predefinido === 1);
 
     this.handleSelectItemCliente({
       celular: cabecera.celular,
@@ -203,13 +212,17 @@ class PedidoEditar extends CustomComponent {
       comprobantes,
       monedas,
       impuestos,
+      almacenes,
+
       idImpuesto: isEmpty(cabecera.idImpuesto) ? '' : cabecera.idImpuesto,
       idComprobante: isEmpty(cabecera.idComprobante) ? '' : cabecera.idComprobante,
       idMoneda: isEmpty(cabecera.idMoneda) ? '' : cabecera.idMoneda,
       codiso: isEmpty(moneda) ? '' : moneda.codiso,
+      idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
       observacion: cabecera.observacion,
       nota: cabecera.nota,
       detalles: detalles,
+
       loading: false,
     });
   };
@@ -235,7 +248,7 @@ class PedidoEditar extends CustomComponent {
   }
 
   async fetchFiltrarProductos(params) {
-    const response = await filtrarProducto(params);
+    const response = await filtrarAlmacenProducto(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -296,6 +309,23 @@ class PedidoEditar extends CustomComponent {
 
   async fetchImpuesto() {
     const response = await comboImpuesto();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+  async fetchAlmacen(params) {
+    const response = await comboAlmacen(
+      params,
+      this.abortController.signal
+    );
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -410,6 +440,7 @@ class PedidoEditar extends CustomComponent {
     this.setState({ loadingProducto: true });
 
     const params = {
+      idAlmacen: this.state.idAlmacen,
       filtrar: searchWord,
     };
 
@@ -885,9 +916,9 @@ class PedidoEditar extends CustomComponent {
                 <div className='d-flex justify-content-center flex-wrap gap-4'>
                   {
                     this.state.productos.map((item, index) => (
-                      <button
+                      <Button
                         key={index}
-                        className='btn btn-light bg-white'
+                        className='btn-light bg-white'
                         style={{
                           border: '1px solid #e2e8f0',
                           width: '16rem',
@@ -895,23 +926,31 @@ class PedidoEditar extends CustomComponent {
                         onClick={() => this.handleSelectItemProducto(item)}
                       >
                         <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className='mb-2 object-contain'
-                          />
+                          <div className='d-flex justify-content-center align-items-center flex-column'>
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.nombre}
+                              width={150}
+                              height={150}
+                              className='mb-2 object-contain'
+                            />
+                            <p className={`${item.idTipoProducto === PRODUCTO && item.cantidad <= 0 ? 'badge badge-danger text-base' : 'badge badge-success text-base'} `}>
+                              INV. {formatDecimal(item.cantidad)}
+                            </p>
+                          </div>
 
                           <div className='d-flex justify-content-center align-items-center flex-column'>
+                            <span className="text-sm">{item.codigo}</span>
                             <p className='m-0 text-lg'>{item.nombre}</p>
                             <p className='m-0 text-xl font-weight-bold'>
-                              {numberFormat(item.precio, this.state.codiso)} <small>x {item.unidad}</small>
+                              {numberFormat(item.precio, this.state.codiso)} <span className="text-sm">x {item.unidad}</span>
                             </p>
                           </div>
                         </div>
-                      </button>
+
+                        <div className='w-100 text-left text-sm'>Almacen: {item.almacen}</div>
+                      </Button>
                     ))
                   }
                 </div>
@@ -971,7 +1010,7 @@ class PedidoEditar extends CustomComponent {
                     renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
                     customButton={
                       <Button
-                        className="btn-outline-success d-flex align-items-center"
+                        className="btn-outline-primary d-flex align-items-center"
                         onClick={this.handleOpenModalPersona}>
                         <i className='fa fa-plus'></i>
                         <span className="ml-2">Nuevo</span>

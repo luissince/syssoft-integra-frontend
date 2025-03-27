@@ -43,7 +43,8 @@ class ModalProducto extends Component {
     this.setState({
       idProducto: producto.idProducto,
       codigo: producto.codigo,
-      cantidad: producto.cantidad ?? 1,
+      // cantidad: producto.cantidad ?? 1,
+      cantidad: 1,
       costo: producto.costo,
       descripcion: producto.nombre,
       imagen: producto.imagen,

@@ -4,6 +4,7 @@ import CustomComponent from '../../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
+  formatDecimal,
   isEmpty,
   numberFormat,
   rounded,
@@ -11,11 +12,13 @@ import {
 import { connect } from 'react-redux';
 import { PEDIDO } from '../../../../../../model/types/tipo-comprobante';
 import {
+  comboAlmacen,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
   createPedido,
   documentsPdfInvoicesPedido,
+  filtrarAlmacenProducto,
   filtrarPersona,
   filtrarProducto,
 } from '../../../../../../network/rest/principal.network';
@@ -36,6 +39,7 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -57,6 +61,7 @@ class PedidoCrear extends CustomComponent {
       idPedido: '',
       idComprobante: '',
       idMoneda: '',
+      idAlmacen: '',
       idImpuesto: '',
       observacion: '',
       nota: '',
@@ -70,6 +75,7 @@ class PedidoCrear extends CustomComponent {
       monedas: [],
       impuestos: [],
       medidas: [],
+      almacenes: [],
 
       // Filtrar producto
       loadingProducto: false,
@@ -122,6 +128,7 @@ class PedidoCrear extends CustomComponent {
     this.idSidebarConfiguration = 'idSidebarConfiguration';
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
+    this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
     this.refNota = React.createRef();
 
@@ -179,24 +186,30 @@ class PedidoCrear extends CustomComponent {
         }
       });
     } else {
-      const [comprobantes, monedas, impuestos] = await Promise.all([
+      const [comprobantes, monedas, impuestos, almacenes] = await Promise.all([
         this.fetchComprobante(PEDIDO),
         this.fetchMoneda(),
         this.fetchImpuesto(),
+        this.fetchAlmacen({ idSucursal: this.state.idSucursal })
       ]);
 
       const comprobante = comprobantes.find((item) => item.preferida === 1);
       const moneda = monedas.find((item) => item.nacional === 1);
       const impuesto = impuestos.find((item) => item.preferido === 1);
+      const almacen = almacenes.find((item) => item.predefinido === 1);
 
       this.setState({
         comprobantes,
         monedas,
         impuestos,
+        almacenes,
+
         idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
         idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
         idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
         codiso: isEmpty(moneda) ? '' : moneda.codiso,
+        idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+
         loading: false,
       }, () => {
         this.updateReduxState();
@@ -227,7 +240,7 @@ class PedidoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   async fetchFiltrarProductos(params) {
-    const response = await filtrarProducto(params);
+    const response = await filtrarAlmacenProducto(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -288,6 +301,23 @@ class PedidoCrear extends CustomComponent {
 
   async fetchImpuesto() {
     const response = await comboImpuesto();
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
+  async fetchAlmacen(params) {
+    const response = await comboAlmacen(
+      params,
+      this.abortController.signal
+    );
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -413,6 +443,7 @@ class PedidoCrear extends CustomComponent {
     this.setState({ loadingProducto: true });
 
     const params = {
+      idAlmacen: this.state.idAlmacen,
       filtrar: searchWord,
     };
 
@@ -843,7 +874,7 @@ class PedidoCrear extends CustomComponent {
                   </Button>
                 </div>
 
-                <div className='py-3 d-flex align-items-center'> 
+                <div className='py-3 d-flex align-items-center'>
                   <p className='h5 m-0'>Crear Pedido <i className='fa fa-plus text-secondary'></i> </p>
                 </div>
               </div>
@@ -905,7 +936,7 @@ class PedidoCrear extends CustomComponent {
                 <div className='d-flex justify-content-center flex-wrap gap-4'>
                   {
                     this.state.productos.map((item, index) => (
-                      <button
+                      <Button
                         key={index}
                         className='btn btn-light bg-white'
                         style={{
@@ -915,23 +946,31 @@ class PedidoCrear extends CustomComponent {
                         onClick={() => this.handleSelectItemProducto(item)}
                       >
                         <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className='mb-2 object-contain'
-                          />
+                          <div className='d-flex justify-content-center align-items-center flex-column'>
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.nombre}
+                              width={150}
+                              height={150}
+                              className='mb-2 object-contain'
+                            />
+                            <p className={`${item.idTipoProducto === PRODUCTO && item.cantidad <= 0 ? 'badge badge-danger text-base' : 'badge badge-success text-base'} `}>
+                              INV. {formatDecimal(item.cantidad)}
+                            </p>
+                          </div>
 
                           <div className='d-flex justify-content-center align-items-center flex-column'>
+                            <span className="text-sm">{item.codigo}</span>
                             <p className='m-0 text-lg'>{item.nombre}</p>
                             <p className='m-0 text-xl font-weight-bold'>
-                              {numberFormat(item.precio, this.state.codiso)} <small>x {item.unidad}</small>
+                              {numberFormat(item.precio, this.state.codiso)} <span className="text-sm">x {item.unidad}</span>
                             </p>
                           </div>
                         </div>
-                      </button>
+
+                        <div className='w-100 text-left text-sm'>Almacen: {item.almacen}</div>
+                      </Button>
                     ))
                   }
                 </div>
@@ -996,7 +1035,7 @@ class PedidoCrear extends CustomComponent {
                     renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
                     customButton={
                       <Button
-                        className="btn-outline-success d-flex align-items-center"
+                        className="btn-outline-primary d-flex align-items-center"
                         onClick={this.handleOpenModalPersona}>
                         <i className='fa fa-plus'></i>
                         <span className="ml-2">Nuevo</span>

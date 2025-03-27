@@ -38,6 +38,7 @@ import ModalInventario from '../component/ModalInventario';
 import ModalProducto from '../component/ModalProducto';
 import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_SABOR, TIPO_ATRIBUTO_TALLA } from '../../../../../../model/types/tipo-atributo';
 import { TabContent, TabHead, TabHeader, TabPane } from '../../../../../../components/Tab';
+import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
@@ -55,7 +56,7 @@ class ProductoAgregar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      tipo: 'TP0001',
+      tipo: PRODUCTO,
       imagen: {
         url: images.noImage,
       },
@@ -1361,17 +1362,17 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRegistrar = () => {
-    if (this.state.tipo === 'TP0001') {
+    if (this.state.tipo === PRODUCTO) {
       this.handleSaveProducto();
       return;
     }
 
-    if (this.state.tipo === 'TP0002') {
+    if (this.state.tipo === SERVICIO) {
       this.handleSaveServicio();
       return;
     }
 
-    if (this.state.tipo === 'TP0003') {
+    if (this.state.tipo === COMBO) {
       this.handleSaveCombo();
       return;
     }
@@ -1756,16 +1757,16 @@ class ProductoAgregar extends CustomComponent {
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={
-                tipo === 'TP0001'
+                tipo === PRODUCTO
                   ? nombreProducto
-                  : tipo === 'TP0002'
+                  : tipo === SERVICIO
                     ? nombreServicio
                     : nombreCombo
               }
               precio={
-                tipo === 'TP0001'
+                tipo === PRODUCTO
                   ? precioProducto
-                  : tipo === 'TP0002'
+                  : tipo === SERVICIO
                     ? precioServicio
                     : precioCombo
               }

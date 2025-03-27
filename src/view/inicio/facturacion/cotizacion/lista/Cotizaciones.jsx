@@ -410,7 +410,7 @@ class Cotizaciones extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={"table-bordered "}>
                 <TableHeader className="thead-light">
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>

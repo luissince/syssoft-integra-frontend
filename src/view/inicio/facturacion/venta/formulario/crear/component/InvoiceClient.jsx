@@ -1,3 +1,4 @@
+import Button from '../../../../../../../components/Button';
 import SearchInput from '../../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 
@@ -19,12 +20,12 @@ const InvoiceClient = (props) => {
         handleFilter={handleFilter}
         handleSelectItem={handleSelectItem}
         customButton={
-          <button
-            className="btn btn-outline-primary d-flex align-items-center"
+          <Button
+            className="btn-outline-primary d-flex align-items-center"
             onClick={handleOpenCliente}>
             <i className='fa fa-user-plus'></i>
             <div className="ml-2">Nuevo</div>
-          </button>
+          </Button>
         }
         renderItem={(value) =>
           <>

@@ -69,7 +69,7 @@ const Select = ({
     group = false,
     iconLeft,
     title,
-    className,
+    className = "border border-primary",
     refSelect,
     value,
     disabled,
@@ -83,11 +83,18 @@ const Select = ({
                 {label && <label htmlFor={id}>{label} </label>}
 
                 <div className="input-group">
-                    {iconLeft && <div className="input-group-prepend">
-                        <div className="input-group-text">
+                    {
+                        iconLeft && (
+                            <div className="input-group-prepend">
+                                <span className='btn btn-primary'>
+                                    {iconLeft}
+                                </span>
+                                {/* <div className="input-group-text">
                             {iconLeft}
-                        </div>
-                    </div>}
+                        </div> */}
+                            </div>
+                        )
+                    }
 
                     <select
                         autoFocus={autoFocus}
@@ -100,9 +107,13 @@ const Select = ({
                         onChange={onChange}>
                         {children}
                     </select>
-                    <div className="input-group-append">
-                        {buttonRight}
-                    </div>
+                    {
+                        buttonRight && (
+                            <div className="input-group-append">
+                                {buttonRight}
+                            </div>
+                        )
+                    }
                 </div>
             </>
         );

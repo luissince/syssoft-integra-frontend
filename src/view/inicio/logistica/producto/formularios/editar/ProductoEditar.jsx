@@ -40,6 +40,7 @@ import { SpinnerView } from '../../../../../../components/Spinner';
 import ModalProducto from '../component/ModalProducto';
 import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_SABOR, TIPO_ATRIBUTO_TALLA } from '../../../../../../model/types/tipo-atributo';
 import { TabContent, TabHead, TabHeader, TabPane } from '../../../../../../components/Tab';
+import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -57,7 +58,7 @@ class ProductoEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      tipo: 'TP0001',
+      tipo: PRODUCTO,
       idProducto: '',
       imagen: {
         url: images.noImage,
@@ -261,7 +262,7 @@ class ProductoEditar extends CustomComponent {
       this.fetchProducto(idProducto),
     ]);
 
-    if (producto.idTipoProducto === 'TP0001') {
+    if (producto.idTipoProducto === PRODUCTO) {
       await this.setStateAsync({
         activeTabProducto: true,
         activeTabServicio: false,
@@ -292,7 +293,7 @@ class ProductoEditar extends CustomComponent {
         tallasProducto: producto.tallas,
         saboresProducto: producto.sabores,
       });
-    } else if (producto.idTipoProducto === 'TP0002') {
+    } else if (producto.idTipoProducto === SERVICIO) {
       await this.setStateAsync({
         activeTabProducto: false,
         activeTabServicio: true,
@@ -1428,17 +1429,17 @@ class ProductoEditar extends CustomComponent {
   };
 
   handleRegistrar = () => {
-    if (this.state.tipo === 'TP0001') {
+    if (this.state.tipo === PRODUCTO) {
       this.handleSaveProducto();
       return;
     }
 
-    if (this.state.tipo === 'TP0002') {
+    if (this.state.tipo === SERVICIO) {
       this.handleSaveServicio();
       return;
     }
 
-    if (this.state.tipo === 'TP0003') {
+    if (this.state.tipo === COMBO) {
       this.handleSaveCombo();
       return;
     }
@@ -1817,16 +1818,16 @@ class ProductoEditar extends CustomComponent {
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={
-                tipo === 'TP0001'
+                tipo === PRODUCTO
                   ? nombreProducto
-                  : tipo === 'TP0002'
+                  : tipo === SERVICIO
                     ? nombreServicio
                     : nombreCombo
               }
               precio={
-                tipo === 'TP0001'
+                tipo === PRODUCTO
                   ? precioProducto
-                  : tipo === 'TP0002'
+                  : tipo === SERVICIO
                     ? precioServicio
                     : precioCombo
               }

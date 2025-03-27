@@ -4,6 +4,7 @@ import CustomComponent from '../../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
+  formatDecimal,
   isEmpty,
   isText,
   numberFormat,
@@ -13,12 +14,13 @@ import {
 import { connect } from 'react-redux';
 import { COTIZACION } from '../../../../../../model/types/tipo-comprobante';
 import {
+  comboAlmacen,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
   documentsPdfInvoicesCotizacion,
+  filtrarAlmacenProducto,
   filtrarPersona,
-  filtrarProducto,
   idCotizacion,
   obtenerPreCotizacionPdf,
   updateCotizacion,
@@ -40,6 +42,7 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import Search from '../../../../../../components/Search';
+import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -67,6 +70,7 @@ class CotizacionEditar extends CustomComponent {
       idImpuesto: '',
       observacion: '',
       nota: '',
+      cacheConfiguracion: null,
 
       // Detalle del gasto
       detalles: [],
@@ -112,9 +116,6 @@ class CotizacionEditar extends CustomComponent {
 
     // Referencia principales
     this.refComprobante = React.createRef();
-    this.refIdMoneda = React.createRef();
-    this.refIdImpuesto = React.createRef();
-    this.refObservacion = React.createRef();
 
     // Filtrar producto
     this.refProducto = React.createRef();
@@ -140,6 +141,7 @@ class CotizacionEditar extends CustomComponent {
     this.idSidebarConfiguration = 'idSidebarConfiguration';
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
+    this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
     this.refNota = React.createRef();
   }
@@ -192,17 +194,19 @@ class CotizacionEditar extends CustomComponent {
   */
 
   loadingData = async (idCotizacion) => {
-    const [cotizacion, comprobantes, monedas, impuestos] =
+    const [cotizacion, comprobantes, monedas, impuestos, almacenes] =
       await Promise.all([
         this.fetchIdCotizacion({ idCotizacion: idCotizacion }),
         this.fetchComprobante(COTIZACION),
         this.fetchMoneda(),
         this.fetchImpuesto(),
+        this.fetchAlmacen({ idSucursal: this.state.idSucursal })
       ]);
 
     const { cabecera, detalles } = cotizacion;
 
     const moneda = monedas.find((item) => item.idMoneda === cabecera.idMoneda);
+    const almacen = almacenes.find((item) => item.predefinido === 1);
 
     this.handleSelectItemCliente({
       celular: cabecera.celular,
@@ -217,14 +221,19 @@ class CotizacionEditar extends CustomComponent {
       idCotizacion,
       comprobantes,
       monedas,
+      almacenes,
+
       impuestos,
       idImpuesto: isEmpty(cabecera.idImpuesto) ? '' : cabecera.idImpuesto,
       idComprobante: isEmpty(cabecera.idComprobante) ? '' : cabecera.idComprobante,
       idMoneda: isEmpty(cabecera.idMoneda) ? '' : cabecera.idMoneda,
       codiso: isEmpty(moneda) ? '' : moneda.codiso,
+      idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+
       observacion: cabecera.observacion,
       nota: cabecera.nota,
       detalles: detalles,
+
       loading: false,
     });
   };
@@ -246,7 +255,7 @@ class CotizacionEditar extends CustomComponent {
   }
 
   async fetchFiltrarProductos(params) {
-    const response = await filtrarProducto(params);
+    const response = await filtrarAlmacenProducto(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -319,6 +328,23 @@ class CotizacionEditar extends CustomComponent {
     }
   }
 
+  async fetchAlmacen(params) {
+    const response = await comboAlmacen(
+      params,
+      this.abortController.signal
+    );
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
   close = () => {
     this.props.history.goBack();
   }
@@ -370,7 +396,7 @@ class CotizacionEditar extends CustomComponent {
 
     if (isEmpty(idImpuesto)) {
       this.alert.warning('Cotización', 'Seleccione un impuesto para continuar.', () => {
-        this.refIdImpuesto.current.focus();
+        this.refImpuesto.current.focus();
       });
       return;
     }
@@ -423,6 +449,7 @@ class CotizacionEditar extends CustomComponent {
     }
 
     const params = {
+      idAlmacen: this.state.idAlmacen,
       filtrar: searchWord,
     };
 
@@ -586,14 +613,14 @@ class CotizacionEditar extends CustomComponent {
 
     if (isEmpty(idMoneda)) {
       this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
-        this.refIdMoneda.current.focus(),
+        this.refMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
       this.alert.warning('Cotización', 'Seleccione el impuesto', () =>
-        this.refIdImpuesto.current.focus(),
+        this.refImpuesto.current.focus(),
       );
       return;
     }
@@ -683,14 +710,14 @@ class CotizacionEditar extends CustomComponent {
 
     if (isEmpty(idMoneda)) {
       this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
-        this.refIdMoneda.current.focus(),
+        this.refMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
       this.alert.warning('Cotización', 'Seleccione un impuesto', () =>
-        this.refIdImpuesto.current.focus(),
+        this.refImpuesto.current.focus(),
       );
       return;
     }
@@ -983,9 +1010,9 @@ class CotizacionEditar extends CustomComponent {
                 <div className='d-flex justify-content-center flex-wrap gap-4'>
                   {
                     this.state.productos.map((item, index) => (
-                      <button
+                      <Button
                         key={index}
-                        className='btn btn-light bg-white'
+                        className='btn-light bg-white'
                         style={{
                           border: '1px solid #e2e8f0',
                           width: '16rem',
@@ -993,23 +1020,31 @@ class CotizacionEditar extends CustomComponent {
                         onClick={() => this.handleSelectItemProducto(item)}
                       >
                         <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className='mb-2 object-contain'
-                          />
+                          <div className='d-flex justify-content-center align-items-center flex-column'>
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.nombre}
+                              width={150}
+                              height={150}
+                              className='mb-2 object-contain'
+                            />
+                            <p className={`${item.idTipoProducto === PRODUCTO && item.cantidad <= 0 ? 'badge badge-danger text-base' : 'badge badge-success text-base'} `}>
+                              INV. {formatDecimal(item.cantidad)}
+                            </p>
+                          </div>
 
                           <div className='d-flex justify-content-center align-items-center flex-column'>
+                            <span className="text-sm">{item.codigo}</span>
                             <p className='m-0 text-lg'>{item.nombre}</p>
                             <p className='m-0 text-xl font-weight-bold'>
-                              {numberFormat(item.precio, this.state.codiso)} <small>x {item.unidad}</small>
+                              {numberFormat(item.precio, this.state.codiso)} <span className="text-sm">x {item.unidad}</span>
                             </p>
                           </div>
                         </div>
-                      </button>
+
+                        <div className='w-100 text-left text-sm'>Almacen: {item.almacen}</div>
+                      </Button>
                     ))
                   }
                 </div>

@@ -20,7 +20,7 @@ const Input = ({
     iconLeft,
     type = "text",
     autoComplete = "off",
-    className = "",
+    className = "border border-primary",
     placeholder,
     disabled,
     role,
@@ -63,9 +63,12 @@ const Input = ({
                     {
                         iconLeft && (
                             <div className="input-group-prepend">
-                                <div className="input-group-text">
+                                {/* <div className="input-group-text">
                                     {iconLeft}
-                                </div>
+                                </div> */}
+                                <span className='btn btn-primary'>
+                                    {iconLeft}
+                                </span>
                             </div>
                         )
                     }
@@ -90,7 +93,7 @@ const Input = ({
                     />
 
                     {
-                        contentRight 
+                        contentRight
                     }
 
                     {

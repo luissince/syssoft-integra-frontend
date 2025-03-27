@@ -6,6 +6,7 @@ import Row from '../../../../../../components/Row';
 import { images } from '../../../../../../helper';
 import { formatDecimal } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
+import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
 
 const DetalleImagen = (props) => {
   const { tipo } = props;
@@ -97,7 +98,7 @@ const DetalleImagen = (props) => {
         </Column>
       </Row>
 
-      {tipo === 'TP0001' && (
+      {tipo === PRODUCTO && (
         <Row>
           <Column className="col-md-12" formGroup={true}>
             <Switches
