@@ -116,6 +116,7 @@ class Transacciones extends CustomComponent {
  */
 
   loadingData = async () => {
+    console.log(this.props.finanzasLista)
     if (this.props.finanzasLista && this.props.finanzasLista.data && this.props.finanzasLista.paginacion) {
       this.setState(this.props.finanzasLista.data)
       this.refPaginacion.current.upperPageBound = this.props.finanzasLista.paginacion.upperPageBound;
@@ -145,6 +146,14 @@ class Transacciones extends CustomComponent {
   }
 
   loadingInit = async () => {
+    await this.setStateAsync({
+      buscar: '',
+      fechaInicio: currentDate(),
+      fechaFinal: currentDate(),
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
+    });
+
     const sucursalResponse = await comboSucursal(
       this.abortControllerView.signal,
     );
@@ -180,20 +189,6 @@ class Transacciones extends CustomComponent {
 
     await this.searchOpciones();
   }
-
-  loadingInit = async () => {
-    await this.setStateAsync({
-      buscar: '',
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
-      idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
-    });
-
-    if (this.state.loading) return;
-
-    this.searchOpciones();
-  };
 
   searchText = async (text) => {
     if (this.state.loading) return;
