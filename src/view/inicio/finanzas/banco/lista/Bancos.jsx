@@ -25,8 +25,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
+import { setListaBancoData, setListaBancoPaginacion } from '../../../../../redux/predeterminadoSlice';
+import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -37,19 +37,6 @@ class Bancos extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      // add: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado,
-      // ),
-      // view: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado,
-      // ),
-      // edit: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado,
-      // ),
-      // remove: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado,
-      // ),
-
       loading: false,
       lista: [],
       restart: false,
@@ -66,6 +53,10 @@ class Bancos extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
+    this.refPaginacion = React.createRef();
+
+    this.refSearch = React.createRef();
+
     this.abortControllerTable = new AbortController();
   }
 
@@ -78,6 +69,36 @@ class Bancos extends CustomComponent {
   }
 
   loadingData = async () => {
+    console.log
+    if (this.props.bancoLista && this.props.bancoLista.data && this.props.bancoLista.paginacion) {
+      this.setState(this.props.bancoLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.bancoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.bancoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.bancoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.bancoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.bancoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.bancoLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.bancoLista.data.buscar);
+    } else {
+      await this.loadingInit();
+      this.updateReduxState();
+    }
+  }
+
+  updateReduxState() {
+    this.props.setListaBancoData(this.state)
+    this.props.setListaBancoPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
+  loadingInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -137,6 +158,8 @@ class Bancos extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -152,7 +175,7 @@ class Bancos extends CustomComponent {
     }
   };
 
-  handleAgregar = () => {
+  handleCrear = () => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/agregar`,
     });
@@ -182,7 +205,7 @@ class Bancos extends CustomComponent {
 
         if (response instanceof SuccessReponse) {
           alertSuccess('Banco', response.data, () => {
-            this.loadingData();
+            this.loadingInit();
           });
         }
 
@@ -268,7 +291,7 @@ class Bancos extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-outline-info"
-              onClick={this.handleAgregar}
+              onClick={this.handleCrear}
             // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
@@ -276,7 +299,7 @@ class Bancos extends CustomComponent {
             {' '}
             <Button
               className="btn-outline-secondary"
-              onClick={() => this.loadingData()}
+              onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
@@ -288,6 +311,7 @@ class Bancos extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por nombre..."
             />
@@ -320,6 +344,7 @@ class Bancos extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -341,6 +366,12 @@ Bancos.propTypes = {
       idUsuario: PropTypes.string,
     }),
   }),
+  bancoLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaBancoData: PropTypes.func,
+  setListaBancoPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
     pathname: PropTypes.string,
@@ -350,9 +381,12 @@ Bancos.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    bancoLista: state.predeterminado.bancoLista
   };
 };
 
-const ConnectedBancos = connect(mapStateToProps, null)(Bancos);
+const mapDispatchToProps = { setListaBancoData, setListaBancoPaginacion }
+
+const ConnectedBancos = connect(mapStateToProps, mapDispatchToProps)(Bancos);
 
 export default ConnectedBancos;

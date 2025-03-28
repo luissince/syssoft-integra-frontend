@@ -216,27 +216,27 @@ class Cotizaciones extends CustomComponent {
   }
 
   handleInputFechaInico = (event) => {
-    this.setState({ fechaInicio: event.target.value }, () => {
-      this.searchOpciones();
-    })
+    this.setState({ fechaInicio: event.target.value }, async () => {
+      await this.searchOpciones();
+    });
   }
 
   handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value }, () => {
-      this.searchOpciones();
-    })
+    this.setState({ fechaFinal: event.target.value }, async () => {
+      await this.searchOpciones();
+    });
   }
 
   handleSelectLigado = (event) => {
-    this.setState({ ligado: event.target.value }, () => {
-      this.searchOpciones();
-    })
+    this.setState({ ligado: event.target.value }, async () => {
+      await this.searchOpciones();
+    });
   }
 
   handleSelectEstado = (event) => {
-    this.setState({ estado: event.target.value }, () => {
-      this.searchOpciones();
-    })
+    this.setState({ estado: event.target.value }, async () => {
+      await this.searchOpciones();
+    });
   }
 
   handleAnular = (id) => {

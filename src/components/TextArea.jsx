@@ -24,11 +24,18 @@ const TextArea = ({
             <>
                 {label && <label> {label} </label>}
                 <div className="input-group">
-                    {iconLeft && <div className="input-group-prepend">
-                        <div className="input-group-text">
-                            {iconLeft}
-                        </div>
-                    </div>}
+                    {
+                        iconLeft && (
+                            <div className="input-group-prepend">
+                                {/* <div className="input-group-text">
+                                    {iconLeft}
+                                </div> */}
+                                <span className='btn btn-primary'>
+                                    {iconLeft}
+                                </span>
+                            </div>
+                        )
+                    }
 
                     <textarea
                         autoFocus={autoFocus}

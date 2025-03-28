@@ -32,6 +32,8 @@ import Select from '../../../../../components/Select';
 import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import { TIPO_CONCEPTO_EGRESO, TIPO_CONCEPTO_INGRESO } from '../../../../../model/types/tipo-concepto';
+import { setListaFinanzasData, setListaFinanzasPaginacion } from '../../../../../redux/predeterminadoSlice';
+import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -46,19 +48,6 @@ class Transacciones extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      // add: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[0].estado,
-      // ),
-      // view: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[1].estado,
-      // ),
-      // edit: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[2].estado,
-      // ),
-      // remove: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[2].privilegio[3].estado,
-      // ),
-
       loading: false,
       lista: [],
       restart: false,
@@ -79,8 +68,11 @@ class Transacciones extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
-
     };
+
+    this.refPaginacion = React.createRef();
+
+    this.refSearch = React.createRef();
 
     this.abortControllerView = new AbortController();
     this.abortControllerTable = new AbortController();
@@ -124,6 +116,35 @@ class Transacciones extends CustomComponent {
  */
 
   loadingData = async () => {
+    if (this.props.finanzasLista && this.props.finanzasLista.data && this.props.finanzasLista.paginacion) {
+      this.setState(this.props.finanzasLista.data)
+      this.refPaginacion.current.upperPageBound = this.props.finanzasLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = this.props.finanzasLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = this.props.finanzasLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = this.props.finanzasLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = this.props.finanzasLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = this.props.finanzasLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(this.props.finanzasLista.data.buscar);
+    } else {
+      await this.loadingInit();
+      this.updateReduxState();
+    }
+  }
+
+  updateReduxState() {
+    this.props.setListaFinanzasData(this.state)
+    this.props.setListaFinanzasPaginacion({
+      upperPageBound: this.refPaginacion.current.upperPageBound,
+      lowerPageBound: this.refPaginacion.current.lowerPageBound,
+      isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
+      isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
+      pageBound: this.refPaginacion.current.pageBound,
+      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+    });
+  }
+
+  loadingInit = async () => {
     const sucursalResponse = await comboSucursal(
       this.abortControllerView.signal,
     );
@@ -132,7 +153,7 @@ class Transacciones extends CustomComponent {
       if (sucursalResponse.getType() === CANCELED) return;
 
       alertWarning('Reporte Financiero', sucursalResponse.getMessage(), async () => {
-        await this.loadingData();
+        await this.loadingInit();
       });
       return;
     }
@@ -145,7 +166,7 @@ class Transacciones extends CustomComponent {
       if (usuarioResponse.getType() === CANCELED) return;
 
       alertWarning('Reporte Venta', usuarioResponse.getMessage(), async () => {
-        await this.loadingData();
+        await this.loadingInit();
       });
       return;
     }
@@ -242,6 +263,8 @@ class Transacciones extends CustomComponent {
         loading: false,
         lista: response.data.result,
         totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -357,9 +380,27 @@ class Transacciones extends CustomComponent {
               {item.serie}-{formatNumberWithZeros(item.numeracion)} <ExternalLink width={18} height={18} />
             </Link>
           </TableCell>
-          <TableCell>{estado}</TableCell>
-          <TableCell className="text-right">{item.credito == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.credito, item.codiso)}</span>}</TableCell>
-          <TableCell className="text-right">{item.debito == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.debito, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-right">
+            {item.credito == 0 ? "" : <span className='text-base'><i className='fa fa-plus text-success'></i> {numberFormat(item.credito, item.codiso)}</span>}
+            {
+              item.credito != 0 && item.detalles.map((detalle, index) => (
+                <div key={index}>
+                  <span className='text-xs'>{detalle.nombre}: {numberFormat(detalle.monto, item.codiso)}</span>
+                </div>
+              ))
+            }
+          </TableCell>
+          <TableCell className="text-right">
+            {item.debito == 0 ? "" : <span className='text-base'><i className='fa fa-minus text-danger'></i> {numberFormat(item.debito, item.codiso)}</span>}
+            {
+              item.debito != 0 && item.detalles.map((detalle, index) => (
+                <div key={index}>
+                  <span className='text-xs'>{detalle.nombre}: {numberFormat(detalle.monto, item.codiso)}</span>
+                </div>
+              ))
+            }
+          </TableCell>
         </TableRow>
       );
     });
@@ -439,6 +480,7 @@ class Transacciones extends CustomComponent {
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
+              ref={this.refSearch}
               onSearch={this.searchText}
               placeholder="Buscar por nombre..."
             />
@@ -455,7 +497,7 @@ class Transacciones extends CustomComponent {
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Concepto</TableHead>
                     <TableHead width="15%">Referencia</TableHead>
-                    <TableHead width="10%">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
                     <TableHead width="10%">Debito <i className='fa fa-arrow-down'></i></TableHead>
                     <TableHead width="10%">Crédito <i className='fa fa-arrow-up'></i></TableHead>
                   </TableRow>
@@ -469,6 +511,7 @@ class Transacciones extends CustomComponent {
         </Row>
 
         <Paginacion
+          ref={this.refPaginacion}
           loading={this.state.loading}
           data={this.state.lista}
           totalPaginacion={this.state.totalPaginacion}
@@ -490,6 +533,12 @@ Transacciones.propTypes = {
       idUsuario: PropTypes.string,
     }),
   }),
+  finanzasLista: PropTypes.shape({
+    data: PropTypes.object,
+    paginacion: PropTypes.object
+  }),
+  setListaFinanzasData: PropTypes.func,
+  setListaFinanzasPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
     pathname: PropTypes.string,
@@ -499,9 +548,12 @@ Transacciones.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    finanzasLista: state.predeterminado.finanzasLista
   };
 };
 
-const ConnectedTransacciones = connect(mapStateToProps, null)(Transacciones);
+const mapDispatchToProps = { setListaFinanzasData, setListaFinanzasPaginacion }
+
+const ConnectedTransacciones = connect(mapStateToProps, mapDispatchToProps)(Transacciones);
 
 export default ConnectedTransacciones;

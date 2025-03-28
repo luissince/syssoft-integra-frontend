@@ -309,8 +309,8 @@ class RepFinanciero extends CustomComponent {
               {item.serie}-{formatNumberWithZeros(item.numeracion)} <ExternalLink width={18} height={18} />
             </Link>
           </TableCell>
-          <TableCell>{item.credito == 0 ? "" : numberFormat(item.credito, item.codiso)}</TableCell>
-          <TableCell>{item.debito == 0 ? "" : numberFormat(item.debito, item.codiso)}</TableCell>
+          <TableCell className="text-right">{item.credito == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.credito, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">{item.debito == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.debito, item.codiso)}</span>}</TableCell>
         </TableRow>
       );
     });
@@ -571,8 +571,8 @@ class RepFinanciero extends CustomComponent {
                         <TableHead className="text-secondary" width="15%">Fecha</TableHead>
                         <TableHead className="text-secondary" width="20%">Concepto</TableHead>
                         <TableHead className="text-secondary" width="15%">Referencia</TableHead>
-                        <TableHead className="text-secondary" width="5%">Débito</TableHead>
-                        <TableHead className="text-secondary" width="5%">Crédito</TableHead>
+                        <TableHead className="text-secondary" width="10%">Débito</TableHead>
+                        <TableHead className="text-secondary" width="10%">Crédito</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
