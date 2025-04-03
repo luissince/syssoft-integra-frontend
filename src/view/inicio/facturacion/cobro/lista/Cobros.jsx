@@ -205,7 +205,7 @@ class Cobros extends CustomComponent {
   };
 
   handleAnular = (idCobro) => {
-    alertDialog('Cobro', '¿Está seguro de que desea eliminar el cobro? Esta operación no se puede deshacer.',
+    alertDialog('Ingreso', '¿Está seguro de que desea eliminar el Ingreso? Esta operación no se puede deshacer.',
       async (value) => {
         if (value) {
           const params = {
@@ -213,12 +213,12 @@ class Cobros extends CustomComponent {
             idUsuario: this.state.idUsuario,
           };
 
-          alertInfo('Cobro', 'Procesando información...');
+          alertInfo('Ingreso', 'Procesando información...');
 
           const response = await cancelCobro(params);
 
           if (response instanceof SuccessReponse) {
-            alertSuccess('Cobro', response.data, () => {
+            alertSuccess('Ingreso', response.data, () => {
               this.loadInit();
             });
           }
@@ -226,7 +226,7 @@ class Cobros extends CustomComponent {
           if (response instanceof ErrorResponse) {
             if (response.getType() === CANCELED) return;
 
-            alertWarning('Cobro', response.getMessage());
+            alertWarning('Ingreso', response.getMessage());
           }
         }
       },
@@ -323,7 +323,7 @@ class Cobros extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Cobros'
+          title='Ingresos'
           subTitle='LISTA'
           handleGoBack={() => this.props.history.goBack()}
         />

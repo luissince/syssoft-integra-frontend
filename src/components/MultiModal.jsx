@@ -17,6 +17,7 @@ import RadioButton from './RadioButton';
 import Select from './Select';
 import Input from './Input';
 import SearchInput from './SearchInput';
+import { RUC } from '../model/types/tipo-documento';
 
 /**
  * Modal para mostrar del impresión.
@@ -604,7 +605,7 @@ class ModalPersona extends Component {
                                     <option value="">-- Seleccione --</option>
                                     {
                                         idTipoCliente === CLIENTE_NATURAL && (
-                                            this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                                            this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
                                                 <option key={index} value={item.idTipoDocumento}>
                                                     {item.nombre}
                                                 </option>
@@ -613,7 +614,7 @@ class ModalPersona extends Component {
                                     }
                                     {
                                         idTipoCliente === CLIENTE_JURIDICO && (
-                                            this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                                            this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
                                                 <option key={index} value={item.idTipoDocumento}>
                                                     {item.nombre}
                                                 </option>

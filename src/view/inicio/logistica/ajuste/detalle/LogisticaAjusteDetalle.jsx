@@ -14,6 +14,9 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerView } from '../../../../../components/Spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import { images } from '../../../../../helper';
+import Image from '../../../../../components/Image';
+import Button from '../../../../../components/Button';
 
 class LogisticaAjusteDetalle extends CustomComponent {
   constructor(props) {
@@ -32,7 +35,7 @@ class LogisticaAjusteDetalle extends CustomComponent {
       hora: '',
       motivo: '',
       observacion: '',
-      detalle: [],
+      detalles: [],
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -69,7 +72,7 @@ class LogisticaAjusteDetalle extends CustomComponent {
       motivo: ajuste.cabecera.motivo,
       observacion: ajuste.cabecera.observacion,
 
-      detalle: ajuste.detalle,
+      detalles: ajuste.detalles,
       loading: false,
     });
   }
@@ -114,6 +117,31 @@ class LogisticaAjusteDetalle extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
+            <Button
+              className="btn-light"
+              // onClick={this.handlePrintInvoices.bind(this, 'A4')}
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              // onClick={this.handlePrintInvoices.bind(this, '80mm')}
+            >
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+              // onClick={this.handlePrintInvoices.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column>
             <TableResponsive>
               <Table>
                 <TableHeader>
@@ -182,6 +210,7 @@ class LogisticaAjusteDetalle extends CustomComponent {
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
+                    <TableHead className="text-center">Image</TableHead>
                     <TableHead>Producto</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Cantidad</TableHead>
@@ -190,10 +219,18 @@ class LogisticaAjusteDetalle extends CustomComponent {
                 </TableHeader>
                 <TableBody>
                   {
-                    this.state.detalle.map((item, index) => {
+                    this.state.detalles.map((item, index) => {
                       return (
                         <TableRow key={index}>
-                          <TableCell className="text-center">{++index}</TableCell>
+                          <TableCell className="text-center">{item.id}</TableCell>
+                          <TableCell className="text-center">
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.producto}
+                              width={100}
+                            />
+                          </TableCell>
                           <TableCell>
                             {item.codigo}
                             <br />

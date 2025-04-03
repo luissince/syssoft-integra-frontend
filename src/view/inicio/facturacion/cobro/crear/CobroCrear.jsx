@@ -360,27 +360,27 @@ class CobroCrear extends CustomComponent {
     const { concepto, idComprobante, monto, cliente, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Cobro', 'Seleccione su concepto.', () => this.refValueConcepto.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione su concepto.', () => this.refValueConcepto.current.focus());
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Cobro', 'Ingrese el monto.', () => this.refMonto.current.focus());
+      this.alert.warning('Ingreso', 'Ingrese el monto.', () => this.refMonto.current.focus());
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Cobro', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Cobro', 'Seleccione un cliente.', () => this.refValueCliente.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione un cliente.', () => this.refValueCliente.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Cobro', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
       return;
     }
 
@@ -388,7 +388,7 @@ class CobroCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog("Cobro", "¿Está seguro de limpiar el cobro?", (accept) => {
+    this.alert.dialog("Ingreso", "¿Está seguro de limpiar el Ingreso?", (accept) => {
       if (accept) {
         this.clearView();
       }
@@ -420,7 +420,7 @@ class CobroCrear extends CustomComponent {
       monto
     } = this.state;
 
-    this.alert.dialog('Cobro', '¿Estás seguro de continuar?', async (accept) => {
+    this.alert.dialog('Ingreso', '¿Estás seguro de continuar?', async (accept) => {
       if (accept) {
         const data = {
           idFormaPago: idFormaPago,
@@ -439,7 +439,7 @@ class CobroCrear extends CustomComponent {
         };
 
         await callback();
-        this.alert.information('Cobro', 'Procesando información...');
+        this.alert.information('Ingreso', 'Procesando información...');
 
         const response = await createCobro(data);
 
@@ -451,7 +451,7 @@ class CobroCrear extends CustomComponent {
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          this.alert.warning('Cobro', response.getMessage());
+          this.alert.warning('Ingreso', response.getMessage());
         }
       }
     });
@@ -510,8 +510,8 @@ class CobroCrear extends CustomComponent {
         />
 
         <ModalTransaccion
-          tipo={"Cobro"}
-          title={"Completar Cobro"}
+          tipo={"Ingreso"}
+          title={"Completar Ingreso"}
           isOpen={this.state.isOpenTerminal}
 
           idSucursal={this.state.idSucursal}
@@ -537,7 +537,7 @@ class CobroCrear extends CustomComponent {
         />
 
         <Title
-          title='Cobro'
+          title='Ingreso'
           subTitle='AGREGAR'
           handleGoBack={() => this.handleCerrar()}
         />

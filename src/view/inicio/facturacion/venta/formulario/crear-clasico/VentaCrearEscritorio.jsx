@@ -50,7 +50,7 @@ import { images } from '../../../../../../helper';
 import Input from '../../../../../../components/Input';
 import Select from '../../../../../../components/Select';
 import Button from '../../../../../../components/Button';
-import { setProductosFavoritos, starProduct } from '../../../../../../redux/predeterminadoSlice';
+import { clearCrearVentaClasico, setCrearVentaClasicoLocal, setCrearVentaClasicoState, setProductosFavoritos, starProduct } from '../../../../../../redux/predeterminadoSlice';
 import RadioButton from '../../../../../../components/RadioButton';
 import SearchInput from '../../../../../../components/SearchInput';
 import ModalVenta from '../common/ModalVenta';
@@ -69,6 +69,7 @@ import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../../../../components/Table';
 import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
+import { RUC } from '../../../../../../model/types/tipo-documento';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -92,7 +93,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Lista de datos
       comprobantes: [],
-      clientes: [],
       impuestos: [],
       monedas: [],
       almacenes: [],
@@ -151,10 +151,11 @@ class VentaCrearEscritorio extends CustomComponent {
       formaPago: CONTADO,
 
       // Filtrar cliente
-      idCliente: '',
       nuevoCliente: null,
+      cliente: null,
+      clientes: [],
 
-      // Atributos del modal cliente
+      // Atributos del cliente formulario
       loadingCliente: false,
       msgLoadingCliente: 'Consultado datos...',
       idTipoCliente: CLIENTE_NATURAL,
@@ -253,7 +254,7 @@ class VentaCrearEscritorio extends CustomComponent {
    */
   async componentDidMount() {
     document.addEventListener('keydown', this.handleDocumentKeyDown)
-    await this.initData();
+    await this.loadingData();
   }
 
   /**
@@ -285,65 +286,98 @@ class VentaCrearEscritorio extends CustomComponent {
   |
   */
 
-  async initData() {
-    await this.loadingData();
+  loadingData = async () => {
+    if (this.props.ventaCrearClasico && this.props.ventaCrearClasico.state && this.props.ventaCrearClasico.local) {
+      this.setState(this.props.ventaCrearClasico.state, () => {
+        this.index = this.props.ventaCrearClasico.local.index;
+
+        const cliente = {
+          idTipoCliente: this.props.ventaCrearClasico.state.idTipoCliente,
+          idTipoDocumento: this.props.ventaCrearClasico.state.idTipoDocumento,
+          documento: this.props.ventaCrearClasico.state.numeroDocumento,
+          informacion: this.props.ventaCrearClasico.state.informacion,
+          celular: this.props.ventaCrearClasico.state.numeroCelular,
+          email: this.props.ventaCrearClasico.state.email,
+          direccion: this.props.ventaCrearClasico.state.direccion,
+        }
+
+        this.handleSelectItemCliente(cliente);
+      });
+    } else {
+      const [
+        venta,
+        monedas,
+        impuestos,
+        predeterminado,
+        tiposDocumentos,
+        almacenes
+      ] = await Promise.all([
+        this.fetchComprobante(VENTA),
+        this.fetchMoneda(),
+        this.fetchImpuesto(),
+        this.fetchPersonaPredeterminado({ cliente: "1" }),
+        this.fetchTipoDocumento(),
+        this.fetchAlmacen({ idSucursal: this.state.idSucursal })
+      ]);
+
+      const comprobantes = [...venta];
+      const monedaFilter = monedas.find((item) => item.nacional === 1);
+      const impuestoFilter = impuestos.find((item) => item.preferido === 1);
+      const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
+      const almacenFilter = almacenes.find((item) => item.predefinido === 1);
+
+      if (typeof predeterminado === 'object') {
+        this.handleSelectItemCliente(predeterminado);
+      }
+
+      await this.setStateAsync({
+        comprobantes,
+        monedas,
+        impuestos,
+        almacenes,
+
+        idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
+        nombreComporbante: !comprobanteFilter ? "Ninguno" : comprobanteFilter.nombre,
+
+        idTipoCliente: typeof predeterminado === 'object' ? predeterminado.idTipoCliente : '',
+        idTipoDocumento: typeof predeterminado === 'object' ? predeterminado.idTipoDocumento : '',
+
+        idMoneda: monedaFilter ? monedaFilter.idMoneda : '',
+        codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
+
+        idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : '',
+
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+
+        tiposDocumentos,
+
+        loading: false,
+      });
+
+      const productos = await this.fetchProductoPreferidos({ idSucursal: this.state.idSucursal, idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '' });
+      this.props.setProductosFavoritos(productos);
+      this.redCodigoBarras.current.focus();
+      this.updateReduxState();
+    }
+  };
+
+  updateReduxState() {
+    this.props.setCrearVentaClasicoState(this.state)
+    this.props.setCrearVentaClasicoLocal({
+      index: this.index
+    })
   }
 
-  loadingData = async () => {
-    const [
-      venta,
-      monedas,
-      impuestos,
-      predeterminado,
-      tiposDocumentos,
-      almacenes
-    ] = await Promise.all([
-      this.fetchComprobante(VENTA),
-      this.fetchMoneda(),
-      this.fetchImpuesto(),
-      this.fetchPersonaPredeterminado({cliente: "1"}),
-      this.fetchTipoDocumento(),
-      this.fetchAlmacen({ idSucursal: this.state.idSucursal })
-    ]);
+  clearView = () => {
+    this.setState(this.initial, async () => {
+      await this.refPersona.current.restart();
+       await this.props.clearCrearVentaClasico();
+      await this.loadingData();
+      this.index = -1;
 
-    const comprobantes = [...venta];
-    const monedaFilter = monedas.find((item) => item.nacional === 1);
-    const impuestoFilter = impuestos.find((item) => item.preferido === 1);
-    const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
-    const almacenFilter = almacenes.find((item) => item.predefinido === 1);
-
-    if (typeof predeterminado === 'object') {
-      this.handleSelectItemCliente(predeterminado);
-    }
-
-    await this.setStateAsync({
-      comprobantes,
-      monedas,
-      impuestos,
-      almacenes,
-
-      idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
-      nombreComporbante: !comprobanteFilter ? "Ninguno" : comprobanteFilter.nombre,
-
-      idTipoCliente: typeof predeterminado === 'object' ? predeterminado.idTipoCliente : '',
-      idTipoDocumento: typeof predeterminado === 'object' ? predeterminado.idTipoDocumento : '',
-
-      idMoneda: monedaFilter ? monedaFilter.idMoneda : '',
-      codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
-
-      idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : '',
-
-      idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
-
-      tiposDocumentos,
-
-      loading: false,
-    });
-
-    const productos = await this.fetchProductoPreferidos({ idSucursal: this.state.idSucursal, idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '' });
-    this.props.setProductosFavoritos(productos);
-    this.redCodigoBarras.current.focus();
-  };
+      this.updateReduxState();
+    })
+  }
 
   async fetchComprobante(tipo) {
     const params = {
@@ -505,14 +539,6 @@ class VentaCrearEscritorio extends CustomComponent {
     callback();
   }
 
-  reloadView = () => {
-    this.setState(this.initial, async () => {
-      await this.refPersona.current.restart();
-      await this.loadingData();
-      this.index = -1;
-    })
-  }
-
   calculateTotal = () => {
     this.setState(prevState => ({
       importeTotal: prevState.detalleVenta.reduce((accumulator, item) => {
@@ -527,181 +553,95 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   addItemDetalle = (producto, precio, cantidad, index = -1) => {
-    const almacen = this.state.almacenes.find(item => item.idAlmacen == this.state.idAlmacen);
+    const { almacenes, idAlmacen, idImpuesto, detalleVenta } = this.state;
 
-    const existingItem = this.state.detalleVenta.find((item) => item.idProducto === producto.idProducto);
+    // Clonar el estado actual de detalleVenta para evitar mutaciones directas
+    const detalles = structuredClone(detalleVenta);
 
+    // Encontrar el almacén actual
+    const almacen = almacenes.find(item => item.idAlmacen == idAlmacen);
+
+    // Buscar si el producto ya existe en los detalles
+    const existingItem = detalles.find((item) => item.idProducto === producto.idProducto);
+
+    // Función auxiliar para crear un nuevo inventario
+    const createInventory = (can) => ({
+      idAlmacen: almacen.idAlmacen,
+      almacen: almacen.nombre,
+      idInventario: producto.idInventario,
+      cantidad: can,
+    });
+
+    // Función auxiliar para crear un nuevo item de detalle
+    const createNewItem = (pre) => ({
+      id: index === -1 ? detalleVenta.length + 1 : index,
+      idProducto: producto.idProducto,
+      codigo: producto.codigo,
+      nombreProducto: producto.nombreProducto,
+      imagen: producto.imagen,
+      idImpuesto: idImpuesto,
+      precio: pre,
+      medida: producto.medida,
+      idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
+      tipo: producto.tipo,
+    });
+
+    // Lógica principal basada en el tipo de tratamiento del producto
     if (producto.idTipoTratamientoProducto === UNIDADES) {
       if (!existingItem) {
-        const inventarios = [];
 
-        inventarios.push({
-          idAlmacen: almacen.idAlmacen,
-          almacen: almacen.nombre,
-          idInventario: producto.idInventario,
-          cantidad: cantidad ? Number(producto.cantidad) : 1,
-        });
+        const newItem = createNewItem(Number(producto.precio));
+        newItem.inventarios = [createInventory(cantidad ? Number(producto.cantidad) : 1)];
 
-        const newItem = {
-          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          nombreProducto: producto.nombreProducto,
-          imagen: producto.imagen,
-          idImpuesto: this.state.idImpuesto,
-          precio: Number(producto.precio),
-          medida: producto.medida,
-          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-          tipo: producto.tipo,
-          inventarios: inventarios
-        };
-
-        this.setState(prevState => ({
-          detalleVenta: [...prevState.detalleVenta, newItem],
-        }));
-
+        return [...detalles, newItem];
       } else {
-        const existingInventario = existingItem.inventarios.some(item => item.idInventario === producto.idInventario);
-        if (!existingInventario) {
-          existingItem.inventarios.push({
-            idAlmacen: almacen.idAlmacen,
-            almacen: almacen.nombre,
-            idInventario: producto.idInventario,
-            cantidad: cantidad ? Number(producto.cantidad) : 1,
-          });
-        } else {
-          for (const inventario of existingItem.inventarios) {
-            if (inventario.idInventario === producto.idInventario) {
-              inventario.cantidad += 1;
-              break;
-            }
+        for (const inventario of existingItem.inventarios) {
+          if (inventario.idInventario === producto.idInventario) {
+            inventario.cantidad += 1;
           }
         }
-
-        this.setState(prevState => ({
-          detalleVenta: prevState.detalleVenta.map(item =>
-            item.idProducto === existingItem.idProducto ? existingItem : item
-          ),
-        }));
       }
     }
 
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
       if (!existingItem) {
-        const inventarios = [];
 
-        inventarios.push({
-          idAlmacen: almacen.idAlmacen,
-          almacen: almacen.nombre,
-          idInventario: producto.idInventario,
-          cantidad: 1,
-        });
+        const newItem = createNewItem(Number(precio));
+        newItem.inventarios = [createInventory(1)];
 
-        const newItem = {
-          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          nombreProducto: producto.nombreProducto,
-          imagen: producto.imagen,
-          idImpuesto: this.state.idImpuesto,
-          precio: Number(precio),
-          medida: producto.medida,
-          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-          tipo: producto.tipo,
-          inventarios: inventarios
-        };
-
-        this.setState(prevState => ({
-          detalleVenta: [...prevState.detalleVenta, newItem],
-        }));
+        return [...detalles, newItem];
       } else {
         existingItem.precio = Number(precio);
-
-        this.setState(prevState => ({
-          detalleVenta: prevState.detalleVenta.map(item =>
-            item.idProducto === existingItem.idProducto ? existingItem : item
-          ),
-        }));
       }
     }
 
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
       if (!existingItem) {
-        const inventarios = [];
 
-        inventarios.push({
-          idAlmacen: almacen.idAlmacen,
-          almacen: almacen.nombre,
-          idInventario: producto.idInventario,
-          cantidad: Number(cantidad),
-        });
+        const newItem = createNewItem(Number(producto.precio));
+        newItem.inventarios = [createInventory(Number(cantidad))];
 
-        const newItem = {
-          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          nombreProducto: producto.nombreProducto,
-          imagen: producto.imagen,
-          idImpuesto: this.state.idImpuesto,
-          precio: Number(producto.precio),
-          medida: producto.medida,
-          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-          tipo: producto.tipo,
-          inventarios: inventarios
-        };
-
-        this.setState(prevState => ({
-          detalleVenta: [...prevState.detalleVenta, newItem],
-        }));
+        return [...detalles, newItem];
       } else {
-        const existingInventario = existingItem.inventarios.some(item => item.idInventario === producto.idInventario);
-        if (!existingInventario) {
-          existingItem.inventarios.push({
-            idAlmacen: almacen.idAlmacen,
-            almacen: almacen.nombre,
-            idInventario: producto.idInventario,
-            cantidad: Number(cantidad),
-          });
-        } else {
-          for (const inventario of existingItem.inventarios) {
-            if (inventario.idInventario === producto.idInventario) {
-              inventario.cantidad = cantidad;
-              break;
-            }
+        for (const inventario of existingItem.inventarios) {
+          if (inventario.idInventario === producto.idInventario) {
+            inventario.cantidad = Number(cantidad);
           }
         }
-
-        this.setState(prevState => ({
-          detalleVenta: prevState.detalleVenta.map(item =>
-            item.idProducto === existingItem.idProducto ? existingItem : item
-          ),
-        }));
       }
     }
 
     if (producto.idTipoTratamientoProducto === SERVICIO) {
       if (!existingItem) {
-        const newItem = {
-          id: index === -1 ? this.state.detalleVenta.length + 1 : index,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          nombreProducto: producto.nombreProducto,
-          imagen: producto.imagen,
-          idImpuesto: this.state.idImpuesto,
-          precio: precio ? Number(precio) : Number(producto.precio),
-          medida: producto.medida,
-          idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-          tipo: producto.tipo,
-          cantidad: 1,
-        };
 
-        this.setState(prevState => ({
-          detalleVenta: [...prevState.detalleVenta, newItem],
-        }));
+        const newItem = createNewItem(precio ? Number(precio) : Number(producto.precio));
+        newItem.cantidad = 1;
+
+        return [...detalles, newItem];
       }
     }
 
-    this.calculateTotal();
+    return detalles;
   }
 
   generateTotals = () => {
@@ -828,7 +768,12 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-      this.addItemDetalle(producto, null, null);
+      const detalles = this.addItemDetalle(producto, null, null);
+
+      this.setState({ detalleVenta: detalles }, () => {
+        this.updateReduxState();
+        this.calculateTotal();
+      });
     }
 
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
@@ -964,7 +909,7 @@ class VentaCrearEscritorio extends CustomComponent {
   handleClearSale = async () => {
     this.alert.dialog("Venta", "Los productos serán eliminados de la venta actual ¿Desea continuar?", async (accept) => {
       if (accept) {
-        this.reloadView()
+        this.clearView()
       }
     })
   }
@@ -975,6 +920,8 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({
       idComprobante: event.target.value,
       nombreComporbante: !comprobante ? "Ninguno" : comprobante.nombre
+    }, () => {
+      this.updateReduxState();
     });
   }
 
@@ -990,7 +937,7 @@ class VentaCrearEscritorio extends CustomComponent {
       nuevoCliente,
       idUsuario,
       idSucursal,
-      idCliente,
+      cliente,
       idImpuesto,
       idMoneda,
       idComprobante,
@@ -1007,7 +954,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idComprobante: idComprobante,
           idMoneda: idMoneda,
           idImpuesto: idImpuesto,
-          idCliente: idCliente,
+          idCliente: cliente.idPersona,
           idSucursal: idSucursal,
           observacion: observacion,
           nota: nota,
@@ -1072,7 +1019,7 @@ class VentaCrearEscritorio extends CustomComponent {
       nuevoCliente,
       idUsuario,
       idSucursal,
-      idCliente,
+      cliente,
       idImpuesto,
       idMoneda,
       idComprobante,
@@ -1089,7 +1036,7 @@ class VentaCrearEscritorio extends CustomComponent {
           idComprobante: idComprobante,
           idMoneda: idMoneda,
           idImpuesto: idImpuesto,
-          idCliente: idCliente,
+          idCliente: cliente.idPersona,
           idSucursal: idSucursal,
           observacion: observacion,
           nota: nota,
@@ -1174,12 +1121,13 @@ class VentaCrearEscritorio extends CustomComponent {
       });
       return;
     }
-
-    this.setState({ isOpenProductos: true })
+    this.setState({ isOpenProductos: true });
   }
 
   handleCloseProductos = () => {
-    this.setState({ isOpenProductos: false })
+    this.setState({ isOpenProductos: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -1191,19 +1139,27 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   handleCloseAgregar = () => {
-    this.setState({ isOpenAgregar: false });
+    this.setState({ isOpenAgregar: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSaveAgregar = async (producto, cantidad) => {
+    let detalles = structuredClone(this.state.detalleVenta);
+
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      this.addItemDetalle(producto, parseFloat(cantidad), null);
+      detalles = this.addItemDetalle(producto, parseFloat(cantidad), null);
     }
 
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
-      this.addItemDetalle(producto, null, parseFloat(cantidad));
+      detalles = this.addItemDetalle(producto, null, parseFloat(cantidad));
     }
-  }
 
+    this.setState({ detalleVenta: detalles }, () => {
+      this.updateReduxState();
+      this.calculateTotal();
+    });
+  }
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal precios
@@ -1217,7 +1173,9 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   handleClosePrecios = () => {
-    this.setState({ isOpenPrecios: false });
+    this.setState({ isOpenPrecios: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSavePrecios = (producto, precio) => {
@@ -1253,7 +1211,9 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   handleCloseCantidad = () => {
-    this.setState({ isOpenCantidad: false });
+    this.setState({ isOpenCantidad: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSaveCantidad = async (idProducto, inventarios) => {
@@ -1289,7 +1249,9 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   handleCloseDatos = () => {
-    this.setState({ isOpenDatos: false });
+    this.setState({ isOpenDatos: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSaveDatos = async (producto, descripcion) => {
@@ -1313,11 +1275,13 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenCotizacion = () => {
-    this.setState({ isOpenCotizacion: true })
+    this.setState({ isOpenCotizacion: true });
   }
 
   handleCloseCotizacion = () => {
-    this.setState({ isOpenCotizacion: false })
+    this.setState({ isOpenCotizacion: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSeleccionarCotizacion = async (cotizacion) => {
@@ -1341,33 +1305,41 @@ class VentaCrearEscritorio extends CustomComponent {
 
       if (isEmpty(response.data.productos)) {
         this.alert.warning('Venta', 'La cotización no tiene productos, ya que fue utilizado para la venta.', () => {
-          this.reloadView();
+          this.clearView();
         });
         return;
       }
 
       this.handleSelectItemCliente(response.data.cliente);
-      let index = 0;
-      for (const producto of response.data.productos) {
-        index++;
-        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-          this.addItemDetalle(producto, null, producto.cantidad, index);
-        }
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index);
-        }
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          this.addItemDetalle(producto, null, producto.cantidad, index);
-        }
-      }
 
-      this.setState({ cotizacion, loading: false });
+      const detalles = response.data.productos.flatMap((producto, index) => {
+        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+        }
+
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          return this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index + 1);
+        }
+
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+        }
+
+        return [];
+      });
+
+      this.setState({ cotizacion, detalleVenta: detalles, loading: false }, () => {
+        this.updateReduxState();
+        this.calculateTotal();
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.setState({ loading: false });
+      this.setState({ loading: false }, () => {
+        this.updateReduxState();
+      });
       this.alert.warning("Venta", response.getMessage())
     }
   }
@@ -1377,11 +1349,13 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenPedido = () => {
-    this.setState({ isOpenPedido: true })
+    this.setState({ isOpenPedido: true });
   }
 
   handleClosePedido = () => {
-    this.setState({ isOpenPedido: false })
+    this.setState({ isOpenPedido: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSeleccionarPedido = async (pedido) => {
@@ -1404,32 +1378,41 @@ class VentaCrearEscritorio extends CustomComponent {
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
         this.alert.warning('Venta', 'El pedido no tiene productos, ya que fue utilizado para la venta.', () => {
-          this.reloadView();
+          this.clearView();
         });
         return;
       }
 
       this.handleSelectItemCliente(response.data.cliente);
 
-      for (const producto of response.data.productos) {
-        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-          this.addItemDetalle(producto, null, producto.cantidad);
+      const detalles = response.data.productos.flatMap((producto, index) => {
+        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
         }
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          this.addItemDetalle(producto, producto.cantidad * producto.precio, null);
-        }
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          this.addItemDetalle(producto, null, producto.cantidad);
-        }
-      }
 
-      this.setState({ pedido, loading: false });
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          return this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index + 1);
+        }
+
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+        }
+
+        return []; // En caso de que no entre en ninguna condición
+      });
+
+      this.setState({ pedido, detalleVenta: detalles, loading: false }, () => {
+        this.updateReduxState();
+        this.calculateTotal();
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.setState({ loading: false });
+      this.setState({ loading: false }, () => {
+        this.updateReduxState();
+      });
       this.alert.warning("Venta", response.getMessage())
     }
   }
@@ -1439,11 +1422,13 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenVenta = () => {
-    this.setState({ isOpenVenta: true })
+    this.setState({ isOpenVenta: true });
   }
 
   handleCloseVenta = () => {
-    this.setState({ isOpenVenta: false })
+    this.setState({ isOpenVenta: false }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleSeleccionarVenta = async (idVenta) => {
@@ -1464,31 +1449,38 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       this.handleSelectItemCliente(response.data.cliente);
-      let index = 0;
-      for (const producto of response.data.productos) {
-        index++;
-        if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-          this.addItemDetalle(producto, null, producto.cantidad, index);
-        }
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index);
-        }
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          this.addItemDetalle(producto, null, producto.cantidad, index);
-        }
-      }
 
-      this.setState({ loading: false })
+      const detalles = response.data.productos.flatMap((producto, index) => {
+        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+        }
+
+        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+          return this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index + 1);
+        }
+
+        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+        }
+
+        return []; // En caso de que no entre en ninguna condición
+      });
+
+      this.setState({ detalleVenta: detalles, loading: false }, () => {
+        this.updateReduxState();
+        this.calculateTotal();
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.setState({ loading: false });
+      this.setState({ loading: false }, () => {
+        this.updateReduxState();
+      });
       this.alert.warning("Venta", response.getMessage())
     }
   }
-
 
   //------------------------------------------------------------------------------------------
   // Modal impresión
@@ -1509,7 +1501,7 @@ class VentaCrearEscritorio extends CustomComponent {
       showModal: true,
       modalMessage: "Recuperando documento...",
       onPrintDialogClose: () => {
-        this.reloadView();
+        this.clearView();
         this.handleCloseImpresion();
       }
     })
@@ -1520,7 +1512,7 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenPreImpresion = () => {
-    const { idComprobante, idCliente, idMoneda, idImpuesto, detalleVenta } = this.state;
+    const { idComprobante, cliente, idMoneda, idImpuesto, detalleVenta } = this.state;
 
     if (isEmpty(idComprobante)) {
       this.alert.warning('Venta', 'Seleccione su comprobante.', () =>
@@ -1529,7 +1521,7 @@ class VentaCrearEscritorio extends CustomComponent {
       return;
     }
 
-    if (isEmpty(idCliente)) {
+    if (isEmpty(cliente)) {
       this.alert.warning('Venta', 'Seleccione un cliente.', () =>
         this.refCliente.current.focus()
       );
@@ -1559,11 +1551,11 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   handleProcessPreImpresion = async (type, abort, success, error) => {
-    const { idComprobante, idCliente, idMoneda, idUsuario, idSucursal, observacion, nota, detalleVenta } = this.state;
+    const { idComprobante, cliente, idMoneda, idUsuario, idSucursal, observacion, nota, detalleVenta } = this.state;
 
     const response = await obtenerPreVentaPdf({
       idComprobante: idComprobante,
-      idCliente: idCliente,
+      idCliente: cliente.idPersona,
       idMoneda: idMoneda,
       idUsuario: idUsuario,
       idSucursal: idSucursal,
@@ -1602,20 +1594,40 @@ class VentaCrearEscritorio extends CustomComponent {
   // Modal cliente
   //------------------------------------------------------------------------------------------
 
+  handleSelectTipoCliente = (event) => {
+    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' }, () => {
+      this.updateReduxState();
+    });
+  }
+
+  handleSelectTipoDocumento = (event) => {
+    this.setState({ idTipoDocumento: event.target.value }, () => {
+      this.updateReduxState();
+    });
+  }
+
   handleInputInformacion = (event) => {
-    this.setState({ informacion: event.target.value })
+    this.setState({ informacion: event.target.value }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleInputNumeroCelular = (event) => {
-    this.setState({ numeroCelular: event.target.value })
+    this.setState({ numeroCelular: event.target.value }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleInputEmail = (event) => {
-    this.setState({ email: event.target.value })
+    this.setState({ email: event.target.value }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleInputDireccion = (event) => {
-    this.setState({ direccion: event.target.value })
+    this.setState({ direccion: event.target.value }, () => {
+      this.updateReduxState();
+    });
   }
 
   handleGetApiReniec = async () => {
@@ -1640,6 +1652,8 @@ class VentaCrearEscritorio extends CustomComponent {
         numeroDocumento: convertNullText(response.data.dni),
         informacion: convertNullText(response.data.apellidoPaterno) + ' ' + convertNullText(response.data.apellidoMaterno) + ' ' + convertNullText(response.data.nombres),
         loadingCliente: false,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -1647,6 +1661,8 @@ class VentaCrearEscritorio extends CustomComponent {
       if (response.getType() === CANCELED) {
         this.setState({
           loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
         });
         return;
       }
@@ -1654,6 +1670,8 @@ class VentaCrearEscritorio extends CustomComponent {
       this.alert.warning('Venta', response.getMessage(), () => {
         this.setState({
           loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
         });
       });
     }
@@ -1682,6 +1700,8 @@ class VentaCrearEscritorio extends CustomComponent {
         informacion: convertNullText(response.data.razonSocial),
         direccion: convertNullText(response.data.direccion),
         loadingCliente: false,
+      }, () => {
+        this.updateReduxState();
       });
     }
 
@@ -1696,6 +1716,8 @@ class VentaCrearEscritorio extends CustomComponent {
       this.alert.warning('Venta', response.getMessage(), () => {
         this.setState({
           loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
         });
       });
     }
@@ -1708,7 +1730,7 @@ class VentaCrearEscritorio extends CustomComponent {
   handleClearInputCliente = () => {
     this.setState({
       clientes: [],
-      idCliente: '',
+      cliente: null,
       idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumento: '',
       numeroDocumento: '',
@@ -1717,12 +1739,14 @@ class VentaCrearEscritorio extends CustomComponent {
       email: '',
       direccion: '',
       nuevoCliente: null,
+    }, () => {
+      this.updateReduxState();
     });
   }
 
   handleFilterCliente = async (text) => {
     const searchWord = text;
-    this.setState({ idCliente: '', numeroDocumento: searchWord });
+    this.setState({ cliente: null, numeroDocumento: searchWord });
 
     if (isEmpty(searchWord)) {
       this.setState({ clientes: [] });
@@ -1752,7 +1776,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.refPersona.current.initialize(value.documento);
     this.setState({
       clientes: [],
-      idCliente: value.idPersona,
+      cliente: value,
       idTipoCliente: value.idTipoCliente,
       idTipoDocumento: value.idTipoDocumento,
       numeroDocumento: value.documento,
@@ -1760,6 +1784,8 @@ class VentaCrearEscritorio extends CustomComponent {
       numeroCelular: value.celular,
       email: value.email,
       direccion: value.direccion,
+    }, () => {
+      this.updateReduxState();
     });
   }
 
@@ -2042,7 +2068,7 @@ class VentaCrearEscritorio extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-          clear={this.reloadView}
+          clear={this.clearView}
           handleClose={this.handleCloseImpresion}
 
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
@@ -2312,7 +2338,9 @@ class VentaCrearEscritorio extends CustomComponent {
                     value={CLIENTE_NATURAL}
                     checked={this.state.idTipoCliente === CLIENTE_NATURAL}
                     onChange={(event) => {
-                      this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' })
+                      this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' }, () => {
+                        this.updateReduxState();
+                      });
                     }}
                   >
                     <i className="bi bi-person"></i> Persona Natural {this.state.idTipoCliente === CLIENTE_NATURAL && "(" + this.state.numeroDocumento.length + ")"}
@@ -2324,9 +2352,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     id={CLIENTE_JURIDICO}
                     value={CLIENTE_JURIDICO}
                     checked={this.state.idTipoCliente === CLIENTE_JURIDICO}
-                    onChange={(event) => {
-                      this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' })
-                    }}
+                    onChange={this.handleSelectTipoCliente}
                   >
                     <i className="bi bi-building"></i> Persona Juridica {this.state.idTipoCliente === CLIENTE_JURIDICO && "(" + this.state.numeroDocumento.length + ")"}
                   </RadioButton>
@@ -2341,14 +2367,12 @@ class VentaCrearEscritorio extends CustomComponent {
                   <Select
                     value={this.state.idTipoDocumento}
                     refSelect={this.refIdTipoDocumento}
-                    onChange={(event) => {
-                      this.setState({ idTipoDocumento: event.target.value })
-                    }}
+                    onChange={this.handleSelectTipoDocumento}
                   >
                     <option value={""}>Tipo de documento</option>
                     {
                       this.state.idTipoCliente === CLIENTE_NATURAL && (
-                        this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                        this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
                           <option key={index} value={item.idTipoDocumento}>
                             {item.nombre}
                           </option>
@@ -2357,7 +2381,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     }
                     {
                       this.state.idTipoCliente === CLIENTE_JURIDICO && (
-                        this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                        this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
                           <option key={index} value={item.idTipoDocumento}>
                             {item.nombre}
                           </option>
@@ -2498,7 +2522,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </>
             }
 
-{
+            {
               this.state.pedido &&
               <>
                 <span className='mr-1'>
@@ -2569,6 +2593,13 @@ VentaCrearEscritorio.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,
+  ventaCrearClasico: PropTypes.shape({
+    state: PropTypes.object,
+    local: PropTypes.object,
+  }),
+  setCrearVentaClasicoState: PropTypes.func,
+  setCrearVentaClasicoLocal: PropTypes.func,
+  clearCrearVentaClasico: PropTypes.func,
 };
 
 /**
@@ -2579,10 +2610,17 @@ const mapStateToProps = (state) => {
   return {
     token: state.principal,
     productos: state.predeterminado.productos,
+    ventaCrearClasico: state.predeterminado.ventaCrearClasico
   };
 };
 
-const mapDispatchToProps = { starProduct, setProductosFavoritos };
+const mapDispatchToProps = {
+  starProduct,
+  setProductosFavoritos,
+  setCrearVentaClasicoState,
+  setCrearVentaClasicoLocal,
+  clearCrearVentaClasico,
+};
 
 /**
  *

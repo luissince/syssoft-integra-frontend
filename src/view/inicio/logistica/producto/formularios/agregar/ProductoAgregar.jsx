@@ -1476,7 +1476,17 @@ class ProductoAgregar extends CustomComponent {
           <Column className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
             <Row>
               <Column className="col-lg-12 col-md-12 col-sm-12 col-12">
-                <TabHeader>
+                <TabHeader
+                  onTabChange={(activeTab) => {
+                    if (activeTab === 'producto-tab') {
+                      this.setState({ tipo: PRODUCTO });
+                    } else if (activeTab === 'servicio-tab') {
+                      this.setState({ tipo: SERVICIO });
+                    } else if (activeTab === 'combo-tab') {
+                      this.setState({ tipo: COMBO });
+                    }
+                  }}
+                >
                   <TabHead id='producto' isActive={true}>
                     <i className="bi bi-info-circle"></i> Producto
                   </TabHead>

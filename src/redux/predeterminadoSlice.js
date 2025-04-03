@@ -25,6 +25,14 @@ const initialState = {
     data: null,
     paginacion: null
   },
+  ventaCrear: {
+    state: null,
+    local: null
+  },
+  ventaCrearClasico: {
+    state: null,
+    local: null
+  },
   cotizacionLista: {
     data: null,
     paginacion: null
@@ -127,6 +135,32 @@ const predeterminadoSlice = createSlice({
       state.ventaLista = {
         data: null,
         paginacion: null
+      };
+    },
+
+    setCrearVentaState: (state, action) => {
+      state.ventaCrear.state = action.payload;
+    },
+    setCrearVentaLocal: (state, action) => {
+      state.ventaCrear.local = action.payload;
+    },
+    clearCrearVenta: (state) => {
+      state.ventaCrear = {
+        state: null,
+        local: null
+      };
+    },
+
+    setCrearVentaClasicoState: (state, action) => {
+      state.ventaCrearClasico.state = action.payload;
+    },
+    setCrearVentaClasicoLocal: (state, action) => {
+      state.ventaCrearClasico.local = action.payload;
+    },
+    clearCrearVentaClasico: (state) => {
+      state.ventaCrearClasico = {
+        state: null,
+        local: null
       };
     },
 
@@ -383,6 +417,14 @@ const predeterminadoSlice = createSlice({
         data: null,
         paginacion: null
       };
+      state.ventaCrear = {
+        state: null,
+        local: null
+      };
+      state.ventaCrearClasico = {
+        state: null,
+        local: null
+      };
       state.cotizacionLista = {
         data: null,
         paginacion: null
@@ -468,6 +510,14 @@ const predeterminadoSlice = createSlice({
       state.ventaLista = {
         data: null,
         paginacion: null
+      };
+      state.ventaCrear = {
+        state: null,
+        local: null
+      };
+      state.ventaCrearClasico = {
+        state: null,
+        local: null
       };
       state.cotizacionLista = {
         data: null,
@@ -571,6 +621,14 @@ export const {
   setListaVentaData,
   setListaVentaPaginacion,
   clearListaVenta,
+
+  setCrearVentaState,
+  setCrearVentaLocal,
+  clearCrearVenta,
+
+  setCrearVentaClasicoState,
+  setCrearVentaClasicoLocal,
+  clearCrearVentaClasico,
 
   setListaCotizacionData,
   setListaCotizacionPaginacion,

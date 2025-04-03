@@ -38,6 +38,7 @@ import Select from '../../../../../components/Select';
 import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
 import CheckBox, { Switches } from '../../../../../components/Checks';
+import { RUC } from '../../../../../model/types/tipo-documento';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -516,7 +517,7 @@ class PersonaEditar extends CustomComponent {
               <option value="">-- Seleccione --</option>
               {
                 idTipoCliente === CLIENTE_NATURAL && (
-                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
                     <option key={index} value={item.idTipoDocumento}>
                       {item.nombre}
                     </option>
@@ -525,7 +526,7 @@ class PersonaEditar extends CustomComponent {
               }
               {
                 idTipoCliente === CLIENTE_JURIDICO && (
-                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
                     <option key={index} value={item.idTipoDocumento}>
                       {item.nombre}
                     </option>

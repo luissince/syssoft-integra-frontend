@@ -14,6 +14,10 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
+import { Table, TableCell, TableHead, TableHeader, TableResponsive, TableBody, TableRow, TableTitle } from '../../../../../components/Table';
+import { images } from '../../../../../helper';
+import Image from '../../../../../components/Image';
+import Button from '../../../../../components/Button';
 
 class TrasladoDetalle extends CustomComponent {
   constructor(props) {
@@ -34,7 +38,7 @@ class TrasladoDetalle extends CustomComponent {
       hora: '',
       motivo: '',
       observacion: '',
-      detalle: [],
+      detalles: [],
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -73,7 +77,7 @@ class TrasladoDetalle extends CustomComponent {
       sucursalDestino: traslado.cabecera.sucursalDestino,
       estado: traslado.cabecera.estado,
 
-      detalle: traslado.detalle,
+      detalles: traslado.detalles,
       loading: false,
     });
   }
@@ -115,115 +119,148 @@ class TrasladoDetalle extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-              <div className="table-responsive">
-                <table width="100%">
-                  <thead>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Fecha y Hora
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {fecha} - {formatTime(hora)}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Tipo de traslado
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {tipo}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Motivo
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {motivo}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Almacen de Origen
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {almacenOrigen}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Sucursal de Destino
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {sucursalDestino}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Almacen de Destino
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {almacenDestino}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Observación
-                      </th>
-                      <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {observacion}
-                      </th>
-                    </tr>
-                    <tr>
-                      <th className="table-secondary w-25 p-1 font-weight-normal ">
-                        Estado
-                      </th>
-                      <th
-                        className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
-                          }`}
-                      >
-                        {estado === 1 ? 'ACTIVO' : 'ANULADO'}
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
+            <Button
+              className="btn-light"
+            // onClick={this.handlePrintInvoices.bind(this, 'A4')}
+            >
+              <i className="fa fa-print"></i> A4
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+            // onClick={this.handlePrintInvoices.bind(this, '80mm')}
+            >
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+            {' '}
+            <Button
+              className="btn-light"
+            // onClick={this.handlePrintInvoices.bind(this, '58mm')}
+            >
+              <i className="fa fa-print"></i> 58MM
+            </Button>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <TableResponsive>
+              <Table width="100%">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Fecha y Hora
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {fecha} - {formatTime(hora)}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Tipo de traslado
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {tipo}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Motivo
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {motivo}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Almacen de Origen
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {almacenOrigen}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Sucursal de Destino
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {sucursalDestino}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Almacen de Destino
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {almacenDestino}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Observación
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {observacion}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Estado
+                    </TableHead>
+                    <TableHead
+                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
+                        }`}
+                    >
+                      {estado === 1 ? 'ACTIVO' : 'ANULADO'}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
 
         <Row>
           <Column>
-            <p className="lead">Detalle</p>
-            <div className="table-responsive">
-              <table className="table table-light table-striped">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Cantidad</th>
-                    <th>Unidad</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.detalle.map((item, index) => {
+            <TableResponsive>
+              <TableTitle>Detalles</TableTitle>
+              <Table className="table table-light table-striped">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Producto</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead>Cantidad</TableHead>
+                    <TableHead>Unidad</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {this.state.detalles.map((item, index) => {
                     return (
-                      <tr key={index}>
-                        <td className="text-center">{++index}</td>
-                        <td>
+                      <TableRow key={index}>
+                        <TableCell className="text-center">{item.id}</TableCell>
+                        <TableCell className="text-center">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            width={100}
+                          />
+                        </TableCell>
+                        <TableCell>
                           {item.codigo}
                           <br />
                           {item.producto}
-                        </td>
-                        <td>{item.categoria}</td>
-                        <td>{rounded(item.cantidad)}</td>
-                        <td>{item.unidad}</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell>{item.categoria}</TableCell>
+                        <TableCell>{rounded(item.cantidad)}</TableCell>
+                        <TableCell>{item.unidad}</TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableResponsive>
           </Column>
         </Row>
       </ContainerWrapper>

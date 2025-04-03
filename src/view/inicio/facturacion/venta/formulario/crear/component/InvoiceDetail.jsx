@@ -3,6 +3,7 @@ import { numberFormat } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import Button from '../../../../../../../components/Button';
+import Image from '../../../../../../../components/Image';
 
 const InvoiceDetail = (props) => {
   const { codiso, detalleVenta } = props;
@@ -40,7 +41,7 @@ const InvoiceDetail = (props) => {
               className="invoice-item_add-item d-flex position-relative cursor-pointer"
             >
               <div className="item_container">
-                <div className="pl-3 py-3 w-100 d-flex flex-column justify-content-center h-100">
+                <div className="py-3 w-100 d-flex flex-column justify-content-center h-100">
                   <div className="d-flex justify-content-between align-items-center py-1 px-3">
                     <div className="invoice-item_add-item-options">
                       <span>
@@ -62,12 +63,22 @@ const InvoiceDetail = (props) => {
                       </span>
                     </div>
 
+                    <Image
+                      default={images.noImage}
+                      src={producto.imagen}
+                      alt={producto.nombreProducto}
+                      width={80}
+                      height={80}
+                      className='object-contain'
+                    />
+
                     <div className="invoice-item_add-item-describe d-flex flex-column text-break text-truncate text-nowrap">
                       <div className="invoice-item_add-item-describe-title text-truncate text-base">
                         <small>{producto.codigo}</small>
                         <br />
                         {producto.nombreProducto}
                       </div>
+
                       <div className="invoice-item_add-item-describe-price d-flex align-items-center text-break text-truncate text-nowrap text-base">
                         {
                           producto.idTipoTratamientoProducto === VALOR_MONETARIO && (

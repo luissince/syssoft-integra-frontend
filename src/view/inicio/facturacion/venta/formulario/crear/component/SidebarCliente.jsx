@@ -9,6 +9,7 @@ import { images } from "../../../../../../../helper";
 import { handlePasteInteger, keyNumberInteger, keyNumberPhone } from "../../../../../../../helper/utils.helper";
 import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../../model/types/tipo-cliente";
 import PropTypes from 'prop-types';
+import { RUC } from "../../../../../../../model/types/tipo-documento";
 
 const SidebarCliente = (props) => {
   // Desestructurar props para extraer valores específicos
@@ -98,7 +99,7 @@ const SidebarCliente = (props) => {
                   <option value={""}>- Seleccione -</option>
                   {
                     idTipoCliente === CLIENTE_NATURAL && (
-                      tiposDocumentos.filter((item) => item.idTipoDocumento !== 'TD0003').map((item, index) => (
+                      tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
                         <option key={index} value={item.idTipoDocumento}>
                           {item.nombre}
                         </option>
@@ -107,7 +108,7 @@ const SidebarCliente = (props) => {
                   }
                   {
                     idTipoCliente === CLIENTE_JURIDICO && (
-                      tiposDocumentos.filter((item) => item.idTipoDocumento === 'TD0003').map((item, index) => (
+                      tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
                         <option key={index} value={item.idTipoDocumento}>
                           {item.nombre}
                         </option>

@@ -56,7 +56,14 @@ class ModalAgregar extends Component {
     if (!isNumeric(this.state.cantidad)) {
       alertWarning("Venta", "Ingrese el valor solicitado.", () => {
         this.refCantidad.current.focus();
-      })
+      });
+      return;
+    }
+
+    if(this.state.cantidad <= 0){
+      alertWarning("Venta", "La cantidad no puede ser menor a 0 o igual a 0.", () => {
+        this.refCantidad.current.focus();
+      });
       return;
     }
 

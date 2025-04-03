@@ -35,6 +35,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
+import { imagen } from '../../../../../helper/images.helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -86,8 +87,6 @@ class LogisticaAjusteCrear extends CustomComponent {
     this.refIdAlmacen = React.createRef();
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
-
-    this.inputRefs = [];
 
     this.abortController = new AbortController();
   }
@@ -200,12 +199,11 @@ class LogisticaAjusteCrear extends CustomComponent {
       idProducto: producto.idProducto,
       codigo: producto.codigo,
       nombre: producto.nombre,
+      imagen: producto.imagen,
       cantidad: 0,
       actual: producto.cantidad,
       unidad: producto.unidad,
     };
-
-    this.inputRefs.push(React.createRef());
 
     this.setState((prevState) => ({
       detalle: [...prevState.detalle, data],
@@ -422,9 +420,11 @@ class LogisticaAjusteCrear extends CustomComponent {
   generateBody() {
     if (isEmpty(this.state.detalle)) {
       return (
-        <tr className="text-center">
-          <td colSpan="6">¡No hay productos agregados!</td>
-        </tr>
+        <TableRow>
+          <TableCell className="text-center" colSpan="7">
+            ¡No hay datos para mostrar!
+          </TableCell>
+        </TableRow>
       );
     }
 
@@ -450,6 +450,14 @@ class LogisticaAjusteCrear extends CustomComponent {
               <i className="bi bi-trash"></i>
             </Button>
           </TableCell>
+          <TableCell className="text-center">
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.nombre}
+              width={70}
+            />
+          </TableCell>
           <TableCell>
             {item.codigo}
             <br />
@@ -467,7 +475,7 @@ class LogisticaAjusteCrear extends CustomComponent {
           </TableCell>
           <TableCell>{rounded(item.actual)}</TableCell>
           <TableCell>{rounded(diferencia)}</TableCell>
-          <tTableCelld>{item.unidad}</tTableCelld>
+          <TableCell>{item.unidad}</TableCell>
         </TableRow>
       );
     });
@@ -688,15 +696,16 @@ class LogisticaAjusteCrear extends CustomComponent {
               <Column>
                 <TableResponsive>
                   <TableTitle>Lista de productos:</TableTitle>
-                  <Table>
+                  <Table className="table-striped table-bordered rounded">
                     <TableHeader>
                       <TableRow>
-                        <th width="5%">Quitar</th>
-                        <th width="30%">Clave/Nombre</th>
-                        <th width="15%">Nueva Existencia</th>
-                        <th width="15%">Existencia Actual</th>
-                        <th width="15%">Diferencia</th>
-                        <th width="15%">Medida</th>
+                        <TableHead width="5%">Quitar</TableHead>
+                        <TableHead width="10%">Imagen</TableHead>
+                        <TableHead width="30%">Clave/Nombre</TableHead>
+                        <TableHead width="15%">Nueva Existencia</TableHead>
+                        <TableHead width="15%">Existencia Actual</TableHead>
+                        <TableHead width="15%">Diferencia</TableHead>
+                        <TableHead width="15%">Medida</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

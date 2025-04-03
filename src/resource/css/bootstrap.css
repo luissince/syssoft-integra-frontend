@@ -13035,7 +13035,7 @@ a.text-dark:focus {
 
 .main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-describe {
   width: 40%;
-  padding: 0 5px 0 0;
+  padding: 0 5px 0 13px;
 }
 
 .main-pos .invoice-right .invoice-item_add-item .invoice-item_add-item-describe-title {

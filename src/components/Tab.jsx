@@ -1,12 +1,39 @@
 import PropTypes from "prop-types";
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useRef } from "react";
 
 const TabHeader = forwardRef((props, ref) => {
-    const { children, className = '', id = 'tab-container', ...rest } = props;
+    const { children, className = '', id = 'tab-container', onTabChange, ...rest } = props;
+    const tabRef = useRef(null);
+
+    useEffect(() => {
+        const handleTabChange = (event) => {
+            if (onTabChange) {
+                onTabChange(event.target.id);
+            }
+        };
+
+        const tabElement = tabRef.current;
+        if (tabElement) {
+            tabElement.addEventListener('shown.bs.tab', handleTabChange);
+        }
+
+        return () => {
+            if (tabElement) {
+                tabElement.removeEventListener('shown.bs.tab', handleTabChange);
+            }
+        };
+    }, [onTabChange]);
 
     return (
         <ul
-            ref={ref}
+            ref={(el) => {
+                tabRef.current = el;
+                if (typeof ref === 'function') {
+                    ref(el);
+                } else if (ref) {
+                    ref.current = el;
+                }
+            }}
             className={`nav nav-tabs ${className}`}
             id={id}
             role="tablist"
@@ -23,7 +50,8 @@ TabHeader.propTypes = {
     className: PropTypes.string,
     children: PropTypes.node.isRequired,
     id: PropTypes.string,
-}
+    onTabChange: PropTypes.func, // Nueva prop para manejar cambios de tab
+};
 
 const TabHead = forwardRef((props, ref) => {
     const {

@@ -45,11 +45,16 @@ class InvoiceView extends CustomComponent {
     }
   }
 
-  componentClear = () => {
+  clearDataComponents = () => {
     this.setState(this.initial, () => {
       this.refSearch.current.restart();
       this.refProducto.current.focus();
     })
+  }
+
+  setInitialData = (state) => {
+    this.setState(state);
+    this.refSearch.current.initialize(state.buscar);
   }
 
   handleSelectTipo = (tipo) => {
@@ -246,7 +251,8 @@ class InvoiceView extends CustomComponent {
       handleStarProduct,
       handleAddItem,
       productos,
-      cotizacion
+      cotizacion,
+      pedido
     } = this.props;
 
     const {
@@ -292,6 +298,18 @@ class InvoiceView extends CustomComponent {
                 </h6>
               </>
             }
+
+            {
+                          pedido &&
+                          <>
+                            <span className='mr-1'>
+                              <img src={images.invoice} width={22} /> PEDIDO:
+                            </span>
+                            <h6 className='p-0 m-0'>
+                              {pedido.serie}-{formatNumberWithZeros(pedido.numeracion)}
+                            </h6>
+                          </>
+                        }
           </div>
         </div>
       </div>
@@ -559,6 +577,7 @@ InvoiceView.propTypes = {
   codiso: PropTypes.string.isRequired,
   productos: PropTypes.array.isRequired,
   cotizacion: PropTypes.object,
+  pedido: PropTypes.object,
   handleUpdateProductos: PropTypes.func.isRequired,
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,

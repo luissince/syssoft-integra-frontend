@@ -176,7 +176,7 @@ class CobroDetalle extends CustomComponent {
   handlePrint = async (size) => {
     await pdfVisualizer.init({
       url: documentsPdfInvoicesCobro(this.state.idCobro, size),
-      title: 'Cobro',
+      title: 'Ingreso',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
@@ -206,7 +206,7 @@ class CobroDetalle extends CustomComponent {
     const message = `
     Hola! Somos *${companyInfo.name}*
     
-    Le enviamos su comprobante de cobro:
+    Le enviamos su comprobante de ingreso:
     ${documentUrl}
     
     Para cualquier consulta, puede contactarnos:
@@ -353,7 +353,7 @@ class CobroDetalle extends CustomComponent {
         />
 
         <Title
-          title='Cobro'
+          title='Ingreso'
           subTitle='DETALLE'
           handleGoBack={() => this.props.history.goBack()}
         />

@@ -34,6 +34,7 @@ import RadioButton from '../../../../../components/RadioButton';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -109,8 +110,6 @@ class TrasladorCrear extends CustomComponent {
 
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
-
-    this.inputRefs = [];
 
     this.abortController = new AbortController();
   }
@@ -234,12 +233,11 @@ class TrasladorCrear extends CustomComponent {
       idProducto: producto.idProducto,
       codigo: producto.codigo,
       nombre: producto.nombre,
+      imagen: producto.imagen,
       cantidad: 0,
       actual: producto.cantidad,
       unidad: producto.unidad,
     };
-
-    this.inputRefs.push(React.createRef());
 
     this.setState((prevState) => ({
       detalle: [...prevState.detalle, data],
@@ -556,21 +554,22 @@ class TrasladorCrear extends CustomComponent {
   generateBody() {
     if (isEmpty(this.state.detalle)) {
       return (
-        <tr className="text-center">
-          <td colSpan="6">¡No hay productos agregados!</td>
-        </tr>
+        <TableRow>
+          <TableCell className="text-center" colSpan="7">
+            ¡No hay datos para mostrar!
+          </TableCell>
+        </TableRow>
       );
     }
 
     return this.state.detalle.map((item, index) => {
       const isLastRow = index === this.state.detalle.length - 1;
 
-
       const diferencia = item.actual - parseFloat(item.cantidad);
 
       return (
-        <tr key={index}>
-          <td>
+        <TableRow key={index}>
+          <TableCell>
             <Button
               className="btn-outline-danger btn-sm"
               title="Anular"
@@ -578,13 +577,21 @@ class TrasladorCrear extends CustomComponent {
             >
               <i className="bi bi-trash"></i>
             </Button>
-          </td>
-          <td>
+          </TableCell>
+          <TableCell className="text-center">
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.nombre}
+              width={70}
+            />
+          </TableCell>
+          <TableCell>
             {item.codigo}
             <br />
             {item.nombre}
-          </td>
-          <td>
+          </TableCell>
+          <TableCell>
             <Input
               value={item.cantidad}
               onChange={(event) =>
@@ -593,11 +600,11 @@ class TrasladorCrear extends CustomComponent {
               onKeyDown={keyNumberFloat}
               onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
             />
-          </td>
-          <td className={`${diferencia <= 0 ? "text-danger" : ""}`}>{rounded(diferencia)}</td>
-          <td>{rounded(item.cantidad)}</td>
-          <td>{item.unidad}</td>
-        </tr>
+          </TableCell>
+          <TableCell className={`${diferencia <= 0 ? "text-danger" : ""}`}>{rounded(diferencia)}</TableCell>
+          <TableCell>{rounded(item.cantidad)}</TableCell>
+          <TableCell>{item.unidad}</TableCell>
+        </TableRow>
       );
     });
   }
@@ -838,14 +845,14 @@ class TrasladorCrear extends CustomComponent {
             <>
               <Row>
                 <Column formGroup={true}>
-                  <div className="table-responsive">
-                    <table width="100%">
-                      <thead>
-                        <tr>
-                          <th className="table-secondary w-20 p-1 font-weight-normal ">
+                  <TableResponsive>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                             Tipo de Traslado:
-                          </th>
-                          <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                          </TableHead>
+                          <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                             {this.state.idTipoTraslado === 'TT0001' ? (
                               <span>
                                 Entre almacenes
@@ -855,75 +862,75 @@ class TrasladorCrear extends CustomComponent {
                                 Entre sucursales
                               </span>
                             )}
-                          </th>
-                        </tr>
+                          </TableHead>
+                        </TableRow>
                         {
                           this.state.idTipoTraslado === 'TT0001' && (
                             <>
-                              <tr>
-                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                              <TableRow>
+                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                                   Motivo ajuste:
-                                </th>
-                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                </TableHead>
+                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                   {this.state.nombreMotivoAjuste}
-                                </th>
-                              </tr>
+                                </TableHead>
+                              </TableRow>
 
-                              <tr>
-                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                              <TableRow>
+                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                                   Almacen de Origen:
-                                </th>
-                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                </TableHead>
+                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                   {this.state.nombreAlmacenOrigenInterno}
-                                </th>
-                              </tr>
+                                </TableHead>
+                              </TableRow>
 
-                              <tr>
-                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                              <TableRow>
+                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                                   Almacen de Destino:
-                                </th>
-                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                </TableHead>
+                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                   {this.state.nombreAlmacenDestinoInterno}
-                                </th>
-                              </tr>
+                                </TableHead>
+                              </TableRow>
                             </>
                           )
                         }
                         {
                           this.state.idTipoTraslado === 'TT0002' && (
                             <>
-                              <tr>
-                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                              <TableRow>
+                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                                   Almacen de Origen:
-                                </th>
-                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                </TableHead>
+                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                   {this.state.nombreAlmacenOriginExterno}
-                                </th>
-                              </tr>
+                                </TableHead>
+                              </TableRow>
 
-                              <tr>
-                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                              <TableRow>
+                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                                   Sucursal de Destino:
-                                </th>
-                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                </TableHead>
+                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                   {this.state.nombreSucursalExterno}
-                                </th>
-                              </tr>
+                                </TableHead>
+                              </TableRow>
 
-                              <tr>
-                                <th className="table-secondary w-20 p-1 font-weight-normal ">
+                              <TableRow>
+                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
                                   Almacen de Destino:
-                                </th>
-                                <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                                </TableHead>
+                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                                   {this.state.nombreAlmacenDestinoExterno}
-                                </th>
-                              </tr>
+                                </TableHead>
+                              </TableRow>
                             </>
                           )
                         }
-                      </thead>
-                    </table>
-                  </div>
+                      </TableHeader>
+                    </Table>
+                  </TableResponsive>
                 </Column>
               </Row>
 
@@ -953,7 +960,7 @@ class TrasladorCrear extends CustomComponent {
                           alt={value.nombre}
                           width={60}
                         />
-  
+
                         <div className='ml-2'>
                           {value.codigo}
                           <br />
@@ -977,22 +984,25 @@ class TrasladorCrear extends CustomComponent {
 
               <Row>
                 <Column>
-                  <label>Lista de productos:</label>
-                  <div className="table-responsive">
-                    <table className="table table-striped table-bordered rounded">
-                      <thead>
-                        <tr>
-                          <th width="5%">Quitar</th>
-                          <th width="30%">Clave/Nombre</th>
-                          <th width="15%">Nueva Existencia</th>
-                          <th width="15%">Almacen Origen</th>
-                          <th width="15%">Almacen Destino</th>
-                          <th width="15%">Medida</th>
-                        </tr>
-                      </thead>
-                      <tbody>{this.generateBody()}</tbody>
-                    </table>
-                  </div>
+                  <TableResponsive>
+                    <TableTitle>Lista de productos:</TableTitle>
+                    <Table className="table-striped table-bordered rounded">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead width="5%">Quitar</TableHead>
+                          <TableHead width="10%">Imagen</TableHead>
+                          <TableHead width="30%">Clave/Nombre</TableHead>
+                          <TableHead width="15%">Nueva Existencia</TableHead>
+                          <TableHead width="15%">Almacen Origen</TableHead>
+                          <TableHead width="15%">Almacen Destino</TableHead>
+                          <TableHead width="15%">Medida</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {this.generateBody()}
+                      </TableBody>
+                    </Table>
+                  </TableResponsive>
                 </Column>
               </Row>
 
