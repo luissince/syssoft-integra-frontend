@@ -10186,6 +10186,42 @@ button.bg-dark:focus {
   left: 0px;
 }
 
+.bottom-2-5 {
+  bottom: 0.625rem;
+}
+
+.top-2-5 {
+  top: 0.625rem;
+}
+
+.right-2-5 {
+  right: 0.625rem;
+}
+
+.left-2-5 {
+  left: 0.625rem;
+}
+
+.top-3-5 {
+  top: 0.875rem;
+}
+
+.right-3-5 {
+  right: 0.875rem;
+}
+
+.bottom-3-5 {
+  bottom: 0.875rem;
+}
+
+.left-3-5 {
+  left: 0.875rem;
+}
+
+.z-index-9999 {
+  z-index: 9999;
+}
+
 @supports ((position: -webkit-sticky) or (position: sticky)) {
   .sticky-top {
     position: -webkit-sticky;
@@ -10297,12 +10333,20 @@ button.bg-dark:focus {
   height: auto !important;
 }
 
+.mw-90 {
+  max-width: 90% !important;
+}
+
 .mw-100 {
   max-width: 100% !important;
 }
 
 .mh-100 {
   max-height: 100% !important;
+}
+
+.mh-90 {
+  max-height: 90% !important;
 }
 
 .min-vw-100 {

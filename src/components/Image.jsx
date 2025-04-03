@@ -1,7 +1,6 @@
 import { Component } from "react";
 import PropTypes from "prop-types";
 import { images } from "../helper";
-import "./Image.css"; // Importa los estilos CSS
 
 class Image extends Component {
     constructor(props) {
@@ -57,9 +56,12 @@ class Image extends Component {
 
                 {/* Imagen en pantalla completa */}
                 {showFullScreen && (
-                    <div className="fullscreen-container" onClick={this.toggleFullScreen}>
-                        <span className="close-button">&times;</span>
-                        <img src={image} alt={alt} className="fullscreen-image" />
+                    <div
+                        className="fullscreen-container position-fixed top-0 left-0 vw-100 vh-100 d-flex justify-content-center align-items-center z-index-9999"
+                        style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+                        onClick={this.toggleFullScreen}>
+                        <span className="btn btn-light position-absolute top-3-5 right-3-5">&times;</span>
+                        <img src={image} alt={alt} className="mw-90 mh-90 rounded-sm shadow" />
                     </div>
                 )}
             </>
