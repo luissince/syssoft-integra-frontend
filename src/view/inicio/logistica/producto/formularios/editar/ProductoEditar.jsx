@@ -58,7 +58,7 @@ class ProductoEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      tipo: PRODUCTO,
+      idTipoProducto: PRODUCTO,
       idProducto: '',
       imagen: {
         url: images.noImage,
@@ -268,7 +268,7 @@ class ProductoEditar extends CustomComponent {
         activeTabServicio: false,
         activeTabCombo: false,
 
-        tipo: producto.idTipoProducto,
+        idTipoProducto: producto.idTipoProducto,
         nombreProducto: producto.nombre,
         codigoProducto: producto.codigo,
         skuProducto: producto.sku,
@@ -299,7 +299,7 @@ class ProductoEditar extends CustomComponent {
         activeTabServicio: true,
         activeTabCombo: false,
 
-        tipo: producto.idTipoProducto,
+        idTipoProducto: producto.idTipoProducto,
         nombreServicio: producto.nombre,
         codigoServicio: producto.codigo,
         skuServicio: producto.sku,
@@ -327,7 +327,7 @@ class ProductoEditar extends CustomComponent {
         activeTabServicio: false,
         activeTabCombo: true,
 
-        tipo: producto.idTipoProducto,
+        idTipoProducto: producto.idTipoProducto,
         nombreCombo: producto.nombre,
         codigoCombo: producto.codigo,
         skuCombo: producto.sku,
@@ -367,11 +367,7 @@ class ProductoEditar extends CustomComponent {
   };
 
   async fetchProducto(id) {
-    const params = {
-      idProducto: id,
-    };
-
-    const response = await getIdProducto(params, this.abortController.signal);
+    const response = await getIdProducto(id, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -1052,8 +1048,8 @@ class ProductoEditar extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
-      if (logoSend.size > 50) {
-        alertWarning("Producto", "La imagen a subir tiene que ser menor a 50 KB.")
+      if (logoSend.size > 100) {
+        alertWarning("Producto", "La imagen a subir tiene que ser menor a 100 KB.")
         return;
       }
       this.setState({
@@ -1429,17 +1425,17 @@ class ProductoEditar extends CustomComponent {
   };
 
   handleRegistrar = () => {
-    if (this.state.tipo === PRODUCTO) {
+    if (this.state.idTipoProducto === PRODUCTO) {
       this.handleSaveProducto();
       return;
     }
 
-    if (this.state.tipo === SERVICIO) {
+    if (this.state.idTipoProducto === SERVICIO) {
       this.handleSaveServicio();
       return;
     }
 
-    if (this.state.tipo === COMBO) {
+    if (this.state.idTipoProducto === COMBO) {
       this.handleSaveCombo();
       return;
     }
@@ -1468,7 +1464,7 @@ class ProductoEditar extends CustomComponent {
   render() {
     const { loading, msgLoading } = this.state;
 
-    const { tipo } = this.state;
+    const { idTipoProducto } = this.state;
 
     const { nombreProducto, codigoProducto, skuProducto, codigoBarrasProducto, codigoSunatProducto } = this.state;
 
@@ -1541,11 +1537,11 @@ class ProductoEditar extends CustomComponent {
                 <TabHeader
                   onTabChange={(activeTab) => {
                     if (activeTab === 'producto-tab') {
-                      this.setState({ tipo: PRODUCTO });
+                      this.setState({ idTipoProducto: PRODUCTO });
                     } else if (activeTab === 'servicio-tab') {
-                      this.setState({ tipo: SERVICIO });
+                      this.setState({ idTipoProducto: SERVICIO });
                     } else if (activeTab === 'combo-tab') {
-                      this.setState({ tipo: COMBO });
+                      this.setState({ idTipoProducto: COMBO });
                     }
                   }}
                 >
@@ -1823,21 +1819,21 @@ class ProductoEditar extends CustomComponent {
 
           <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
             <DetalleImagen
-              tipo={tipo}
+              idTipoProducto={idTipoProducto}
               imagen={imagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={
-                tipo === PRODUCTO
+                idTipoProducto === PRODUCTO
                   ? nombreProducto
-                  : tipo === SERVICIO
+                  : idTipoProducto === SERVICIO
                     ? nombreServicio
                     : nombreCombo
               }
               precio={
-                tipo === PRODUCTO
+                idTipoProducto === PRODUCTO
                   ? precioProducto
-                  : tipo === SERVICIO
+                  : idTipoProducto === SERVICIO
                     ? precioServicio
                     : precioCombo
               }

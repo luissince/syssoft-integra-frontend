@@ -56,7 +56,7 @@ class ProductoAgregar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      tipo: PRODUCTO,
+      idTipoProducto: PRODUCTO,
       imagen: {
         url: images.noImage,
       },
@@ -967,8 +967,8 @@ class ProductoAgregar extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
-      if (logoSend.size > 50) {
-        alertWarning("Producto", "La imagen a subir tiene que ser menor a 50 KB.")
+      if (logoSend.size > 100) {
+        alertWarning("Producto", "La imagen a subir tiene que ser menor a 100 KB.")
         return;
       }
       this.setState({
@@ -1112,7 +1112,7 @@ class ProductoAgregar extends CustomComponent {
         alertInfo('Producto', 'Procesando información...');
 
         const data = {
-          tipo: this.state.tipo,
+          idTipoProducto: this.state.idTipoProducto,
           nombre: this.state.nombreProducto,
           codigo: this.state.codigoProducto,
           sku: this.state.skuProducto,
@@ -1213,7 +1213,7 @@ class ProductoAgregar extends CustomComponent {
         alertInfo('Producto - Servicio', 'Procesando información...');
 
         const data = {
-          tipo: this.state.tipo,
+          idTipoProducto: this.state.idTipoProducto,
           nombre: this.state.nombreServicio,
           codigo: this.state.codigoServicio,
           sku: this.state.skuServicio,
@@ -1314,7 +1314,7 @@ class ProductoAgregar extends CustomComponent {
         alertInfo('Producto - Combo', 'Procesando información...');
 
         const data = {
-          tipo: this.state.tipo,
+          idTipoProducto: this.state.idTipoProducto,
           nombre: this.state.nombreCombo,
           codigo: this.state.codigoCombo,
           sku: this.state.skuCombo,
@@ -1362,17 +1362,17 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRegistrar = () => {
-    if (this.state.tipo === PRODUCTO) {
+    if (this.state.idTipoProducto === PRODUCTO) {
       this.handleSaveProducto();
       return;
     }
 
-    if (this.state.tipo === SERVICIO) {
+    if (this.state.idTipoProducto === SERVICIO) {
       this.handleSaveServicio();
       return;
     }
 
-    if (this.state.tipo === COMBO) {
+    if (this.state.idTipoProducto === COMBO) {
       this.handleSaveCombo();
       return;
     }
@@ -1395,7 +1395,7 @@ class ProductoAgregar extends CustomComponent {
     */
 
   render() {
-    const { tipo } = this.state;
+    const { idTipoProducto } = this.state;
 
     const { nombreProducto, codigoProducto, skuProducto, codigoBarrasProducto, codigoSunatProducto } = this.state;
 
@@ -1479,11 +1479,11 @@ class ProductoAgregar extends CustomComponent {
                 <TabHeader
                   onTabChange={(activeTab) => {
                     if (activeTab === 'producto-tab') {
-                      this.setState({ tipo: PRODUCTO });
+                      this.setState({ idTipoProducto: PRODUCTO });
                     } else if (activeTab === 'servicio-tab') {
-                      this.setState({ tipo: SERVICIO });
+                      this.setState({ idTipoProducto: SERVICIO });
                     } else if (activeTab === 'combo-tab') {
-                      this.setState({ tipo: COMBO });
+                      this.setState({ idTipoProducto: COMBO });
                     }
                   }}
                 >
@@ -1761,22 +1761,22 @@ class ProductoAgregar extends CustomComponent {
 
           <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
             <DetalleImagen
-              tipo={tipo}
+              idTipoProducto={idTipoProducto}
               imagen={imagen}
               refFileImagen={this.refFileImagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={
-                tipo === PRODUCTO
+                idTipoProducto === PRODUCTO
                   ? nombreProducto
-                  : tipo === SERVICIO
+                  : idTipoProducto === SERVICIO
                     ? nombreServicio
                     : nombreCombo
               }
               precio={
-                tipo === PRODUCTO
+                idTipoProducto === PRODUCTO
                   ? precioProducto
-                  : tipo === SERVICIO
+                  : idTipoProducto === SERVICIO
                     ? precioServicio
                     : precioCombo
               }

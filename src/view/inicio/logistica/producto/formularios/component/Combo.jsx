@@ -493,7 +493,7 @@ const Combo = (props) => {
 
         <Column className="col-12" formGroup={true}>
           <label>
-            Agregar las imagenes que sean mas atractivas para el usuario. <b className='text-danger'>Las imagenes no debe superar los 50 KB.</b>
+            Agregar las imagenes que sean mas atractivas para el usuario. <b className='text-danger'>Las imagenes no debe superar los 100 KB.</b>
           </label>
           <label>
             Las imágenes deben tener un tamaño de <b>800 x 800 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).

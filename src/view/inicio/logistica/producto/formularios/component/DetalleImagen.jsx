@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
 
 const DetalleImagen = (props) => {
-  const { tipo } = props;
+  const { idTipoProducto } = props;
 
   const { imagen, handleInputImagen, handleRemoveImagen } = props;
 
@@ -36,7 +36,7 @@ const DetalleImagen = (props) => {
             className="img-fluid border border-primary rounded"
           />
           <label>
-            <b className='text-danger'>* Las imagenes no debe superar los 50 KB.</b>
+            <b className='text-danger'>* Las imagenes no debe superar los 100 KB.</b>
           </label>
         </Column>
       </Row>
@@ -98,7 +98,7 @@ const DetalleImagen = (props) => {
         </Column>
       </Row>
 
-      {tipo === PRODUCTO && (
+      {idTipoProducto === PRODUCTO && (
         <Row>
           <Column className="col-md-12" formGroup={true}>
             <Switches
@@ -170,7 +170,7 @@ const DetalleImagen = (props) => {
 };
 
 DetalleImagen.propTypes = {
-  tipo: PropTypes.string,
+  idTipoProducto: PropTypes.string,
 
   imagen: PropTypes.object,
   handleInputImagen: PropTypes.func,

@@ -280,11 +280,10 @@ export async function listProducto(params, signal) {
   );
 }
 
-export async function getIdProducto(params, signal) {
+export async function getIdProducto(idProducto, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/id', {
+    instancePrincipal.get(`/api/producto/id/${idProducto}`, {
       signal: signal,
-      params: params,
     }),
   );
 }
