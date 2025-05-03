@@ -49,7 +49,9 @@ class SucursalAgregar extends CustomComponent {
       principal: false,
       estado: true,
 
-      imagen: images.noImage,
+      imagen: {
+        url: images.noImage,
+      },
 
       ubigeos: [],
 
@@ -64,8 +66,6 @@ class SucursalAgregar extends CustomComponent {
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
     this.refValueUbigeo = React.createRef();
-
-    this.refFileImagen = React.createRef();
   }
 
   async fetchFiltrarUbigeo(params) {
@@ -83,18 +83,45 @@ class SucursalAgregar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Eventos de la imagen
   //------------------------------------------------------------------------------------------
-  handleFileImage = (event) => {
-    if (!isEmpty(event.target.files)) {
-      this.setState({ imagen: URL.createObjectURL(event.target.files[0]) });
+  handleFileImage = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+      if (logoSend.size > 500) {
+        alertWarning("Producto", "La imagen a subir tiene que ser menor a 500 KB.")
+        return;
+      }
+      this.setState({
+        imagen: {
+          // name: file.name,
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
     } else {
-      this.setState({ imagen: images.noImage });
-      this.refFileImagen.current.value = ''
+      this.setState({
+        imagen: {
+          url: images.noImage
+        }
+      });
     }
+
+    event.target.value = null;
   }
 
   handleClearImage = () => {
-    this.setState({ imagen: images.noImage });
-    this.refFileImagen.current.value = ''
+    this.setState({
+      imagen: {
+        url: images.noImage
+      }
+    });
   }
 
   //------------------------------------------------------------------------------------------
@@ -171,19 +198,19 @@ class SucursalAgregar extends CustomComponent {
       if (accept) {
         alertInfo('Sucursal', 'Procesando información...');
 
-        const logoSend = await imageBase64(this.refFileImagen.current.files[0]);
-
         const data = {
           //datos
           nombre: this.state.nombre.trim().toUpperCase(),
+          telefono: this.state.telefono.trim(),
+          celular: this.state.celular.trim(),
+          email: this.state.email.trim(),
+          paginaWeb: this.state.paginaWeb.trim(),
           direccion: this.state.direcion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
+          googleMaps: this.state.googleMaps,
           principal: this.state.principal,
           estado: this.state.estado,
-          //imagen
-          imagen: logoSend.base64String ?? "",
-          extension: logoSend.extension ?? "",
-
+          imagen: this.state.imagen,
           idUsuario: this.state.idUsuario,
         };
 
@@ -370,7 +397,7 @@ class SucursalAgregar extends CustomComponent {
 
                 <Image
                   default={images.noImage}
-                  src={this.state.imagen}
+                  src={this.state.imagen.url}
                   alt="Portada de la sucursal"
                   className="img-fluid border border-primary rounded"
                 />
@@ -384,7 +411,6 @@ class SucursalAgregar extends CustomComponent {
                   type="file"
                   id="fileImage"
                   accept="image/png, image/jpeg, image/gif, image/svg"
-                  ref={this.refFileImagen}
                   onChange={this.handleFileImage}
                 />
                 <label

@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import { SpinnerTable } from '../../../../components/Spinner';
 import Image from '../../../../components/Image';
 import Button from '../../../../components/Button';
+import { images } from '../../../../helper';
 
 class Empresa extends React.Component {
   constructor(props) {
@@ -100,6 +101,7 @@ class Empresa extends React.Component {
           <TableCell>{item.nombreEmpresa}</TableCell>
           <TableCell>
             <Image
+              default={images.noImage}
               src={item.rutaLogo}
               alt={"Logo"}
               width={96}
@@ -107,6 +109,7 @@ class Empresa extends React.Component {
           </TableCell>
           <TableCell>
             <Image
+              default={images.noImage}
               src={item.rutaImage}
               alt={"Imagen"}
               width={96}

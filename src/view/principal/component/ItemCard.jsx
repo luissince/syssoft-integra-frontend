@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import Button from '../../../components/Button';
 import Image from '../../../components/Image';
+import { images } from '../../../helper';
 
 const ItemCard = ({ item, handleIngresar }) => {
   return (
@@ -8,6 +9,7 @@ const ItemCard = ({ item, handleIngresar }) => {
       <div className="form-group">
         <div className="card">
           <Image
+            default={images.noImage}
             src={ `${item.imagen}`}
             alt={"Imagen de la sucursal"}
             className={"card-img-top"}

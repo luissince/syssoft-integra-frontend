@@ -36,7 +36,7 @@ const DetalleImagen = (props) => {
             className="img-fluid border border-primary rounded"
           />
           <label>
-            <b className='text-danger'>* Las imagenes no debe superar los 100 KB.</b>
+            <b className='text-danger'>* Las imagenes no debe superar los 500 KB.</b>
           </label>
         </Column>
       </Row>

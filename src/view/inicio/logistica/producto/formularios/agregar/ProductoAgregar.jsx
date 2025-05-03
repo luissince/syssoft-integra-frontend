@@ -967,8 +967,8 @@ class ProductoAgregar extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
-      if (logoSend.size > 100) {
-        alertWarning("Producto", "La imagen a subir tiene que ser menor a 100 KB.")
+      if (logoSend.size > 500) {
+        alertWarning("Producto", "La imagen a subir tiene que ser menor a 500 KB.")
         return;
       }
       this.setState({

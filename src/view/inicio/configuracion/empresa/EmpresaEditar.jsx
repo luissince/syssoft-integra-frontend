@@ -798,6 +798,7 @@ class EmpresaProceso extends CustomComponent {
               <small>Para mostrar en los reportes</small>
               <div className="text-center mb-2">
                 <Image
+                  default={images.noImage}
                   src={this.state.logo.url}
                   alt={"Logo de la empresa"}
                   className={"img-fluid border border-primary rounded"}
@@ -842,6 +843,7 @@ class EmpresaProceso extends CustomComponent {
               <small>Para mostrar el logo en sistema en la página web</small>
               <div className="text-center mb-2">
                 <Image
+                  default={images.noImage}
                   src={this.state.image.url}
                   alt={"Imagen de la empresa"}
                   className={"img-fluid border border-primary rounded"}
@@ -888,6 +890,7 @@ class EmpresaProceso extends CustomComponent {
               <small>Usuado como favicon de la página web</small>
               <div className="text-center mb-2">
                 <Image
+                  default={images.noImage}
                   src={this.state.icon.url}
                   alt={"Icono de la empresa"}
                   className={"img-fluid border border-primary rounded"}

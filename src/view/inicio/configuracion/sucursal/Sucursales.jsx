@@ -23,6 +23,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
+import Image from '../../../../components/Image';
+import { images } from '../../../../helper';
 
 class Sucursales extends CustomComponent {
   constructor(props) {
@@ -220,6 +222,14 @@ class Sucursales extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">{principal}</TableCell>
           <TableCell className="text-center">{estado}</TableCell>
+          <TableCell>
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={"Imagen"}
+              width={96}
+            />
+          </TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
@@ -293,6 +303,7 @@ class Sucursales extends CustomComponent {
                     <TableHead width="40%">Dirección</TableHead>
                     <TableHead width="10%" className="text-center">Principal</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Imagen</TableHead>
                     <TableHead width="5%" className="text-center">Editar</TableHead>
                     <TableHead width="5%" className="text-center">Eliminar</TableHead>
                   </TableRow>

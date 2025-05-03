@@ -59,7 +59,9 @@ class SucursalEditar extends CustomComponent {
       principal: false,
       estado: true,
 
-      imagen: images.noImage,
+      imagen: {
+        url: images.noImage,
+      },
 
       ubigeos: [],
 
@@ -74,8 +76,6 @@ class SucursalEditar extends CustomComponent {
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
     this.refValueUbigeo = React.createRef();
-
-    this.refFileImagen = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -117,7 +117,10 @@ class SucursalEditar extends CustomComponent {
       principal: sucursal.principal === 1 ? true : false,
       estado: sucursal.estado === 1 ? true : false,
       idUbigeo: sucursal.idUbigeo.toString(),
-      imagen: sucursal.ruta,
+      imagen: sucursal.imagen ??
+      {
+        url: images.noImage
+      },
       loading: false,
     });
   }
@@ -159,18 +162,45 @@ class SucursalEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Eventos de la imagen
   //------------------------------------------------------------------------------------------
-  handleFileImage = (event) => {
-    if (!isEmpty(event.target.files)) {
-      this.setState({ imagen: URL.createObjectURL(event.target.files[0]) });
+  handleFileImage = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+      if (logoSend.size > 500) {
+        alertWarning("Producto", "La imagen a subir tiene que ser menor a 500 KB.")
+        return;
+      }
+      this.setState({
+        imagen: {
+          // name: file.name,
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
     } else {
-      this.setState({ imagen: images.noImage });
-      this.refFileImagen.current.value = ''
+      this.setState({
+        imagen: {
+          url: images.noImage
+        }
+      });
     }
+
+    event.target.value = null;
   }
 
   handleClearImage = () => {
-    this.setState({ imagen: images.noImage });
-    this.refFileImagen.current.value = ''
+    this.setState({
+      imagen: {
+        url: images.noImage
+      }
+    });
   }
 
   handleDownload(url) {
@@ -250,8 +280,6 @@ class SucursalEditar extends CustomComponent {
       if (accept) {
         alertInfo('Sucursal', 'Procesando información...');
 
-        const logoSend = await imageBase64(this.refFileImagen.current.files[0]);
-
         const data = {
           //datos
           nombre: this.state.nombre.trim(),
@@ -264,10 +292,7 @@ class SucursalEditar extends CustomComponent {
           googleMaps: this.state.googleMaps,
           principal: this.state.principal,
           estado: this.state.estado,
-          //imagen
-          imagen: logoSend.base64String ?? "",
-          extension: logoSend.extension ?? "",
-
+          imagen: this.state.imagen,
           idUsuario: this.state.idUsuario,
           idSucursal: this.state.idSucursal,
         };
@@ -461,7 +486,7 @@ class SucursalEditar extends CustomComponent {
 
                 <Image
                   default={images.noImage}
-                  src={this.state.imagen}
+                  src={this.state.imagen.url}
                   alt="Portada de la sucursal"
                   className="img-fluid border border-primary rounded"
                 />
@@ -475,7 +500,6 @@ class SucursalEditar extends CustomComponent {
                   type="file"
                   id="fileImage"
                   accept="image/png, image/jpeg, image/gif, image/svg"
-                  ref={this.refFileImagen}
                   onChange={this.handleFileImage}
                 />
                 <label

@@ -35,8 +35,8 @@ class ItemImage extends React.Component {
 
             const logoSend = await imageBase64(file);
 
-            if (logoSend.size > 100) {
-                alertWarning("Producto", "La imagen " + file.name + " a subir tiene que ser menor a 100 KB, la imagen tiene un peso aproximado de " + logoSend.size + " KB")
+            if (logoSend.size > 500) {
+                alertWarning("Producto", "La imagen " + file.name + " a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de " + logoSend.size + " KB")
                 continue;
             } else {
                 arrayImages.push({
