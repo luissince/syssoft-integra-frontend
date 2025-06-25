@@ -566,7 +566,7 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={"Tipo de Moneda:"}
               iconLeft={<i className="bi bi-cash"></i>}
-              refSelect={this.refMoneda}
+              ref={this.refMoneda}
               value={this.state.idMoneda}
               onChange={this.handleSelectMoneda}
             >
@@ -587,7 +587,7 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={"Monto:"}
               iconLeft={<i className="bi bi-cash-coin"></i>}
-              refInput={this.refMonto}
+              ref={this.refMonto}
               value={this.state.monto}
               onChange={this.handleInputMonto}
               placeholder="Ingrese el monto"
@@ -618,7 +618,7 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={"Comprobante:"}
               iconLeft={<i className="bi bi-receipt"></i>}
-              refSelect={this.refComprobante}
+              ref={this.refComprobante}
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
             >
@@ -638,7 +638,7 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={"Observación:"}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-              refInput={this.refObservacion}
+              ref={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -652,7 +652,7 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={"Nota (Visible el los reportes):"}
               iconLeft={<i className="bi bi-card-text"></i>}
-              refInput={this.refONota}
+              ref={this.refONota}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"

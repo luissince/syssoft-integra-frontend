@@ -1,77 +1,49 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
+import { forwardRef } from 'react';
 
 /**
  * 
- * @param {*} param0 
- * @returns 
- * Example:
-    <RadioButton
-        className='form-check-inline'
-        name='ckTipoCliente'
-        id={CLIENTE_NATURAL}
-        value={CLIENTE_NATURAL}
-        checked={idTipoCliente === CLIENTE_NATURAL}
-        onChange={this.handleTipoCliente}
-    >
-        <i className="bi bi-person"></i> Persona Natural
-    </RadioButton>
+ * @example
+ * <RadioButton
+ *   className="form-check-inline"
+ *   name="ckTipoCliente"
+ *   id="natural"
+ *   value="natural"
+ *   checked={tipo === 'natural'}
+ *   onChange={handleTipo}
+ * >
+ *   <i className="bi bi-person"></i> Persona Natural
+ * </RadioButton>
  */
-const RadioButton = ({
-    autoFocus,
+const RadioButton = forwardRef(({
     id,
     className = "",
-    disabled,
-    refInput,
-    value,
-    name,
-    checked,
-    onChange,
-    onKeyUp,
-    onKeyDown,
-    onPaste,
-    children
-}) => {
+    children,
+    ...rest // incluye autoFocus, value, name, checked, disabled, onChange, etc.
+}, ref) => {
     return (
         <div className={`form-check ${className}`}>
             <input
-                autoFocus={autoFocus}
-                id={id}
                 type="radio"
+                id={id}
+                ref={ref}
                 className="form-check-input"
-                disabled={disabled}
-                ref={refInput}
-                value={value}
-                name={name}
-                checked={checked}
-                onChange={onChange}
-                onKeyUp={onKeyUp}
-                onKeyDown={onKeyDown}
-                onPaste={onPaste}
+                {...rest}
             />
-            {
-                children &&
+            {children && (
                 <label className="form-check-label" htmlFor={id}>
                     {children}
                 </label>
-            }
+            )}
         </div>
     );
-}
+});
 
 RadioButton.propTypes = {
-    autoFocus: PropTypes.bool,
     id: PropTypes.string.isRequired,
     className: PropTypes.string,
-    disabled: PropTypes.bool,
-    refInput: PropTypes.object,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    name: PropTypes.string.isRequired,
-    checked: PropTypes.bool.isRequired,
-    onChange: PropTypes.func.isRequired,
-    onKeyUp: PropTypes.func,
-    onKeyDown: PropTypes.func,
-    onPaste: PropTypes.func,
     children: PropTypes.node,
+    // Los demás props como autoFocus, value, checked, etc., van por ...rest
 };
 
 export default RadioButton;

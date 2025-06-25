@@ -374,12 +374,12 @@ class RepCpeSunat extends CustomComponent {
                     <Legend />
                     <Bar name="Total" dataKey="total" fill="#000000"  >
                       <LabelList
-                        dataKey="total"
+                        dataKey="Total"
                         content={(props) => {
                           const { x, y, width, value } = props;
                           return (
                             <g>
-                              <text x={x + width / 2} y={y - 5} fontSize={15} textAnchor="middle">
+                              <text x={x + width / 2} y={y ? y - 5 : 0} fontSize={15} textAnchor="middle">
                                 {numberFormat(value, this.state.codIso)}
                               </text>
                             </g>

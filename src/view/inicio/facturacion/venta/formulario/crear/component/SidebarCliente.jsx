@@ -93,7 +93,7 @@ const SidebarCliente = (props) => {
               <Column formGroup={true}>
                 <Select
                   label={<> Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
-                  refSelect={refIdTipoDocumento}
+                  ref={refIdTipoDocumento}
                   value={idTipoDocumento}
                   onChange={handleSelectIdTipoDocumento}>
                   <option value={""}>- Seleccione -</option>
@@ -126,7 +126,7 @@ const SidebarCliente = (props) => {
                   group={true}
                   label={<> N° de documento ({numeroDocumento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="00000000"
-                  refInput={refNumeroDocumento}
+                  ref={refNumeroDocumento}
                   value={numeroDocumento}
                   onChange={handleInputNumeroDocumento}
                   onKeyDown={keyNumberInteger}
@@ -170,7 +170,7 @@ const SidebarCliente = (props) => {
                   placeholder={
                     idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
                   }
-                  refInput={refInformacion}
+                  ref={refInformacion}
                   value={informacion}
                   onChange={handleInputInformacion}
                 />
@@ -183,7 +183,7 @@ const SidebarCliente = (props) => {
                   label={"N° de Celular:"}
                   placeholder="Ingrese el número de celular."
                   onKeyDown={keyNumberPhone}
-                  refInput={refNumeroCelular}
+                  ref={refNumeroCelular}
                   value={numeroCelular}
                   onChange={handleInputNumeroCelular}
                 />
@@ -195,7 +195,7 @@ const SidebarCliente = (props) => {
                 <Input
                   label={" Dirección:"}
                   placeholder="Ingrese la dirección"
-                  refInput={refDireccion}
+                  ref={refDireccion}
                   value={direccion}
                   onChange={handleInputDireccion}
                 />

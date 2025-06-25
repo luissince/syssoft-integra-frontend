@@ -599,7 +599,7 @@ class ModalPersona extends Component {
                                 <Select
                                     label={<>Tipo Documento: <i className='fa fa-asterisk text-danger small'></i></>}
                                     value={idTipoDocumento}
-                                    refSelect={this.refTipoDocumento}
+                                    ref={this.refTipoDocumento}
                                     onChange={this.handleSelectTipoDocumento}
                                 >
                                     <option value="">-- Seleccione --</option>
@@ -629,7 +629,7 @@ class ModalPersona extends Component {
                                     group={true}
                                     label={<>  N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
                                     role={"integer"}
-                                    refInput={this.refDocumento}
+                                    ref={this.refDocumento}
                                     value={documento}
                                     onChange={this.handleInputNumeroDocumento}
                                     placeholder="00000000"
@@ -670,7 +670,7 @@ class ModalPersona extends Component {
                                         {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
                                         <i className="fa fa-asterisk text-danger small"></i>
                                     </>}
-                                    refInput={this.refInformacion}
+                                    ref={this.refInformacion}
                                     value={informacion}
                                     onChange={this.handleInputInformacion}
                                     placeholder={
@@ -688,7 +688,7 @@ class ModalPersona extends Component {
                                     label={"N° de Celular:"}
                                     role={"phone"}
                                     value={celular}
-                                    refInput={this.refCelular}
+                                    ref={this.refCelular}
                                     onChange={this.handleInputCelular}
                                     placeholder="Ingrese el número de celular."
                                 />
@@ -709,7 +709,7 @@ class ModalPersona extends Component {
                             <Column formGroup={true}>
                                 <Input
                                     label={"Dirección:"}
-                                    refInput={this.refDireccion}
+                                    ref={this.refDireccion}
                                     value={direccion}
                                     onChange={this.handleInputDireccion}
                                     placeholder="Ingrese la dirección"
@@ -768,7 +768,6 @@ ModalPersona.propTypes = {
  * Modal para enviar mensaje por Whatsapp.
  */
 class ModalSendWhatsApp extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -835,7 +834,7 @@ class ModalSendWhatsApp extends React.Component {
                                 autoFocus={true}
                                 label={"Número de teléfono (con código de país)"}
                                 placeholder={"Ej: +51966750883"}
-                                refInput={this.refPhone}
+                                ref={this.refPhone}
                                 value={this.state.phone}
                                 onChange={this.handleInputPhone}
                                 onKeyDown={keyNumberPhone}

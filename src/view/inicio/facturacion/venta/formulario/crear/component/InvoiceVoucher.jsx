@@ -14,7 +14,7 @@ const InvoiceVoucher = (props) => {
       <div className="form-group">
         <Select
           title="Comprobantes de venta"
-          refSelect={refComprobante}
+          ref={refComprobante}
           value={idComprobante}
           onChange={handleSelectComprobante}
         >

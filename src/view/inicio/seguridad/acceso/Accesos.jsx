@@ -321,7 +321,7 @@ class Accesos extends CustomComponent {
             <Select
               group={true}
               label={"Perfil:"}
-              refSelect={this.refIdPerfil}
+              ref={this.refIdPerfil}
               value={this.state.idPerfil}
               onChange={this.onChangePerfil}
             >

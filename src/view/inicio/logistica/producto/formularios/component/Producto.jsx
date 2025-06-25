@@ -115,7 +115,7 @@ const Producto = (props) => {
             </>}
             className={`${nombre ? '' : 'is-invalid'}`}
             placeholder="Dijite un nombre..."
-            refInput={refNombre}
+            ref={refNombre}
             value={nombre}
             onChange={handleSelectNombre}
           />
@@ -128,7 +128,7 @@ const Producto = (props) => {
             </>}
             className={`${codigo ? '' : 'is-invalid'}`}
             placeholder="Ejemplo: CAS002 ..."
-            refInput={refCodigo}
+            ref={refCodigo}
             value={codigo}
             onChange={handleInputCodigo}
           />
@@ -140,7 +140,7 @@ const Producto = (props) => {
               SKU:
             </>}
             placeholder="Ejemplo: CAM-NIKE-001 ..."
-            refInput={refSku}
+            ref={refSku}
             value={sku}
             onChange={handleInputSku}
           />
@@ -153,7 +153,7 @@ const Producto = (props) => {
               Código de Barras: <i className="bi bi-upc-scan"></i>
             </>}
             placeholder="Ejemplo: 1234567890123 ..."
-            refInput={refCodigoBarras}
+            ref={refCodigoBarras}
             value={codigoBarras}
             onChange={handleInputCodigoBarras}
             buttonRight={
@@ -170,17 +170,9 @@ const Producto = (props) => {
         <Column className="col-md-6" formGroup={true}>
           <Select
             label={"Marca:"}
-            // group={true}
-            refSelect={refIdMarca}
+            ref={refIdMarca}
             value={idMarca}
             onChange={handleSelectIdMarca}
-          // buttonRight={
-          //   <Button
-          //     className="btn-outline-success"
-          //   >
-          //     <i className="fa fa-plus"></i>
-          //   </Button>
-          // }
           >
             <option value="">-- Selecciona --</option>
             {marcas.map((item, index) => (
@@ -196,18 +188,10 @@ const Producto = (props) => {
             label={<>
               Unidad de medida: <i className="fa fa-asterisk text-danger small"></i>
             </>}
-            // group={true}
             className={`${idMedida ? '' : 'is-invalid'}`}
-            refSelect={refIdMedida}
+            ref={refIdMedida}
             value={idMedida}
             onChange={handleSelectIdMedida}
-          // buttonRight={
-          //   <Button
-          //     className="btn-outline-success"
-          //   >
-          //     <i className="fa fa-plus"></i>
-          //   </Button>
-          // }
           >
             <option value="">-- Selecciona --</option>
             {medidas.map((item, index) => (
@@ -223,18 +207,10 @@ const Producto = (props) => {
             label={<>
               Categoria: <i className="fa fa-asterisk text-danger small"></i>
             </>}
-            // group={true}
             className={`form-control ${idCategoria ? '' : 'is-invalid'}`}
-            refSelect={refIdCategoria}
+            ref={refIdCategoria}
             value={idCategoria}
             onChange={handleSelectIdCategoria}
-          // buttonRight={
-          //   <Button
-          //     className="btn-outline-success"
-          //   >
-          //     <i className="fa fa-plus"></i>
-          //   </Button>
-          // }
           >
             <option value="">-- Selecciona --</option>
             {categorias.map((item, index) => (
@@ -248,7 +224,7 @@ const Producto = (props) => {
         <Column className="col-md-6" formGroup={true}>
           <Select
             label={"Código producto SUNAT:"}
-            refSelect={refCodigoSunat}
+            ref={refCodigoSunat}
             value={codigoSunat}
             onChange={handleSelectCodigoSunat}
           >
@@ -333,7 +309,7 @@ const Producto = (props) => {
             </>}
             className={`${costo ? '' : 'is-invalid'}`}
             placeholder="S/ 0.00"
-            refInput={refCosto}
+            ref={refCosto}
             value={costo}
             onChange={handleInputCosto}
             onKeyDown={keyNumberFloat}
@@ -360,7 +336,7 @@ const Producto = (props) => {
             </>}
             className={`${precio ? '' : 'is-invalid'}`}
             placeholder=" S/ 0.00"
-            refInput={refPrecio}
+            ref={refPrecio}
             value={precio}
             onChange={handleInputPrecio}
             onKeyDown={keyNumberFloat}
@@ -504,7 +480,7 @@ const Producto = (props) => {
           <TextArea
             label={"Descripción Corta:"}
             rows={3}
-            refInput={refDescripcionCorta}
+            ref={refDescripcionCorta}
             value={descripcionCorta}
             onChange={handleInputDescripcionCorta}
           ></TextArea>
@@ -514,7 +490,7 @@ const Producto = (props) => {
           <TextArea
             label={"Descripción Larga:"}
             rows={6}
-            refInput={refDescripcionLarga}
+            ref={refDescripcionLarga}
             value={descripcionLarga}
             onChange={handleInputDescripcionLarga}
           ></TextArea>

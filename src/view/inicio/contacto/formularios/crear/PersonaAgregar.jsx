@@ -446,7 +446,7 @@ class PersonaAgregar extends CustomComponent {
               label={<>Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
-              refSelect={this.refTipoDocumento}
+              ref={this.refTipoDocumento}
               onChange={this.handleSelectTipoDocumento}
             >
               <option value="">-- Seleccione --</option>
@@ -476,7 +476,7 @@ class PersonaAgregar extends CustomComponent {
               group={true}
               label={<>   N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
               className={`${documento ? '' : 'is-invalid'}`}
-              refInput={this.refDocumento}
+              ref={this.refDocumento}
               value={documento}
               onChange={this.handleInputNumeroDocumento}
               onKeyDown={keyNumberInteger}
@@ -518,7 +518,7 @@ class PersonaAgregar extends CustomComponent {
                 {' '}<i className="fa fa-asterisk text-danger small"></i>
               </>}
               className={`${informacion ? '' : 'is-invalid'}`}
-              refInput={this.refInformacion}
+              ref={this.refInformacion}
               value={informacion}
               onChange={this.handleInputInformacion}
               placeholder={
@@ -576,7 +576,7 @@ class PersonaAgregar extends CustomComponent {
                   <Column>
                     <Input
                       placeholder='Número de licencia de conducir'
-                      refInput={this.refLicenciaConducir}
+                      ref={this.refLicenciaConducir}
                       value={this.state.licenciaConductir}
                       onChange={(event) => {
                         this.setState({ licenciaConductir: event.target.value })
@@ -593,7 +593,7 @@ class PersonaAgregar extends CustomComponent {
             <Column className='col-md-4' formGroup={true}>
               <Select
                 label={"Genero:"}
-                refSelect={this.refGenero}
+                ref={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
               >
@@ -621,7 +621,7 @@ class PersonaAgregar extends CustomComponent {
               <Input
                 label={"Fecha de Nacimiento:"}
                 type="date"
-                refInput={this.refFechaNacimiento}
+                ref={this.refFechaNacimiento}
                 value={fechaNacimiento}
                 onChange={this.handleInputFechaNacimiento}
               />
@@ -645,7 +645,7 @@ class PersonaAgregar extends CustomComponent {
             <Input
               label={"N° de Celular:"}
               value={celular}
-              refInput={this.refCelular}
+              ref={this.refCelular}
               onChange={this.handleInputCelular}
               onKeyDown={keyNumberPhone}
               placeholder="Ingrese el número de celular."
@@ -656,7 +656,7 @@ class PersonaAgregar extends CustomComponent {
             <Input
               label={"N° de Telefono:"}
               value={telefono}
-              refInput={this.refTelefono}
+              ref={this.refTelefono}
               onChange={this.handleInputTelefono}
               onKeyDown={keyNumberPhone}
               placeholder="Ingrese el número de telefono."

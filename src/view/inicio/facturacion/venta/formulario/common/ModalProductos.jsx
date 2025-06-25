@@ -446,7 +446,7 @@ class ModalProductos extends CustomComponent {
                             <Column className='col-md-4 col-12' formGroup={true}>
                                 <Select
                                     label={<>Almacen: <i className="fa fa-asterisk text-danger small"></i></>}
-                                    refSelect={refAlmacen}
+                                    ref={refAlmacen}
                                     value={idAlmacen}
                                     onChange={async (event) => handleSelectIdIdAlmacen(event, true, () => this.handleOnOpen())}>
                                     <option value="">-- Almacen --</option>

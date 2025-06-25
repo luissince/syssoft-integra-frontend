@@ -91,7 +91,7 @@ class ModalProceso extends React.Component {
                   label={<>Monto a pagar: <i className='fa fa-asterisk text-danger small'></i></>}
                   placeholder={"0.00"}
                   role='float'
-                  refInput={this.refMonto}
+                  ref={this.refMonto}
                   value={monto}
                   onChange={this.handleInputMonto}
                 />

@@ -182,7 +182,7 @@ class ModalProducto extends Component {
                   label={"Cantidad:"}
                   placeholder={"0.00"}
                   role={"float"}
-                  refInput={this.refCantidad}
+                  ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
                   onPaste={handlePasteFloat}
@@ -194,7 +194,7 @@ class ModalProducto extends Component {
                   label={"Costo:"}
                   placeholder={"0.00"}
                   role={"float"}
-                  refInput={this.refCosto}
+                  ref={this.refCosto}
                   value={costo}
                   onChange={this.handleInputCosto}
                   onPaste={handlePasteFloat}

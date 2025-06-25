@@ -95,7 +95,7 @@ class ConceptoAgregar extends CustomComponent {
               group={true}
               label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
               value={this.state.nombre}
-              refInput={this.refNombre}
+              ref={this.refNombre}
               onChange={(event) =>
                 this.setState({ nombre: event.target.value })
               }
@@ -109,7 +109,7 @@ class ConceptoAgregar extends CustomComponent {
               group={true}
               label={<>Tipo de Concepto: <i className="fa fa-asterisk text-danger small"></i></>}
               value={this.state.idTipoConcepto}
-              refSelect={this.refIdTipoConcepto}
+              ref={this.refIdTipoConcepto}
               onChange={(event) =>
                 this.setState({ idTipoConcepto: event.target.value })
               }>

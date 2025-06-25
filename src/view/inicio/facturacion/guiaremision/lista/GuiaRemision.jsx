@@ -346,14 +346,14 @@ class GuiaRemision extends CustomComponent {
             {formatTime(item.hora)}
           </TableCell>
           <TableCell>
-            {item.comprobante}
-            <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
-          </TableCell>
-          <TableCell>
             {item.tipoDocumento} - {item.documento}
             <br />
             {item.informacion}
+          </TableCell>
+          <TableCell>
+            {item.comprobante}
+            <br />
+            {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
           <TableCell>
             {item.comprobanteRef}
@@ -471,8 +471,8 @@ class GuiaRemision extends CustomComponent {
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
-                    <TableHead width="20%">Comprobante</TableHead>
                     <TableHead width="15%">Cliente</TableHead>
+                    <TableHead width="20%">Comprobante</TableHead>
                     <TableHead width="15%">referencia</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>
                     <TableHead width="5%" className="text-center">Mostrar</TableHead>

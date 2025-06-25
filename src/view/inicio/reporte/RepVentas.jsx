@@ -184,7 +184,7 @@ class RepVentas extends CustomComponent {
     }
 
     dashboard instanceof SuccessReponse;
-    
+
     const totalPaginacion = parseInt(
       Math.ceil(parseFloat(dashboard.data.total) / this.state.filasPorPagina),
     );
@@ -488,7 +488,7 @@ class RepVentas extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" name={`AÑO - ${new Date().getFullYear()}`} dataKey="total" stroke="#8884d8" />
+                    <Line type="monotone" name={`AÑO - ${new Date().getFullYear()}`} dataKey="total" stroke="#004099" />
                     {/* <Line type="monotone" name='Años Pasado' dataKey="atras" stroke="#82ca9d" /> */}
                   </LineChart>
                 </ResponsiveContainer>
@@ -507,7 +507,7 @@ class RepVentas extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar name="Total" dataKey="total" fill="#8884d8" />
+                    <Bar name="Total" dataKey="total" fill="#004099" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>

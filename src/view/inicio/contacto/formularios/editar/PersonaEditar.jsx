@@ -511,7 +511,7 @@ class PersonaEditar extends CustomComponent {
               label={<>Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
-              refSelect={this.refTipoDocumento}
+              ref={this.refTipoDocumento}
               onChange={this.handleSelectTipoDocumento}
             >
               <option value="">-- Seleccione --</option>
@@ -541,7 +541,7 @@ class PersonaEditar extends CustomComponent {
               group={true}
               label={<> N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
               className={`${documento ? '' : 'is-invalid'}`}
-              refInput={this.refDocumento}
+              ref={this.refDocumento}
               value={documento}
               onChange={this.handleInputNumeroDocumento}
               onKeyDown={keyNumberInteger}
@@ -581,7 +581,7 @@ class PersonaEditar extends CustomComponent {
                 {' '}<i className="fa fa-asterisk text-danger small"></i>
               </>}
               className={`${informacion ? '' : 'is-invalid'}`}
-              refInput={this.refInformacion}
+              ref={this.refInformacion}
               value={informacion}
               onChange={this.handleInputInformacion}
               placeholder={
@@ -651,7 +651,7 @@ class PersonaEditar extends CustomComponent {
               <Select
                 label={"Genero:"}
                 className="form-control"
-                refSelect={this.refGenero}
+                ref={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
               >
@@ -679,7 +679,7 @@ class PersonaEditar extends CustomComponent {
               <Input
                 label={"Fecha de Nacimiento:"}
                 type="date"
-                refInput={this.refFechaNacimiento}
+                ref={this.refFechaNacimiento}
                 value={fechaNacimiento}
                 onChange={this.handleInputFechaNacimiento}
               />
@@ -703,7 +703,7 @@ class PersonaEditar extends CustomComponent {
             <Input
               label={"N° de Celular:"}
               value={celular}
-              refInput={this.refCelular}
+              ref={this.refCelular}
               onChange={this.handleInputCelular}
               onKeyDown={keyNumberPhone}
               placeholder="Ingrese el número de celular."
@@ -714,7 +714,7 @@ class PersonaEditar extends CustomComponent {
             <Input
               label={"N° de Telefono:"}
               value={telefono}
-              refInput={this.refTelefono}
+              ref={this.refTelefono}
               onChange={this.handleInputTelefono}
               onKeyDown={keyNumberPhone}
               placeholder="Ingrese el número de telefono."
@@ -738,7 +738,7 @@ class PersonaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={"Dirección:"}
-              refInput={this.refDireccion}
+              ref={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
               placeholder="Ingrese la dirección"

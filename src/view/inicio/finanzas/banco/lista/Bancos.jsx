@@ -69,7 +69,6 @@ class Bancos extends CustomComponent {
   }
 
   loadingData = async () => {
-    console.log
     if (this.props.bancoLista && this.props.bancoLista.data && this.props.bancoLista.paginacion) {
       this.setState(this.props.bancoLista.data)
       this.refPaginacion.current.upperPageBound = this.props.bancoLista.paginacion.upperPageBound;

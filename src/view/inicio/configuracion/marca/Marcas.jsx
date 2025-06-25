@@ -21,6 +21,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
+import { images } from '../../../../helper';
+import Image from '../../../../components/Image';
 
 class Marcas extends CustomComponent {
   constructor(props) {
@@ -231,6 +233,14 @@ class Marcas extends CustomComponent {
           <TableCell>{item.codigo}</TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell>{item.descripcion}</TableCell>
+          <TableCell>
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.nombre}
+              width={96}
+            />
+          </TableCell>
           <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-center">
             <Button
@@ -303,6 +313,7 @@ class Marcas extends CustomComponent {
                     <TableHead width="10%">Código</TableHead>
                     <TableHead width="25%">Nombre</TableHead>
                     <TableHead width="30%">Descripción</TableHead>
+                    <TableHead width="10%">Imagen</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>
                     <TableHead width="5%" className="text-center">Editar</TableHead>
                     <TableHead width="5%" className="text-center">Eliminar</TableHead>

@@ -532,7 +532,7 @@ class CatalogoCrear extends CustomComponent {
                     onChange={(event) => {
                       this.setState({ nombre: event.target.value })
                     }}
-                    refInput={this.refNombre}
+                    ref={this.refNombre}
                   />
                 </div>
               </div>

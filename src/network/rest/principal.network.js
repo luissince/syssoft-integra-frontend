@@ -146,6 +146,14 @@ export async function listPersonasConductor(params, signal) {
   );
 }
 
+export async function detailPersona(data, signal) {
+  return await Resolve.create(
+    instancePrincipal.post(`/api/persona/detail/`, data, {
+      signal: signal,
+    }),
+  );
+}
+
 export async function comboPersona(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/persona/combo', {
@@ -362,11 +370,9 @@ export async function updateProducto(data) {
   return await Resolve.create(instancePrincipal.put('/api/producto', data),);
 }
 
-export async function deleteProducto(params) {
+export async function deleteProducto(idProducto) {
   return await Resolve.create(
-    instancePrincipal.delete('/api/producto', {
-      params: params,
-    }),
+    instancePrincipal.delete(`/api/producto/${idProducto}`),
   );
 }
 
@@ -936,6 +942,23 @@ export async function comboTipoAtributo(signal) {
 // ------------------------------------------------------------------------
 // FIN PARA TIPO ATRIBUTO
 // ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE TIPO ALMACEN
+|--------------------------------------------------------------------------
+*/
+export async function comboTipoAlmacen(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/tipoalmacen/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TIPO ALMACEN
+// ------------------------------------------------------------------------
+
 
 /*
 |--------------------------------------------------------------------------
@@ -1868,7 +1891,7 @@ export async function listBancos(params, signal = null) {
   );
 }
 
-export async function detailtBanco(params, signal) {
+export async function detailBanco(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/banco/detail', {
       params: params,
@@ -1877,7 +1900,7 @@ export async function detailtBanco(params, signal) {
   );
 }
 
-export async function detailtListBanco(params, signal) {
+export async function detailListBanco(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/banco/detail/list', {
       params: params,
@@ -1922,6 +1945,64 @@ export async function updateBanco(data, signal = null) {
 export async function deleteBanco(params) {
   return await Resolve.create(
     instancePrincipal.delete('/api/banco/', {
+      params: params,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA BANCO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE CONSULTA
+|--------------------------------------------------------------------------
+*/
+export async function listConsultas(params, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/consulta/list', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function detailConsulta(idConsulta, signal) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/consulta/detail/${idConsulta}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function addConsulta(data, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.post('/api/consulta/', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function getIdConsulta(idConsulta, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/consulta/${idConsulta}`, {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function updateConsulta(data, signal = null) {
+  return await Resolve.create(
+    instancePrincipal.put('/api/consulta/', data, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function deleteConsulta(idConsulta) {
+  return await Resolve.create(
+    instancePrincipal.delete(`/api/consulta/${idConsulta}`, {
       params: params,
     }),
   );
@@ -2302,7 +2383,7 @@ export async function listNotificacion(signal) {
 
 export async function detailNotifications(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/notificacion/detailt', {
+    instancePrincipal.get('/api/notificacion/detail', {
       params: params,
       signal: signal,
     }),

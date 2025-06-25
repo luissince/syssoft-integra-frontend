@@ -513,7 +513,7 @@ class LogisticaAjusteCrear extends CustomComponent {
                 <label>Seleccione el tipo de ajuste:</label>
 
                 <RadioButton
-                  refInput={this.refIdTipoAjuste}
+                  ref={this.refIdTipoAjuste}
                   name="ckTipoAjuste"
                   id={INCREMENTO}
                   value={INCREMENTO}
@@ -539,7 +539,7 @@ class LogisticaAjusteCrear extends CustomComponent {
               <Column formGroup={true}>
                 <Select
                   label={"Seleccione el motivo del ajuste:"}
-                  refSelect={this.refIdMotivoAjuste}
+                  ref={this.refIdMotivoAjuste}
                   value={this.state.idMotivoAjuste}
                   onChange={this.handleSelectMetodoAjuste}
                 >
@@ -559,7 +559,7 @@ class LogisticaAjusteCrear extends CustomComponent {
               <Column formGroup={true}>
                 <Select
                   label={"Seleccione el almacen:"}
-                  refSelect={this.refIdAlmacen}
+                  ref={this.refIdAlmacen}
                   value={this.state.idAlmacen}
                   onChange={this.handleSelectAlmacen}
                 >

@@ -9,7 +9,6 @@ import {
   alertWarning,
   isEmpty,
   isText,
-  spinnerLoading,
 } from '../../../../../../helper/utils.helper';
 import {
   getIdBando,
@@ -24,6 +23,9 @@ import Button from '../../../../../../components/Button';
 import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
 import { SpinnerView } from '../../../../../../components/Spinner';
+import Select from '../../../../../../components/Select';
+import Input from '../../../../../../components/Input';
+import { Switches } from '../../../../../../components/Checks';
 
 class BancoEditar extends CustomComponent {
   constructor(props) {
@@ -84,10 +86,10 @@ class BancoEditar extends CustomComponent {
       idMoneda: banco.idMoneda,
       numCuenta: banco.numCuenta,
       cci: banco.cci,
-      preferido: banco.preferido,
-      vuelto: banco.vuelto,
-      reporte: banco.reporte,
-      estado: banco.estado,
+      preferido: banco.preferido === 1 ? true : false,
+      vuelto: banco.vuelto === 1 ? true : false,
+      reporte: banco.reporte === 1 ? true : false,
+      estado: banco.estado === 1 ? true : false,
       idBanco: banco.idBanco,
       loading: false,
     });
@@ -196,30 +198,24 @@ class BancoEditar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Nombre Banco <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <input
-              type="text"
-              className="form-control"
+        <Row>
+          <Column className="col-md-6" formGroup={true}>
+            <Input
+              group={true}
+              label={<>Nombre Banco: <i className="fa fa-asterisk text-danger small"></i></>}
               ref={this.refTxtNombre}
+              placeholder="BCP, BBVA, etc"
               value={this.state.nombre}
               onChange={(event) =>
                 this.setState({ nombre: event.target.value })
               }
-              placeholder="BCP, BBVA, etc"
             />
-          </div>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label>
-              Tipo de Cuenta:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <select
-              className="form-control"
+          <Column className="col-md-6" formGroup={true}>
+            <Select
+              group={true}
+              label={<>Tipo de Cuenta: <i className="fa fa-asterisk text-danger small"></i></>}
               ref={this.refTipoCuenta}
               value={this.state.tipoCuenta}
               onChange={(event) =>
@@ -230,17 +226,15 @@ class BancoEditar extends CustomComponent {
               <option value="1">Banco</option>
               <option value="2">Tarjeta</option>
               <option value="3">Efectivo</option>
-            </select>
-          </div>
-        </div>
+            </Select>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>
-              Moneda: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-            <select
-              className="form-control"
+        <Row>
+          <Column className="col-md-6" formGroup={true}>
+            <Select
+              group={true}
+              label={<>Moneda: <i className="fa fa-asterisk text-danger small"></i></>}
               ref={this.refTxtMoneda}
               value={this.state.idMoneda}
               onChange={(event) =>
@@ -253,121 +247,91 @@ class BancoEditar extends CustomComponent {
                   {item.nombre}
                 </option>
               ))}
-            </select>
-          </div>
+            </Select>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label>Número de cuenta:</label>
-            <input
-              type="text"
-              className="form-control"
+          <Column className="col-md-6" formGroup={true}>
+            <Input
+              group={true}
+              label={<>Número de cuenta:</>}
+              placeholder="##############"
               ref={this.refTxtNumCuenta}
               value={this.state.numCuenta}
               onChange={(event) =>
                 this.setState({ numCuenta: event.target.value })
               }
-              placeholder="##############"
             />
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label>CCI:</label>
-            <input
-              type="text"
-              className="form-control"
+        <Row>
+          <Column className="col-md-6" formGroup={true}>
+            <Input
+              group={true}
+              label={<>CCI:</>}
+              placeholder="##############"
               ref={this.refTxtCci}
               value={this.state.cci}
               onChange={(event) => this.setState({ cci: event.target.value })}
-              placeholder="####################"
             />
-          </div>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Vuelto:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="vueltoChecked"
-                checked={this.state.vuelto}
-                onChange={(value) =>
-                  this.setState({ vuelto: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="vueltoChecked">
-                {this.state.vuelto ? 'Si' : 'No'}
-              </label>
-            </div>
-          </div>
-        </div>
+          <Column className="col-md-6" formGroup={true}>
+            <Switches
+              label={"Vuelto:"}
+              id={"vueltoChecked"}
+              checked={this.state.vuelto}
+              onChange={(value) =>
+                this.setState({ vuelto: value.target.checked })
+              }
+            >
+              {this.state.vuelto ? 'Si' : 'No'}
+            </Switches>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Estado:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="estadoChecked"
-                checked={this.state.estado}
-                onChange={(value) =>
-                  this.setState({ estado: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="estadoChecked">
-                {this.state.estado ? 'Activo' : 'Inactivo'}
-              </label>
-            </div>
-          </div>
+        <Row>
+          <Column className="col-md-6" formGroup={true}>
+            <Switches
+              label={"Estado:"}
+              id={"estadoChecked"}
+              checked={this.state.estado}
+              onChange={(value) =>
+                this.setState({ estado: value.target.checked })
+              }
+            >
+              {this.state.estado ? 'Activo' : 'Inactivo'}
+            </Switches>
+          </Column>
 
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Preferido:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="preferidoChecked"
-                checked={this.state.preferido}
-                onChange={(value) =>
-                  this.setState({ preferido: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="preferidoChecked">
-                {this.state.preferido ? 'Si' : 'No'}
-              </label>
-            </div>
-          </div>
-        </div>
+          <Column className="col-md-6" formGroup={true}>
+            <Switches
+              label={"Preferido:"}
+              id={"preferidoChecked"}
+              checked={this.state.preferido}
+              onChange={(value) =>
+                this.setState({ preferido: value.target.checked })
+              }
+            >
+              {this.state.preferido ? 'Si' : 'No'}
+            </Switches>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="form-group col-md-6">
-            <label htmlFor="nombre" className="col-form-label">
-              Mostrar en Reporte:
-            </label>
-            <div className="custom-control custom-switch">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                id="reporteChecked"
-                checked={this.state.reporte}
-                onChange={(value) =>
-                  this.setState({ reporte: value.target.checked })
-                }
-              />
-              <label className="custom-control-label" htmlFor="reporteChecked">
-                {this.state.reporte ? 'Si' : 'No'}
-              </label>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column className="col-md-6" formGroup={true}>
+            <Switches
+              label={"Mostrar en Reporte:"}
+              id={"reporteChecked"}
+              checked={this.state.reporte}
+              onChange={(value) =>
+                this.setState({ reporte: value.target.checked })
+              }
+            >
+              {this.state.reporte ? 'Si' : 'No'}
+            </Switches>
+          </Column>
+        </Row>
 
         <Row>
           <Column>

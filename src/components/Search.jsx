@@ -50,7 +50,7 @@ class Search extends React.Component {
         group={this.props.group}
         label={this.props.label}
         className={this.props.className}
-        refInput={this.props.refInput}
+        ref={this.props.refInput}
         iconLeft={this.props.iconLeft}
         placeholder={this.props.placeholder}
         value={this.state.searchTerm}

@@ -1006,7 +1006,7 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column formGroup={true}>
             <Select
               label={<> Comprobante: <i className="fa fa-asterisk text-danger small"></i></>}
-              refSelect={this.refComprobante}
+              ref={this.refComprobante}
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}>
               <option value="">-- Seleccione --</option>
@@ -1073,7 +1073,7 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column className='col-md-6 col-12' formGroup={true}>
             <Select
               label={<>Motivo del traslado: <i className="fa fa-asterisk text-danger small"></i></>}
-              refSelect={this.refMotivoTraslado}
+              ref={this.refMotivoTraslado}
               value={this.state.idMotivoTraslado}
               onChange={(event) => {
                 this.setState({ idMotivoTraslado: event.target.value })
@@ -1103,7 +1103,7 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={<>Tipo Peso de Carga: <i className="fa fa-asterisk text-danger small" /></>}
-              refSelect={this.refTipoPeso}
+              ref={this.refTipoPeso}
               value={this.state.idTipoPeso}
               onChange={(event) => {
                 this.setState({ idTipoPeso: event.target.value })
@@ -1121,7 +1121,7 @@ class GuiaRemisionCrear extends CustomComponent {
             <Input
               label={<>Peso de la Carga:{' '}<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ejm: 0.00, 0"
-              refInput={this.refPeso}
+              ref={this.refPeso}
               value={this.state.peso}
               onChange={(event) => {
                 this.setState({ peso: event.target.value })
@@ -1222,7 +1222,7 @@ class GuiaRemisionCrear extends CustomComponent {
                 iconLeft={<i className="bi bi-search"></i>}
                 label={<>Dirección Partida: <i className="fa fa-asterisk text-danger small"></i></>}
                 placeholder="Ingrese Dirección de partida..."
-                refInput={this.refDireccionPartida}
+                ref={this.refDireccionPartida}
                 value={this.state.direccionPartida}
                 onChange={(event) => {
                   this.setState({ direccionPartida: event.target.value })
@@ -1264,7 +1264,7 @@ class GuiaRemisionCrear extends CustomComponent {
                 iconLeft={<i className="bi bi-search"></i>}
                 label={<>Dirección Llegada: <i className="fa fa-asterisk text-danger small"></i></>}
                 placeholder="Ingrese Dirección de llegada..."
-                refInput={this.refDireccionLlegada}
+                ref={this.refDireccionLlegada}
                 value={this.state.direccionLlegada}
                 onChange={(event) => {
                   this.setState({ direccionLlegada: event.target.value })

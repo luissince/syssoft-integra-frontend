@@ -249,7 +249,7 @@ class Almacenes extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
+          colSpan='7'
           message='Cargando información de la tabla...'
         />
       );
@@ -258,7 +258,7 @@ class Almacenes extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="7">¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
@@ -268,9 +268,8 @@ class Almacenes extends CustomComponent {
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
           <TableCell>{item.nombre}</TableCell>
-          <TableCell>{item.direccion}</TableCell>
-          <TableCell>{item.departamento + '-' + item.provincia + '-' + item.distrito}</TableCell>
-          <TableCell>{item.codigoSunat}</TableCell>
+          <TableCell>{item.tipoAlmacen}</TableCell>
+          <TableCell>{item.direccion} <br /> {item.departamento + '-' + item.provincia + '-' + item.distrito}</TableCell>
           <TableCell className='text-center'>
             <div
               className={`badge ${item.predefinido === 1 ? 'badge-info' : 'badge-secondary'}`}
@@ -345,9 +344,8 @@ class Almacenes extends CustomComponent {
                   <TableRow>
                     <TableHead className="text-center" width="5%">#</TableHead>
                     <TableHead width="15%">Nombre</TableHead>
+                    <TableHead width="15%">Tipo</TableHead>
                     <TableHead width="25%">Dirección</TableHead>
-                    <TableHead width="20%">Distrito</TableHead>
-                    <TableHead width="10%">Código Sunat</TableHead>
                     <TableHead width="10%">Predefinido</TableHead>
                     <TableHead className="text-center" width="5%">Editar</TableHead>
                     <TableHead className="text-center" width="5%">Eliminar</TableHead>

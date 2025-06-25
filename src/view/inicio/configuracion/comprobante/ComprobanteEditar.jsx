@@ -234,7 +234,7 @@ class ComporbanteEditar extends CustomComponent {
               label={<>Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i></>}
               className="form-control"
               id="estado"
-              refSelect={this.refTipo}
+              ref={this.refTipo}
               value={this.state.idTipoComprobante}
               onChange={(event) => {
                 this.setState({ idTipoComprobante: event.target.value });
@@ -255,7 +255,7 @@ class ComporbanteEditar extends CustomComponent {
             <Input
               label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingresar el nombre del comprobante"
-              refInput={this.refNombre}
+              ref={this.refNombre}
               value={this.state.nombre}
               onChange={(event) =>
                 this.setState({ nombre: event.target.value })
@@ -269,7 +269,7 @@ class ComporbanteEditar extends CustomComponent {
             <Input
               label={<>Serie: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder={'B001, F001'}
-              refInput={this.refSerie}
+              ref={this.refSerie}
               value={this.state.serie}
               onChange={(event) => this.setState({ serie: event.target.value })}
             />
@@ -279,7 +279,7 @@ class ComporbanteEditar extends CustomComponent {
             <Input
               label={<>Numeración:<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder={'1, 2, 3'}
-              refInput={this.refNumeracion}
+              ref={this.refNumeracion}
               value={this.state.numeracion}
               onChange={(event) =>
                 this.setState({ numeracion: event.target.value })
@@ -294,7 +294,7 @@ class ComporbanteEditar extends CustomComponent {
             <Input
               label={<>Caracteres a Usar:</>}
               placeholder={'0, 8, 11'}
-              refInput={this.refNumeroCampo}
+              ref={this.refNumeroCampo}
               value={this.state.numeroCampo}
               onChange={(event) =>
                 this.setState({ numeroCampo: event.target.value })

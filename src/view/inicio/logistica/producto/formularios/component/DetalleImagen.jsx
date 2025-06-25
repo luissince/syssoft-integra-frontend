@@ -1,7 +1,7 @@
 import Button from '../../../../../../components/Button';
 import { Switches } from '../../../../../../components/Checks';
 import Column from '../../../../../../components/Column';
-import Image from '../../../../../../components/Image';
+import { ImageUpload } from '../../../../../../components/Image';
 import Row from '../../../../../../components/Row';
 import { images } from '../../../../../../helper';
 import { formatDecimal } from '../../../../../../helper/utils.helper';
@@ -29,39 +29,17 @@ const DetalleImagen = (props) => {
     <>
       <Row>
         <Column className="col-12 text-center" formGroup={true}>
-          <Image
-            default={images.noImage}
-            src={imagen.url}
-            alt="Logo"
-            className="img-fluid border border-primary rounded"
-          />
-          <label>
-            <b className='text-danger'>* Las imagenes no debe superar los 500 KB.</b>
-          </label>
-        </Column>
-      </Row>
-
-      <Row>
-        <Column className="col-12 text-center" formGroup={true}>
-          <input
-            type="file"
-            id="fileImage"
-            accept="image/png, image/jpeg, image/gif, image/webp"
-            className="display-none"
+          <ImageUpload
+            label="Imagen principal del producto"
+            subtitle="Las imagenes no debe superar los 500 KB."
+            imageUrl={imagen.url}
+            defaultImage={images.noImage}
+            alt="Imagen del producto"
+            inputId="fileImagen"
+            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
             onChange={handleInputImagen}
+            onClear={handleRemoveImagen}
           />
-          <label htmlFor="fileImage" className="btn btn-outline-secondary m-0">
-            <div className="content-button">
-              <i className="bi bi-image"></i>
-              <span></span>
-            </div>
-          </label>{' '}
-          <Button
-            className="btn-outline-secondary"
-            onClick={handleRemoveImagen}
-          >
-            <i className="bi bi-trash"></i>
-          </Button>
         </Column>
       </Row>
 

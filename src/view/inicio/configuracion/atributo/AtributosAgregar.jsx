@@ -163,7 +163,7 @@ class AtributosAgregar extends React.Component {
           <Column formGroup={true}>
             <Select
               label={<>Tipo Atributo:<i className="fa fa-asterisk text-danger small"></i></>}
-              refInput={this.refTipoAtributo}
+              ref={this.refTipoAtributo}
               value={this.state.idTipoAtributo}
               onChange={this.handleSelectTipoAtributo}
             >
@@ -182,7 +182,7 @@ class AtributosAgregar extends React.Component {
             <Input
               label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese el nombre"
-              refInput={this.refNombre}
+              ref={this.refNombre}
               value={this.state.nombre}
               onChange={this.handleInputNombre}
             />
@@ -197,7 +197,7 @@ class AtributosAgregar extends React.Component {
                   label={"Color"}
                   type='color'
                   placeholder="Ingrese su color"
-                  refInput={this.refHexadecimal}
+                  ref={this.refHexadecimal}
                   value={this.state.hexadecimal}
                   onChange={this.handleInputHexacimal}
                 />
@@ -213,7 +213,7 @@ class AtributosAgregar extends React.Component {
                 <Input
                   label={<>Valor:<i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="Ingrese su valor"
-                  refInput={this.refValor}
+                  ref={this.refValor}
                   value={this.state.valor}
                   onChange={this.handleInputValor}
                 />

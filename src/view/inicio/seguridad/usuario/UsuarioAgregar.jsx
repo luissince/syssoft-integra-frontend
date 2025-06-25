@@ -7,6 +7,7 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
+  keyNumberFloat,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
@@ -21,6 +22,12 @@ import { CANCELED } from '../../../../model/types/types';
 import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import { TabContent, TabHead, TabHeader, TabPane } from '../../../../components/Tab';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Input from '../../../../components/Input';
+import Button from '../../../../components/Button';
+import Select from '../../../../components/Select';
+import { Switches } from '../../../../components/Checks';
 
 class UsuarioAgregar extends CustomComponent {
 
@@ -251,8 +258,8 @@ class UsuarioAgregar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col">
+        <Row>
+          <Column>
             <TabHeader>
               <TabHead id='datos' isActive={true}>
                 <i className="bi bi-info-circle"></i> Datos
@@ -265,41 +272,35 @@ class UsuarioAgregar extends CustomComponent {
 
             <TabContent>
               <TabPane id='datos' isActive={true}>
-                <div className="form-group">
-                  <label htmlFor="dni">
-                    Dni <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="dni"
-                    value={this.state.dni}
-                    ref={this.refDni}
-                    onChange={(event) => {
-                      if (event.target.value.trim().length > 0) {
-                        this.setState({
-                          dni: event.target.value,
-                        });
-                      } else {
-                        this.setState({
-                          dni: event.target.value,
-                        });
-                      }
-                    }}
-                    placeholder="Ingrese el numero de DNI"
-                    onKeyDown={keyNumberInteger}
-                  />
-                </div>
+                <Row>
+                  <Column formGroup={true}>
+                    <Input
+                      label={<>Dni: <i className="fa fa-asterisk text-danger small"></i></>}
+                      placeholder="Ingrese el numero de DNI"
+                      ref={this.refDni}
+                      value={this.state.dni}
+                      onChange={(event) => {
+                        if (event.target.value.trim().length > 0) {
+                          this.setState({
+                            dni: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            dni: event.target.value,
+                          });
+                        }
+                      }}
+                      onKeyDown={keyNumberInteger}
+                    />
+                  </Column>
+                </Row>
 
-                <div className="form-row">
-                  <div className="form-group col-md-6">
-                    <label htmlFor="nombres">
-                      Nombre(s){' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
+                <Row>
+                  <Column className='col-md-6 col-12' formGroup={true}>
+                    <Input
+                      group={true}
+                      label={<>Nombre(s){' '}<i className="fa fa-asterisk text-danger small"></i></>}
+                      placeholder="Ingrese los nombres"
                       id="nombres"
                       value={this.state.nombres}
                       ref={this.refNombres}
@@ -314,21 +315,17 @@ class UsuarioAgregar extends CustomComponent {
                           });
                         }
                       }}
-                      placeholder="Ingrese los nombres"
                     />
-                  </div>
+                  </Column>
 
-                  <div className="form-group col-md-6">
-                    <label htmlFor="apellidos">
-                      Apellidos{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
+                  <Column className='col-md-6 col-12' formGroup={true}>
+                    <Input
+                      group={true}
+                      label={<>Apellidos{' '}<i className="fa fa-asterisk text-danger small"></i></>}
                       id="apellidos"
-                      value={this.state.apellidos}
+                      placeholder="ingrese apellidos del usuario"
                       ref={this.refApellidos}
+                      value={this.state.apellidos}
                       onChange={(event) => {
                         if (event.target.value.trim().length > 0) {
                           this.setState({
@@ -340,70 +337,66 @@ class UsuarioAgregar extends CustomComponent {
                           });
                         }
                       }}
-                      placeholder="ingrese apellidos del usuario"
                     />
-                  </div>
-                </div>
+                  </Column>
+                </Row>
 
-                <div className="form-group">
-                  <label htmlFor="genero">
-                    Genero <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <select
-                    className="form-control"
-                    id="genero"
-                    value={this.state.genero}
-                    ref={this.refGenero}
-                    onChange={(event) => {
-                      if (event.target.value.trim().length > 0) {
-                        this.setState({
-                          genero: event.target.value,
-                        });
-                      } else {
-                        this.setState({
-                          genero: event.target.value,
-                        });
-                      }
-                    }}
-                  >
-                    <option value="">-- Seleccione --</option>
-                    <option value="1">Masculino</option>
-                    <option value="2">Femenino</option>
-                  </select>
-                </div>
+                <Row>
+                  <Column formGroup={true}>
+                    <Select
+                      group={true}
+                      label={<>Genero <i className="fa fa-asterisk text-danger small"></i></>}
+                      id="genero"
+                      value={this.state.genero}
+                      ref={this.refGenero}
+                      onChange={(event) => {
+                        if (event.target.value.trim().length > 0) {
+                          this.setState({
+                            genero: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            genero: event.target.value,
+                          });
+                        }
+                      }}>
+                      <option value="">-- Seleccione --</option>
+                      <option value="1">Masculino</option>
+                      <option value="2">Femenino</option>
+                    </Select>
+                  </Column>
+                </Row>
 
-                <div className="form-group">
-                  <label htmlFor="direccion">
-                    Dirección{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="direccion"
-                    value={this.state.direccion}
-                    ref={this.refDireccion}
-                    onChange={(event) => {
-                      if (event.target.value.trim().length > 0) {
-                        this.setState({
-                          direccion: event.target.value,
-                        });
-                      } else {
-                        this.setState({
-                          direccion: event.target.value,
-                        });
-                      }
-                    }}
-                    placeholder="Ingrese la dirección"
-                  />
-                </div>
+                <Row>
+                  <Column formGroup={true}>
+                    <Input
+                      group={true}
+                      label={<>Dirección <i className="fa fa-asterisk text-danger small"></i></>}
+                      id="direccion"
+                      placeholder="Ingrese la dirección"
+                      ref={this.refDireccion}
+                      value={this.state.direccion}
+                      onChange={(event) => {
+                        if (event.target.value.trim().length > 0) {
+                          this.setState({
+                            direccion: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            direccion: event.target.value,
+                          });
+                        }
+                      }}
+                    />
+                  </Column>
+                </Row>
 
-                <div className="form-row">
-                  <div className="form-group col-md-6">
-                    <label htmlFor="telefono">Telefono o celular</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                <Row>
+                  <Column className='col-md-6 col-12' formGroup={true}>
+                    <Input
+                      group={true}
+                      label={<>Telefono o celular</>}
+                      placeholder="Ingrese el N° de telefono"
                       id="telefono"
                       value={this.state.telefono}
                       ref={this.refTelefono}
@@ -419,17 +412,18 @@ class UsuarioAgregar extends CustomComponent {
                         }
                       }}
                       onKeyDown={keyNumberPhone}
-                      placeholder="Ingrese el N° de telefono"
                     />
-                  </div>
-                  <div className="form-group col-md-6">
-                    <label htmlFor="email">Correo Electrónico</label>
-                    <input
+                  </Column>
+
+                  <Column className='col-md-6 col-12' formGroup={true}>
+                    <Input
+                      group={true}
+                      label={<>Correo Electrónico <i className="fa fa-asterisk text-danger small"></i></>}
                       type="email"
-                      className="form-control"
                       id="email"
-                      value={this.state.email}
+                      placeholder="Ingrese el email"
                       ref={this.refEmail}
+                      value={this.state.email}
                       onChange={(event) => {
                         if (event.target.value.trim().length > 0) {
                           this.setState({
@@ -441,37 +435,38 @@ class UsuarioAgregar extends CustomComponent {
                           });
                         }
                       }}
-                      placeholder="Ingrese el email"
                     />
-                  </div>
-                </div>
+                  </Column>
+                </Row>
               </TabPane>
 
               <TabPane id='login'>
-                <div className="form-group">
-                  <label htmlFor="perfil">Perfil</label>
-                  <select
-                    className="form-control"
-                    ref={this.refPerfil}
-                    value={this.state.idPerfil}
-                    onChange={(event) =>
-                      this.setState({ idPerfil: event.target.value })
-                    }
-                  >
-                    <option value="">- Seleccione -</option>
-                    {this.state.perfiles.map((item, index) => (
-                      <option key={index} value={item.idPerfil}>
-                        {item.descripcion}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Row>
+                  <Column formGroup={true}>
+                    <Select
+                      group={true}
+                      label={<>Perfil</>}
+                      ref={this.refPerfil}
+                      value={this.state.idPerfil}
+                      onChange={(event) =>
+                        this.setState({ idPerfil: event.target.value })
+                      }
+                    >
+                      <option value="">- Seleccione -</option>
+                      {this.state.perfiles.map((item, index) => (
+                        <option key={index} value={item.idPerfil}>
+                          {item.descripcion}
+                        </option>
+                      ))}
+                    </Select>
+                  </Column>
+                </Row>
 
-                <div className="form-row">
-                  <div className="form-group col-md-6">
-                    <label htmlFor="representante">¿Representante?</label>
-                    <select
-                      className="form-control"
+                <Row>
+                  <Column className='col-md-6 col-12' formGroup={true}>
+                    <Select
+                      group={true}
+                      label={<>Representante</>}
                       id="representante"
                       value={this.state.representante}
                       ref={this.refRepresentante}
@@ -485,14 +480,14 @@ class UsuarioAgregar extends CustomComponent {
                             representante: event.target.value,
                           });
                         }
-                      }}
-                    >
+                      }}>
                       <option value="">-- seleccione --</option>
                       <option value="1">Si</option>
                       <option value="2">No</option>
-                    </select>
-                  </div>
-                  <div className="form-group col-md-6">
+                    </Select>
+                  </Column>
+
+                  <Column className='col-md-6 col-12' formGroup={true}>
                     <label htmlFor="estado">Estado</label>
                     <select
                       className="form-control"
@@ -506,62 +501,61 @@ class UsuarioAgregar extends CustomComponent {
                       <option value="1">Activo</option>
                       <option value="2">Inactivo</option>
                     </select>
-                  </div>
-                </div>
+                  </Column>
+                </Row>
 
                 {/* Start Login */}
-                <div className="form-group">
-                  <label>
-                    <div className="custom-control custom-switch">
-                      <input
-                        type="checkbox"
-                        className="custom-control-input"
-                        id="cbActiveLogin"
-                        checked={this.state.activeLogin}
-                        onChange={(value) =>
-                          this.setState({ activeLogin: value.target.checked })
-                        }
-                      />
-                      <label
-                        className="custom-control-label"
-                        htmlFor="cbActiveLogin"
-                      >
-                        Usar login
-                      </label>
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="usuario"
-                    value={this.state.usuario}
-                    ref={this.refUsuario}
-                    onChange={(event) => {
-                      if (event.target.value.trim().length > 0) {
-                        this.setState({
-                          usuario: event.target.value,
-                        });
-                      } else {
-                        this.setState({
-                          usuario: event.target.value,
-                        });
+                <Row>
+                  <Column>
+                    <Switches
+                      id={"cbActiveLogin"}
+                      checked={this.state.activeLogin}
+                      onChange={(value) =>
+                        this.setState({ activeLogin: value.target.checked })
                       }
-                    }}
-                    placeholder="Ingrese el usuario"
-                    disabled={!this.state.activeLogin}
-                  />
-                </div>
+                    >
+                      Activar Inicio de Sesión
+                    </Switches>
+                  </Column>
+                </Row>
+
+                <Row>
+                  <Column formGroup={true}>
+                    <Input
+                      group
+                      label="Usuario"
+                      id="usuario"
+                      value={this.state.usuario}
+                      ref={this.refUsuario}
+                      onChange={(event) => {
+                        if (event.target.value.trim().length > 0) {
+                          this.setState({
+                            usuario: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            usuario: event.target.value,
+                          });
+                        }
+                      }}
+                      placeholder="Ingrese el usuario"
+                      disabled={!this.state.activeLogin}
+                    />
+                  </Column>
+                </Row>
 
                 {this.state.tipo ? (
-                  <div className="form-row">
-                    <div className="form-group col-md-6">
-                      <label htmlFor="contraseña">Contraseña</label>
-                      <input
+                  <Row>
+                    <Column className='col-md-6 col-12' formGroup={true}>
+                      <Input
+                        group={true}
+                        label={<>Contraseña <i className="fa fa-asterisk text-danger small"></i></>}
                         type="password"
-                        className="form-control"
                         id="contraseña"
-                        value={this.state.clave}
+                        placeholder="********"
+                        disabled={!this.state.activeLogin}
                         ref={this.refClave}
+                        value={this.state.clave}
                         onChange={(event) => {
                           if (event.target.value.trim().length > 0) {
                             this.setState({
@@ -573,15 +567,15 @@ class UsuarioAgregar extends CustomComponent {
                             });
                           }
                         }}
-                        placeholder="Ingrese la contraseña"
-                        disabled={!this.state.activeLogin}
+                        onKeyDown={keyNumberFloat}
                       />
-                    </div>
-                    <div className="form-group col-md-6">
-                      <label htmlFor="contraseña2">Confirmar Contraseña</label>
-                      <input
+                    </Column>
+
+                    <Column className='col-md-6 col-12' formGroup={true}>
+                      <Input
+                        group={true}
+                        label={<>Confirmar Contraseña <i className="fa fa-asterisk text-danger small"></i></>}
                         type="password"
-                        className="form-control"
                         id="contraseña2"
                         value={this.state.configClave}
                         ref={this.refConfigClave}
@@ -599,37 +593,33 @@ class UsuarioAgregar extends CustomComponent {
                         placeholder="Ingrese contraseña nuevamente"
                         disabled={!this.state.activeLogin}
                       />
-                    </div>
-                  </div>
+                    </Column>
+                  </Row>
                 ) : null}
 
                 {/* End Login */}
               </TabPane>
             </TabContent>
-          </div>
-        </div>
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={() => this.handleGuardar()}
-              >
-                <i className='fa fa-save'></i> Registrar
-              </button>
-              {" "}
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => this.props.history.goBack()}
-              >
-                <i className='fa fa-close'></i>  Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-success"
+              onClick={() => this.handleGuardar()}
+            >
+              <i className='fa fa-save'></i> Guardar
+            </Button>
+            {" "}
+            <Button
+              className="btn-danger"
+              onClick={() => this.props.history.goBack()}
+            >
+              <i className='fa fa-close'></i>  Cerrar
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

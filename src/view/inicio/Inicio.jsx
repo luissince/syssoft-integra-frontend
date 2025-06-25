@@ -190,6 +190,13 @@ import Finanzas, {
   Transacciones,
 } from './finanzas/index.jsx';
 
+import Crm, {
+  Consultas,
+  ConsultaDetalle,
+  ConsultaAgregar,
+  ConsultaEditar,
+} from './crm/index.jsx';
+
 import {
   configEmpresa,
   listNotificacion,
@@ -1154,6 +1161,11 @@ class Inicio extends React.Component {
           />
 
           <Route
+            path={`${path}/reportes/repfinanciero`}
+            render={(props) => <RepFinanciero {...props} />}
+          />
+
+          <Route
             path={`${path}/reportes/repventas`}
             render={(props) => <RepVentas {...props} />}
           />
@@ -1161,11 +1173,6 @@ class Inicio extends React.Component {
           <Route
             path={`${path}/reportes/repcompras`}
             render={(props) => <RepCompras {...props} />}
-          />
-
-          <Route
-            path={`${path}/reportes/repfinanciero`}
-            render={(props) => <RepFinanciero {...props} />}
           />
 
           <Route
@@ -1245,6 +1252,36 @@ class Inicio extends React.Component {
             path={`${path}/finanzas/transacciones`}
             exact={true}
             render={(props) => <Transacciones {...props} />}
+          />
+
+          {/*
+          ----------------------------------------------------------
+          | CRM
+          ----------------------------------------------------------
+          */}
+
+          <Route
+            path={`${path}/crm`}
+            exact={true}
+            render={(props) => <Crm {...props} />}
+          />
+
+          <Route
+            path={`${path}/crm/consulta`}
+            exact={true}
+            render={(props) => <Consultas {...props} />}
+          />
+
+          <Route
+            path={`${path}/crm/consulta/detalle`}
+            exact={true}
+            render={(props) => <ConsultaDetalle {...props} />}
+          />
+
+          <Route
+            path={`${path}/crm/consulta/editar`}
+            exact={true}
+            render={(props) => <ConsultaEditar {...props} />}
           />
 
           <Route component={NotFoundMain} />

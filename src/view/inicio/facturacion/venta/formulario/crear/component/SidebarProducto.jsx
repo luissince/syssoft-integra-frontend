@@ -56,7 +56,7 @@ const SidebarProducto = (props) => {
                   autoFocus={true}
                   label={<>Precio: <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="0.00"
-                  refInput={refPrecio}
+                  ref={refPrecio}
                   onKeyDown={keyNumberFloat}
                   onPaste={handlePasteFloat}
                 />
@@ -68,7 +68,7 @@ const SidebarProducto = (props) => {
                 <Input
                   label={"Bonificación:"}
                   placeholder="0"
-                  refInput={refBonificacion}
+                  ref={refBonificacion}
                   onKeyDown={keyNumberFloat}
                   onPaste={handlePasteFloat}
                 />
@@ -80,7 +80,7 @@ const SidebarProducto = (props) => {
                 <TextArea
                   label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="Ingrese los datos del producto"
-                  refInput={refDescripcion}
+                  ref={refDescripcion}
                 />
               </Column>
             </Row>

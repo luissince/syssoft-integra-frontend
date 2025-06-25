@@ -350,7 +350,6 @@ class Inventario extends CustomComponent {
   //--------------------------------------------------------------------------------------------
 
   handleOpenPrinterCodBar = async (idProducto) => {
-    console.log(idProducto);
     await pdfVisualizer.init({
       url: documentsPdfCodbarProducto(),
       title: 'Lista de productos - Código de Barras',

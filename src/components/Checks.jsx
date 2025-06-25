@@ -17,52 +17,22 @@ import PropTypes from 'prop-types';
     </Switches>
  */
 export const Switches = ({
-    autoFocus,
+    autoFocus = false,
     id,
     label,
-    className = "",
-    disabled,
+    className = '',
+    disabled = false,
     refInput,
     value,
     name,
-    checked,
+    checked = false,
     onChange,
     onKeyUp,
     onKeyDown,
     onPaste,
     children
 }) => {
-
-    if (label) {
-        return (
-            <>
-                <label htmlFor={id}>{label}</label>
-
-                <div className={`custom-control custom-switch ${className}`}>
-                    <input
-                        type="checkbox"
-                        className="custom-control-input"
-                        autoFocus={autoFocus}
-                        ref={refInput}
-                        id={id}
-                        name={name}
-                        value={value}
-                        checked={checked}
-                        onChange={onChange}
-                        onKeyUp={onKeyUp}
-                        onKeyDown={onKeyDown}
-                        onPaste={onPaste}
-                        disabled={disabled}
-                    />
-                    <label className="custom-control-label" htmlFor={id}>
-                        {children}
-                    </label>
-                </div>
-            </>
-        );
-    }
-
-    return (
+    const renderSwitch = () => (
         <div className={`custom-control custom-switch ${className}`}>
             <input
                 type="checkbox"
@@ -84,15 +54,22 @@ export const Switches = ({
             </label>
         </div>
     );
-}
+
+    return (
+        <>
+            {label && <label htmlFor={id}>{label}</label>}
+            {renderSwitch()}
+        </>
+    );
+};
 
 Switches.propTypes = {
     autoFocus: PropTypes.bool,
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
     label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
     className: PropTypes.string,
     disabled: PropTypes.bool,
-    refInput: PropTypes.object,
+    refInput: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     name: PropTypes.string,
     checked: PropTypes.bool,
@@ -102,7 +79,6 @@ Switches.propTypes = {
     onPaste: PropTypes.func,
     children: PropTypes.node,
 };
-
 /**
  * 
  * @param {*} param0 
@@ -118,48 +94,50 @@ Switches.propTypes = {
     </CheckBox>
  */
 const CheckBox = ({
-    autoFocus,
+    autoFocus = false,
     id,
-    className = "",
-    disabled,
+    className = '',
+    disabled = false,
     refInput,
     value,
     name,
-    checked,
+    checked = false,
     onChange,
     onKeyUp,
     onKeyDown,
     onPaste,
     children
-}) => {
-    return (
-
-        <div className={`form-check ${className}`}>
-            <input
-                className="form-check-input"
-                autoFocus={autoFocus}
-                type="checkbox"
-                ref={refInput}
-                name={name}
-                id={id}
-                value={value}
-                checked={checked}
-                onChange={onChange}
-                onKeyUp={onKeyUp}
-                onKeyDown={onKeyDown}
-                onPaste={onPaste}
-                disabled={disabled} />
-            {children && <label className="form-check-label" htmlFor={id}> {children}</label>}
-        </div>
-    );
-}
+}) => (
+    <div className={`form-check ${className}`}>
+        <input
+            type="checkbox"
+            className="form-check-input"
+            autoFocus={autoFocus}
+            ref={refInput}
+            id={id}
+            name={name}
+            value={value}
+            checked={checked}
+            onChange={onChange}
+            onKeyUp={onKeyUp}
+            onKeyDown={onKeyDown}
+            onPaste={onPaste}
+            disabled={disabled}
+        />
+        {children && (
+            <label className="form-check-label" htmlFor={id}>
+                {children}
+            </label>
+        )}
+    </div>
+);
 
 CheckBox.propTypes = {
     autoFocus: PropTypes.bool,
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
     className: PropTypes.string,
     disabled: PropTypes.bool,
-    refInput: PropTypes.object,
+    refInput: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     name: PropTypes.string,
     checked: PropTypes.bool,

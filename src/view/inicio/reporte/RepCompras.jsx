@@ -382,7 +382,7 @@ class RepCompras extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
             <Select
               label={"Sucursal:"}
-              refSelect={this.refIdSucursal}
+              ref={this.refIdSucursal}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >
@@ -400,7 +400,7 @@ class RepCompras extends CustomComponent {
           <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
             <Select
               label={"Usuario:"}
-              refSelect={this.refUsuario}
+              ref={this.refUsuario}
               value={this.state.idUsuario}
               onChange={this.handleSelectUsuario}
             >

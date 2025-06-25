@@ -227,6 +227,10 @@ export function currentTime() {
   return formatted_time;
 }
 
+/**
+ * Obtiene los meses del año actual
+ * @returns 
+ */
 export function months() {
   return [
     {
@@ -524,7 +528,12 @@ export function debounce(func, delay) {
   };
 }
 
-
+/**
+ * Formatea una cadena de fecha en un formato de "DD/MM/YYYY"
+ * 
+ * @param {string} date 
+ * @returns {string} La cadena de fecha formateada.
+ */
 export function formatDate(date) {
   const parts = date.split('-');
   const today = new Date(parts[0], parts[1] - 1, parts[2]);

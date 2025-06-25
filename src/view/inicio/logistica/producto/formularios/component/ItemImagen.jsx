@@ -79,14 +79,14 @@ class ItemImage extends React.Component {
 
     render() {
         return (
-            <div className='d-flex flex-wrap position-relative mt-3 gap-8'>
+            <div className="d-flex flex-wrap position-relative mt-3 gap-8">
                 {this.props.imagenes.map((imagen, index) => {
                     if (imagen.remover !== undefined) {
                         if (imagen.remover === false) {
                             return (
                                 <div
                                     key={index}
-                                    className='d-flex justify-content-center border align-items-center position-relative p-2 col-xl-3 col-md-4 col-sm-5 col-12'
+                                    className="d-flex justify-content-center border align-items-center position-relative p-2 col-xl-3 col-md-4 col-sm-5 col-12"
                                 >
                                     <img alt="algo" src={imagen.url} style={{ height: "120px", maxWidth: "100%" }} />
 
@@ -105,7 +105,7 @@ class ItemImage extends React.Component {
                         return (
                             <div
                                 key={index}
-                                className='d-flex justify-content-center border align-items-center position-relative p-2 col-xl-3 col-md-4 col-sm-5 col-12'
+                                className="d-flex justify-content-center border align-items-center position-relative p-2 col-xl-3 col-md-4 col-sm-5 col-12"
                             >
                                 <img alt="algo" src={imagen.url} style={{ height: "120px", maxWidth: "100%" }} />
 
@@ -123,7 +123,7 @@ class ItemImage extends React.Component {
                 })}
 
                 <div
-                    className='d-flex justify-content-center border align-items-center p-2 col-xl-3 col-md-4 col-sm-5 col-12'
+                    className="d-flex justify-content-center border align-items-center p-2 col-xl-3 col-md-4 col-sm-5 col-12"
                 >
                     <input
                         type="file"

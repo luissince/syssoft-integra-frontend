@@ -19,6 +19,7 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Title from '../../../../components/Title';
 import Button from '../../../../components/Button';
+import Select from '../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -338,9 +339,8 @@ class CpeElectronicos extends React.Component {
 
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <label>Tipo: </label>
-            <select
+            <Select
               ref={this.refTipo}
-              className="form-control"
               value={this.state.tipo}
               onChange={(value) =>
                 this.setState({ tipo: value.target.value })
@@ -359,7 +359,7 @@ class CpeElectronicos extends React.Component {
               <option value="23">
                 23 - Póliza de Adjudicación Electrónica
               </option>
-            </select>
+            </Select>
           </Column>
         </Row>
 

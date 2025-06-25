@@ -53,7 +53,6 @@ import ModalCotizacion from '../common/ModalCotizacion';
 import ModalVenta from '../common/ModalVenta';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import ModalTransaccion from '../../../../../../components/ModalTransaccion';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
 import SidebarProducto from './component/SidebarProducto';
 import ModalPedido from '../common/ModalPedido';
 import { alertKit } from 'alert-kit';
@@ -144,8 +143,6 @@ class VentaCrear extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Referencia al modal cobrar
     this.refInvoiceView = React.createRef();
@@ -665,7 +662,13 @@ class VentaCrear extends CustomComponent {
 
   handleAddItem = async (producto) => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione un impuesto.', () => {
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un impuesto.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.handleOpenOptions();
         this.refImpuesto.current.focus();
       });
@@ -673,7 +676,13 @@ class VentaCrear extends CustomComponent {
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      this.alert.warning('Venta', 'Seleccione el almacen.', () => {
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el almacen.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.handleOpenOptions();
         this.refAlmacen.current.focus();
       });
@@ -681,7 +690,10 @@ class VentaCrear extends CustomComponent {
     }
 
     if (Number(producto.precio) <= 0) {
-      this.alert.warning('Venta', '¡El precio no puede tener un valor de 0!');
+      alertKit.warning({
+        title: 'Venta',
+        message: '¡El precio no puede tener un valor de 0!',
+      });
       return;
     }
 
@@ -798,23 +810,41 @@ class VentaCrear extends CustomComponent {
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un impuesto.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Venta', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione una moneda.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      this.alert.warning('Venta', 'Seleccione un almacen.', () =>
-        this.refAlmacen.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un almacen.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refAlmacen.current.focus();
+      });
       return;
     }
 
@@ -872,35 +902,62 @@ class VentaCrear extends CustomComponent {
     const { idComprobante, cliente, idMoneda, idImpuesto, detalleVenta } = this.state;
 
     if (isEmpty(idComprobante)) {
-      this.alert.warning('Venta', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus()
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione su comprobante.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Venta', 'Seleccione un cliente.', () =>
-        this.refValueCliente.current.focus()
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un cliente.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refValueCliente.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      this.alert.warning('Venta', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus()
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione su moneda.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus()
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el impuesto',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalleVenta)) {
-      this.alert.warning('Venta', 'Agregar algún producto a la lista.', () => { });
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Agregar algún producto a la lista.',
+      });
       return;
     }
 
@@ -938,8 +995,10 @@ class VentaCrear extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       error();
-
-      this.alert.warning("Venta", response.getMessage());
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   }
 
@@ -978,7 +1037,10 @@ class VentaCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        this.alert.warning('Venta', 'La cotización no tiene productos, ya que fue utilizado para la venta.', () => {
+        alertKit.warning({
+          title: 'Venta',
+          message: 'La cotización no tiene productos, ya que fue utilizado para la venta.',
+        }, () => {
           this.clearView();
         });
         return;
@@ -1013,7 +1075,11 @@ class VentaCrear extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning("Venta", response.getMessage())
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   }
 
@@ -1048,7 +1114,10 @@ class VentaCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        this.alert.warning('Venta', 'El pedido no tiene productos, ya que fue utilizado para la venta.', () => {
+        alertKit.warning({
+          title: 'Venta',
+          message: 'El pedido no tiene productos, ya que fue utilizado para la venta.',
+        }, () => {
           this.clearView();
         });
         return;
@@ -1083,7 +1152,11 @@ class VentaCrear extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning("Venta", response.getMessage())
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   }
 
@@ -1145,7 +1218,11 @@ class VentaCrear extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning("Venta", response.getMessage())
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   }
 
@@ -1213,9 +1290,15 @@ class VentaCrear extends CustomComponent {
 
   handleGetApiReniec = async () => {
     if (this.state.numeroDocumento.length !== 8) {
-      this.alert.warning("Venta", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: 'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refNumeroDocumento.current.focus();
-      })
+      });
       return;
     }
 
@@ -1235,7 +1318,10 @@ class VentaCrear extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      this.alert.warning('Venta', response.getMessage(), () => {
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      }, () => {
         this.setState({
           loadingCliente: false,
         });
@@ -1245,7 +1331,13 @@ class VentaCrear extends CustomComponent {
 
   handleGetApiSunat = async () => {
     if (this.state.numeroDocumento.length !== 11) {
-      this.alert.warning("Venta", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refNumeroDocumento.current.focus();
       })
       return;
@@ -1268,7 +1360,11 @@ class VentaCrear extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      this.alert.warning('Venta', response.getMessage(), () => {
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      }, () => {
         this.setState({
           loadingCliente: false,
         });
@@ -1280,28 +1376,52 @@ class VentaCrear extends CustomComponent {
     const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      this.alert.warning("Venta", "Seleccione el tipo de documento.", () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refIdTipoDocumento.current.focus()
       })
       return;
     }
 
     if (isEmpty(this.state.numeroDocumento)) {
-      this.alert.warning("Venta", "Seleccione el tipo de documento.", () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refNumeroDocumento.current.focus()
       })
       return;
     }
 
     if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.numeroDocumento.length) {
-      this.alert.warning("Venta", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
+      alertKit.warning({
+        title: "Venta",
+        message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refNumeroDocumento.current.focus();
       })
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      this.alert.warning("Venta", "Seleccione el tipo de documento.", () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refInformacion.current.focus()
       })
       return;
@@ -1466,14 +1586,26 @@ class VentaCrear extends CustomComponent {
     const productoActual = this.producto;
 
     if (!isNumeric(precioProducto) || Number(precioProducto) <= 0) {
-      this.alert.warning('Venta', 'El precio del producto tiene un valor no admitido o es menor o igual a 0.', () => {
+      alertKit.warning({
+        title: 'Venta',
+        message: 'El precio del producto tiene un valor no admitido o es menor o igual a 0.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refPrecioProducto.current.focus();
       });
       return;
     }
 
     if (isEmpty(descripcionProducto)) {
-      this.alert.warning('Venta', 'La descripción del producto no puede ser vacía.', () => {
+      alertKit.warning({
+        title: 'Venta',
+        message: 'La descripción del producto no puede ser vacía.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+      }, () => {
         this.refDescripcionProducto.current.focus();
       });
       return;
@@ -1482,7 +1614,10 @@ class VentaCrear extends CustomComponent {
     const producto = this.state.detalleVenta.find(item => item.idProducto === productoActual.idProducto);
 
     if (producto.precio !== Number(precioProducto) && producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      this.alert.warning('Venta', 'Los productos a granel no se puede cambia el precio.');
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Los productos a granel no se puede cambia el precio.',
+      });
       return;
     }
 
@@ -1551,56 +1686,36 @@ class VentaCrear extends CustomComponent {
 
   handleOpenSale = async () => {
     if (isEmpty(this.state.detalleVenta)) {
-      alertKit.show({
-        headerTitle: 'SysSoft Integra',
+      alertKit.warning({
         title: 'Venta',
         message: 'La lista de productos esta vacía.',
-        type: 'warning',
-        buttons: [
-          {
-            html: "<i class='fa fa-check'></i> Aceptar",
-            primary: true,
-            class: ['btn', 'btn-primary'],
-          },
-        ]
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.idComprobante)) {
-      alertKit.show({
-        headerTitle: 'SysSoft Integra',
+      alertKit.warning({
         title: 'Venta',
         message: 'Seleccione un comprobante.',
-        type: 'warning',
-        buttons: [
-          {
-            html: "<i class='fa fa-check'></i> Aceptar",
-            primary: true,
-            class: ['btn', 'btn-primary'],
-          },
-        ]
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
       });
-
       return;
     }
 
     if (isEmpty(this.state.cliente) && this.state.nuevoCliente === null) {
-      alertKit.show({
-        headerTitle: 'SysSoft Integra',
+      alertKit.warning({
         title: 'Venta',
         message: 'Selecciona un cliente.',
-        type: 'warning',
-        buttons: [
-          {
-            html: "<i class='fa fa-check'></i> Aceptar",
-            primary: true,
-            class: ['btn', 'btn-primary'],
-          },
-        ],
-        onClose: () => {
-          this.refValueCliente.current.focus();
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
+      }, () => {
+        this.refValueCliente.current.focus();
       });
       return;
     }
@@ -1609,7 +1724,16 @@ class VentaCrear extends CustomComponent {
   }
 
   handleClearSale = async () => {
-    this.alert.dialog("Venta", "Los productos serán eliminados de la venta actual ¿Desea continuar?", async (accept) => {
+    alertKit.question({
+      title: "Venta",
+      message: "Los productos serán eliminados de la venta actual ¿Desea continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         this.clearView()
       }
@@ -1638,7 +1762,16 @@ class VentaCrear extends CustomComponent {
       detalleVenta
     } = this.state;
 
-    this.alert.dialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: "Venta",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const data = {
           idFormaPago: idFormaPago,
@@ -1659,12 +1792,15 @@ class VentaCrear extends CustomComponent {
         };
 
         await callback();
-        this.alert.information('Venta', 'Procesando venta...');
+
+        alertKit.loading({
+          message: 'Procesando venta...',
+        });
 
         const response = await createVenta(data);
 
         if (response instanceof SuccessReponse) {
-          this.alert.close();
+          alertKit.close();
           this.handleOpenImpresion(response.data.idVenta);
         }
 
@@ -1679,8 +1815,8 @@ class VentaCrear extends CustomComponent {
                 </tr>`,
             );
 
-            this.alert.html('Venta',
-              `<div class="d-flex flex-column align-items-center">
+            const html = `
+              <div class="d-flex flex-column align-items-center">
                     <h5>Productos con cantidades faltantes</h5>
                     <table class="table">
                         <thead>
@@ -1695,10 +1831,17 @@ class VentaCrear extends CustomComponent {
                         ${body}
                         </tbody>
                     </table>
-                </div>`,
-            );
+                </div>`;
+
+            alertKit.html({
+              title: "Venta",
+              bodyInnerHTML: html,
+            });
           } else {
-            this.alert.warning('Venta', response.getMessage());
+            alertKit.warning({
+              title: "Venta",
+              message: response.getMessage(),
+            });
           }
         }
       }
@@ -1720,8 +1863,16 @@ class VentaCrear extends CustomComponent {
       detalleVenta
     } = this.state;
 
-
-    this.alert.dialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: "Venta",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const data = {
           idFormaPago: idFormaPago,
@@ -1744,12 +1895,14 @@ class VentaCrear extends CustomComponent {
         };
 
         await callback();
-        this.alert.information('Venta', 'Procesando venta...');
+        alertKit.loading({
+          message: 'Procesando venta...',
+        });
 
         const response = await createVenta(data);
 
         if (response instanceof SuccessReponse) {
-          this.alert.close();
+          alertKit.close();
           this.handleOpenImpresion(response.data.idVenta);
         }
 
@@ -1783,7 +1936,10 @@ class VentaCrear extends CustomComponent {
                 </div>`,
             );
           } else {
-            this.alert.warning('Venta', response.getMessage());
+            alertKit.warning({
+              title: "Venta",
+              message: response.getMessage(),
+            });
           }
         }
       }

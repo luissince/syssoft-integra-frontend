@@ -1439,6 +1439,10 @@ class ProductoAgregar extends CustomComponent {
 
     const { sabores, saboresProducto, saboresServicio, saboresCombo } = this.state;
 
+    const nombre = idTipoProducto === PRODUCTO ? nombreProducto : idTipoProducto === SERVICIO ? nombreServicio : nombreCombo;
+
+    const precio = idTipoProducto === PRODUCTO ? precioProducto : idTipoProducto === SERVICIO ? precioServicio : precioCombo;
+
     return (
       <ContainerWrapper>
         <ModalInventario
@@ -1766,20 +1770,8 @@ class ProductoAgregar extends CustomComponent {
               refFileImagen={this.refFileImagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
-              nombre={
-                idTipoProducto === PRODUCTO
-                  ? nombreProducto
-                  : idTipoProducto === SERVICIO
-                    ? nombreServicio
-                    : nombreCombo
-              }
-              precio={
-                idTipoProducto === PRODUCTO
-                  ? precioProducto
-                  : idTipoProducto === SERVICIO
-                    ? precioServicio
-                    : precioCombo
-              }
+              nombre={nombre}
+              precio={precio}
               publicar={publicar}
               handleSelectPublico={this.handleSelectPublico}
 

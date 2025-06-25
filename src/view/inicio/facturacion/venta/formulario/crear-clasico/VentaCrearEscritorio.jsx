@@ -2213,7 +2213,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
 
                   <Input
-                    refInput={this.redCodigoBarras}
+                    ref={this.redCodigoBarras}
                     value={this.state.codigoBarras}
                     onChange={this.handleInputCodigoBarras}
                     onKeyDown={this.handleOnKeyDownCodigoBarras}
@@ -2316,7 +2316,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <Select
                     title="Comprobantes de venta"
-                    refSelect={this.refComprobante}
+                    ref={this.refComprobante}
                     value={this.state.idComprobante}
                     onChange={this.handleSelectComprobante}>
                     <option value={""}>Tipos de comprobante</option>
@@ -2366,7 +2366,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <Select
                     value={this.state.idTipoDocumento}
-                    refSelect={this.refIdTipoDocumento}
+                    ref={this.refIdTipoDocumento}
                     onChange={this.handleSelectTipoDocumento}
                   >
                     <option value={""}>Tipo de documento</option>
@@ -2453,7 +2453,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     placeholder={
                       this.state.idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
                     }
-                    refInput={this.refInformacion}
+                    ref={this.refInformacion}
                     value={this.state.informacion}
                     onChange={this.handleInputInformacion}
                   />
@@ -2467,7 +2467,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <Input
                     placeholder="Ingrese el número de celular."
-                    refInput={this.refNumeroCelular}
+                    ref={this.refNumeroCelular}
                     value={this.state.numeroCelular}
                     onChange={this.handleInputNumeroCelular}
                     onKeyDown={keyNumberPhone}
@@ -2482,7 +2482,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <Input
                     placeholder='Ingrese su correo electrónico del cliente'
-                    refInput={this.refEmail}
+                    ref={this.refEmail}
                     value={this.state.email}
                     onChange={this.handleInputEmail}
                   />
@@ -2496,7 +2496,7 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <Input
                     placeholder="Ingrese su dirección fiscal del cliente"
-                    refInput={this.refDireccion}
+                    ref={this.refDireccion}
                     value={this.state.direccion}
                     onChange={this.handleInputDireccion}
                   />

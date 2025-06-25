@@ -351,7 +351,7 @@ const ItemSearch = (props) => {
               <Input
                 className="border border-primary"
                 placeholder={`Buscar código de barras...`}
-                refInput={refProducto}
+                ref={refProducto}
                 value={buscar}
                 onChange={handleInputBuscar}
                 onKeyDown={handleSearchCodBar}

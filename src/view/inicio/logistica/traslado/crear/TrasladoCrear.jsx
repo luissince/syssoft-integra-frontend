@@ -643,7 +643,7 @@ class TrasladorCrear extends CustomComponent {
                 <label>Seleccione el tipo de traslado:</label>
 
                 <RadioButton
-                  refInput={this.refIdTipoTraslado}
+                  ref={this.refIdTipoTraslado}
                   id={"TT0001"}
                   value={"TT0001"}
                   name='ckTipoTraslado'
@@ -671,7 +671,7 @@ class TrasladorCrear extends CustomComponent {
               <Column formGroup={true}>
                 <Select
                   label={"Seleccione el motivo del traslado:"}
-                  refSelect={this.refIdMotivoTraslado}
+                  ref={this.refIdMotivoTraslado}
                   value={this.state.idMotivoTraslado}
                   onChange={this.handleSelectMotivojuste}
                 >
@@ -697,7 +697,7 @@ class TrasladorCrear extends CustomComponent {
                     <Column formGroup={true}>
                       <Select
                         label={"Seleccione el almacen de origen:"}
-                        refSelect={this.refIdAlmacenOriginInterno}
+                        ref={this.refIdAlmacenOriginInterno}
                         value={this.state.idAlmacenOrigenInterno}
                         onChange={this.handleSelectAlmacenOrigenInterno}
                       >
@@ -718,7 +718,7 @@ class TrasladorCrear extends CustomComponent {
                     <Column formGroup={true}>
                       <Select
                         label={"Seleccione el almacen de destino:"}
-                        refSelect={this.refIdAlmacenDesitnoInterno}
+                        ref={this.refIdAlmacenDesitnoInterno}
                         value={this.state.idAlmacenDestinoInterno}
                         onChange={this.handleSelectAlmacenDestinoInterno}
                         disabled
@@ -755,7 +755,7 @@ class TrasladorCrear extends CustomComponent {
                     <Column formGroup={true}>
                       <Select
                         label={"Seleccione el almacen:"}
-                        refSelect={this.refIdAlmacenOrigenExterno}
+                        ref={this.refIdAlmacenOrigenExterno}
                         value={this.state.idAlmacenOrigenExterno}
                         onChange={this.handleSelectAlmacenOrigenExterno}
                       >
@@ -784,7 +784,7 @@ class TrasladorCrear extends CustomComponent {
                     <Column className="col-md-6 col-12" formGroup={true}>
                       <Select
                         label={"Seleccione la sucursal:"}
-                        refSelect={this.refIdSucursalExterno}
+                        ref={this.refIdSucursalExterno}
                         value={this.state.idSucursalExterno}
                         onChange={this.handleSelectSucursalExterno}>
                         <option value="">-- Sucursal --</option>
@@ -801,7 +801,7 @@ class TrasladorCrear extends CustomComponent {
                     <Column className="col-md-6 col-12" formGroup={true}>
                       <Select
                         label={"Seleccione el almacen:"}
-                        refSelect={this.refIdAlmacenDestinoExterno}
+                        ref={this.refIdAlmacenDestinoExterno}
                         value={this.state.idAlmacenDestinoExterno}
                         onChange={this.handleSelectAlmacenDestinoExterno}
                         disabled>

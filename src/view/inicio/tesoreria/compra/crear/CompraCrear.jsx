@@ -1243,7 +1243,7 @@ class CompraCrear extends CustomComponent {
                 <div className="form-group">
                   <Select
                     group={false}
-                    refSelect={this.refComprobante}
+                    ref={this.refComprobante}
                     value={this.state.idComprobante}
                     onChange={this.handleSelectComprobante}
                   >
@@ -1284,7 +1284,7 @@ class CompraCrear extends CustomComponent {
                 <div className="form-group">
                   <Select
                     group={false}
-                    refSelect={this.refAlmacenDestino}
+                    ref={this.refAlmacenDestino}
                     value={this.state.idAlmacenDestino}
                     onChange={this.handleSelectAlmacenDestino}
                   >

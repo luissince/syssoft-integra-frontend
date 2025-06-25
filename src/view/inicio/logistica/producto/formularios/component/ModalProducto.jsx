@@ -236,7 +236,7 @@ class ModalProducto extends CustomComponent {
                   label={<> Cantidad <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="0"
                   role={"float"}
-                  refInput={this.refCantidad}
+                  ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
                 />

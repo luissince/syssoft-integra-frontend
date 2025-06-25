@@ -21,7 +21,7 @@ import Column from '../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
-import { alertKit, AlertType } from 'alert-kit';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -158,12 +158,10 @@ class Perfiles extends CustomComponent {
   };
 
   handleBorrar(idPerfil) {
-    alertKit.show({
-      type: AlertType.question,
+    alertKit.question({   
       headerTitle: "SysSoft Integra",
       title: "Perfil",
       message: '¿Estás seguro de eliminar el perfil?',
-      backdropBlur: false,
       isMoveable: true,
       showCloseButton: false,
       closeOnEsc: false,
@@ -178,25 +176,16 @@ class Perfiles extends CustomComponent {
               idPerfil: idPerfil,
             };
 
-            alertKit.show({
-              type: AlertType.loading,
+            alertKit.loading({
               message: 'Procesando información...',
-              backdropBlur: false,
-              showCloseButton: false,
-              closeOnEsc: false,
-              closeOnClickOutside: false,
-              autoClose: false,
-              buttons: [],
             });
 
             const response = await removePerfil(params);
 
             if (response instanceof SuccessReponse) {
-              alertKit.show({
-                type: AlertType.success,
+              alertKit.success({
                 headerTitle: "SysSoft Integra",
                 title: "Perfil",
-                backdropBlur: false,
                 message: response.data,
                 buttons: [
                   {
@@ -211,11 +200,9 @@ class Perfiles extends CustomComponent {
 
             if (response instanceof ErrorResponse) {
 
-              alertKit.show({
-                type: AlertType.warning,
+              alertKit.warning({
                 headerTitle: "SysSoft Integra",
                 title: "Perfil",
-                backdropBlur: false,
                 message: response.getMessage(),
                 buttons: [
                   {
@@ -229,7 +216,7 @@ class Perfiles extends CustomComponent {
           },
         },
         {
-          html: "<i class='fa fa-close'></i> Eliminar",
+          html: "<i class='fa fa-close'></i> Cancelar",
           class: ['btn', 'btn-outline-danger']
         },
       ],

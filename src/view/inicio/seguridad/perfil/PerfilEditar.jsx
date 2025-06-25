@@ -3,9 +3,8 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 import {
-  alertWarning,
   isEmpty,
-  isText,
+  isText
 } from '../../../../helper/utils.helper';
 import {
   getIdPerfil,
@@ -20,7 +19,7 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
-import { alertKit, AlertType } from 'alert-kit';
+import { alertKit } from 'alert-kit';
 
 class PerfilEditar extends CustomComponent {
   constructor(props) {
@@ -85,120 +84,59 @@ class PerfilEditar extends CustomComponent {
 
   handleEditar = () => {
     if (isEmpty(this.state.descripcion)) {
-      alertWarning('Perfil', 'Ingrese la descripción del perfil', () => {
+      alertKit.warning({
+        title: "Perfil",
+        message: "!Ingrese la descripción del perfil!",
+      }, () => {
         this.refDescripcion.current.focus();
       });
       return;
     }
 
-    alertKit.show({
-      type: AlertType.question,
-      headerTitle: "SysSoft Integra",
+    alertKit.question({
       title: "Perfil",
       message: '¿Estás seguro de continuar?',
-      backdropBlur: false,
-      isMoveable: true,
-      showCloseButton: false,
-      closeOnEsc: false,
-      closeOnClickOutside: false,
-      buttons: [
-        {
-          html: "<i class='fa fa-check'></i> Aceptar",
-          primary: true,
-          class: ['btn', 'btn-primary'],
-          onClick: async () => {
-            const data = {
-              descripcion: this.state.descripcion.trim(),
-              idEmpresa: 'EM0001',
-              idUsuario: this.state.idUsuario,
-              idPerfil: this.state.idPerfil,
-            };
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
+      if (accept) {
 
-            alertKit.show({
-              type: AlertType.loading,
-              message: 'Procesando información...',
-              backdropBlur: false,
-              showCloseButton: false,
-              closeOnEsc: false,
-              closeOnClickOutside: false,
-              autoClose: false,
-              buttons: [],
-            });
+        const data = {
+          descripcion: this.state.descripcion.trim(),
+          idEmpresa: 'EM0001',
+          idUsuario: this.state.idUsuario,
+          idPerfil: this.state.idPerfil,
+        };
 
-            const response = await updatePerfil(data);
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
-            if (response instanceof SuccessReponse) {
-              alertKit.show({
-                type: AlertType.success,
-                headerTitle: "SysSoft Integra",
-                title: "Perfil",
-                backdropBlur: false,
-                message: response.data,
-                buttons: [
-                  {
-                    html: "<i class='fa fa-check'></i> Aceptar",
-                    primary: true,
-                    class: ['btn', 'btn-outline-primary'],
-                    onClick: () => this.props.history.goBack(),
-                  },
-                ],
-              });
-            }
+        const response = await updatePerfil(data);
 
-            if (response instanceof ErrorResponse) {
-              if (response.getType() === CANCELED) return;
+        if (response instanceof SuccessReponse) {
+          alertKit.success({
+            title: "Perfil",
+            message: response.data,
+          }, () => {
+            this.props.history.goBack();
+          });
+        }
 
-              alertKit.show({
-                type: AlertType.warning,
-                title: "SysSoft Integra",
-                subTitle: "Perfil",
-                backdropBlur: false,
-                message: response.getMessage(),
-                buttons: [
-                  {
-                    html: "<i class='fa fa-check'></i> Aceptar",
-                    primary: true,
-                    class: ['btn', 'btn-outline-primary'],
-                  },
-                ],
-              });
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
 
-            }
-          },        
-        },
-        {
-          html: "<i class='fa fa-close'></i> Eliminar",
-          class: ['btn', 'btn-outline-danger']
-        },
-      ],
+          alertKit.warning({
+            subTitle: "Perfil",
+            message: response.getMessage(),
+          });
+        }
+      }
     });
-
-    // alertDialog('Perfil', '¿Estás seguro de continuar?', async (accept) => {
-    //   if (accept) {
-    //     alertInfo('Perfil', 'Procesando información...');
-
-    //     const data = {
-    //       descripcion: this.state.descripcion.trim(),
-    //       idEmpresa: 'EM0001',
-    //       idUsuario: this.state.idUsuario,
-    //       idPerfil: this.state.idPerfil,
-    //     };
-
-    //     const response = await updatePerfil(data);
-
-    //     if (response instanceof SuccessReponse) {
-    //       alertSuccess('Perfil', response.data, () => {
-    //         this.props.history.goBack();
-    //       });
-    //     }
-
-    //     if (response instanceof ErrorResponse) {
-    //       if (response.getType() === CANCELED) return;
-
-    //       alertWarning('Perfil', response.getMessage());
-    //     }
-    //   }
-    // });
   };
 
   render() {
@@ -220,7 +158,7 @@ class PerfilEditar extends CustomComponent {
             <Input
               label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese la descripción."
-              refInput={this.refDescripcion}
+              ref={this.refDescripcion}
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
             />

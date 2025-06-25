@@ -262,8 +262,8 @@ class RepProductos extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="ingresos" stroke="#8884d8" />
-                    <Line type="monotone" dataKey="gastos" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="ingresos" label="Ingresos" name="Ingresos" stroke="#004099" />
+                    <Line type="monotone" dataKey="gastos" label="Gastos" name="Gastos" stroke="#32a852" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardBody>
@@ -281,7 +281,7 @@ class RepProductos extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="valor" fill="#8884d8" />
+                    <Bar dataKey="valor" label="Valor" name="Valor" fill="#004099" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>
@@ -301,8 +301,8 @@ class RepProductos extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="ingresos" stroke="#8884d8" />
-                    <Line type="monotone" dataKey="gastos" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="ingresos" label="Ingresos" name="Ingresos" stroke="#004099" />
+                    <Line type="monotone" dataKey="gastos" label="Gastos" name="Gastos" stroke="#32a852" />
                   </LineChart>
                 </ResponsiveContainer>
               </CardBody>
@@ -320,7 +320,7 @@ class RepProductos extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="valor" fill="#8884d8" />
+                    <Bar dataKey="valor" label="Valor" name="Valor" fill="#004099" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>

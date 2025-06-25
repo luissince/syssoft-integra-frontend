@@ -204,7 +204,7 @@ class ModalInventario extends Component {
                   autoFocus={true}
                   label={<>Nombre Almacen: <i className="fa fa-asterisk text-danger small"></i></>}
                   className="form-control"
-                  refSelect={this.refIdAlmacen}
+                  ref={this.refIdAlmacen}
                   value={idAlmacen}
                   onChange={this.handleSelectIdAlmacen}
                 >
@@ -226,7 +226,7 @@ class ModalInventario extends Component {
                   label={<>Cantidad Inicial: <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="0"
                   role={"float"}
-                  refInput={this.refCantidad}
+                  ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
                 />
@@ -237,7 +237,7 @@ class ModalInventario extends Component {
                   label={<>Cantidad Máxima: <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="0"
                   role={"float"}
-                  refInput={this.refCantidadMaxima}
+                  ref={this.refCantidadMaxima}
                   value={cantidadMaxima}
                   onChange={this.handleInputCantidadMaxima}
                 />
@@ -248,7 +248,7 @@ class ModalInventario extends Component {
                   label={<>Cantidad Mínima: <i className="fa fa-asterisk text-danger small"></i></>}
                   placeholder="0"
                   role={"float"}
-                  refInput={this.refCantidadMinima}
+                  ref={this.refCantidadMinima}
                   value={cantidadMinima}
                   onChange={this.handleInputCantidadMinima}
                 />

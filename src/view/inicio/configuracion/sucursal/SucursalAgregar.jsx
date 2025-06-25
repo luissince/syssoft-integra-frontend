@@ -1,9 +1,5 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   imageBase64,
   isEmpty,
   keyNumberPhone,
@@ -26,7 +22,7 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
-import Image from '../../../../components/Image';
+import Image, { ImageUpload } from '../../../../components/Image';
 import TextArea from '../../../../components/TextArea';
 
 /**
@@ -46,6 +42,7 @@ class SucursalAgregar extends CustomComponent {
       direcion: '',
       idUbigeo: '',
       googleMaps: '',
+      horarioAtencion: '',
       principal: false,
       estado: true,
 
@@ -91,7 +88,10 @@ class SucursalAgregar extends CustomComponent {
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
       if (logoSend.size > 500) {
-        alertWarning("Producto", "La imagen a subir tiene que ser menor a 500 KB.")
+        alertKit.warning({
+          title: "Sucursal",
+          message: "La imagen a subir tiene que ser menor a 500 KB."
+        });
         return;
       }
       this.setState({
@@ -123,6 +123,7 @@ class SucursalAgregar extends CustomComponent {
       }
     });
   }
+
 
   //------------------------------------------------------------------------------------------
   // Filtrar ubigeo
@@ -174,29 +175,52 @@ class SucursalAgregar extends CustomComponent {
 
   handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Sucursal', 'Ingrese el nombre del sucursal.', () => {
-        this.refNombre.current.focus();
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'Ingrese el nombre del sucursal.',
+        onClose: () => {
+          this.refNombre.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.direcion)) {
-      alertWarning('Sucursal', 'Ingrese la dirección del sucursal.', () => {
-        this.refDireccion.current.focus();
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'Ingrese la dirección del sucursal.',
+        onClose: () => {
+          this.refDireccion.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.idUbigeo)) {
-      alertWarning('Sucursal', 'Ingrese su ubigeo.', () => {
-        this.refValueUbigeo.current.focus();
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'Ingrese su ubigeo.',
+        onClose: () => {
+          this.refValueUbigeo.current.focus();
+        },
       });
       return;
     }
 
-    alertDialog('Sucursal', '¿Está seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: 'Sucursal',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
-        alertInfo('Sucursal', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const data = {
           //datos
@@ -208,6 +232,7 @@ class SucursalAgregar extends CustomComponent {
           direccion: this.state.direcion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
           googleMaps: this.state.googleMaps,
+          horarioAtencion: this.state.horarioAtencion.trim(),
           principal: this.state.principal,
           estado: this.state.estado,
           imagen: this.state.imagen,
@@ -217,15 +242,22 @@ class SucursalAgregar extends CustomComponent {
         const response = await addSucursal(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Sucursal', response.data, () => {
-            this.props.history.goBack();
+          alertKit.success({
+            title: 'Sucursal',
+            message: response.data,
+            onClose: () => {
+              this.props.history.goBack();
+            },
           });
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Sucursal', response.getMessage());
+          alertKit.warning({
+            title: 'Sucursal',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -247,7 +279,7 @@ class SucursalAgregar extends CustomComponent {
                 <Input
                   autoFocus={true}
                   label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
-                  refInput={this.refNombre}
+                  ref={this.refNombre}
                   value={this.state.nombre}
                   onChange={(event) =>
                     this.setState({ nombre: event.target.value })
@@ -261,7 +293,7 @@ class SucursalAgregar extends CustomComponent {
               <Column className={"col-md-6"} formGroup={true}>
                 <Input
                   label={"N° de Teléfono:"}
-                  refInput={this.refTelefono}
+                  ref={this.refTelefono}
                   value={this.state.telefono}
                   onChange={(event) =>
                     this.setState({ telefono: event.target.value })
@@ -274,7 +306,7 @@ class SucursalAgregar extends CustomComponent {
               <Column className={"col-md-6"} formGroup={true}>
                 <Input
                   label={"N° de Celular:"}
-                  refInput={this.refCelular}
+                  ref={this.refCelular}
                   value={this.state.celular}
                   onChange={(event) =>
                     this.setState({ celular: event.target.value })
@@ -289,7 +321,7 @@ class SucursalAgregar extends CustomComponent {
               <Column className={"col-md-6"} formGroup={true}>
                 <Input
                   label={"Correo Electrónico:"}
-                  refInput={this.refEmail}
+                  ref={this.refEmail}
                   value={this.state.email}
                   onChange={(event) =>
                     this.setState({ email: event.target.value })
@@ -301,7 +333,7 @@ class SucursalAgregar extends CustomComponent {
               <Column className={"col-md-6"} formGroup={true}>
                 <Input
                   label={"Página Web:"}
-                  refInput={this.refPaginWeb}
+                  ref={this.refPaginWeb}
                   value={this.state.paginaWeb}
                   onChange={(event) =>
                     this.setState({ paginaWeb: event.target.value })
@@ -315,7 +347,7 @@ class SucursalAgregar extends CustomComponent {
               <Column formGroup={true}>
                 <Input
                   label={<>Dirección: <i className="fa fa-asterisk text-danger small"></i></>}
-                  refInput={this.refDireccion}
+                  ref={this.refDireccion}
                   value={this.state.direcion}
                   onChange={(event) =>
                     this.setState({ direcion: event.target.value })
@@ -361,6 +393,21 @@ class SucursalAgregar extends CustomComponent {
             </Row>
 
             <Row>
+              <Column formGroup={true}>
+                <TextArea
+                  label={<>Horario de Atención:</>}
+                  value={this.state.horarioAtencion}
+                  onChange={(event) =>
+                    this.setState({ horarioAtencion: event.target.value })
+                  }
+                  placeholder="Ingrese su horario de atención ..."
+                  rows={4}
+                >
+                </TextArea>
+              </Column>
+            </Row>
+
+            <Row>
               <Column className={"col-md-6 col-12"} formGroup={true}>
                 <Switches
                   label={<>Principal: <i className="fa fa-asterisk text-danger small"></i></>}
@@ -390,42 +437,18 @@ class SucursalAgregar extends CustomComponent {
           </Column>
 
           <Column className="col-lg-4 col-md-6 col-12" formGroup={true}>
-            <Row>
-              <Column className='col-12 text-center' formGroup={true}>
-                <p className='p-0 m-0'>Imagen de portada 1024 x 629 pixeles </p>
-                <small>Usuado como portada para cada sucursal</small>
-
-                <Image
-                  default={images.noImage}
-                  src={this.state.imagen.url}
-                  alt="Portada de la sucursal"
-                  className="img-fluid border border-primary rounded"
-                />
-              </Column>
-            </Row>
-
-            <Row>
-              <Column className='col-12 text-center' formGroup={true}>
-                <input
-                  className="d-none"
-                  type="file"
-                  id="fileImage"
-                  accept="image/png, image/jpeg, image/gif, image/svg"
+            <Row>          
+              <Column formGroup={true}>
+                <ImageUpload
+                  label="Imagen de portada"
+                  subtitle="La imagen no debe superar los 1MB(Megabytes) y debe tener un tamaño de 1024 x 629 píxeles"
+                  imageUrl={this.state.imagen.url}
+                  defaultImage={images.noImage}
+                  alt="Icono de la categoría"
+                  inputId="fileImagen"
+                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
                   onChange={this.handleFileImage}
-                />
-                <label
-                  htmlFor="fileImage"
-                  className="btn btn-outline-secondary m-0"
-                >
-                  <div className="content-button">
-                    <i className="bi bi-image"></i>
-                    <span></span>
-                  </div>
-                </label>{' '}
-                <Button
-                  className='btn-outline-secondary'
-                  onClick={this.handleClearImage}
-                  icono={<i className="bi bi-trash"></i>}
+                  onClear={this.handleClearImage}
                 />
               </Column>
             </Row>

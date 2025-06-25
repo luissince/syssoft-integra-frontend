@@ -1,106 +1,76 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
+import { forwardRef } from 'react';
 
-const TextArea = ({
-    autoFocus = false,
+/**
+ * 
+ * @example
+ * <TextArea
+ *   label={"Descripción Corta:"}
+ *   rows={3}
+ *   ref={refDescripcionCorta}
+ *   value={descripcionCorta}
+ *   onChange={handleInputDescripcionCorta}
+ * />
+ */
+const TextArea = forwardRef(({
     label,
-    rows,
+    rows = 3,
     group = false,
     iconLeft,
-    title,
-    className = "border border-primary",
-    placeholder,
-    disabled,
-    role,
-    refInput,
-    value,
     buttonRight,
-    onChange,
-    onKeyUp,
-    onKeyDown,
-    onPaste
-}) => {
+    className = "border border-primary",
+    ...rest // aquí van autoFocus, placeholder, value, onChange, etc.
+}, ref) => {
+    const textareaElement = (
+        <textarea
+            ref={ref}
+            rows={rows}
+            className={`form-control border border-primary ${className}`}
+            {...rest}
+        />
+    );
+
     if (group) {
         return (
             <>
-                {label && <label> {label} </label>}
+                {label && <label>{label}</label>}
                 <div className="input-group">
-                    {
-                        iconLeft && (
-                            <div className="input-group-prepend">
-                                {/* <div className="input-group-text">
-                                    {iconLeft}
-                                </div> */}
-                                <span className='btn btn-primary'>
-                                    {iconLeft}
-                                </span>
-                            </div>
-                        )
-                    }
-
-                    <textarea
-                        autoFocus={autoFocus}
-                        title={title}
-                        rows={rows}
-                        className={`form-control ${className}`}
-                        placeholder={placeholder}
-                        disabled={disabled}
-                        role={role}
-                        ref={refInput}
-                        value={value}
-                        onChange={onChange}
-                        onKeyUp={onKeyUp}
-                        onKeyDown={onKeyDown}
-                        onPaste={onPaste}
-                    />
-                    {buttonRight &&
+                    {iconLeft && (
+                        <div className="input-group-prepend">
+                            <span className="btn btn-primary">
+                                {iconLeft}
+                            </span>
+                        </div>
+                    )}
+                    {textareaElement}
+                    {buttonRight && (
                         <div className="input-group-append">
                             {buttonRight}
                         </div>
-                    }
+                    )}
                 </div>
             </>
         );
     }
+
     return (
         <>
-            {label && <label> {label} </label>}
-            <textarea
-                autoFocus={autoFocus}
-                title={title}
-                rows={rows}
-                className={`form-control ${className}`}
-                placeholder={placeholder}
-                disabled={disabled}
-                role={role}
-                ref={refInput}
-                value={value}
-                onChange={onChange}
-                onKeyUp={onKeyUp}
-                onKeyDown={onKeyDown}
-                onPaste={onPaste}
-            />
+            {label && <label>{label}</label>}
+            {textareaElement}
         </>
     );
-}
+});
+
+TextArea.displayName = 'TextArea';
 
 TextArea.propTypes = {
-    autoFocus: PropTypes.bool,
     label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
     rows: PropTypes.number,
     group: PropTypes.bool,
     iconLeft: PropTypes.element,
-    title: PropTypes.string,
-    className: PropTypes.string,
-    placeholder: PropTypes.string,
-    disabled: PropTypes.bool,
-    role: PropTypes.string,
-    refInput: PropTypes.object,
-    value: PropTypes.string,
     buttonRight: PropTypes.element,
-    onChange: PropTypes.func,
-    onKeyUp: PropTypes.func,
-    onKeyDown: PropTypes.func,
-    onPaste: PropTypes.func
+    className: PropTypes.string,
+    // los demás props como value, placeholder, etc., son pasados por `...rest`
 };
 
 export default TextArea;

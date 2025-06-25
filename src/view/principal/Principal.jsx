@@ -232,7 +232,7 @@ class Principal extends CustomComponent {
               className="bg-transparent"
               type="search"
               placeholder="Filtar por nombre de sucursal"
-              refInput={this.refTxtSearch}
+              ref={this.refTxtSearch}
               onKeyUp={(event) => this.handleSearch(event.target.value)}
             />
           </Column>

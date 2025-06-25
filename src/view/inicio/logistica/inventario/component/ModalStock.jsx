@@ -57,7 +57,7 @@ const CustomModalStock = ({
                 label={<> Stock Máximo <i className="fa fa-asterisk text-danger small"></i></>}
                 placeholder={"ingrese..."}
                 role={"float"}
-                refInput={refStockMaximo}
+                ref={refStockMaximo}
                 value={stockMaximo}
                 onChange={handleInputStockMaximo}
               />
@@ -68,7 +68,7 @@ const CustomModalStock = ({
                 label={<>Stock Mínimo <i className="fa fa-asterisk text-danger small"></i></>}
                 placeholder="ingrese..."
                 role={"float"}
-                refInput={refStockMinimo}
+                ref={refStockMinimo}
                 value={stockMinimo}
                 onChange={handleInputStockMinimo}
               />

@@ -309,8 +309,8 @@ class RepFinanciero extends CustomComponent {
               {item.serie}-{formatNumberWithZeros(item.numeracion)} <ExternalLink width={18} height={18} />
             </Link>
           </TableCell>
-          <TableCell className="text-right">{item.credito == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.credito, item.codiso)}</span>}</TableCell>
-          <TableCell className="text-right">{item.debito == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.debito, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">{item.ingreso == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.ingreso, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">{item.egreso == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.egreso, item.codiso)}</span>}</TableCell>
         </TableRow>
       );
     });
@@ -509,7 +509,7 @@ class RepFinanciero extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="saldo" stroke="#8884d8" />
+                    <Line type="monotone" label="Saldo" dataKey="saldo" name='Saldo' stroke="#004099" />
                     {/* <Line type="monotone" dataKey="gastos" stroke="#82ca9d" /> */}
                   </LineChart>
                 </ResponsiveContainer>
@@ -530,7 +530,7 @@ class RepFinanciero extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" fill="#8884d8" />
+                    <Bar dataKey="total" label="Total" name='Total' fill="#004099" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>
@@ -547,7 +547,7 @@ class RepFinanciero extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" fill="#8884d8" />
+                    <Bar dataKey="total" label="Total" name='Total' fill="#004099" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>
@@ -571,8 +571,8 @@ class RepFinanciero extends CustomComponent {
                         <TableHead className="text-secondary" width="15%">Fecha</TableHead>
                         <TableHead className="text-secondary" width="20%">Concepto</TableHead>
                         <TableHead className="text-secondary" width="15%">Referencia</TableHead>
-                        <TableHead className="text-secondary" width="10%">Débito</TableHead>
-                        <TableHead className="text-secondary" width="10%">Crédito</TableHead>
+                        <TableHead className="text-secondary" width="10%">Ingreso</TableHead>
+                        <TableHead className="text-secondary" width="10%">Egreso</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

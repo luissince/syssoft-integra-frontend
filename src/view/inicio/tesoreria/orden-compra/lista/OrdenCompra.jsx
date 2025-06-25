@@ -390,7 +390,7 @@ class OrdenCompras extends CustomComponent {
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
-                    <TableHead width="20%">Cliente</TableHead>
+                    <TableHead width="20%">Proveedor</TableHead>
                     <TableHead width="15%">Comprobante</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>
                     <TableHead width="10%" className="text-center">Ligado</TableHead>

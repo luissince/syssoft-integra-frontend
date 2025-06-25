@@ -41,7 +41,7 @@ const SidebarConfiguration = (props) => {
                 </label>
                 <Select
                   title="Lista de Impuestos"
-                  refSelect={refImpuesto}
+                  ref={refImpuesto}
                   value={idImpuesto}
                   onChange={handleSelectIdImpuesto}
                 >
@@ -62,7 +62,7 @@ const SidebarConfiguration = (props) => {
                 </label>
                 <Select
                   title="Lista de Monedas"
-                  refSelect={refMoneda}
+                  ref={refMoneda}
                   value={idMoneda}
                   onChange={handleSelectIdMoneda}
                 >
@@ -83,7 +83,7 @@ const SidebarConfiguration = (props) => {
                 </label>
                 <Select
                   title="Lista de Almacenes"
-                  refSelect={refAlmacen}
+                  ref={refAlmacen}
                   value={idAlmacen}
                   onChange={handleSelectIdIdAlmacen}
                 >
@@ -102,7 +102,7 @@ const SidebarConfiguration = (props) => {
                 <label>Observación:</label>
                 <TextArea
                   placeholder="Ingrese alguna observación."
-                  refInput={refObservacion}
+                  ref={refObservacion}
                   value={observacion}
                   onChange={handleInputObservacion}
                 />
@@ -114,7 +114,7 @@ const SidebarConfiguration = (props) => {
                 <label>Nota (Visible en los documentos impresos):</label>
                 <TextArea
                   placeholder="Ingrese alguna nota."
-                  refInput={refNota}
+                  ref={refNota}
                   value={nota}
                   onChange={handleInputNota}
                 />

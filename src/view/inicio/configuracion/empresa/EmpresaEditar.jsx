@@ -3,9 +3,6 @@ import PropTypes from 'prop-types';
 import {
   convertNullText,
   alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   keyNumberInteger,
   imageBase64,
   isText,
@@ -29,11 +26,12 @@ import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import Image from '../../../../components/Image';
+import { ImageUpload, MultiImages } from '../../../../components/Image';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
 import TextArea from '../../../../components/TextArea';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -58,10 +56,6 @@ class EmpresaProceso extends CustomComponent {
       razonSocial: '',
       nombreEmpresa: '',
       email: '',
-      paginaWeb: '',
-
-      usuarioEmail: '',
-      claveEmail: '',
 
       usuarioSolSunat: '',
       claveSolSunat: '',
@@ -84,10 +78,20 @@ class EmpresaProceso extends CustomComponent {
         src: images.noImage,
       },
 
+      banner: {
+        src: images.noImage,
+      },
+
+      portada: {
+        src: images.noImage,
+      },
+
+      banners: [],
+
       numeroWhatsapp: '',
       tituloWhatsapp: '',
       mensajeWhatsapp: '',
-      horarioAtencion: '',
+      informacion: '',
       acercaNosotros: '',
       politicasPrivacidad: '',
       terminosCondiciones: '',
@@ -97,19 +101,30 @@ class EmpresaProceso extends CustomComponent {
       lookPasswordClave: false,
       lookPasswordClaveCertificado: false,
 
+      paginaWeb: '',
+      youTubePagina: '',
+      facebookPagina: '',
+      twitterPagina: '',
+      instagramPagina: '',
+      tiktokPagina: '',
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.refDocumento = React.createRef();
     this.refRazonSocial = React.createRef();
-    this.refEmail = React.createRef();
-    this.refPaginaWeb = React.createRef();
 
     this.refPasswordEmail = React.createRef();
     this.refPasswordSol = React.createRef();
     this.refPasswordClave = React.createRef();
     this.refPasswordClaveCertificado = React.createRef();
+
+    this.refPaginaWeb = React.createRef();
+    this.refYouTube = React.createRef();
+    this.refFacebook = React.createRef();
+    this.refTwitter = React.createRef();
+    this.refInstagram = React.createRef();
+    this.refTiktok = React.createRef();
 
     this.refFileCertificado = React.createRef();
     this.refFileFireBase = React.createRef();
@@ -178,31 +193,39 @@ class EmpresaProceso extends CustomComponent {
         razonSocial: empresa.razonSocial,
         nombreEmpresa: empresa.nombreEmpresa,
         email: empresa.email,
-        paginaWeb: empresa.paginaWeb,
 
-        usuarioSolSunat: empresa.usuarioSolSunat ?? "",
-        claveSolSunat: empresa.claveSolSunat ?? "",
+        usuarioSolSunat: empresa.usuarioSolSunat ?? '',
+        claveSolSunat: empresa.claveSolSunat ?? '',
 
-        idApiSunat: empresa.idApiSunat ?? "",
-        claveApiSunat: empresa.claveApiSunat ?? "",
+        idApiSunat: empresa.idApiSunat ?? '',
+        claveApiSunat: empresa.claveApiSunat ?? '',
 
-        certificado: empresa.certificadoSunat ?? "Hacer click para seleccionar su archivo.",
-        claveCertificado: empresa.claveCertificadoSunat ?? "",
+        certificado: empresa.certificadoSunat ?? 'Hacer click para seleccionar su archivo.',
+        claveCertificado: empresa.claveCertificadoSunat ?? '',
 
-        usuarioEmail: empresa.usuarioEmail ?? "",
-        claveEmail: empresa.claveEmail ?? "",
+        fireBaseCertificado: empresa.certificadoFirebase ?? 'Hacer click para seleccionar su archivo.',
 
         logo: empresa.rutaLogo ?? { src: images.noImage },
         image: empresa.rutaImage ?? { src: images.noImage },
         icon: empresa.rutaIcon ?? { src: images.noImage },
+        banner: empresa.rutaBanner ?? { src: images.noImage },
+        portada: empresa.rutaPortada ?? { src: images.noImage },
+        banners: empresa.banners ?? [],
 
-        numeroWhatsapp: empresa.numeroWhatsapp ?? "",
-        tituloWhatsapp: empresa.tituloWhatsapp ?? "",
-        mensajeWhatsapp: empresa.mensajeWhatsapp ?? "",
-        horarioAtencion: empresa.horarioAtencion ?? "",
-        acercaNosotros: empresa.acercaNosotros ?? "",
-        politicasPrivacidad: empresa.politicasPrivacidad ?? "",
-        terminosCondiciones: empresa.terminosCondiciones ?? "",
+        numeroWhatsapp: empresa.numeroWhatsapp ?? '',
+        tituloWhatsapp: empresa.tituloWhatsapp ?? '',
+        mensajeWhatsapp: empresa.mensajeWhatsapp ?? '',
+        informacion: empresa.informacion ?? '',
+        acercaNosotros: empresa.acercaNosotros ?? '',
+        politicasPrivacidad: empresa.politicasPrivacidad ?? '',
+        terminosCondiciones: empresa.terminosCondiciones ?? '',
+
+        paginaWeb: empresa.paginaWeb,
+        youTubePagina: empresa.youTubePagina,
+        facebookPagina: empresa.facebookPagina,
+        twitterPagina: empresa.twitterPagina,
+        instagramPagina: empresa.instagramPagina,
+        tiktokPagina: empresa.tiktokPagina,
 
         loading: false,
       });
@@ -282,10 +305,15 @@ class EmpresaProceso extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Empresa', response.getMessage(), () => {
-        this.setState({
-          loading: false,
-        });
+      alertKit.error({
+        headerTitle: "SysSoft Integra",
+        title: "Error",
+        message: response.getMessage(),
+        onClose: () => {
+          this.setState({
+            loading: false,
+          });
+        }
       });
     }
   }
@@ -326,6 +354,14 @@ class EmpresaProceso extends CustomComponent {
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
 
+      if (logoSend.size > 500) {
+        alertKit.warning({
+          title: "Logo repote",
+          message: "El logo del reporte " + file.name + " no debe superar los 500KB(Kilobytes)."
+        });
+        return;
+      }
+
       this.setState({
         logo: {
           base64: logoSend.base64String,
@@ -354,6 +390,14 @@ class EmpresaProceso extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
+
+      if (logoSend.size > 500) {
+        alertKit.warning({
+          title: "Logo pagina web",
+          message: "El logo pagina web " + file.name + " no debe superar los 500KB(Kilobytes)."
+        });
+        return;
+      }
 
       this.setState({
         image: {
@@ -384,6 +428,14 @@ class EmpresaProceso extends CustomComponent {
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
 
+      if (logoSend.size > 50) {
+        alertKit.warning({
+          title: "Icono",
+          message: "El icono " + file.name + " no debe superar los 50KB(Kilobytes)."
+        });
+        return;
+      }
+
       this.setState({
         icon: {
           base64: logoSend.base64String,
@@ -397,6 +449,96 @@ class EmpresaProceso extends CustomComponent {
     } else {
       this.setState({
         icon: {
+          url: images.noImage
+        }
+      });
+    }
+
+    event.target.value = null;
+  };
+
+  handleFileBanner = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+
+      if (logoSend.width !== 1200 && logoSend.height !== 1200) {
+        alertKit.warning({
+          title: "Banner",
+          message: "La imagen del banner " + file.name + " tiene que tener un aspecto de 1200 x 1200 pixeles."
+        });
+        return;
+      }
+
+      if (logoSend.size > 1024) {
+        alertKit.warning({
+          title: "Banner",
+          message: "La imagen del banner " + file.name + " no debe superar los 1024KB(Kilobytes)."
+        });
+        return;
+      }
+
+      this.setState({
+        banner: {
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
+    } else {
+      this.setState({
+        banner: {
+          url: images.noImage
+        }
+      });
+    }
+
+    event.target.value = null;
+  };
+
+  handleFilePortada = async (event) => {
+    const files = event.currentTarget.files;
+
+    if (!isEmpty(files)) {
+      const file = files[0];
+      let url = URL.createObjectURL(file);
+      const logoSend = await imageBase64(file);
+
+      if (logoSend.width !== 1200 && logoSend.height !== 1200) {
+        alertKit.warning({
+          title: "Portada",
+          message: "La imagen de la portada " + file.name + " tiene que tener un aspecto de 1200 x 1200 pixeles."
+        });
+        return;
+      }
+
+      if (logoSend.size > 1024) {
+        alertKit.warning({
+          title: "Portada",
+          message: "La imagen de la portada " + file.name + " no debe superar los 1024KB(Kilobytes)."
+        });
+        return;
+      }
+
+      this.setState({
+        portada: {
+          base64: logoSend.base64String,
+          extension: logoSend.extension,
+          width: logoSend.width,
+          height: logoSend.height,
+          size: logoSend.size,
+          url: url
+        }
+      })
+    } else {
+      this.setState({
+        portada: {
           url: images.noImage
         }
       });
@@ -429,6 +571,22 @@ class EmpresaProceso extends CustomComponent {
     });
   };
 
+  handleClearBanner = () => {
+    this.setState({
+      banner: {
+        url: images.noImage
+      }
+    });
+  };
+
+  handleClearPortada = () => {
+    this.setState({
+      portada: {
+        url: images.noImage
+      }
+    });
+  };
+
   handleDownload(url) {
     if (isEmpty(url)) return;
 
@@ -437,101 +595,158 @@ class EmpresaProceso extends CustomComponent {
   };
 
   // ------------------------------------------------------------------------
+  // Eventos para manejo de los banners
+  // ------------------------------------------------------------------------
+
+  handleSelectBanners = (banners) => {
+    this.setState({ banners: banners });
+  };
+
+  handleRemoveBanners = (banners) => {
+    this.setState({ banners: banners });
+  };
+
+  // ------------------------------------------------------------------------
   // Evento para editar empresa
   // ------------------------------------------------------------------------
 
-  async handleGuardar() {
+  handleGuardar = async () => {
     if (isEmpty(this.state.documento)) {
-      alertWarning('Empresa', 'Ingrese el número de documento.', () =>
-        this.refDocumento.current.focus(),
-      );
+      alertKit.warning({
+        title: "Documento",
+        message: "Ingrese el número de documento.",
+        onClose: () => {
+          this.refDocumento.current.focus();
+        }
+      });
       return;
     }
 
     if (isEmpty(this.state.razonSocial)) {
-      alertWarning('Empresa', 'Ingrese la razón social.', () =>
-        this.refRazonSocial.current.focus(),
-      );
+      alertKit.warning({
+        title: "Razón Social",
+        message: "Ingrese la razón social.",
+        onClose: () => {
+          this.refRazonSocial.current.focus();
+        }
+      });
       return;
     }
 
-    alertDialog('Empresa', '¿Está seguro de continuar?', async () => {
-      alertInfo('Empresa', 'Procesando información...');
-
-      const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
-
-      const fireBaseSend = await convertFileBase64(this.refFileFireBase.current.files);
-
-      const data = {
-        documento: this.state.documento.trim(),
-        razonSocial: this.state.razonSocial.trim(),
-        nombreEmpresa: this.state.nombreEmpresa.trim(),
-        email: this.state.email.trim(),
-        paginaWeb: this.state.paginaWeb.trim(),
-
-        usuarioSolSunat: this.state.usuarioSolSunat.trim(),
-        claveSolSunat: this.state.claveSolSunat.trim(),
-
-        idApiSunat: this.state.idApiSunat.trim(),
-        claveApiSunat: this.state.claveApiSunat.trim(),
-
-        usuarioEmail: this.state.usuarioEmail.trim(),
-        claveEmail: this.state.claveEmail.trim(),
-
-        certificado: certificadoSend.data ?? "",
-        extCertificado: certificadoSend.extension ?? "",
-        claveCertificado: this.state.claveCertificado,
-
-        fireBase: fireBaseSend.data ?? "",
-        extFireBase: fireBaseSend.extension ?? "",
-
-        logo: this.state.logo,
-        image: this.state.image,
-        icon: this.state.icon,
-
-        numeroWhatsapp: this.state.numeroWhatsapp.trim(),
-        tituloWhatsapp: this.state.tituloWhatsapp.trim(),
-        mensajeWhatsapp: this.state.mensajeWhatsapp.trim(),
-        horarioAtencion: this.state.horarioAtencion.trim(),
-        acercaNosotros: this.state.acercaNosotros.trim(),
-        politicasPrivacidad: this.state.politicasPrivacidad.trim(),
-        terminosCondiciones: this.state.terminosCondiciones.trim(),
-
-        idUsuario: this.state.idUsuario,
-        idEmpresa: this.state.idEmpresa,
-      };
-
-      const response = await updateEmpresa(data);
-
-      if (response instanceof SuccessReponse) {
-        alertSuccess('Empresa', response.data, () => {
-          this.props.history.goBack();
-        });
-      }
-
-      if (response instanceof ErrorResponse) {
-        if (response.getType() === CANCELED) return;
-
-        alertWarning('Empresa', response.getMessage());
+    alertKit.question({
+      title: "Empresa",
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
+      if (accept) {
+        await this.handleGuardarProcess();
       }
     });
   };
 
+  handleGuardarProcess = async () => {
+    alertKit.loading({
+      message: 'Procesando información...',
+    });
+
+    const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
+
+    const fireBaseSend = await convertFileBase64(this.refFileFireBase.current.files);
+
+    const data = {
+      documento: this.state.documento.trim(),
+      razonSocial: this.state.razonSocial.trim(),
+      nombreEmpresa: this.state.nombreEmpresa.trim(),
+      email: this.state.email.trim(),
+
+      usuarioSolSunat: this.state.usuarioSolSunat.trim(),
+      claveSolSunat: this.state.claveSolSunat.trim(),
+
+      idApiSunat: this.state.idApiSunat.trim(),
+      claveApiSunat: this.state.claveApiSunat.trim(),
+
+      certificado: certificadoSend.data ?? '',
+      extCertificado: certificadoSend.extension ?? '',
+      claveCertificado: this.state.claveCertificado,
+
+      fireBase: fireBaseSend.data ?? '',
+      extFireBase: fireBaseSend.extension ?? '',
+
+      logo: this.state.logo,
+      image: this.state.image,
+      icon: this.state.icon,
+      banner: this.state.banner,
+      portada: this.state.portada,
+      banners: this.state.banners,
+
+      numeroWhatsapp: this.state.numeroWhatsapp.trim(),
+      tituloWhatsapp: this.state.tituloWhatsapp.trim(),
+      mensajeWhatsapp: this.state.mensajeWhatsapp.trim(),
+      informacion: this.state.informacion.trim(),
+      acercaNosotros: this.state.acercaNosotros.trim(),
+      politicasPrivacidad: this.state.politicasPrivacidad.trim(),
+      terminosCondiciones: this.state.terminosCondiciones.trim(),
+
+      paginaWeb: this.state.paginaWeb.trim(),
+      youTubePagina: this.state.youTubePagina.trim(),
+      facebookPagina: this.state.facebookPagina.trim(),
+      twitterPagina: this.state.twitterPagina.trim(),
+      instagramPagina: this.state.instagramPagina.trim(),
+      tiktokPagina: this.state.tiktokPagina.trim(),
+
+      idUsuario: this.state.idUsuario,
+      idEmpresa: this.state.idEmpresa,
+    };
+
+    const response = await updateEmpresa(data);
+
+    if (response instanceof SuccessReponse) {
+      alertKit.success({
+        headerTitle: "SysSoft Integra",
+        title: "Empresa",
+        message: response.data,
+        onClose: () => {
+          this.props.history.goBack();
+        }
+      });
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertKit.error({
+        headerTitle: "SysSoft Integra",
+        title: "Error",
+        message: response.getMessage(),
+        onClose: () => {
+          this.setState({
+            loading: false,
+          });
+        }
+      });
+    }
+  };
+
   /*
-|--------------------------------------------------------------------------
-| Método de renderización
-|--------------------------------------------------------------------------
-|
-| El método render() es esencial en los componentes de React y se encarga de determinar
-| qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-| del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-| en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-| de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-| sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-| directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-| actuales del componente para determinar lo que se mostrará.
-|
-*/
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
     return (
@@ -542,18 +757,23 @@ class EmpresaProceso extends CustomComponent {
         />
 
         <Title
-          title='Empresa'
-          subTitle='EDITAR'
+          title="Empresa"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">1</span> Información General</h6>
+          </Column>
+          <div className="dropdown-divider"></div>
+
           <Column className={"col-md-6"} formGroup={true}>
             <Input
               group={true}
               label={<>Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="10909000223"
-              refInput={this.refDocumento}
+              ref={this.refDocumento}
               value={this.state.documento}
               onChange={(event) =>
                 this.setState({ documento: event.target.value })
@@ -574,7 +794,7 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={<>Razón Social: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese la razón social"
-              refInput={this.refRazonSocial}
+              ref={this.refRazonSocial}
               value={this.state.razonSocial}
               onChange={(event) =>
                 this.setState({ razonSocial: event.target.value })
@@ -588,83 +808,38 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={<>Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese el nombre comercial"
-              refInput={this.refNombreEmpresa}
+              ref={this.refNombreEmpresa}
               value={this.state.nombreEmpresa}
               onChange={(event) =>
                 this.setState({ nombreEmpresa: event.target.value })
               }
             />
           </Column>
-        </Row>
 
-        <Row>
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <Input
               label={<>Email:</>}
               placeholder="Ingrese el nombre comercial"
-              refInput={this.refEmail}
+              ref={this.refEmail}
               value={this.state.email}
               onChange={(event) =>
                 this.setState({ email: event.target.value })
               }
             />
           </Column>
-
-          <Column className={"col-md-6 col-12"} formGroup={true}>
-            <Input
-              label={<>Página Web:</>}
-              placeholder="Ingrese el nombre comercial"
-              refInput={this.refPaginaWeb}
-              value={this.state.paginaWeb}
-              onChange={(event) =>
-                this.setState({ paginaWeb: event.target.value })
-              }
-            />
-          </Column>
         </Row>
 
         <Row>
-          <Column className={"col-md-6"} formGroup={true}>
-            <Input
-              label={<>Usuario Email(<small>Para el envío del correo, solo activo para cuentas de gmail</small>):<i className="fa fa-asterisk text-danger small"></i></>}
-              placeholder="Email de Envío"
-              refInput={this.refEmail}
-              value={this.state.usuarioEmail}
-              onChange={(event) =>
-                this.setState({ usuarioEmail: event.target.value })
-              }
-            />
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">3</span> Credenciales para envio de comprobantes electrónicos a SUNAT</h6>
           </Column>
+          <div className="dropdown-divider"></div>
 
-          <Column className={"col-md-6"} formGroup={true}>
-            <Input
-              group={true}
-              label={<>Contraseña Email (<small>Para el envío del correo, solo activo para cuentas de gmail</small>):<i className="fa fa-asterisk text-danger small"></i></>}
-              placeholder="********"
-              refInput={this.refPasswordEmail}
-              value={this.state.claveEmail}
-              onChange={(event) =>
-                this.setState({ claveEmail: event.target.value })
-              }
-              type={this.state.lookPasswordEmail ? 'text' : 'password'}
-              buttonRight={
-                <Button
-                  className="btn-outline-secondary"
-                  onClick={this.handleLookPasswordEmail}
-                >
-                  <i className={this.state.lookPasswordEmail ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
-                </Button>
-              }
-            />
-          </Column>
-        </Row>
-
-        <Row>
           <Column className={"col-md-6"} formGroup={true}>
             <Input
               label={<>Usuario Sol(<small>Para el envío a Sunat</small>):<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Usurio secundario"
-              refInput={this.refUserSolSunat}
+              ref={this.refUserSolSunat}
               value={this.state.usuarioSolSunat}
               onChange={(event) =>
                 this.setState({ usuarioSolSunat: event.target.value })
@@ -677,18 +852,18 @@ class EmpresaProceso extends CustomComponent {
               group={true}
               label={<>Clave Sol(<small>Para el envío a Sunat</small>):<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="********"
-              refInput={this.refPasswordSol}
+              ref={this.refPasswordSol}
               value={this.state.claveSolSunat}
               onChange={(event) =>
                 this.setState({ claveSolSunat: event.target.value })
               }
-              type={this.state.refPasswordSol ? 'text' : 'password'}
+              type={this.state.refPasswordSol ? "text" : "password"}
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
                   onClick={this.handleLookPasswordSol}
                 >
-                  <i className={this.state.refPasswordSol ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  <i className={this.state.refPasswordSol ? "fa fa-eye" : "fa fa-eye-slash"}></i>
                 </Button>
               }
             />
@@ -700,7 +875,7 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={<>Id Api Sunat(<small>Para el envío de guía de remisión</small>):<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Usurio Api Sunat"
-              refInput={this.refIdApiSunat}
+              ref={this.refIdApiSunat}
               value={this.state.idApiSunat}
               onChange={(event) =>
                 this.setState({ idApiSunat: event.target.value })
@@ -713,18 +888,18 @@ class EmpresaProceso extends CustomComponent {
               group={true}
               label={<>Clave Api Sunat(<small>Para el envío de guía de remisión</small>):<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="********"
-              refInput={this.refPasswordClave}
+              ref={this.refPasswordClave}
               value={this.state.claveApiSunat}
               onChange={(event) =>
                 this.setState({ claveApiSunat: event.target.value })
               }
-              type={this.state.lookPasswordClave ? 'text' : 'password'}
+              type={this.state.lookPasswordClave ? "text" : "password"}
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
                   onClick={this.handleLookPasswordApiSunat}
                 >
-                  <i className={this.state.lookPasswordClave ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  <i className={this.state.lookPasswordClave ? "fa fa-eye" : "fa fa-eye-slash"}></i>
                 </Button>
               }
             />
@@ -744,7 +919,7 @@ class EmpresaProceso extends CustomComponent {
               ref={this.refFileCertificado}
               onChange={this.handleFileCertificado}
             />
-            <label htmlFor={"fileCertificado"} className='form-control cursor-pointer '>
+            <label htmlFor={"fileCertificado"} className="form-control cursor-pointer">
               {this.state.certificado}
             </label>
           </Column>
@@ -754,24 +929,30 @@ class EmpresaProceso extends CustomComponent {
               group={true}
               label={<>Contraseña de tu Certificado:<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="********"
-              refInput={this.refPasswordClaveCertificado}
+              ref={this.refPasswordClaveCertificado}
               value={this.state.claveCertificado}
               onChange={(event) =>
                 this.setState({ claveCertificado: event.target.value })
               }
-              type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
+              type={this.state.lookPasswordClaveCertificado ? "text" : "password"}
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
                   onClick={this.handleLookPasswordCertificado}
                 >
-                  <i className={this.state.lookPasswordClaveCertificado ? 'fa fa-eye' : 'fa fa-eye-slash'}></i>
+                  <i className={this.state.lookPasswordClaveCertificado ? "fa fa-eye" : "fa fa-eye-slash"}></i>
                 </Button>
               }
             />
           </Column>
         </Row>
+
         <Row>
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">4</span> Configuración de Firebase para subir imagenes y documentos</h6>
+          </Column>
+          <div className="dropdown-divider"></div>
+
           <Column formGroup={true}>
             <label>
               Seleccionar Archivo de Configuración de FireBase (.json):
@@ -784,157 +965,100 @@ class EmpresaProceso extends CustomComponent {
               ref={this.refFileFireBase}
               onChange={this.handleFileFireBaseBase}
             />
-            <label htmlFor={"fileFireBase"} className='form-control cursor-pointer'>
+            <label htmlFor={"fileFireBase"} className="form-control cursor-pointer">
               {this.state.fireBaseCertificado}
             </label>
           </Column>
         </Row>
 
         <Row>
-          <Column className={"col-md-4 col-12"} formGroup={true}>
-            <div className="text-center">
-              <label>Logo</label>
-              <br />
-              <small>Para mostrar en los reportes</small>
-              <div className="text-center mb-2">
-                <Image
-                  default={images.noImage}
-                  src={this.state.logo.url}
-                  alt={"Logo de la empresa"}
-                  className={"img-fluid border border-primary rounded"}
-                  width={250}
-                />
-              </div>
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">5</span> Imagens para uso en la página web y reportes</h6>
+          </Column>
+          <div className="dropdown-divider"></div>
 
-              <input
-                type="file"
-                id="fileLogo"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                className="display-none"
-                onChange={this.handleFileLogo}
-              />
-              <label htmlFor="fileLogo" className="btn btn-outline-secondary m-0">
-                <div className="content-button">
-                  <i className="bi bi-image"></i>
-                  <span></span>
-                </div>
-              </label>
-              {' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.handleClearLogo}
-              >
-                <i className="bi bi-trash"></i>
-              </Button>
-              {' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.handleDownload.bind(this, this.state.logo.src)}
-              >
-                <i className="bi bi-download"></i>
-              </Button>
-            </div>
+          <Column className={"col-md-4 col-12"} formGroup={true}>
+            <ImageUpload
+              label="Logo reporte"
+              subtitle={<>Para mostrar en los reportes. <b className='text-danger'>La imagen no debe superar los 500KB(Kilobytes).</b></>}
+              imageUrl={this.state.logo.url}
+              defaultImage={images.noImage}
+              alt="Logo reporte"
+              inputId="fileLogo"
+              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+              onChange={this.handleFileLogo}
+              onClear={this.handleClearLogo}
+              onDownload={() => this.handleDownload(this.state.logo.url)}
+            />
           </Column>
 
           <Column className={"col-md-4 col-12"} formGroup={true}>
-            <div className="text-center">
-              <label>Imagen</label>
-              <br />
-              <small>Para mostrar el logo en sistema en la página web</small>
-              <div className="text-center mb-2">
-                <Image
-                  default={images.noImage}
-                  src={this.state.image.url}
-                  alt={"Imagen de la empresa"}
-                  className={"img-fluid border border-primary rounded"}
-                  width={250}
-                />
-              </div>
-
-              <input
-                type="file"
-                id="fileImage"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                className="display-none"
-                onChange={this.handleFileImage}
-              />
-              <label
-                htmlFor="fileImage"
-                className="btn btn-outline-secondary m-0"
-              >
-                <div className="content-button">
-                  <i className="bi bi-image"></i>
-                  <span></span>
-                </div>
-              </label>{' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.handleClearImage}
-              >
-                <i className="bi bi-trash"></i>
-              </Button>
-              {' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.handleDownload.bind(this, this.state.image.url)}
-              >
-                <i className="bi bi-download"></i>
-              </Button>
-            </div>
+            <ImageUpload
+              label="Logo pagina web"
+              subtitle={<>Para mostrar en la página web como banner. <b className='text-danger'>La imagen no debe superar los 500KB(Kilobytes).</b></>}
+              imageUrl={this.state.image.url}
+              defaultImage={images.noImage}
+              alt="Logo pagina web"
+              inputId="fileImage"
+              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+              onChange={this.handleFileImage}
+              onClear={this.handleClearImage}
+              onDownload={() => this.handleDownload(this.state.image.url)}
+            />
           </Column>
 
           <Column className={"col-md-4 col-12"} formGroup={true}>
-            <div className="text-center">
-              <label>Icono</label>
-              <br />
-              <small>Usuado como favicon de la página web</small>
-              <div className="text-center mb-2">
-                <Image
-                  default={images.noImage}
-                  src={this.state.icon.url}
-                  alt={"Icono de la empresa"}
-                  className={"img-fluid border border-primary rounded"}
-                  width={250}
-                />
-              </div>
-
-              <input
-                type="file"
-                id="fileIcon"
-                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp, image/x-icon"
-                className="display-none"
-                onChange={this.handleFileIcon}
-              />
-              <label
-                htmlFor="fileIcon"
-                className="btn btn-outline-secondary m-0"
-              >
-                <div className="content-button">
-                  <i className="bi bi-image"></i>
-                  <span></span>
-                </div>
-              </label>{' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.handleClearIcono}
-              >
-                <i className="bi bi-trash"></i>
-              </Button>
-              {' '}
-              <Button
-                className="btn-outline-secondary"
-                onClick={this.handleDownload.bind(this, this.state.icon.url)}
-              >
-                <i className="bi bi-download"></i>
-              </Button>
-            </div>
+            <ImageUpload
+              label="Icono"
+              subtitle={<>Para mostrar como favicon de la página web. <b className='text-danger'>La imagen no debe superar los 50KB(Kilobytes).</b></>}
+              imageUrl={this.state.icon.url}
+              defaultImage={images.noImage}
+              alt="Icono de la empresa"
+              inputId="fileIcon"
+              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+              onChange={this.handleFileIcon}
+              onClear={this.handleClearIcono}
+              onDownload={() => this.handleDownload(this.state.icon.url)}
+            />
           </Column>
         </Row>
 
         <Row>
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">6</span> Imagenes para el banner de la página web</h6>
+          </Column>
+          <div className="dropdown-divider"></div>
+
+          <Column className="col-12" formGroup={true}>
+            <label>
+              Agregar las imagenes para el banner. <b className='text-danger'>Las imagenes no debe superar los 1MB(Megabyte).</b>
+            </label>
+            <label>
+              Las imágenes deben tener un tamaño de <b>1440 x 800 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).
+            </label>
+          </Column>
+
+          <Column className="col-12" formGroup={true}>
+            <MultiImages
+              maxSizeKB={1024}
+              width={1440}
+              height={800}
+              images={this.state.banners}
+              handleSelectImages={this.handleSelectBanners}
+              handleRemoveImages={this.handleRemoveBanners}
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">7</span> Datos para comunicación con la platadorma Whatsapp</h6>
+          </Column>
+          <div className="dropdown-divider"></div>
+
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <Input
-              label={<>Número de WhatsApp (<small>Usando en la página web</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={<>Número de WhatsApp:<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="51999000999"
               value={this.state.numeroWhatsapp}
               onChange={(event) =>
@@ -945,7 +1069,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <Input
-              label={<>Título del modal WhatsApp (<small>Usando en la página web</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={<>Título del modal WhatsApp:<i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Hola, ¿podemos hacer algo?"
               value={this.state.tituloWhatsapp}
               onChange={(event) =>
@@ -958,7 +1082,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={"col-12"} formGroup={true}>
             <TextArea
-              label={<>Mensaje de WhatsApp: (<small>Usando en la página web</small>)</>}
+              label={<>Mensaje de WhatsApp:</>}
               rows={4}
               placeholder="Mensaje de WhatsApp que acompañará a la solicitud"
               value={this.state.mensajeWhatsapp}
@@ -970,21 +1094,62 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-12"} formGroup={true}>
-            <TextArea
-              label={<>Horario de Atención: (<small>Usando en la página web</small>)</>}
-              rows={4}
-              placeholder="Ingrese el horario de atención"
-              value={this.state.horarioAtencion}
-              onChange={(event) =>
-                this.setState({ horarioAtencion: event.target.value })
-              }
-            />
+          <Column className="col-12" formGroup={true}>
+            <h6><span className="badge badge-primary">8</span> Información para mostrar en la pagina web</h6>
           </Column>
+          <div className="dropdown-divider"></div>
 
           <Column className={"col-12"} formGroup={true}>
             <TextArea
-              label={<>Acerca de Nosotros: (<small>Usando en la página web</small>)</>}
+              label={<>Información:</>}
+              rows={4}
+              placeholder="Ingrese un resumen de la empresa"
+              value={this.state.informacion}
+              onChange={(event) =>
+                this.setState({ informacion: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <ImageUpload
+              label="Banner de portada"
+              subtitle={<>Para mostrar en la página web y debe tener un tamaño de 1200 × 1200 pixele. <b className='text-danger'>La imagen no debe superar los 1MB(Megabytes).</b></>}
+              imageUrl={this.state.banner.url}
+              defaultImage={images.noImage}
+              alt="Banner de portada"
+              inputId="fileBanner"
+              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+              onChange={this.handleFileBanner}
+              onClear={this.handleClearBanner}
+              onDownload={() => this.handleDownload(this.state.banner.url)}
+            />
+          </Column>
+
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <ImageUpload
+              label="Imagen de portada"
+              subtitle={<>Para mostrar en la página web y debe tener un tamaño de 1200 × 1200 pixele. <b className='text-danger'>La imagen no debe superar los 1MB(Megabytes).</b></>}
+              imageUrl={this.state.portada.url}
+              defaultImage={images.noImage}
+              alt="Imagen de portada"
+              inputId="filePortada"
+              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+              onChange={this.handleFilePortada}
+              onClear={this.handleClearPortada}
+              onDownload={() => this.handleDownload(this.state.portada.url)}
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-12"} formGroup={true}>
+            <TextArea
+              label={<>Acerca de Nosotros:</>}
               rows={8}
               placeholder="Ingrese la información de Acerca de Nosotros"
               value={this.state.acercaNosotros}
@@ -998,7 +1163,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <TextArea
-              label={<>Políticas de Privacidad: (<small>Usando en la página web</small>)</>}
+              label={<>Políticas de Privacidad:</>}
               rows={8}
               placeholder="Ingrese su políticas de privacidad"
               value={this.state.politicasPrivacidad}
@@ -1010,7 +1175,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={"col-md-6 col-12"} formGroup={true}>
             <TextArea
-              label={<>Terminos y Condiciones: (<small>Usando en la página web</small>)</>}
+              label={<>Terminos y Condiciones:</>}
               rows={8}
               placeholder="Ingrese sus terminos y condiciones"
               value={this.state.terminosCondiciones}
@@ -1022,10 +1187,88 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Página Web:</>}
+              placeholder="Ingrese la url de la cuenta"
+              ref={this.refPaginaWeb}
+              value={this.state.paginaWeb}
+              onChange={(event) =>
+                this.setState({ paginaWeb: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Cuetan de YouTube:</>}
+              placeholder="Ingrese la url de la cuenta"
+              ref={this.refYouTube}
+              value={this.state.youTubePagina}
+              onChange={(event) =>
+                this.setState({ youTubePagina: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Cuenta de Facebook:</>}
+              placeholder="Ingrese la url de la cuenta"
+              ref={this.refFacebook}
+              value={this.state.facebookPagina}
+              onChange={(event) =>
+                this.setState({ facebookPagina: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Cuenta de Twitter:</>}
+              placeholder="Ingrese la url de la cuenta"
+              ref={this.refTwitter}
+              value={this.state.twitterPagina}
+              onChange={(event) =>
+                this.setState({ twitterPagina: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Cuenta de Instagram:</>}
+              placeholder="Ingrese la url de la cuenta"
+              ref={this.refInstagram}
+              value={this.state.instagramPagina}
+              onChange={(event) =>
+                this.setState({ instagramPagina: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={"col-md-6 col-12"} formGroup={true}>
+            <Input
+              label={<>Cuenta de TikTok:</>}
+              placeholder="Ingrese la url de la cuenta"
+              ref={this.refTiktok}
+              value={this.state.tiktokPagina}
+              onChange={(event) =>
+                this.setState({ tiktokPagina: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
+
+        <Row>
           <Column formGroup={true}>
             <Button
               className="btn-warning"
-              onClick={() => this.handleGuardar()}
+              onClick={this.handleGuardar}
             >
               <i className='fa fa-save'></i> Guardar
             </Button>{' '}

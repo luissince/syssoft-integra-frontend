@@ -256,7 +256,7 @@ class ModalProducto extends Component {
                   disabled={tipoProducto === "SERVICIO"}
                   placeholder={"0.00"}
                   role={"float"}
-                  refInput={this.refCantidad}
+                  ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
                   onPaste={handlePasteFloat}
@@ -268,7 +268,7 @@ class ModalProducto extends Component {
                   label={"Costo:"}
                   placeholder={"0.00"}
                   role={"float"}
-                  refInput={this.refCosto}
+                  ref={this.refCosto}
                   value={costo}
                   onChange={this.handleInputCosto}
                   onPaste={handlePasteFloat}
@@ -281,7 +281,7 @@ class ModalProducto extends Component {
                 <Input
                   label={"Descripción:"}
                   placeholder={"Datos del producto..."}
-                  refInput={this.refDescripcion}
+                  ref={this.refDescripcion}
                   value={descripcion}
                   onChange={this.handleInputDescripcion}
                 />
@@ -292,7 +292,7 @@ class ModalProducto extends Component {
               <Column formGroup={true}>
                 <Select
                   label={"Unidad de Medida:"}
-                  refSelect={this.refMedida}
+                  ref={this.refMedida}
                   value={idMedida}
                   onChange={this.handleSelectMedida}>
                   <option value={""}>- Seleccione -</option>

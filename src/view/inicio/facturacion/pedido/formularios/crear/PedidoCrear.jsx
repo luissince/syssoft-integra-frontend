@@ -1010,7 +1010,7 @@ class PedidoCrear extends CustomComponent {
                 <div className="form-group">
                   <Select
                     group={false}
-                    refSelect={this.refComprobante}
+                    ref={this.refComprobante}
                     value={this.state.idComprobante}
                     onChange={this.handleSelectComprobante}
                   >

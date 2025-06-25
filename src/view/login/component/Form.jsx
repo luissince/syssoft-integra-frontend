@@ -57,7 +57,7 @@ const Form = (props) => {
 
             <div className="mb-4">
               <Input
-                refInput={usernameRef}
+                ref={usernameRef}
                 value={username}
                 onChange={handleChangeUsername}
                 placeholder="Ingrese su usuario"
@@ -68,7 +68,7 @@ const Form = (props) => {
             <div className="mb-4">
               <Input
                 group={true}
-                refInput={passwordRef}
+                ref={passwordRef}
                 value={password}
                 onChange={handleChangePassword}
                 type={lookPassword ? 'text' : 'password'}

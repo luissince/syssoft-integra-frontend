@@ -112,7 +112,7 @@ class ModalAgregar extends Component {
                   label={subTitulo}
                   placeholder={"0.00"}
                   role={"float"}
-                  refInput={this.refCantidad}
+                  ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
                   onPaste={handlePasteFloat}

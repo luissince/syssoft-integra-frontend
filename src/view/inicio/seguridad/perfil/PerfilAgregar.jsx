@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 import {
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { addPerfil } from '../../../../network/rest/principal.network';
@@ -15,7 +14,7 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Input from '../../../../components/Input';
 import Button from '../../../../components/Button';
-import { alertKit, AlertType } from 'alert-kit';
+import { alertKit } from 'alert-kit';
 
 class PerfilAgregar extends CustomComponent {
   constructor(props) {
@@ -35,91 +34,58 @@ class PerfilAgregar extends CustomComponent {
 
   handleGuardar = () => {
     if (isEmpty(this.state.descripcion)) {
-      alertWarning('Perfil', 'Ingrese la descripción del perfil', () => {
+      alertKit.warning({
+        title: "Perfil",
+        message: "!Ingrese la descripción del perfil!",
+      }, () => {
         this.refDescripcion.current.focus();
       });
       return;
     }
 
-    alertKit.show({
-      type: AlertType.question,
+    alertKit.question({
       headerTitle: "SysSoft Integra",
       title: "Perfil",
       message: '¿Estás seguro de continuar?',
-      backdropBlur: false,
-      isMoveable: true,
-      showCloseButton: false,
-      closeOnEsc: false,
-      closeOnClickOutside: false,
-      buttons: [
-        {
-          html: "<i class='fa fa-check'></i> Aceptar",
-          primary: true,
-          class: ['btn', 'btn-primary'],
-          onClick: async () => {
-            const data = {
-              descripcion: this.state.descripcion.trim(),
-              idEmpresa: 'EM0001',
-              idUsuario: this.state.idUsuario,
-            };
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
+      if (accept) {
 
-            alertKit.show({
-              type: AlertType.loading,
-              message: 'Procesando información...',
-              backdropBlur: false,
-              showCloseButton: false,
-              closeOnEsc: false,
-              closeOnClickOutside: false,
-              autoClose: false,
-              buttons: [],
-            });
+        const data = {
+          descripcion: this.state.descripcion.trim(),
+          idEmpresa: 'EM0001',
+          idUsuario: this.state.idUsuario,
+        };
 
-            const response = await addPerfil(data);
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
-            if (response instanceof SuccessReponse) {
-              alertKit.show({
-                type: AlertType.success,
-                headerTitle: "SysSoft Integra",
-                title: "Perfil",
-                backdropBlur: false,
-                message: response.data,
-                buttons: [
-                  {
-                    html: "<i class='fa fa-check'></i> Aceptar",
-                    primary: true,
-                    class: ['btn', 'btn-outline-primary'],
-                    onClick: () =>  this.props.history.goBack(),                  
-                  },
-                ],
-              });
-            }
+        const response = await addPerfil(data);
 
-            if (response instanceof ErrorResponse) {
-              if (response.getType() === CANCELED) return;
+        if (response instanceof SuccessReponse) {
+          alertKit.success({
+            title: "Perfil",
+            message: response.data,
+          }, () => {
+            this.props.history.goBack();
+          });
+        }
 
-              alertKit.show({
-                type: AlertType.warning,
-                headerTitle: "SysSoft Integra",
-                title: "Perfil",
-                backdropBlur: false,
-                message: response.getMessage(),
-                buttons: [
-                  {
-                    html: "<i class='fa fa-check'></i> Aceptar",
-                    primary: true,
-                    class: ['btn', 'btn-outline-primary'],
-                  },
-                ],
-              });
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
 
-            }
-          },        
-        },
-        {
-          html: "<i class='fa fa-close'></i> Eliminar",
-          class: ['btn', 'btn-outline-danger']
-        },
-      ],
+          alertKit.warning({
+            title: "Perfil",
+            message: response.getMessage(),
+          });
+        }
+      }
     });
   };
 
@@ -137,7 +103,7 @@ class PerfilAgregar extends CustomComponent {
             <Input
               label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
               placeholder="Ingrese la descripción."
-              refInput={this.refDescripcion}
+              ref={this.refDescripcion}
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
             />

@@ -104,7 +104,7 @@ class MonedaAgregar extends CustomComponent {
             <Input
               group={true}
               label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
-              refInput={this.refTxtNombre}
+              ref={this.refTxtNombre}
               value={this.state.nombre}
               onChange={(event) =>
                 this.setState({ nombre: event.target.value })
@@ -117,7 +117,7 @@ class MonedaAgregar extends CustomComponent {
             <Input
               group={true}
               label={<>Código ISO: <i className="fa fa-asterisk text-danger small"></i></>}
-              refInput={this.refTxtCodIso}
+              ref={this.refTxtCodIso}
               value={this.state.codIso}
               onChange={(event) =>
                 this.setState({ codIso: event.target.value })
@@ -132,7 +132,7 @@ class MonedaAgregar extends CustomComponent {
             <Input
               group={true}
               label={"Simbolo"}
-              refInput={this.refTxtSimbolo}
+              ref={this.refTxtSimbolo}
               value={this.state.simbolo}
               onChange={(event) =>
                 this.setState({ simbolo: event.target.value })

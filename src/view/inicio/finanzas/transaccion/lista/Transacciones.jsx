@@ -116,7 +116,6 @@ class Transacciones extends CustomComponent {
  */
 
   loadingData = async () => {
-    console.log(this.props.finanzasLista)
     if (this.props.finanzasLista && this.props.finanzasLista.data && this.props.finanzasLista.paginacion) {
       this.setState(this.props.finanzasLista.data)
       this.refPaginacion.current.upperPageBound = this.props.finanzasLista.paginacion.upperPageBound;
@@ -377,9 +376,9 @@ class Transacciones extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-right">
-            {item.credito == 0 ? "" : <span className='text-base'><i className='fa fa-plus text-success'></i> {numberFormat(item.credito, item.codiso)}</span>}
+            {item.ingreso == 0 ? "" : <span className='text-base'><i className='fa fa-plus text-success'></i> {numberFormat(item.ingreso, item.codiso)}</span>}
             {
-              item.credito != 0 && item.detalles.map((detalle, index) => (
+              item.ingreso != 0 && item.detalles.map((detalle, index) => (
                 <div key={index}>
                   <span className='text-xs'>{detalle.nombre}: {numberFormat(detalle.monto, item.codiso)}</span>
                 </div>
@@ -387,9 +386,9 @@ class Transacciones extends CustomComponent {
             }
           </TableCell>
           <TableCell className="text-right">
-            {item.debito == 0 ? "" : <span className='text-base'><i className='fa fa-minus text-danger'></i> {numberFormat(item.debito, item.codiso)}</span>}
+            {item.egreso == 0 ? "" : <span className='text-base'><i className='fa fa-minus text-danger'></i> {numberFormat(item.egreso, item.codiso)}</span>}
             {
-              item.debito != 0 && item.detalles.map((detalle, index) => (
+              item.egreso != 0 && item.detalles.map((detalle, index) => (
                 <div key={index}>
                   <span className='text-xs'>{detalle.nombre}: {numberFormat(detalle.monto, item.codiso)}</span>
                 </div>
@@ -493,8 +492,8 @@ class Transacciones extends CustomComponent {
                     <TableHead width="15%">Concepto</TableHead>
                     <TableHead width="15%">Referencia</TableHead>
                     <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="10%">Debito <i className='fa fa-arrow-down'></i></TableHead>
-                    <TableHead width="10%">Crédito <i className='fa fa-arrow-up'></i></TableHead>
+                    <TableHead width="10%">Ingreso <i className='fa fa-arrow-down'></i></TableHead>
+                    <TableHead width="10%">Egreso <i className='fa fa-arrow-up'></i></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

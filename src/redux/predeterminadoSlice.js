@@ -109,6 +109,10 @@ const initialState = {
     data: null,
     paginacion: null
   },
+  consultaLista: {
+    data: null,
+    paginacion: null
+  },
 };
 
 const predeterminadoSlice = createSlice({
@@ -411,6 +415,19 @@ const predeterminadoSlice = createSlice({
       };
     },
 
+    setListaConsultaData: (state, action) => {
+      state.consultaLista.data = action.payload;
+    },
+    setListaConsultaPaginacion: (state, action) => {
+      state.consultaLista.paginacion = action.payload;
+    },
+    clearListaConsulta: (state) => {
+      state.consultaLista = {
+        data: null,
+        paginacion: null
+      };
+    },
+
 
     clearSucursal: (state) => {
       state.ventaLista = {
@@ -498,6 +515,10 @@ const predeterminadoSlice = createSlice({
         paginacion: null
       };
       state.finanzasLista = {
+        data: null,
+        paginacion: null
+      };
+      state.consultaLista = {
         data: null,
         paginacion: null
       };
@@ -592,6 +613,10 @@ const predeterminadoSlice = createSlice({
         paginacion: null
       };
       state.finanzasLista = {
+        data: null,
+        paginacion: null
+      };
+      state.consultaLista = {
         data: null,
         paginacion: null
       };
@@ -705,6 +730,10 @@ export const {
   setCrearCatalogoState,
   setCrearCatalogoLocal,
   clearCrearCatalogo,
+
+  setListaConsultaData,
+  setListaConsultaPaginacion,
+  clearListaConsulta,
 
   clearSucursal,
   clearPredeterminado

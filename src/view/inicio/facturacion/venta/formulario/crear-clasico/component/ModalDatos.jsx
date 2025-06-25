@@ -86,7 +86,7 @@ class ModalDatos extends Component {
                   autoFocus={true}
                   label={"Ingrese su nueva descripción:"}
                   placeholder={"descripción"}
-                  refInput={this.refInformacion}
+                  ref={this.refInformacion}
                   value={informacion}
                   onChange={this.handleInputInformacion}
                 />

@@ -224,7 +224,6 @@ class ModalTransaccion extends CustomComponent {
 
     if (metodoPagosLista.some((item) => !isNumeric(item.monto))) {
       alertKit.show({
-        headerTitle: 'SysSoft Integra',
         title: this.state.tipo,
         message: 'Hay montos del metodo de cobro que no tiene valor.',
         type: 'warning',
@@ -858,7 +857,7 @@ class ModalTransaccion extends CustomComponent {
                     label={"Agregar método de cobro:"}
                     iconLeft={<i className="bi bi-tag-fill"></i>}
                     title="Lista metodo de cobro"
-                    refSelect={this.refMetodoContado}
+                    ref={this.refMetodoContado}
                     buttonRight={
                       <Button
                         className="btn-outline-success d-flex"
@@ -905,7 +904,7 @@ class ModalTransaccion extends CustomComponent {
                       iconLeft={<i className="bi bi-hourglass-split"></i>}
                       role={"float"}
                       placeholder="Número de cuotas"
-                      refInput={this.refNumeroCuotas}
+                      ref={this.refNumeroCuotas}
                       value={numeroCuotas}
                       onChange={this.handleSelectNumeroCuotas}
                       onKeyDown={keyNumberInteger}
@@ -917,7 +916,7 @@ class ModalTransaccion extends CustomComponent {
                       group={true}
                       iconLeft={<i className="bi bi-credit-card-2-back"></i>}
                       title="Lista frecuencia de pago"
-                      refSelect={this.refFrecuenciaPagoFijo}
+                      ref={this.refFrecuenciaPagoFijo}
                       value={frecuenciaPagoFijo}
                       onChange={this.handleSelectFrecuenciaPagoFijo}>
                       <option value="">-- Frecuencia de pago --</option>
@@ -957,7 +956,7 @@ class ModalTransaccion extends CustomComponent {
                       group={true}
                       iconLeft={<i className="bi bi-credit-card-2-back"></i>}
                       title="Lista frecuencia de pago"
-                      refSelect={this.refFrecuenciaPagoVariable}
+                      ref={this.refFrecuenciaPagoVariable}
                       value={frecuenciaPagoVariable}
                       onChange={this.handleSelectFrecuenciaPagoVariable}
                     >

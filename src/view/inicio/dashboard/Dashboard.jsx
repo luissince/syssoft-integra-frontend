@@ -6,7 +6,7 @@ import { SpinnerView } from '../../../components/Spinner';
 import Row from '../../../components/Row';
 import Column from '../../../components/Column';
 import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
-// import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
 import Title from '../../../components/Title';
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText } from 'lucide-react';
@@ -266,10 +266,10 @@ class Dashboard extends React.Component {
         </Row>
 
         <Row>
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='m-0'>Comprobantes Electrónicos</CardTitle>
+                <CardTitle className='m-0'>Comprobantes CPE</CardTitle>
 
               </CardHeader>
               <CardBody>
@@ -289,7 +289,7 @@ class Dashboard extends React.Component {
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
                 <CardTitle className='m-0'>Cotizaciones</CardTitle>
@@ -311,7 +311,7 @@ class Dashboard extends React.Component {
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
             <Card>
               <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
                 <CardTitle className='m-0'>Orden de Compras</CardTitle>
@@ -329,6 +329,93 @@ class Dashboard extends React.Component {
                   </div>
                   <span className='text-base'>{this.state.totalOrdenCompra - this.state.totalOrdenCompraLigadas}</span>
                 </div>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='m-0'>Pedidos</CardTitle>
+
+              </CardHeader>
+              <CardBody>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Emitidos:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantes}</span>
+                </div>
+                <div className='d-flex flex-row align-items-center justify-content-between'>
+                  <div className='d-flex align-items-center'>
+                    <FileText width={16} height={16} className='mr-2' /> <span className='text-base'> Pendientes:</span>
+                  </div>
+                  <span className='text-base'>{this.state.totalComprobantesPorDeclarar}</span>
+                </div>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Tendencia de Ventas</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart width={300} height={300} data={[]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mes" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" name={`AÑO - ${new Date().getFullYear()}`} dataKey="total" stroke="#004099" />
+                    {/* <Line type="monotone" name='Años Pasado' dataKey="atras" stroke="#82ca9d" /> */}
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+        </Row>
+
+
+        <Row>
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Inventario Cantidades</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={{}}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="nombre" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="negativo" label="Nevativo" name='Nevativo' fill="#004099" />
+                    <Bar dataKey="por-terminar" label="Por Terminar" name='Por Terminar' fill="#004099" />
+                    <Bar dataKey="exacta" label="Exacta" name='Exacta' fill="#004099" />
+                    <Bar dataKey="superado" label="Superado" name='Superado' fill="#004099" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+            <Card>
+              <CardBody>
+                <CardTitle>Inventario a Vencer</CardTitle>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={[]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="nombre" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="por-vencer" label="Por Vencer" name='Por Vencer' fill="#004099" />
+                    <Bar dataKey="vencidos" label="Vencidos" name='Vencidos' fill="#004099" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardBody>
             </Card>
           </Column>
@@ -360,159 +447,6 @@ class Dashboard extends React.Component {
             </Card>
           </Column>
         </Row>
-
-        {/* <Row>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
-            <Card>
-              <CardBody>
-                <CardTitle>Tendencia de Ventas</CardTitle>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={ventasMensuales}>
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="ventas" stroke="#2563eb" strokeWidth={2} />
-                    <Line type="monotone" dataKey="compras" stroke="#dc2626" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
-            <Card>
-              <CardBody>
-                <CardTitle>Ventas por Comprobante</CardTitle>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={inventarioPorSucursal}>
-                    <XAxis dataKey="sucursal" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="stock" fill="#3b82f6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardBody>
-            </Card>
-          </Column>
-        </Row> */}
-
-        {/* <Row>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
-            <Card>
-              <CardBody>
-                <CardTitle>Cuentas por Cobrar</CardTitle>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={cuentasPorCobrar}
-                      dataKey="valor"
-                      nameKey="estado"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      label={({ name, value }) => `${name}: $${value}`}
-                    >
-                      {cuentasPorCobrar.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
-            <Card>
-              <CardBody>
-                <CardTitle>Ventas por Comprobante</CardTitle>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={cuentasPorPagar}
-                      dataKey="valor"
-                      nameKey="estado"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      label={({ name, value }) => `${name}: $${value}`}
-                    >
-                      {cuentasPorPagar.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardBody>
-            </Card>
-          </Column>
-        </Row> */}
-
-        {/* <Row>
-          <Column className='col-xl-4 col-lg-12' formGroup={true}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Cotizaciones Pendientes</CardTitle>
-              </CardHeader>
-              <CardBody>
-                <TableResponsive>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>COT-2024-001</TableCell>
-                        <TableCell className={"text-primary"}>$12,450</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableResponsive>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-xl-4 col-lg-12' formGroup={true}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Orden de Compra en Proceso</CardTitle>
-              </CardHeader>
-              <CardBody>
-                <TableResponsive>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>COT-2024-001</TableCell>
-                        <TableCell className={"text-success"}>En preparación</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableResponsive>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-xl-4 col-lg-12' formGroup={true}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Últimas Facturas</CardTitle>
-              </CardHeader>
-              <CardBody>
-                <TableResponsive>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>COT-2024-001</TableCell>
-                        <TableCell className={"text-danger"}>Pagada</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableResponsive>
-              </CardBody>
-            </Card>
-          </Column>
-        </Row> */}
       </ContainerWrapper>
     );
   }

@@ -1,57 +1,40 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import { forwardRef, useState, useEffect } from 'react';
 
-export class SelectActive extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            active: props.active || false
-        };
-    }
+export const SelectActive = ({ id, name, active = false, background, handleSelect }) => {
+    const [isActive, setIsActive] = useState(active);
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.active !== this.props.active) {
-            this.setState({
-                active: this.props.active || false,
-            });
-        }
-    }
+    useEffect(() => {
+        setIsActive(active || false);
+    }, [active]);
 
-    handleSelectActive = () => {
-        this.setState(
-            prevState => ({ active: !prevState.active }),
-            () => {
-                this.props.handleSelect({
-                    idAtributo: this.props.id,
-                    nombre: this.props.name,
-                    hexadecimal: this.props.background
-                });
-            }
-        );
+    const handleSelectActive = () => {
+        const newState = !isActive;
+        setIsActive(newState);
+        handleSelect({
+            idAtributo: id,
+            nombre: name,
+            hexadecimal: background
+        });
     };
 
-    render() {
-        const { active } = this.state;
-        const { name, background } = this.props;
-
-        return (
+    return (
+        <span
+            className={`border border-secondary ${isActive ? 'bg-primary text-white' : 'bg-white text-secondary'} position-relative px-4 py-2 btn`}
+            onClick={handleSelectActive}
+        >
             <span
-                className={`border border-secondary ${active ? 'bg-primary text-white' : 'bg-white text-secondary'} position-relative px-4 py-2 btn`}
-                onClick={this.handleSelectActive}
-            >
-                <span
-                    className='btn position-absolute p-2'
-                    style={{
-                        left: "0",
-                        bottom: "0",
-                        backgroundColor: background
-                    }}
-                />
-                {name}
-            </span>
-        );
-    }
-}
+                className='btn position-absolute p-2'
+                style={{
+                    left: "0",
+                    bottom: "0",
+                    backgroundColor: background
+                }}
+            />
+            {name}
+        </span>
+    );
+};
 
 SelectActive.propTypes = {
     id: PropTypes.string.isRequired,
@@ -61,96 +44,66 @@ SelectActive.propTypes = {
     handleSelect: PropTypes.func.isRequired
 };
 
-
-const Select = ({
-    autoFocus = false,
+const Select = forwardRef(({
     label,
     id,
     group = false,
     iconLeft,
-    title,
-    className = "border border-primary",
-    refSelect,
-    value,
-    disabled,
     buttonRight,
-    onChange,
-    children
-}) => {
+    className = "border border-primary",
+    children,
+    ...rest
+}, ref) => {
+    const selectElement = (
+        <select
+            id={id}
+            ref={ref}
+            className={`form-control border border-primary ${className}`}
+            {...rest}
+        >
+            {children}
+        </select>
+    );
+
     if (group) {
         return (
             <>
-                {label && <label htmlFor={id}>{label} </label>}
-
+                {label && <label htmlFor={id}>{label}</label>}
                 <div className="input-group">
-                    {
-                        iconLeft && (
-                            <div className="input-group-prepend">
-                                <span className='btn btn-primary'>
-                                    {iconLeft}
-                                </span>
-                                {/* <div className="input-group-text">
-                            {iconLeft}
-                        </div> */}
-                            </div>
-                        )
-                    }
-
-                    <select
-                        autoFocus={autoFocus}
-                        title={title}
-                        id={id}
-                        className={`form-control ${className}`}
-                        ref={refSelect}
-                        value={value}
-                        disabled={disabled}
-                        onChange={onChange}>
-                        {children}
-                    </select>
-                    {
-                        buttonRight && (
-                            <div className="input-group-append">
-                                {buttonRight}
-                            </div>
-                        )
-                    }
+                    {iconLeft && (
+                        <div className="input-group-prepend">
+                            <span className="btn btn-primary">{iconLeft}</span>
+                        </div>
+                    )}
+                    {selectElement}
+                    {buttonRight && (
+                        <div className="input-group-append">
+                            {buttonRight}
+                        </div>
+                    )}
                 </div>
             </>
         );
     }
+
     return (
         <>
-            {label && <label>{label} </label>}
-
-            <select
-                autoFocus={autoFocus}
-                title={title}
-                id={id}
-                className={`form-control ${className}`}
-                ref={refSelect}
-                value={value}
-                disabled={disabled}
-                onChange={onChange}>
-                {children}
-            </select>
+            {label && <label htmlFor={id}>{label}</label>}
+            {selectElement}
         </>
     );
-}
+});
+
+Select.displayName = 'Select';
 
 Select.propTypes = {
-    autoFocus: PropTypes.bool,
-    label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
     id: PropTypes.string,
     group: PropTypes.bool,
     iconLeft: PropTypes.element,
-    title: PropTypes.string,
-    className: PropTypes.string,
-    refSelect: PropTypes.object,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     buttonRight: PropTypes.element,
-    disabled: PropTypes.bool,
-    onChange: PropTypes.func,
-    children: PropTypes.node,
+    className: PropTypes.string,
+    children: PropTypes.node
 };
 
 export default Select;

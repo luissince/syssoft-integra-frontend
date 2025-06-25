@@ -268,7 +268,7 @@ class SearchInput extends React.Component {
           label={label}
           iconLeft={renderIconLeft}
           placeholder={placeholder}
-          refInput={refValue}
+          ref={refValue}
           value={searchTerm}
           onChange={this.handleInputChange}
           // onKeyUp={this.handleKeyUp}

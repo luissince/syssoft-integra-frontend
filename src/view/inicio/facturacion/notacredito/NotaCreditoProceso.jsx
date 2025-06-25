@@ -15,6 +15,7 @@ import {
 // import { apiComprobanteListcombo } from '../../../../network/api';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
+import Select from '../../../../components/Select';
 
 class NotaCreditoProceso extends React.Component {
   constructor(props) {
@@ -312,8 +313,7 @@ class NotaCreditoProceso extends React.Component {
           <div className="col-md-4 col-sm-12 col-xs-12">
             <label>Nota de Crédito</label>
             <div className="form-group">
-              <select
-                className="form-control"
+              <Select
                 ref={this.refComprobante}
                 value={this.state.idComprobante}
                 onChange={(event) =>
@@ -326,14 +326,13 @@ class NotaCreditoProceso extends React.Component {
                     {item.nombre + ' (' + item.serie + ')'}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
           <div className="col-md-4 col-sm-12 col-xs-12">
             <label>Moneda</label>
             <div className="form-group">
-              <select
-                className="form-control"
+              <Select
                 ref={this.refMoneda}
                 value={this.state.idMoneda}
                 onChange={(event) =>
@@ -346,7 +345,7 @@ class NotaCreditoProceso extends React.Component {
                     {item.nombre}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
           <div className="col-md-4 col-sm-12 col-xs-12">

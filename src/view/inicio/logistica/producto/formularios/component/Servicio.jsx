@@ -94,7 +94,7 @@ const Servicio = (props) => {
             </>}
             className={`${nombre ? '' : 'is-invalid'}`}
             placeholder="Dijite un nombre..."
-            refInput={refNombre}
+            ref={refNombre}
             value={nombre}
             onChange={handleSelectNombre}
           />
@@ -107,7 +107,7 @@ const Servicio = (props) => {
             </>}
             className={`${codigo ? '' : 'is-invalid'}`}
             placeholder="Ejemplo: CAS002 ..."
-            refInput={refCodigo}
+            ref={refCodigo}
             value={codigo}
             onChange={handleInputCodigo}
           />
@@ -119,7 +119,7 @@ const Servicio = (props) => {
               SKU:
             </>}
             placeholder="Ejemplo: CAM-NIKE-001 ..."
-            refInput={refSku}
+            ref={refSku}
             value={sku}
             onChange={handleInputSku}
           />
@@ -132,7 +132,7 @@ const Servicio = (props) => {
               Código de Barras: <i className="bi bi-upc-scan"></i>
             </>}
             placeholder="Ejemplo: 1234567890123 ..."
-            refInput={refCodigoBarras}
+            ref={refCodigoBarras}
             value={codigoBarras}
             onChange={handleInputCodigoBarras}
             buttonRight={
@@ -149,17 +149,9 @@ const Servicio = (props) => {
         <Column className="col-md-6" formGroup={true}>
           <Select
             label={"Marca:"}
-            // group={true}
-            refSelect={refIdMarca}
+            ref={refIdMarca}
             value={idMarca}
             onChange={handleSelectIdMarca}
-          // buttonRight={
-          //   <Button
-          //     className="btn-outline-success"
-          //   >
-          //     <i className="fa fa-plus"></i>
-          //   </Button>
-          // }
           >
             <option value="">-- Selecciona --</option>
             {marcas.map((item, index) => (
@@ -177,7 +169,7 @@ const Servicio = (props) => {
             </>}
             // group={true}
             className={`${idMedida ? '' : 'is-invalid'}`}
-            refSelect={refIdMedida}
+            ref={refIdMedida}
             value={idMedida}
             onChange={handleSelectIdMedida}
           // buttonRight={
@@ -204,7 +196,7 @@ const Servicio = (props) => {
             </>}
             // group={true}
             className={`form-control ${idCategoria ? '' : 'is-invalid'}`}
-            refSelect={refIdCategoria}
+            ref={refIdCategoria}
             value={idCategoria}
             onChange={handleSelectIdCategoria}
           // buttonRight={
@@ -227,7 +219,7 @@ const Servicio = (props) => {
         <Column className="col-md-6" formGroup={true}>
           <Select
             label={"Código producto SUNAT:"}
-            refSelect={refCodigoSunat}
+            ref={refCodigoSunat}
             value={codigoSunat}
             onChange={handleSelectCodigoSunat}
           >
@@ -259,7 +251,7 @@ const Servicio = (props) => {
             </>}
             className={`${precio ? '' : 'is-invalid'}`}
             placeholder=" S/ 0.00"
-            refInput={refPrecio}
+            ref={refPrecio}
             value={precio}
             onChange={handleInputPrecio}
             onKeyDown={keyNumberFloat}
@@ -287,7 +279,7 @@ const Servicio = (props) => {
           <TextArea
             label={"Descripción Corta:"}
             rows={3}
-            refInput={refDescripcionCorta}
+            ref={refDescripcionCorta}
             value={descripcionCorta}
             onChange={handleInputDescripcionCorta}
           ></TextArea>
@@ -297,7 +289,7 @@ const Servicio = (props) => {
           <TextArea
             label={"Descripción Larga:"}
             rows={6}
-            refInput={refDescripcionLarga}
+            ref={refDescripcionLarga}
             value={descripcionLarga}
             onChange={handleInputDescripcionLarga}
           ></TextArea>

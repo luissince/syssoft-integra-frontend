@@ -14,6 +14,10 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { resetUsuario } from '../../../../network/rest/principal.network';
 import Title from '../../../../components/Title';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Input from '../../../../components/Input';
 
 class UsuarioResetear extends CustomComponent {
   constructor(props) {
@@ -82,42 +86,38 @@ class UsuarioResetear extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <label>Nueva Clave: </label>
-              <input
-                type="text"
-                placeholder="Nueva clave."
-                className="form-control"
-                ref={this.refResetClave}
-                value={this.state.resetClave}
-                onChange={(event) =>
-                  this.setState({ resetClave: event.target.value })
-                }
-              />
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Column formGroup={true}>
+            <Input
+              group={true}
+              label={">Nueva Clave:"}
+              placeholder="Nueva clave."
+              ref={this.refResetClave}
+              value={this.state.resetClave}
+              onChange={(event) =>
+                this.setState({ resetClave: event.target.value })
+              }
+            />
+          </Column>
+        </Row>
 
-        <div className="row">
-          <div className="col">
-            <button
-              type="button"
-              className="btn btn-primary"
+        <Row>
+          <Column formGroup={true}>
+            <Button
+              className="btn-primary"
               onClick={() => this.handleGuardar()}
             >
               Aceptar
-            </button>{' '}
-            <button
-              type="button"
-              className="btn btn-danger"
+            </Button>
+            {' '}
+            <Button
+              className="btn-danger"
               onClick={() => this.props.history.goBack()}
             >
               Cerrar
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Column>
+        </Row>
       </ContainerWrapper>
     );
   }

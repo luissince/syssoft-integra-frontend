@@ -11,9 +11,9 @@ import RepProveedores from './RepProveedores.jsx';
 import RepCpeSunat from './RepCpeSunat.jsx';
 
 export {
+    RepFinanciero,
     RepVentas,
     RepCompras,
-    RepFinanciero,
     RepProductos,
     RepClientes,
     RepProveedores,

@@ -10,7 +10,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailtBanco, detailtListBanco } from '../../../../../network/rest/principal.network';
+import { detailBanco, detailListBanco } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -75,7 +75,7 @@ class BancoDetalle extends CustomComponent {
       idBanco: id
     }
 
-    const response = await detailtBanco(params, this.abortControllerView.signal);
+    const response = await detailBanco(params, this.abortControllerView.signal);
     if (response instanceof SuccessReponse) {
 
       const banco = response.data.banco;
@@ -136,7 +136,7 @@ class BancoDetalle extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await detailtListBanco(data, this.abortControllerTable.signal);
+    const response = await detailListBanco(data, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
@@ -210,8 +210,8 @@ class BancoDetalle extends CustomComponent {
             </Link>
           </TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell className="text-right">{item.credito == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.credito, item.codiso)}</span>}</TableCell>
-          <TableCell className="text-right">{item.debito == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.debito, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">{item.ingreso == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.ingreso, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">{item.egreso == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.egreso, item.codiso)}</span>}</TableCell>
         </TableRow>
       );
     });
@@ -329,8 +329,8 @@ class BancoDetalle extends CustomComponent {
                     <TableHead width="15%">Fecha</TableHead>
                     <TableHead width="20%">Comprobante</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="10%">Ingresos</TableHead>
-                    <TableHead width="10%">Salidas</TableHead>
+                    <TableHead width="10%">Ingreso</TableHead>
+                    <TableHead width="10%">Egreso</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

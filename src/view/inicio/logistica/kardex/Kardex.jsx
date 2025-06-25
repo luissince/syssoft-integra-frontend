@@ -436,7 +436,7 @@ class Kardex extends CustomComponent {
               group={true}
               iconLeft={<i className="fa fa-building"></i>}
               label={"Almacen:"}
-              refSelect={this.refIdAlmacen}
+              ref={this.refIdAlmacen}
               value={this.state.idAlmacen}
               onChange={this.handleSelectAlmacen}
             >
