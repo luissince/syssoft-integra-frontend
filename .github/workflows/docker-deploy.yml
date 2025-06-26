@@ -4,10 +4,11 @@ on:
   push:
     branches: 
       - "master"
+      - "staging"
       - "test"
 
 jobs:
-  build-and-deploy-master-webs:
+  build-and-deploy-master:
     if: github.ref == 'refs/heads/master'
     runs-on: webs
     strategy:
@@ -46,7 +47,42 @@ jobs:
       - name: Creando y ejecutando contenedor
         run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
 
-  build-and-deploy-test-webs:
+  build-and-deploy-staging:
+    if: github.ref == 'refs/heads/staging'
+    runs-on: webs
+    strategy:
+      matrix:
+        include:
+          - environment: dracoly
+            service: dracoly-services
+          - environment: main
+            service: main-services
+    
+    environment: ${{ matrix.environment }}
+      
+    env:  
+      VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
+      VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
+      VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
+      VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
+          VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{env.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
+          EOL
+      
+      - name: Creando y ejecutando contenedor
+        run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
+
+  build-and-deploy-test:
     if: github.ref == 'refs/heads/test'
     runs-on: webs
     strategy:

@@ -88,6 +88,20 @@ services:
     ports:
       - 6038:80
 
+  dracoly-services:
+    <<: *frontend-service
+    image: dracoly-frontend-image
+    container_name: dracoly-frontend
+    # ports:
+      # - 6038:80
+
+  main-services:
+    <<: *frontend-service
+    image: main-frontend-image
+    container_name: main-frontend
+    # ports:
+      # - 6038:80
+
 networks:
   luis:
     external: true
