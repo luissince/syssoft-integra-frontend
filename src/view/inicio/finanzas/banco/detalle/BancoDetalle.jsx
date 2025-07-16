@@ -1,7 +1,5 @@
 import {
-  rounded,
   numberFormat,
-  spinnerLoading,
   isText,
   isEmpty,
   formatTime,
@@ -21,7 +19,7 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
+import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 
 class BancoDetalle extends CustomComponent {
 
@@ -220,7 +218,10 @@ class BancoDetalle extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.initial && spinnerLoading(this.state.messageLoading)}
+        <SpinnerView 
+          loading={this.state.initial}
+          message={this.state.messageLoading}
+        />
 
         <Title
           title='Banco'

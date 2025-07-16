@@ -259,7 +259,7 @@ class CatalogoEditar extends CustomComponent {
   // Procesos guardar
   //------------------------------------------------------------------------------------------
   handleGuardar = async () => {
-    const { idCatalogo,nombre, detalles, idSucursal, idUsuario } = this.state;
+    const { idCatalogo, nombre, detalles, idSucursal, idUsuario } = this.state;
 
     if (isEmpty(nombre)) {
       this.alert.warning('Catálogo', 'Ingrese el nombre del catálogo.', () =>
@@ -404,12 +404,13 @@ class CatalogoEditar extends CustomComponent {
                     <Button
                       className="btn-outline-secondary"
                       title="Limpiar"
-                      icono={<i className="fa fa-close"></i>}
                       onClick={() => {
                         this.refProducto.current.restart();
                         this.refProductoValue.current.focus();
                       }}
-                    />
+                    >
+                      <i className="fa fa-close"></i>
+                    </Button>
                   }
                 />
               </div>
@@ -450,9 +451,9 @@ class CatalogoEditar extends CustomComponent {
                 <div className='d-flex justify-content-center flex-wrap gap-4'>
                   {
                     this.state.productos.map((item, index) => (
-                      <button
+                      <Button
                         key={index}
-                        className='btn btn-light bg-white'
+                        className='btn-light bg-white'
                         style={{
                           border: '1px solid #e2e8f0',
                           width: '16rem',
@@ -476,7 +477,7 @@ class CatalogoEditar extends CustomComponent {
                             </p>
                           </div>
                         </div>
-                      </button>
+                      </Button>
                     ))
                   }
                 </div>
@@ -562,10 +563,10 @@ class CatalogoEditar extends CustomComponent {
                       {/* Segunda columna para quitar */}
                       <div className='d-flex flex-column justify-content-end align-items-center'>
                         <div className='d-flex align-items-end justify-content-end gap-4'>
-                          <button className='btn btn-danger'
+                          <Button className='btn-danger'
                             onClick={() => this.handleRemoverProducto(item.idProducto)}>
                             <i className='fa fa-minus'></i>
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>

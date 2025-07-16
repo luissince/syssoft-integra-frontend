@@ -435,8 +435,7 @@ class ComporbanteEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Button
-              type="button"
-              className="btn btn-warning"
+              className="btn-warning"
               onClick={this.handleGuardar}
             >
               <i className='fa fa-save'></i> Guardar

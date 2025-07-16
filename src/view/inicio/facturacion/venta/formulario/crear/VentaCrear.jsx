@@ -56,6 +56,7 @@ import ModalTransaccion from '../../../../../../components/ModalTransaccion';
 import SidebarProducto from './component/SidebarProducto';
 import ModalPedido from '../common/ModalPedido';
 import { alertKit } from 'alert-kit';
+import ModalLote from '../common/ModalLote';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -124,6 +125,9 @@ class VentaCrear extends CustomComponent {
       // Atributos del modal agregar
       isOpenAgregar: false,
 
+      // Atributos del modal lote
+      isOpenLote: false,
+
       // Atributos del modal cliente
       loadingCliente: false,
       idTipoCliente: CLIENTE_NATURAL,
@@ -164,6 +168,9 @@ class VentaCrear extends CustomComponent {
 
     // Referencia al modal agregar
     this.refModalAgregar = React.createRef();
+
+    // Referencia al modal lote
+    this.refModalLote = React.createRef();
 
     // Referencia al tipo de cliente
     this.refCliente = React.createRef();
@@ -483,7 +490,7 @@ class VentaCrear extends CustomComponent {
     await this.setStateAsync({ productos: productos });
   }
 
-  addItemDetalle = (producto, precio, cantidad) => {
+  addItemDetalle = (producto, precio, cantidad, lotes = []) => {
     const { almacenes, idAlmacen, idImpuesto, detalleVenta } = this.state;
 
     // Clonar el estado actual de detalleVenta para evitar mutaciones directas
@@ -496,11 +503,12 @@ class VentaCrear extends CustomComponent {
     const existingItem = detalles.find((item) => item.idProducto === producto.idProducto);
 
     // Función auxiliar para crear un nuevo inventario
-    const createInventory = (can) => ({
+    const createInventory = (can, lotes) => ({
       idAlmacen: almacen.idAlmacen,
       almacen: almacen.nombre,
       idInventario: producto.idInventario,
       cantidad: can,
+      lotes: lotes
     });
 
     // Función auxiliar para crear un nuevo item de detalle
@@ -520,14 +528,21 @@ class VentaCrear extends CustomComponent {
     if (producto.idTipoTratamientoProducto === UNIDADES) {
       if (!existingItem) {
 
+        const newAmount = !isEmpty(lotes) ? cantidad : cantidad ? Number(producto.cantidad) : 1;
+
         const newItem = createNewItem(Number(producto.precio));
-        newItem.inventarios = [createInventory(cantidad ? Number(producto.cantidad) : 1)];
+        newItem.inventarios = [createInventory(newAmount, lotes)];
 
         return [...detalles, newItem];
       } else {
         for (const inventario of existingItem.inventarios) {
           if (inventario.idInventario === producto.idInventario) {
-            inventario.cantidad += 1;
+            if (!isEmpty(lotes)) {
+              inventario.cantidad = Number(cantidad);
+              inventario.lotes = lotes;
+            } else {
+              inventario.cantidad += 1;
+            }
           }
         }
       }
@@ -541,7 +556,13 @@ class VentaCrear extends CustomComponent {
 
         return [...detalles, newItem];
       } else {
-        existingItem.precio = Number(precio);
+        // Lógica original para productos sin lote específico
+        for (const inventario of existingItem.inventarios) {
+          if (inventario.idInventario === producto.idInventario) {
+            inventario.cantidad += 1;
+            break;
+          }
+        }
       }
     }
 
@@ -567,6 +588,27 @@ class VentaCrear extends CustomComponent {
         newItem.cantidad = 1;
 
         return [...detalles, newItem];
+      } else {
+        // Para productos a granel con lotes múltiples
+        if (lote) {
+          const existingLoteIndex = existingItem.inventarios.findIndex(
+            inv => inv.lote && inv.lote.idLote === lote.idLote
+          );
+
+          if (existingLoteIndex >= 0) {
+            existingItem.inventarios[existingLoteIndex].cantidad = Number(cantidad);
+          } else {
+            existingItem.inventarios.push(createInventory(Number(cantidad), lote));
+          }
+        } else {
+          // Lógica original
+          for (const inventario of existingItem.inventarios) {
+            if (inventario.idInventario === producto.idInventario) {
+              inventario.cantidad = Number(cantidad);
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -601,11 +643,11 @@ class VentaCrear extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenPedido && !this.state.isOpenVenta) {
+    if (event.key === 'F1' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenLote && !this.state.isOpenCotizacion && !this.state.isOpenPedido && !this.state.isOpenVenta) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenPedido && !this.state.isOpenVenta) {
+    if (event.key === 'F2' && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenLote && !this.state.isOpenCotizacion && !this.state.isOpenPedido && !this.state.isOpenVenta) {
       this.handleClearSale();
     }
   }
@@ -698,10 +740,14 @@ class VentaCrear extends CustomComponent {
     }
 
     if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
-      const detalles = this.addItemDetalle(producto, null, null);
-      this.setState({ detalleVenta: detalles }, () => {
-        this.updateReduxState();
-      });
+      if (producto.lote === 1) {
+        this.handleOpenLote(producto);
+      } else {
+        const detalles = this.addItemDetalle(producto, null, null);
+        this.setState({ detalleVenta: detalles }, () => {
+          this.updateReduxState();
+        });
+      }
     }
 
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
@@ -753,6 +799,27 @@ class VentaCrear extends CustomComponent {
     });
   }
 
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal lote
+  //------------------------------------------------------------------------------------------
+  handleOpenLote = async (producto) => {
+    this.setState({ isOpenLote: true });
+    await this.refModalLote.current.loadDatos(producto);
+  }
+
+  handleCloseLote = () => {
+    this.setState({ isOpenLote: false });
+  }
+
+  handleSaveLote = async (producto, lotes, cantidadTotal) => {
+    let detalles = this.state.detalleVenta;
+
+    detalles = this.addItemDetalle(producto, null, cantidadTotal, lotes);
+
+    this.setState({ detalleVenta: detalles }, () => {
+      this.updateReduxState();
+    });
+  };
   //------------------------------------------------------------------------------------------
   // Opciones de configuración
   //------------------------------------------------------------------------------------------
@@ -1988,6 +2055,7 @@ class VentaCrear extends CustomComponent {
             handleStarProduct={this.handleStarProduct}
           />
         </section>
+
         <section className="invoice-right">
           <InvoiceTicket
             nombreComporbante={this.state.nombreComporbante}
@@ -2174,6 +2242,15 @@ class VentaCrear extends CustomComponent {
           onClose={this.handleCloseAgregar}
           handleAdd={this.handleSaveAgregar}
         />
+
+        <ModalLote
+          ref={this.refModalLote}
+          isOpen={this.state.isOpenLote}
+          detalleVenta={this.state.detalleVenta}
+          onClose={this.handleCloseLote}
+          handleAdd={this.handleSaveLote}
+        />
+
       </PosContainerWrapper>
     );
   }

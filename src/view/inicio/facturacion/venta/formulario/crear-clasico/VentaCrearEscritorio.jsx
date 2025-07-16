@@ -371,7 +371,7 @@ class VentaCrearEscritorio extends CustomComponent {
   clearView = () => {
     this.setState(this.initial, async () => {
       await this.refPersona.current.restart();
-       await this.props.clearCrearVentaClasico();
+      await this.props.clearCrearVentaClasico();
       await this.loadingData();
       this.index = -1;
 
@@ -1992,8 +1992,9 @@ class VentaCrearEscritorio extends CustomComponent {
           <TableCell className='text-center'>
             <Button
               className='btn-outline-danger'
-              icono={<i className="bi bi-trash"></i>}
-              onClick={() => this.handleRemoveItem(producto)} />
+              onClick={() => this.handleRemoveItem(producto)}>
+              <i className="bi bi-trash"></i>
+            </Button>
           </TableCell>
           <TableCell className="text-center">
             <Image

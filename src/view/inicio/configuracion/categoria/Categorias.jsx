@@ -254,7 +254,6 @@ class Categorias extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
-              title=""
               onClick={() => this.handleDelete(item.idCategoria)}
             // disabled={!this.state.remove}
             >

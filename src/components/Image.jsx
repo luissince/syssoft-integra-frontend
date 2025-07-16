@@ -224,7 +224,8 @@ class Image extends Component {
         });
     };
 
-    toggleFullScreen = () => {
+    toggleFullScreen = (e) => {
+         e.stopPropagation(); 
         this.setState((prevState) => ({
             showFullScreen: !prevState.showFullScreen,
         }));

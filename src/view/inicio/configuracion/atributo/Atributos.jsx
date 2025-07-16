@@ -1,8 +1,4 @@
 import {
-  alertDialog,
-  alertSuccess,
-  alertWarning,
-  alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -22,6 +18,7 @@ import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_TALLA } from '../../../../model/types/tipo-atributo';
+import { alertKit } from 'alert-kit';
 
 class Atributos extends CustomComponent {
   constructor(props) {
@@ -175,24 +172,41 @@ class Atributos extends CustomComponent {
   };
 
   handleDelete = (id) => {
-    alertDialog('Color', '¿Estás seguro de eliminar la Color?', async (accept) => {
+    alertKit.question({
+      title: "Color",
+      message: '¿Estás seguro de eliminar la Color?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const params = {
           idAtributo: id,
         };
 
-        alertInfo('Color', 'Se esta procesando la petición...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const response = await removeAtributo(params);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Color', response.data, () => {
+          alertKit.success({
+            title: "Color",
+            message: response.data,
+          }, () => {
             this.loadInit();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Color', response.getMessage());
+          alertKit.warning({
+            title: "Color",
+            message: response.getMessage(),
+          });
         }
       }
     });

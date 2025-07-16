@@ -52,6 +52,7 @@ class Kardex extends CustomComponent {
       cantidad: 0,
       costo: 0,
       valor: 0,
+      manejaLote: false,
 
       productos: [],
 
@@ -62,6 +63,10 @@ class Kardex extends CustomComponent {
       loading: false,
       lista: [],
       restart: false,
+
+      // Filtros adicionales
+      mostrarSinLote: true,
+      filtroFecha: 'todos', // 'todos', 'hoy', 'semana', 'mes'
 
       opcion: 0,
       paginacion: 0,
@@ -77,7 +82,6 @@ class Kardex extends CustomComponent {
 
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
-
     this.refIdAlmacen = React.createRef();
 
     this.abortControllerTable = new AbortController();
@@ -87,14 +91,6 @@ class Kardex extends CustomComponent {
   |--------------------------------------------------------------------------
   | Método de cliclo de vida
   |--------------------------------------------------------------------------
-  |
-  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
-  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
-  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
-  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
-  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
-  | de la aplicación y optimizar el rendimiento del componente.
-  |
   */
 
   async componentDidMount() {
@@ -113,8 +109,11 @@ class Kardex extends CustomComponent {
         this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
       ]);
 
+      const almacenFilter = almacenes.find((item) => item.predefinido === 1);
+
       this.setState({
         almacenes,
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
         initialLoad: false,
       }, () => {
         this.updateReduxState();
@@ -124,14 +123,6 @@ class Kardex extends CustomComponent {
 
   updateReduxState() {
     this.props.setKardexData(this.state)
-    // this.props.setKardexPaginacion({
-    //   upperPageBound: this.refPaginacion.current.upperPageBound,
-    //   lowerPageBound: this.refPaginacion.current.lowerPageBound,
-    //   isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
-    //   isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
-    //   pageBound: this.refPaginacion.current.pageBound,
-    //   messagePaginacion: this.refPaginacion.current.messagePaginacion,
-    // });
   }
 
   async fetchComboAlmacen(params) {
@@ -143,7 +134,6 @@ class Kardex extends CustomComponent {
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
-
       return [];
     }
   }
@@ -157,7 +147,6 @@ class Kardex extends CustomComponent {
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
-
       return [];
     }
   }
@@ -175,7 +164,6 @@ class Kardex extends CustomComponent {
   }
 
   async loadDataKardex(idProducto) {
-
     const params = {
       idProducto: idProducto,
       idAlmacen: this.state.idAlmacen,
@@ -189,6 +177,9 @@ class Kardex extends CustomComponent {
     });
 
     const kardex = await this.fetchListarKardex(params);
+
+    // Verificar si el producto maneja lotes
+    const manejaLote = kardex.length > 0 ? kardex[0].manejaLote === 1 : false;
 
     const cantidad = kardex.reduce((accumlate, item) => {
       accumlate +=
@@ -213,6 +204,7 @@ class Kardex extends CustomComponent {
       cantidad: cantidad,
       costo: costo,
       valor: valor,
+      manejaLote: manejaLote,
       loading: false,
     }, () => {
       this.updateReduxState();
@@ -223,16 +215,6 @@ class Kardex extends CustomComponent {
   |--------------------------------------------------------------------------
   | Método de eventos
   |--------------------------------------------------------------------------
-  |
-  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-  |
   */
 
   //------------------------------------------------------------------------------------------
@@ -257,7 +239,6 @@ class Kardex extends CustomComponent {
     };
 
     const productos = await this.fetchFiltrarProducto(params);
-
     this.setState({ productos });
   };
 
@@ -286,20 +267,79 @@ class Kardex extends CustomComponent {
     });
   };
 
+  handleToggleSinLote = () => {
+    this.setState({ mostrarSinLote: !this.state.mostrarSinLote });
+  };
+
+  handleFilterFecha = (event) => {
+    this.setState({ filtroFecha: event.target.value });
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de utilidad
+  |--------------------------------------------------------------------------
+  */
+
+  getFilteredData = () => {
+    let filteredData = this.state.lista;
+
+    // Filtrar por lotes si es necesario
+    if (this.state.manejaLote && !this.state.mostrarSinLote) {
+      filteredData = filteredData.filter(item => item.codigoLote !== 'SIN LOTE');
+    }
+
+    // Filtrar por fecha
+    if (this.state.filtroFecha !== 'todos') {
+      const today = new Date();
+      const filterDate = new Date();
+
+      switch (this.state.filtroFecha) {
+        case 'hoy':
+          filterDate.setHours(0, 0, 0, 0);
+          break;
+        case 'semana':
+          filterDate.setDate(today.getDate() - 7);
+          break;
+        case 'mes':
+          filterDate.setMonth(today.getMonth() - 1);
+          break;
+      }
+
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.f);
+        return itemDate >= filterDate;
+      });
+    }
+
+    return filteredData;
+  };
+
+  getLoteIcon = (codigoLote, fechaVencimiento) => {
+    if (codigoLote === 'N/A') return '';
+    if (codigoLote === 'SIN LOTE') return <span className="text-muted">📦</span>;
+
+    // Verificar si está próximo a vencer (30 días)
+    if (fechaVencimiento && fechaVencimiento !== 'SIN FECHA') {
+      const [dia, mes, año] = fechaVencimiento.split('/');
+      const fechaVenc = new Date(año, mes - 1, dia);
+      const hoy = new Date();
+      const diasRestantes = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+
+      if (diasRestantes <= 30 && diasRestantes > 0) {
+        return <span className="text-warning" title="Próximo a vencer">⚠️</span>;
+      } else if (diasRestantes <= 0) {
+        return <span className="text-danger" title="Vencido">🚫</span>;
+      }
+    }
+
+    return <span className="text-success">✅</span>;
+  };
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
   |--------------------------------------------------------------------------
-  |
-  | El método render() es esencial en los componentes de React y se encarga de determinar
-  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-  | actuales del componente para determinar lo que se mostrará.
-  |
   */
 
   //------------------------------------------------------------------------------------------
@@ -307,21 +347,23 @@ class Kardex extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   generateBody() {
-    const { loading, lista, messageTable } = this.state;
+    const { loading, messageTable, manejaLote, codiso } = this.state;
 
     if (loading) {
       return (
         <SpinnerTable
-          colSpan='12'
+          colSpan={manejaLote ? '15' : '13'}
           message={messageTable}
         />
       );
     }
 
-    if (isEmpty(lista)) {
+    const filteredData = this.getFilteredData();
+
+    if (isEmpty(filteredData)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="12">¡No hay datos para mostrar!</TableCell>
+          <TableCell colSpan={manejaLote ? '15' : '13'}>¡No hay datos para mostrar!</TableCell>
         </TableRow>
       );
     }
@@ -329,7 +371,7 @@ class Kardex extends CustomComponent {
     let cantidad = 0;
     let costo = 0;
 
-    return lista.map((item, index) => {
+    return filteredData.map((item, index) => {
       cantidad =
         cantidad +
         (item.tipo === 'INGRESO'
@@ -343,49 +385,70 @@ class Kardex extends CustomComponent {
 
       return (
         <TableRow key={index}>
-          {/* <TableCell>{++index}</TableCell> */}
           <TableCell>{item.fecha}<br />{formatTime(item.hora)}</TableCell>
           <TableCell>
             <Link className="btn-link" to={getPathNavigation(item.opcion, item.idNavegacion)}>
               {item.detalle} <i className='bi bi-hand-index-fill'></i>
             </Link>
           </TableCell>
-          <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
-          <TableCell>{item.tipo === 'INGRESO' ? numberFormat(item.costo, this.state.codiso) : ''}</TableCell>
-          <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
 
-          <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
-          <TableCell>{item.tipo === 'SALIDA' ? numberFormat(item.costo, this.state.codiso) : ''}</TableCell>
-          <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
+          {/* Columnas de lote (solo si el producto maneja lotes) */}
+          {manejaLote && (
+            <TableCell>
+              <div className="d-flex align-items-center">
+                {this.getLoteIcon(item.codigoLote, item.fechaVencimiento)}
+                <span className="ml-1">{item.codigoLote}</span>
+              </div>
+              <div className="d-flex align-items-center">
+                <span className={item.fechaVencimiento === 'SIN FECHA' ? 'text-muted' : ''}>
+                  {item.fechaVencimiento}
+                </span>
+              </div>
+            </TableCell>
+          )}
 
-          <TableCell>{numberFormat(cantidad, this.state.codiso)}</TableCell>
-          <TableCell>{numberFormat(costo / cantidad, this.state.codiso)}</TableCell>
-          <TableCell>{numberFormat(costo, this.state.codiso)}</TableCell>
+          {/* Columnas de Ingreso */}
+          <TableCell className="bg-success text-white">
+            {item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}
+          </TableCell>
+          <TableCell>
+            {item.tipo === 'INGRESO' ? numberFormat(item.costo, codiso) : ''}
+          </TableCell>
+          <TableCell>
+            {item.tipo === 'INGRESO' ? '+' + numberFormat(item.costo * item.cantidad, codiso) : ''}
+          </TableCell>
 
-          <TableCell>{item.almacen}</TableCell>
-          <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell>
-          {/* 
-          <TableCell className="bg-success text-white">{item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}</TableCell>
-          <TableCell className="bg-danger text-white">{item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}</TableCell>
+          {/* Columnas de Salida */}
+          <TableCell className="bg-danger text-white">
+            {item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}
+          </TableCell>
+          <TableCell>
+            {item.tipo === 'SALIDA' ? numberFormat(item.costo, codiso) : ''}
+          </TableCell>
+          <TableCell>
+            {item.tipo === 'SALIDA' ? '-' + numberFormat(item.costo * item.cantidad, codiso) : ''}
+          </TableCell>
+
+          {/* Columnas de Saldo */}
           <TableCell className="font-weight-bold">{rounded(cantidad)}</TableCell>
-          <TableCell>{numberFormat(item.costo, this.state.codiso)}</TableCell>
-          <TableCell>{item.tipo === 'INGRESO' ? '+' + rounded(item.costo * item.cantidad) : ''}</TableCell>
-          <TableCell>{item.tipo === 'SALIDA' ? '-' + rounded(item.costo * item.cantidad) : ''}</TableCell>
-          <TableCell>{numberFormat(costo, this.state.codiso)}</TableCell>
-          
-          <TableCell>{item.apellidos}{<br />}{item.nombres}</TableCell> */}
+          <TableCell>{numberFormat(cantidad > 0 ? costo / cantidad : 0, codiso)}</TableCell>
+          <TableCell>{numberFormat(costo, codiso)}</TableCell>
+
+          {/* <TableCell>{item.almacen}</TableCell>
+          <TableCell>
+            <small>{item.usuario}</small>
+          </TableCell> */}
         </TableRow>
       );
     });
   }
-
 
   //------------------------------------------------------------------------------------------
   // Render
   //------------------------------------------------------------------------------------------
 
   render() {
-    const { producto, cantidad, costo, valor } = this.state;
+    const { producto, cantidad, costo, valor, manejaLote, mostrarSinLote, filtroFecha } = this.state;
 
     return (
       <ContainerWrapper>
@@ -400,6 +463,7 @@ class Kardex extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
+        {/* Filtros principales */}
         <Row>
           <Column className="col-md-9 col-12">
             <SearchInput
@@ -420,11 +484,11 @@ class Kardex extends CustomComponent {
                     alt={value.nombre}
                     width={60}
                   />
-
                   <div className='ml-2'>
-                    {value.codigo}
+                    <strong>{value.codigo}</strong>
                     <br />
                     {value.nombre}
+                    {value.lote === 1 && <span className="badge badge-info ml-2">Con Lotes</span>}
                   </div>
                 </div>}
               renderIconLeft={<i className="bi bi-search"></i>}
@@ -435,12 +499,12 @@ class Kardex extends CustomComponent {
             <Select
               group={true}
               iconLeft={<i className="fa fa-building"></i>}
-              label={"Almacen:"}
+              label={"Almacén:"}
               ref={this.refIdAlmacen}
               value={this.state.idAlmacen}
               onChange={this.handleSelectAlmacen}
             >
-              <option value="">-- Almacen --</option>
+              <option value="">-- Todos los Almacenes --</option>
               {this.state.almacenes.map((item, index) => {
                 return (
                   <option key={index} value={item.idAlmacen}>
@@ -452,147 +516,160 @@ class Kardex extends CustomComponent {
           </Column>
         </Row>
 
+        {/* Filtros adicionales */}
+        {producto && (
+          <Row>
+            <Column className="col-md-4 col-12" formGroup={true}>
+              <Select
+                group={true}
+                iconLeft={<i className="fa fa-calendar"></i>}
+                label={"Filtrar por fecha:"}
+                value={filtroFecha}
+                onChange={this.handleFilterFecha}
+              >
+                <option value="todos">Todas las fechas</option>
+                <option value="hoy">Hoy</option>
+                <option value="semana">Última semana</option>
+                <option value="mes">Último mes</option>
+              </Select>
+            </Column>
+
+            {manejaLote && (
+              <Column className="col-md-4 col-12" formGroup={true}>
+                <div className="form-check mt-4">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="mostrarSinLote"
+                    checked={mostrarSinLote}
+                    onChange={this.handleToggleSinLote}
+                  />
+                  <label className="form-check-label" htmlFor="mostrarSinLote">
+                    Mostrar movimientos sin lote
+                  </label>
+                </div>
+              </Column>
+            )}
+          </Row>
+        )}
+
+        {/* Información del producto */}
         <Row>
-          <Column formGroup={true}>
-            <h5>Información del Producto</h5>
-            <p>
-              <strong>Código del Producto:</strong>{' '}
-              {producto && producto.codigo}
-            </p>
-            <p>
-              <strong>Nombre del Producto:</strong>{' '}
-              {producto && producto.nombre}
-            </p>
-            <p>
-              <strong>Almacen:</strong> {this.state.nombreAlmacen}
-            </p>
-            <p>
-              <strong>Unidades Disponibles:</strong> {cantidad}{' '}
-              {producto && producto.unidad}
-            </p>
-            <p>
-              <strong>Costo Promedio Ponderado:</strong>{' '}
-              {numberFormat(costo, this.state.codiso)}
-            </p>
-            <p>
-              <strong>Valor Total Inventario:</strong>{' '}
-              {numberFormat(valor, this.state.codiso)}
-            </p>
+          <Column className="col-md-8 col-12" formGroup={true}>
+            <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">
+                  Información del Producto
+                  {manejaLote && <span className="badge badge-info ml-2">Maneja Lotes</span>}
+                </h5>
+                <Row>
+                  <Column className="col-md-6">
+                    <p><strong>Código:</strong> {producto && producto.codigo}</p>
+                    <p><strong>Nombre:</strong> {producto && producto.nombre}</p>
+                    <p><strong>Almacén:</strong> {this.state.nombreAlmacen}</p>
+                  </Column>
+                  <Column className="col-md-6">
+                    <p><strong>Unidades Disponibles:</strong> {rounded(cantidad)} {producto && producto.unidad}</p>
+                    <p><strong>Costo Promedio:</strong> {numberFormat(costo, this.state.codiso)}</p>
+                    <p><strong>Valor Total:</strong> {numberFormat(valor, this.state.codiso)}</p>
+                  </Column>
+                </Row>
+              </div>
+            </div>
           </Column>
 
-          <Column formGroup={true}>
-            <div className='d-flex align-items-center justify-content-end'>
-              <Image
-                default={images.noImage}
-                src={producto && producto.imagen || null}
-                alt={producto && producto.nombre || "Producto sin imagen"}
-                width={160}
-              />
+          <Column className="col-md-4 col-12" formGroup={true}>
+            <div className="card">
+              <div className="card-body text-center">
+                <Image
+                  default={images.noImage}
+                  src={producto && producto.imagen || null}
+                  alt={producto && producto.nombre || "Producto sin imagen"}
+                  width={160}
+                  className="img-thumbnail"
+                />
+              </div>
             </div>
           </Column>
         </Row>
 
+        {/* Tabla de movimientos */}
         <Row>
           <Column>
-            <TableResponsive>
-              <Table className="table table-bordered rounded">
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Fecha</TableHead>
-                    <TableHead width="21%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Descripción</TableHead>
-                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3}>Ingreso</TableHead>
-                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3}>Salidas</TableHead>
-                    <TableHead width="23%" className="text-center" rowSpan={1} colSpan={3}>Saldos</TableHead>
-                    <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Almacen</TableHead>
-                    <TableHead width="10%" className="text-center align-bottom" rowSpan={2} colSpan={1}>Usuario</TableHead>
-                  </TableRow>
+            <div className="card">
+              <div className="card-header">
+                <h5 className="mb-0">
+                  Movimientos de Kardex
+                  {manejaLote && (
+                    <span className="float-right">
+                      <small>
+                        <span className="text-success">✅ Lote válido</span>
+                        <span className="text-warning ml-2">⚠️ Próximo a vencer</span>
+                        <span className="text-danger ml-2">🚫 Vencido</span>
+                      </small>
+                    </span>
+                  )}
+                </h5>
+              </div>
+              <div className="card-body">
+                <TableResponsive>
+                  <Table className="table table-bordered table-hover">
+                    <TableHeader className="thead-dark">
+                      <TableRow>
+                        <TableHead width="8%" className="text-center align-bottom" rowSpan={2}>
+                          Fecha
+                        </TableHead>
+                        <TableHead width="20%" className="text-center align-bottom" rowSpan={2}>
+                          Descripción
+                        </TableHead>
 
-                  <TableRow>
-                    <TableHead className="text-center">Cantidad</TableHead>
-                    <TableHead className="text-center">Costo Unitario</TableHead>
-                    <TableHead className="text-center">Total</TableHead>
+                        {/* Columnas de lote (solo si el producto maneja lotes) */}
+                        {manejaLote && (
+                          <>
+                            <TableHead width="15%" className="text-center align-bottom" rowSpan={2}>
+                              Lote
+                            </TableHead>
+                          </>
+                        )}
 
-                    <TableHead className="text-center">Cantidad</TableHead>
-                    <TableHead className="text-center">Costo Unitario</TableHead>
-                    <TableHead className="text-center">Total</TableHead>
+                        <TableHead width="18%" className="text-center" colSpan={3}>
+                          Ingreso
+                        </TableHead>
+                        <TableHead width="18%" className="text-center" colSpan={3}>
+                          Salida
+                        </TableHead>
+                        <TableHead width="18%" className="text-center" colSpan={3}>
+                          Saldo
+                        </TableHead>
+                        {/* <TableHead width="8%" className="text-center align-bottom" rowSpan={2}>
+                          Almacén
+                        </TableHead>
+                        <TableHead width="8%" className="text-center align-bottom" rowSpan={2}>
+                          Usuario
+                        </TableHead> */}
+                      </TableRow>
 
-                    <TableHead className="text-center">Cantidad</TableHead>
-                    <TableHead className="text-center">Costo Unitario</TableHead>
-                    <TableHead className="text-center">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-            {/* <div className="table-responsive">
-              <table className="table table-bordered rounded">
-                <thead>
-                  <tr>
-                    <th
-                      scope="col"
-                      rowSpan={2}
-                      colSpan={1}
-                      width="5%"
-                      className="text-center"
-                    >
-                      #
-                    </th>
-                    <th scope="col" rowSpan={2} colSpan={1} width="10%">
-                      Fecha
-                    </th>
-                    <th scope="col" rowSpan={2} colSpan={1} width="30%">
-                      Detalle
-                    </th>
-                    <th scope="col" rowSpan={1} colSpan={3} width="25%">
-                      Unidades
-                    </th>
-                    <th scope="col" rowSpan={2} colSpan={1} width="15%">
-                      Cambios <br /> Costo
-                    </th>
-                    <th
-                      scope="col"
-                      rowSpan={1}
-                      colSpan={3}
-                      width="25%"
-                      className="text-center"
-                    >
-                      Valores
-                    </th>
-                    <th
-                      scope="col"
-                      rowSpan={2}
-                      colSpan={1}
-                      width="10%"
-                      className="text-center"
-                    >
-                      Almacen
-                    </th>
-                    <th
-                      scope="col"
-                      rowSpan={2}
-                      colSpan={1}
-                      width="10%"
-                      className="text-center"
-                    >
-                      Usuario
-                    </th>
-                  </tr>
-                  <tr>
-                    <th>Ingreso</th>
-                    <th>Salida</th>
-                    <th>Existencia</th>
+                      <TableRow>
+                        <TableHead className="text-center">Cantidad</TableHead>
+                        <TableHead className="text-center">Costo Unit.</TableHead>
+                        <TableHead className="text-center">Total</TableHead>
 
-                    <th>Debe</th>
-                    <th>Haber</th>
-                    <th>Saldo</th>
-                  </tr>
-                </thead>
+                        <TableHead className="text-center">Cantidad</TableHead>
+                        <TableHead className="text-center">Costo Unit.</TableHead>
+                        <TableHead className="text-center">Total</TableHead>
 
-                <tbody>{this.generateBody()}</tbody>
-              </table>
-            </div> */}
+                        <TableHead className="text-center">Cantidad</TableHead>
+                        <TableHead className="text-center">Costo Unit.</TableHead>
+                        <TableHead className="text-center">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {this.generateBody()}
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </div>
+            </div>
           </Column>
         </Row>
       </ContainerWrapper>
@@ -620,7 +697,6 @@ Kardex.propTypes = {
 }
 
 /**
- *
  * Método encargado de traer la información de redux
  */
 const mapStateToProps = (state) => {
@@ -634,7 +710,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = { setKardexData, setKardexPaginacion }
 
 /**
- *
  * Método encargado de conectar con redux y exportar la clase
  */
 const ConnectedKardex = connect(mapStateToProps, mapDispatchToProps)(Kardex);

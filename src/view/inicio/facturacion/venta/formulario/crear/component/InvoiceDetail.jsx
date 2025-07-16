@@ -44,23 +44,19 @@ const InvoiceDetail = (props) => {
                 <div className="py-3 w-100 d-flex flex-column justify-content-center h-100">
                   <div className="d-flex justify-content-between align-items-center py-1 px-3">
                     <div className="invoice-item_add-item-options">
-                      <span>
-                        <div
-                          className="d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
+                        <button
+                          className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
                           onClick={() => handleEdit(producto)}
                         >
                           <img src={images.edit} alt="Editar" />
-                        </div>
-                      </span>
+                        </button>
 
-                      <span>
-                        <div
-                          className="d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
+                        <button
+                          className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
                           onClick={() => handleRemove(producto)}
                         >
                           <img src={images.remove} alt="Eliminar" />
-                        </div>
-                      </span>
+                        </button>
                     </div>
 
                     <Image

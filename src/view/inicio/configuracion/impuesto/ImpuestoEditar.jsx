@@ -11,7 +11,6 @@ import {
   isNumeric,
   isText,
   keyNumberInteger,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import {
   editImpuesto,
@@ -24,6 +23,7 @@ import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
+import { SpinnerView } from '../../../../components/Spinner';
 
 class ImpuestoEditar extends CustomComponent {
   constructor(props) {
@@ -143,7 +143,10 @@ class ImpuestoEditar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Impuesto'

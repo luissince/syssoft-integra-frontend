@@ -30,6 +30,7 @@ import pdfVisualizer from "pdf-visualizer";
 import { ModalImpresion, ModalSendWhatsApp } from "../../../../../components/MultiModal";
 import { images } from "../../../../../helper";
 import Image from "../../../../../components/Image";
+import DropdownActions from "../../../../../components/DropdownActions";
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -444,22 +445,6 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   |
    */
 
-  opcionButtonOpcion(image, title, width, alt, onClick) {
-    return (
-      <li>
-        <Button
-          contentClassName="dropdown-item"
-          onClick={onClick}>
-          <img
-            src={image}
-            width={width}
-            alt={alt}
-          />{" "} {title}
-        </Button>
-      </li>
-    );
-  }
-
   renderDetalle() {
     return (
       this.state.detalles.map((item, index) => (
@@ -584,24 +569,28 @@ class CuentasPorCobrarAbonar extends CustomComponent {
               </Button>
             </TableCell>
             <TableCell className="text-center">
-              <div className="dropdown">
-                <a
-                  className="btn btn-light dropdown-toggle"
-                  href="#"
-                  role="button"
-                  id="dropdownMenuLink"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <i className="fa fa-th-list"></i>
-                </a>
-
-                <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                  {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', this.handlePrintAccountsPayable.bind(this, cuota.idCuota, 'A4'))}
-                  {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', this.handlePrintAccountsPayable.bind(this, cuota.idCuota, '80mm'))}
-                  {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 58mm', 22, 'Pdf Ticket', this.handlePrintAccountsPayable.bind(this, cuota.idCuota, '54mm'))}
-                </ul>
-              </div>
+              <DropdownActions
+                options={[
+                  {
+                    image: images.pdf,
+                    tooltip: 'Pdf A4',
+                    label: 'Archivo Pdf A4',
+                    onClick: () => this.handlePrintAccountsPayable.bind(this, cuota.idCuota, 'A4'),
+                  },
+                  {
+                    image: images.invoice,
+                    tooltip: 'Pdf Ticket',
+                    label: 'Archivo Pdf 80mm',
+                    onClick: () => this.handlePrintAccountsPayable.bind(this, cuota.idCuota, '80mm'),
+                  },
+                   {
+                    image: images.invoice,
+                    tooltip: 'Pdf Ticket',
+                    label: 'Archivo Pdf 58mm',
+                    onClick: () => this.handlePrintAccountsPayable.bind(this, cuota.idCuota, '54mm'),
+                  },
+                ]}
+              />
             </TableCell>
           </TableRow>
 

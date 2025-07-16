@@ -3,6 +3,7 @@ import { images } from '../../helper';
 import PropTypes from 'prop-types';
 import { getStatePrivilegio } from '../../helper/utils.helper';
 import { FACTURACION, REALIZAR_VENTA, VENTAS } from '../../model/types/menu';
+import Button from '../Button';
 
 const Menu = (props) => {
 
@@ -128,19 +129,19 @@ const Menu = (props) => {
               </p>
             </li>
             <li className="user-footer">
-              <button
-                className="btn btn-secondary"
+              <Button
+                className="btn-secondary"
                 onClick={handleCloseSucursal}
               >
                 <i className="fa fa-sign-out fa-sm"></i> Cerrar Sucursal
-              </button>
+              </Button>
 
-              <button
-                className="btn btn-secondary"
+              <Button
+                className="btn-secondary"
                 onClick={handleSignIn}
               >
                 <i className="fa fa-window-close fa-sm"></i> Cerrar Sesión
-              </button>
+              </Button>
             </li>
           </ul>
         </div>

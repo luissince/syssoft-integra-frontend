@@ -24,7 +24,7 @@ const ModalElegirInterfaz = ({
 
             <CustomModalContentBody>
                 <h5 className='text-center'>Elegir Interfaz</h5>
-                <div className='d-flex justify-content-center align-items-center gap-2_5 py-3'>
+                <div className='d-flex justify-content-center align-items-center gap-2-5 py-3'>
                     <Button className="btn-outline-info"
                         onClick={handleInterfazClasico}>
                         <i className="fa fa-desktop"></i> Clasico

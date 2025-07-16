@@ -51,6 +51,7 @@ import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
 import { toastKit, ToastStyle } from 'toast-kit';
 import { Link } from 'react-router-dom';
+import DropdownActions from '../../../../components/DropdownActions';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -594,23 +595,7 @@ class CpeElectronicos extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
   */
-
-  opcionButtonOpcion(image, title, width, alt, onClick) {
-    return (
-      <li>
-        <Button
-          contentClassName="dropdown-item"
-          onClick={onClick}>
-          <img
-            src={image}
-            width={width}
-            alt={alt}
-          />{" "} {title}
-        </Button>
-      </li>
-    );
-  }
-
+ 
   opcionButtonEnvio(image, alt, onClick) {
     return (
       <Button
@@ -701,35 +686,55 @@ class CpeElectronicos extends CustomComponent {
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
           <TableCell>
-            <div className="dropdown">
-              <a
-                className="btn btn-primary dropdown-toggle"
-                href="#"
-                role="button"
-                id="dropdownMenuLink"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i className="fa fa-th-list"></i>
-              </a>
-
-              <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                {this.opcionButtonOpcion(images.pdf, 'Archivo Pdf A4', 22, 'Pdf A4', () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'))}
-                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 80mm', 22, 'Pdf Ticket', () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'))}
-                {this.opcionButtonOpcion(images.invoice, 'Archivo Pdf 58mm', 22, 'Pdf Ticket', () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'))}
-                {this.opcionButtonOpcion(images.xml, 'Archivo Xml', 22, 'Xml', () => this.handleDownloadXml(item.idComprobante))}
-                {this.opcionButtonOpcion(images.email, 'Enviar Correo', 22, 'Email', () => this.handleSendEmail(item.idComprobante, item.tipo))}
+            <DropdownActions
+              options={[
                 {
-                  item.tipo === "fac" && item.anulacion !== 0 && this.opcionButtonOpcion(images.error, item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario', 22, 'Error', () => {
-                    if (item.anulacion === 1) {
-                      this.handleSendComunicacionDeBaja(item.idComprobante, item.serie + '-' + formatNumberWithZeros(item.numeracion))
-                    } else {
-                      this.handleSendResumenDiario(item.idComprobante, item.serie + '-' + formatNumberWithZeros(item.numeracion))
-                    }
-                  })
-                }
-              </ul>
-            </div>
+                  image: images.pdf,
+                  tooltip: 'Archivo Pdf A4',
+                  label: 'Pdf A4',
+                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
+                },
+                {
+                  image: images.invoice,
+                  tooltip: 'Archivo Pdf 80mm',
+                  label: 'Pdf Ticket',
+                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
+                },
+                {
+                  image: images.invoice,
+                  tooltip: 'Archivo Pdf 58mm',
+                  label: 'Pdf Ticket',
+                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
+                },
+                {
+                  image: images.xml,
+                  tooltip: 'Archivo Xml',
+                  label: 'Xml',
+                  onClick: () => this.handleDownloadXml(item.idComprobante),
+                },
+                {
+                  image: images.email,
+                  tooltip: 'Enviar Correo',
+                  label: 'Email',
+                  onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
+                },
+                ...(item.tipo === 'fac' && item.anulacion !== 0
+                  ? [{
+                    image: images.error,
+                    tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
+                    label: 'Error',
+                    onClick: () => {
+                      const id = item.idComprobante;
+                      const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
+                      item.anulacion === 1
+                        ? this.handleSendComunicacionDeBaja(id, num)
+                        : this.handleSendResumenDiario(id, num);
+                    },
+                  }]
+                  : []
+                )
+              ]}
+            />
           </TableCell>
           <TableCell>
             <span>{item.fecha}<br />{formatTime(item.hora)}</span>

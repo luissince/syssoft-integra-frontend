@@ -154,8 +154,9 @@ const Combo = (props) => {
                 className="btn-outline-secondary"
                 title="Generar Código de Barras"
                 onClick={handleGenerateCodigoBarras}
-                icono={<i className="bi-arrow-clockwise"></i>}
-              />
+              >
+                <i className="bi-arrow-clockwise"></i>
+              </Button>
             }
           />
         </Column>

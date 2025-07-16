@@ -9,7 +9,7 @@ import { comboTipoDocumento, createPersona, getUbigeo } from '../network/rest/pr
 import SuccessReponse from '../model/class/response';
 import ErrorResponse from '../model/class/error-response';
 import { CANCELED } from '../model/types/types';
-import { alertDialog, alertInfo, alertSuccess, alertWarning, convertNullText, currentDate, isEmpty, keyNumberPhone, validateNumberWhatsApp } from '../helper/utils.helper';
+import { alertDialog, convertNullText, currentDate, isEmpty, keyNumberPhone, validateNumberWhatsApp } from '../helper/utils.helper';
 import { getDni, getRuc } from '../network/rest/apisperu.network';
 import Row from './Row';
 import Column from './Column';
@@ -18,6 +18,7 @@ import Select from './Select';
 import Input from './Input';
 import SearchInput from './SearchInput';
 import { RUC } from '../model/types/tipo-documento';
+import { alertKit } from 'alert-kit';
 
 /**
  * Modal para mostrar del impresión.
@@ -60,7 +61,7 @@ const ModalImpresion = ({
                 </div>
                 <div className='d-flex justify-content-center'>
                     <Button
-                        autoFocus={true}
+                        autoFocus
                         className='btn-danger'
                         onClick={async () => {
                             if (clear) clear();
@@ -69,7 +70,7 @@ const ModalImpresion = ({
                         <img src={images.escoba} width={22} /> Realizar otra Operación.
                     </Button>
                 </div>
-                <div className='d-flex justify-content-center align-items-center flex-wrap gap-2_5 mt-3'>
+                <div className='d-flex justify-content-center align-items-center flex-wrap gap-2-5 mt-3'>
                     {handlePrinterA4 && <Button className="btn-outline-secondary"
                         onClick={handlePrinterA4}>
                         <i className="fa fa-print"></i> A4
@@ -193,7 +194,7 @@ class ModalPreImpresion extends Component {
                     />
 
                     <h5 className='text-center'>Opciones de pre-impresión</h5>
-                    <div className='d-flex justify-content-center align-items-center gap-2_5 mt-3'>
+                    <div className='d-flex justify-content-center align-items-center gap-2-5 mt-3'>
                         <Button
                             className="btn-outline-info"
                             onClick={() => this.handlePrint('a4')}>
@@ -355,7 +356,10 @@ class ModalPersona extends Component {
 
     handleGetApiReniec = async () => {
         if (this.state.documento.length !== 8) {
-            alertWarning("Persona", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.', () => {
+            alertKit.warning({
+                title: "Persona",
+                message: 'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+            }, () => {
                 this.refDocumento.current.focus();
             })
             return;
@@ -377,7 +381,10 @@ class ModalPersona extends Component {
         }
 
         if (response instanceof ErrorResponse) {
-            alertWarning('Persona', response.getMessage(), () => {
+            alertKit.warning({
+                title: 'Persona',
+                message: response.getMessage(),
+            }, () => {
                 this.setState({
                     loading: false,
                 });
@@ -387,7 +394,10 @@ class ModalPersona extends Component {
 
     handleGetApiSunat = async () => {
         if (this.state.documento.length !== 11) {
-            alertWarning("Persona", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.', () => {
+            alertKit.warning({
+                title: "Persona",
+                message: 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+            }, () => {
                 this.refDocumentoPj.current.focus();
             })
             return;
@@ -410,7 +420,10 @@ class ModalPersona extends Component {
         }
 
         if (response instanceof ErrorResponse) {
-            alertWarning('Persona', response.getMessage(), () => {
+            alertKit.warning({
+                title: 'Persona',
+                message: response.getMessage(),
+            }, () => {
                 this.setState({
                     loading: false,
                 });
@@ -458,34 +471,55 @@ class ModalPersona extends Component {
         const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
 
         if (isEmpty(this.state.idTipoDocumento)) {
-            alertWarning("Persona", 'Seleccione el tipo de documento.', () => {
+            alertKit.warning({
+                title: "Persona",
+                message: 'Seleccione el tipo de documento.',
+            }, () => {
                 this.refTipoDocumento.current.focus();
             })
             return;
         }
 
         if (isEmpty(this.state.documento)) {
-            alertWarning("Persona", 'Ingrese el número de documento.', () => {
+            alertKit.warning({
+                title: "Persona",
+                message: 'Ingrese el número de documento.',
+            }, () => {
                 this.refDocumento.current.focus();
             })
             return;
         }
 
         if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.documento.length) {
-            alertWarning("Persona", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
+            alertKit.warning({
+                title: "Persona",
+                message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+            }, () => {
                 this.refDocumento.current.focus();
             })
             return;
         }
 
         if (isEmpty(this.state.informacion)) {
-            alertWarning("Persona", 'Ingrese los apellidos y nombres.', () => {
+            alertKit.warning({
+                title: "Persona",
+                message: 'Ingrese los apellidos y nombres.',
+            }, () => {
                 this.refInformacion.current.focus();
             })
             return;
         }
 
-        alertDialog('Persona', '¿Estás seguro de continuar?', async (accept) => {
+        alertKit.question({
+            title: "Persona",
+            message: '¿Estás seguro de continuar?',
+            acceptButton: {
+                html: "<i class='fa fa-check'></i> Aceptar",
+            },
+            cancelButton: {
+                html: "<i class='fa fa-close'></i> Cancelar",
+            },
+        }, async (accept) => {
             if (accept) {
                 const data = {
                     idTipoCliente: this.state.idTipoCliente,
@@ -510,18 +544,26 @@ class ModalPersona extends Component {
                     idUsuario: this.props.idUsuario,
                 };
 
-                alertInfo('Persona', 'Procesando información...');
+                alertKit.loading({
+                    message: 'Procesando información...',
+                });
 
                 const response = await createPersona(data);
 
                 if (response instanceof SuccessReponse) {
-                    alertSuccess('Persona', response.data, async () => {
+                    alertKit.success({
+                        title: 'Persona',
+                        message: response.data,
+                    }, async () => {
                         await this.refModal.current.handleOnClose()
                     });
                 }
 
                 if (response instanceof ErrorResponse) {
-                    alertWarning('Persona', response.getMessage());
+                    alertKit.warning({
+                        title: 'Persona',
+                        message: response.getMessage(),
+                    });
                 }
             }
         });
@@ -788,7 +830,10 @@ class ModalSendWhatsApp extends React.Component {
 
     handleSendWhatsapp = async () => {
         if (!validateNumberWhatsApp(this.state.phone)) {
-            alertWarning("WhatsApp", "El número de teléfono no es válido.", () => {
+            alertKit.warning({
+                title: "WhatsApp",
+                message: "El número de teléfono no es válido.",
+            }, () => {
                 this.refPhone.current.focus();
             });
             return;

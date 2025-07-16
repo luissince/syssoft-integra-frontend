@@ -114,9 +114,10 @@ export function formatDecimal(
  *
  * @param {number} amount - La cantidad numérica
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
+ * @param {string} [type='string'] - El tipo de retorno (string o number).
  * @returns {string} La cantidad formateada como dinero.
  */
-export function rounded(amount, decimalCount = 2) {
+export function rounded(amount, decimalCount = 2, type = 'string') {
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
   if (!isNumber) return '0';
 
@@ -129,7 +130,9 @@ export function rounded(amount, decimalCount = 2) {
   const parsedAmount = Math.abs(number);
   const fixedAmount = parsedAmount.toFixed(decimalCount);
 
-  return negativeSign + fixedAmount;
+  const value = negativeSign + fixedAmount
+
+  return type === 'string' ? value : Number(value);
 }
 
 /**
@@ -384,17 +387,35 @@ export function validateEmail(email) {
   return isValid;
 }
 
+/**
+ * Verifica si el valor proporcionado es numérico.
+ *
+ * @param {*} valor - El valor a evaluar.
+ * @returns {boolean} `true` si el valor es numérico válido, `false` en caso contrario.
+ */
 export function isNumeric(valor) {
   return !isNaN(valor) && !isNaN(parseFloat(valor));
 }
 
+/**
+ * Verifica si el valor proporcionado es un texto no vacío.
+ *
+ * @param {*} value - El valor a evaluar.
+ * @returns {boolean} `true` si el valor es una cadena de texto no vacía, `false` en caso contrario.
+ */
 export function isText(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+/**
+ * Convierte un valor a número si es numérico, de lo contrario retorna 0.
+ *
+ * @param {*} value - El valor a convertir.
+ * @returns {number} El valor convertido a número, o 0 si no es numérico.
+ */
 export function getNumber(value) {
   if (!isNumeric(value)) {
-    return 0
+    return 0;
   }
 
   return Number(value);
@@ -622,6 +643,32 @@ export function convertNullText(value) {
   return text === null ? '' : text;
 }
 
+/**
+ * Verifica si un valor es "vacío".
+ *
+ * Esta función es útil para condiciones donde quieras saber si una variable está vacía
+ * sin preocuparte del tipo (null, undefined, string vacío, array vacío, objeto sin claves, etc).
+ *
+ * @param {*} object - El valor a verificar.
+ * @returns {boolean} `true` si está vacío, `false` si contiene datos.
+ *
+ * ✔️ Soporta:
+ * - `null` o `undefined`
+ * - Strings (considera vacíos los que solo tienen espacios)
+ * - Arrays o `FileList`
+ * - Objetos (devuelve true si no tiene claves)
+ *
+ * ❌ Otros tipos (como números o funciones) siempre devolverán `false`.
+ *
+ * @example
+ * if (isEmpty(nombre)) {
+ *   console.log("El nombre está vacío");
+ * }
+ *
+ * if (!isEmpty(data)) {
+ *   procesar(data);
+ * }
+ */
 export function isEmpty(object) {
   if (object === null || typeof object === 'undefined') {
     return true;
@@ -641,6 +688,7 @@ export function isEmpty(object) {
 
   return false;
 }
+
 
 export function limitarCadena(cadena, limite, sufijo) {
   if (cadena.length > limite) {
@@ -715,6 +763,27 @@ export function spinnerLoading(message = 'Cargando datos...', table = false) {
   );
 }
 
+/**
+ * Valida los inputs dentro de un contenedor referenciado.
+ * Si encuentra un campo inválido según el tipo (`number` o `string`), enfoca ese campo.
+ *
+ * @param {React.RefObject} ref - Referencia a un contenedor DOM (por ejemplo, un `<form>` o `<div>`).
+ * @param {'number' | 'string'} [type='number'] - Tipo de validación:
+ *   - 'number': verifica que los valores sean numéricos.
+ *   - 'string': verifica que los valores no estén vacíos.
+ *
+ * ✅ Uso común: validación básica antes de enviar formularios.
+ *
+ * 🛑 Si encuentra un input inválido, **frena** en el primero y aplica `.focus()` a ese campo.
+ *
+ * ⚠️ Requiere que existan las funciones `isNumeric` e `isEmpty`.
+ *
+ * @example
+ * const formRef = useRef();
+ * validateNumericInputs(formRef, 'number'); // Verifica que todos los inputs tengan valores numéricos
+ *
+ * validateNumericInputs(formRef, 'string'); // Verifica que los campos no estén vacíos
+ */
 export function validateNumericInputs(ref, type = 'number') {
   if (!ref || !ref.current) return;
 
@@ -739,6 +808,24 @@ export function validateNumericInputs(ref, type = 'number') {
   }
 }
 
+/**
+ * Enfoca el primer `<input>` encontrado dentro de un contenedor referenciado.
+ *
+ * @param {React.RefObject} ref - Referencia a un contenedor DOM (como un <form> o <div>).
+ *
+ * ✔️ Uso típico: mejorar la experiencia del usuario al validar formularios.
+ * 
+ * 🔍 Qué hace:
+ * 1. Verifica que el `ref` exista y sea válido.
+ * 2. Obtiene todos los elementos `<input>` dentro del contenedor.
+ * 3. Si hay al menos uno, enfoca el primero (por ejemplo, para que el usuario corrija un error).
+ *
+ * ❗ Requiere que la función `isEmpty()` esté disponible (verifica arrays vacíos).
+ *
+ * @example
+ * const formRef = useRef();
+ * focusOnFirstInvalidInput(formRef);
+ */
 export function focusOnFirstInvalidInput(ref) {
   if (!ref || !ref.current) return;
 

@@ -9,7 +9,6 @@ import {
   alertWarning,
   isEmpty,
   isText,
-  spinnerLoading,
 } from '../../../../../../helper/utils.helper';
 import {
   getIdBando,

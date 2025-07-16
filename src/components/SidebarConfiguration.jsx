@@ -132,13 +132,15 @@ const SidebarConfiguration = (props) => {
                 <Button
                   className="btn-outline-success mr-2"
                   onClick={handleSaveOptions}
-                  text={"Aceptar"}
-                />
+                >
+                  <i className='fa fa-save'></i> Guardar
+                </Button>
                 <Button
                   className="btn-outline-secondary "
                   onClick={handleCloseOptions}
-                  text={"Cancelar"}
-                />
+                >
+                  <i className='fa fa-close'></i> Cancelar
+                </Button>
               </div>
             </div>
           </div>

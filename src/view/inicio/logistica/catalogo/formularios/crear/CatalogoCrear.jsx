@@ -396,7 +396,7 @@ class CatalogoCrear extends CustomComponent {
                 style={{ borderBottom: '1px solid #cbd5e1' }}>
                 <div className='d-flex'>
                   <Button
-                    className='btn btn-link'
+                    className='btn-link'
                     onClick={this.handleCerrar}>
                     <i className="bi bi-arrow-left-short text-xl text-dark"></i>
                   </Button>
@@ -421,12 +421,13 @@ class CatalogoCrear extends CustomComponent {
                     <Button
                       className="btn-outline-secondary"
                       title="Limpiar"
-                      icono={<i className="fa fa-close"></i>}
                       onClick={() => {
                         this.refProducto.current.restart();
                         this.refProductoValue.current.focus();
                       }}
-                    />
+                    >
+                      <i className="fa fa-close"></i>
+                    </Button>
                   }
                 />
               </div>
@@ -467,9 +468,9 @@ class CatalogoCrear extends CustomComponent {
                 <div className='d-flex justify-content-center flex-wrap gap-4'>
                   {
                     this.state.productos.map((item, index) => (
-                      <button
+                      <Button
                         key={index}
-                        className='btn btn-light bg-white'
+                        className='btn-light bg-white'
                         style={{
                           border: '1px solid #e2e8f0',
                           width: '16rem',
@@ -493,7 +494,7 @@ class CatalogoCrear extends CustomComponent {
                             </p>
                           </div>
                         </div>
-                      </button>
+                      </Button>
                     ))
                   }
                 </div>
@@ -516,7 +517,7 @@ class CatalogoCrear extends CustomComponent {
 
                 <div className='d-flex justify-content-end'>
                   <Button
-                    className='btn btn-link'
+                    className='btn-link'
                     onClick={this.handleLimpiar}>
                     <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
                   </Button>
@@ -587,10 +588,10 @@ class CatalogoCrear extends CustomComponent {
                       {/* Segunda columna para quitar */}
                       <div className='d-flex flex-column justify-content-end align-items-center'>
                         <div className='d-flex align-items-end justify-content-end gap-4'>
-                          <button className='btn btn-danger'
+                          <Button className='btn-danger'
                             onClick={() => this.handleRemoverProducto(item.idProducto)}>
                             <i className='fa fa-minus'></i>
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>

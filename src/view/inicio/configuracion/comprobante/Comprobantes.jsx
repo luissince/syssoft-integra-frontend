@@ -224,7 +224,6 @@ class Comprobantes extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
-              title="Editar"
               onClick={() => this.handleEditar(item.idComprobante)}
             // disabled={!this.state.edit}
             >

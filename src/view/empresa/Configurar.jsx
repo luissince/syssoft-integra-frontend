@@ -5,10 +5,6 @@ import {
   keyNumberInteger,
   keyNumberPhone,
   spinnerLoading,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isText,
 } from '../../helper/utils.helper';
 import PropTypes from 'prop-types';
@@ -21,13 +17,15 @@ import { CANCELED } from '../../model/types/types';
 import { getRuc } from '../../network/rest/apisperu.network';
 import CustomComponent from '../../model/class/custom-component';
 import { configSave } from '../../redux/principalSlice';
+import Button from '../../components/Button';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class Configurar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -158,7 +156,16 @@ class Configurar extends CustomComponent {
       return;
     }
 
-    alertDialog('Mi Empresa', '¿Está seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: "Mi Empresa",
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const logoSend = await imageBase64(this.refFileLogo.current.files[0]);
         const baseLogo = logoSend ? logoSend.base64String : '';
@@ -183,12 +190,17 @@ class Configurar extends CustomComponent {
           extimage: extImage,
         };
 
-        alertInfo('Mi Empresa', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const response = await saveEmpresa(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Mi Empresa', response.data, () => {
+          alertKit.success({
+            title: "Mi Empresa",
+            message: response.data,
+          }, () => {
             this.props.configSave();
             window.location.href = '/';
           });
@@ -197,7 +209,10 @@ class Configurar extends CustomComponent {
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Mi Empresa', response.getMessage());
+          alertKit.warning({
+            title: "Mi Empresa",
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -247,14 +262,13 @@ class Configurar extends CustomComponent {
                     }
                   />
                   <div className="input-group-append">
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
+                    <Button
+                      className="btn-outline-secondary"
                       title="Sunat"
                       onClick={() => this.onEventGetApiSunat()}
                     >
                       <img src={images.sunat} alt="Sunat" width="12" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -402,12 +416,12 @@ class Configurar extends CustomComponent {
                     <span></span>
                   </div>
                 </label>{' '}
-                <button
-                  className="btn btn-outline-secondary"
+                <Button
+                  className="btn-outline-secondary"
                   onClick={() => this.clearLogo()}
                 >
                   <i className="bi bi-trash"></i>
-                </button>
+                </Button>
               </div>
 
               <div className="col-md-6 mb-3 text-center">
@@ -438,22 +452,21 @@ class Configurar extends CustomComponent {
                     <span></span>
                   </div>
                 </label>{' '}
-                <button
-                  className="btn btn-outline-secondary"
+                <Button
+                  className="btn-outline-secondary"
                   onClick={() => this.clearImage()}
                 >
                   <i className="bi bi-trash"></i>
-                </button>
+                </Button>
               </div>
             </div>
 
-            <button
-              className="btn btn-success btn-lg btn-block"
-              type="button"
+            <Button
+              className="btn-success btn-lg btn-block"
               onClick={() => this.onEventSave()}
             >
               <i className="fa fa-save"></i> Guardar Información
-            </button>
+            </Button>
           </div>
         </div>
 

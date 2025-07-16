@@ -4,8 +4,6 @@ import {
   alertInfo,
   alertSuccess,
   alertWarning,
-  spinnerLoading,
-  keyUpSearch,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';

@@ -198,12 +198,13 @@ class ModalVenta extends CustomComponent {
                         <Button
                             className='btn-primary btn-sm'
                             title="Seleccionar"
-                            icono={<i className="fa fa-plus"></i>}
                             onClick={async () => {
                                 await this.props.refModal.current.handleOnClose()
                                 handleSeleccionar(item.idVenta)
                             }}
-                        />
+                        >
+                            <i className="fa fa-plus"></i>
+                        </Button>
                     </TableCell>
                 </TableRow>
             );
@@ -257,9 +258,10 @@ class ModalVenta extends CustomComponent {
                                                 <Button
                                                     className="btn-outline-secondary"
                                                     title="Recargar"
-                                                    icono={<i className="bi bi-arrow-clockwise"></i>}
                                                     onClick={this.loadInit}
-                                                />
+                                                >
+                                                    <i className="bi bi-arrow-clockwise"></i>
+                                                </Button>
                                             }
                                         />
                                     </Column>

@@ -394,8 +394,7 @@ class ComporbanteAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Button
-              type="button"
-              className="btn btn-success"
+              className="btn-success"
               onClick={this.handleGuardar}
             >
               <i className='fa fa-save'></i>  Guardar

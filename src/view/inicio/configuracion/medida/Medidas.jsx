@@ -4,7 +4,6 @@ import {
   alertSuccess,
   alertWarning,
   spinnerLoading,
-  keyUpSearch,
   alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -244,22 +243,20 @@ class Medidas extends CustomComponent {
           <td>{item.descripcion}</td>
           <td className="text-center">{estado}</td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-warning btn-sm"
-              title="Editar"
+            <Button
+              className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idMedida)}
             >
               <i className="bi bi-pencil"></i>
-            </button>
+            </Button>
           </td>
           <td className="text-center">
-            <button
-              className="btn btn-outline-danger btn-sm"
-              title="Anular"
+            <Button
+              className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idMedida)}
             >
               <i className="bi bi-trash"></i>
-            </button>
+            </Button>
           </td>
         </tr>
       );

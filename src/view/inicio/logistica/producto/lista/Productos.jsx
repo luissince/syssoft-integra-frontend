@@ -331,19 +331,21 @@ class Productos extends CustomComponent {
             <Button
               className='btn-outline-warning btn-sm'
               title="Editar"
-              icono={<i className="bi bi-pencil"></i>}
               // disabled={!this.state.edit}
               onClick={() => this.handleEditar(item.idProducto)}
-            />
+            >
+              <i className="bi bi-pencil"></i>
+            </Button>
           </TableCell>
           <TableCell className="text-center">
             <Button
               className='btn-outline-danger btn-sm'
               title="Anular"
-              icono={<i className="bi bi-trash"></i>}
               // disabled={!this.state.remove}
               onClick={() => this.handleEliminar(item.idProducto)}
-            />
+            >
+              <i className="bi bi-trash"></i>
+              </Button>
           </TableCell>
         </TableRow>
       );

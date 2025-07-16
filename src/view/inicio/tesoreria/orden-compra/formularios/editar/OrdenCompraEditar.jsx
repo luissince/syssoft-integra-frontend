@@ -854,7 +854,7 @@ class OrdenCompraEditar extends CustomComponent {
                 style={{ borderBottom: '1px solid #cbd5e1' }}>
                 <div className='d-flex'>
                   <Button
-                    className='btn btn-link'
+                    className='btn-link'
                     onClick={this.handleCerrar}>
                     <i className="bi bi-arrow-left-short text-xl text-dark"></i>
                   </Button>
@@ -878,12 +878,13 @@ class OrdenCompraEditar extends CustomComponent {
                     <Button
                       className="btn-outline-secondary"
                       title="Limpiar"
-                      icono={<i className="fa fa-close"></i>}
                       onClick={() => {
                         this.refProducto.current.restart();
                         this.refProductoValue.current.focus();
                       }}
-                    />
+                    >
+                      <i className="fa fa-close"></i>
+                    </Button>
                   }
                 />
               </div>
@@ -1097,14 +1098,15 @@ class OrdenCompraEditar extends CustomComponent {
                         <div className='h-100 text-lg'>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</div>
 
                         <div className='d-flex align-items-end justify-content-end gap-4'>
-                          <button className='btn btn-link'
+                          <Button className='btn-link'
                             onClick={() => this.handleOpenModalProducto(item)}>
                             <i className='fa fa-edit text-secondary text-xl'></i>
-                          </button>
-                          <button className='btn btn-link'
+                          </Button>
+
+                          <Button className='btn-link'
                             onClick={() => this.handleRemoverProducto(item.idProducto)}>
                             <i className='fa fa-trash text-secondary text-xl'></i>
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-import { handlePasteFloat, keyNumberFloat, rounded } from '../../../../../../../helper/utils.helper';
+import { handlePasteFloat, isEmpty, keyNumberFloat, rounded } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { UNIDADES } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import { SpinnerView } from '../../../../../../../components/Spinner';
@@ -95,7 +95,7 @@ const SidebarProducto = (props) => {
                       contentClassName="list-group-item list-group-item-action"
                       onClick={() => handleSeleccionar(item)}
                     >
-                      {item.nombre} - {item.valor}
+                    <i className='fa fa-hand-pointer-o'></i>  {item.nombre} - {item.valor}
                     </Button>
                   ))}
                 </ul>
@@ -111,16 +111,44 @@ const SidebarProducto = (props) => {
                       {producto.inventarios.map((item, index) => (
                         <li key={index} className="list-group-item">
                           <div className='d-flex justify-content-between flex-row'>
-                            <div className=''>
-                              <span>{item.almacen}</span>
+                            <div className='d-flex align-items-center gap-2'>
+                              <i className="bi bi-house text-muted"></i>
+                              <span className='text-sm'>{item.almacen}</span>
                             </div>
                             <div>
-                              <span>cantidad: {rounded(item.cantidad)}</span>
+                              <span className='text-sm'>cantidad: {rounded(item.cantidad)}</span>
                             </div>
                           </div>
                         </li>
                       ))}
                     </ul>
+
+                    {
+                      !isEmpty(producto.inventarios) && !isEmpty(producto.inventarios.filter(item => !isEmpty(item.lotes))) && (
+                        <>
+                          <label className='mt-3'>Lotes:</label>
+                          <ul className="list-group">
+                            {producto.inventarios.map((inv, index) => {
+                              const lotes = inv.lotes;
+
+                              return lotes.map((lote, index) => (
+                                <li key={index} className="list-group-item">
+                                  <div className='d-flex justify-content-between flex-row'>
+                                    <div className='d-flex align-items-center gap-2'>
+                                      <i className="bi bi-box text-muted"></i>
+                                      <span className='text-sm'>{lote.codigoLote}</span>
+                                    </div>
+                                    <div>
+                                      <span className='text-sm'>cantidad: {rounded(lote.cantidadSeleccionada)}</span>
+                                    </div>
+                                  </div>
+                                </li>
+                              ));
+                            })}
+                          </ul>
+                        </>
+                      )
+                    }
 
                   </Column>
                 </Row>

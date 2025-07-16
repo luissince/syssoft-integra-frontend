@@ -1,14 +1,8 @@
-import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
 import Paginacion from '../../../../components/Paginacion';
-import { keyUpSearch } from '../../../../helper/utils.helper';
 import CustomComponent from '../../../../model/class/custom-component';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -25,6 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, T
 import { SpinnerTable } from '../../../../components/Spinner';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
+import { alertKit } from 'alert-kit';
 
 class Almacenes extends CustomComponent {
   constructor(props) {
@@ -218,30 +213,46 @@ class Almacenes extends CustomComponent {
    * handleEliminar('AL0001');
    */
   handleEliminar = (idAlmacen) => {
-    alertDialog(
-      'Almacén',
-      '¿Está seguro de que desea eliminar el almacen? Esta operación no se puede deshacer.',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Almacén', 'Procesando información...');
 
-          const params = {
-            idAlmacen: idAlmacen,
-          };
-
-          const response = await deleteAlmacen(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Almacén', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Almacén', response.getMessage());
-          }
-        }
+    alertKit.question({
+      title: "Almacén",
+      message: '¿Está seguro de que desea eliminar el almacen? Esta operación no se puede deshacer.',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
+      if (accept) {
+
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
+
+        const params = {
+          idAlmacen: idAlmacen,
+        };
+
+        const response = await deleteAlmacen(params);
+
+        if (response instanceof SuccessReponse) {
+          alertKit.success({
+            title: "Almacén",
+            message: response.data,
+          }, () => {
+            this.loadInit();
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          alertKit.warning({
+            title: "Almacén",
+            message: response.getMessage(),
+          });
+        }
+      }
+    },
     );
   };
 

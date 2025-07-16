@@ -8,7 +8,6 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { addVehiculo } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
@@ -17,6 +16,7 @@ import Title from '../../../../components/Title';
 import Button from '../../../../components/Button';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
+import { SpinnerView } from '../../../../components/Spinner';
 
 class VehiculoAgregar extends CustomComponent {
 
@@ -82,7 +82,10 @@ class VehiculoAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView 
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Vehículo'

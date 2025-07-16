@@ -8,7 +8,6 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-  spinnerLoading,
 } from '../../../../../../helper/utils.helper';
 import {
   addBanco,

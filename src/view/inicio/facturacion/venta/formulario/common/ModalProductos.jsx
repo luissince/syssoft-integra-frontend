@@ -435,9 +435,10 @@ class ModalProductos extends CustomComponent {
                                         <Button
                                             className="btn-outline-secondary"
                                             title="Recargar"
-                                            icono={<i className="bi bi-arrow-clockwise"></i>}
                                             onClick={this.loadInit}
-                                        />
+                                        >
+                                            <i className="bi bi-arrow-clockwise"></i>
+                                        </Button>
                                     }
                                     onKeyDown={this.handleInputKeyDown}
                                 />

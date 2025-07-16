@@ -286,7 +286,7 @@ class InvoiceView extends CustomComponent {
           handleStarProduct={handleStarProduct}
         />
 
-        <div className='w-100 bottom-0 bg-white' style={{ borderTop: '1px solid #e1e7ee',flex: '1 1 3.5rem' }}>
+        <div className='w-100 bottom-0 bg-white' style={{ borderTop: '1px solid #e1e7ee', flex: '1 1 3.5rem' }}>
           <div className='px-3 py-3 d-flex align-items-center'>
             {
               cotizacion && <>
@@ -300,16 +300,16 @@ class InvoiceView extends CustomComponent {
             }
 
             {
-                          pedido &&
-                          <>
-                            <span className='mr-1'>
-                              <img src={images.invoice} width={22} /> PEDIDO:
-                            </span>
-                            <h6 className='p-0 m-0'>
-                              {pedido.serie}-{formatNumberWithZeros(pedido.numeracion)}
-                            </h6>
-                          </>
-                        }
+              pedido &&
+              <>
+                <span className='mr-1'>
+                  <img src={images.invoice} width={22} /> PEDIDO:
+                </span>
+                <h6 className='p-0 m-0'>
+                  {pedido.serie}-{formatNumberWithZeros(pedido.numeracion)}
+                </h6>
+              </>
+            }
           </div>
         </div>
       </div>
@@ -337,14 +337,16 @@ const ItemSearch = (props) => {
             <Button
               className={`${tipo === 1 ? "btn-primary " : "btn-outline-primary"} px-3`}
               onClick={() => handleSelectTipo(1)}
-              icono={<i className='fa fa-barcode'></i>}
-            />
+            >
+              <i className='fa fa-barcode'></i>
+            </Button>
 
             <Button
               className={`${tipo === 0 ? "btn-primary" : "btn-outline-primary"}`}
               onClick={() => handleSelectTipo(0)}
-              icono={<i className='fa fa-search px-1'></i>}
-            />
+            >
+              <i className='fa fa-search px-1'></i>
+            </Button>
           </div>
           {
             tipo === 1 ?
@@ -382,7 +384,7 @@ const ItemSearch = (props) => {
                 <div className='mr-2'>Nuevo producto</div>
                 <img src={images.add} alt='Agregar Producto' />
             </button> */}
-    </div>
+    </div >
   );
 };
 

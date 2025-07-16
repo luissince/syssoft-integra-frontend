@@ -1,92 +1,81 @@
 import PropTypes from 'prop-types';
-import { isEmpty } from '../helper/utils.helper';
+import { forwardRef } from 'react';
 import { NavLink } from 'react-router-dom';
 
-const Button = (props) => {
-    const {
-        refButton,
-        autoFocus,
-        id,
-        type = "button",
-        contentClassName = "",
-        className = "",
-        style,
-        title,
-        text,
-        icono,
-        disabled = false,
-        onClick,
-        children
-    } = props;
+/**
+ * Button
+ *
+ * Componente de botón reutilizable basado en Bootstrap.
+ * Soporta todas las props estándar de un `<button>`, y permite pasar children personalizados.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.type="button"] - Tipo de botón (`button`, `submit`, etc.).
+ * @param {string} [props.contentClassName] - Clases que reemplazan el estilo completo del botón.
+ * @param {string} [props.className] - Clases adicionales (si no se usa `contentClassName`).
+ * @param {React.ReactNode} props.children - Contenido interno del botón.
+ * @param {...any} rest - Otras props estándar del botón (`onClick`, `disabled`, etc.).
+ *
+ * @example
+ * <Button type="submit" className="btn-success">
+ *   Guardar
+ * </Button>
+ */
 
-    if (!isEmpty(contentClassName)) {
-        return (
-            <button
-                ref={refButton}
-                type={type}
-                id={id}
-                className={contentClassName}
-                style={style}
-                title={title}
-                autoFocus={autoFocus}
-                disabled={disabled}
-                onClick={onClick}>
-                {children}
-            </button>
-        );
-    }
-
-    if (children) {
-        return (
-            <button
-                ref={refButton}
-                type={type}
-                id={id}
-                className={`btn ${className}`}
-                style={style}
-                title={title}
-                autoFocus={autoFocus}
-                disabled={disabled}
-                onClick={onClick}>
-                {children}
-            </button>
-        );
-    }
-
+const Button = forwardRef(({
+    refButton,
+    contentClassName = "",
+    className = "",
+    type="button",
+    children,
+    ...rest // ← Aquí van las demás props como onChange, value, etc.
+}, ref) => {
     return (
         <button
-            ref={refButton}
+            ref={ref}
             type={type}
-            id={id}
-            className={`btn ${className}`}
-            style={style}
-            title={title}
-            autoFocus={autoFocus}
-            disabled={disabled}
-            onClick={onClick}>
-            {text} {icono}
+            className={contentClassName ? contentClassName : `btn ${className}`}
+            {...rest}>
+            {children}
         </button>
     );
-};
+
+});
+
+Button.displayName = 'Button';
 
 Button.propTypes = {
-    refButton: PropTypes.object,
-    autoFocus: PropTypes.bool,
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    type: PropTypes.oneOf(["button", "submit", "reset"]),
     contentClassName: PropTypes.string,
+    type: PropTypes.string,
     className: PropTypes.string,
-    style: PropTypes.object,
-    title: PropTypes.string,
-    text: PropTypes.string,
-    icono: PropTypes.element,
-    disabled: PropTypes.bool,
-    refInput: PropTypes.object,
-    onClick: PropTypes.func,
     children: PropTypes.node,
 };
 
-export const ButtonMenu = ({ icon, path, title, category }) => {
+export default Button;
+
+/**
+ * ButtonMenu
+ *
+ * Componente de botón vertical con ícono y texto, útil para accesos rápidos a secciones.
+ * Usa `NavLink` de React Router para navegación interna.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} props.icon - Clase del ícono (ej. `"fa fa-cog"`).
+ * @param {string} props.path - Ruta destino para navegar.
+ * @param {string} props.title - Título principal del botón.
+ * @param {string} props.category - Subcategoría o descripción adicional.
+ *
+ * @example
+ * <ButtonMenu
+ *   icon="fa fa-cube"
+ *   path="/productos"
+ *   title="Productos"
+ *   category="Inventario"
+ * />
+ */
+
+const ButtonMenu = ({ icon, path, title, category }) => {
     return (
         <NavLink
             to={path}
@@ -105,4 +94,6 @@ ButtonMenu.propTypes = {
     category: PropTypes.string.isRequired,
 }
 
-export default Button;
+export {
+    ButtonMenu
+}

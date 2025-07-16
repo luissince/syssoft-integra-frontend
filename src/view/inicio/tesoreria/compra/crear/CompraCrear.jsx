@@ -21,7 +21,6 @@ import {
   documentsPdfInvoicesCompra,
   filtrarAlmacenProducto,
   filtrarPersona,
-  filtrarProducto,
   forPurchaseOrdenCompra,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -37,13 +36,13 @@ import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import { clearCrearCompra, setCrearCompraLocal, setCrearCompraState } from '../../../../../redux/predeterminadoSlice';
 import { ModalImpresion, ModalPersona } from '../../../../../components/MultiModal';
 import printJS from 'print-js';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import Search from '../../../../../components/Search';
 import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
 import { PRODUCTO } from '../../../../../model/types/tipo-producto';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -116,8 +115,6 @@ class CompraCrear extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Referencia principales
     this.refComprobante = React.createRef();
@@ -386,7 +383,11 @@ class CompraCrear extends CustomComponent {
       id: ++index
     }));
 
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => {
+      const cantidad = !item.lote ? item.cantidad : item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
+      const costo = item.costo;
+      return accumulate + cantidad * costo;
+    }, 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
@@ -395,11 +396,14 @@ class CompraCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
   //------------------------------------------------------------------------------------------
-  handleOpenModalProducto = async (producto) => {
+  handleOpenModalProducto = async (producto, type) => {
     const { idImpuesto } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Compra', 'Seleccione un impuesto para continuar.', async () => {
+      alertKit.warning({
+        title: "Compra",
+        message: "Seleccione un impuesto para continuar.",
+      }, async () => {
         this.refImpuesto.current.focus();
       });
       return;
@@ -408,7 +412,7 @@ class CompraCrear extends CustomComponent {
     const item = producto;
     if (item) {
       this.setState({ isOpenProducto: true })
-      await this.refModalProducto.current.loadDatos(item);
+      await this.refModalProducto.current.loadDatos(item, type);
     }
   }
 
@@ -418,7 +422,11 @@ class CompraCrear extends CustomComponent {
   }
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
-    const total = detalles.reduce((accumulate, item) => (accumulate += item.cantidad * item.costo), 0);
+    const total = detalles.reduce((accumulate, item) => {
+      const cantidad = !item.lote ? item.cantidad : item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
+      const costo = item.costo;
+      return accumulate + cantidad * costo;
+    }, 0);
     this.setState({ detalles, total }, () => {
       this.updateReduxState();
     });
@@ -476,7 +484,7 @@ class CompraCrear extends CustomComponent {
   handleSelectItemProducto = (value) => {
     this.updateReduxState();
 
-    this.handleOpenModalProducto(value);
+    this.handleOpenModalProducto(value, 'new');
   };
 
   //------------------------------------------------------------------------------------------
@@ -522,21 +530,27 @@ class CompraCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Opciones de orden de compra
+  // Opciones de compra
   //------------------------------------------------------------------------------------------
 
   handleOpenOrdenCompra = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Orden de Compra', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Orden de Compra",
+        message: "Seleccione un impuesto.",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Orden de Compra', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Orden de Compra",
+        message: "Seleccione una moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
@@ -565,7 +579,10 @@ class CompraCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        this.alert.warning('Orden de Compra', 'La orden de compra no tiene productos, ya que fue utilizado para la compra.', () => {
+        alertKit.warning({
+          title: "Orden de Compra",
+          message: "La orden de compra no tiene productos, ya que fue utilizado para la compra.",
+        }, () => {
           this.reloadView();
         });
         return;
@@ -601,7 +618,10 @@ class CompraCrear extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       this.setState({ loading: false });
-      this.alert.warning("Orden de Compra", response.getMessage())
+      alertKit.warning({
+        title: "Orden de Compra",
+        message: response.getMessage(),
+      })
     }
   }
 
@@ -660,16 +680,22 @@ class CompraCrear extends CustomComponent {
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Orden de Compra', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Orden de Compra",
+        message: "Seleccione un impuesto.",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Orden de Compra', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Orden de Compra",
+        message: "Seleccione una moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
@@ -703,43 +729,61 @@ class CompraCrear extends CustomComponent {
     const { idComprobante, proveedor, idMoneda, idImpuesto, idAlmacenDestino, detalles } = this.state;
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Compra', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Compra",
+        message: "Seleccione su comprobante.",
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(proveedor)) {
-      this.alert.warning('Compra', 'Seleccione un proveedor.', () =>
-        this.refProveedorValue.current.focus(),
-      );
+      alertKit.warning({
+        title: "Compra",
+        message: "Seleccione un proveedor.",
+      }, () => {
+        this.refProveedorValue.current.focus();
+      });
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Compra', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Compra",
+        message: "Seleccione su moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
     if (!isText(idImpuesto)) {
-      this.alert.warning('Compra', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Compra",
+        message: "Seleccione el impuesto",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (!isText(idAlmacenDestino)) {
-      this.alert.warning('Compra', 'Seleccione su almacen.', () => {
+      alertKit.warning({
+        title: "Compra",
+        message: "Seleccione su almacen.",
+      }, () => {
         this.refAlmacenDestino.current.focus();
       });
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning('Compra', 'Agregar algún producto a la lista.', () =>
-        this.refProductoValue.current.focus(),
-      );
+      alertKit.warning({
+        title: "Compra",
+        message: "Agregar algún producto a la lista.",
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
@@ -747,7 +791,10 @@ class CompraCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog("Compra", "¿Está seguro de limpiar la compra?", (accept) => {
+    alertKit.question({
+      title: "Compra",
+      message: "¿Está seguro de limpiar la compra?",
+    }, (accept) => {
       if (accept) {
         this.clearView();
       }
@@ -784,7 +831,10 @@ class CompraCrear extends CustomComponent {
       idSucursal
     } = this.state;
 
-    this.alert.dialog('Compra', '¿Está seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: "Compra",
+      message: "¿Está seguro de continuar?",
+    }, async (accept) => {
       if (accept) {
         const data = {
           idFormaPago: idFormaPago,
@@ -805,19 +855,24 @@ class CompraCrear extends CustomComponent {
         };
 
         await callback();
-        this.alert.information('Compra', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const response = await createCompra(data);
 
         if (response instanceof SuccessReponse) {
-          this.alert.close();
+          alertKit.close();
           this.handleOpenImpresion(response.data.idCompra);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          this.alert.warning('Compra', response.getMessage());
+          alertKit.warning({
+            title: "Compra",
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -838,7 +893,10 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    this.alert.dialog('Compra', '¿Está seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: "Compra",
+      message: "¿Está seguro de continuar?",
+    }, async (accept) => {
       if (accept) {
         const data = {
           idFormaPago: idFormaPago,
@@ -861,19 +919,24 @@ class CompraCrear extends CustomComponent {
         };
 
         await callback();
-        this.alert.information('Compra', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const response = await createCompra(data);
 
         if (response instanceof SuccessReponse) {
-          this.alert.close();
+          alertKit.close();
           this.handleOpenImpresion(response.data.idCompra);
         }
 
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          this.alert.warning('Compra', response.getMessage());
+          alertKit.warning({
+            title: "Compra",
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -924,7 +987,7 @@ class CompraCrear extends CustomComponent {
     let total = 0;
 
     for (const item of this.state.detalles) {
-      const cantidad = item.cantidad;
+      const cantidad = !item.lote ? item.cantidad : item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
       const valor = item.costo;
 
       const porcentaje = item.porcentajeImpuesto;
@@ -940,7 +1003,8 @@ class CompraCrear extends CustomComponent {
 
     const impuestosGenerado = () => {
       const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.costo;
+        const cantidad = !item.lote ? item.cantidad : item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
+        const total = cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
 
@@ -1083,7 +1147,7 @@ class CompraCrear extends CustomComponent {
 
         <div className='bg-white w-100 h-100 d-flex flex-column overflow-auto'>
           <div className='d-flex w-100 h-100'>
-            {/*  */}
+            {/* PANEL IZQUIERDO */}
             <div className='w-100 d-flex flex-column position-relative'
               style={{
                 flex: '0 0 60%',
@@ -1116,12 +1180,13 @@ class CompraCrear extends CustomComponent {
                     <Button
                       className="btn-outline-secondary"
                       title="Limpiar"
-                      icono={<i className="fa fa-close"></i>}
                       onClick={() => {
                         this.refProducto.current.restart();
                         this.refProductoValue.current.focus();
                       }}
-                    />
+                    >
+                      <i className="fa fa-close"></i>
+                    </Button>
                   }
                 />
               </div>
@@ -1204,7 +1269,7 @@ class CompraCrear extends CustomComponent {
               </div>
             </div>
 
-            {/*  */}
+            {/* PANEL DERECHO  */}
             <div
               className='d-flex flex-column position-relative bg-white'
               style={{
@@ -1226,12 +1291,12 @@ class CompraCrear extends CustomComponent {
                     <i className="bi bi-file-earmark-text text-xl text-secondary"></i>
                   </Button>
                   <Button
-                    className='btn btn-link'
+                    className='btn-link'
                     onClick={this.handleLimpiar}>
                     <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
                   </Button>
                   <Button
-                    className='btn btn-link'
+                    className='btn-link'
                     onClick={this.handleOpenOptions}>
                     <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
                   </Button>
@@ -1317,8 +1382,11 @@ class CompraCrear extends CustomComponent {
                 </div>}
 
                 {
-                  this.state.detalles.map((item, index) => (
-                    <div
+                  this.state.detalles.map((item, index) => {
+                    const cantidad = !item.lote ? item.cantidad : item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
+                    const costo = item.costo;
+
+                    return (<div
                       key={index}
                       className='d-grid px-3 position-relative align-items-center bg-white'
                       style={{
@@ -1342,32 +1410,34 @@ class CompraCrear extends CustomComponent {
                           <p className='m-0 text-base font-weight-bold text-break'>
                             {item.nombre}
                           </p>
-                          <p className='m-0'>{numberFormat(item.costo, this.state.codiso)}</p>
+                          <p className='m-0'>{numberFormat(costo, this.state.codiso)}</p>
                         </div>
                       </div>
 
                       {/* Segundo columna (costo total) y opciones */}
                       <div className='d-flex flex-column justify-content-end align-items-center'>
-                        <div className='h-100 text-xml'>{rounded(item.cantidad)}</div>
+                        <div className='h-100 text-xml'>{
+                          rounded(cantidad)
+                        }</div>
                       </div>
 
                       {/* Tercera columna (costo total) y opciones */}
                       <div className='d-flex flex-column justify-content-end align-items-center'>
-                        <div className='h-100 text-lg'>{numberFormat(item.cantidad * item.costo, this.state.codiso)}</div>
+                        <div className='h-100 text-lg'>{numberFormat(cantidad * costo, this.state.codiso)}</div>
 
                         <div className='d-flex align-items-end justify-content-end gap-4'>
-                          <button className='btn btn-link'
-                            onClick={() => this.handleOpenModalProducto(item)}>
+                          <Button className='btn-link'
+                            onClick={() => this.handleOpenModalProducto(item, 'edit')}>
                             <i className='fa fa-edit text-secondary text-xl'></i>
-                          </button>
-                          <button className='btn btn-link'
+                          </Button>
+                          <Button className='btn-link'
                             onClick={() => this.handleRemoverProducto(item.idProducto)}>
                             <i className='fa fa-trash text-secondary text-xl'></i>
-                          </button>
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    </div>);
+                  })
                 }
               </div>
 

@@ -8,7 +8,7 @@ const Form = (props) => {
     loading,
 
     message,
-    
+
     username,
     usernameRef,
     handleChangeUsername,
@@ -76,11 +76,10 @@ const Form = (props) => {
                 buttonRight={
                   <Button
                     className={"btn-outline-secondary"}
-                    icono={
-                      <i className={lookPassword ? 'fa fa-eye' : 'fa fa-eye-slash'} ></i>
-                    }
                     onClick={handleViewPassword}
-                  />
+                  >
+                    <i className={lookPassword ? 'fa fa-eye' : 'fa fa-eye-slash'} ></i>
+                  </Button>
                 }
               />
             </div>
@@ -89,10 +88,9 @@ const Form = (props) => {
               type={"submit"}
               className={"btn-primary btn-block mb-3"}
               text={" Iniciar Sesión"}
-              icono={
-                <i className="fa fa-arrow-right"></i>
-              }
-            />
+            >
+              <i className="fa fa-arrow-right"></i>
+            </Button>
 
             <div className="text-center">
               <p>SysSoft Integra © {new Date().getFullYear()}</p>
@@ -108,13 +106,13 @@ const Form = (props) => {
 Form.propTypes = {
   loading: PropTypes.bool,
   message: PropTypes.string,
-  
+
   username: PropTypes.string,
   usernameRef: PropTypes.object,
 
   password: PropTypes.string,
   passwordRef: PropTypes.object,
-  
+
   handleChangeUsuario: PropTypes.func,
   passwordInput: PropTypes.object,
   handleChangePassword: PropTypes.func,

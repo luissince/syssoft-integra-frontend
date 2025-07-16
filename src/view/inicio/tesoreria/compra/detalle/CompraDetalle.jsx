@@ -223,9 +223,9 @@ class CompraDetalle extends CustomComponent {
   */
 
   renderDetalles() {
-    return (
-      this.state.detalles.map((item, index) => (
-        <TableRow key={index}>
+    return this.state.detalles.map((item, index) => (
+      <React.Fragment key={index}>
+        <TableRow>
           <TableCell>{item.id}</TableCell>
           <TableCell className="text-center">
             <Image
@@ -242,14 +242,39 @@ class CompraDetalle extends CustomComponent {
           <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
           <TableCell>{item.medida}</TableCell>
           <TableCell className="text-right">
-            {numberFormat(
-              item.cantidad * item.costo,
-              this.state.codiso,
-            )}
+            {numberFormat(item.cantidad * item.costo, this.state.codiso)}
           </TableCell>
         </TableRow>
-      ))
-    );
+
+        {/* Mostrar lotes si existen */}
+        {
+          item.lotes && Array.isArray(item.lotes) && item.lotes.length > 0 && (
+            <TableRow>
+              <TableCell colSpan="9" className="pl-5 pr-5 pt-2 pb-2">
+                <Table className="table-sm table-bordered w-100">
+                  <TableHeader>
+                    <TableRow className="table-light">
+                      <TableHead>Código Lote</TableHead>
+                      <TableHead>Fecha Vencimiento</TableHead>
+                      <TableHead className="text-right">Cantidad</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {item.lotes.map((lote, loteIndex) => (
+                      <TableRow key={loteIndex}>
+                        <TableCell>{lote.codigoLote}</TableCell>
+                        <TableCell>{lote.fechaVencimiento}</TableCell>
+                        <TableCell className="text-right">{rounded(lote.cantidad)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableCell>
+            </TableRow>
+          )
+        }
+      </React.Fragment>
+    ));
   }
 
   renderTotal() {
@@ -553,7 +578,7 @@ class CompraDetalle extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <TableTitle>Transacciones</TableTitle>
+              <TableTitle>Detalles</TableTitle>
               <Table className={"table-light"}>
                 <TableHeader className="thead-dark">
                   <TableRow>

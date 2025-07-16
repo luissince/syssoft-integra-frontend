@@ -314,7 +314,6 @@ class ModalProducto extends Component {
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
-              type="button"
               className="btn-danger"
               onClick={async () => await this.refModal.current.handleOnClose()}>
               <i className="fa fa-close"></i> Cerrar

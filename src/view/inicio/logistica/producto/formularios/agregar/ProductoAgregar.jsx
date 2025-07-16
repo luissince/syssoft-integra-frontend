@@ -3,10 +3,6 @@ import CustomComponent from '../../../../../../model/class/custom-component';
 import ContainerWrapper from '../../../../../../components/Container';
 import { images } from '../../../../../../helper';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   generateEAN13Code,
   imageBase64,
   isEmpty,
@@ -39,6 +35,7 @@ import ModalProducto from '../component/ModalProducto';
 import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_SABOR, TIPO_ATRIBUTO_TALLA } from '../../../../../../model/types/tipo-atributo';
 import { TabContent, TabHead, TabHeader, TabPane } from '../../../../../../components/Tab';
 import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
+import { alertKit } from 'alert-kit';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
@@ -61,6 +58,7 @@ class ProductoAgregar extends CustomComponent {
         url: images.noImage,
       },
 
+      lote: false,
       publicar: false,
       negativo: false,
       preferido: false,
@@ -968,8 +966,10 @@ class ProductoAgregar extends CustomComponent {
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
       if (logoSend.size > 500) {
-        alertWarning("Producto", "La imagen a subir tiene que ser menor a 500 KB.")
-        return;
+        alertKit.warning({
+          title: "Producto",
+          message: "La imagen a subir tiene que ser menor a 500 KB."
+        });
       }
       this.setState({
         imagen: {
@@ -1013,6 +1013,12 @@ class ProductoAgregar extends CustomComponent {
     });
   };
 
+  handleSelectLote = (event) => {
+    this.setState({
+      lote: event.target.checked,
+    });
+  };
+
   handleSelectPublico = (event) => {
     this.setState({
       publicar: event.target.checked,
@@ -1031,85 +1037,122 @@ class ProductoAgregar extends CustomComponent {
 
   handleSaveProducto = () => {
     if (isEmpty(this.state.nombreProducto)) {
-      alertWarning('Producto', 'Ingrese el nombre del producto.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el nombre del producto.',
+      }, () => {
         this.refNombreProducto.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.codigoProducto)) {
-      alertWarning('Producto', 'Ingrese el código del producto.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el código del producto.',
+      }, () => {
         this.refCodigoProducto.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idMedidaProducto)) {
-      alertWarning('Producto', 'Seleccione la medida.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Seleccione la medida.',
+      }, () => {
         this.refIdMedidaProducto.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idCategoriaProducto)) {
-      alertWarning('Producto', 'Seleccione la categoría.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Seleccione la categoría.',
+      }, () => {
         this.refIdCategoriaProducto.current.focus();
       });
       return;
     }
 
     if (!isNumeric(this.state.costoProducto)) {
-      alertWarning('Producto', 'Ingrese el costo.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el costo.',
+      }, () => {
         this.refCostoProducto.current.focus();
       });
       return;
     }
 
     if (!isNumeric(this.state.precioProducto)) {
-      alertWarning('Producto', 'Ingrese el precio.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el precio.',
+      }, () => {
         this.refPrecioProducto.current.focus();
       });
       return;
     }
 
     if (parseFloat(this.state.precioProducto) <= parseFloat(this.state.costoProducto)) {
-      alertWarning('Producto', 'El costo no debe ser mayor o igual al precio.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'El costo no debe ser mayor o igual al precio.',
+      }, () => {
         this.refCostoProducto.current.focus();
       });
       return;
     }
 
     if (this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertWarning('Producto', 'Hay precios sin nombre..', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Hay precios sin nombre..',
+      }, () => {
         validateNumericInputs(this.refPreciosProducto, 'string');
       });
       return;
     }
 
     if (this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0) {
-      alertWarning('Producto', 'Hay precios sin valor.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Hay precios sin valor.',
+      }, () => {
         validateNumericInputs(this.refPreciosProducto);
       });
       return;
     }
 
     if (this.state.detallesProducto.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertWarning('Producto', 'Hay detalle sin nombre..', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Hay detalle sin nombre..',
+      }, () => {
         validateNumericInputs(this.refDetallesProducto, 'string');
       });
       return;
     }
 
     if (this.state.detallesProducto.filter((item) => isEmpty(item.valor)).length !== 0) {
-      alertWarning('Producto', 'Hay detalle sin valor.', () => {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Hay detalle sin valor.',
+      }, () => {
         validateNumericInputs(this.refDetallesProducto);
       });
       return;
     }
 
-    alertDialog('Producto', '¿Estás seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: 'Producto',
+      message: '¿Estás seguro de continuar?',
+    }, async (accept) => {
       if (accept) {
-        alertInfo('Producto', 'Procesando información...');
+
+        alertKit.info({ message: 'Procesando información...', });
 
         const data = {
           idTipoProducto: this.state.idTipoProducto,
@@ -1128,6 +1171,7 @@ class ProductoAgregar extends CustomComponent {
           precio: this.state.precioProducto,
           inventarios: this.state.inventariosProducto,
           precios: this.state.precios,
+          lote: this.state.lote,
           publicar: this.state.publicar,
           negativo: this.state.negativo,
           preferido: this.state.preferido,
@@ -1146,13 +1190,20 @@ class ProductoAgregar extends CustomComponent {
 
         const response = await addProducto(data);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Producto', response.data, () => {
+          alertKit.success({
+            title: 'Producto',
+            message: response.data,
+          }, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Producto', response.getMessage());
+
+          alertKit.warning({
+            title: 'Producto',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -1160,57 +1211,83 @@ class ProductoAgregar extends CustomComponent {
 
   handleSaveServicio = () => {
     if (isEmpty(this.state.nombreServicio)) {
-      alertWarning('Producto - Servicio', 'Ingrese el nombre del servicio.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el nombre del servicio.',
+      }, () => {
         this.refNombreServicio.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.codigoServicio)) {
-      alertWarning('Producto - Servicio', 'Ingrese el código del servicio.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el código del servicio.',
+      }, () => {
         this.refCodigoServicio.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idMedidaServicio)) {
-      alertWarning('Producto - Servicio', 'Seleccione la medida.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Seleccione la medida.',
+      }, () => {
         this.refIdMedidaServicio.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idCategoriaServicio)) {
-      alertWarning('Producto - Servicio', 'Seleccione la categoría.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Seleccione la categoría.',
+      }, () => {
         this.refIdCategoriaServicio.current.focus();
       });
       return;
     }
 
     if (!isNumeric(this.state.precioServicio)) {
-      alertWarning('Producto - Servicio', 'Ingrese el precio.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el precio.',
+      }, () => {
         this.refPrecioServicio.current.focus();
       });
       return;
     }
 
     if (this.state.detallesServicio.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertWarning('Producto - Servicio', 'Hay detalle sin nombre..', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Hay detalle sin nombre..',
+      }, () => {
         validateNumericInputs(this.refDetallesServicio, 'string');
       });
       return;
     }
 
     if (this.state.detallesServicio.filter((item) => isEmpty(item.valor)).length !== 0) {
-      alertWarning('Producto - Servicio', 'Hay detalle sin valor.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Hay detalle sin valor.',
+      }, () => {
         validateNumericInputs(this.refDetallesServicio);
       });
       return;
     }
 
-    alertDialog('Producto - Servicio', '¿Estás seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: 'Producto - Servicio',
+      message: '¿Estás seguro de continuar?',
+    }, async (accept) => {
       if (accept) {
-        alertInfo('Producto - Servicio', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const data = {
           idTipoProducto: this.state.idTipoProducto,
@@ -1229,6 +1306,7 @@ class ProductoAgregar extends CustomComponent {
           costo: 0,
           inventarios: [],
           precios: [],
+          lote: this.state.lote,
           publicar: this.state.publicar,
           negativo: false,
           preferido: this.state.preferido,
@@ -1247,13 +1325,19 @@ class ProductoAgregar extends CustomComponent {
 
         const response = await addProducto(data);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Producto - Servicio', response.data, () => {
+          alertKit.success({
+            title: 'Producto - Servicio',
+            message: response.data,
+          }, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Producto - Servicio', response.getMessage());
+          alertKit.warning({
+            title: 'Producto - Servicio',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -1261,57 +1345,83 @@ class ProductoAgregar extends CustomComponent {
 
   handleSaveCombo = () => {
     if (isEmpty(this.state.nombreCombo)) {
-      alertWarning('Producto - Combo', 'Ingrese el nombre del combo.', () => {
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Ingrese el nombre del combo.',
+      }, () => {
         this.refNombreCombo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.codigoCombo)) {
-      alertWarning('Producto - Servicio', 'Ingrese el código del combo.', () => {
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el código del combo.',
+      }, () => {
         this.refCodigoCombo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idMedidaCombo)) {
-      alertWarning('Producto - Combo', 'Seleccione la medida.', () => {
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Seleccione la medida.',
+      }, () => {
         this.refIdMedidaCombo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idCategoriaCombo)) {
-      alertWarning('Producto - Combo', 'Seleccione la categoría.', () => {
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Seleccione la categoría.',
+      }, () => {
         this.refIdCategoriaCombo.current.focus();
       });
       return;
     }
 
     if (!isNumeric(this.state.precioCombo)) {
-      alertWarning('Producto - Combo', 'Ingrese el precio.', () => {
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Ingrese el precio.',
+      }, () => {
         this.refPrecioCombo.current.focus();
       });
       return;
     }
 
     if (this.state.detallesCombo.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertWarning('Producto - Combo', 'Hay detalle sin nombre..', () => {
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Hay detalle sin nombre..',
+      }, () => {
         validateNumericInputs(this.refDetallesCombo, 'string');
       });
       return;
     }
 
     if (this.state.detallesCombo.filter((item) => isEmpty(item.valor)).length !== 0) {
-      alertWarning('Producto - Combo', 'Hay detalle sin valor.', () => {
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Hay detalle sin valor.',
+      }, () => {
         validateNumericInputs(this.refDetallesCombo);
       });
       return;
     }
 
-    alertDialog('Producto - Combo', '¿Estás seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: 'Producto - Combo',
+      message: '¿Estás seguro de continuar?',
+    }, async (accept) => {
       if (accept) {
-        alertInfo('Producto - Combo', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const data = {
           idTipoProducto: this.state.idTipoProducto,
@@ -1331,6 +1441,7 @@ class ProductoAgregar extends CustomComponent {
           combos: [],
           inventarios: this.state.inventariosCombo,
           precios: [],
+          lote: this.state.lote,
           publicar: this.state.publicar,
           negativo: false,
           preferido: this.state.preferido,
@@ -1349,13 +1460,19 @@ class ProductoAgregar extends CustomComponent {
 
         const response = await addProducto(data);
         if (response instanceof SuccessReponse) {
-          alertSuccess('Producto - Combo', response.data, () => {
+          alertKit.success({
+            title: 'Producto - Combo',
+            message: response.data,
+          }, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Producto - Combo', response.getMessage());
+          alertKit.warning({
+            title: 'Producto - Combo',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -1421,6 +1538,7 @@ class ProductoAgregar extends CustomComponent {
       medidas,
       categorias,
       marcas,
+      lote,
       publicar,
       negativo,
       preferido,
@@ -1772,6 +1890,10 @@ class ProductoAgregar extends CustomComponent {
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={nombre}
               precio={precio}
+
+              lote={lote}
+              handleSelectLote={this.handleSelectLote}
+
               publicar={publicar}
               handleSelectPublico={this.handleSelectPublico}
 

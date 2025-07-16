@@ -35,11 +35,12 @@ const Title = ({ rutaImage, razonSocial, nombreEmpresa, documento, handleSignOut
       <Column className="col-md-3 col-12">
         <div className="d-flex h-100 justify-content-end align-items-center">
           <div className="form-group">
-            <Button 
+            <Button
               className="btn-danger"
               onClick={handleSignOut}
-              icono={<i className="fa fa-power-off"></i>}
-            />
+            >
+              <i className="fa fa-power-off"></i>
+            </Button>
           </div>
         </div>
       </Column>

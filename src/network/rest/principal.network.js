@@ -250,7 +250,7 @@ export async function listInventario(params, signal) {
   );
 }
 
-export async function obtenerStockInventario(params, signal) {
+export async function getStockInventario(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/inventario/obtener/stock', {
       params: params,
@@ -259,7 +259,7 @@ export async function obtenerStockInventario(params, signal) {
   );
 }
 
-export async function actualizarStockInventario(data, signal) {
+export async function updateStockInventario(data, signal) {
   return await Resolve.create(
     instancePrincipal.put('/api/inventario/actualizar/stock', data, {
       signal: signal,
@@ -308,6 +308,14 @@ export async function productoDetalle(params, signal) {
 export async function comboProductos(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/combo', {
+      signal: signal,
+    }),
+  );
+}
+
+export async function getLotesProducto(idInventario, signal) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/producto/lote/${idInventario}`, {
       signal: signal,
     }),
   );

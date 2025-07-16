@@ -1,14 +1,7 @@
 import React from 'react';
 import {
-  isEmpty,
   rounded,
   convertNullText,
-  numberFormat,
-  alertWarning,
-  alertDialog,
-  alertInfo,
-  isNumeric,
-  alertSuccess,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../components/Container';
@@ -17,11 +10,9 @@ import CustomComponent from '../../../../model/class/custom-component';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import {
-  actualizarStockInventario,
   comboAlmacen,
   documentsPdfCodbarProducto,
   listInventario,
-  obtenerStockInventario,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import { connect } from 'react-redux';
@@ -36,6 +27,12 @@ import Search from '../../../../components/Search';
 import { setListaInventarioData, setListaInventarioPaginacion } from '../../../../redux/predeterminadoSlice';
 import Button from '../../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
+import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../../components/Card';
+import { Box, CircleCheck, Clock, TriangleAlert } from 'lucide-react';
+import Image from '../../../../components/Image';
+import { images } from '../../../../helper';
+import DropdownActions from '../../../../components/DropdownActions';
+import ProgressBar from '../../../../components/ProgressBar';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,20 +48,26 @@ class Inventario extends CustomComponent {
     super(props);
 
     this.state = {
+      // Atributos de carga
       initialLoad: true,
       initialMessage: 'Cargando datos...',
 
-      isOpenStock: false,
-      loadingModal: false,
-      stockMinimo: '',
-      stockMaximo: '',
+      // Atributos de busqueda
+      idTipoAlmacen: '',
+      tiposAlmacenes: [],
 
+      idAlmacen: '',
+      almacenes: [],
+
+      isEstado: '',
+      estados: [],
+
+      // Atributos principales de la tabla
       loading: false,
       lista: [],
       restart: false,
 
-      idAlmacen: '',
-      almacenes: [],
+      lotesVisible: {},
 
       buscar: '',
 
@@ -74,8 +77,13 @@ class Inventario extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
+      // Atributos de uso
       codiso: convertNullText(this.props.moneda.codiso),
 
+      // Atributos del modal stock
+      isOpenStock: false,
+
+      // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -85,11 +93,6 @@ class Inventario extends CustomComponent {
     this.refSearch = React.createRef();
 
     this.refModalStock = React.createRef();
-
-    this.idInventario = '';
-
-    this.refStockMinimo = React.createRef();
-    this.refStockMaximo = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -118,8 +121,11 @@ class Inventario extends CustomComponent {
         this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
       ]);
 
+      const almacenFilter = almacenes.find((item) => item.predefinido === 1);
+
       this.setState({
         almacenes,
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
         initialLoad: false
       }, async () => {
         await this.loadingInit();
@@ -234,120 +240,29 @@ class Inventario extends CustomComponent {
     }
   }
 
-  async fetchObtenerStockInvetario() {
-    const params = {
-      idInventario: this.idInventario,
-    };
 
-    const response = await obtenerStockInventario(
-      params,
-      this.abortControllerTable.signal,
-    );
+  //------------------------------------------------------------------------------------------
+  // Funciones del modal producto
+  //------------------------------------------------------------------------------------------
 
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return null;
-    }
+  handleOpenModalStock = async (producto) => {
+    this.setState({ isOpenStock: true });
+    await this.refModalStock.current.loadDatos(producto);
   }
 
-  //------------------------------------------------------------------------------------------
-  // Funciones del modal
-  //------------------------------------------------------------------------------------------
-
-  handleOpenModal = (inventario) => {
-    this.idInventario = inventario.idInventario;
-    this.setState({
-      isOpenStock: true,
-      loadingModal: true,
-    })
-  };
-
-  handleCloseModal = () => {
+  handleCloseStock = async () => {
     this.setState({ isOpenStock: false })
   }
 
-  handleOnOpen = async () => {
-    const stock = await this.fetchObtenerStockInvetario();
+  //--------------------------------------------------------------------------------------------
+  // Handlers
+  //--------------------------------------------------------------------------------------------
 
-    this.setState({
-      stockMinimo: stock.cantidadMinima,
-      stockMaximo: stock.cantidadMaxima,
-      loadingModal: false,
-    });
-  }
-
-  handleHiddenModal = () => {
-    this.setState({
-      stockMinimo: '',
-      stockMaximo: '',
-      loadingModal: false,
-    });
-  }
-
-  handleInputStockMinimo = (event) => {
-    this.setState({ stockMinimo: event.target.value });
-  };
-
-  handleInputStockMaximo = (event) => {
-    this.setState({ stockMaximo: event.target.value });
-  };
-
-  handleSave = () => {
-    if (!isNumeric(this.state.stockMinimo)) {
-      alertWarning('Inventario', 'Ingrese el stock mínimo', () => {
-        this.refStockMinimo.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(this.state.stockMaximo)) {
-      alertWarning('Inventario', 'Ingrese el stock máximo', () => {
-        this.refStockMaximo.current.focus();
-      });
-      return;
-    }
-
-    alertDialog('Inventario', '¿Estas seguro de continar?', async (accept) => {
-      if (accept) {
-
-        const data = {
-          stockMinimo: this.state.stockMinimo,
-          stockMaximo: this.state.stockMaximo,
-          idInventario: this.idInventario,
-        };
-
-        this.handleCloseModal()
-        alertInfo('Inventario', 'Procesando información...');
-
-        const response = await actualizarStockInventario(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Inventario', response.data, () => {
-            this.loadingInit();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Inventario', response.getMessage());
-        }
-      }
-    });
-  };
 
   handleSelectAlmacen = (event) => {
     this.setState({ idAlmacen: event.target.value }, () => this.loadingInit());
   };
 
-  //--------------------------------------------------------------------------------------------
-  // Handlers
-  //--------------------------------------------------------------------------------------------
 
   handleOpenPrinterCodBar = async (idProducto) => {
     await pdfVisualizer.init({
@@ -358,60 +273,298 @@ class Inventario extends CustomComponent {
     });
   };
 
+  toggleLotesVisibility = (index) => {
+    this.setState(prevState => ({
+      lotesVisible: {
+        ...prevState.lotesVisible,
+        [index]: !prevState.lotesVisible?.[index]
+      }
+    }));
+  };
+
+  getLotesEnRiesgo = (lotes) => {
+    if (!lotes || lotes.length === 0) return 0;
+
+    return lotes.filter(lote => lote.diasRestantes <= 30 || lote.estado === 'Crítico').length;
+  };
+
+  getProximoVencimiento = (lotes) => {
+    if (!lotes || lotes.length === 0) return 'N/A';
+
+    const lotesOrdenados = [...lotes].sort((a, b) => a.diasRestantes - b.diasRestantes);
+    return lotesOrdenados[0].fechaVencimiento;
+  };
+
+  determinarEstadoLote = (lote) => {
+    if (lote.diasRestantes <= 0) {
+      return {
+        estado: 'Vencido',
+        clase: 'bg-dark text-white',
+        icono: 'bi bi-x-circle-fill',
+        colorBarra: 'bg-dark'
+      };
+    } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
+      return {
+        estado: 'Próximo',
+        clase: 'bg-warning text-dark',
+        icono: 'bi bi-clock-fill',
+        colorBarra: 'bg-warning'
+      };
+    } else if (lote.diasRestantes <= 90) {
+      return {
+        estado: 'Vigilar',
+        clase: 'bg-info text-white',
+        icono: 'bi bi-eye-fill',
+        colorBarra: 'bg-info'
+      };
+    } else {
+      return {
+        estado: 'Óptimo',
+        clase: 'bg-success text-white',
+        icono: 'bi bi-check-circle-fill',
+        colorBarra: 'bg-success'
+      };
+    }
+  };
+
   //------------------------------------------------------------------------------------------
   // Render
   //------------------------------------------------------------------------------------------
 
   generarBody() {
-    if (this.state.loading) {
+    const { loading, lista } = this.state;
+
+    if (loading) {
       return (
         <SpinnerTable
-          colSpan='8'
+          colSpan='6'
           message='Cargando información de la tabla...'
         />
       );
     }
 
-    if (isEmpty(this.state.lista)) {
+    if (!lista || lista.length === 0) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="8">¡No hay datos registrados!</TableCell>
+          <td colSpan="10">¡No hay datos registrados!</td>
         </TableRow>
       );
     }
 
-    return this.state.lista.map((item, index) => {
-      const background =
-        parseFloat(item.cantidad) <= 0 ? 'bg-danger' : 'bg-success';
-      const color = 'text-white';
+    return lista.flatMap((item, index) => {
+      const calcularPorcentaje = () => {
+        const { cantidad, cantidadMinima, cantidadMaxima } = item;
+        const rango = cantidadMaxima - cantidadMinima;
+        if (rango <= 0) return 100;
 
-      return (
-        <TableRow key={index}>
-          <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>{item.codigo}<br /><b>{item.producto}</b></TableCell>
-          <TableCell>{item.almacen}</TableCell>
-          <TableCell>{item.cantidadMaxima} {item.medida}</TableCell>
-          <TableCell>{item.cantidadMinima} {item.medida}</TableCell>
-          <TableCell className={`${background} ${color}`}>{rounded(item.cantidad)} {item.medida}</TableCell>
-          <TableCell className="text-right">{numberFormat(item.costo, this.state.codiso)}</TableCell>
+        const porcentaje = ((cantidad - cantidadMinima) / rango) * 100;
+        return Number(rounded(Math.max(0, Math.min(100, porcentaje)), 0));
+      };
+
+      const determinarEstadoInventario = (item) => {
+        const { cantidad, cantidadMinima, cantidadMaxima } = item;
+        if (cantidad < cantidadMinima) {
+          return {
+            estado: 'Crítico',
+            clase: 'bg-danger text-white',
+            icono: 'bi bi-exclamation-triangle-fill'
+          };
+        } else if (cantidad > cantidadMaxima) {
+          return {
+            estado: 'Exceso',
+            clase: 'bg-info text-white',
+            icono: 'bi bi-arrow-up-circle-fill'
+          };
+        } else {
+          return {
+            estado: 'Óptimo',
+            clase: 'bg-success text-white',
+            icono: 'bi bi-check-circle-fill'
+          };
+        }
+      };
+
+      // Determinar si el producto tiene lotes
+      const tieneLotes = item.lotes && item.lotes.length > 0;
+      const estadoInventario = determinarEstadoInventario(item);
+
+      const filaPrincipal = (
+        <TableRow key={`inv-${index}`} className={`bg-white ${tieneLotes ? 'border-bottom-0' : ''}`}>
           <TableCell className="text-center">
-            <Button
-              className="btn-outline-warning btn-sm"
-              onClick={() => this.handleOpenModal(item)}
-            >
-              <i className="bi bi-pencil"></i>
-            </Button>
+            <div className="d-flex align-items-center justify-content-center gap-2">
+              <span>{item.id}</span>
+              {tieneLotes && (
+                <button
+                  className="btn btn-link btn-sm p-0"
+                  onClick={() => this.toggleLotesVisibility(index)}
+                  title={this.state.lotesVisible?.[index] ? "Ocultar lotes" : "Ver lotes"}
+                >
+                  <i className={`bi ${this.state.lotesVisible?.[index] ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
+                </button>
+              )}
+            </div>
+          </TableCell>
+          <TableCell>
+            <div className='d-flex align-items-center gap-2'>
+              <Image
+                default={images.noImage}
+                src={item.imagen}
+                alt={item.producto}
+                width={70}
+              />
+              <div className='d-flex flex-column gap-2 justify-content-center'>
+                {item.codigo}
+                <strong>{item.producto}</strong>
+                {tieneLotes && (
+                  <small className="text-info">
+                    <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
+                  </small>
+                )}
+              </div>
+            </div>
+          </TableCell>
+          <TableCell>
+            <div className="d-flex flex-column">
+              <span>{item.categoria}</span>
+              {tieneLotes && (
+                <small className="text-muted">
+                  Próximo venc: {this.getProximoVencimiento(item.lotes)}
+                </small>
+              )}
+            </div>
+          </TableCell>
+          <TableCell>
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{rounded(item.cantidad)} {item.medida || ''}</strong>
+                <div className="small text-muted">
+                  Max: {item.cantidadMaxima} | Min: {item.cantidadMinima}
+                </div>
+              </div>
+              {tieneLotes && (
+                <div className="text-end">
+                  <small className="text-muted d-block">
+                    Distribuido en {item.lotes.length} lote(s)
+                  </small>
+                </div>
+              )}
+            </div>
+            <ProgressBar
+              value={calcularPorcentaje()}
+              className={
+                item.cantidad < item.cantidadMinima ? "bg-danger" :
+                  item.cantidad > item.cantidadMaxima ? "bg-success" : "bg-warning"
+              }
+            />
           </TableCell>
           <TableCell className="text-center">
-            <Button
-              className="btn-outline-dark btn-sm"
-              onClick={this.handleOpenPrinterCodBar.bind(this, item.idProducto)}
-            >
-              <i className="fa fa-barcode"></i>
-            </Button>
+            <div className="d-flex flex-column gap-1 align-items-center">
+              <span className={`badge rounded-pill ${estadoInventario.clase} d-flex align-items-center justify-content-center gap-1`}>
+                <i className={estadoInventario.icono}></i>
+                {estadoInventario.estado}
+              </span>
+              {tieneLotes && this.getLotesEnRiesgo(item.lotes) > 0 && (
+                <small className="text-warning">
+                  <i className="bi bi-exclamation-triangle"></i> {this.getLotesEnRiesgo(item.lotes)} lote(s) en riesgo
+                </small>
+              )}
+            </div>
+          </TableCell>
+          <TableCell className="text-center">
+            <DropdownActions
+              options={[
+                {
+                  image: <i className="bi bi-pencil"></i>,
+                  tooltip: 'Editar',
+                  label: 'Editar',
+                  onClick: () => this.handleOpenModalStock(item),
+                },
+                {
+                  image: <i className="fa fa-barcode"></i>,
+                  tooltip: 'Código de Barras',
+                  label: 'Código de Barras',
+                  onClick: () => this.handleOpenPrinterCodBar(item.idProducto),
+                },
+
+              ]}
+            />
           </TableCell>
         </TableRow>
       );
+
+      const filasLotes = (tieneLotes && this.state.lotesVisible?.[index])
+        ? item.lotes.map((lote, loteIndex) => {
+          const estadoLote = this.determinarEstadoLote(lote);
+          const esUltimoLote = loteIndex === item.lotes.length - 1;
+
+          return (
+            <TableRow key={`lote-${index}-${loteIndex}`} className={`bg-gray border-start border-4 border-info ${esUltimoLote ? 'border-bottom border-info' : ''}`}>
+              <TableCell colSpan="10" className="border-gray">
+                <Table>
+                  <TableHeader className="bg-gray">
+                    <TableRow>
+                      <TableHead width="5%" className="border-gray border-0">Lote</TableHead>
+                      <TableHead width="20%" className="border-gray border-0">Vencimiento</TableHead>
+                      <TableHead width="10%" className="border-gray border-0">Días</TableHead>
+                      <TableHead width="15%" className="border-gray border-0">Cantidad</TableHead>
+                      <TableHead width="10%" className="border-gray border-0 text-center">Estado</TableHead>
+                      <TableHead width="7%" className="border-gray border-0 text-center">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="bg-gray">
+                    <TableRow>
+                      <TableCell className="border-gray border-0">
+                        <small className="text-muted">L-{loteIndex + 1}</small>
+                      </TableCell>
+                      <TableCell className="border-gray border-0">
+                        <div className="d-flex align-items-center gap-2 ps-3">
+                          <i className="bi bi-box text-muted"></i>
+                          <div>
+                            <div className="fw-bold">{lote.codigoLote}</div>
+                            <small className="text-muted">
+                              Lote de: {item.producto}
+                            </small>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="border-gray border-0">
+                        <div className="d-flex flex-column">
+                          <span>Venc: {lote.fechaVencimiento}</span>
+                          <small className={`${lote.diasRestantes <= 30 ? 'text-danger' : lote.diasRestantes <= 90 ? 'text-warning' : 'text-muted'}`}>
+                            {lote.diasRestantes} días restantes
+                          </small>
+                        </div>
+                      </TableCell>
+                      <TableCell className="border-gray border-0">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <strong>{rounded(lote.cantidad)} {item.medida || ''}</strong>
+                        </div>
+                        <ProgressBar
+                          value={rounded((lote.cantidad / item.cantidad) * 100, 0, 'number')}
+                          className={estadoLote.colorBarra}
+                        />
+                      </TableCell>
+                      <TableCell className="border-gray border-0 text-center">
+                        <span className={`badge rounded-pill ${estadoLote.clase} d-flex align-items-center justify-content-center gap-1`}>
+                          <i className={estadoLote.icono}></i>
+                          {estadoLote.estado}
+                        </span>
+                      </TableCell>
+                      <TableCell className="border-gray border-0 text-center">
+                        <Button className="btn-outline-dark btn-sm">
+                          <i className="fa fa-shopping-cart"></i>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableCell>
+            </TableRow>
+          );
+        })
+        : [];
+
+      return [filaPrincipal, ...filasLotes];
     });
   }
 
@@ -430,26 +583,42 @@ class Inventario extends CustomComponent {
         />
 
         <CustomModalStock
-          refModal={this.refModalStock}
+          ref={this.refModalStock}
           isOpen={this.state.isOpenStock}
-          onOpen={this.handleOnOpen}
-          onHidden={this.handleHiddenModal}
-          onClose={this.handleCloseModal}
+          onClose={this.handleCloseStock}
 
-          loading={this.state.loadingModal}
-
-          refStockMinimo={this.refStockMinimo}
-          stockMinimo={this.state.stockMinimo}
-          handleInputStockMinimo={this.handleInputStockMinimo}
-
-          refStockMaximo={this.refStockMaximo}
-          stockMaximo={this.state.stockMaximo}
-          handleInputStockMaximo={this.handleInputStockMaximo}
-
-          handleSave={this.handleSave}
+          handleSave={this.loadingInit}
         />
 
         <Row>
+          <Column className="col-md-6 col-sm-12" formGroup={true}>
+            <Select
+              group
+              iconLeft={<i className="fa fa-building"></i>}
+              value={this.state.idAlmacen}
+              onChange={this.handleSelectAlmacen}>
+              <option value={''}>-- Almacen --</option>
+              {this.state.almacenes.map((item, index) => {
+                return (
+                  <option key={index} value={item.idAlmacen}>
+                    {item.nombre} - {item.tipoAlmacen}
+                  </option>
+                );
+              })}
+            </Select>
+          </Column>
+
+          <Column className="col-md-3 col-sm-12" formGroup={true}>
+            <Select
+              group
+              iconLeft={<i className="fa fa-building"></i>}
+              value={this.state.estado}
+              onChange={this.handleSelectAlmacen}>
+              <option value={''}>-- Estado --</option>
+
+            </Select>
+          </Column>
+
           <Column formGroup={true}>
             <Button
               className="btn-outline-secondary"
@@ -460,7 +629,7 @@ class Inventario extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
+          <Column className="col-md-12" formGroup={true}>
             <Search
               group={true}
               iconLeft={<i className="bi bi-search"></i>}
@@ -469,32 +638,65 @@ class Inventario extends CustomComponent {
               placeholder="Buscar..."
             />
           </Column>
-
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <Select
-              group
-              iconLeft={<i className="fa fa-building"></i>}
-              value={this.state.idAlmacen}
-              onChange={this.handleSelectAlmacen}>
-              <option value={''}>-- Almacen --</option>
-              {this.state.almacenes.map((item, index) => {
-                return (
-                  <option key={index} value={item.idAlmacen}>
-                    {item.nombre}
-                  </option>
-                );
-              })}
-            </Select>
-          </Column>
         </Row>
 
-        <Row>
+        {/* <Row>
           <Column className="col-md-3 col-sm-12" formGroup={true}>
             <span>Cantidad de Items: </span>
           </Column>
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
             <span className="text-success">Valor de Inventario: </span>
+          </Column>
+        </Row> */}
+
+        <Row>
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='text-base m-0'>Total Productos</CardTitle>
+                <Box className='text-info' />
+              </CardHeader>
+              <CardBody>
+                <CardText>1,234</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='text-base m-0'>Lotes por Vencen</CardTitle>
+                <Clock className='text-warning' />
+              </CardHeader>
+              <CardBody>
+                <CardText>$123,456</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='text-base m-0'>Stock Crítico</CardTitle>
+                <TriangleAlert className='text-danger' />
+              </CardHeader>
+              <CardBody>
+                <CardText>24</CardText>
+              </CardBody>
+            </Card>
+          </Column>
+
+          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+            <Card>
+              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
+                <CardTitle className='text-base m-0'>Stock Óptimo</CardTitle>
+                <CircleCheck className='text-success' />
+              </CardHeader>
+              <CardBody>
+                <CardText>56</CardText>
+              </CardBody>
+            </Card>
           </Column>
         </Row>
 
@@ -506,13 +708,10 @@ class Inventario extends CustomComponent {
                   <TableRow>
                     <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="20%">Producto</TableHead>
-                    <TableHead width="13%">Almacen</TableHead>
-                    <TableHead width="10%">Stock Máx.</TableHead>
-                    <TableHead width="10%">Stock Mín.</TableHead>
-                    <TableHead width="15%">Cantidad</TableHead>
-                    <TableHead width="10%" className="text-right">Costo</TableHead>
-                    <TableHead width="7%">Editar</TableHead>
-                    <TableHead width="7%">Cod. Bar</TableHead>
+                    <TableHead width="10%">Categoría</TableHead>
+                    <TableHead width="15%">Stock Total</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="7%" className="text-center">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

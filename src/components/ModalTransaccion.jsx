@@ -7,7 +7,6 @@ import {
   numberFormat,
   isEmpty,
   isNumeric,
-  alertWarning,
   validateNumericInputs,
   rounded,
 } from '../helper/utils.helper';
@@ -218,7 +217,10 @@ class ModalTransaccion extends CustomComponent {
     let metodoPagosLista = bancosAgregados.map(item => ({ ...item }));
 
     if (isEmpty(metodoPagosLista)) {
-      alertWarning(this.state.tipo, 'Tiene que agregar método de cobro para continuar.');
+      alertKit.warning({
+        title: this.state.tipo,
+        message: 'Tiene que agregar método de cobro para continuar.',
+      });
       return;
     }
 
@@ -249,7 +251,10 @@ class ModalTransaccion extends CustomComponent {
 
     if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
-        alertWarning(this.state.tipo, 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.', () => {
+        alertKit.warning({
+          title: this.state.tipo,
+          message: 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
+        }, () => {  
           validateNumericInputs(this.refMetodoPagoContenedor);
         });
         return;
@@ -258,7 +263,10 @@ class ModalTransaccion extends CustomComponent {
       const metodo = metodoPagosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < importeTotal) {
-          alertWarning(this.state.tipo, 'El monto a cobrar es menor que el total.', () => {
+          alertKit.warning({
+            title: this.state.tipo,
+            message: 'El monto a cobrar es menor que el total.',
+          }, () => {
             validateNumericInputs(this.refMetodoPagoContenedor);
           });
           return;
@@ -270,7 +278,10 @@ class ModalTransaccion extends CustomComponent {
         });
       } else {
         if (metodoCobroTotal !== importeTotal) {
-          alertWarning(this.state.tipo, 'El monto a cobrar debe ser igual al total.', () => {
+          alertKit.warning({
+            title: this.state.tipo,
+            message: 'El monto a cobrar debe ser igual al total.',
+          }, () => {
             validateNumericInputs(this.refMetodoPagoContenedor);
           });
           return;
@@ -293,21 +304,30 @@ class ModalTransaccion extends CustomComponent {
     } = this.state;
 
     if (!isNumeric(numeroCuotas)) {
-      alertWarning(this.state.tipo, "Ingrese el número de cuotas", () => {
+      alertKit.warning({
+        title: this.state.tipo,
+        message: "Ingrese el número de cuotas",
+      }, () => {
         this.refNumeroCuotas.current.focus()
       })
       return;
     }
 
     if (parseFloat(numeroCuotas) < 1) {
-      alertWarning(this.state.tipo, "El número de cuotas no puede menor a 0", () => {
+      alertKit.warning({
+        title: this.state.tipo,
+        message: "El número de cuotas no puede menor a 0",
+      }, () => {  
         this.refNumeroCuotas.current.focus()
       })
       return;
     }
 
     if (isEmpty(frecuenciaPagoFijo)) {
-      alertWarning(this.state.tipo, "Selecciona la frecuencia de cobros.", () => {
+      alertKit.warning({
+        title: this.state.tipo,
+        message: "Selecciona la frecuencia de cobros.",
+      }, () => {
         this.refFrecuenciaPagoFijo.current.focus()
       })
       return;
@@ -863,8 +883,9 @@ class ModalTransaccion extends CustomComponent {
                         className="btn-outline-success d-flex"
                         title="Agregar Pago"
                         onClick={this.handleAddBancosAgregados}
-                        icono={<i className="bi bi-plus-circle-fill"></i>}
-                      />
+                      >
+                        <i className="bi bi-plus-circle-fill"></i>
+                      </Button>
                     }>
                     {bancos.map((item, index) => (
                       <option key={index} value={item.idBanco}>
@@ -1060,8 +1081,9 @@ const MetodoPago = ({
               className="btn-outline-danger d-flex"
               title="Agregar Pago"
               onClick={() => handleRemoveItemBancosAgregados(idBanco)}
-              icono={<i className="bi bi-trash3-fill"></i>}
-            />
+            >
+              <i className="bi bi-trash3-fill"></i>
+            </Button>
           </div>
         </>
       }

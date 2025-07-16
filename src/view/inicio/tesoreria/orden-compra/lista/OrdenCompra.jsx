@@ -1,5 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
-import { alertDialog, alertInfo, alertSuccess, alertWarning, currentDate, formatNumberWithZeros, formatTime, isEmpty, numberFormat } from '../../../../../helper/utils.helper';
+import { alertDialog, currentDate, formatNumberWithZeros, formatTime, isEmpty, numberFormat } from '../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../model/class/custom-component';
 import { listOrdenCompra, cancelOrdenCompra } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -19,6 +19,7 @@ import Select from '../../../../../components/Select';
 import PropTypes from 'prop-types';
 import { setListaOrdenCompraData, setListaOrdenCompraPaginacion } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -228,25 +229,42 @@ class OrdenCompras extends CustomComponent {
   }
 
   handleAnular = (id) => {
-    alertDialog('Orden de Compra', '¿Estás seguro de anular la orden de compra?', async (accept) => {
+    alertKit.question({
+      title: "Orden de Compra",
+      message: '¿Estás seguro de anular la orden de compra?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const params = {
           idOrdenCompra: id,
           idUsuario: this.state.idUsuario
         }
 
-        alertInfo("Orden de Compra", "Procesando petición...")
+        alertKit.loading({
+          message: "Procesando petición..."
+        })
 
         const response = await cancelOrdenCompra(params);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess("Orden de Compra", response.data, async () => {
+          alertKit.success({
+            title: "Orden de Compra",
+            message: response.data,
+          }, async () => {
             await this.loadingInit()
-          })
+          });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning("Orden de Compra", response.getMessage())
+          alertKit.question({
+            title: "Orden de Compra",
+            message: response.getMessage(),
+          });
         }
       }
     });

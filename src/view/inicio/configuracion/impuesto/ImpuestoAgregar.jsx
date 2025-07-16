@@ -10,7 +10,6 @@ import {
   isEmpty,
   isNumeric,
   keyNumberInteger,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { addImpuesto } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
@@ -19,6 +18,7 @@ import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
+import { SpinnerView } from '../../../../components/Spinner';
 
 class ImpuestoAgregar extends CustomComponent {
   constructor(props) {
@@ -85,7 +85,10 @@ class ImpuestoAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        <SpinnerView 
+          loading={this.state.loading}
+          message={this.state.msgLoading}
+        />
 
         <Title
           title='Impuesto'
