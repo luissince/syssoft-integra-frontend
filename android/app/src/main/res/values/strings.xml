@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">syssoft-integra</string>
+    <string name="title_activity_main">syssoft-integra</string>
+    <string name="package_name">com.syssosftintegra.app</string>
+    <string name="custom_url_scheme">com.syssosftintegra.app</string>
+</resources>

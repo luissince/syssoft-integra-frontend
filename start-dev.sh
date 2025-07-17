@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Verifica si se pasó el flag '--stay' para permanecer en la rama actual
+# Ejemplo de ejecución: 
+# - npm run dev -- --stay (para permanecer en la rama actual)
+# - npm run dev (para cambiar a la rama 'development' y continuar desarrollando)
 stay_in_current_branch=false
 for arg in "$@"; do
   if [ "$arg" == "--stay" ]; then

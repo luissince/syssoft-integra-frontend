@@ -14,6 +14,11 @@ import { dashboardInit } from '../../../network/rest/principal.network';
 import { isEmpty, months, numberFormat, rounded } from '../../../helper/utils.helper';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
+import { OperationsSummary } from '@/components/ui/operations-summary';
+import { OperationsFlow } from '@/components/ui/operations-flow';
+import { AlertsPanel } from '@/components/ui/alerts-panel';
+import { QuickActions } from '@/components/ui/quick-actions';
+import { RecentActivity } from '@/components/ui/recent-activity';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -206,7 +211,18 @@ class Dashboard extends React.Component {
           message={this.state.msgLoading}
         />
 
-        <Title
+        <div className="flex flex-col gap-4">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <OperationsSummary />
+          <OperationsFlow />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <AlertsPanel />
+            <QuickActions />
+          </div>
+          <RecentActivity />
+        </div>
+
+        {/* <Title
           title='DASHBOARD'
           subTitle='RESUMEN'
         />
@@ -370,14 +386,12 @@ class Dashboard extends React.Component {
                     <Tooltip />
                     <Legend />
                     <Line type="monotone" name={`AÑO - ${new Date().getFullYear()}`} dataKey="total" stroke="#004099" />
-                    {/* <Line type="monotone" name='Años Pasado' dataKey="atras" stroke="#82ca9d" /> */}
                   </LineChart>
                 </ResponsiveContainer>
               </CardBody>
             </Card>
           </Column>
         </Row>
-
 
         <Row>
           <Column className='col-xl-6 col-lg-12' formGroup={true}>
@@ -446,7 +460,7 @@ class Dashboard extends React.Component {
               </CardBody>
             </Card>
           </Column>
-        </Row>
+        </Row> */}
       </ContainerWrapper>
     );
   }

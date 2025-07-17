@@ -1,5 +1,6 @@
 {
     "docwriter.language": "Spanish",
     "docwriter.style": "XML",
-    "svg.preview.background": "dark-transparent"
+    "svg.preview.background": "dark-transparent",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

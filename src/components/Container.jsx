@@ -9,7 +9,7 @@ const ContainerWrapper = ({ children }) => {
   return (
     <main>
       <div className="container-xl mt-3">
-        <div className="bg-white p-3  rounded position-relative">
+        <div className="bg-white p-3 rounded position-relative">
           {children}
         </div>
       </div>
