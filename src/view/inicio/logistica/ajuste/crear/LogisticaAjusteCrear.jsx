@@ -1,12 +1,11 @@
 import React from 'react';
 import {
   alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
+  getNumber,
   isEmpty,
   keyNumberFloat,
-  rounded
+  rounded,
+  validateNumericInputs
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
@@ -36,6 +35,8 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
 import { imagen } from '../../../../../helper/images.helper';
+import ModalLote from './ModalLote';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,9 +52,11 @@ class LogisticaAjusteCrear extends CustomComponent {
     super(props);
 
     this.state = {
+      // Atributos de carga
       initialLoad: true,
       initialMessage: 'Cargando datos...',
 
+      // Atributos principales
       paso: 1,
 
       producto: null,
@@ -71,22 +74,33 @@ class LogisticaAjusteCrear extends CustomComponent {
       idAlmacen: '',
       almacenes: [],
 
-      detalle: [],
+      detalles: [],
 
       nombreMotivoAjuste: '',
       nombreAlmacen: '',
 
+      // Atributos del modal lote
+      isOpenLote: false,
+
+      // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.initial = { ...this.state }
 
+    // Referencial al padre
+    this.refTableBody = React.createRef();
+
+    // Referencia del formulario principal
     this.refIdTipoAjuste = React.createRef();
     this.refIdMotivoAjuste = React.createRef();
     this.refIdAlmacen = React.createRef();
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
+
+    // Referencia al modal lote
+    this.refModalLote = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -187,11 +201,14 @@ class LogisticaAjusteCrear extends CustomComponent {
     });
   }
 
-  agregarProducto(producto) {
-    const exists = this.state.detalle.find((item) => item.idProducto === producto.idProducto);
+  addProducto(producto, lotes = null) {
+    const exists = this.state.detalles.find((item) => item.idProducto === producto.idProducto);
 
     if (exists) {
-      alertWarning('Ajuste', 'El producto ya existe en la lista.');
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'El producto ya existe en la lista.',
+      });
       return;
     }
 
@@ -200,13 +217,14 @@ class LogisticaAjusteCrear extends CustomComponent {
       codigo: producto.codigo,
       nombre: producto.nombre,
       imagen: producto.imagen,
-      cantidad: 0,
+      cantidad: '',
       actual: producto.cantidad,
       unidad: producto.unidad,
+      lotes: lotes ? lotes : null,
     };
 
     this.setState((prevState) => ({
-      detalle: [...prevState.detalle, data],
+      detalles: [...prevState.detalles, data],
     }));
   }
 
@@ -263,12 +281,17 @@ class LogisticaAjusteCrear extends CustomComponent {
 
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
-    this.setState({
-      producto: value,
-      productos: [],
-    }, () => {
-      this.agregarProducto(value);
-    });
+
+    if (value.lote === 1) {
+      this.handleOpenLote(value);
+    } else {
+      this.setState({
+        producto: value,
+        productos: [],
+      }, () => {
+        this.addProducto(value);
+      });
+    }
   }
 
   handleSelectMetodoAjuste = (event) => {
@@ -285,21 +308,30 @@ class LogisticaAjusteCrear extends CustomComponent {
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoAjuste)) {
-      alertWarning('Ajuste', 'Seleccione el tipo de ajuste.', () => {
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Seleccione el tipo de ajuste.',
+      }, () => {
         this.refIdTipoAjuste.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idMotivoAjuste)) {
-      alertWarning('Ajuste', 'Seleccione el motivo del ajuste.', () => {
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Seleccione el motivo del ajuste.',
+      }, () => {
         this.refIdMotivoAjuste.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      alertWarning('Ajuste', 'Seleccione el almacen.', () => {
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Seleccione el almacen.',
+      }, () => {
         this.refIdAlmacen.current.focus();
       });
       return;
@@ -319,16 +351,16 @@ class LogisticaAjusteCrear extends CustomComponent {
   }
 
   handleRemoveDetalle = (idProducto) => {
-    const detalle = this.state.detalle.filter(
+    const detalles = this.state.detalles.filter(
       (item) => item.idProducto !== idProducto,
     );
-    this.setState({ detalle });
+    this.setState({ detalles });
   }
 
   handleInputDetalle = (event, idProducto) => {
     const { value } = event.target;
     this.setState((prevState) => ({
-      detalle: prevState.detalle.map((item) =>
+      detalles: prevState.detalles.map((item) =>
         item.idProducto === idProducto ? { ...item, cantidad: value } : item,
       ),
     }));
@@ -347,15 +379,61 @@ class LogisticaAjusteCrear extends CustomComponent {
     }
   }
 
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal lote
+  //------------------------------------------------------------------------------------------
+  handleOpenLote = async (producto) => {
+    this.setState({ isOpenLote: true });
+    await this.refModalLote.current.loadDatos(producto);
+  }
+
+  handleCloseLote = () => {
+    this.setState({ isOpenLote: false });
+  }
+
+  handleSaveLote = async (producto, lotes) => {
+    this.setState({
+      producto: producto,
+      productos: [],
+    }, () => {
+      this.addProducto(producto, lotes);
+    });
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Acciones de proceso de registro
+  //------------------------------------------------------------------------------------------
   handleSave = () => {
-    if (isEmpty(this.state.detalle)) {
-      alertWarning('Ajuste', 'Agregue productos en la lista para continuar.', () => {
+    if (isEmpty(this.state.detalles)) {
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Agregue productos en la lista para continuar.',
+      }, () => {
         this.refValueProducto.current.focus();
       });
       return;
     }
 
-    alertDialog('Ajuste', '¿Está seguro de continuar?', async (accept) => {
+    if (!isEmpty(this.state.detalles.filter(item => !item.lotes && getNumber(item.cantidad) <= 0))) {
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
+      }, () => {
+        validateNumericInputs(this.refTableBody);
+      });
+      return;
+    }
+
+    alertKit.question({
+      title: 'Ajuste',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const data = {
           idTipoAjuste: this.state.idTipoAjuste,
@@ -364,15 +442,20 @@ class LogisticaAjusteCrear extends CustomComponent {
           idSucursal: this.state.idSucursal,
           observacion: this.state.observacion,
           idUsuario: this.state.idUsuario,
-          detalle: this.state.detalle,
+          detalles: this.state.detalles,
         };
 
-        alertInfo('Ajuste', 'Procesando petición...');
+        alertKit.loading({
+          message: 'Procesando petición...',
+        });
 
         const response = await createAjuste(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Ajuste', response.data, () => {
+          alertKit.success({
+            title: 'Ajuste',
+            message: response.data,
+          }, () => {
             this.clearView();
           });
         }
@@ -380,7 +463,10 @@ class LogisticaAjusteCrear extends CustomComponent {
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Ajuste', response.getMessage());
+          alertKit.warning({
+            title: 'Ajuste',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -389,7 +475,7 @@ class LogisticaAjusteCrear extends CustomComponent {
   handleBack = () => {
     this.setState({
       paso: 1,
-      detalle: []
+      detalles: []
     })
   }
 
@@ -418,7 +504,7 @@ class LogisticaAjusteCrear extends CustomComponent {
     */
 
   generateBody() {
-    if (isEmpty(this.state.detalle)) {
+    if (isEmpty(this.state.detalles)) {
       return (
         <TableRow>
           <TableCell className="text-center" colSpan="7">
@@ -428,15 +514,17 @@ class LogisticaAjusteCrear extends CustomComponent {
       );
     }
 
-    return this.state.detalle.map((item, index) => {
-      const isLastRow = index === this.state.detalle.length - 1;
+    return this.state.detalles.map((item, index) => {
+      const isLastRow = index === this.state.detalles.length - 1;
+
+      const cantidad = item.lotes ? item.lotes.reduce((acum, lote) => acum + getNumber(lote.cantidadAjustar), 0) : item.cantidad;
 
       let diferencia = 0;
 
       if (this.state.idTipoAjuste === INCREMENTO) {
-        diferencia = item.actual + parseFloat(item.cantidad);
+        diferencia = item.actual + parseFloat(cantidad);
       } else {
-        diferencia = item.actual - parseFloat(item.cantidad);
+        diferencia = item.actual - parseFloat(cantidad);
       }
 
       return (
@@ -464,18 +552,42 @@ class LogisticaAjusteCrear extends CustomComponent {
             {item.nombre}
           </TableCell>
           <TableCell>
-            <Input
-              value={item.cantidad}
-              onChange={(event) =>
-                this.handleInputDetalle(event, item.idProducto)
-              }
-              onKeyDown={keyNumberFloat}
-              onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
-            />
+            {
+              item.lotes && (
+                <small className="text-info">
+                  <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
+                </small>
+              )
+            }
+
+            {
+              !item.lotes && (
+                <Input
+                  value={cantidad}
+                  placeholder="0"
+                  onChange={(event) =>
+                    this.handleInputDetalle(event, item.idProducto)
+                  }
+                  onKeyDown={keyNumberFloat}
+                  onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
+                />
+              )
+            }
           </TableCell>
-          <TableCell>{rounded(item.actual)}</TableCell>
-          <TableCell>{rounded(diferencia)}</TableCell>
-          <TableCell>{item.unidad}</TableCell>
+          <TableCell>
+            {
+              item.lotes && rounded(cantidad)
+            }
+            {
+              !item.lotes && rounded(cantidad)
+            }
+          </TableCell>
+          <TableCell className={`${diferencia <= 0 ? "text-danger" : ""}`}>
+            {rounded(diferencia)}
+          </TableCell>
+          <TableCell>
+            {item.unidad}
+          </TableCell>
         </TableRow>
       );
     });
@@ -493,6 +605,14 @@ class LogisticaAjusteCrear extends CustomComponent {
           title="Ajuste de inventario"
           subTitle="CREAR"
           handleGoBack={() => this.props.history.goBack()}
+        />
+
+        <ModalLote
+          ref={this.refModalLote}
+          isOpen={this.state.isOpenLote}
+          idTipoAjuste={this.state.idTipoAjuste}
+          onClose={this.handleCloseLote}
+          handleAdd={this.handleSaveLote}
         />
 
         {/* Primero paso */}
@@ -708,7 +828,7 @@ class LogisticaAjusteCrear extends CustomComponent {
                         <TableHead width="15%">Medida</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody ref={this.refTableBody}>
                       {this.generateBody()}
                     </TableBody>
                   </Table>
@@ -725,13 +845,13 @@ class LogisticaAjusteCrear extends CustomComponent {
                 </Button>
                 {' '}
                 <Button
-                  className="btn-outline-warning"
+                  className="btn-outline-light"
                   onClick={this.handleBack}>
                   <i className="fa fa-arrow-left"></i> Atras
                 </Button>
                 {' '}
                 <Button
-                  className="btn-outline-info"
+                  className="btn-outline-light"
                   onClick={this.handleClear}>
                   <i className="fa fa-trash"></i> Limpiar
                 </Button>

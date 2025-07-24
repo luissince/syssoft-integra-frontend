@@ -1,13 +1,23 @@
+import React, { forwardRef } from 'react';
+import PropTypes from 'prop-types';
 import { ButtonMenu } from './Button';
 import Footer from './footer/Footer';
-import PropTypes from 'prop-types';
 import Input from './Input';
-import React from 'react';
 import { isEmpty } from '../helper/utils.helper';
 
-const ContainerWrapper = ({ children }) => {
+/**
+ * Componente contenedor principal que envuelve el contenido de la aplicación
+ * y añade un `Footer`. Ideal para páginas generales (no POS).
+ *
+ * @component
+ * @param {object} props
+ * @param {React.ReactNode} props.children - Elementos hijos a renderizar dentro del contenedor.
+ * @param {React.Ref} ref - Referencia hacia el elemento principal.
+ * @returns {JSX.Element}
+ */
+const ContainerWrapper = forwardRef(({ children }, ref) => {
   return (
-    <main>
+    <main ref={ref}>
       <div className="container-xl mt-3">
         <div className="bg-white p-3 rounded position-relative">
           {children}
@@ -17,16 +27,27 @@ const ContainerWrapper = ({ children }) => {
       <Footer />
     </main>
   );
-};
+});
+
+ContainerWrapper.displayName = 'ContainerWrapper';
 
 ContainerWrapper.propTypes = {
-  children: PropTypes.node.isRequired
-}
+  children: PropTypes.node.isRequired,
+};
 
-
-export const PosContainerWrapper = ({ children, className = '' }) => {
+/**
+ * Componente contenedor diseñado específicamente para la interfaz de punto de venta (POS).
+ *
+ * @component
+ * @param {object} props
+ * @param {React.ReactNode} props.children - Elementos hijos del contenedor POS.
+ * @param {string} [props.className] - Clases adicionales para personalización del layout.
+ * @param {React.Ref} ref - Referencia hacia el elemento principal.
+ * @returns {JSX.Element}
+ */
+export const PosContainerWrapper = forwardRef(({ children, className = '' }, ref) => {
   return (
-    <main className="main-pos">
+    <main className="main-pos" ref={ref}>
       <div className="h-100">
         <div className={`d-flex position-relative h-100 ${className}`}>
           {children}
@@ -34,12 +55,15 @@ export const PosContainerWrapper = ({ children, className = '' }) => {
       </div>
     </main>
   );
-};
+});
+
+PosContainerWrapper.displayName = 'PosContainerWrapper';
 
 PosContainerWrapper.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
-}
+};
+
 
 /**
  * Componente que representa una funcionalidad específica.

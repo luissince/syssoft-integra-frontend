@@ -115,11 +115,11 @@ export function formatDecimal(
  * @param {number} amount - La cantidad numérica
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
  * @param {string} [type='string'] - El tipo de retorno (string o number).
- * @returns {string} La cantidad formateada como dinero.
+ * @returns {string | number} La cantidad formateada como dinero.
  */
 export function rounded(amount, decimalCount = 2, type = 'string') {
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
-  if (!isNumber) return '0';
+  if (!isNumber) return type === 'number' ? 0 : '0.00';
 
   const number = Number(amount);
 

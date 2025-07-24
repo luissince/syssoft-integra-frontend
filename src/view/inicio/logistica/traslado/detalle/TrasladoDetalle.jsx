@@ -228,6 +228,7 @@ class TrasladoDetalle extends CustomComponent {
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
+                    <TableHead>Imagen</TableHead>
                     <TableHead>Producto</TableHead>
                     <TableHead>Categoría</TableHead>
                     <TableHead>Cantidad</TableHead>

@@ -857,7 +857,7 @@ class ModalTransaccion extends CustomComponent {
             {/* contado detalle */}
             {formaPago === CONTADO && (
               <Row >
-                <Column refChildren={this.refMetodoPagoContenedor} formGroup={true}>
+                <Column ref={this.refMetodoPagoContenedor} formGroup={true}>
                   <h6>Lista de métodos:</h6>
                   {bancosAgregados.map((item, index) => (
                     <MetodoPago

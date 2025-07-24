@@ -49,7 +49,7 @@ const ModalImpresion = ({
             </CustomModalContentHeader>
 
             <CustomModalContentBody>
-                <div className='text-center'>
+                <div className="flex items-center justify-center">
                     <img src={images.accept} width={64} height={64} className='mb-2' />
                 </div>
                 <h5 className='text-center '>Proceso Completado</h5>
@@ -67,7 +67,9 @@ const ModalImpresion = ({
                             if (clear) clear();
                             await refModal.current.handleOnClose();
                         }}>
-                        <img src={images.escoba} width={22} /> Realizar otra Operación.
+                        <div className='flex items-center justify-between space-x-2'>
+                            <img src={images.escoba} width={22} /> <span>Realizar otra Operación.</span>
+                        </div>
                     </Button>
                 </div>
                 <div className='d-flex justify-content-center align-items-center flex-wrap gap-2-5 mt-3'>

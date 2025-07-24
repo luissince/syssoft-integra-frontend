@@ -1,12 +1,10 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
+  getNumber,
   isEmpty,
   keyNumberFloat,
   rounded,
+  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
@@ -35,6 +33,8 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import { alertKit } from 'alert-kit';
+import ModalLote from './ModalLote';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -49,9 +49,11 @@ class TrasladorCrear extends CustomComponent {
     super(props);
 
     this.state = {
+      // Atributos de carga
       initialLoad: true,
       initialMessage: 'Cargando datos...',
 
+      // Atributos principales
       paso: 1,
 
       producto: null,
@@ -81,7 +83,7 @@ class TrasladorCrear extends CustomComponent {
 
       sucursales: [],
 
-      detalle: [],
+      detalles: [],
 
       nombreMotivoAjuste: '',
       nombreAlmacenOrigenInterno: '',
@@ -90,12 +92,20 @@ class TrasladorCrear extends CustomComponent {
       nombreSucursalExterno: '',
       nombreAlmacenDestinoExterno: '',
 
+      // Atributos del modal lote
+      isOpenLote: false,
+
+      // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.initial = { ...this.state }
 
+    // Referencial al padre
+    this.refTableBody = React.createRef();
+
+    // Referencia del formulario principal
     this.refIdTipoTraslado = React.createRef();
     this.refIdMotivoTraslado = React.createRef();
 
@@ -110,6 +120,9 @@ class TrasladorCrear extends CustomComponent {
 
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
+
+    // Referencia al modal lote
+    this.refModalLote = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -221,11 +234,14 @@ class TrasladorCrear extends CustomComponent {
     }
   }
 
-  agregarProducto(producto) {
-    const exists = this.state.detalle.find((item) => item.idProducto === producto.idProducto)
+  addProducto(producto, lotes = null) {
+    const exists = this.state.detalles.find((item) => item.idProducto === producto.idProducto)
 
     if (exists) {
-      alertWarning('Ajuste', 'El producto ya existe en la lista.');
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'El producto ya existe en la lista.',
+      });
       return;
     }
 
@@ -234,13 +250,14 @@ class TrasladorCrear extends CustomComponent {
       codigo: producto.codigo,
       nombre: producto.nombre,
       imagen: producto.imagen,
-      cantidad: 0,
+      cantidad: '',
       actual: producto.cantidad,
       unidad: producto.unidad,
+      lotes: lotes ? lotes : null,
     };
 
     this.setState((prevState) => ({
-      detalle: [...prevState.detalle, data],
+      detalles: [...prevState.detalles, data],
     }));
   }
 
@@ -297,12 +314,17 @@ class TrasladorCrear extends CustomComponent {
 
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
-    this.setState({
-      producto: value,
-      productos: [],
-    }, () => {
-      this.agregarProducto(value);
-    });
+
+    if (value.lote === 1) {
+      this.handleOpenLote(value);
+    } else {
+      this.setState({
+        producto: value,
+        productos: [],
+      }, () => {
+        this.addProducto(value);
+      });
+    }
   }
 
   handleOptionTipoTraslado = (event) => {
@@ -374,49 +396,70 @@ class TrasladorCrear extends CustomComponent {
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoTraslado)) {
-      alertWarning('Traslado', 'Seleccione el tipo de traslado.', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione el tipo de traslado.',
+      }, () => {
         this.refIdTipoTraslado.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idMotivoTraslado)) {
-      alertWarning('Traslado', 'Seleccione el motivo traslado.', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione el motivo traslado.',
+      }, () => {
         this.refIdMotivoTraslado.current.focus();
       });
       return;
     }
 
     if (this.state.idTipoTraslado === 'TT0001' && isEmpty(this.state.idAlmacenOrigenInterno)) {
-      alertWarning('Traslado', 'Seleccione el almacen origin.', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione el almacen origin.',
+      }, () => {
         this.refIdAlmacenOriginInterno.current.focus();
       });
       return;
     }
 
     if (this.state.idTipoTraslado === 'TT0001' && isEmpty(this.state.idAlmacenDestinoInterno)) {
-      alertWarning('Traslado', 'Seleccione el almacen destino.', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione el almacen destino.',
+      }, () => {
         this.refIdAlmacenDesitnoInterno.current.focus();
       });
       return;
     }
 
     if (this.state.idTipoTraslado === 'TT0002' && isEmpty(this.state.idAlmacenOrigenExterno)) {
-      alertWarning('Traslado', 'Seleccione el almacen origin.', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione el almacen origin.',
+      }, () => {
         this.refIdAlmacenOrigenExterno.current.focus();
       });
       return;
     }
 
     if (this.state.idTipoTraslado === 'TT0002' && isEmpty(this.state.idSucursalExterno)) {
-      alertWarning('Traslado', 'Seleccione la sucursal.', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione la sucursal.',
+      }, () => {
         this.refIdSucursalExterno.current.focus();
       });
       return;
     }
 
     if (this.state.idTipoTraslado === 'TT0002' && isEmpty(this.state.idAlmacenDestinoExterno)) {
-      alertWarning('Traslado', 'Seleccione el almcen de destino', () => {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Seleccione el almacen destino.',
+      }, () => {
         this.refIdAlmacenDestinoExterno.current.focus();
       });
       return;
@@ -447,14 +490,14 @@ class TrasladorCrear extends CustomComponent {
   }
 
   handleRemoveDetalle = (idProducto) => {
-    const detalle = this.state.detalle.filter((item) => item.idProducto !== idProducto);
-    this.setState({ detalle });
+    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto);
+    this.setState({ detalles });
   }
 
   handleInputDetalle = (event, idProducto) => {
     const { value } = event.target;
     this.setState((prevState) => ({
-      detalle: prevState.detalle.map((item) =>
+      detalles: prevState.detalles.map((item) =>
         item.idProducto === idProducto ? { ...item, cantidad: value } : item,
       ),
     }));
@@ -471,15 +514,63 @@ class TrasladorCrear extends CustomComponent {
     }
   }
 
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal lote
+  //------------------------------------------------------------------------------------------
+  handleOpenLote = async (producto) => {
+    this.setState({ isOpenLote: true });
+    await this.refModalLote.current.loadDatos(producto);
+  }
+
+  handleCloseLote = () => {
+    this.setState({ isOpenLote: false });
+  }
+
+  handleSaveLote = async (producto, lotes) => {
+    this.setState({
+      producto: producto,
+      productos: [],
+    }, () => {
+      this.addProducto(producto, lotes);
+    });
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Acciones de proceso de registro
+  //------------------------------------------------------------------------------------------
   handleSave = () => {
-    if (isEmpty(this.state.detalle)) {
-      alertWarning('Traslado', 'Agregue productos en la lista para continuar.', () => {
+    if (isEmpty(this.state.detalles)) {
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Agregue productos en la lista para continuar.',
+      }, () => {
         this.refValueProducto.current.focus();
       });
       return;
     }
 
-    alertDialog('Traslado', '¿Está seguro de continuar?', async (accept) => {
+    console.log(this.state.detalles)
+
+    if (!isEmpty(this.state.detalles.filter(item => !item.lotes && getNumber(item.cantidad) <= 0))) {
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
+      }, () => {
+        validateNumericInputs(this.refTableBody);
+      });
+      return;
+    }
+
+    alertKit.question({
+      title: 'Traslado',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const data = {
           idTipoTraslado: this.state.idTipoTraslado,
@@ -489,18 +580,22 @@ class TrasladorCrear extends CustomComponent {
           idSucursalDestino: this.state.idSucursalExterno,
           idSucursal: this.state.idSucursal,
           observacion: this.state.observacion,
-          estado: 1,
           idUsuario: this.state.idUsuario,
 
-          detalle: this.state.detalle,
+          detalles: this.state.detalles,
         };
 
-        alertInfo('Traslado', 'Procesando petición...');
+        alertKit.loading({
+          message: 'Procesando petición...',
+        });
 
         const response = await createTraslado(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Traslado', response.data, () => {
+          alertKit.success({
+            title: 'Traslado',
+            message: response.data,
+          }, () => {
             this.setState(this.initial, async () => {
               await this.loadingData();
               this.refIdTipoTraslado.current.focus();
@@ -511,7 +606,10 @@ class TrasladorCrear extends CustomComponent {
         if (response instanceof ErrorResponse) {
           if (response.getType() === CANCELED) return;
 
-          alertWarning('Traslado', response.getMessage());
+          alertKit.warning({
+            title: 'Traslado',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -519,13 +617,22 @@ class TrasladorCrear extends CustomComponent {
 
   handleBack = () => {
     this.setState({
-      detalle: [],
+      detalles: [],
       paso: 1
     })
   }
 
   handleClear = () => {
-    alertDialog('Traslado', '¿Está seguro de continuar, se va limpiar toda la información?', async (accept) => {
+    alertKit.question({
+      title: 'Traslado',
+      message: '¿Está seguro de continuar, se va limpiar toda la información?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         this.setState(this.initial, async () => {
           await this.loadingData();
@@ -552,7 +659,7 @@ class TrasladorCrear extends CustomComponent {
     */
 
   generateBody() {
-    if (isEmpty(this.state.detalle)) {
+    if (isEmpty(this.state.detalles)) {
       return (
         <TableRow>
           <TableCell className="text-center" colSpan="7">
@@ -562,10 +669,12 @@ class TrasladorCrear extends CustomComponent {
       );
     }
 
-    return this.state.detalle.map((item, index) => {
-      const isLastRow = index === this.state.detalle.length - 1;
+    return this.state.detalles.map((item, index) => {
+      const isLastRow = index === this.state.detalles.length - 1;
 
-      const diferencia = item.actual - parseFloat(item.cantidad);
+      const cantidad = item.lotes ? item.lotes.reduce((acum, lote) => acum + getNumber(lote.cantidadAjustar), 0) : Number(item.cantidad);
+
+      const diferencia = item.actual - cantidad;
 
       return (
         <TableRow key={index}>
@@ -592,18 +701,42 @@ class TrasladorCrear extends CustomComponent {
             {item.nombre}
           </TableCell>
           <TableCell>
-            <Input
-              value={item.cantidad}
-              onChange={(event) =>
-                this.handleInputDetalle(event, item.idProducto)
-              }
-              onKeyDown={keyNumberFloat}
-              onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
-            />
+            {
+              item.lotes && (
+                <small className="text-info">
+                  <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
+                </small>
+              )
+            }
+
+            {
+              !item.lotes && (
+                <Input
+                  value={item.cantidad}
+                  placeholder="0"
+                  onChange={(event) =>
+                    this.handleInputDetalle(event, item.idProducto)
+                  }
+                  onKeyDown={keyNumberFloat}
+                  onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
+                />
+              )
+            }
           </TableCell>
-          <TableCell className={`${diferencia <= 0 ? "text-danger" : ""}`}>{rounded(diferencia)}</TableCell>
-          <TableCell>{rounded(item.cantidad)}</TableCell>
-          <TableCell>{item.unidad}</TableCell>
+          <TableCell className={`${diferencia <= 0 ? "text-danger" : ""}`}>
+            {rounded(diferencia)}
+          </TableCell>
+          <TableCell>
+            {
+              item.lotes && rounded(cantidad)
+            }
+            {
+              !item.lotes && rounded(cantidad)
+            }
+          </TableCell>
+          <TableCell>
+            {item.unidad}
+          </TableCell>
         </TableRow>
       );
     });
@@ -622,6 +755,13 @@ class TrasladorCrear extends CustomComponent {
           title="Traslado"
           subTitle="CREAR"
           handleGoBack={() => this.props.history.goBack()}
+        />
+
+        <ModalLote
+          ref={this.refModalLote}
+          isOpen={this.state.isOpenLote}
+          onClose={this.handleCloseLote}
+          handleAdd={this.handleSaveLote}
         />
 
         {/* Condición para renderizar contenido específico según el estado 'paso' */}
@@ -992,13 +1132,13 @@ class TrasladorCrear extends CustomComponent {
                           <TableHead width="5%">Quitar</TableHead>
                           <TableHead width="10%">Imagen</TableHead>
                           <TableHead width="30%">Clave/Nombre</TableHead>
-                          <TableHead width="15%">Nueva Existencia</TableHead>
+                          <TableHead width="15%">Cantidad</TableHead>
                           <TableHead width="15%">Almacen Origen</TableHead>
                           <TableHead width="15%">Almacen Destino</TableHead>
                           <TableHead width="15%">Medida</TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody>
+                      <TableBody ref={this.refTableBody}>
                         {this.generateBody()}
                       </TableBody>
                     </Table>
@@ -1016,7 +1156,7 @@ class TrasladorCrear extends CustomComponent {
                     <i className="fa fa-save"></i> Guardar
                   </Button>{' '}
                   <Button
-                    className="btn-outline-secondary"
+                    className="btn-outline-light"
                     onClick={this.handleBack}
                   >
                     <i className="fa fa-arrow-left"></i> Atras

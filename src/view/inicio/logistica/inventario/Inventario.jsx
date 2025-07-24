@@ -498,7 +498,7 @@ class Inventario extends CustomComponent {
           const esUltimoLote = loteIndex === item.lotes.length - 1;
 
           return (
-            <TableRow key={`lote-${index}-${loteIndex}`} className={`bg-gray border-start border-4 border-info ${esUltimoLote ? 'border-bottom border-info' : ''}`}>
+            <TableRow key={`lote-${index}-${loteIndex}`} className={`bg-gray border-start border-1 border-info ${esUltimoLote ? 'border-bottom border-info' : ''}`}>
               <TableCell colSpan="10" className="border-gray">
                 <Table>
                   <TableHeader className="bg-gray">

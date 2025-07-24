@@ -820,6 +820,7 @@ class VentaCrear extends CustomComponent {
       this.updateReduxState();
     });
   };
+
   //------------------------------------------------------------------------------------------
   // Opciones de configuración
   //------------------------------------------------------------------------------------------
@@ -2246,7 +2247,6 @@ class VentaCrear extends CustomComponent {
         <ModalLote
           ref={this.refModalLote}
           isOpen={this.state.isOpenLote}
-          detalleVenta={this.state.detalleVenta}
           onClose={this.handleCloseLote}
           handleAdd={this.handleSaveLote}
         />
