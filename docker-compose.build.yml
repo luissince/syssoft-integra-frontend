@@ -3,40 +3,40 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: leatsac-frontend
+    image: leatsac-frontend
 
   ferreteria-rym-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ferreteria-rym-frontend
+    image: ferreteria-rym-frontend
 
   importmuneli-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: importmuneli-frontend
+    image: importmuneli-frontend
 
   supermarketya-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: supermarketya-frontend
+    image: supermarketya-frontend
 
   dracoly-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dracoly-frontend
+    image: dracoly-frontend
 
   main-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: main-frontend
+    image: main-frontend
 
   sysintegra-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: desarrollo-frontend
+    image: sysintegra-frontend
