@@ -45,8 +45,8 @@ jobs:
             VITE_APP_VERSION="${{secrets.VITE_APP_VERSION}}"
             EOL
 
-        - name: Construyendo contenedor NextJs
-          run: docker compose -f docker-compose.build.yml ${{ matrix.service }} build
+        - name: Construyendo contenedor ReactJs
+          run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
 
         - name: Configure AWS credentials
           uses: aws-actions/configure-aws-credentials@v2
