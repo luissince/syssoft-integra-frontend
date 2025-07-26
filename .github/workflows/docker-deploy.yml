@@ -105,9 +105,27 @@ jobs:
       - name: Descargar imagen desde ECR
         run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
+      - name: Crear archivo Compose para ${{ matrix.environment }}
+        run: |
+          cat <<EOF > docker-compose-${{ matrix.environment }}.yml
+          services:
+            ${NAME_SERVICE}:
+              image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end:${NAME_SERVICE}-latest
+              container_name: ${NAME_SERVICE}-frontend
+              restart: always
+              networks:
+                - luis
+          networks:
+            luis:
+              external: true
+          EOF
+
       - name: Crear y ejecutar contenedor en producción
-        run: docker compose -f docker-compose.prod.yml up -d
-      
+        run: docker compose -f docker-compose-${{ matrix.environment }}.yml up -d ${{ matrix.environment }}
+
+      - name: Eliminar Compose temporal
+        run: rm docker-compose-${{ matrix.environment }}.yml
+
       - name: Eliminar imágenes locales
         run: docker image prune -af || true
 
