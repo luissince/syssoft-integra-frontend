@@ -39,4 +39,4 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: sysintegra-frontend
+    image: desarrollo-frontend
