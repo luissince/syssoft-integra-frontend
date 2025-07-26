@@ -1,48 +1,41 @@
 services:
   leatsac-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
     container_name: leatsac-frontend
 
   ferreteria-rym-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
     container_name: ferreteria-rym-frontend
 
   importmuneli-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
     container_name: importmuneli-frontend
 
   supermarketya-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
     container_name: supermarketya-frontend
 
   dracoly-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
     container_name: dracoly-frontend
 
   main-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
     container_name: main-frontend
 
   sysintegra-services:
-    image: frontend
     build:
       context: .
       dockerfile: Dockerfile
