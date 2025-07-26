@@ -41,7 +41,7 @@ services:
       dockerfile: Dockerfile
     container_name: main-frontend
 
-  desarrollo-services:
+  sysintegra-services:
     image: frontend
     build:
       context: .
