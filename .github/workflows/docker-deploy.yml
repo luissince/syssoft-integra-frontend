@@ -59,10 +59,10 @@ jobs:
           uses: aws-actions/amazon-ecr-login@v1 
         
         - name: Tag front-end image
-          run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:latest
+          run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:v1.0.0
 
         - name: Push front-end image to ECR
-          run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:latest
+          run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:v1.0.0
 
 
   # build-and-deploy-master:
