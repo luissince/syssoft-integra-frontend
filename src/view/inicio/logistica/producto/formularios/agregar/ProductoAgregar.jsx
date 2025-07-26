@@ -1152,7 +1152,7 @@ class ProductoAgregar extends CustomComponent {
     }, async (accept) => {
       if (accept) {
 
-        alertKit.info({ message: 'Procesando información...', });
+        alertKit.loading({ message: 'Procesando información...', });
 
         const data = {
           idTipoProducto: this.state.idTipoProducto,
@@ -1285,6 +1285,7 @@ class ProductoAgregar extends CustomComponent {
       message: '¿Estás seguro de continuar?',
     }, async (accept) => {
       if (accept) {
+
         alertKit.loading({
           message: 'Procesando información...',
         });
@@ -1419,6 +1420,7 @@ class ProductoAgregar extends CustomComponent {
       message: '¿Estás seguro de continuar?',
     }, async (accept) => {
       if (accept) {
+        
         alertKit.loading({
           message: 'Procesando información...',
         });

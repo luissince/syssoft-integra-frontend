@@ -15,18 +15,18 @@ jobs:
     strategy:
       matrix:
         include:
-          # - environment: leatsac
-          #   service: leatsac-services
-          # - environment: ferreteria-rym
-          #   service: ferreteria-rym-services
+          - environment: leatsac
+            service: leatsac-services
+          - environment: ferreteria-rym
+            service: ferreteria-rym-services
           - environment: importmuneli
             service: importmuneli-services
-          # - environment: supermarketya
-          #   service: supermarketya-services
-          # - environment: dracoly
-          #   service: dracoly-services
-          # - environment: main
-          #   service: main-services
+          - environment: supermarketya
+            service: supermarketya-services
+          - environment: dracoly
+            service: dracoly-services
+          - environment: main
+            service: main-services
           - environment: desarrollo
             service: sysintegra-services
   
@@ -68,18 +68,18 @@ jobs:
     strategy:
       matrix:
         include:
-          # - environment: leatsac
-          #   service: leatsac-services
-          # - environment: ferreteria-rym
-          #   service: ferreteria-rym-services
+          - environment: leatsac
+            service: leatsac-services
+          - environment: ferreteria-rym
+            service: ferreteria-rym-services
           - environment: importmuneli
             service: importmuneli-services
-          # - environment: supermarketya
-          #   service: supermarketya-services
-          # - environment: dracoly
-          #   service: dracoly-services
-          # - environment: main
-          #   service: main-services
+          - environment: supermarketya
+            service: supermarketya-services
+          - environment: dracoly
+            service: dracoly-services
+          - environment: main
+            service: main-services
           - environment: desarrollo
             service: desarrollo-services
 
@@ -128,38 +128,57 @@ jobs:
 
       - name: Eliminar imágenes locales
         run: docker image prune -af || true
-
-        
   
-  # build-and-deploy-test:
-  #   if: github.ref == 'refs/heads/test'
-  #   runs-on: webs
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - environment: desarrollo
-  #           service: sysintegra-services
-    
-  #   environment: ${{ matrix.environment }}
-      
-  #   env:  
-  #     VITE_APP_BACK_END: ${{ secrets.VITE_APP_BACK_END }}
-  #     VITE_APP_APIS_PERU: ${{ secrets.VITE_APP_APIS_PERU }}
-  #     VITE_APP_ENV: ${{ vars.VITE_APP_ENV }}
-  #     VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
-    
-  #   steps:
-  #     - name: Checkout código
-  #       uses: actions/checkout@v3
+  clean-ecr-images:
+    name: Borrar imágenes antiguas de ECR
+    runs-on: ubuntu-latest
+    needs: [build-reactjs]
 
-  #     - name: Crear archivo .env
-  #       run: |
-  #         cat > .env <<EOL
-  #         VITE_APP_BACK_END="${{env.VITE_APP_BACK_END}}"
-  #         VITE_APP_APIS_PERU="${{env.VITE_APP_APIS_PERU}}"
-  #         VITE_APP_ENV="${{env.VITE_APP_ENV}}"
-  #         VITE_APP_VERSION="${{env.VITE_APP_VERSION}}"
-  #         EOL
-      
-  #     - name: Creando y ejecutando contenedor
-  #       run: docker compose -f docker-compose.yml up --build ${{ matrix.service }} -d
+    strategy:
+      matrix:
+        include:
+          - environment: leatsac
+            service: leatsac-services
+          - environment: ferreteria-rym
+            service: ferreteria-rym-services
+          - environment: importmuneli
+            service: importmuneli-services
+          - environment: supermarketya
+            service: supermarketya-services
+          - environment: dracoly
+            service: dracoly-services
+          - environment: main
+            service: main-services
+          - environment: desarrollo
+            service: desarrollo-services
+
+    environment: ${{ matrix.environment }}
+
+    steps:
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Instalar jq
+        run: sudo apt-get install -y jq
+
+      - name: Borrar imágenes antiguas para ${{ matrix.environment }}
+        run: |
+          REPO_NAME="syssoftintegra/front-end"
+          
+          echo "Buscando imágenes antiguas en el repositorio: $REPO_NAME para entorno: ${{ matrix.environment }}"
+          
+          aws ecr list-images \
+            --repository-name $REPO_NAME \
+            --query 'imageIds[?contains(imageTag, `{{ matrix.environment }}`) && imageTag!=`'${{ matrix.environment }}-latest'`]' \
+            --output json > images.json
+
+          if [ $(jq length images.json) -gt 0 ]; then
+            echo "Se eliminarán $(jq length images.json) imágenes para ${{ matrix.environment }}"
+            aws ecr batch-delete-image --repository-name $REPO_NAME --image-ids file://images.json
+          else
+            echo "No hay imágenes antiguas para eliminar para ${{ matrix.environment }}"
+          fi

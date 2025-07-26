@@ -30,7 +30,7 @@ const DetalleImagen = (props) => {
   return (
     <>
       <Row>
-        <Column className="col-12 text-center" formGroup={true}>
+        <Column className="col-12 flex items-center justify-center" formGroup={true}>
           <ImageUpload
             label="Imagen principal del producto"
             subtitle="Las imagenes no debe superar los 500 KB."
