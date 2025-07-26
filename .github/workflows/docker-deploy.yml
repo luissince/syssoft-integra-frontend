@@ -6,6 +6,7 @@ on:
       - "master"
       - "staging"
       - "test"
+      - "development"
 
 jobs:
     build-nextjs:
