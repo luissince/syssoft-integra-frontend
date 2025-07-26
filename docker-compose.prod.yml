@@ -1,0 +1,11 @@
+services:
+  ${NAME_SERVICE}-services:    
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end:${NAME_SERVICE}-latest
+    container_name: ${NAME_SERVICE}-frontend
+    networks:
+      - luis
+    restart: always
+
+networks:
+  luis:
+    external: true

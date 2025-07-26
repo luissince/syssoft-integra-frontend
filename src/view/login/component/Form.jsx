@@ -95,6 +95,7 @@ const Form = (props) => {
             <div className="text-center">
               <p>SysSoft Integra © {new Date().getFullYear()}</p>
               <p className='my-0'>VERSIÓN {import.meta.env.VITE_APP_VERSION}</p>
+              <p className='my-0'>{import.meta.env.VITE_APP_NAME}</p>
             </div>
           </form>
         </div>
