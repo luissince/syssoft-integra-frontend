@@ -496,8 +496,6 @@ class GuiaRemision extends CustomComponent {
           paginacion={this.state.paginacion}
           fillTable={this.paginacionContext}
           restart={this.state.restart}
-
-          setListaVentaPaginacion={this.props.setListaGuiaRemisionPaginacion}
         />
       </ContainerWrapper>
     );

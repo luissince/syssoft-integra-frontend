@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   rounded,
   convertNullText,
+  numberFormat,
+  isEmpty,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../components/Container';
@@ -13,6 +15,7 @@ import {
   comboAlmacen,
   documentsPdfCodbarProducto,
   listInventario,
+  summaryInventario,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import { connect } from 'react-redux';
@@ -21,14 +24,15 @@ import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
-import CustomModalStock from './component/ModalStock';
+// import CustomModalStock from './component/ModalStock';
+const CustomModalStock = React.lazy(() => import('@/view/inicio/logistica/inventario/component/ModalStock'));
 import Select from '../../../../components/Select';
 import Search from '../../../../components/Search';
 import { setListaInventarioData, setListaInventarioPaginacion } from '../../../../redux/predeterminadoSlice';
 import Button from '../../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
 import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../../components/Card';
-import { Box, CircleCheck, Clock, TriangleAlert } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Barcode, Box, CheckCircle, ChevronDown, ChevronUp, CircleCheck, Clock, MoreHorizontal, PackageOpen, PackagePlus, Plus, RefreshCw, SearchIcon, TrendingUp, TriangleAlert } from 'lucide-react';
 import Image from '../../../../components/Image';
 import { images } from '../../../../helper';
 import DropdownActions from '../../../../components/DropdownActions';
@@ -59,13 +63,18 @@ class Inventario extends CustomComponent {
       idAlmacen: '',
       almacenes: [],
 
-      isEstado: '',
-      estados: [],
-
       // Atributos principales de la tabla
       loading: false,
       lista: [],
       restart: false,
+
+      resumen: {
+        totalProductos: 0,
+        totalStockCritico: 0,
+        totalStockExcedente: 0,
+        totalStockOptimo: 0,
+        totalLotesPorVencer: 0,
+      },
 
       lotesVisible: {},
 
@@ -77,13 +86,11 @@ class Inventario extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      // Atributos de uso
-      codiso: convertNullText(this.props.moneda.codiso),
-
       // Atributos del modal stock
       isOpenStock: false,
 
       // Id principales
+      codIso: this.props.moneda.codiso ?? '',
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -115,7 +122,8 @@ class Inventario extends CustomComponent {
       this.refPaginacion.current.pageBound = this.props.inventarioLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion = this.props.inventarioLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.inventarioLista.data.buscar);
+      // this.refSearch.current.initialize(this.props.inventarioLista.data.buscar);
+      this.refSearch.current.value = this.props.inventarioLista.data.buscar;
     } else {
       const [almacenes] = await Promise.all([
         this.fetchComboAlmacen({ idSucursal: this.state.idSucursal })
@@ -128,10 +136,25 @@ class Inventario extends CustomComponent {
         idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
         initialLoad: false
       }, async () => {
+        await this.loadingSummary();
         await this.loadingInit();
         this.updateReduxState();
       });
     }
+  }
+
+  loadingSummary = async () => {
+    const response = await summaryInventario(this.state.idAlmacen, this.abortControllerTable.signal);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return;
+    }
+
+    this.setState({
+      resumen: response.data,
+    });
   }
 
   updateReduxState() {
@@ -299,30 +322,30 @@ class Inventario extends CustomComponent {
     if (lote.diasRestantes <= 0) {
       return {
         estado: 'Vencido',
-        clase: 'bg-dark text-white',
-        icono: 'bi bi-x-circle-fill',
-        colorBarra: 'bg-dark'
+        clase: 'bg-red-600 text-white',
+        icono: AlertCircle,
+        colorBarra: 'bg-red-600'
       };
     } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
       return {
         estado: 'Próximo',
-        clase: 'bg-warning text-dark',
-        icono: 'bi bi-clock-fill',
-        colorBarra: 'bg-warning'
+        clase: 'bg-orange-500 text-white',
+        icono: Clock,
+        colorBarra: 'bg-orange-500'
       };
     } else if (lote.diasRestantes <= 90) {
       return {
         estado: 'Vigilar',
-        clase: 'bg-info text-white',
-        icono: 'bi bi-eye-fill',
-        colorBarra: 'bg-info'
+        clase: 'bg-yellow-500 text-white',
+        icono: AlertTriangle,
+        colorBarra: 'bg-yellow-500'
       };
     } else {
       return {
         estado: 'Óptimo',
-        clase: 'bg-success text-white',
-        icono: 'bi bi-check-circle-fill',
-        colorBarra: 'bg-success'
+        clase: 'bg-green-500 text-white',
+        icono: CheckCircle,
+        colorBarra: 'bg-green-500'
       };
     }
   };
@@ -331,242 +354,37 @@ class Inventario extends CustomComponent {
   // Render
   //------------------------------------------------------------------------------------------
 
-  generarBody() {
-    const { loading, lista } = this.state;
-
-    if (loading) {
-      return (
-        <SpinnerTable
-          colSpan='6'
-          message='Cargando información de la tabla...'
-        />
-      );
-    }
-
-    if (!lista || lista.length === 0) {
-      return (
-        <TableRow className="text-center">
-          <td colSpan="10">¡No hay datos registrados!</td>
-        </TableRow>
-      );
-    }
-
-    return lista.flatMap((item, index) => {
-      const calcularPorcentaje = () => {
-        const { cantidad, cantidadMinima, cantidadMaxima } = item;
-        const rango = cantidadMaxima - cantidadMinima;
-        if (rango <= 0) return 100;
-
-        const porcentaje = ((cantidad - cantidadMinima) / rango) * 100;
-        return Number(rounded(Math.max(0, Math.min(100, porcentaje)), 0));
+  determinarEstadoInventario = (item) => {
+    const { cantidad, cantidadMinima, cantidadMaxima } = item;
+    if (cantidad < cantidadMinima) {
+      return {
+        estado: 'Crítico',
+        clase: 'bg-red-600 text-white',
+        icono: AlertTriangle
       };
-
-      const determinarEstadoInventario = (item) => {
-        const { cantidad, cantidadMinima, cantidadMaxima } = item;
-        if (cantidad < cantidadMinima) {
-          return {
-            estado: 'Crítico',
-            clase: 'bg-danger text-white',
-            icono: 'bi bi-exclamation-triangle-fill'
-          };
-        } else if (cantidad > cantidadMaxima) {
-          return {
-            estado: 'Exceso',
-            clase: 'bg-info text-white',
-            icono: 'bi bi-arrow-up-circle-fill'
-          };
-        } else {
-          return {
-            estado: 'Óptimo',
-            clase: 'bg-success text-white',
-            icono: 'bi bi-check-circle-fill'
-          };
-        }
+    } else if (cantidad > cantidadMaxima) {
+      return {
+        estado: 'Exceso',
+        clase: 'bg-blue-600 text-white',
+        icono: PackagePlus
       };
+    } else {
+      return {
+        estado: 'Óptimo',
+        clase: 'bg-green-500 text-white',
+        icono: CheckCircle
+      };
+    }
+  };
 
-      // Determinar si el producto tiene lotes
-      const tieneLotes = item.lotes && item.lotes.length > 0;
-      const estadoInventario = determinarEstadoInventario(item);
+  calcularPorcentaje = (item) => {
+    const { cantidad, cantidadMinima, cantidadMaxima } = item;
+    const rango = cantidadMaxima - cantidadMinima;
+    if (rango <= 0) return 100;
 
-      const filaPrincipal = (
-        <TableRow key={`inv-${index}`} className={`bg-white ${tieneLotes ? 'border-bottom-0' : ''}`}>
-          <TableCell className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2">
-              <span>{item.id}</span>
-              {tieneLotes && (
-                <button
-                  className="btn btn-link btn-sm p-0"
-                  onClick={() => this.toggleLotesVisibility(index)}
-                  title={this.state.lotesVisible?.[index] ? "Ocultar lotes" : "Ver lotes"}
-                >
-                  <i className={`bi ${this.state.lotesVisible?.[index] ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
-                </button>
-              )}
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className='d-flex align-items-center gap-2'>
-              <Image
-                default={images.noImage}
-                src={item.imagen}
-                alt={item.producto}
-                width={70}
-              />
-              <div className='d-flex flex-column gap-2 justify-content-center'>
-                {item.codigo}
-                <strong>{item.producto}</strong>
-                {tieneLotes && (
-                  <small className="text-info">
-                    <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
-                  </small>
-                )}
-              </div>
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="d-flex flex-column">
-              <span>{item.categoria}</span>
-              {tieneLotes && (
-                <small className="text-muted">
-                  Próximo venc: {this.getProximoVencimiento(item.lotes)}
-                </small>
-              )}
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <strong>{rounded(item.cantidad)} {item.medida || ''}</strong>
-                <div className="small text-muted">
-                  Max: {item.cantidadMaxima} | Min: {item.cantidadMinima}
-                </div>
-              </div>
-              {tieneLotes && (
-                <div className="text-end">
-                  <small className="text-muted d-block">
-                    Distribuido en {item.lotes.length} lote(s)
-                  </small>
-                </div>
-              )}
-            </div>
-            <ProgressBar
-              value={calcularPorcentaje()}
-              className={
-                item.cantidad < item.cantidadMinima ? "bg-danger" :
-                  item.cantidad > item.cantidadMaxima ? "bg-success" : "bg-warning"
-              }
-            />
-          </TableCell>
-          <TableCell className="text-center">
-            <div className="d-flex flex-column gap-1 align-items-center">
-              <span className={`badge rounded-pill ${estadoInventario.clase} d-flex align-items-center justify-content-center gap-1`}>
-                <i className={estadoInventario.icono}></i>
-                {estadoInventario.estado}
-              </span>
-              {tieneLotes && this.getLotesEnRiesgo(item.lotes) > 0 && (
-                <small className="text-warning">
-                  <i className="bi bi-exclamation-triangle"></i> {this.getLotesEnRiesgo(item.lotes)} lote(s) en riesgo
-                </small>
-              )}
-            </div>
-          </TableCell>
-          <TableCell className="text-center">
-            <DropdownActions
-              options={[
-                {
-                  image: <i className="bi bi-pencil"></i>,
-                  tooltip: 'Editar',
-                  label: 'Editar',
-                  onClick: () => this.handleOpenModalStock(item),
-                },
-                {
-                  image: <i className="fa fa-barcode"></i>,
-                  tooltip: 'Código de Barras',
-                  label: 'Código de Barras',
-                  onClick: () => this.handleOpenPrinterCodBar(item.idProducto),
-                },
-
-              ]}
-            />
-          </TableCell>
-        </TableRow>
-      );
-
-      const filasLotes = (tieneLotes && this.state.lotesVisible?.[index])
-        ? item.lotes.map((lote, loteIndex) => {
-          const estadoLote = this.determinarEstadoLote(lote);
-          const esUltimoLote = loteIndex === item.lotes.length - 1;
-
-          return (
-            <TableRow key={`lote-${index}-${loteIndex}`} className={`bg-gray border-start border-1 border-info ${esUltimoLote ? 'border-bottom border-info' : ''}`}>
-              <TableCell colSpan="10" className="border-gray">
-                <Table>
-                  <TableHeader className="bg-gray">
-                    <TableRow>
-                      <TableHead width="5%" className="border-gray border-0">Lote</TableHead>
-                      <TableHead width="20%" className="border-gray border-0">Vencimiento</TableHead>
-                      <TableHead width="10%" className="border-gray border-0">Días</TableHead>
-                      <TableHead width="15%" className="border-gray border-0">Cantidad</TableHead>
-                      <TableHead width="10%" className="border-gray border-0 text-center">Estado</TableHead>
-                      <TableHead width="7%" className="border-gray border-0 text-center">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="bg-gray">
-                    <TableRow>
-                      <TableCell className="border-gray border-0">
-                        <small className="text-muted">L-{loteIndex + 1}</small>
-                      </TableCell>
-                      <TableCell className="border-gray border-0">
-                        <div className="d-flex align-items-center gap-2 ps-3">
-                          <i className="bi bi-box text-muted"></i>
-                          <div>
-                            <div className="fw-bold">{lote.codigoLote}</div>
-                            <small className="text-muted">
-                              Lote de: {item.producto}
-                            </small>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="border-gray border-0">
-                        <div className="d-flex flex-column">
-                          <span>Venc: {lote.fechaVencimiento}</span>
-                          <small className={`${lote.diasRestantes <= 30 ? 'text-danger' : lote.diasRestantes <= 90 ? 'text-warning' : 'text-muted'}`}>
-                            {lote.diasRestantes} días restantes
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell className="border-gray border-0">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <strong>{rounded(lote.cantidad)} {item.medida || ''}</strong>
-                        </div>
-                        <ProgressBar
-                          value={rounded((lote.cantidad / item.cantidad) * 100, 0, 'number')}
-                          className={estadoLote.colorBarra}
-                        />
-                      </TableCell>
-                      <TableCell className="border-gray border-0 text-center">
-                        <span className={`badge rounded-pill ${estadoLote.clase} d-flex align-items-center justify-content-center gap-1`}>
-                          <i className={estadoLote.icono}></i>
-                          {estadoLote.estado}
-                        </span>
-                      </TableCell>
-                      <TableCell className="border-gray border-0 text-center">
-                        <Button className="btn-outline-dark btn-sm">
-                          <i className="fa fa-shopping-cart"></i>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableCell>
-            </TableRow>
-          );
-        })
-        : [];
-
-      return [filaPrincipal, ...filasLotes];
-    });
-  }
+    const porcentaje = ((cantidad - cantidadMinima) / rango) * 100;
+    return Number(rounded(Math.max(0, Math.min(100, porcentaje)), 0));
+  };
 
   render() {
     return (
@@ -582,155 +400,354 @@ class Inventario extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <CustomModalStock
-          ref={this.refModalStock}
-          isOpen={this.state.isOpenStock}
-          onClose={this.handleCloseStock}
+        <Suspense>
+          <CustomModalStock
+            ref={this.refModalStock}
+            isOpen={this.state.isOpenStock}
+            onClose={this.handleCloseStock}
 
-          handleSave={this.loadingInit}
-        />
+            handleSave={this.loadingInit}
+          />
+        </Suspense>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Select
-              group
-              iconLeft={<i className="fa fa-building"></i>}
-              value={this.state.idAlmacen}
-              onChange={this.handleSelectAlmacen}>
-              <option value={''}>-- Almacen --</option>
-              {this.state.almacenes.map((item, index) => {
-                return (
-                  <option key={index} value={item.idAlmacen}>
-                    {item.nombre} - {item.tipoAlmacen}
-                  </option>
-                );
-              })}
-            </Select>
-          </Column>
+        {/* Header */}
+        <div className="bg-white">
+          <div className="max-w-7xl mx-auto pb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <p className="text-gray-600 mt-1">Gestión de productos y stock</p>
+              </div>
+              <button
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                onClick={this.loadingInit}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Recargar
+              </button>
+            </div>
+          </div>
+        </div>
 
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <Select
-              group
-              iconLeft={<i className="fa fa-building"></i>}
-              value={this.state.estado}
-              onChange={this.handleSelectAlmacen}>
-              <option value={''}>-- Estado --</option>
+        {/* Body */}
+        <div className="max-w-7xl mx-auto">
 
-            </Select>
-          </Column>
+          {/* Filters */}
+          <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Almacén
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  value={this.state.idAlmacen}
+                  onChange={this.handleSelectAlmacen}
+                >
+                  <option value="">Todos los almacenes</option>
+                  {this.state.almacenes.map((item, index) => {
+                    return (
+                      <option key={index} value={item.idAlmacen}>
+                        {item.nombre} - {item.tipoAlmacen}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Buscar producto
+                </label>
+                <Search
+                  group={true}
+                  iconLeft={<i className="bi bi-search"></i>}
+                  ref={this.refSearch}
+                  onSearch={this.searchText}
+                  placeholder="Buscar por código o nombre..."
+                  theme="modern"
+                />
+              </div>
+            </div>
+          </div>
 
-          <Column formGroup={true}>
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadingInit}>
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Box className="h-8 w-8 text-indigo-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Productos</p>
+                  <p className="text-2xl font-bold text-gray-900">{rounded(this.state.resumen.totalProductos, 0)}</p>
+                </div>
+              </div>
+            </div>
 
-        <Row>
-          <Column className="col-md-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar..."
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Clock className="h-8 w-8 text-orange-500" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Lotes por Vencer</p>
+                  <p className="text-2xl font-bold text-gray-900">{rounded(this.state.resumen.totalLotesPorVencer, 0)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Stock Crítico</p>
+                  <p className="text-2xl font-bold text-gray-900">{rounded(this.state.resumen.totalStockCritico, 0)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Stock Óptimo</p>
+                  <p className="text-2xl font-bold text-gray-900">{rounded(this.state.resumen.totalStockOptimo, 0)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <PackagePlus className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Stock Excedente</p>
+                  <p className="text-2xl font-bold text-gray-900">{rounded(this.state.resumen.totalStockExcedente, 0)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {this.state.loading ? (
+                    <tr>
+                      <td colSpan="6" className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
+                          <p className="text-gray-500">Cargando información...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : isEmpty(this.state.lista) ? (
+                    <tr>
+                      <td colSpan="6" className="px-6 py-12 text-center">
+                        <div className="text-gray-500">
+                          <PackageOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                          <p className="text-lg font-medium">No se encontraron productos con el filtro</p>
+                          <p className="text-sm">Intenta cambiar el filtro</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    this.state.lista.map((item, index) => {
+                      const estadoInventario = this.determinarEstadoInventario(item);
+                      const tieneLotes = item.lotes && item.lotes.length > 0;
+                      const porcentaje = this.calcularPorcentaje(item);
+
+                      return (
+                        <React.Fragment key={`producto-${item.idInventario}`}>
+                          <tr className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center">
+                                <Image
+                                  default={images.noImage}
+                                  src={item.imagen}
+                                  alt={item.producto}
+                                  width={70}
+                                />
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">{item.producto}</div>
+                                  <div className="text-sm text-gray-500">{item.codigo}</div>
+                                  {tieneLotes && (
+                                    <div className="flex items-center mt-1">
+                                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                                        {item.lotes.length} lote(s)
+                                      </div>
+                                      {this.getLotesEnRiesgo(item.lotes) > 0 && (
+                                        <div className="ml-2 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                                          {this.getLotesEnRiesgo(item.lotes)} en riesgo
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900">{item.categoria}</div>
+                              {tieneLotes && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Próx. venc: {this.getProximoVencimiento(item.lotes)}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {item.cantidad} {item.medida}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
+                                </div>
+                                <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className={`h-2 rounded-full transition-all duration-300 ${item.cantidad < item.cantidadMinima ? 'bg-red-500' :
+                                      item.cantidad > item.cantidadMaxima ? 'bg-blue-500' : 'bg-green-500'
+                                      }`}
+                                    style={{ width: `${porcentaje}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {numberFormat(item.costo, this.state.codIso)}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoInventario.clase}`}>
+                                <estadoInventario.icono className="h-3 w-3 mr-1" />
+                                {estadoInventario.estado}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center space-x-2">
+                                <button className="text-gray-400 hover:text-indigo-600 transition-colors"
+                                  onClick={() => this.handleOpenModalStock(item)}>
+                                  <Plus className="h-5 w-5" />
+                                </button>
+                                <button className="text-gray-400 hover:text-indigo-600 transition-colors"
+                                  onClick={() => this.handleOpenPrinterCodBar(item.idProducto)}>
+                                  <Barcode className="h-5 w-5" />
+                                </button>
+                                {tieneLotes && (
+                                  <button
+                                    onClick={() => this.toggleLotesVisibility(index)}
+                                    className="text-gray-400 hover:text-indigo-600 transition-colors"
+                                  >
+                                    {this.state.lotesVisible[index] ? (
+                                      <ChevronUp className="h-5 w-5" />
+                                    ) : (
+                                      <ChevronDown className="h-5 w-5" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Lotes rows */}
+                          {tieneLotes && this.state.lotesVisible[index] && (
+                            <tr>
+                              <td colSpan="6" className="px-6 py-0 bg-gray-50">
+                                <div className="rounded-lg p-4 mb-4">
+                                  <h4 className="text-sm font-medium text-gray-900 mb-3">Lotes del producto</h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {item.lotes.map((lote, loteIndex) => {
+                                      const estadoLote = this.determinarEstadoLote(lote);
+                                      const porcentajeLote = (lote.cantidad / item.cantidad) * 100;
+
+                                      return (
+                                        <div key={lote.idLote} className="bg-white rounded-lg p-4 shadow-sm">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <div className="text-sm font-medium text-gray-900">Lote {loteIndex + 1}</div>
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoLote.clase}`}>
+                                              <estadoLote.icono className="h-3 w-3 mr-1" />
+                                              {estadoLote.estado}
+                                            </span>
+                                          </div>
+                                          <div className="space-y-2">
+                                            <div className="text-sm">
+                                              <span className="text-gray-500">Código: </span>
+                                              <span className="font-medium">{lote.codigoLote}</span>
+                                            </div>
+                                            <div className="text-sm">
+                                              <span className="text-gray-500">Vencimiento: </span>
+                                              <span className="font-medium">{lote.fechaVencimiento}</span>
+                                            </div>
+                                            <div className="text-sm">
+                                              <span className="text-gray-500">Días restantes: </span>
+                                              <span className={`font-medium ${lote.diasRestantes <= 30 ? 'text-red-600' :
+                                                lote.diasRestantes <= 90 ? 'text-orange-600' : 'text-gray-900'
+                                                }`}>
+                                                {lote.diasRestantes} días
+                                              </span>
+                                            </div>
+                                            <div className="text-sm">
+                                              <span className="text-gray-500">Cantidad: </span>
+                                              <span className="font-medium">{lote.cantidad} {item.medida}</span>
+                                            </div>
+                                            <div className="mt-2">
+                                              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                <span>Participación en stock</span>
+                                                <span>{rounded(porcentajeLote, 0)}%</span>
+                                              </div>
+                                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div
+                                                  className={`h-2 rounded-full ${estadoLote.colorBarra}`}
+                                                  style={{ width: `${porcentajeLote}%` }}
+                                                ></div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+
+            <Paginacion
+              ref={this.refPaginacion}
+              loading={this.state.loading}
+              data={this.state.lista}
+              totalPaginacion={this.state.totalPaginacion}
+              paginacion={this.state.paginacion}
+              fillTable={this.paginacionContext}
+              restart={this.state.restart}
+              theme="modern"
             />
-          </Column>
-        </Row>
+          </div>
 
-        {/* <Row>
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <span>Cantidad de Items: </span>
-          </Column>
-
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <span className="text-success">Valor de Inventario: </span>
-          </Column>
-        </Row> */}
-
-        <Row>
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Total Productos</CardTitle>
-                <Box className='text-info' />
-              </CardHeader>
-              <CardBody>
-                <CardText>1,234</CardText>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Lotes por Vencen</CardTitle>
-                <Clock className='text-warning' />
-              </CardHeader>
-              <CardBody>
-                <CardText>$123,456</CardText>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Stock Crítico</CardTitle>
-                <TriangleAlert className='text-danger' />
-              </CardHeader>
-              <CardBody>
-                <CardText>24</CardText>
-              </CardBody>
-            </Card>
-          </Column>
-
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
-            <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Stock Óptimo</CardTitle>
-                <CircleCheck className='text-success' />
-              </CardHeader>
-              <CardBody>
-                <CardText>56</CardText>
-              </CardBody>
-            </Card>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className={"table-bordered"}>
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="20%">Producto</TableHead>
-                    <TableHead width="10%">Categoría</TableHead>
-                    <TableHead width="15%">Stock Total</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="7%" className="text-center">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
-
-        <Paginacion
-          ref={this.refPaginacion}
-          loading={this.state.loading}
-          data={this.state.lista}
-          totalPaginacion={this.state.totalPaginacion}
-          paginacion={this.state.paginacion}
-          fillTable={this.paginacionContext}
-          restart={this.state.restart}
-        />
+        </div>
       </ContainerWrapper>
     );
   }

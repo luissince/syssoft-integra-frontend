@@ -44,19 +44,19 @@ const InvoiceDetail = (props) => {
                 <div className="py-3 w-100 d-flex flex-column justify-content-center h-100">
                   <div className="d-flex justify-content-between align-items-center py-1 px-3">
                     <div className="invoice-item_add-item-options">
-                        <button
-                          className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
-                          onClick={() => handleEdit(producto)}
-                        >
-                          <img src={images.edit} alt="Editar" />
-                        </button>
+                      <button
+                        className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
+                        onClick={() => handleEdit(producto)}
+                      >
+                        <i className='fa fa-edit text-secondary text-xl'></i>
+                      </button>
 
-                        <button
-                          className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
-                          onClick={() => handleRemove(producto)}
-                        >
-                          <img src={images.remove} alt="Eliminar" />
-                        </button>
+                      <button
+                        className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
+                        onClick={() => handleRemove(producto)}
+                      >
+                        <i className='fa fa-trash text-secondary text-xl'></i>
+                      </button>
                     </div>
 
                     <Image
@@ -113,7 +113,7 @@ const InvoiceDetail = (props) => {
                               className="m-0 d-flex justify-content-center align-items-center pointer"
                               onClick={() => handleMinus(producto, item.idInventario)}
                             >
-                              <img src={images.minus} alt="Menorar" />
+                              <i className='fa fa-minus text-secondary text-xl'></i>
                             </Button>
                             <div className="item_quantity d-flex justify-content-center align-items-center">
                               {item.cantidad}
@@ -122,7 +122,7 @@ const InvoiceDetail = (props) => {
                               className="m-0 d-flex justify-content-center align-items-center pointer"
                               onClick={() => handlePlus(producto, item.idInventario)}
                             >
-                              <img src={images.plus} alt="Aumentar" />
+                              <i className='fa fa-plus text-secondary text-xl'></i>
                             </Button>
                           </div>
                         </div>

@@ -250,9 +250,18 @@ export async function listInventario(params, signal) {
   );
 }
 
+export async function summaryInventario(idAlmacen, signal) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/inventario/summary/${idAlmacen}`, {
+      signal: signal,
+    }),
+  );
+}
+
+
 export async function getStockInventario(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/inventario/obtener/stock', {
+    instancePrincipal.get('/api/inventario/get/stock', {
       params: params,
       signal: signal,
     }),
@@ -261,7 +270,7 @@ export async function getStockInventario(params, signal) {
 
 export async function updateStockInventario(data, signal) {
   return await Resolve.create(
-    instancePrincipal.put('/api/inventario/actualizar/stock', data, {
+    instancePrincipal.put('/api/inventario/update/stock', data, {
       signal: signal,
     }),
   );
@@ -384,7 +393,6 @@ export async function deleteProducto(idProducto) {
   );
 }
 
-
 export function documentsPdfReportsProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/reports`
 }
@@ -395,6 +403,10 @@ export function documentsExcelProducto() {
 
 export function documentsPdfCodbarProducto() {
   return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/codbar`
+}
+
+export async function dashboardProducto(data, signal) {
+  return await Resolve.create(instancePrincipal.post('/api/producto/dashboard', data, { signal: signal, }));
 }
 
 // ------------------------------------------------------------------------

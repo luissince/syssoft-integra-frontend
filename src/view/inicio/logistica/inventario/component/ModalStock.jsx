@@ -13,6 +13,7 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { images } from '../../../../../helper';
+import Image from '@/components/Image';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -79,11 +80,13 @@ class CustomModalStock extends Component {
       this.abortController = null;
 
       this.setState({
-        nombre: producto.nombre,
+        nombre: producto.producto,
         imagen: producto.imagen,
         stockMinimo: response.data.cantidadMinima,
         stockMaximo: response.data.cantidadMaxima,
         loading: false,
+      }, () => {
+        this.refStockMinimo.current.focus();
       });
     }
 
@@ -210,7 +213,7 @@ class CustomModalStock extends Component {
   | actuales del componente para determinar lo que se mostrará.
   |
   */
- 
+
   render() {
     const {
       loading,
@@ -235,76 +238,75 @@ class CustomModalStock extends Component {
         onHidden={this.handleOnHidden}
         onClose={onClose}
         contentLabel="Modal Stock"
-        titleHeader="Agregar Stock"
+        titleHeader="Actualizar Stock"
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView
-              loading={loading}
-              message={message}
-            />
+            <SpinnerView loading={loading} message={message} />
 
-            <Row>
-              <Column formGroup>
-                <h6>Actualizar stock</h6>
-              </Column>
-            </Row>
+            {/* Producto + Imagen */}
+            <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">{nombre}</h2>
+              <Image
+                default={images.noImage}
+                src={imagen}
+                alt={nombre}
+                width={100}
+                height={100}
+                className="object-contain rounded-md border"
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <h6>{nombre}</h6>
-                <Image
-                  default={images.noImage}
-                  src={imagen}
-                  alt={nombre}
-                  width={100}
-                  height={100}
-                  className='object-contain'
-                />
-              </Column>
-            </Row>
+            {/* Formulario Stock */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stock Mínimo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ingrese..."
+                    ref={this.refStockMinimo}
+                    value={stockMinimo}
+                    onChange={this.handleInputStockMinimo}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
 
-            <Row>
-              <Column className={"col-sm-6 col-12"} formGroup>
-                <Input
-                  autoFocus={true}
-                  label={<> Stock Máximo <i className="fa fa-asterisk text-danger small"></i></>}
-                  placeholder={"ingrese..."}
-                  role={"float"}
-                  ref={this.refStockMaximo}
-                  value={stockMaximo}
-                  onChange={this.handleInputStockMaximo}
-                />
-              </Column>
-
-              <Column className={"col-sm-6 col-12"} formGroup>
-                <Input
-                  label={<>Stock Mínimo <i className="fa fa-asterisk text-danger small"></i></>}
-                  placeholder="ingrese..."
-                  role={"float"}
-                  ref={this.refStockMinimo}
-                  value={stockMinimo}
-                  onChange={this.handleInputStockMinimo}
-                />
-              </Column>
-            </Row>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stock Máximo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ingrese..."
+                    ref={this.refStockMaximo}
+                    value={stockMaximo}
+                    onChange={this.handleInputStockMaximo}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
           </>
         }
         footer={
-          <>
-            <Button
+          <div className="flex justify-end gap-3 pt-4">
+            <button
               type="submit"
-              className="btn-success"
+              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
-              <i className="fa fa-save"></i> Guardar
-            </Button>
-            <Button
-              className="btn-danger"
+              <i className="fa fa-save mr-2"></i> Guardar
+            </button>
+            <button
+              type="button"
               onClick={async () => await this.refModal.current.handleOnClose()}
+              className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </>
+              <i className="fa fa-close mr-2"></i> Cerrar
+            </button>
+          </div>
         }
       />
     );
