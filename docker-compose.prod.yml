@@ -1,5 +1,5 @@
 services:
-  ${NAME_SERVICE}-services:    
+  app:    
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end:${NAME_SERVICE}-latest
     container_name: ${NAME_SERVICE}-frontend
     networks:

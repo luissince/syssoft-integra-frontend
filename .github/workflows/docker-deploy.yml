@@ -15,18 +15,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: leatsac
-            service: leatsac-services
-          - environment: ferreteria-rym
-            service: ferreteria-rym-services
+          # - environment: leatsac
+          #   service: leatsac-services
+          # - environment: ferreteria-rym
+          #   service: ferreteria-rym-services
           - environment: importmuneli
             service: importmuneli-services
-          - environment: supermarketya
-            service: supermarketya-services
-          - environment: dracoly
-            service: dracoly-services
-          - environment: main
-            service: main-services
+          # - environment: supermarketya
+          #   service: supermarketya-services
+          # - environment: dracoly
+          #   service: dracoly-services
+          # - environment: main
+          #   service: main-services
           - environment: desarrollo
             service: sysintegra-services
   
