@@ -19,6 +19,7 @@ import { alertKit } from 'alert-kit';
 import { comboAlmacen, comboSucursal, dashboardProducto } from '@/network/rest/principal.network';
 import { currentDate, isEmpty, numberFormat, rounded } from '@/helper/utils.helper';
 import { images } from '@/helper';
+import Image from '@/components/Image';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -281,11 +282,10 @@ class RepProductos extends CustomComponent {
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                currentPage === 1
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === 1
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -306,11 +306,10 @@ class RepProductos extends CustomComponent {
               <button
                 key={page}
                 onClick={() => onPageChange(page)}
-                className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  page === currentPage
-                    ? 'z-10 bg-blue-600 border-blue-600 text-white'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
+                className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${page === currentPage
+                  ? 'z-10 bg-blue-600 border-blue-600 text-white'
+                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  }`}
               >
                 {page}
               </button>
@@ -331,11 +330,10 @@ class RepProductos extends CustomComponent {
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                currentPage === totalPages
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === totalPages
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -541,9 +539,9 @@ class RepProductos extends CustomComponent {
                     <label className="text-sm text-gray-600">Mostrar:</label>
                     <select
                       value={itemsPerPageProductos}
-                      onChange={(e) => this.setState({ 
+                      onChange={(e) => this.setState({
                         itemsPerPageProductos: parseInt(e.target.value),
-                        currentPageProductos: 1 
+                        currentPageProductos: 1
                       })}
                       className="px-2 py-1 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500"
                     >
@@ -560,6 +558,7 @@ class RepProductos extends CustomComponent {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendidos</th>
@@ -573,7 +572,7 @@ class RepProductos extends CustomComponent {
                     {
                       isEmpty(paginatedProductosVendidos) &&
                       <tr>
-                        <td colSpan="7" className="text-center">
+                        <td colSpan="8" className="text-center">
                           <div className="d-flex flex-column align-items-center py-4">
                             <img className="mb-1" src={images.basket} alt="Canasta" />
                             <div className="w-50">
@@ -587,6 +586,14 @@ class RepProductos extends CustomComponent {
                     }
                     {paginatedProductosVendidos.map((producto, index) => (
                       <tr key={index} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <Image
+                            default={images.noImage}
+                            src={producto.imagen}
+                            alt={producto.nombre}
+                            width={90}
+                          />
+                        </td>
                         <td className="px-6 py-4">
                           <div>
                             <div className="font-medium text-gray-900">{producto.nombre}</div>
@@ -616,7 +623,7 @@ class RepProductos extends CustomComponent {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Paginación para productos vendidos */}
               {this.renderPagination(currentPageProductos, totalPagesProductos, this.handlePageChangeProductos)}
             </div>
@@ -654,7 +661,7 @@ class RepProductos extends CustomComponent {
                   </div>
                 ))}
               </div>
-              
+
               {/* Paginación para productos más vendidos */}
               {productosMasVendidos.length > itemsPerPageMasVendidos && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
@@ -666,11 +673,10 @@ class RepProductos extends CustomComponent {
                       <button
                         onClick={() => this.handlePageChangeMasVendidos(currentPageMasVendidos - 1)}
                         disabled={currentPageMasVendidos === 1}
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageMasVendidos === 1
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                        className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === 1
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:bg-gray-100'
+                          }`}
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
@@ -680,11 +686,10 @@ class RepProductos extends CustomComponent {
                       <button
                         onClick={() => this.handlePageChangeMasVendidos(currentPageMasVendidos + 1)}
                         disabled={currentPageMasVendidos === totalPagesMasVendidos}
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageMasVendidos === totalPagesMasVendidos
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                        className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === totalPagesMasVendidos
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:bg-gray-100'
+                          }`}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -753,25 +758,23 @@ class RepProductos extends CustomComponent {
                       <button
                         onClick={() => this.handlePageChangeRendimientoCategoria(currentPageRendimientoCategoria - 1)}
                         disabled={currentPageRendimientoCategoria === 1}
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageRendimientoCategoria === 1
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
+                        className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria === 1
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
-                      <span className="px-2 py-1 text-xs text-gray-600">                        
+                      <span className="px-2 py-1 text-xs text-gray-600">
                         {currentPageRendimientoCategoria}/{totalPagesRendimientoCategoria}
                       </span>
                       <button
                         onClick={() => this.handlePageChangeRendimientoCategoria(currentPageRendimientoCategoria + 1)}
                         disabled={currentPageRendimientoCategoria === totalPagesRendimientoCategoria}
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageRendimientoCategoria === totalPagesRendimientoCategoria
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
+                        className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria === totalPagesRendimientoCategoria
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -807,20 +810,28 @@ class RepProductos extends CustomComponent {
                         <div className="text-gray-500 text-sm">No hay productos con bajo inventario</div>
                       </div>
                     )}
-                    {paginatedBajoInventario.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                        <div>
-                          <div className="text-sm font-medium text-red-800">{item.nombre}</div>
-                          <div className="text-xs text-red-600">Actual: {item.inventario_actual}, Mínimo: {item.cantidadMinima}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-red-700">Reordenar</div>
-                          <div className="text-xs text-red-600">{item.unidades_para_reordenar} {item.medida}</div>
+                    {paginatedBajoInventario.map((producto, index) => (
+                      <div key={index} className="flex items-center p-3 bg-red-50 rounded-lg border border-red-200 gap-x-4">
+                        <Image
+                          default={images.noImage}
+                          src={producto.imagen}
+                          alt={producto.nombre}
+                          width={70}
+                        />
+                        <div className="flex flex-1 items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium text-red-800">{producto.nombre}</div>
+                            <div className="text-xs text-red-600">Actual: {producto.inventario_actual}, Mínimo: {producto.cantidadMinima}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-red-700">Reordenar</div>
+                            <div className="text-xs text-red-600">{producto.unidades_para_reordenar} {producto.medida}</div>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* Paginación para bajo inventario */}
                   {productosConBajoInventario.length > itemsPerPageBajoInventario && (
                     <div className="mt-4 pt-4 border-t border-red-200">
@@ -832,11 +843,10 @@ class RepProductos extends CustomComponent {
                           <button
                             onClick={() => this.handlePageChangeBajoInventario(currentPageBajoInventario - 1)}
                             disabled={currentPageBajoInventario === 1}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageBajoInventario === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario === 1
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-600 hover:bg-gray-100'
+                              }`}
                           >
                             <ChevronLeft className="w-4 h-4" />
                           </button>
@@ -846,11 +856,10 @@ class RepProductos extends CustomComponent {
                           <button
                             onClick={() => this.handlePageChangeBajoInventario(currentPageBajoInventario + 1)}
                             disabled={currentPageBajoInventario === totalPagesBajoInventario}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageBajoInventario === totalPagesBajoInventario
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario === totalPagesBajoInventario
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-600 hover:bg-gray-100'
+                              }`}
                           >
                             <ChevronRight className="w-4 h-4" />
                           </button>
@@ -878,19 +887,27 @@ class RepProductos extends CustomComponent {
                       </div>
                     )}
                     {paginatedSinVentas.map((producto, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <div>
-                          <div className="text-sm font-medium text-orange-800">{producto.nombre}</div>
-                          <div className="text-xs text-orange-600">Inventario: {producto.inventario_actual} unidades</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-orange-700">Promoción</div>
-                          <div className="text-xs text-orange-600">considerar descuento</div>
+                      <div key={index} className="flex items-center p-3 bg-red-50 rounded-lg border border-red-200 gap-x-4">
+                        <Image
+                          default={images.noImage}
+                          src={producto.imagen}
+                          alt={producto.nombre}
+                          width={70}
+                        />
+                        <div className="flex flex-1 items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium text-orange-800">{producto.nombre}</div>
+                            <div className="text-xs text-orange-600">Inventario: {producto.inventario_actual} unidades</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-orange-700">Promoción</div>
+                            <div className="text-xs text-orange-600">considerar descuento</div>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* Paginación para sin ventas */}
                   {productosSinVentaConInventario.length > itemsPerPageSinVentas && (
                     <div className="mt-4 pt-4 border-t border-orange-200">
@@ -902,11 +919,10 @@ class RepProductos extends CustomComponent {
                           <button
                             onClick={() => this.handlePageChangeSinVentas(currentPageSinVentas - 1)}
                             disabled={currentPageSinVentas === 1}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageSinVentas === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === 1
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-600 hover:bg-gray-100'
+                              }`}
                           >
                             <ChevronLeft className="w-4 h-4" />
                           </button>
@@ -916,11 +932,10 @@ class RepProductos extends CustomComponent {
                           <button
                             onClick={() => this.handlePageChangeSinVentas(currentPageSinVentas + 1)}
                             disabled={currentPageSinVentas === totalPagesSinVentas}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageSinVentas === totalPagesSinVentas
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === totalPagesSinVentas
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-600 hover:bg-gray-100'
+                              }`}
                           >
                             <ChevronRight className="w-4 h-4" />
                           </button>

@@ -37,13 +37,18 @@ jobs:
             service: desarrollo-services
             branch: test
   
-    if: github.ref == 'refs/heads/${{ matrix.branch }}'
-
     environment: ${{ matrix.environment }}
 
     steps:
+      - name: Cancelar si no es la rama correcta
+        if: github.ref != 'refs/heads/${{ matrix.branch }}'
+        run: |
+          echo "No corresponde a la rama '${{ matrix.branch }}'. Terminando job."
+          exit 0
+
       - name: Checkout código
         uses: actions/checkout@v3
+
       - name: Crear archivo .env
         run: |
           cat > .env <<EOL
@@ -53,19 +58,23 @@ jobs:
           VITE_APP_VERSION="${{vars.VITE_APP_VERSION}}"
           VITE_APP_NAME="${{vars.VITE_APP_NAME}}"
           EOL
+
       - name: Construyendo contenedor ReactJs
         run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1 
       
       - name: Tag front-end image
         run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
+
       - name: Push front-end image to ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
@@ -99,14 +108,18 @@ jobs:
             service: desarrollo-services
             branch: test
 
-    if: github.ref == 'refs/heads/${{ matrix.branch }}'
-
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       NAME_SERVICE: ${{ matrix.environment }}
 
     steps:
+      - name: Cancelar si no es la rama correcta
+        if: github.ref_name != matrix.branch
+        run: |
+          echo "No corresponde a la rama '${{ matrix.branch }}'. Terminando job."
+          exit 0
+
       - name: Checkout código
         uses: actions/checkout@v3
 
@@ -170,8 +183,6 @@ jobs:
           - environment: desarrollo
             branch: test
     
-    if: github.ref == 'refs/heads/${{ matrix.branch }}'
-
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
