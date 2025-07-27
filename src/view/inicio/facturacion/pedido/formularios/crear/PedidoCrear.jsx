@@ -989,7 +989,7 @@ class PedidoCrear extends CustomComponent {
                   isEmpty(this.state.productos) && (
                     <div className="text-center position-relative">
                       <i className="bi bi-cart4 text-secondary text-2xl"></i>
-                      <p className="text-secondary text-base text-lg mb-0">
+                      <p className="text-secondary text-lg mb-0">
                         Use la barra de busqueda para encontrar su producto.
                       </p>
                     </div>
@@ -1134,7 +1134,7 @@ class PedidoCrear extends CustomComponent {
                 {isEmpty(this.state.detalles) && (
                   <div className="text-center">
                     <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-base text-lg mb-0">
+                    <p className="text-secondary text-base mb-0">
                       Aquí verás los productos que elijas en tu próxima pedido
                     </p>
                   </div>
@@ -1216,8 +1216,8 @@ class PedidoCrear extends CustomComponent {
                 {this.renderTotal()}
 
                 <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 text-secondary">Cantidad:</p>
-                  <p className="m-0 text-secondary">
+                  <p className="m-0 font-normal">Cantidad:</p>
+                  <p className="m-0 text-black font-normal">
                     {this.state.detalles.length === 1
                       ? this.state.detalles.length + ' Producto'
                       : this.state.detalles.length + ' Productos'}{' '}

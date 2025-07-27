@@ -40,16 +40,11 @@ jobs:
     environment: ${{ matrix.environment }}
 
     steps:
-      - name: Cancelar si no es la rama correcta
-        if: github.ref != 'refs/heads/${{ matrix.branch }}'
-        run: |
-          echo "No corresponde a la rama '${{ matrix.branch }}'. Terminando job."
-          exit 0
-
       - name: Checkout código
         uses: actions/checkout@v3
 
       - name: Crear archivo .env
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{secrets.VITE_APP_BACK_END}}"
@@ -60,9 +55,11 @@ jobs:
           EOL
 
       - name: Construyendo contenedor ReactJs
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
 
       - name: Configure AWS credentials
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -70,12 +67,15 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/amazon-ecr-login@v1 
       
       - name: Tag front-end image
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
       - name: Push front-end image to ECR
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
   deploy-reactjs:
@@ -114,16 +114,11 @@ jobs:
       NAME_SERVICE: ${{ matrix.environment }}
 
     steps:
-      - name: Cancelar si no es la rama correcta
-        if: github.ref_name != matrix.branch
-        run: |
-          echo "No corresponde a la rama '${{ matrix.branch }}'. Terminando job."
-          exit 0
-
       - name: Checkout código
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -131,12 +126,15 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Descargar imagen desde ECR
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
       - name: Crear archivo Compose para ${{ matrix.environment }}
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
           cat <<EOF > docker-compose-${{ matrix.environment }}.yml
           services:
@@ -152,12 +150,15 @@ jobs:
           EOF
 
       - name: Crear y ejecutar contenedor en producción
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker compose -f docker-compose-${{ matrix.environment }}.yml up -d ${{ matrix.environment }}
 
       - name: Eliminar Compose temporal
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: rm docker-compose-${{ matrix.environment }}.yml
 
       - name: Eliminar imágenes locales
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker image prune -af || true
   
   clean-ecr-images:
@@ -188,13 +189,31 @@ jobs:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
     steps:
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+      - name: Configurar credenciales AWS
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Clean old images in ECR
+      - name: Instalar jq
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
+        run: sudo apt-get install -y jq
+
+      - name: Borrar imágenes sin tag '${{ matrix.environment }}-latest' - Frontend
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
-          aws ecr batch-delete-image \
-            --repository-name syssoftintegra/front-end \
-            --image-ids imageTag=${{ matrix.environment }}-previous || true
+          REPO="syssoftintegra/front-end"
+
+           # 1. Obtener todas las imágenes (excepto latest)
+            aws ecr list-images --repository-name $REPO \
+              --query 'imageIds[?type(imageTag)==`null` || imageTag!=`${{ matrix.environment }}-latest`]' \
+              --output json > images.json
+
+            # 2. Verificar si hay imágenes para borrar
+            if [ $(jq -e 'length > 0' images.json) = "true" ]; then
+              echo "Borrando $(jq length images.json) imágenes antiguas..."
+              aws ecr batch-delete-image --repository-name $REPO --image-ids file://images.json
+            else
+              echo "No hay imágenes antiguas para borrar en $REPO"
