@@ -529,7 +529,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-
-const ConnectedNotaCreditoProceso = connect(mapStateToProps, null)(NotaCreditoProceso);
+const ConnectedNotaCreditoProceso = connect(
+  mapStateToProps,
+  null,
+)(NotaCreditoProceso);
 
 export default ConnectedNotaCreditoProceso;

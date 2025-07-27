@@ -57,6 +57,6 @@ ItemProducto.propTypes = {
 
   handleInputCantidadCombos: PropTypes.func,
   handleRemoveItemCombo: PropTypes.func,
-}
+};
 
 export default ItemProducto;

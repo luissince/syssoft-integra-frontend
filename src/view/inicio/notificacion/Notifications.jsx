@@ -1,4 +1,9 @@
-import { formatTime, isEmpty, formatNumberWithZeros, getPathNavigation } from '../../../helper/utils.helper';
+import {
+  formatTime,
+  isEmpty,
+  formatNumberWithZeros,
+  getPathNavigation,
+} from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -60,19 +65,21 @@ class Notications extends CustomComponent {
   };
 
   fillTable = async () => {
-
     this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
-    })
+    });
 
     const params = {
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
-    }
+    };
 
-    const response = await detailNotifications(params, this.abortControllerTable.signal);
+    const response = await detailNotifications(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
@@ -94,7 +101,7 @@ class Notications extends CustomComponent {
         lista: [],
         totalPaginacion: 0,
         messageTable: response.getMessage(),
-      })
+      });
     }
   };
 
@@ -102,8 +109,8 @@ class Notications extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='4'
-          message={ 'Cargando información de la tabla...'}
+          colSpan="4"
+          message={'Cargando información de la tabla...'}
         />
       );
     }
@@ -117,13 +124,21 @@ class Notications extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1 ? <span className="text-success">DECLARAR</span> : <span className="text-danger">ANULAR</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="text-success">DECLARAR</span>
+        ) : (
+          <span className="text-danger">ANULAR</span>
+        );
 
       return (
         <tr key={index}>
           <td className="text-center">{item.id}</td>
           <td>
-            <Link className="btn-link" to={getPathNavigation("cpe", `${item.serie}-${item.numeracion}`)}>
+            <Link
+              className="btn-link"
+              to={getPathNavigation('cpe', `${item.serie}-${item.numeracion}`)}
+            >
               {item.comprobante}
               <br />
               {item.serie}-{formatNumberWithZeros(item.numeracion)}
@@ -132,9 +147,7 @@ class Notications extends CustomComponent {
             {<br />}
             {item.serie + '-' + item.numeracion} */}
           </td>
-          <td>
-            {estado}
-          </td>
+          <td>{estado}</td>
           <td>
             {item.fecha}
             {<br />}
@@ -172,9 +185,7 @@ class Notications extends CustomComponent {
                     <th width="10%">Fecha</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {this.generateBody()}
-                </tbody>
+                <tbody>{this.generateBody()}</tbody>
               </table>
             </div>
           </div>

@@ -196,8 +196,8 @@ class GastoCrear extends CustomComponent {
 
   async fetchComprobante(tipo) {
     const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
+      tipo: tipo,
+      idSucursal: this.state.idSucursal,
     };
 
     const response = await comboComprobante(
@@ -305,12 +305,15 @@ class GastoCrear extends CustomComponent {
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState({
-      concepto: value,
-      conceptos: [],
-    }, () => {
-      this.refMonto.current.focus();
-    });
+    this.setState(
+      {
+        concepto: value,
+        conceptos: [],
+      },
+      () => {
+        this.refMonto.current.focus();
+      },
+    );
   };
 
   //------------------------------------------------------------------------------------------
@@ -345,7 +348,9 @@ class GastoCrear extends CustomComponent {
   };
 
   handleSelectItemProveedor = (value) => {
-    this.refProveedor.current.initialize(value.documento + ' - ' + value.informacion);
+    this.refProveedor.current.initialize(
+      value.documento + ' - ' + value.informacion,
+    );
     this.setState({
       proveedor: value,
       proveedores: [],
@@ -360,27 +365,37 @@ class GastoCrear extends CustomComponent {
     const { concepto, idComprobante, monto, proveedor, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Gasto', 'Seleccione su concepto.', () => this.refValueConcepto.current.focus());
+      this.alert.warning('Gasto', 'Seleccione su concepto.', () =>
+        this.refValueConcepto.current.focus(),
+      );
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Gasto', 'Ingrese el monto.', () => this.refMonto.current.focus());
+      this.alert.warning('Gasto', 'Ingrese el monto.', () =>
+        this.refMonto.current.focus(),
+      );
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Gasto', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
+      this.alert.warning('Gasto', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus(),
+      );
       return;
     }
 
     if (isEmpty(proveedor)) {
-      this.alert.warning('Gasto', 'Seleccione un proveedor.', () => this.refValueProveedor.current.focus());
+      this.alert.warning('Gasto', 'Seleccione un proveedor.', () =>
+        this.refValueProveedor.current.focus(),
+      );
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Gasto', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
+      this.alert.warning('Gasto', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
       return;
     }
 
@@ -388,11 +403,15 @@ class GastoCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog("Gasto", "¿Está seguro de limpiar el gasto?", (accept) => {
-      if (accept) {
-        this.clearView();
-      }
-    });
+    this.alert.dialog(
+      'Gasto',
+      '¿Está seguro de limpiar el gasto?',
+      (accept) => {
+        if (accept) {
+          this.clearView();
+        }
+      },
+    );
   };
 
   handleCerrar = () => {
@@ -404,10 +423,15 @@ class GastoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenModalTerminal = () => {
-    this.setState({ isOpenTerminal: true })
-  }
+    this.setState({ isOpenTerminal: true });
+  };
 
-  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
+  handleProcessContado = (
+    idFormaPago,
+    metodoPagosLista,
+    notaTransacion,
+    callback = async function () {},
+  ) => {
     const {
       proveedor,
       idUsuario,
@@ -417,73 +441,77 @@ class GastoCrear extends CustomComponent {
       observacion,
       nota,
       concepto,
-      monto
+      monto,
     } = this.state;
 
-    this.alert.dialog('Gasto', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: idFormaPago,
-          idPersona: proveedor.idPersona,
-          idUsuario: idUsuario,
-          idMoneda: idMoneda,
-          idSucursal: idSucursal,
-          idComprobante: idComprobante,
-          idConcepto: concepto.idConcepto,
-          monto: monto,
-          estado: 1,
-          observacion,
-          nota,
-          notaTransacion,
-          bancosAgregados: metodoPagosLista,
-        };
+    this.alert.dialog(
+      'Gasto',
+      '¿Estás seguro de continuar?',
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idFormaPago: idFormaPago,
+            idPersona: proveedor.idPersona,
+            idUsuario: idUsuario,
+            idMoneda: idMoneda,
+            idSucursal: idSucursal,
+            idComprobante: idComprobante,
+            idConcepto: concepto.idConcepto,
+            monto: monto,
+            estado: 1,
+            observacion,
+            nota,
+            notaTransacion,
+            bancosAgregados: metodoPagosLista,
+          };
 
-        await callback();
-        this.alert.information('Gasto', 'Procesando información...');
+          await callback();
+          this.alert.information('Gasto', 'Procesando información...');
 
-        const response = await createGasto(data);
+          const response = await createGasto(data);
 
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idGasto);
+          if (response instanceof SuccessReponse) {
+            this.alert.close();
+            this.handleOpenImpresion(response.data.idGasto);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            this.alert.warning('Gasto', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          this.alert.warning('Gasto', response.getMessage());
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleCloseModalTerminal = async () => {
-    this.setState({ isOpenTerminal: false })
-  }
+    this.setState({ isOpenTerminal: false });
+  };
 
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
   handleOpenImpresion = (idGasto) => {
-    this.setState({ isOpenImpresion: true, idGasto: idGasto })
-  }
+    this.setState({ isOpenImpresion: true, idGasto: idGasto });
+  };
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false });
-  }
+  };
 
   handlePrinterImpresion = (size) => {
     printJS({
       printable: documentsPdfInvoicesGasto(this.state.idGasto, size),
       type: 'pdf',
       showModal: true,
-      modalMessage: "Recuperando documento...",
+      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
-      }
-    })
-  }
+      },
+    });
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -510,26 +538,24 @@ class GastoCrear extends CustomComponent {
         />
 
         <ModalTransaccion
-          tipo={"Gasto"}
-          title={"Completar Gasto"}
+          tipo={'Gasto'}
+          title={'Completar Gasto'}
           isOpen={this.state.isOpenTerminal}
-
           idSucursal={this.state.idSucursal}
           disabledCreditoFijo={true}
           codiso={this.state.codiso}
-          importeTotal={isNumeric(this.state.monto) ? Number(this.state.monto) : 0}
-
+          importeTotal={
+            isNumeric(this.state.monto) ? Number(this.state.monto) : 0
+          }
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => { }}
+          handleProcessCredito={() => {}}
         />
 
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-
           clear={this.clearView}
-
           handleClose={this.handleCloseImpresion}
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
@@ -537,17 +563,20 @@ class GastoCrear extends CustomComponent {
         />
 
         <Title
-          title='Gasto'
-          subTitle='AGREGAR'
+          title="Gasto"
+          subTitle="AGREGAR"
           handleGoBack={() => this.handleCerrar()}
         />
 
         <Row>
           {/* Filtrar */}
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <SearchInput
               group={true}
-              label={"Concepto:"}
+              label={'Concepto:'}
               ref={this.refConcepto}
               autoFocus={true}
               placeholder="Filtrar conceptos..."
@@ -561,10 +590,13 @@ class GastoCrear extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
               group={true}
-              label={"Tipo de Moneda:"}
+              label={'Tipo de Moneda:'}
               iconLeft={<i className="bi bi-cash"></i>}
               ref={this.refMoneda}
               value={this.state.idMoneda}
@@ -582,10 +614,13 @@ class GastoCrear extends CustomComponent {
 
         <Row>
           {/* Precio */}
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
               group={true}
-              label={"Monto:"}
+              label={'Monto:'}
               iconLeft={<i className="bi bi-cash-coin"></i>}
               ref={this.refMonto}
               value={this.state.monto}
@@ -595,10 +630,13 @@ class GastoCrear extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <SearchInput
               group={true}
-              label={"Proveedor:"}
+              label={'Proveedor:'}
               ref={this.refProveedor}
               placeholder="Filtrar proveedores..."
               refValue={this.refValueProveedor}
@@ -606,7 +644,9 @@ class GastoCrear extends CustomComponent {
               handleClearInput={this.handleClearInputProveedor}
               handleFilter={this.handleFilterProveedor}
               handleSelectItem={this.handleSelectItemProveedor}
-              renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
+              renderItem={(value) => (
+                <>{value.documento + ' - ' + value.informacion}</>
+              )}
               renderIconLeft={<i className="bi bi-person-circle"></i>}
             />
           </Column>
@@ -616,7 +656,7 @@ class GastoCrear extends CustomComponent {
           <Column formGroup={true}>
             <Select
               group={true}
-              label={"Comprobante:"}
+              label={'Comprobante:'}
               iconLeft={<i className="bi bi-receipt"></i>}
               ref={this.refComprobante}
               value={this.state.idComprobante}
@@ -636,7 +676,7 @@ class GastoCrear extends CustomComponent {
           <Column formGroup={true}>
             <TextArea
               group={true}
-              label={"Observación (Visible en el sistema):"}
+              label={'Observación (Visible en el sistema):'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
               ref={this.refObservacion}
               value={this.state.observacion}
@@ -650,7 +690,7 @@ class GastoCrear extends CustomComponent {
           <Column formGroup={true}>
             <TextArea
               group={true}
-              label={"Nota (Visible el los reportes):"}
+              label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
               ref={this.refONota}
               value={this.state.nota}
@@ -662,22 +702,13 @@ class GastoCrear extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
+            <Button className="btn-success" onClick={this.handleGuardar}>
               <i className="fa fa-save"></i> Guardar
             </Button>{' '}
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleLimpiar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleLimpiar}>
               <i className="fa fa-trash"></i> Limpiar
             </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={this.handleCerrar}
-            >
+            <Button className="btn-outline-danger" onClick={this.handleCerrar}>
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
@@ -700,7 +731,6 @@ GastoCrear.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
 };
-
 
 const mapStateToProps = (state) => {
   return {

@@ -55,8 +55,8 @@ class App extends React.Component {
 App.propTypes = {
   token: PropTypes.shape({
     isLoading: PropTypes.bool,
-    isConfig: PropTypes.bool
-  })
+    isConfig: PropTypes.bool,
+  }),
 };
 
 const mapStateToProps = (state) => {

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { CreditCard, DollarSign, Users } from 'lucide-react'
+import { CreditCard, DollarSign, Users } from 'lucide-react';
 import { connect } from 'react-redux';
 // import SearchBarClient from '../../../components/SearchBarClient';
 import ContainerWrapper from '../../../components/Container';
@@ -10,11 +10,29 @@ import Button from '../../../components/Button';
 import Column from '../../../components/Column';
 import Input from '../../../components/Input';
 import Select from '../../../components/Select';
-import { Card, CardBody, CardDescription, CardHeader, CardText, CardTitle } from '../../../components/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import {
+  Card,
+  CardBody,
+  CardDescription,
+  CardHeader,
+  CardText,
+  CardTitle,
+} from '../../../components/Card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../components/Table';
 import CustomComponent from '../../../model/class/custom-component';
 import pdfVisualizer from 'pdf-visualizer';
-import { documentsExcelPersonaCliente, documentsPdfReportsPersonaCliente } from '../../../network/rest/principal.network';
+import {
+  documentsExcelPersonaCliente,
+  documentsPdfReportsPersonaCliente,
+} from '../../../network/rest/principal.network';
 import { guId } from '../../../helper/utils.helper';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 
@@ -23,21 +41,19 @@ import { downloadFileAsync } from '../../../redux/downloadSlice';
  * @extends React.Component
  */
 class RepClientes extends CustomComponent {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
       nombreSucursal: this.props.token.project.nombre,
     };
-
   }
 
   /*
@@ -54,13 +70,9 @@ class RepClientes extends CustomComponent {
   |
   */
 
-  async componentDidMount() {
+  async componentDidMount() {}
 
-  }
-
-  componentWillUnmount() {
-
-  }
+  componentWillUnmount() {}
 
   /*
   |--------------------------------------------------------------------------
@@ -75,8 +87,6 @@ class RepClientes extends CustomComponent {
   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
   |
   */
-
-
 
   /*
   |--------------------------------------------------------------------------
@@ -94,7 +104,6 @@ class RepClientes extends CustomComponent {
   |
   */
 
-
   handleOpenPdf = async () => {
     await pdfVisualizer.init({
       url: documentsPdfReportsPersonaCliente(),
@@ -102,15 +111,13 @@ class RepClientes extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handleDownloadExcel = async () => {
     const id = guId();
     const url = documentsExcelPersonaCliente();
     this.props.downloadFileAsync({ id, url });
-  }
-
-
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -137,8 +144,8 @@ class RepClientes extends CustomComponent {
         />
 
         <Title
-          title='Reporte Cliente'
-          subTitle='DASHBOARD'
+          title="Reporte Cliente"
+          subTitle="DASHBOARD"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -165,78 +172,101 @@ class RepClientes extends CustomComponent {
         </Row> */}
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Input
-              label={"Fecha de Inicio:"}
-              type="date"
-            />
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Input label={'Fecha de Inicio:'} type="date" />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Input
-              label={"Fecha de Final:"}
-              type="date"
-            />
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Input label={'Fecha de Final:'} type="date" />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Select
-              label={"Sucursal:"}
-            >
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Select label={'Sucursal:'}>
               <option value="">TODOS</option>
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Usuario:"}
+              label={'Usuario:'}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value='0'>TODOS</option>
-              <option value='1'>COBRADO</option>
-              <option value='2'>POR COBRAR</option>
-              <option value='3'>ANULADO</option>
+              <option value="0">TODOS</option>
+              <option value="1">COBRADO</option>
+              <option value="2">POR COBRAR</option>
+              <option value="3">ANULADO</option>
             </Select>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-4 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Total Clientes</CardTitle>
-                <Users className='text-secondary' />
+              <CardHeader className="d-flex flex-row align-items-center justify-content-between">
+                <CardTitle className="text-base m-0">Total Clientes</CardTitle>
+                <Users className="text-secondary" />
               </CardHeader>
               <CardBody>
                 <CardText>1,234</CardText>
-                <p className="text-xs text-secondary">+20% desde el último mes</p>
+                <p className="text-xs text-secondary">
+                  +20% desde el último mes
+                </p>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-4 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Ingresos Totales</CardTitle>
-                <DollarSign className='text-secondary' />
+              <CardHeader className="d-flex flex-row align-items-center justify-content-between">
+                <CardTitle className="text-base m-0">
+                  Ingresos Totales
+                </CardTitle>
+                <DollarSign className="text-secondary" />
               </CardHeader>
               <CardBody>
                 <CardText>$54,321</CardText>
-                <p className="text-xs text-secondary">+5.2% desde el mes pasado</p>
+                <p className="text-xs text-secondary">
+                  +5.2% desde el mes pasado
+                </p>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-4 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Clientes por Cobrar</CardTitle>
-                <CreditCard className='text-secondary' />
+              <CardHeader className="d-flex flex-row align-items-center justify-content-between">
+                <CardTitle className="text-base m-0">
+                  Clientes por Cobrar
+                </CardTitle>
+                <CreditCard className="text-secondary" />
               </CardHeader>
               <CardBody>
                 <CardText>$12,345</CardText>
-                <p className="text-xs text-secondary">15 clientes con pagos pendientes</p>
+                <p className="text-xs text-secondary">
+                  15 clientes con pagos pendientes
+                </p>
               </CardBody>
             </Card>
           </Column>
@@ -253,9 +283,15 @@ class RepClientes extends CustomComponent {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="30%">Nombre del Cliente</TableHead>
-                        <TableHead className="text-secondary" width="30%">Última Compra</TableHead>
-                        <TableHead className="text-secondary" width="35%">Total de Compras</TableHead>
+                        <TableHead className="text-secondary" width="30%">
+                          Nombre del Cliente
+                        </TableHead>
+                        <TableHead className="text-secondary" width="30%">
+                          Última Compra
+                        </TableHead>
+                        <TableHead className="text-secondary" width="35%">
+                          Total de Compras
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -273,7 +309,7 @@ class RepClientes extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardHeader>
                 <CardTitle>Productos Más Comprados por Cliente</CardTitle>
@@ -284,9 +320,15 @@ class RepClientes extends CustomComponent {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="10%">Cliente</TableHead>
-                        <TableHead className="text-secondary" width="10%">Producto</TableHead>
-                        <TableHead className="text-secondary" width="15%">Cantidad</TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Cliente
+                        </TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Producto
+                        </TableHead>
+                        <TableHead className="text-secondary" width="15%">
+                          Cantidad
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -302,19 +344,25 @@ class RepClientes extends CustomComponent {
             </Card>
           </Column>
 
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardHeader>
                 <CardTitle>Top 5 Clientes</CardTitle>
-                <CardDescription>Clientes con mayor volumen de compras</CardDescription>
+                <CardDescription>
+                  Clientes con mayor volumen de compras
+                </CardDescription>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="10%">Nombre</TableHead>
-                        <TableHead className="text-secondary" width="15%">Compras Totales</TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Nombre
+                        </TableHead>
+                        <TableHead className="text-secondary" width="15%">
+                          Compras Totales
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -354,6 +402,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedRepClientes = connect(mapStateToProps, mapDispatchToProps)(RepClientes);;
+const ConnectedRepClientes = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(RepClientes);
 
 export default ConnectedRepClientes;

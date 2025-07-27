@@ -5,7 +5,7 @@ const instancePrincipal = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
   timeout: 50000,
   headers: {
-    'Accept': 'application/json',
+    Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 });
@@ -166,7 +166,7 @@ export async function filtrarPersona(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/persona/filtrar', {
       params: params,
-      signal: signal
+      signal: signal,
     }),
   );
 }
@@ -218,19 +218,27 @@ export async function getPreferidoPersona(params, signal) {
 }
 
 export function documentsPdfReportsPersonaCliente() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/cliente/documents/pdf/reports`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/persona/cliente/documents/pdf/reports`;
 }
 
 export function documentsExcelPersonaCliente() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/cliente/documents/excel`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/persona/cliente/documents/excel`;
 }
 
 export function documentsPdfReportsPersonaProveedor() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/proveedor/documents/pdf/reports`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/persona/proveedor/documents/pdf/reports`;
 }
 
 export function documentsExcelPersonaProveedor() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/persona/proveedor/documents/excel`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/persona/proveedor/documents/excel`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA CLIENTE
@@ -258,7 +266,6 @@ export async function summaryInventario(idAlmacen, signal) {
   );
 }
 
-
 export async function getStockInventario(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/inventario/get/stock', {
@@ -285,7 +292,9 @@ export async function updateStockInventario(data, signal) {
 |--------------------------------------------------------------------------
 */
 export function filtrarStreamProductoVenta(params) {
-  return `${instancePrincipal.defaults.baseURL}/api/producto/filtrar/venta?${params.toString()}`
+  return `${
+    instancePrincipal.defaults.baseURL
+  }/api/producto/filtrar/venta?${params.toString()}`;
 }
 
 export async function listProducto(params, signal) {
@@ -342,7 +351,7 @@ export async function filtrarProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/filter', {
       params: params,
-      signal: signal
+      signal: signal,
     }),
   );
 }
@@ -368,7 +377,7 @@ export async function obtenerListaPrecioProducto(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/lista/precios', {
       params: params,
-      signal: signal
+      signal: signal,
     }),
   );
 }
@@ -380,11 +389,11 @@ export async function establecerPreferidoProducto(data) {
 }
 
 export async function addProducto(data) {
-  return await Resolve.create(instancePrincipal.post('/api/producto', data),);
+  return await Resolve.create(instancePrincipal.post('/api/producto', data));
 }
 
 export async function updateProducto(data) {
-  return await Resolve.create(instancePrincipal.put('/api/producto', data),);
+  return await Resolve.create(instancePrincipal.put('/api/producto', data));
 }
 
 export async function deleteProducto(idProducto) {
@@ -394,25 +403,30 @@ export async function deleteProducto(idProducto) {
 }
 
 export function documentsPdfReportsProducto() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/reports`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/producto/documents/pdf/reports`;
 }
 
 export function documentsExcelProducto() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/excel`
+  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/excel`;
 }
 
 export function documentsPdfCodbarProducto() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/producto/documents/pdf/codbar`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/producto/documents/pdf/codbar`;
 }
 
 export async function dashboardProducto(data, signal) {
-  return await Resolve.create(instancePrincipal.post('/api/producto/dashboard', data, { signal: signal, }));
+  return await Resolve.create(
+    instancePrincipal.post('/api/producto/dashboard', data, { signal: signal }),
+  );
 }
 
 // ------------------------------------------------------------------------
 // FIN PARA PRODUCTO
 // ------------------------------------------------------------------------
-
 
 /*
 |--------------------------------------------------------------------------
@@ -446,15 +460,21 @@ export async function detailCatalogo(idCatalogo, signal) {
 }
 
 export async function createCatalogo(data) {
-  return await Resolve.create(instancePrincipal.post('/api/catalogo/create', data),);
+  return await Resolve.create(
+    instancePrincipal.post('/api/catalogo/create', data),
+  );
 }
 
 export async function updateCatalogo(data) {
-  return await Resolve.create(instancePrincipal.post('/api/catalogo/update', data),);
+  return await Resolve.create(
+    instancePrincipal.post('/api/catalogo/update', data),
+  );
 }
 
 export function documentsPdfCatalogo(idCatalogo) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/catalogo/documents/pdf/${idCatalogo}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/catalogo/documents/pdf/${idCatalogo}`;
 }
 
 // ------------------------------------------------------------------------
@@ -528,7 +548,6 @@ export async function listVenta(params, signal) {
   );
 }
 
-
 export async function listFiltrarVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/filtrar', {
@@ -540,7 +559,7 @@ export async function listFiltrarVenta(params, signal) {
 
 export async function createVenta(data) {
   return await Resolve.create(
-    instancePrincipal.post('/api/factura/create', data)
+    instancePrincipal.post('/api/factura/create', data),
   );
 }
 
@@ -624,19 +643,25 @@ export async function dashboardVenta(params, signal) {
 }
 
 export function documentsPdfInvoicesVenta(idVenta, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/pdf/invoices/${idVenta}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/factura/documents/pdf/invoices/${idVenta}/${size}`;
 }
 
 export function documentsPdfAccountReceivableVenta(idCuota, idVenta, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/pdf/account/receivable/${idCuota}/${idVenta}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/factura/documents/pdf/account/receivable/${idCuota}/${idVenta}/${size}`;
 }
 
 export function documentsPdfReportsVenta() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/pdf/reports`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/factura/documents/pdf/reports`;
 }
 
 export function documentsExcelVenta() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/excel`
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/excel`;
 }
 
 // ------------------------------------------------------------------------
@@ -668,7 +693,9 @@ export async function dashboardTransaccion(params, signal) {
 }
 
 export function documentsPdfReportsTransaccion(params) {
-  const baseUrl = `${import.meta.env.VITE_APP_BACK_END}/api/transaccion/documents/pdf/reports`;
+  const baseUrl = `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/transaccion/documents/pdf/reports`;
 
   // Crear una instancia de URLSearchParams para manejar los parámetros
   const queryParams = new URLSearchParams();
@@ -730,9 +757,7 @@ export async function nacionalMoneda(signal) {
 }
 
 export async function addMoneda(data) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/moneda/add', data),
-  );
+  return await Resolve.create(instancePrincipal.post('/api/moneda/add', data));
 }
 
 export async function editMoneda(data, signal) {
@@ -763,7 +788,7 @@ export async function deleteMoneda(params, signal) {
 export async function configEmpresa(signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/empresa/config', {
-      signal: signal
+      signal: signal,
     }),
   );
 }
@@ -914,7 +939,6 @@ export async function comboTipoTraslado(signal) {
 // FIN PARA TIPO TRASLADO
 // ------------------------------------------------------------------------
 
-
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE MOTIVO AJUSTE
@@ -978,7 +1002,6 @@ export async function comboTipoAlmacen(signal) {
 // ------------------------------------------------------------------------
 // FIN PARA TIPO ALMACEN
 // ------------------------------------------------------------------------
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1065,19 +1088,25 @@ export async function dashboardCompra(params, signal) {
 }
 
 export function documentsPdfInvoicesCompra(idCompra, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/pdf/invoices/${idCompra}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/compra/documents/pdf/invoices/${idCompra}/${size}`;
 }
 
 export function documentsPdfAccountPayableCompra(idPlazo, idCompra, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/pdf/account/payable/${idPlazo}/${idCompra}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/compra/documents/pdf/account/payable/${idPlazo}/${idCompra}/${size}`;
 }
 
 export function documentsPdfReportsCompra() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/pdf/reports`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/compra/documents/pdf/reports`;
 }
 
 export function documentsExcelCompra() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/excel`
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/excel`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA COMPRA
@@ -1150,7 +1179,9 @@ export async function cancelGuiaRemision(params, signal) {
 }
 
 export function documentsPdfInvoicesGuiaRemision(idGuiaRemision, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA GUÍA DE REMISIÓN
@@ -1223,11 +1254,15 @@ export async function cancelCotizacion(params, signal) {
 }
 
 export function documentsPdfInvoicesCotizacion(idCotizacion, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`;
 }
 
 export function documentsPdfListsCotizacion(idCotizacion) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/cotizacion/documents/pdf/lists/${idCotizacion}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/cotizacion/documents/pdf/lists/${idCotizacion}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA COTIZACION
@@ -1274,7 +1309,6 @@ export async function forPurchaseOrdenCompra(params, signal) {
   );
 }
 
-
 export async function createOrdenCompra(data, signal) {
   return await Resolve.create(
     instancePrincipal.post('/api/ordencompra/create', data, {
@@ -1301,11 +1335,15 @@ export async function cancelOrdenCompra(params, signal) {
 }
 
 export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
 export function documentsPdfListsOrdenCompra(idOrdenCompra) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA ORDEN DE COMPRA
@@ -1352,7 +1390,6 @@ export async function forSalePedido(params, signal) {
   );
 }
 
-
 export async function createPedido(data, signal) {
   return await Resolve.create(
     instancePrincipal.post('/api/pedido/create', data, {
@@ -1379,11 +1416,15 @@ export async function cancelPedido(params, signal) {
 }
 
 export function documentsPdfInvoicesPedido(idOrdenCompra, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/invoices/${idOrdenCompra}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/pedido/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
 export function documentsPdfListsPedido(idOrdenCompra) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/pedido/documents/pdf/lists/${idOrdenCompra}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/pedido/documents/pdf/lists/${idOrdenCompra}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA PEDIDO
@@ -1430,7 +1471,9 @@ export async function cancelCobro(params, signal) {
 }
 
 export function documentsPdfInvoicesCobro(idCobro, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/cobro/documents/pdf/invoices/${idCobro}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/cobro/documents/pdf/invoices/${idCobro}/${size}`;
 }
 
 // ------------------------------------------------------------------------
@@ -1478,7 +1521,9 @@ export async function cancelGasto(params, signal) {
 }
 
 export function documentsPdfInvoicesGasto(idGasto, size) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/gasto/documents/pdf/invoices/${idGasto}/${size}`
+  return `${
+    import.meta.env.VITE_APP_BACK_END
+  }/api/gasto/documents/pdf/invoices/${idGasto}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA GASTO
@@ -1670,7 +1715,6 @@ export async function deleteVehiculo(params) {
 // FIN PARA IMPUESTO
 // ------------------------------------------------------------------------
 
-
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE COMPROBANTE
@@ -1816,9 +1860,7 @@ export async function addMarca(data) {
 }
 
 export async function updateMarca(data) {
-  return await Resolve.create(
-    await instancePrincipal.put('/api/marca', data),
-  );
+  return await Resolve.create(await instancePrincipal.put('/api/marca', data));
 }
 
 export async function removeMarca(params) {
@@ -2093,9 +2135,7 @@ export async function addMedida(data) {
 }
 
 export async function updateMedida(data) {
-  return await Resolve.create(
-    await instancePrincipal.put('/api/medida', data)
-  );
+  return await Resolve.create(await instancePrincipal.put('/api/medida', data));
 }
 
 export async function removeMedida(params) {
@@ -2213,7 +2253,6 @@ export async function comboMotivoTraslado(signal) {
 // ------------------------------------------------------------------------
 // FIN PARA TIPO DE MOTIVO TRASLADO
 // ------------------------------------------------------------------------
-
 
 /*
 |--------------------------------------------------------------------------
@@ -2452,15 +2491,33 @@ export async function guiaRemisionCpeSunat(idGuiaRemision) {
   );
 }
 
-export async function consultarCpeSunat(ruc, usuario, clave, tipoComprobante, serie, numeracion) {
+export async function consultarCpeSunat(
+  ruc,
+  usuario,
+  clave,
+  tipoComprobante,
+  serie,
+  numeracion,
+) {
   return await Resolve.create(
-    instancePrincipal.get(`/api/sunat/consultar/${ruc}/${usuario}/${clave}/${tipoComprobante}/${serie}/${numeracion}`),
+    instancePrincipal.get(
+      `/api/sunat/consultar/${ruc}/${usuario}/${clave}/${tipoComprobante}/${serie}/${numeracion}`,
+    ),
   );
 }
 
-export async function cdrCpeSunat(ruc, usuario, clave, tipoComprobante, serie, numeracion) {
+export async function cdrCpeSunat(
+  ruc,
+  usuario,
+  clave,
+  tipoComprobante,
+  serie,
+  numeracion,
+) {
   return await Resolve.create(
-    instancePrincipal.get(`/api/sunat/cdr/${ruc}/${usuario}/${clave}/${tipoComprobante}/${serie}/${numeracion}`),
+    instancePrincipal.get(
+      `/api/sunat/cdr/${ruc}/${usuario}/${clave}/${tipoComprobante}/${serie}/${numeracion}`,
+    ),
   );
 }
 
@@ -2471,7 +2528,7 @@ export async function enviarEmail(idComprobante, tipo) {
 }
 
 export function obtenerXmlSunat(idComprobante) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`
+  return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`;
 }
 
 export async function dashboardSunat(params, signal) {
@@ -2493,22 +2550,29 @@ export async function dashboardSunat(params, signal) {
 |--------------------------------------------------------------------------
 */
 
-
 export async function obtenerPreVentaPdf(data, tipo, signal) {
   return await Resolve.create(
-    instancePrincipal.post(`/api/reporte/facturacion/venta/pre/pdf/${tipo}`, data, {
-      responseType: 'blob',
-      signal: signal,
-    })
+    instancePrincipal.post(
+      `/api/reporte/facturacion/venta/pre/pdf/${tipo}`,
+      data,
+      {
+        responseType: 'blob',
+        signal: signal,
+      },
+    ),
   );
 }
 
 export async function obtenerPreCotizacionPdf(data, tipo, signal) {
   return await Resolve.create(
-    instancePrincipal.post(`/api/reporte/facturacion/cotizacion/pre/pdf/${tipo}`, data, {
-      responseType: 'blob',
-      signal: signal,
-    })
+    instancePrincipal.post(
+      `/api/reporte/facturacion/cotizacion/pre/pdf/${tipo}`,
+      data,
+      {
+        responseType: 'blob',
+        signal: signal,
+      },
+    ),
   );
 }
 

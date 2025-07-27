@@ -1,13 +1,37 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { alertWarning, calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, getPathNavigation, isEmpty, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import {
+  alertWarning,
+  calculateTax,
+  calculateTaxBruto,
+  formatNumberWithZeros,
+  formatTime,
+  getPathNavigation,
+  isEmpty,
+  isText,
+  numberFormat,
+  rounded,
+} from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { detailCotizacion, documentsPdfInvoicesCotizacion, documentsPdfListsCotizacion } from '../../../../../network/rest/principal.network';
+import {
+  detailCotizacion,
+  documentsPdfInvoicesCotizacion,
+  documentsPdfListsCotizacion,
+} from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import React from 'react';
@@ -25,7 +49,6 @@ import { images } from '../../../../../helper';
  * @extends React.Component
  */
 class CotizacionDetalle extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -115,7 +138,10 @@ class CotizacionDetalle extends CustomComponent {
       idCotizacion: id,
     };
 
-    const response = await detailCotizacion(params, this.abortControllerView.signal);
+    const response = await detailCotizacion(
+      params,
+      this.abortControllerView.signal,
+    );
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
@@ -148,25 +174,32 @@ class CotizacionDetalle extends CustomComponent {
       observacion,
       nota,
       codiso,
-
     } = cotizacion.cabecera;
 
-    const monto = cotizacion.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
+    const monto = cotizacion.detalles.reduce(
+      (accumlate, item) => accumlate + item.precio * item.cantidad,
+      0,
+    );
 
     this.setState({
       idCotizacion: id,
-      fechaHora: fecha + " " + formatTime(hora),
+      fechaHora: fecha + ' ' + formatTime(hora),
 
       comprobante: comprobante,
-      serieNumeracion: serie + "-" + formatNumberWithZeros(numeracion),
+      serieNumeracion: serie + '-' + formatNumberWithZeros(numeracion),
 
-      cliente: documento + " - " + informacion,
+      cliente: documento + ' - ' + informacion,
       telefono: telefono,
       celular: celular,
       email: email,
       direccion: direccion,
 
-      estado: estado === 1 ? <span className='text-success'>ACTIVO</span> : <span className='text-danger'>ANULADO</span>,
+      estado:
+        estado === 1 ? (
+          <span className="text-success">ACTIVO</span>
+        ) : (
+          <span className="text-danger">ANULADO</span>
+        ),
       observacion: observacion,
       notas: nota,
       codiso: codiso,
@@ -181,7 +214,7 @@ class CotizacionDetalle extends CustomComponent {
 
   close = () => {
     this.props.history.goBack();
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -210,7 +243,7 @@ class CotizacionDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handlePrintList = async (size) => {
     await pdfVisualizer.init({
@@ -219,7 +252,7 @@ class CotizacionDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de enviar WhatsApp
@@ -227,19 +260,25 @@ class CotizacionDetalle extends CustomComponent {
 
   handleOpenSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: true });
-  }
+  };
 
-  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+  handleProcessSendWhatsapp = async (
+    phone,
+    callback = async function () {},
+  ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
       website: paginaWeb,
-      email: email
+      email: email,
     };
 
-    const documentUrl = documentsPdfInvoicesCotizacion(this.state.idCotizacion, "A4");
+    const documentUrl = documentsPdfInvoicesCotizacion(
+      this.state.idCotizacion,
+      'A4',
+    );
 
     // Crear mensaje con formato
     const message = `
@@ -260,17 +299,19 @@ class CotizacionDetalle extends CustomComponent {
     const cleanPhone = phone.replace(/\D/g, '');
 
     // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+      message,
+    )}`;
 
     await callback();
 
     // Abrir en una nueva ventana
     window.open(whatsappUrl, '_blank');
-  }
+  };
 
   handleCloseSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: false });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -313,7 +354,9 @@ class CotizacionDetalle extends CustomComponent {
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
 
-        const existingImpuesto = acc.find((imp) => imp.idImpuesto === item.idImpuesto,);
+        const existingImpuesto = acc.find(
+          (imp) => imp.idImpuesto === item.idImpuesto,
+        );
 
         if (existingImpuesto) {
           existingImpuesto.valor += impuestoTotal;
@@ -331,14 +374,16 @@ class CotizacionDetalle extends CustomComponent {
       return resultado.map((impuesto, index) => {
         return (
           <TableRow key={index}>
-            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
+              {impuesto.nombre} :
+            </TableHead>
             <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
             </TableHead>
           </TableRow>
         );
       });
-    }
+    };
     return (
       <>
         <TableRow>
@@ -368,8 +413,8 @@ class CotizacionDetalle extends CustomComponent {
         />
 
         <Title
-          title='Cotización'
-          subTitle='DETALLE'
+          title="Cotización"
+          subTitle="DETALLE"
           handleGoBack={() => this.close()}
         />
 
@@ -388,40 +433,36 @@ class CotizacionDetalle extends CustomComponent {
               onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintList.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> Lista
-            </Button>
-            {' '}
-            <Button
-              className="btn-light"
-              onClick={this.handleOpenSendWhatsapp}
-            >
+            </Button>{' '}
+            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-6 col-sm-12 col-12"
+            formGroup={true}
+          >
             <TableResponsive>
               <Table>
                 <TableHeader>
@@ -478,7 +519,10 @@ class CotizacionDetalle extends CustomComponent {
             </TableResponsive>
           </Column>
 
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-6 col-sm-12 col-12"
+            formGroup={true}
+          >
             <TableResponsive>
               <Table>
                 <TableHeader>
@@ -555,78 +599,83 @@ class CotizacionDetalle extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    this.state.detalles.map((item, index) => {
+                  {this.state.detalles.map((item, index) => {
+                    const vendido = this.state.vendidos.find(
+                      (vendido) => vendido.idProducto === item.idProducto,
+                    );
 
-                      const vendido = this.state.vendidos.find((vendido) => vendido.idProducto === item.idProducto);
+                    return (
+                      <React.Fragment key={index}>
+                        <TableRow key={index}>
+                          <TableCell>{item.id}</TableCell>
+                          <TableCell className="text-center">
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.producto}
+                              width={100}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {item.codigo}
+                            <br />
+                            {item.producto}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {numberFormat(item.precio, this.state.codiso)}
+                          </TableCell>
 
-                      return (
-                        <React.Fragment key={index}>
-                          <TableRow key={index}>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell className="text-center">
-                              <Image
-                                default={images.noImage}
-                                src={item.imagen}
-                                alt={item.producto}
-                                width={100}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              {item.codigo}
-                              <br />
-                              {item.producto}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {numberFormat(item.precio, this.state.codiso)}
-                            </TableCell>
+                          <TableCell>{item.categoria}</TableCell>
+                          <TableCell className="text-right">
+                            {item.impuesto}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {rounded(item.cantidad)}
+                          </TableCell>
+                          <TableCell>{item.medida}</TableCell>
+                          <TableCell className="text-right">
+                            {numberFormat(
+                              item.cantidad * item.precio,
+                              this.state.codiso,
+                            )}
+                          </TableCell>
+                        </TableRow>
 
-                            <TableCell>{item.categoria}</TableCell>
-                            <TableCell className="text-right">{item.impuesto}</TableCell>
-                            <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-                            <TableCell>{item.medida}</TableCell>
-                            <TableCell className="text-right">
-                              {numberFormat(
-                                item.cantidad * item.precio,
-                                this.state.codiso,
-                              )}
-                            </TableCell>
-                          </TableRow>
-
-                          <TableRow>
-                            <TableHead></TableHead>
-                            <TableHead></TableHead>
-                            <TableHead></TableHead>
-                            <TableHead></TableHead>
-                            <TableHead></TableHead>
-                            <TableHead className="text-right">Registrados</TableHead>
-                            <TableHead className="text-right">Faltantes</TableHead>
-                            <TableHead></TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell className="text-right">
-                              {
-                                vendido ? rounded(vendido.cantidad) : rounded(0)
-                              }
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {
-                                vendido ? rounded(item.cantidad - vendido.cantidad) : rounded(item.cantidad)
-                              }
-                            </TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                          </TableRow>
-                        </React.Fragment>
-                      );
-                    })
-                  }
+                        <TableRow>
+                          <TableHead></TableHead>
+                          <TableHead></TableHead>
+                          <TableHead></TableHead>
+                          <TableHead></TableHead>
+                          <TableHead></TableHead>
+                          <TableHead className="text-right">
+                            Registrados
+                          </TableHead>
+                          <TableHead className="text-right">
+                            Faltantes
+                          </TableHead>
+                          <TableHead></TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell className="text-right">
+                            {vendido ? rounded(vendido.cantidad) : rounded(0)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {vendido
+                              ? rounded(item.cantidad - vendido.cantidad)
+                              : rounded(item.cantidad)}
+                          </TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </React.Fragment>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -636,7 +685,7 @@ class CotizacionDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table classNameContent='w-100'>
+            <Table classNameContent="w-100">
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>
@@ -659,53 +708,75 @@ class CotizacionDetalle extends CustomComponent {
                 <TableBody>
                   {isEmpty(this.state.ventas) && (
                     <TableRow>
-                      <td className="text-center" colSpan="5">¡No hay ventas asociadas!</td>
+                      <td className="text-center" colSpan="5">
+                        ¡No hay ventas asociadas!
+                      </td>
                     </TableRow>
                   )}
 
                   {this.state.ventas.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell>{item.id}</TableCell>
-                      <TableCell>{item.fecha} <br /> {formatTime(item.hora)} </TableCell>
                       <TableCell>
-                        <Link className="btn-link" to={getPathNavigation("venta", item.idVenta)}>
-                          {item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)}
+                        {item.fecha} <br /> {formatTime(item.hora)}{' '}
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          className="btn-link"
+                          to={getPathNavigation('venta', item.idVenta)}
+                        >
+                          {item.comprobante} <br /> {item.serie}-
+                          {formatNumberWithZeros(item.numeracion)}
                         </Link>
                       </TableCell>
                       <TableCell>
                         <React.Fragment>
-                          {item.estado === 1 && <span className="text-success">COBRADO</span>}
-                          {item.estado === 2 && <span className="text-warning">POR COBRAR</span>}
-                          {item.estado === 3 && <span className="text-danger">ANULADO</span>}
-                          {item.estado !== 1 && item.estado !== 2 && item.estado !== 3 && <span className="text-primary">POR LLEVAR</span>}
+                          {item.estado === 1 && (
+                            <span className="text-success">COBRADO</span>
+                          )}
+                          {item.estado === 2 && (
+                            <span className="text-warning">POR COBRAR</span>
+                          )}
+                          {item.estado === 3 && (
+                            <span className="text-danger">ANULADO</span>
+                          )}
+                          {item.estado !== 1 &&
+                            item.estado !== 2 &&
+                            item.estado !== 3 && (
+                              <span className="text-primary">POR LLEVAR</span>
+                            )}
                         </React.Fragment>
                       </TableCell>
-                      <TableCell className="text-center"> {numberFormat(item.total, item.codiso)} </TableCell>
+                      <TableCell className="text-center">
+                        {' '}
+                        {numberFormat(item.total, item.codiso)}{' '}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
-                {
-                  this.state.ventas.length > 0 && (
-                    <tfoot>
-                      <tr>
-                        <th className="text-left"></th>
-                        <th className="text-left"></th>
-                        <th className="text-left"></th>
-                        <th className="text-left">Suma Total:</th>
-                        <th id="total" className="text-center">
-                          {
-                            numberFormat(this.state.ventas.reduce((acumulador, item) => (acumulador += item.total), 0), this.state.codiso)
-                          }
-                        </th>
-                      </tr>
-                    </tfoot>
-                  )
-                }
+                {this.state.ventas.length > 0 && (
+                  <tfoot>
+                    <tr>
+                      <th className="text-left"></th>
+                      <th className="text-left"></th>
+                      <th className="text-left"></th>
+                      <th className="text-left">Suma Total:</th>
+                      <th id="total" className="text-center">
+                        {numberFormat(
+                          this.state.ventas.reduce(
+                            (acumulador, item) => (acumulador += item.total),
+                            0,
+                          ),
+                          this.state.codiso,
+                        )}
+                      </th>
+                    </tr>
+                  </tfoot>
+                )}
               </Table>
             </TableResponsive>
           </Column>
         </Row>
-
       </ContainerWrapper>
     );
   }
@@ -716,18 +787,18 @@ CotizacionDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
       razonSocial: PropTypes.string,
-    })
+    }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
       paginaWeb: PropTypes.string,
       email: PropTypes.string,
-    })
+    }),
   }),
 };
 
@@ -738,6 +809,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedCotizacionDetalle = connect(mapStateToProps, null)(CotizacionDetalle);
+const ConnectedCotizacionDetalle = connect(
+  mapStateToProps,
+  null,
+)(CotizacionDetalle);
 
 export default ConnectedCotizacionDetalle;

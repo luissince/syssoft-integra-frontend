@@ -17,7 +17,15 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
@@ -82,7 +90,7 @@ class Marcas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -125,10 +133,7 @@ class Marcas extends CustomComponent {
     /**
      * Peticion http
      */
-    const response = await listMarca(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const response = await listMarca(params, this.abortControllerTable.signal);
 
     /**
      * Si la respuesta fue existosa
@@ -176,35 +181,39 @@ class Marcas extends CustomComponent {
   };
 
   handleDelete = (id) => {
-    alertDialog('Marca', '¿Estás seguro de eliminar la Marca?', async (accept) => {
-      if (accept) {
-        const params = {
-          idMarca: id,
-        };
+    alertDialog(
+      'Marca',
+      '¿Estás seguro de eliminar la Marca?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idMarca: id,
+          };
 
-        alertInfo('Marca', 'Se esta procesando la petición...');
+          alertInfo('Marca', 'Se esta procesando la petición...');
 
-        const response = await removeMarca(params);
+          const response = await removeMarca(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Marca', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Marca', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Marca', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Marca', response.getMessage());
-        }
-      }
-    });
+      },
+    );
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='7'
-          message='Cargando información de la tabla...'
+          colSpan="7"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -246,7 +255,7 @@ class Marcas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idMarca)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -255,7 +264,7 @@ class Marcas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idMarca)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -269,24 +278,17 @@ class Marcas extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Marcas'
-          subTitle='LISTA'
+          title="Marcas"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -306,22 +308,28 @@ class Marcas extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Código</TableHead>
                     <TableHead width="25%">Nombre</TableHead>
                     <TableHead width="30%">Descripción</TableHead>
                     <TableHead width="10%">Imagen</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

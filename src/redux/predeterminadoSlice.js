@@ -1,21 +1,27 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { establecerPreferidoProducto, preferidosProducto } from '../network/rest/principal.network';
+import {
+  establecerPreferidoProducto,
+  preferidosProducto,
+} from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 
-export const starProduct = createAsyncThunk('productos/starProduct', async (data) => {
-  await establecerPreferidoProducto({
-    preferido: data.producto.preferido,
-    idProducto: data.producto.idProducto,
-  });
+export const starProduct = createAsyncThunk(
+  'productos/starProduct',
+  async (data) => {
+    await establecerPreferidoProducto({
+      preferido: data.producto.preferido,
+      idProducto: data.producto.idProducto,
+    });
 
-  const response = await preferidosProducto(data.params);
-  if (response instanceof SuccessReponse) {
-    return response.data;
-  }
+    const response = await preferidosProducto(data.params);
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
 
-  throw new Error('Hubo un error al obtener los productos preferidos');
-});
+    throw new Error('Hubo un error al obtener los productos preferidos');
+  },
+);
 
 const initialState = {
   moneda: null,
@@ -23,95 +29,95 @@ const initialState = {
   productos: [],
   ventaLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   ventaCrear: {
     state: null,
-    local: null
+    local: null,
   },
   ventaCrearClasico: {
     state: null,
-    local: null
+    local: null,
   },
   cotizacionLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   cotizacionCrear: {
     state: null,
-    local: null
+    local: null,
   },
   guiaRemisionLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   productoLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   ajusteLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   inventarioLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   kardex: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   trasladoLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   compraLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   compraCrear: {
     state: null,
-    local: null
+    local: null,
   },
   ordenCompraLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   ordenCompraCrear: {
     state: null,
-    local: null
+    local: null,
   },
   pedidoLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   pedidoCrear: {
     state: null,
-    local: null
+    local: null,
   },
   catalogoLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   catalogoCrear: {
     state: null,
-    local: null
+    local: null,
   },
   cpeSunatLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   bancoLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   finanzasLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
   consultaLista: {
     data: null,
-    paginacion: null
+    paginacion: null,
   },
 };
 
@@ -138,7 +144,7 @@ const predeterminadoSlice = createSlice({
     clearListaVenta: (state) => {
       state.ventaLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -151,7 +157,7 @@ const predeterminadoSlice = createSlice({
     clearCrearVenta: (state) => {
       state.ventaCrear = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -164,7 +170,7 @@ const predeterminadoSlice = createSlice({
     clearCrearVentaClasico: (state) => {
       state.ventaCrearClasico = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -177,7 +183,7 @@ const predeterminadoSlice = createSlice({
     clearListaCotizacion: (state) => {
       state.cotizacionLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -190,7 +196,7 @@ const predeterminadoSlice = createSlice({
     clearCrearCotizacion: (state) => {
       state.cotizacionCrear = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -203,7 +209,7 @@ const predeterminadoSlice = createSlice({
     clearListaGuiaRemision: (state) => {
       state.guiaRemisionLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -216,7 +222,7 @@ const predeterminadoSlice = createSlice({
     clearListaAjuste: (state) => {
       state.ajusteLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -229,7 +235,7 @@ const predeterminadoSlice = createSlice({
     clearListaProducto: (state) => {
       state.productoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -242,7 +248,7 @@ const predeterminadoSlice = createSlice({
     clearListaInventario: (state) => {
       state.inventarioLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -255,7 +261,7 @@ const predeterminadoSlice = createSlice({
     clearKardex: (state) => {
       state.kardex = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -268,7 +274,7 @@ const predeterminadoSlice = createSlice({
     clearListaTraslado: (state) => {
       state.trasladoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -281,7 +287,7 @@ const predeterminadoSlice = createSlice({
     clearListaCompra: (state) => {
       state.compraLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -294,7 +300,7 @@ const predeterminadoSlice = createSlice({
     clearCrearCompra: (state) => {
       state.compraCrear = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -307,7 +313,7 @@ const predeterminadoSlice = createSlice({
     clearListaOrdenCompra: (state) => {
       state.ordenCompraLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -320,7 +326,7 @@ const predeterminadoSlice = createSlice({
     clearCrearOrdenCompra: (state) => {
       state.ordenCompraCrear = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -333,7 +339,7 @@ const predeterminadoSlice = createSlice({
     clearListaPedido: (state) => {
       state.pedidoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -346,7 +352,7 @@ const predeterminadoSlice = createSlice({
     clearCrearPedido: (state) => {
       state.pedidoCrear = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -359,7 +365,7 @@ const predeterminadoSlice = createSlice({
     clearListaCatalogo: (state) => {
       state.catalogoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -372,7 +378,7 @@ const predeterminadoSlice = createSlice({
     clearCrearCatalogo: (state) => {
       state.catalogoCrear = {
         state: null,
-        local: null
+        local: null,
       };
     },
 
@@ -385,7 +391,7 @@ const predeterminadoSlice = createSlice({
     clearListaCpeSunat: (state) => {
       state.cpeSunatLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -398,7 +404,7 @@ const predeterminadoSlice = createSlice({
     clearListaBanco: (state) => {
       state.bancoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -411,7 +417,7 @@ const predeterminadoSlice = createSlice({
     clearListaFinanzas: (state) => {
       state.finanzasLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -424,103 +430,102 @@ const predeterminadoSlice = createSlice({
     clearListaConsulta: (state) => {
       state.consultaLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
-
 
     clearSucursal: (state) => {
       state.ventaLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.ventaCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.ventaCrearClasico = {
         state: null,
-        local: null
+        local: null,
       };
       state.cotizacionLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.cotizacionCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.guiaRemisionLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.productoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.ajusteLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.inventarioLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.kardex = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.trasladoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.compraLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.compraCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.ordenCompraLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.ordenCompraCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.pedidoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.pedidoCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.catalogoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.catalogoCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.cpeSunatLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.bancoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.finanzasLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.consultaLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
 
@@ -530,95 +535,95 @@ const predeterminadoSlice = createSlice({
       state.productos = [];
       state.ventaLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.ventaCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.ventaCrearClasico = {
         state: null,
-        local: null
+        local: null,
       };
       state.cotizacionLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.cotizacionCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.guiaRemisionLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.productoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.ajusteLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.inventarioLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.kardex = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.trasladoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.compraLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.compraCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.ordenCompraLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.ordenCompraCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.pedidoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.pedidoCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.catalogoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.catalogoCrear = {
         state: null,
-        local: null
+        local: null,
       };
       state.cpeSunatLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.bancoLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.finanzasLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
       state.consultaLista = {
         data: null,
-        paginacion: null
+        paginacion: null,
       };
     },
   },
@@ -630,7 +635,7 @@ const predeterminadoSlice = createSlice({
       // })
       .addCase(starProduct.fulfilled, (state, action) => {
         state.productos = action.payload;
-      })
+      });
     // .addCase(starProduct.rejected, (state, action) => {
     //   state.loading = false;
     //   state.error = action.error.message;
@@ -736,7 +741,7 @@ export const {
   clearListaConsulta,
 
   clearSucursal,
-  clearPredeterminado
+  clearPredeterminado,
 } = predeterminadoSlice.actions;
 
 export default predeterminadoSlice.reducer;

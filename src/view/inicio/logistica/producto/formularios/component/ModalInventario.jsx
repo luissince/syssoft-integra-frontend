@@ -18,7 +18,6 @@ import { alertWarning, isEmpty } from '../../../../../../helper/utils.helper';
  * @extends React.Component
  */
 class ModalInventario extends Component {
-
   constructor(props) {
     super(props);
 
@@ -30,8 +29,8 @@ class ModalInventario extends Component {
       idAlmacen: '',
       cantidad: '',
       cantidadMaxima: '',
-      cantidadMinima: ''
-    }
+      cantidadMinima: '',
+    };
 
     this.refModal = React.createRef();
     this.refIdAlmacen = React.createRef();
@@ -52,12 +51,15 @@ class ModalInventario extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState({
-        almacenes: response.data,
-        loading: false
-      }, () => {
-        this.refIdAlmacen.current.focus();
-      });
+      this.setState(
+        {
+          almacenes: response.data,
+          loading: false,
+        },
+        () => {
+          this.refIdAlmacen.current.focus();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -66,11 +68,9 @@ class ModalInventario extends Component {
       this.peticion = false;
       this.abortController = null;
     }
-  }
+  };
 
-  handleOnOpen = () => {
-
-  }
+  handleOnOpen = () => {};
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -88,26 +88,26 @@ class ModalInventario extends Component {
       producto: null,
       productos: [],
       loading: false,
-    })
+    });
 
     this.peticion = false;
-  }
+  };
 
   handleSelectIdAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value })
-  }
+    this.setState({ idAlmacen: event.target.value });
+  };
 
   handleInputCantidad = (event) => {
-    this.setState({ cantidad: event.target.value })
-  }
+    this.setState({ cantidad: event.target.value });
+  };
 
   handleInputCantidadMaxima = (event) => {
-    this.setState({ cantidadMaxima: event.target.value })
-  }
+    this.setState({ cantidadMaxima: event.target.value });
+  };
 
   handleInputCantidadMinima = (event) => {
-    this.setState({ cantidadMinima: event.target.value })
-  }
+    this.setState({ cantidadMinima: event.target.value });
+  };
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.idAlmacen)) {
@@ -149,7 +149,11 @@ class ModalInventario extends Component {
       return;
     }
 
-    if (this.props.inventarios.find((item) => item.idAlmacen === this.state.idAlmacen)) {
+    if (
+      this.props.inventarios.find(
+        (item) => item.idAlmacen === this.state.idAlmacen,
+      )
+    ) {
       alertWarning('Producto', 'El almacen ya se encuentra agregado.', () => {
         this.refIdAlmacenProducto.current.focus();
       });
@@ -158,14 +162,20 @@ class ModalInventario extends Component {
 
     const item = {
       idAlmacen: this.state.idAlmacen,
-      nombreAlmacen: this.refIdAlmacen.current.options[this.refIdAlmacen.current.selectedIndex].innerText,
+      nombreAlmacen:
+        this.refIdAlmacen.current.options[
+          this.refIdAlmacen.current.selectedIndex
+        ].innerText,
       cantidad: this.state.cantidad,
       cantidadMaxima: this.state.cantidadMaxima,
       cantidadMinima: this.state.cantidadMinima,
     };
 
-    this.props.handleAddInventario(item, await this.refModal.current.handleOnClose())
-  }
+    this.props.handleAddInventario(
+      item,
+      await this.refModal.current.handleOnClose(),
+    );
+  };
 
   render() {
     const {
@@ -174,13 +184,10 @@ class ModalInventario extends Component {
       idAlmacen,
       cantidad,
       cantidadMaxima,
-      cantidadMinima
+      cantidadMinima,
     } = this.state;
 
-    const {
-      isOpen,
-      onClose,
-    } = this.props;
+    const { isOpen, onClose } = this.props;
 
     return (
       <CustomModalForm
@@ -194,28 +201,29 @@ class ModalInventario extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView
-              loading={loading}
-              message={"Cargando datos..."} />
+            <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             <Row>
               <Column formGroup={true}>
                 <Select
                   autoFocus={true}
-                  label={<>Nombre Almacen: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      Nombre Almacen:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   className="form-control"
                   ref={this.refIdAlmacen}
                   value={idAlmacen}
                   onChange={this.handleSelectIdAlmacen}
                 >
                   <option value={''}>-- Seleccione --</option>
-                  {
-                    almacenes.map((item, index) => (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre} / {item.sucursal}
-                      </option>
-                    ))
-                  }
+                  {almacenes.map((item, index) => (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre} / {item.sucursal}
+                    </option>
+                  ))}
                 </Select>
               </Column>
             </Row>
@@ -223,9 +231,14 @@ class ModalInventario extends Component {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={<>Cantidad Inicial: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      Cantidad Inicial:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="0"
-                  role={"float"}
+                  role={'float'}
                   ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
@@ -234,9 +247,14 @@ class ModalInventario extends Component {
 
               <Column formGroup={true}>
                 <Input
-                  label={<>Cantidad Máxima: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      Cantidad Máxima:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="0"
-                  role={"float"}
+                  role={'float'}
                   ref={this.refCantidadMaxima}
                   value={cantidadMaxima}
                   onChange={this.handleInputCantidadMaxima}
@@ -245,9 +263,14 @@ class ModalInventario extends Component {
 
               <Column formGroup={true}>
                 <Input
-                  label={<>Cantidad Mínima: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      Cantidad Mínima:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="0"
-                  role={"float"}
+                  role={'float'}
                   ref={this.refCantidadMinima}
                   value={cantidadMinima}
                   onChange={this.handleInputCantidadMinima}
@@ -258,14 +281,13 @@ class ModalInventario extends Component {
         }
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-primary">
+            <Button type="submit" className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -281,7 +303,7 @@ ModalInventario.propTypes = {
 
   inventarios: PropTypes.array,
 
-  handleAddInventario: PropTypes.func
+  handleAddInventario: PropTypes.func,
 };
 
 export default ModalInventario;

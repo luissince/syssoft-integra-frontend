@@ -10,7 +10,7 @@ class FileDownloader extends React.Component {
     super(props);
     this.state = {
       visible: false,
-      isCollapsed: false
+      isCollapsed: false,
     };
 
     this.refDownload = React.createRef();
@@ -38,7 +38,7 @@ class FileDownloader extends React.Component {
       d.style.display = 'block';
       d.classList.remove('hidden');
     }
-  }
+  };
 
   hideDownloader = () => {
     // Extraer las propiedades relevantes
@@ -46,7 +46,9 @@ class FileDownloader extends React.Component {
     const currentDownloads = currentDownload.downloads || [];
 
     // Verificar si todos los elementos tienen el estado 'success'
-    const allDownloadsSuccessful = currentDownloads.every(item => item.status === 'success' || item.status === 'error');
+    const allDownloadsSuccessful = currentDownloads.every(
+      (item) => item.status === 'success' || item.status === 'error',
+    );
 
     if (allDownloadsSuccessful) {
       // Obtener la referencia al elemento DOM
@@ -71,13 +73,13 @@ class FileDownloader extends React.Component {
         });
       }
     }
-  }
+  };
 
   handleCollapse = () => {
     const content = this.refContent.current;
     if (!content) return;
 
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const newIsCollapsed = !prevState.isCollapsed;
 
       if (newIsCollapsed) {
@@ -90,11 +92,11 @@ class FileDownloader extends React.Component {
       }
       return { isCollapsed: newIsCollapsed };
     });
-  }
+  };
 
   handleClose = () => {
     this.hideDownloader();
-  }
+  };
 
   render() {
     const { download } = this.props;
@@ -111,85 +113,83 @@ class FileDownloader extends React.Component {
     return (
       <div
         ref={this.refDownload}
-        className={`downloader ${downloads.length === 0 ? 'hidden' : ''}`}>
+        className={`downloader ${downloads.length === 0 ? 'hidden' : ''}`}
+      >
         <div className="card">
           <div className="card-header">
-            <span className='text-base text-white'>Descargando archivo</span>
-            <div className='options'>
+            <span className="text-base text-white">Descargando archivo</span>
+            <div className="options">
               <button onClick={this.handleCollapse}>
-                <i className={this.state.isCollapsed ? 'fa fa-angle-up' : 'fa fa-angle-down'}></i>
+                <i
+                  className={
+                    this.state.isCollapsed
+                      ? 'fa fa-angle-up'
+                      : 'fa fa-angle-down'
+                  }
+                ></i>
               </button>
               <button onClick={this.handleClose}>x</button>
             </div>
           </div>
-          <div
-            ref={this.refContent}
-            className="collapse-content">
+          <div ref={this.refContent} className="collapse-content">
             <ul className={`list-group list-group-flush`}>
-              {
-                sortedDownloads.map((item, index) => {
-                  return (
-                    <li className="list-group-item" key={item.id || index}>  
-                      <div className="row">
-                        <div className="col-12 d-flex">
-                          <div className="d-inline font-weight-bold text-truncate">
-                            {item.fileName}
-                          </div>
-                          <div className="d-inline ml-2">
-                            <small>
-                              {item.received > 0 && (
-                                <>
-                                  <span className="text-success">
-                                    {formatBytes(item.received)}
-                                  </span>
-                                  / {formatBytes(item.total)}
-                                </>
-                              )}
-
-                              {item.received === 0 && <>Iniciando...</>}
-                            </small>
-                          </div>
-                          <div className="d-inline ml-2 ml-auto">
-                            {item.status === "success" && (
-                              <span className="text-success">
-                                Completado <i className="fa fa-check-circle-o"></i>
-                              </span>
-                            )}
-                            {item.status === "error" && (
-                              <span className="text-danger">
-                                Error <i className="fa fa-times-circle-o"></i>
-                              </span>
-                            )}
-                          </div>
+              {sortedDownloads.map((item, index) => {
+                return (
+                  <li className="list-group-item" key={item.id || index}>
+                    <div className="row">
+                      <div className="col-12 d-flex">
+                        <div className="d-inline font-weight-bold text-truncate">
+                          {item.fileName}
                         </div>
-                        <div className="col-12 mt-2">
-                          {
-                            item.status === "success" && (
-                              <div className="progress">
-                                <div
-                                  className="progress-bar progress-bar-striped"
-                                  role="progressbar"
-                                  aria-valuenow="75"
-                                  aria-valuemin="0"
-                                  aria-valuemax="100"
-                                  style={{ width: `${item.progress}%` }}
-                                >{`${item.progress}%`}</div>
-                              </div>
-                            )                            
-                          }
-                          {
-                            item.status === "error" && (
-                                <span className="text-danger">
-                                  {item.error}
+                        <div className="d-inline ml-2">
+                          <small>
+                            {item.received > 0 && (
+                              <>
+                                <span className="text-success">
+                                  {formatBytes(item.received)}
                                 </span>
-                            )
-                          }
+                                / {formatBytes(item.total)}
+                              </>
+                            )}
+
+                            {item.received === 0 && <>Iniciando...</>}
+                          </small>
+                        </div>
+                        <div className="d-inline ml-2 ml-auto">
+                          {item.status === 'success' && (
+                            <span className="text-success">
+                              Completado{' '}
+                              <i className="fa fa-check-circle-o"></i>
+                            </span>
+                          )}
+                          {item.status === 'error' && (
+                            <span className="text-danger">
+                              Error <i className="fa fa-times-circle-o"></i>
+                            </span>
+                          )}
                         </div>
                       </div>
-                    </li>
-                  );
-                })
-              }
+                      <div className="col-12 mt-2">
+                        {item.status === 'success' && (
+                          <div className="progress">
+                            <div
+                              className="progress-bar progress-bar-striped"
+                              role="progressbar"
+                              aria-valuenow="75"
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                              style={{ width: `${item.progress}%` }}
+                            >{`${item.progress}%`}</div>
+                          </div>
+                        )}
+                        {item.status === 'error' && (
+                          <span className="text-danger">{item.error}</span>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
@@ -213,6 +213,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { removeDownload };
 
-const ConnectedFileDownloader = connect(mapStateToProps, mapDispatchToProps)(FileDownloader);
+const ConnectedFileDownloader = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(FileDownloader);
 
 export default ConnectedFileDownloader;

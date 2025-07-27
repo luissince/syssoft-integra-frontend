@@ -21,7 +21,15 @@ import Button from '../../../../components/Button';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 
@@ -30,7 +38,6 @@ import { SpinnerTable } from '../../../../components/Spinner';
  * @extends React.Component
  */
 class Usuarios extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -87,7 +94,7 @@ class Usuarios extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -203,8 +210,8 @@ class Usuarios extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='10'
-          message='Cargando información de la tabla...'
+          colSpan="10"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -243,7 +250,7 @@ class Usuarios extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idUsuario)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -252,7 +259,7 @@ class Usuarios extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idUsuario)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -261,7 +268,7 @@ class Usuarios extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleResetear(item.idUsuario)}
-            // disabled={!this.state.reset}
+              // disabled={!this.state.reset}
             >
               <i className="bi bi-key"></i>
             </Button>
@@ -275,24 +282,17 @@ class Usuarios extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Usuarios'
-          subTitle='LISTA'
+          title="Usuarios"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -312,10 +312,12 @@ class Usuarios extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="20%">Nombre y Apellidos</TableHead>
                     <TableHead width="10%">Telefono</TableHead>
                     <TableHead width="10%">Email</TableHead>
@@ -327,9 +329,7 @@ class Usuarios extends CustomComponent {
                     <TableHead width="5%">Resetear</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -351,9 +351,9 @@ class Usuarios extends CustomComponent {
 Usuarios.propTypes = {
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
-    pathname: PropTypes.string
-  })
-}
+    pathname: PropTypes.string,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

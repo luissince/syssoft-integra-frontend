@@ -9,7 +9,7 @@ const NotFoundInitial = (props) => {
       <Image
         default={images.noImage}
         src={images.icono}
-        alt={"No encontrado"}
+        alt={'No encontrado'}
         width={150}
       />
       <h1 className="display-5 fw-bold">Error 404 página no encontrada</h1>

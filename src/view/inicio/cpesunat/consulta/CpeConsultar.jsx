@@ -12,7 +12,11 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { cdrCpeSunat, consultarCpeSunat, loadEmpresa } from '../../../../network/rest/principal.network';
+import {
+  cdrCpeSunat,
+  consultarCpeSunat,
+  loadEmpresa,
+} from '../../../../network/rest/principal.network';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
 import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
@@ -26,9 +30,8 @@ import Select from '../../../../components/Select';
  * @extends React.Component
  */
 class CpeElectronicos extends React.Component {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
@@ -57,8 +60,6 @@ class CpeElectronicos extends React.Component {
     this.refTipo = React.createRef();
     this.refSerie = React.createRef();
     this.refCorrelativo = React.createRef();
-
-
   }
 
   setStateAsync(state) {
@@ -88,7 +89,6 @@ class CpeElectronicos extends React.Component {
   };
 
   async onEventConsultarEstado() {
-
     if (isEmpty(this.state.ruc)) {
       alertWarning('Empressa', 'Ingrese el número ruc de la empresa.', () => {
         this.refRuc.current.focus();
@@ -108,16 +108,13 @@ class CpeElectronicos extends React.Component {
         this.refClave.current.focus();
       });
       return;
-
     }
-
 
     if (isEmpty(this.state.tipo)) {
       alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
         this.refTipo.current.focus();
       });
       return;
-
     }
 
     if (isEmpty(this.state.serie)) {
@@ -125,7 +122,6 @@ class CpeElectronicos extends React.Component {
         this.refSerie.current.focus();
       });
       return;
-
     }
 
     if (isEmpty(this.state.correlativo)) {
@@ -137,8 +133,7 @@ class CpeElectronicos extends React.Component {
 
     alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
       if (value) {
-
-        alertInfo("Consulta", "Precesanso...")
+        alertInfo('Consulta', 'Precesanso...');
 
         const response = await consultarCpeSunat(
           this.state.ruc,
@@ -158,20 +153,20 @@ class CpeElectronicos extends React.Component {
                 'Consultar Comprobante',
                 'Resultado: Código ' + result.code + ' ' + result.message,
               );
-              this.setState({ codigo: result.code , respuesta: result.message });
+              this.setState({ codigo: result.code, respuesta: result.message });
             } else {
               alertWarning(
                 'Consultar Comprobante',
                 'Resultado: Código ' + result.code + ' ' + result.message,
               );
-              this.setState({ codigo: result.code , respuesta: result.message });
+              this.setState({ codigo: result.code, respuesta: result.message });
             }
           } else {
             alertWarning(
               'Consultar Comprobante',
               'Resultado: Código ' + result.code + ' ' + result.message,
             );
-            this.setState({ codigo: result.code , respuesta: result.message });
+            this.setState({ codigo: result.code, respuesta: result.message });
           }
         }
 
@@ -202,16 +197,13 @@ class CpeElectronicos extends React.Component {
         this.refClave.current.focus();
       });
       return;
-
     }
-
 
     if (isEmpty(this.state.tipo)) {
       alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
         this.refTipo.current.focus();
       });
       return;
-
     }
 
     if (isEmpty(this.state.serie)) {
@@ -219,7 +211,6 @@ class CpeElectronicos extends React.Component {
         this.refSerie.current.focus();
       });
       return;
-
     }
 
     if (isEmpty(this.state.correlativo)) {
@@ -231,8 +222,7 @@ class CpeElectronicos extends React.Component {
 
     alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
       if (value) {
-
-        alertInfo("Consulta", "Precesanso...")
+        alertInfo('Consulta', 'Precesanso...');
 
         const response = await cdrCpeSunat(
           this.state.ruc,
@@ -254,21 +244,27 @@ class CpeElectronicos extends React.Component {
               );
 
               const id = guId();
-              this.props.downloadFileAsync({ id, url: "", name: result.fileName + ".xml", isFile: true, content: result.xml });
-              this.setState({ codigo: result.code , respuesta: result.message });
+              this.props.downloadFileAsync({
+                id,
+                url: '',
+                name: result.fileName + '.xml',
+                isFile: true,
+                content: result.xml,
+              });
+              this.setState({ codigo: result.code, respuesta: result.message });
             } else {
               alertWarning(
                 'Consultar Comprobante',
                 'Resultado: Código ' + result.code + ' ' + result.message,
               );
-              this.setState({ codigo: result.code , respuesta: result.message });
+              this.setState({ codigo: result.code, respuesta: result.message });
             }
           } else {
             alertWarning(
               'Consultar Comprobante',
               'Resultado: Código ' + result.code + ' ' + result.message,
             );
-            this.setState({ codigo: result.code , respuesta: result.message });
+            this.setState({ codigo: result.code, respuesta: result.message });
           }
         }
 
@@ -287,7 +283,6 @@ class CpeElectronicos extends React.Component {
 
       codigo: '',
       respuesta: '',
-
     });
 
     this.refTipo.current.focus();
@@ -302,8 +297,8 @@ class CpeElectronicos extends React.Component {
         />
 
         <Title
-          title='Consultar Comprobantes'
-          subTitle='FORMULARIO'
+          title="Consultar Comprobantes"
+          subTitle="FORMULARIO"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -342,9 +337,7 @@ class CpeElectronicos extends React.Component {
             <Select
               ref={this.refTipo}
               value={this.state.tipo}
-              onChange={(value) =>
-                this.setState({ tipo: value.target.value })
-              }
+              onChange={(value) => this.setState({ tipo: value.target.value })}
             >
               <option value=""> -- Seleccione -- </option>
               <option value="01">01 - Factura</option>
@@ -387,9 +380,7 @@ class CpeElectronicos extends React.Component {
               placeholder="F001 / B001 / etc"
               maxLength="4"
               value={this.state.serie}
-              onChange={(value) =>
-                this.setState({ serie: value.target.value })
-              }
+              onChange={(value) => this.setState({ serie: value.target.value })}
             />
           </Column>
         </Row>
@@ -404,9 +395,7 @@ class CpeElectronicos extends React.Component {
               autoComplete="off"
               ref={this.refClave}
               value={this.state.clave}
-              onChange={(value) =>
-                this.setState({ clave: value.target.value })
-              }
+              onChange={(value) => this.setState({ clave: value.target.value })}
             />
           </Column>
 
@@ -427,26 +416,24 @@ class CpeElectronicos extends React.Component {
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-              <Button
-                className="btn-success"
-                onClick={() => this.onEventConsultarEstado()}
-              >
-                Consultar Estado
-              </Button>
-              {' '}
-              <Button
-                className="btn-primary"
-                onClick={() => this.onEventConsultarCdr()}
-              >
-                Consultar CDR
-              </Button>
-              {' '}
-              <Button
-                className="btn-danger"
-                onClick={() => this.onEventLimpiar()}
-              >
-                Limpiar
-              </Button>
+            <Button
+              className="btn-success"
+              onClick={() => this.onEventConsultarEstado()}
+            >
+              Consultar Estado
+            </Button>{' '}
+            <Button
+              className="btn-primary"
+              onClick={() => this.onEventConsultarCdr()}
+            >
+              Consultar CDR
+            </Button>{' '}
+            <Button
+              className="btn-danger"
+              onClick={() => this.onEventLimpiar()}
+            >
+              Limpiar
+            </Button>
           </Column>
           <div className="col-md-6 col-sm-12"></div>
         </Row>
@@ -484,6 +471,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedCpeElectronicos = connect(mapStateToProps, mapDispatchToProps)(CpeElectronicos);
+const ConnectedCpeElectronicos = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(CpeElectronicos);
 
 export default ConnectedCpeElectronicos;

@@ -36,17 +36,32 @@ import {
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import CustomComponent from '../../../../model/class/custom-component';
-import { VENTA, GUIA_DE_REMISION, NOTA_DE_CREDITO } from '../../../../model/types/tipo-comprobante';
+import {
+  VENTA,
+  GUIA_DE_REMISION,
+  NOTA_DE_CREDITO,
+} from '../../../../model/types/tipo-comprobante';
 import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Select from '../../../../components/Select';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import Search from '../../../../components/Search';
-import { setListaCpeSunatData, setListaCpeSunatPaginacion } from '../../../../redux/predeterminadoSlice';
+import {
+  setListaCpeSunatData,
+  setListaCpeSunatPaginacion,
+} from '../../../../redux/predeterminadoSlice';
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../../redux/downloadSlice';
 import { toastKit, ToastStyle } from 'toast-kit';
@@ -58,7 +73,6 @@ import DropdownActions from '../../../../components/DropdownActions';
  * @extends React.Component
  */
 class CpeElectronicos extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -159,47 +173,58 @@ class CpeElectronicos extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (this.props.cpeSunatLista && this.props.cpeSunatLista.data && this.props.cpeSunatLista.paginacion) {
-      this.setState(this.props.cpeSunatLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.cpeSunatLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.cpeSunatLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.cpeSunatLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.cpeSunatLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.cpeSunatLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.cpeSunatLista.paginacion.messagePaginacion;
+    if (
+      this.props.cpeSunatLista &&
+      this.props.cpeSunatLista.data &&
+      this.props.cpeSunatLista.paginacion
+    ) {
+      this.setState(this.props.cpeSunatLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.cpeSunatLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.cpeSunatLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.cpeSunatLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.cpeSunatLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.cpeSunatLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.cpeSunatLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.cpeSunatLista.data.buscar);
     } else {
-      const [
-        facturado,
-        notaCredito,
-        guiaRemision,
-        sucursales
-      ] = await Promise.all([
-        this.fetchComprobante(VENTA),
-        this.fetchComprobante(NOTA_DE_CREDITO),
-        this.fetchComprobante(GUIA_DE_REMISION),
-        this.fetchSucursal(),
-      ]);
+      const [facturado, notaCredito, guiaRemision, sucursales] =
+        await Promise.all([
+          this.fetchComprobante(VENTA),
+          this.fetchComprobante(NOTA_DE_CREDITO),
+          this.fetchComprobante(GUIA_DE_REMISION),
+          this.fetchSucursal(),
+        ]);
 
       const comprobantes = [...facturado, ...notaCredito, ...guiaRemision];
 
-      const sucursal = sucursales.find(item => item.idSucursal === this.props.token.project.idSucursal)
+      const sucursal = sucursales.find(
+        (item) => item.idSucursal === this.props.token.project.idSucursal,
+      );
 
-      this.setState({
-        idSucursal: sucursal.idSucursal,
-        comprobantes: comprobantes,
-        sucursales: sucursales,
-        initialLoad: false,
-      }, async () => {
-        this.loadingInit()
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          idSucursal: sucursal.idSucursal,
+          comprobantes: comprobantes,
+          sucursales: sucursales,
+          initialLoad: false,
+        },
+        async () => {
+          this.loadingInit();
+          this.updateReduxState();
+        },
+      );
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaCpeSunatData(this.state)
+    this.props.setListaCpeSunatData(this.state);
     this.props.setListaCpeSunatPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -210,11 +235,10 @@ class CpeElectronicos extends CustomComponent {
     });
   }
 
-
   async fetchComprobante(tipo) {
     const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
+      tipo: tipo,
+      idSucursal: this.state.idSucursal,
     };
 
     const response = await comboComprobante(
@@ -253,7 +277,7 @@ class CpeElectronicos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
-  }
+  };
 
   searchText = async (text) => {
     if (this.state.loading) return;
@@ -263,7 +287,7 @@ class CpeElectronicos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   async searchOpciones() {
     if (this.state.loading) return;
@@ -278,7 +302,7 @@ class CpeElectronicos extends CustomComponent {
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
-  }
+  };
 
   onEventPaginacion = () => {
     switch (this.state.opcion) {
@@ -294,7 +318,7 @@ class CpeElectronicos extends CustomComponent {
       default:
         this.fillTable(0);
     }
-  }
+  };
 
   fillTable = async (opcion, buscar = '') => {
     this.setState({
@@ -315,20 +339,26 @@ class CpeElectronicos extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listCpeSunat(params, this.abortControllerTable.signal);
+    const response = await listCpeSunat(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -341,7 +371,7 @@ class CpeElectronicos extends CustomComponent {
         messageTable: response.getMessage(),
       });
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -362,26 +392,26 @@ class CpeElectronicos extends CustomComponent {
   handleInputFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleInputFechaFinal = (event) => {
     this.setState({ fechaFinal: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleSelectSucursal = (event) => {
     this.setState({ idSucursal: event.target.value }, async () => {
@@ -391,148 +421,177 @@ class CpeElectronicos extends CustomComponent {
 
       const comprobantes = [...facturado, ...notaCredito, ...guiaRemision];
 
-      this.setState({ comprobantes })
+      this.setState({ comprobantes });
       this.loadingInit();
-    })
-  }
+    });
+  };
 
   handleSendFacturar = (idVenta) => {
-    alertDialog("Cpe Sunat", "¿Está seguro de enviar el comprobante electrónico?", async (accept) => {
-      if (accept) {
-        alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
+    alertDialog(
+      'Cpe Sunat',
+      '¿Está seguro de enviar el comprobante electrónico?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Cpe Sunat', 'Firmando xml y enviando a sunat.');
 
-        const response = await facturarCpeSunat(idVenta);
+          const response = await facturarCpeSunat(idVenta);
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
+          if (response instanceof SuccessReponse) {
+            const { state, accept, code, description } = response.data;
 
-          if (state) {
-            if (accept) {
-              alertSuccess("Cpe Sunat", "Código " + code + " " + description, () => {
-                this.onEventPaginacion()
-              });
+            if (state) {
+              if (accept) {
+                alertSuccess(
+                  'Cpe Sunat',
+                  'Código ' + code + ' ' + description,
+                  () => {
+                    this.onEventPaginacion();
+                  },
+                );
+              } else {
+                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              }
             } else {
-              alertWarning("Cpe Sunat", "Código " + code + " " + description);
+              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
             }
-          } else {
-            alertWarning("Cpe Sunat", "Código " + code + " " + description);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertError('Cpe Sunat', response.getMessage());
           }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertError("Cpe Sunat", response.getMessage())
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleSendResumenDiario = (idVenta, comprobante) => {
-    alertDialog("Cpe Sunat", `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer un resumen diario?`, async (accept) => {
-      if (accept) {
+    alertDialog(
+      'Cpe Sunat',
+      `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer un resumen diario?`,
+      async (accept) => {
+        if (accept) {
+          alertInfo('Cpe Sunat', 'Firmando xml y enviando a sunat.');
 
-        alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
+          const response = await anularBoletaCpeSunat(idVenta);
 
-        const response = await anularBoletaCpeSunat(idVenta);
+          if (response instanceof SuccessReponse) {
+            const { state, accept, code, description } = response.data;
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
-
-          if (state) {
-            if (accept) {
-              alertSuccess("Cpe Sunat", "Código " + code + " " + description, () => {
-                this.onEventPaginacion()
-              });
+            if (state) {
+              if (accept) {
+                alertSuccess(
+                  'Cpe Sunat',
+                  'Código ' + code + ' ' + description,
+                  () => {
+                    this.onEventPaginacion();
+                  },
+                );
+              } else {
+                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              }
             } else {
-              alertWarning("Cpe Sunat", "Código " + code + " " + description);
+              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
             }
-          } else {
-            alertWarning("Cpe Sunat", "Código " + code + " " + description);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertError('Cpe Sunat', response.getMessage());
           }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertError("Cpe Sunat", response.getMessage())
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleSendComunicacionDeBaja = (idVenta, comprobante) => {
-    alertDialog("Cpe Sunat", `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer una comunicación de baja?`, async (accept) => {
-      if (accept) {
+    alertDialog(
+      'Cpe Sunat',
+      `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer una comunicación de baja?`,
+      async (accept) => {
+        if (accept) {
+          alertInfo('Cpe Sunat', 'Firmando xml y enviando a sunat.');
 
-        alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
+          const response = await anularFacturaCpeSunat(idVenta);
 
-        const response = await anularFacturaCpeSunat(idVenta);
+          if (response instanceof SuccessReponse) {
+            const { state, accept, code, description } = response.data;
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
-
-          if (state) {
-            if (accept) {
-              alertSuccess("Cpe Sunat", "Código " + code + " " + description, () => {
-                this.onEventPaginacion()
-              });
+            if (state) {
+              if (accept) {
+                alertSuccess(
+                  'Cpe Sunat',
+                  'Código ' + code + ' ' + description,
+                  () => {
+                    this.onEventPaginacion();
+                  },
+                );
+              } else {
+                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              }
             } else {
-              alertWarning("Cpe Sunat", "Código " + code + " " + description);
+              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
             }
-          } else {
-            alertWarning("Cpe Sunat", "Código " + code + " " + description);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertError('Cpe Sunat', response.getMessage());
           }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertError("Cpe Sunat", response.getMessage())
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleSendGuiaRemision = (idGuiaRemision) => {
-    alertDialog("Cpe Sunat", "¿Está seguro de enviar el comprobante electrónico?", async (accept) => {
-      if (accept) {
+    alertDialog(
+      'Cpe Sunat',
+      '¿Está seguro de enviar el comprobante electrónico?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Cpe Sunat', 'Firmando xml y enviando a sunat.');
 
-        alertInfo("Cpe Sunat", "Firmando xml y enviando a sunat.")
+          const response = await guiaRemisionCpeSunat(idGuiaRemision);
 
-        const response = await guiaRemisionCpeSunat(idGuiaRemision);
+          if (response instanceof SuccessReponse) {
+            const { state, accept, code, description } = response.data;
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
-
-          if (state) {
-            if (accept) {
-              alertSuccess("Cpe Sunat", "Código " + code + " " + description, () => {
-                this.onEventPaginacion()
-              });
+            if (state) {
+              if (accept) {
+                alertSuccess(
+                  'Cpe Sunat',
+                  'Código ' + code + ' ' + description,
+                  () => {
+                    this.onEventPaginacion();
+                  },
+                );
+              } else {
+                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              }
             } else {
-              alertWarning("Cpe Sunat", "Código " + code + " " + description);
+              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
             }
-          } else {
-            alertWarning("Cpe Sunat", "Código " + code + " " + description);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertError('Cpe Sunat', response.getMessage());
           }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertError("Cpe Sunat", response.getMessage())
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleOpenPrinter = async (idComprobante, tipo, size) => {
-    let url = "";
-    if (tipo === "fac") {
-      url = documentsPdfInvoicesVenta(idComprobante, size)
+    let url = '';
+    if (tipo === 'fac') {
+      url = documentsPdfInvoicesVenta(idComprobante, size);
     } else {
-      url = documentsPdfInvoicesGuiaRemision(idComprobante, size)
+      url = documentsPdfInvoicesGuiaRemision(idComprobante, size);
     }
 
     await pdfVisualizer.init({
@@ -541,13 +600,13 @@ class CpeElectronicos extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handleDownloadXml = (idComprobante) => {
     const id = guId();
     const url = obtenerXmlSunat(idComprobante);
     this.props.downloadFileAsync({ id, url });
-  }
+  };
 
   handleSendEmail = async (idComprobante, tipo) => {
     toastKit.info({
@@ -578,7 +637,7 @@ class CpeElectronicos extends CustomComponent {
         style: ToastStyle.light,
       });
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -595,19 +654,17 @@ class CpeElectronicos extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
   */
- 
+
   opcionButtonEnvio(image, alt, onClick) {
     return (
-      <Button
-        className="btn-light btn-sm"
-        onClick={onClick}>
+      <Button className="btn-light btn-sm" onClick={onClick}>
         <img src={image} alt={alt} width="22" />
       </Button>
     );
   }
 
   renderEstado(item) {
-    if (item.tipo === "fac") {
+    if (item.tipo === 'fac') {
       if (item.estado === 0) {
         return this.opcionButtonEnvio(images.unable, 'Error', () => {
           this.handleSendFacturar(item.idComprobante);
@@ -656,7 +713,6 @@ class CpeElectronicos extends CustomComponent {
         this.handleSendGuiaRemision(item.idComprobante);
       });
     }
-
   }
 
   generateBody() {
@@ -665,8 +721,8 @@ class CpeElectronicos extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -674,13 +730,18 @@ class CpeElectronicos extends CustomComponent {
     if (isEmpty(lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="8">¡No hay datos registrados!</TableCell>
+          <TableCell className="text-center" colSpan="8">
+            ¡No hay datos registrados!
+          </TableCell>
         </TableRow>
       );
     }
 
     return lista.map((item, index) => {
-      const descripcion = item.xmlDescripcion === '' ? 'Por Generar Xml' : limitarCadena(item.xmlDescripcion, 90, '...');
+      const descripcion =
+        item.xmlDescripcion === ''
+          ? 'Por Generar Xml'
+          : limitarCadena(item.xmlDescripcion, 90, '...');
 
       return (
         <TableRow key={index}>
@@ -692,19 +753,30 @@ class CpeElectronicos extends CustomComponent {
                   image: images.pdf,
                   tooltip: 'Archivo Pdf A4',
                   label: 'Pdf A4',
-                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
+                  onClick: () =>
+                    this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
                 },
                 {
                   image: images.invoice,
                   tooltip: 'Archivo Pdf 80mm',
                   label: 'Pdf Ticket',
-                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
+                  onClick: () =>
+                    this.handleOpenPrinter(
+                      item.idComprobante,
+                      item.tipo,
+                      '80mm',
+                    ),
                 },
                 {
                   image: images.invoice,
                   tooltip: 'Archivo Pdf 58mm',
                   label: 'Pdf Ticket',
-                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
+                  onClick: () =>
+                    this.handleOpenPrinter(
+                      item.idComprobante,
+                      item.tipo,
+                      '58mm',
+                    ),
                 },
                 {
                   image: images.xml,
@@ -716,45 +788,62 @@ class CpeElectronicos extends CustomComponent {
                   image: images.email,
                   tooltip: 'Enviar Correo',
                   label: 'Email',
-                  onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
+                  onClick: () =>
+                    this.handleSendEmail(item.idComprobante, item.tipo),
                 },
                 ...(item.tipo === 'fac' && item.anulacion !== 0
-                  ? [{
-                    image: images.error,
-                    tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                    label: 'Error',
-                    onClick: () => {
-                      const id = item.idComprobante;
-                      const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
-                      item.anulacion === 1
-                        ? this.handleSendComunicacionDeBaja(id, num)
-                        : this.handleSendResumenDiario(id, num);
-                    },
-                  }]
-                  : []
-                )
+                  ? [
+                      {
+                        image: images.error,
+                        tooltip:
+                          item.anulacion === 1
+                            ? 'Comunicación de Baja'
+                            : 'Resumen Diario',
+                        label: 'Error',
+                        onClick: () => {
+                          const id = item.idComprobante;
+                          const num =
+                            item.serie +
+                            '-' +
+                            formatNumberWithZeros(item.numeracion);
+                          item.anulacion === 1
+                            ? this.handleSendComunicacionDeBaja(id, num)
+                            : this.handleSendResumenDiario(id, num);
+                        },
+                      },
+                    ]
+                  : []),
               ]}
             />
           </TableCell>
           <TableCell>
-            <span>{item.fecha}<br />{formatTime(item.hora)}</span>
+            <span>
+              {item.fecha}
+              <br />
+              {formatTime(item.hora)}
+            </span>
           </TableCell>
           <TableCell>
             <Link
               to={getPathNavigation(item.tipo, item.idComprobante)}
               className="btn-link"
             >
-              {item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}
+              {item.comprobante}
+              <br />
+              {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
             </Link>
           </TableCell>
           <TableCell>
-            {`${item.tipoDocumento} - ${item.documento}`}<br />{item.informacion}
+            {`${item.tipoDocumento} - ${item.documento}`}
+            <br />
+            {item.informacion}
           </TableCell>
           <TableCell className="text-center">
-            {item.estado !== 3
-              ? <span className="text-success">DECLARAR</span>
-              : <span className="text-danger">DAR DE BAJA</span>
-            }
+            {item.estado !== 3 ? (
+              <span className="text-success">DECLARAR</span>
+            ) : (
+              <span className="text-danger">DAR DE BAJA</span>
+            )}
           </TableCell>
           <TableCell className="text-center">
             {this.renderEstado(item)}
@@ -768,7 +857,6 @@ class CpeElectronicos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
@@ -783,8 +871,8 @@ class CpeElectronicos extends CustomComponent {
         </SpinnerView>
 
         <Title
-          title='Comprobante de Pago Electrónico'
-          subTitle='LISTA'
+          title="Comprobante de Pago Electrónico"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -795,27 +883,42 @@ class CpeElectronicos extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+          <Column
+            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
+            formGroup={true}
+          >
             <img src={images.sunat} alt="Estado Sunat" width="24" />{' '}
             <span>Estados SUNAT:</span>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+          <Column
+            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
+            formGroup={true}
+          >
             <img src={images.accept} alt="Aceptado" width="24" />{' '}
             <span>Aceptado</span>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+          <Column
+            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
+            formGroup={true}
+          >
             <img src={images.unable} alt="Rechazo" width="24" />{' '}
             <span>Rechazado</span>
           </Column>
 
-          <Column className="col-lg-2 col-md-2 col-sm-12 col-xs-12" formGroup={true}>
+          <Column
+            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
+            formGroup={true}
+          >
             <img src={images.reuse} alt="Pendiende de envío" width="24" />{' '}
             <span>Pendiente de Envío</span>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-xs-12"
+            formGroup={true}
+          >
             <img src={images.error} alt="Comunicación de baja" width="24" />{' '}
             <span> Comunicación de Baja (Anulado)</span>
           </Column>
@@ -823,58 +926,67 @@ class CpeElectronicos extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-outline-light"
-              onClick={this.loadingInit}
-            >
+            <Button className="btn-outline-light" onClick={this.loadingInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Inicio:"}
+              label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Final:"}
+              label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Comprobantes:"}
+              label={'Comprobantes:'}
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
             >
               <option value="">TODOS</option>
-              {
-                this.state.comprobantes.map((item, index) => (
-                  <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
-                ))
-              }
+              {this.state.comprobantes.map((item, index) => (
+                <option key={index} value={item.idComprobante}>
+                  {item.nombre} - {item.serie}
+                </option>
+              ))}
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Estados:"}
+              label={'Estados:'}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value='0'>TODOS</option>
-              <option value='1'>POR DECLARAR</option>
-              <option value='2'>POR ANULAR</option>
+              <option value="0">TODOS</option>
+              <option value="1">POR DECLARAR</option>
+              <option value="2">POR ANULAR</option>
             </Select>
           </Column>
         </Row>
@@ -883,7 +995,7 @@ class CpeElectronicos extends CustomComponent {
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Search
               group={true}
-              label={"Buscar:"}
+              label={'Buscar:'}
               iconLeft={<i className="bi bi-search"></i>}
               ref={this.refSearch}
               onSearch={this.searchText}
@@ -893,15 +1005,15 @@ class CpeElectronicos extends CustomComponent {
 
           <Column className="col-md-6 col-sm-12" formGroup={true}>
             <Select
-              label={"Sucursal:"}
+              label={'Sucursal:'}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >
-              {
-                this.state.sucursales.map((item, index) => (
-                  <option key={index} value={item.idSucursal}>{item.nombre}</option>
-                ))
-              }
+              {this.state.sucursales.map((item, index) => (
+                <option key={index} value={item.idSucursal}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
@@ -909,10 +1021,12 @@ class CpeElectronicos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="5%">Opciones</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="10%">Comprobante</TableHead>
@@ -922,9 +1036,7 @@ class CpeElectronicos extends CustomComponent {
                     <TableHead width="15%">Observación SUNAT</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -955,24 +1067,31 @@ CpeElectronicos.propTypes = {
   }).isRequired,
   cpeSunatLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaCpeSunatData: PropTypes.func,
   setListaCpeSunatPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   location: PropTypes.object,
   downloadFileAsync: PropTypes.func,
-}
+};
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    cpeSunatLista: state.predeterminado.cpeSunatLista
+    cpeSunatLista: state.predeterminado.cpeSunatLista,
   };
 };
 
-const mapDispatchToProps = { setListaCpeSunatData, setListaCpeSunatPaginacion, downloadFileAsync }
+const mapDispatchToProps = {
+  setListaCpeSunatData,
+  setListaCpeSunatPaginacion,
+  downloadFileAsync,
+};
 
-const ConnectedCpeElectronicos = connect(mapStateToProps, mapDispatchToProps)(CpeElectronicos);
+const ConnectedCpeElectronicos = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(CpeElectronicos);
 
 export default ConnectedCpeElectronicos;

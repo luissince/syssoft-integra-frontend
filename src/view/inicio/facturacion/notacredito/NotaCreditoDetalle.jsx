@@ -143,9 +143,7 @@ class NotaCreditoDetalle extends React.Component {
     );
   }
 
-  async onEventImprimir() {
-   
-  }
+  async onEventImprimir() {}
 
   render() {
     return (

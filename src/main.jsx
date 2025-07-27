@@ -17,7 +17,7 @@ import './network/rest/principal.network.js';
 import AlertKit from 'alert-kit';
 
 AlertKit.setGlobalDefaults({
-  headerTitle: 'SysSoft Integra', 
+  headerTitle: 'SysSoft Integra',
   primaryButtonClassName: 'btn btn-primary',
   cancelButtonClassName: 'btn btn-outline-danger',
   acceptButtonClassName: 'btn btn-success',
@@ -29,8 +29,8 @@ AlertKit.setGlobalDefaults({
     question: 'Confirmación',
     accept: 'Aceptar',
     cancel: 'Cancelar',
-    ok: 'Aceptar'
-  }
+    ok: 'Aceptar',
+  },
 });
 
 const container = document.getElementById('root');
@@ -39,7 +39,7 @@ const root = ReactDOM.createRoot(container);
 root.render(
   // <React.StrictMode>
   <Provider store={store}>
-      <App />
-  </Provider>
+    <App />
+  </Provider>,
   // </React.StrictMode>
 );

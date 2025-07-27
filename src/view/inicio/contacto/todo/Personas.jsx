@@ -20,7 +20,15 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
@@ -30,11 +38,10 @@ import Search from '../../../../components/Search';
  * @extends React.Component
  */
 class Personas extends CustomComponent {
-
   /**
-  *
-  * Constructor
-  */
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -109,7 +116,7 @@ class Personas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -143,10 +150,15 @@ class Personas extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listPersonas(params, this.abortControllerTable.signal,);
+    const response = await listPersonas(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
 
       this.setState({
         loading: false,
@@ -166,7 +178,6 @@ class Personas extends CustomComponent {
       });
     }
   };
-
 
   /*
   |--------------------------------------------------------------------------
@@ -205,27 +216,30 @@ class Personas extends CustomComponent {
   }
 
   handleRemoverCliente(idPersona) {
-    alertDialog('Cliente', '¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.', async (accept) => {
-      if (accept) {
-        alertInfo('Cliente', 'Procesando información...');
+    alertDialog(
+      'Cliente',
+      '¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Cliente', 'Procesando información...');
 
-        const params = {
-          idPersona: idPersona,
-        };
+          const params = {
+            idPersona: idPersona,
+          };
 
-        const response = await deletePersona(params);
+          const response = await deletePersona(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Cliente', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Cliente', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Cliente', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Cliente', response.getMessage());
-        }
-      }
-    },
+      },
     );
   }
 
@@ -249,8 +263,8 @@ class Personas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
-          message='Cargando información de la tabla...'
+          colSpan="9"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -281,7 +295,9 @@ class Personas extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
+              className={`badge ${
+                item.estado === 1 ? 'badge-success' : 'badge-danger'
+              }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -289,9 +305,7 @@ class Personas extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
-              onClick={() =>
-                this.handleDetalleCliente(item.idPersona)
-              }
+              onClick={() => this.handleDetalleCliente(item.idPersona)}
             >
               <i className="bi bi-eye"></i>
             </Button>
@@ -299,9 +313,7 @@ class Personas extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
-              onClick={() =>
-                this.handleEditarCliente(item.idPersona)
-              }
+              onClick={() => this.handleEditarCliente(item.idPersona)}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -309,9 +321,7 @@ class Personas extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
-              onClick={() =>
-                this.handleRemoverCliente(item.idPersona)
-              }
+              onClick={() => this.handleRemoverCliente(item.idPersona)}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -325,8 +335,8 @@ class Personas extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Contactos'
-          subTitle='LISTA'
+          title="Contactos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -338,10 +348,7 @@ class Personas extends CustomComponent {
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadInit}
-            >
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -361,23 +368,29 @@ class Personas extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
-              <TableHeader className="thead-light">
+              <Table className={'table-bordered'}>
+                <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">DNI / RUC</TableHead>
                     <TableHead width="20%">Cliente</TableHead>
                     <TableHead width="10%">Cel. / Tel.</TableHead>
                     <TableHead width="15%">Dirección</TableHead>
                     <TableHead width="7%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -410,9 +423,9 @@ Personas.propTypes = {
     push: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    pathname: PropTypes.string
+    pathname: PropTypes.string,
   }),
-}
+};
 
 const mapStateToProps = (state) => {
   return {

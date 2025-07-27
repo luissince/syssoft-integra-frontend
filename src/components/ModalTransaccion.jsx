@@ -1,5 +1,10 @@
 import Column from './Column';
-import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader } from './CustomModal';
+import CustomModal, {
+  CustomModalContentBody,
+  CustomModalContentFooter,
+  CustomModalContentForm,
+  CustomModalContentHeader,
+} from './CustomModal';
 import Row from './Row';
 import { SpinnerView } from './Spinner';
 import {
@@ -11,7 +16,12 @@ import {
   rounded,
 } from '../helper/utils.helper';
 import CustomComponent from '../model/class/custom-component';
-import { ADELANTADO, CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../model/types/forma-pago';
+import {
+  ADELANTADO,
+  CONTADO,
+  CREDITO_FIJO,
+  CREDITO_VARIABLE,
+} from '../model/types/forma-pago';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { comboBanco } from '../network/rest/principal.network';
@@ -29,7 +39,6 @@ import { alertKit } from 'alert-kit';
  * @extends React.Component
  */
 class ModalTransaccion extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -44,7 +53,7 @@ class ModalTransaccion extends CustomComponent {
       frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
       importeTotal: 0.0,
       nota: '',
-    }
+    };
 
     this.refModal = React.createRef();
 
@@ -85,19 +94,19 @@ class ModalTransaccion extends CustomComponent {
         monto: '',
         vuelto: metodo.vuelto,
         observacion: '',
-      }
+      };
 
       this.setState((prevState) => ({
         bancosAgregados: [...prevState.bancosAgregados, item],
-      }))
+      }));
     }
 
     this.setState({
       importeTotal: Number(rounded(this.props.importeTotal)),
       bancos,
-      loading: false
+      loading: false,
     });
-  }
+  };
 
   onHidden = () => {
     this.setState({
@@ -106,13 +115,13 @@ class ModalTransaccion extends CustomComponent {
       frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
       frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
       bancosAgregados: [],
-    })
-  }
+    });
+  };
 
   async fetchComboBanco() {
     const response = await comboBanco(
       this.props.idSucursal,
-      this.abortControllerView.signal
+      this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
@@ -125,7 +134,6 @@ class ModalTransaccion extends CustomComponent {
       return [];
     }
   }
-
 
   /*
   |--------------------------------------------------------------------------
@@ -145,32 +153,36 @@ class ModalTransaccion extends CustomComponent {
 
   handleSelectTipoPago = (tipo) => {
     this.setState({ formaPago: tipo });
-  }
+  };
 
   handleSelectNumeroCuotas = (event) => {
     this.setState({ numeroCuotas: event.target.value });
-  }
+  };
 
   handleSelectFrecuenciaPagoFijo = (event) => {
     this.setState({ frecuenciaPagoFijo: event.target.value });
-  }
+  };
 
   handleSelectFrecuenciaPagoVariable = (event) => {
     this.setState({ frecuenciaPagoVariable: event.target.value });
-  }
+  };
 
   handleInputNota = (event) => {
     this.setState({ nota: event.target.value });
-  }
+  };
 
   handleAddBancosAgregados = () => {
-    const listAdd = this.state.bancosAgregados.find((item) => item.idBanco === this.refMetodoContado.current.value);
+    const listAdd = this.state.bancosAgregados.find(
+      (item) => item.idBanco === this.refMetodoContado.current.value,
+    );
 
     if (listAdd) {
       return;
     }
 
-    const metodo = this.state.bancos.find((item) => item.idBanco === this.refMetodoContado.current.value,);
+    const metodo = this.state.bancos.find(
+      (item) => item.idBanco === this.refMetodoContado.current.value,
+    );
 
     const item = {
       idBanco: metodo.idBanco,
@@ -183,7 +195,7 @@ class ModalTransaccion extends CustomComponent {
     this.setState((prevState) => ({
       bancosAgregados: [...prevState.bancosAgregados, item],
     }));
-  }
+  };
 
   handleRemoveItemBancosAgregados = (idBanco) => {
     const bancosAgregados = this.state.bancosAgregados.filter(
@@ -204,17 +216,12 @@ class ModalTransaccion extends CustomComponent {
         }
       }),
     }));
-  }
+  };
 
   handleProcessContado = async () => {
-    const {
-      formaPago,
-      bancosAgregados,
-      importeTotal,
-      nota
-    } = this.state;
+    const { formaPago, bancosAgregados, importeTotal, nota } = this.state;
 
-    let metodoPagosLista = bancosAgregados.map(item => ({ ...item }));
+    let metodoPagosLista = bancosAgregados.map((item) => ({ ...item }));
 
     if (isEmpty(metodoPagosLista)) {
       alertKit.warning({
@@ -247,95 +254,126 @@ class ModalTransaccion extends CustomComponent {
       return;
     }
 
-    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => accumulator += Number(item.monto), 0);
+    const metodoCobroTotal = metodoPagosLista.reduce(
+      (accumulator, item) => (accumulator += Number(item.monto)),
+      0,
+    );
 
     if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
-        alertKit.warning({
-          title: this.state.tipo,
-          message: 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
-        }, () => {  
-          validateNumericInputs(this.refMetodoPagoContenedor);
-        });
+        alertKit.warning(
+          {
+            title: this.state.tipo,
+            message:
+              'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
+          },
+          () => {
+            validateNumericInputs(this.refMetodoPagoContenedor);
+          },
+        );
         return;
       }
     } else {
       const metodo = metodoPagosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < importeTotal) {
-          alertKit.warning({
-            title: this.state.tipo,
-            message: 'El monto a cobrar es menor que el total.',
-          }, () => {
-            validateNumericInputs(this.refMetodoPagoContenedor);
-          });
+          alertKit.warning(
+            {
+              title: this.state.tipo,
+              message: 'El monto a cobrar es menor que el total.',
+            },
+            () => {
+              validateNumericInputs(this.refMetodoPagoContenedor);
+            },
+          );
           return;
         }
 
-        metodoPagosLista.forEach(item => {
-          item.observacion = `Pago con ${rounded(Number(item.monto))} y su vuelto es ${rounded(Number(item.monto) - importeTotal)}`;
+        metodoPagosLista.forEach((item) => {
+          item.observacion = `Pago con ${rounded(
+            Number(item.monto),
+          )} y su vuelto es ${rounded(Number(item.monto) - importeTotal)}`;
           item.monto = importeTotal;
         });
       } else {
         if (metodoCobroTotal !== importeTotal) {
-          alertKit.warning({
-            title: this.state.tipo,
-            message: 'El monto a cobrar debe ser igual al total.',
-          }, () => {
-            validateNumericInputs(this.refMetodoPagoContenedor);
-          });
+          alertKit.warning(
+            {
+              title: this.state.tipo,
+              message: 'El monto a cobrar debe ser igual al total.',
+            },
+            () => {
+              validateNumericInputs(this.refMetodoPagoContenedor);
+            },
+          );
           return;
         }
       }
     }
 
-    this.props.handleProcessContado(formaPago, metodoPagosLista, nota, async () => {
-      await this.refModal.current.handleOnClose()
-    });
+    this.props.handleProcessContado(
+      formaPago,
+      metodoPagosLista,
+      nota,
+      async () => {
+        await this.refModal.current.handleOnClose();
+      },
+    );
   };
 
   handleProcessCreditoFijo = async () => {
-    const {
-      formaPago,
-      numeroCuotas,
-      frecuenciaPagoFijo,
-      importeTotal,
-      nota
-    } = this.state;
+    const { formaPago, numeroCuotas, frecuenciaPagoFijo, importeTotal, nota } =
+      this.state;
 
     if (!isNumeric(numeroCuotas)) {
-      alertKit.warning({
-        title: this.state.tipo,
-        message: "Ingrese el número de cuotas",
-      }, () => {
-        this.refNumeroCuotas.current.focus()
-      })
+      alertKit.warning(
+        {
+          title: this.state.tipo,
+          message: 'Ingrese el número de cuotas',
+        },
+        () => {
+          this.refNumeroCuotas.current.focus();
+        },
+      );
       return;
     }
 
     if (parseFloat(numeroCuotas) < 1) {
-      alertKit.warning({
-        title: this.state.tipo,
-        message: "El número de cuotas no puede menor a 0",
-      }, () => {  
-        this.refNumeroCuotas.current.focus()
-      })
+      alertKit.warning(
+        {
+          title: this.state.tipo,
+          message: 'El número de cuotas no puede menor a 0',
+        },
+        () => {
+          this.refNumeroCuotas.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(frecuenciaPagoFijo)) {
-      alertKit.warning({
-        title: this.state.tipo,
-        message: "Selecciona la frecuencia de cobros.",
-      }, () => {
-        this.refFrecuenciaPagoFijo.current.focus()
-      })
+      alertKit.warning(
+        {
+          title: this.state.tipo,
+          message: 'Selecciona la frecuencia de cobros.',
+        },
+        () => {
+          this.refFrecuenciaPagoFijo.current.focus();
+        },
+      );
       return;
     }
 
-    this.props.handleProcessCredito(formaPago, numeroCuotas, frecuenciaPagoFijo, importeTotal, nota, async () => {
-      await this.refModal.current.handleOnClose()
-    });
+    this.props.handleProcessCredito(
+      formaPago,
+      numeroCuotas,
+      frecuenciaPagoFijo,
+      importeTotal,
+      nota,
+      async () => {
+        await this.refModal.current.handleOnClose();
+      },
+    );
   };
 
   handleProcessCreditoVariable = async () => {
@@ -352,7 +390,6 @@ class ModalTransaccion extends CustomComponent {
     //   bancosAgregados,
     //   importeTotal,
     // } = this.state;
-
     // const {detalleVenta} = this.props;
     /*
         let metodoPagoLista = [...bancosAgregados];
@@ -476,7 +513,6 @@ class ModalTransaccion extends CustomComponent {
     //   bancosAgregados,
     //   importeTotal,
     // } = this.state;
-
     // const {detalleVenta} = this.props;
     /*
         let metodoPagoLista = [...bancosAgregados];
@@ -640,7 +676,8 @@ class ModalTransaccion extends CustomComponent {
         return (
           <>
             <h5>
-              RESTANTE: <span>{numberFormat(currentAmount - total, codiso)}</span>
+              RESTANTE:{' '}
+              <span>{numberFormat(currentAmount - total, codiso)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -651,7 +688,8 @@ class ModalTransaccion extends CustomComponent {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{numberFormat(total - currentAmount, codiso)}</span>
+              POR COBRAR:{' '}
+              <span>{numberFormat(total - currentAmount, codiso)}</span>
             </h5>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
@@ -666,13 +704,15 @@ class ModalTransaccion extends CustomComponent {
       if (currentAmount >= total) {
         return (
           <h5>
-            SU CAMBIO ES: <span>{numberFormat(currentAmount - total, codiso)}</span>
+            SU CAMBIO ES:{' '}
+            <span>{numberFormat(currentAmount - total, codiso)}</span>
           </h5>
         );
       } else {
         return (
           <h5 className="text-danger">
-            POR COBRAR: <span>{numberFormat(total - currentAmount, codiso)}</span>
+            POR COBRAR:{' '}
+            <span>{numberFormat(total - currentAmount, codiso)}</span>
           </h5>
         );
       }
@@ -681,7 +721,8 @@ class ModalTransaccion extends CustomComponent {
         return (
           <>
             <h5>
-              RESTANTE: <span>{numberFormat(currentAmount - total, codiso)}</span>
+              RESTANTE:{' '}
+              <span>{numberFormat(currentAmount - total, codiso)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -690,7 +731,8 @@ class ModalTransaccion extends CustomComponent {
         return (
           <>
             <h5>
-              POR COBRAR: <span>{numberFormat(total - currentAmount, codiso)}</span>
+              POR COBRAR:{' '}
+              <span>{numberFormat(total - currentAmount, codiso)}</span>
             </h5>
             <h6 className="text-danger">El método de pago no genera vuelto.</h6>
           </>
@@ -705,16 +747,11 @@ class ModalTransaccion extends CustomComponent {
     const total = parseFloat(importeTotal);
     if (!isNumeric(numeroCuotas) || numeroCuotas <= 0) return 0;
     return total / numeroCuotas;
-  }
+  };
 
   render() {
-    const {
-      isOpen,
-      disabledContado,
-      disabledCreditoFijo,
-      onClose,
-      codiso,
-    } = this.props;
+    const { isOpen, disabledContado, disabledCreditoFijo, onClose, codiso } =
+      this.props;
 
     const {
       loading,
@@ -724,7 +761,7 @@ class ModalTransaccion extends CustomComponent {
       bancosAgregados,
       numeroCuotas,
       frecuenciaPagoFijo,
-      frecuenciaPagoVariable
+      frecuenciaPagoVariable,
     } = this.state;
 
     return (
@@ -736,26 +773,21 @@ class ModalTransaccion extends CustomComponent {
         onClose={onClose}
         contentLabel={this.state.title}
       >
-        <CustomModalContentForm
-          onSubmit={this.handleCobrar}
-        >
-          <CustomModalContentHeader
-            contentRef={this.refModal}>
+        <CustomModalContentForm onSubmit={this.handleCobrar}>
+          <CustomModalContentHeader contentRef={this.refModal}>
             {this.state.title}
           </CustomModalContentHeader>
 
           <CustomModalContentBody>
-            <SpinnerView
-              loading={loading}
-              message={'Cargando datos...'}
-            />
+            <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             {/* Titutlo del modal */}
             <Row>
               <Column>
                 <div className="text-center">
                   <h5>
-                    TOTAL A COBRAR: <span>{numberFormat(importeTotal, codiso)}</span>
+                    TOTAL A COBRAR:{' '}
+                    <span>{numberFormat(importeTotal, codiso)}</span>
                   </h5>
                 </div>
               </Column>
@@ -779,7 +811,9 @@ class ModalTransaccion extends CustomComponent {
               {/* Al contado */}
               <Column className="col-md-6 col-sm-12" formGroup={true}>
                 <Button
-                  className={`${formaPago === CONTADO ? 'btn-primary' : 'btn-light'} btn-block`}
+                  className={`${
+                    formaPago === CONTADO ? 'btn-primary' : 'btn-light'
+                  } btn-block`}
                   title="Pago al contado"
                   disabled={disabledContado}
                   onClick={() => this.handleSelectTipoPago(CONTADO)}
@@ -798,10 +832,13 @@ class ModalTransaccion extends CustomComponent {
               {/* Crédito fijo*/}
               <Column className="col-md-6 col-sm-12">
                 <Button
-                  className={`${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'} btn-block`}
+                  className={`${
+                    formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
+                  } btn-block`}
                   title="Pago al credito"
                   disabled={disabledCreditoFijo}
-                  onClick={() => this.handleSelectTipoPago(CREDITO_FIJO)}>
+                  onClick={() => this.handleSelectTipoPago(CREDITO_FIJO)}
+                >
                   <Row>
                     <Column className="col-md-12">
                       <i className="bi bi-boxes fa-2x"></i>
@@ -856,7 +893,7 @@ class ModalTransaccion extends CustomComponent {
 
             {/* contado detalle */}
             {formaPago === CONTADO && (
-              <Row >
+              <Row>
                 <Column ref={this.refMetodoPagoContenedor} formGroup={true}>
                   <h6>Lista de métodos:</h6>
                   {bancosAgregados.map((item, index) => (
@@ -865,8 +902,12 @@ class ModalTransaccion extends CustomComponent {
                       idBanco={item.idBanco}
                       name={item.nombre}
                       monto={item.monto}
-                      handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
-                      handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+                      handleInputMontoBancosAgregados={
+                        this.handleInputMontoBancosAgregados
+                      }
+                      handleRemoveItemBancosAgregados={
+                        this.handleRemoveItemBancosAgregados
+                      }
                     />
                   ))}
                 </Column>
@@ -874,7 +915,7 @@ class ModalTransaccion extends CustomComponent {
                 <Column className="col-12" formGroup={true}>
                   <Select
                     group={true}
-                    label={"Agregar método de cobro:"}
+                    label={'Agregar método de cobro:'}
                     iconLeft={<i className="bi bi-tag-fill"></i>}
                     title="Lista metodo de cobro"
                     ref={this.refMetodoContado}
@@ -886,7 +927,8 @@ class ModalTransaccion extends CustomComponent {
                       >
                         <i className="bi bi-plus-circle-fill"></i>
                       </Button>
-                    }>
+                    }
+                  >
                     {bancos.map((item, index) => (
                       <option key={index} value={item.idBanco}>
                         {item.nombre}
@@ -909,13 +951,11 @@ class ModalTransaccion extends CustomComponent {
             {formaPago === CREDITO_FIJO && (
               <Row>
                 <Column>
-
                   <div className="form-group">
                     <span className="text-sm">
                       <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                      Los pagos se efectúan en función del número de
-                      cuotas, con una alerta que indica la frecuencia de
-                      los pagos.
+                      Los pagos se efectúan en función del número de cuotas, con
+                      una alerta que indica la frecuencia de los pagos.
                     </span>
                   </div>
 
@@ -923,7 +963,7 @@ class ModalTransaccion extends CustomComponent {
                     <Input
                       group={true}
                       iconLeft={<i className="bi bi-hourglass-split"></i>}
-                      role={"float"}
+                      role={'float'}
                       placeholder="Número de cuotas"
                       ref={this.refNumeroCuotas}
                       value={numeroCuotas}
@@ -939,7 +979,8 @@ class ModalTransaccion extends CustomComponent {
                       title="Lista frecuencia de pago"
                       ref={this.refFrecuenciaPagoFijo}
                       value={frecuenciaPagoFijo}
-                      onChange={this.handleSelectFrecuenciaPagoFijo}>
+                      onChange={this.handleSelectFrecuenciaPagoFijo}
+                    >
                       <option value="">-- Frecuencia de pago --</option>
                       <option value="15">Quinsenal</option>
                       <option value="30">Mensual</option>
@@ -967,8 +1008,8 @@ class ModalTransaccion extends CustomComponent {
                     <span className="text-sm">
                       <i className="bi bi-info-circle text-success text-lg"></i>{' '}
                       Los pagos se realizan de acuerdo con la frecuencia
-                      establecida, con alertas programadas para recordar
-                      las fechas de pago.
+                      establecida, con alertas programadas para recordar las
+                      fechas de pago.
                     </span>
                   </div>
 
@@ -993,8 +1034,8 @@ class ModalTransaccion extends CustomComponent {
             <Row>
               <Column className="col-12">
                 <TextArea
-                  label={"Notas internas:"}
-                  placeholder={"Ingrese alguna nota interna."}
+                  label={'Notas internas:'}
+                  placeholder={'Ingrese alguna nota interna.'}
                   value={this.state.nota}
                   onChange={this.handleInputNota}
                 />
@@ -1019,25 +1060,22 @@ class ModalTransaccion extends CustomComponent {
           </CustomModalContentBody>
 
           <CustomModalContentFooter>
-            <Button
-              type="submit"
-              className="btn-success"
-            >
-              <i className='fa fa-save'></i> Registrar
+            <Button type="submit" className="btn-success">
+              <i className="fa fa-save"></i> Registrar
             </Button>
 
             <Button
               className="btn-danger"
               onClick={async () => await this.refModal.current.handleOnClose()}
             >
-              <i className='fa fa-close'></i> Cancelar
+              <i className="fa fa-close"></i> Cancelar
             </Button>
           </CustomModalContentFooter>
         </CustomModalContentForm>
       </CustomModal>
     );
   }
-};
+}
 
 ModalTransaccion.propTypes = {
   tipo: PropTypes.string.isRequired,
@@ -1051,8 +1089,8 @@ ModalTransaccion.propTypes = {
 
   onClose: PropTypes.func.isRequired,
   handleProcessContado: PropTypes.func,
-  handleProcessCredito: PropTypes.func
-}
+  handleProcessCredito: PropTypes.func,
+};
 
 const MetodoPago = ({
   idBanco,
@@ -1065,7 +1103,7 @@ const MetodoPago = ({
     <Input
       autoFocus={true}
       group={true}
-      role={"float"}
+      role={'float'}
       placeholder="Monto"
       value={monto}
       onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
@@ -1097,6 +1135,6 @@ MetodoPago.propTypes = {
   monto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   handleInputMontoBancosAgregados: PropTypes.func.isRequired,
   handleRemoveItemBancosAgregados: PropTypes.func.isRequired,
-}
+};
 
 export default ModalTransaccion;

@@ -2,10 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
-import {
-  isEmpty,
-  isText
-} from '../../../../helper/utils.helper';
+import { isEmpty, isText } from '../../../../helper/utils.helper';
 import {
   getIdPerfil,
   updatePerfil,
@@ -84,59 +81,67 @@ class PerfilEditar extends CustomComponent {
 
   handleEditar = () => {
     if (isEmpty(this.state.descripcion)) {
-      alertKit.warning({
-        title: "Perfil",
-        message: "!Ingrese la descripción del perfil!",
-      }, () => {
-        this.refDescripcion.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Perfil',
+          message: '!Ingrese la descripción del perfil!',
+        },
+        () => {
+          this.refDescripcion.current.focus();
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      title: "Perfil",
-      message: '¿Estás seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Perfil',
+        message: '¿Estás seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          const data = {
+            descripcion: this.state.descripcion.trim(),
+            idEmpresa: 'EM0001',
+            idUsuario: this.state.idUsuario,
+            idPerfil: this.state.idPerfil,
+          };
+
+          alertKit.loading({
+            message: 'Procesando información...',
+          });
+
+          const response = await updatePerfil(data);
+
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Perfil',
+                message: response.data,
+              },
+              () => {
+                this.props.history.goBack();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              subTitle: 'Perfil',
+              message: response.getMessage(),
+            });
+          }
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-
-        const data = {
-          descripcion: this.state.descripcion.trim(),
-          idEmpresa: 'EM0001',
-          idUsuario: this.state.idUsuario,
-          idPerfil: this.state.idPerfil,
-        };
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await updatePerfil(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Perfil",
-            message: response.data,
-          }, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.warning({
-            subTitle: "Perfil",
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
+    );
   };
 
   render() {
@@ -148,15 +153,20 @@ class PerfilEditar extends CustomComponent {
         />
 
         <Title
-          title='Perfil'
-          subTitle='EDITAR'
+          title="Perfil"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup>
             <Input
-              label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Descripción:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese la descripción."
               ref={this.refDescripcion}
               value={this.state.descripcion}
@@ -167,10 +177,7 @@ class PerfilEditar extends CustomComponent {
 
         <Row>
           <Column className="col-md-12" formGroup>
-            <Button
-              className="btn-warning"
-              onClick={this.handleEditar}
-            >
+            <Button className="btn-warning" onClick={this.handleEditar}>
               <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button

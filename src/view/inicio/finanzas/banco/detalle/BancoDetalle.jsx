@@ -8,7 +8,10 @@ import {
 } from '../../../../../helper/utils.helper';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailBanco, detailListBanco } from '../../../../../network/rest/principal.network';
+import {
+  detailBanco,
+  detailListBanco,
+} from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -18,11 +21,19 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 
 class BancoDetalle extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -70,28 +81,35 @@ class BancoDetalle extends CustomComponent {
 
   async loadDataId(id) {
     const params = {
-      idBanco: id
-    }
+      idBanco: id,
+    };
 
     const response = await detailBanco(params, this.abortControllerView.signal);
     if (response instanceof SuccessReponse) {
-
       const banco = response.data.banco;
       const monto = response.data.monto;
 
-      this.setState({
-        idBanco: id,
-        nombre: banco.nombre,
-        cci: banco.cci,
-        tipoCuenta: banco.tipoCuenta === 1 ? "BANCO" : banco.tipoCuenta === 2 ? "TARJETA" : "EFECTIVO",
-        numCuenta: banco.numCuenta,
-        moneda: banco.moneda,
-        codiso: banco.codiso,
-        saldo: monto,
-        initial: false,
-      }, async () => {
-        await this.loadingData()
-      });
+      this.setState(
+        {
+          idBanco: id,
+          nombre: banco.nombre,
+          cci: banco.cci,
+          tipoCuenta:
+            banco.tipoCuenta === 1
+              ? 'BANCO'
+              : banco.tipoCuenta === 2
+                ? 'TARJETA'
+                : 'EFECTIVO',
+          numCuenta: banco.numCuenta,
+          moneda: banco.moneda,
+          codiso: banco.codiso,
+          saldo: monto,
+          initial: false,
+        },
+        async () => {
+          await this.loadingData();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -134,10 +152,15 @@ class BancoDetalle extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await detailListBanco(data, this.abortControllerTable.signal);
+    const response = await detailListBanco(
+      data,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
 
       this.setState({
         loading: false,
@@ -158,13 +181,11 @@ class BancoDetalle extends CustomComponent {
     }
   };
 
-
   async onEventImprimir() {
     // const data = {
     //   idBanco: this.state.idBanco,
     //   idEmpresa: 'EM0001',
     // };
-
     // let ciphertext = CryptoJS.AES.encrypt(
     //   JSON.stringify(data),
     //   'key-report-inmobiliaria',
@@ -177,7 +198,7 @@ class BancoDetalle extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='6'
+          colSpan="6"
           message={'Cargando información de la tabla...'}
         />
       );
@@ -192,24 +213,50 @@ class BancoDetalle extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1
-        ? <span className="badge badge-success">ACTIVO</span>
-        : <span className="badge badge-danger">ANULADO</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="badge badge-success">ACTIVO</span>
+        ) : (
+          <span className="badge badge-danger">ANULADO</span>
+        );
 
       return (
         <TableRow key={index}>
           <TableCell>{item.id}</TableCell>
-          <TableCell>{item.fecha} <br /> {formatTime(item.hora)} </TableCell>
           <TableCell>
-            <Link className='btn-link' to={getPathNavigation(item.tipo, item.idComprobante)}>
+            {item.fecha} <br /> {formatTime(item.hora)}{' '}
+          </TableCell>
+          <TableCell>
+            <Link
+              className="btn-link"
+              to={getPathNavigation(item.tipo, item.idComprobante)}
+            >
               {item.comprobante}
               <br />
               {item.serie}-{formatNumberWithZeros(item.numeracion)}
             </Link>
           </TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell className="text-right">{item.ingreso == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.ingreso, item.codiso)}</span>}</TableCell>
-          <TableCell className="text-right">{item.egreso == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.egreso, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">
+            {item.ingreso == 0 ? (
+              ''
+            ) : (
+              <span>
+                <i className="fa fa-plus text-success"></i>{' '}
+                {numberFormat(item.ingreso, item.codiso)}
+              </span>
+            )}
+          </TableCell>
+          <TableCell className="text-right">
+            {item.egreso == 0 ? (
+              ''
+            ) : (
+              <span>
+                <i className="fa fa-minus text-danger"></i>{' '}
+                {numberFormat(item.egreso, item.codiso)}
+              </span>
+            )}
+          </TableCell>
         </TableRow>
       );
     });
@@ -218,37 +265,26 @@ class BancoDetalle extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <SpinnerView 
+        <SpinnerView
           loading={this.state.initial}
           message={this.state.messageLoading}
         />
 
         <Title
-          title='Banco'
-          subTitle='DETALLE'
+          title="Banco"
+          subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.onEventImprimir}
-            >
+            <Button className="btn-light" onClick={this.onEventImprimir}>
               <i className="fa fa-print"></i> Imprimir
-            </Button>
-            {' '}
-            <Button
-              className="btn-light"
-              onClick={this.loadingInit}
-            >
-              <i className="fa fa-plus"></i>  Agregar dinero
-            </Button>
-            {' '}
-            <Button
-              className="btn-light"
-              onClick={this.loadingInit}
-            >
+            </Button>{' '}
+            <Button className="btn-light" onClick={this.loadingInit}>
+              <i className="fa fa-plus"></i> Agregar dinero
+            </Button>{' '}
+            <Button className="btn-light" onClick={this.loadingInit}>
               <i className="fa fa-minus"></i> Disminuir dinero
             </Button>
           </Column>
@@ -305,9 +341,7 @@ class BancoDetalle extends CustomComponent {
                   <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                     <strong
                       className={
-                        this.state.saldo <= 0
-                          ? 'text-danger'
-                          : 'text-success'
+                        this.state.saldo <= 0 ? 'text-danger' : 'text-success'
                       }
                     >
                       {numberFormat(this.state.saldo, this.state.codiso)}
@@ -334,9 +368,7 @@ class BancoDetalle extends CustomComponent {
                     <TableHead width="10%">Egreso</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

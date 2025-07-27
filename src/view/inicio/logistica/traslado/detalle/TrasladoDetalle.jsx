@@ -14,7 +14,16 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableCell, TableHead, TableHeader, TableResponsive, TableBody, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableBody,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
@@ -62,9 +71,7 @@ class TrasladoDetalle extends CustomComponent {
   }
 
   async loadDataId(id) {
-    const [traslado] = await Promise.all([
-      this.fetchDetalleTraslado(id)
-    ]);
+    const [traslado] = await Promise.all([this.fetchDetalleTraslado(id)]);
 
     this.setState({
       fecha: traslado.cabecera.fecha,
@@ -87,7 +94,10 @@ class TrasladoDetalle extends CustomComponent {
       idTraslado: id,
     };
 
-    const responde = await detailTraslado(params, this.abortControllerView.signal,);
+    const responde = await detailTraslado(
+      params,
+      this.abortControllerView.signal,
+    );
 
     if (responde instanceof SuccessReponse) {
       return responde.data;
@@ -101,8 +111,17 @@ class TrasladoDetalle extends CustomComponent {
   }
 
   render() {
-    const { tipo, motivo, almacenOrigen, almacenDestino, sucursalDestino, estado, fecha, hora, observacion } =
-      this.state;
+    const {
+      tipo,
+      motivo,
+      almacenOrigen,
+      almacenDestino,
+      sucursalDestino,
+      estado,
+      fecha,
+      hora,
+      observacion,
+    } = this.state;
 
     return (
       <ContainerWrapper>
@@ -121,21 +140,19 @@ class TrasladoDetalle extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-light"
-            // onClick={this.handlePrintInvoices.bind(this, 'A4')}
+              // onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
-            // onClick={this.handlePrintInvoices.bind(this, '80mm')}
+              // onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
-            // onClick={this.handlePrintInvoices.bind(this, '58mm')}
+              // onClick={this.handlePrintInvoices.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
             </Button>
@@ -208,8 +225,9 @@ class TrasladoDetalle extends CustomComponent {
                       Estado
                     </TableHead>
                     <TableHead
-                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
-                        }`}
+                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${
+                        estado === 1 ? 'text-success' : 'text-danger'
+                      }`}
                     >
                       {estado === 1 ? 'ACTIVO' : 'ANULADO'}
                     </TableHead>
@@ -283,6 +301,9 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedTrasladoDetalle = connect(mapStateToProps, null)(TrasladoDetalle);
+const ConnectedTrasladoDetalle = connect(
+  mapStateToProps,
+  null,
+)(TrasladoDetalle);
 
 export default ConnectedTrasladoDetalle;

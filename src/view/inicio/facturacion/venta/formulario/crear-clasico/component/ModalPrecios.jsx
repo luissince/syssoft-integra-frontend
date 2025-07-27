@@ -3,7 +3,7 @@ import { CustomModalForm } from '../../../../../../../components/CustomModal';
 import Row from '../../../../../../../components/Row';
 import {
   alertWarning,
-  isNumeric
+  isNumeric,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../../components/Button';
@@ -15,15 +15,14 @@ import { obtenerListaPrecioProducto } from '../../../../../../../network/rest/pr
 import { SpinnerView } from '../../../../../../../components/Spinner';
 
 class ModalPrecios extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       precio: '',
       precios: [],
       loading: true,
-      producto: null
-    }
+      producto: null,
+    };
 
     this.peticion = false;
     this.abortController = null;
@@ -42,18 +41,18 @@ class ModalPrecios extends Component {
 
     const response = await obtenerListaPrecioProducto(
       params,
-      this.abortController.signal
+      this.abortController.signal,
     );
 
     if (response instanceof SuccessReponse) {
       this.peticion = true;
       this.abortController = null;
-      
+
       this.setState({
         loading: false,
         precios: response.data,
-        producto: producto
-      })
+        producto: producto,
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -62,7 +61,7 @@ class ModalPrecios extends Component {
       this.peticion = false;
       this.abortController = null;
     }
-  }
+  };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -79,17 +78,17 @@ class ModalPrecios extends Component {
     });
     this.index = -1;
     this.peticion = false;
-  }
+  };
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.precio)) {
-      alertWarning("Venta", "Seleccione un precio.")
+      alertWarning('Venta', 'Seleccione un precio.');
       return;
     }
 
     this.props.handleSave(this.state.producto, Number(this.state.precio));
-    await this.refModal.current.handleOnClose()
-  }
+    await this.refModal.current.handleOnClose();
+  };
 
   render() {
     const { loading, precios, producto } = this.state;
@@ -107,10 +106,7 @@ class ModalPrecios extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView
-              loading={loading}
-              message={"Cargando datos..."}
-            />
+            <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             <Row>
               <Column>
@@ -123,35 +119,36 @@ class ModalPrecios extends Component {
                 <div className="form-group">
                   <label>Lista de Precios:</label>
                   <ul className="list-group">
-                    {producto && precios.map((item, index) => (
-                      <Button
-                        key={index}
-                        contentClassName={`list-group-item list-group-item-action ${this.index === index ? "active": ""}`}
-                        onClick={() => {
-                          this.index = index;
-                          this.setState({ precio: parseFloat(item.valor) })
-                        }}
-                      >
-                        {item.nombre} - {item.valor}
-                      </Button>
-                    ))}
+                    {producto &&
+                      precios.map((item, index) => (
+                        <Button
+                          key={index}
+                          contentClassName={`list-group-item list-group-item-action ${
+                            this.index === index ? 'active' : ''
+                          }`}
+                          onClick={() => {
+                            this.index = index;
+                            this.setState({ precio: parseFloat(item.valor) });
+                          }}
+                        >
+                          {item.nombre} - {item.valor}
+                        </Button>
+                      ))}
                   </ul>
                 </div>
               </Column>
             </Row>
           </>
         }
-
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-success">
+            <Button type="submit" className="btn-success">
               <i className="fa fa-save"></i> Guardar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -166,6 +163,6 @@ ModalPrecios.propTypes = {
   onClose: PropTypes.func.isRequired,
 
   handleSave: PropTypes.func.isRequired,
-}
+};
 
 export default ModalPrecios;

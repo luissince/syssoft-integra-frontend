@@ -1,8 +1,5 @@
 import PropTypes from 'prop-types';
-import {
-  formatTime,
-  isEmpty,
-} from '../../../../helper/utils.helper';
+import { formatTime, isEmpty } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
@@ -18,7 +15,15 @@ import Title from '../../../../components/Title';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { alertKit } from 'alert-kit';
@@ -28,7 +33,6 @@ import { alertKit } from 'alert-kit';
  * @extends React.Component
  */
 class Perfiles extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -84,7 +88,7 @@ class Perfiles extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -158,9 +162,9 @@ class Perfiles extends CustomComponent {
   };
 
   handleBorrar(idPerfil) {
-    alertKit.question({   
-      headerTitle: "SysSoft Integra",
-      title: "Perfil",
+    alertKit.question({
+      headerTitle: 'SysSoft Integra',
+      title: 'Perfil',
       message: '¿Estás seguro de eliminar el perfil?',
       isMoveable: true,
       showCloseButton: false,
@@ -184,8 +188,8 @@ class Perfiles extends CustomComponent {
 
             if (response instanceof SuccessReponse) {
               alertKit.success({
-                headerTitle: "SysSoft Integra",
-                title: "Perfil",
+                headerTitle: 'SysSoft Integra',
+                title: 'Perfil',
                 message: response.data,
                 buttons: [
                   {
@@ -199,10 +203,9 @@ class Perfiles extends CustomComponent {
             }
 
             if (response instanceof ErrorResponse) {
-
               alertKit.warning({
-                headerTitle: "SysSoft Integra",
-                title: "Perfil",
+                headerTitle: 'SysSoft Integra',
+                title: 'Perfil',
                 message: response.getMessage(),
                 buttons: [
                   {
@@ -217,7 +220,7 @@ class Perfiles extends CustomComponent {
         },
         {
           html: "<i class='fa fa-close'></i> Cancelar",
-          class: ['btn', 'btn-outline-danger']
+          class: ['btn', 'btn-outline-danger'],
         },
       ],
     });
@@ -227,8 +230,8 @@ class Perfiles extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='6'
-          message='Cargando información de la tabla...'
+          colSpan="6"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -257,7 +260,7 @@ class Perfiles extends CustomComponent {
               className="btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idPerfil)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -266,7 +269,7 @@ class Perfiles extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idPerfil)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -280,24 +283,17 @@ class Perfiles extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Perfiles'
-          subTitle='LISTA'
+          title="Perfiles"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -317,20 +313,24 @@ class Perfiles extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="30%">Descripción</TableHead>
                     <TableHead width="30%">Empresa</TableHead>
                     <TableHead width="20%">Creación</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -352,9 +352,9 @@ class Perfiles extends CustomComponent {
 Perfiles.propTypes = {
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
-    pathname: PropTypes.string
-  })
-}
+    pathname: PropTypes.string,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

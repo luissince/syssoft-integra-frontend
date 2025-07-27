@@ -6,7 +6,11 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailCobro, detailConsulta, documentsPdfInvoicesCobro } from '../../../../../network/rest/principal.network';
+import {
+  detailCobro,
+  detailConsulta,
+  documentsPdfInvoicesCobro,
+} from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -15,7 +19,16 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -26,7 +39,6 @@ import pdfVisualizer from 'pdf-visualizer';
  * @extends React.Component
  */
 class ConsultaDetalle extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -47,7 +59,6 @@ class ConsultaDetalle extends CustomComponent {
       fecha: '',
       hora: '',
     };
-
 
     // Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -122,7 +133,6 @@ class ConsultaDetalle extends CustomComponent {
     }
   }
 
-
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -138,7 +148,6 @@ class ConsultaDetalle extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
-
 
   /*
   |--------------------------------------------------------------------------
@@ -156,7 +165,6 @@ class ConsultaDetalle extends CustomComponent {
   |
    */
 
-
   render() {
     return (
       <ContainerWrapper>
@@ -166,8 +174,8 @@ class ConsultaDetalle extends CustomComponent {
         />
 
         <Title
-          title='Consulta'
-          subTitle='DETALLE'
+          title="Consulta"
+          subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -268,7 +276,6 @@ class ConsultaDetalle extends CustomComponent {
             </Table>
           </Column>
         </Row>
-
       </ContainerWrapper>
     );
   }
@@ -279,18 +286,18 @@ ConsultaDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
       razonSocial: PropTypes.string,
-    })
+    }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
       paginaWeb: PropTypes.string,
       email: PropTypes.string,
-    })
+    }),
   }),
 };
 
@@ -301,6 +308,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedConsultaDetalle = connect(mapStateToProps, null)(ConsultaDetalle);
+const ConnectedConsultaDetalle = connect(
+  mapStateToProps,
+  null,
+)(ConsultaDetalle);
 
 export default ConnectedConsultaDetalle;

@@ -32,7 +32,16 @@ import RadioButton from '../../../../../components/RadioButton';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import { alertKit } from 'alert-kit';
 import ModalLote from './ModalLote';
 
@@ -100,7 +109,7 @@ class TrasladorCrear extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.initial = { ...this.state }
+    this.initial = { ...this.state };
 
     // Referencial al padre
     this.refTableBody = React.createRef();
@@ -167,10 +176,12 @@ class TrasladorCrear extends CustomComponent {
     const [almacenes, motivoTraslado, sucursales] = await Promise.all([
       this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
       this.fetchComboMotivoTraslado(),
-      this.fetchComboSucursal()
+      this.fetchComboSucursal(),
     ]);
 
-    const newSucursal = sucursales.filter(item => item.idSucursal !== this.state.idSucursal)
+    const newSucursal = sucursales.filter(
+      (item) => item.idSucursal !== this.state.idSucursal,
+    );
 
     await this.setStateAsync({
       almacenes,
@@ -235,7 +246,9 @@ class TrasladorCrear extends CustomComponent {
   }
 
   addProducto(producto, lotes = null) {
-    const exists = this.state.detalles.find((item) => item.idProducto === producto.idProducto)
+    const exists = this.state.detalles.find(
+      (item) => item.idProducto === producto.idProducto,
+    );
 
     if (exists) {
       alertKit.warning({
@@ -290,7 +303,7 @@ class TrasladorCrear extends CustomComponent {
 
   handleFilterProducto = async (value) => {
     const searchWord = value;
-    this.setState({ producto: null, });
+    this.setState({ producto: null });
 
     if (isEmpty(searchWord)) {
       this.setState({ productos: [] });
@@ -298,19 +311,24 @@ class TrasladorCrear extends CustomComponent {
     }
 
     const params = {
-      idAlmacen: this.state.idTipoTraslado === "TT0001" ? this.state.idAlmacenOrigenInterno : this.state.idAlmacenOrigenExterno,
+      idAlmacen:
+        this.state.idTipoTraslado === 'TT0001'
+          ? this.state.idAlmacenOrigenInterno
+          : this.state.idAlmacenOrigenExterno,
       filtrar: searchWord,
-    }
+    };
 
     const productos = await this.fetchFiltrarProducto(params);
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
-    const filteredProductos = productos.filter((item) => item.idTipoProducto !== SERVICIO);
+    const filteredProductos = productos.filter(
+      (item) => item.idTipoProducto !== SERVICIO,
+    );
 
     this.setState({
       productos: filteredProductos,
     });
-  }
+  };
 
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
@@ -318,181 +336,250 @@ class TrasladorCrear extends CustomComponent {
     if (value.lote === 1) {
       this.handleOpenLote(value);
     } else {
-      this.setState({
-        producto: value,
-        productos: [],
-      }, () => {
-        this.addProducto(value);
-      });
+      this.setState(
+        {
+          producto: value,
+          productos: [],
+        },
+        () => {
+          this.addProducto(value);
+        },
+      );
     }
-  }
+  };
 
   handleOptionTipoTraslado = (event) => {
     this.setState({
       idTipoTraslado: event.target.value,
-      almacenesOrigenInterno: this.state.almacenes
+      almacenesOrigenInterno: this.state.almacenes,
     });
-  }
-
+  };
 
   handleSelectMotivojuste = (event) => {
-    this.setState({ idMotivoTraslado: event.target.value, });
-  }
+    this.setState({ idMotivoTraslado: event.target.value });
+  };
 
   handleSelectAlmacenOrigenInterno = (event) => {
-    const almacenesDestinoInterno = this.state.almacenesOrigenInterno.filter(item => item.idAlmacen !== event.target.value)
+    const almacenesDestinoInterno = this.state.almacenesOrigenInterno.filter(
+      (item) => item.idAlmacen !== event.target.value,
+    );
 
-    const idAlmacenDestinoInterno = almacenesDestinoInterno.length === 1 ? almacenesDestinoInterno[0].idAlmacen : ""
+    const idAlmacenDestinoInterno =
+      almacenesDestinoInterno.length === 1
+        ? almacenesDestinoInterno[0].idAlmacen
+        : '';
 
     this.setState({
       idAlmacenOrigenInterno: event.target.value,
       idAlmacenDestinoInterno,
-      almacenesDestinoInterno
+      almacenesDestinoInterno,
     });
 
     if (event.target.value === '') {
-      this.refIdAlmacenDesitnoInterno.current.disabled = true
+      this.refIdAlmacenDesitnoInterno.current.disabled = true;
     } else {
-      this.refIdAlmacenDesitnoInterno.current.disabled = false
+      this.refIdAlmacenDesitnoInterno.current.disabled = false;
     }
-  }
+  };
 
   handleSelectAlmacenDestinoInterno = (event) => {
-    this.setState({ idAlmacenDestinoInterno: event.target.value, });
-  }
+    this.setState({ idAlmacenDestinoInterno: event.target.value });
+  };
 
   handleSelectAlmacenOrigenExterno = (event) => {
-    this.setState({ idAlmacenOrigenExterno: event.target.value })
-  }
+    this.setState({ idAlmacenOrigenExterno: event.target.value });
+  };
 
   handleSelectSucursalExterno = async (event) => {
     this.setState({
       initialLoad: true,
       idSucursalExterno: event.target.value,
-      idAlmacenDestinoExterno: ''
-    })
+      idAlmacenDestinoExterno: '',
+    });
 
     const params = {
-      idSucursal: event.target.value
-    }
+      idSucursal: event.target.value,
+    };
 
-    const almacenes = await this.fetchComboAlmacen(params, this.abortController.signal);
+    const almacenes = await this.fetchComboAlmacen(
+      params,
+      this.abortController.signal,
+    );
 
     this.setState({
       almacenesExterno: almacenes,
-      initialLoad: false
-    })
+      initialLoad: false,
+    });
 
     if (event.target.value === '') {
-      this.refIdAlmacenDestinoExterno.current.disabled = true
+      this.refIdAlmacenDestinoExterno.current.disabled = true;
     } else {
-      this.refIdAlmacenDestinoExterno.current.disabled = false
+      this.refIdAlmacenDestinoExterno.current.disabled = false;
     }
-  }
+  };
 
   handleSelectAlmacenDestinoExterno = (event) => {
-    this.setState({ idAlmacenDestinoExterno: event.target.value })
-  }
+    this.setState({ idAlmacenDestinoExterno: event.target.value });
+  };
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoTraslado)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione el tipo de traslado.',
-      }, () => {
-        this.refIdTipoTraslado.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione el tipo de traslado.',
+        },
+        () => {
+          this.refIdTipoTraslado.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idMotivoTraslado)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione el motivo traslado.',
-      }, () => {
-        this.refIdMotivoTraslado.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione el motivo traslado.',
+        },
+        () => {
+          this.refIdMotivoTraslado.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0001' && isEmpty(this.state.idAlmacenOrigenInterno)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione el almacen origin.',
-      }, () => {
-        this.refIdAlmacenOriginInterno.current.focus();
-      });
+    if (
+      this.state.idTipoTraslado === 'TT0001' &&
+      isEmpty(this.state.idAlmacenOrigenInterno)
+    ) {
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione el almacen origin.',
+        },
+        () => {
+          this.refIdAlmacenOriginInterno.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0001' && isEmpty(this.state.idAlmacenDestinoInterno)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione el almacen destino.',
-      }, () => {
-        this.refIdAlmacenDesitnoInterno.current.focus();
-      });
+    if (
+      this.state.idTipoTraslado === 'TT0001' &&
+      isEmpty(this.state.idAlmacenDestinoInterno)
+    ) {
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione el almacen destino.',
+        },
+        () => {
+          this.refIdAlmacenDesitnoInterno.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0002' && isEmpty(this.state.idAlmacenOrigenExterno)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione el almacen origin.',
-      }, () => {
-        this.refIdAlmacenOrigenExterno.current.focus();
-      });
+    if (
+      this.state.idTipoTraslado === 'TT0002' &&
+      isEmpty(this.state.idAlmacenOrigenExterno)
+    ) {
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione el almacen origin.',
+        },
+        () => {
+          this.refIdAlmacenOrigenExterno.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0002' && isEmpty(this.state.idSucursalExterno)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione la sucursal.',
-      }, () => {
-        this.refIdSucursalExterno.current.focus();
-      });
+    if (
+      this.state.idTipoTraslado === 'TT0002' &&
+      isEmpty(this.state.idSucursalExterno)
+    ) {
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione la sucursal.',
+        },
+        () => {
+          this.refIdSucursalExterno.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0002' && isEmpty(this.state.idAlmacenDestinoExterno)) {
-      alertKit.warning({
-        title: 'Traslado',
-        message: 'Seleccione el almacen destino.',
-      }, () => {
-        this.refIdAlmacenDestinoExterno.current.focus();
-      });
+    if (
+      this.state.idTipoTraslado === 'TT0002' &&
+      isEmpty(this.state.idAlmacenDestinoExterno)
+    ) {
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Seleccione el almacen destino.',
+        },
+        () => {
+          this.refIdAlmacenDestinoExterno.current.focus();
+        },
+      );
       return;
     }
 
     if (this.state.idTipoTraslado === 'TT0001') {
       this.setState({
-        nombreMotivoAjuste: this.refIdMotivoTraslado.current.options[this.refIdMotivoTraslado.current.selectedIndex].innerText,
-        nombreAlmacenOrigenInterno: this.refIdAlmacenOriginInterno.current.options[this.refIdAlmacenOriginInterno.current.selectedIndex].innerText,
-        nombreAlmacenDestinoInterno: this.refIdAlmacenDesitnoInterno.current.options[this.refIdAlmacenDesitnoInterno.current.selectedIndex].innerText,
+        nombreMotivoAjuste:
+          this.refIdMotivoTraslado.current.options[
+            this.refIdMotivoTraslado.current.selectedIndex
+          ].innerText,
+        nombreAlmacenOrigenInterno:
+          this.refIdAlmacenOriginInterno.current.options[
+            this.refIdAlmacenOriginInterno.current.selectedIndex
+          ].innerText,
+        nombreAlmacenDestinoInterno:
+          this.refIdAlmacenDesitnoInterno.current.options[
+            this.refIdAlmacenDesitnoInterno.current.selectedIndex
+          ].innerText,
         paso: 2,
-      })
+      });
     } else {
       this.setState({
-        nombreMotivoAjuste: this.refIdMotivoTraslado.current.options[this.refIdMotivoTraslado.current.selectedIndex].innerText,
-        nombreAlmacenOriginExterno: this.refIdAlmacenOrigenExterno.current.options[this.refIdAlmacenOrigenExterno.current.selectedIndex].innerText,
-        nombreSucursalExterno: this.refIdSucursalExterno.current.options[this.refIdSucursalExterno.current.selectedIndex].innerText,
-        nombreAlmacenDestinoExterno: this.refIdAlmacenDestinoExterno.current.options[this.refIdAlmacenDestinoExterno.current.selectedIndex].innerText,
+        nombreMotivoAjuste:
+          this.refIdMotivoTraslado.current.options[
+            this.refIdMotivoTraslado.current.selectedIndex
+          ].innerText,
+        nombreAlmacenOriginExterno:
+          this.refIdAlmacenOrigenExterno.current.options[
+            this.refIdAlmacenOrigenExterno.current.selectedIndex
+          ].innerText,
+        nombreSucursalExterno:
+          this.refIdSucursalExterno.current.options[
+            this.refIdSucursalExterno.current.selectedIndex
+          ].innerText,
+        nombreAlmacenDestinoExterno:
+          this.refIdAlmacenDestinoExterno.current.options[
+            this.refIdAlmacenDestinoExterno.current.selectedIndex
+          ].innerText,
         paso: 2,
-      })
+      });
     }
-  }
+  };
 
   handleInputObservacion = (event) => {
     this.setState({
       observacion: event.target.value,
     });
-  }
+  };
 
   handleRemoveDetalle = (idProducto) => {
-    const detalles = this.state.detalles.filter((item) => item.idProducto !== idProducto);
+    const detalles = this.state.detalles.filter(
+      (item) => item.idProducto !== idProducto,
+    );
     this.setState({ detalles });
-  }
+  };
 
   handleInputDetalle = (event, idProducto) => {
     const { value } = event.target;
@@ -501,18 +588,24 @@ class TrasladorCrear extends CustomComponent {
         item.idProducto === idProducto ? { ...item, cantidad: value } : item,
       ),
     }));
-  }
+  };
 
   handleFocusInputTable = (event, isLastRow) => {
     if (event.key === 'Enter' && !isLastRow) {
-      const nextInput = event.target.parentElement.parentElement.nextElementSibling.querySelector('input');
+      const nextInput =
+        event.target.parentElement.parentElement.nextElementSibling.querySelector(
+          'input',
+        );
       nextInput.focus();
     }
     if (event.key === 'Enter' && isLastRow) {
-      const firstInput = event.target.parentElement.parentElement.parentElement.querySelector('input');
+      const firstInput =
+        event.target.parentElement.parentElement.parentElement.querySelector(
+          'input',
+        );
       firstInput.focus();
     }
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal lote
@@ -520,19 +613,22 @@ class TrasladorCrear extends CustomComponent {
   handleOpenLote = async (producto) => {
     this.setState({ isOpenLote: true });
     await this.refModalLote.current.loadDatos(producto);
-  }
+  };
 
   handleCloseLote = () => {
     this.setState({ isOpenLote: false });
-  }
+  };
 
   handleSaveLote = async (producto, lotes) => {
-    this.setState({
-      producto: producto,
-      productos: [],
-    }, () => {
-      this.addProducto(producto, lotes);
-    });
+    this.setState(
+      {
+        producto: producto,
+        productos: [],
+      },
+      () => {
+        this.addProducto(producto, lotes);
+      },
+    );
   };
 
   //------------------------------------------------------------------------------------------
@@ -540,107 +636,135 @@ class TrasladorCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleSave = () => {
     if (isEmpty(this.state.detalles)) {
-      alertKit.warning({
+      alertKit.warning(
+        {
+          title: 'Traslado',
+          message: 'Agregue productos en la lista para continuar.',
+        },
+        () => {
+          this.refValueProducto.current.focus();
+        },
+      );
+      return;
+    }
+
+    console.log(this.state.detalles);
+
+    if (
+      !isEmpty(
+        this.state.detalles.filter(
+          (item) => !item.lotes && getNumber(item.cantidad) <= 0,
+        ),
+      )
+    ) {
+      alertKit.warning(
+        {
+          title: 'Ajuste',
+          message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
+        },
+        () => {
+          validateNumericInputs(this.refTableBody);
+        },
+      );
+      return;
+    }
+
+    alertKit.question(
+      {
         title: 'Traslado',
-        message: 'Agregue productos en la lista para continuar.',
-      }, () => {
-        this.refValueProducto.current.focus();
-      });
-      return;
-    }
-
-    console.log(this.state.detalles)
-
-    if (!isEmpty(this.state.detalles.filter(item => !item.lotes && getNumber(item.cantidad) <= 0))) {
-      alertKit.warning({
-        title: 'Ajuste',
-        message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
-      }, () => {
-        validateNumericInputs(this.refTableBody);
-      });
-      return;
-    }
-
-    alertKit.question({
-      title: 'Traslado',
-      message: '¿Está seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+        message: '¿Está seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
-      },
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          idTipoTraslado: this.state.idTipoTraslado,
-          idMotivoTraslado: this.state.idMotivoTraslado,
-          idAlmacenOrigen: this.state.idTipoTraslado === 'TT0001' ? this.state.idAlmacenOrigenInterno : this.state.idAlmacenOrigenExterno,
-          idAlmacenDestino: this.state.idTipoTraslado === 'TT0001' ? this.state.idAlmacenDestinoInterno : this.state.idAlmacenDestinoExterno,
-          idSucursalDestino: this.state.idSucursalExterno,
-          idSucursal: this.state.idSucursal,
-          observacion: this.state.observacion,
-          idUsuario: this.state.idUsuario,
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idTipoTraslado: this.state.idTipoTraslado,
+            idMotivoTraslado: this.state.idMotivoTraslado,
+            idAlmacenOrigen:
+              this.state.idTipoTraslado === 'TT0001'
+                ? this.state.idAlmacenOrigenInterno
+                : this.state.idAlmacenOrigenExterno,
+            idAlmacenDestino:
+              this.state.idTipoTraslado === 'TT0001'
+                ? this.state.idAlmacenDestinoInterno
+                : this.state.idAlmacenDestinoExterno,
+            idSucursalDestino: this.state.idSucursalExterno,
+            idSucursal: this.state.idSucursal,
+            observacion: this.state.observacion,
+            idUsuario: this.state.idUsuario,
 
-          detalles: this.state.detalles,
-        };
+            detalles: this.state.detalles,
+          };
 
-        alertKit.loading({
-          message: 'Procesando petición...',
-        });
+          alertKit.loading({
+            message: 'Procesando petición...',
+          });
 
-        const response = await createTraslado(data);
+          const response = await createTraslado(data);
 
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: 'Traslado',
-            message: response.data,
-          }, () => {
-            this.setState(this.initial, async () => {
-              await this.loadingData();
-              this.refIdTipoTraslado.current.focus();
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Traslado',
+                message: response.data,
+              },
+              () => {
+                this.setState(this.initial, async () => {
+                  await this.loadingData();
+                  this.refIdTipoTraslado.current.focus();
+                });
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              title: 'Traslado',
+              message: response.getMessage(),
             });
-          });
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.warning({
-            title: 'Traslado',
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
+      },
+    );
   };
 
   handleBack = () => {
     this.setState({
       detalles: [],
-      paso: 1
-    })
-  }
+      paso: 1,
+    });
+  };
 
   handleClear = () => {
-    alertKit.question({
-      title: 'Traslado',
-      message: '¿Está seguro de continuar, se va limpiar toda la información?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Traslado',
+        message:
+          '¿Está seguro de continuar, se va limpiar toda la información?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          this.setState(this.initial, async () => {
+            await this.loadingData();
+            this.refIdTipoTraslado.current.focus();
+          });
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-        this.setState(this.initial, async () => {
-          await this.loadingData();
-          this.refIdTipoTraslado.current.focus();
-        });
-      }
-    });
-  }
+    );
+  };
 
   /*
     |--------------------------------------------------------------------------
@@ -672,7 +796,12 @@ class TrasladorCrear extends CustomComponent {
     return this.state.detalles.map((item, index) => {
       const isLastRow = index === this.state.detalles.length - 1;
 
-      const cantidad = item.lotes ? item.lotes.reduce((acum, lote) => acum + getNumber(lote.cantidadAjustar), 0) : Number(item.cantidad);
+      const cantidad = item.lotes
+        ? item.lotes.reduce(
+            (acum, lote) => acum + getNumber(lote.cantidadAjustar),
+            0,
+          )
+        : Number(item.cantidad);
 
       const diferencia = item.actual - cantidad;
 
@@ -701,42 +830,34 @@ class TrasladorCrear extends CustomComponent {
             {item.nombre}
           </TableCell>
           <TableCell>
-            {
-              item.lotes && (
-                <small className="text-info">
-                  <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
-                </small>
-              )
-            }
+            {item.lotes && (
+              <small className="text-info">
+                <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
+              </small>
+            )}
 
-            {
-              !item.lotes && (
-                <Input
-                  value={item.cantidad}
-                  placeholder="0"
-                  onChange={(event) =>
-                    this.handleInputDetalle(event, item.idProducto)
-                  }
-                  onKeyDown={keyNumberFloat}
-                  onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
-                />
-              )
-            }
+            {!item.lotes && (
+              <Input
+                value={item.cantidad}
+                placeholder="0"
+                onChange={(event) =>
+                  this.handleInputDetalle(event, item.idProducto)
+                }
+                onKeyDown={keyNumberFloat}
+                onKeyUp={(event) =>
+                  this.handleFocusInputTable(event, isLastRow)
+                }
+              />
+            )}
           </TableCell>
-          <TableCell className={`${diferencia <= 0 ? "text-danger" : ""}`}>
+          <TableCell className={`${diferencia <= 0 ? 'text-danger' : ''}`}>
             {rounded(diferencia)}
           </TableCell>
           <TableCell>
-            {
-              item.lotes && rounded(cantidad)
-            }
-            {
-              !item.lotes && rounded(cantidad)
-            }
+            {item.lotes && rounded(cantidad)}
+            {!item.lotes && rounded(cantidad)}
           </TableCell>
-          <TableCell>
-            {item.unidad}
-          </TableCell>
+          <TableCell>{item.unidad}</TableCell>
         </TableRow>
       );
     });
@@ -745,7 +866,6 @@ class TrasladorCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
@@ -784,9 +904,9 @@ class TrasladorCrear extends CustomComponent {
 
                 <RadioButton
                   ref={this.refIdTipoTraslado}
-                  id={"TT0001"}
-                  value={"TT0001"}
-                  name='ckTipoTraslado'
+                  id={'TT0001'}
+                  value={'TT0001'}
+                  name="ckTipoTraslado"
                   checked={this.state.idTipoTraslado === 'TT0001'}
                   onChange={this.handleOptionTipoTraslado}
                 >
@@ -794,9 +914,9 @@ class TrasladorCrear extends CustomComponent {
                 </RadioButton>
 
                 <RadioButton
-                  id={"TT0002"}
-                  value={"TT0002"}
-                  name='ckTipoTraslado'
+                  id={'TT0002'}
+                  value={'TT0002'}
+                  name="ckTipoTraslado"
                   checked={this.state.idTipoTraslado === 'TT0002'}
                   onChange={this.handleOptionTipoTraslado}
                 >
@@ -805,24 +925,21 @@ class TrasladorCrear extends CustomComponent {
               </Column>
             </Row>
 
-
             {/* Selección el motivo de traslado */}
             <Row>
               <Column formGroup={true}>
                 <Select
-                  label={"Seleccione el motivo del traslado:"}
+                  label={'Seleccione el motivo del traslado:'}
                   ref={this.refIdMotivoTraslado}
                   value={this.state.idMotivoTraslado}
                   onChange={this.handleSelectMotivojuste}
                 >
                   <option value="">-- Motivo traslado --</option>
-                  {
-                    this.state.motivoTraslado.map((item, index) => (
-                      <option key={index} value={item.idMotivoTraslado}>
-                        {item.nombre}
-                      </option>
-                    ))
-                  }
+                  {this.state.motivoTraslado.map((item, index) => (
+                    <option key={index} value={item.idMotivoTraslado}>
+                      {item.nombre}
+                    </option>
+                  ))}
                 </Select>
               </Column>
             </Row>
@@ -831,24 +948,25 @@ class TrasladorCrear extends CustomComponent {
               // Verificar si el tipo de ajuste es 'TT0001'
               this.state.idTipoTraslado === 'TT0001' && (
                 <>
-
                   {/* Selección el almacen de origen */}
                   <Row>
                     <Column formGroup={true}>
                       <Select
-                        label={"Seleccione el almacen de origen:"}
+                        label={'Seleccione el almacen de origen:'}
                         ref={this.refIdAlmacenOriginInterno}
                         value={this.state.idAlmacenOrigenInterno}
                         onChange={this.handleSelectAlmacenOrigenInterno}
                       >
                         <option value="">-- Almacen --</option>
-                        {this.state.almacenesOrigenInterno.map((item, index) => {
-                          return (
-                            <option key={index} value={item.idAlmacen}>
-                              {item.nombre}
-                            </option>
-                          );
-                        })}
+                        {this.state.almacenesOrigenInterno.map(
+                          (item, index) => {
+                            return (
+                              <option key={index} value={item.idAlmacen}>
+                                {item.nombre}
+                              </option>
+                            );
+                          },
+                        )}
                       </Select>
                     </Column>
                   </Row>
@@ -857,20 +975,22 @@ class TrasladorCrear extends CustomComponent {
                   <Row>
                     <Column formGroup={true}>
                       <Select
-                        label={"Seleccione el almacen de destino:"}
+                        label={'Seleccione el almacen de destino:'}
                         ref={this.refIdAlmacenDesitnoInterno}
                         value={this.state.idAlmacenDestinoInterno}
                         onChange={this.handleSelectAlmacenDestinoInterno}
                         disabled
                       >
                         <option value="">-- Almacen --</option>
-                        {this.state.almacenesDestinoInterno.map((item, index) => {
-                          return (
-                            <option key={index} value={item.idAlmacen}>
-                              {item.nombre}
-                            </option>
-                          );
-                        })}
+                        {this.state.almacenesDestinoInterno.map(
+                          (item, index) => {
+                            return (
+                              <option key={index} value={item.idAlmacen}>
+                                {item.nombre}
+                              </option>
+                            );
+                          },
+                        )}
                       </Select>
                     </Column>
                   </Row>
@@ -885,7 +1005,8 @@ class TrasladorCrear extends CustomComponent {
                   <Row>
                     <Column formGroup={true}>
                       <p>
-                        <i className="bi bi-arrow-bar-down"></i> Almacen de origin
+                        <i className="bi bi-arrow-bar-down"></i> Almacen de
+                        origin
                       </p>
                     </Column>
                   </Row>
@@ -894,19 +1015,17 @@ class TrasladorCrear extends CustomComponent {
                   <Row>
                     <Column formGroup={true}>
                       <Select
-                        label={"Seleccione el almacen:"}
+                        label={'Seleccione el almacen:'}
                         ref={this.refIdAlmacenOrigenExterno}
                         value={this.state.idAlmacenOrigenExterno}
                         onChange={this.handleSelectAlmacenOrigenExterno}
                       >
                         <option value="">-- Almacen --</option>
-                        {
-                          this.state.almacenes.map((item, index) => (
-                            <option key={index} value={item.idAlmacen}>
-                              {item.nombre}
-                            </option>
-                          ))
-                        }
+                        {this.state.almacenes.map((item, index) => (
+                          <option key={index} value={item.idAlmacen}>
+                            {item.nombre}
+                          </option>
+                        ))}
                       </Select>
                     </Column>
                   </Row>
@@ -914,7 +1033,8 @@ class TrasladorCrear extends CustomComponent {
                   <Row>
                     <Column formGroup={true}>
                       <p>
-                        <i className="bi bi-arrow-bar-right"></i> Sucural y almacen de destino
+                        <i className="bi bi-arrow-bar-right"></i> Sucural y
+                        almacen de destino
                       </p>
                     </Column>
                   </Row>
@@ -923,36 +1043,34 @@ class TrasladorCrear extends CustomComponent {
                   <Row>
                     <Column className="col-md-6 col-12" formGroup={true}>
                       <Select
-                        label={"Seleccione la sucursal:"}
+                        label={'Seleccione la sucursal:'}
                         ref={this.refIdSucursalExterno}
                         value={this.state.idSucursalExterno}
-                        onChange={this.handleSelectSucursalExterno}>
+                        onChange={this.handleSelectSucursalExterno}
+                      >
                         <option value="">-- Sucursal --</option>
-                        {
-                          this.state.sucursales.map((item, index) => (
-                            <option key={index} value={item.idSucursal}>
-                              {item.nombre}
-                            </option>
-                          ))
-                        }
+                        {this.state.sucursales.map((item, index) => (
+                          <option key={index} value={item.idSucursal}>
+                            {item.nombre}
+                          </option>
+                        ))}
                       </Select>
                     </Column>
 
                     <Column className="col-md-6 col-12" formGroup={true}>
                       <Select
-                        label={"Seleccione el almacen:"}
+                        label={'Seleccione el almacen:'}
                         ref={this.refIdAlmacenDestinoExterno}
                         value={this.state.idAlmacenDestinoExterno}
                         onChange={this.handleSelectAlmacenDestinoExterno}
-                        disabled>
+                        disabled
+                      >
                         <option value="">-- Almacen --</option>
-                        {
-                          this.state.almacenesExterno.map((item, index) => (
-                            <option key={index} value={item.idAlmacen}>
-                              {item.nombre}
-                            </option>
-                          ))
-                        }
+                        {this.state.almacenesExterno.map((item, index) => (
+                          <option key={index} value={item.idAlmacen}>
+                            {item.nombre}
+                          </option>
+                        ))}
                       </Select>
                     </Column>
                   </Row>
@@ -960,18 +1078,16 @@ class TrasladorCrear extends CustomComponent {
               )
             }
 
-
             {/* Botones de navegación */}
             <Row>
               <Column formGroup={true}>
-                <Button
-                  className="btn-info"
-                  onClick={this.handleSiguiente}>
+                <Button className="btn-info" onClick={this.handleSiguiente}>
                   <i className="fa fa-arrow-right"></i> Siguiente
                 </Button>{' '}
                 <Button
                   className="btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}>
+                  onClick={() => this.props.history.goBack()}
+                >
                   <i className="fa fa-close"></i> Cancelar
                 </Button>
               </Column>
@@ -980,204 +1096,191 @@ class TrasladorCrear extends CustomComponent {
         )}
 
         {/* Condición para renderizar contenido específico según el estado 'paso' */}
-        {
-          this.state.paso === 2 && (
-            <>
-              <Row>
-                <Column formGroup={true}>
-                  <TableResponsive>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                            Tipo de Traslado:
-                          </TableHead>
-                          <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                            {this.state.idTipoTraslado === 'TT0001' ? (
-                              <span>
-                                Entre almacenes
-                              </span>
-                            ) : (
-                              <span>
-                                Entre sucursales
-                              </span>
-                            )}
-                          </TableHead>
-                        </TableRow>
-                        {
-                          this.state.idTipoTraslado === 'TT0001' && (
-                            <>
-                              <TableRow>
-                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                                  Motivo ajuste:
-                                </TableHead>
-                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                  {this.state.nombreMotivoAjuste}
-                                </TableHead>
-                              </TableRow>
+        {this.state.paso === 2 && (
+          <>
+            <Row>
+              <Column formGroup={true}>
+                <TableResponsive>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                          Tipo de Traslado:
+                        </TableHead>
+                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                          {this.state.idTipoTraslado === 'TT0001' ? (
+                            <span>Entre almacenes</span>
+                          ) : (
+                            <span>Entre sucursales</span>
+                          )}
+                        </TableHead>
+                      </TableRow>
+                      {this.state.idTipoTraslado === 'TT0001' && (
+                        <>
+                          <TableRow>
+                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                              Motivo ajuste:
+                            </TableHead>
+                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                              {this.state.nombreMotivoAjuste}
+                            </TableHead>
+                          </TableRow>
 
-                              <TableRow>
-                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                                  Almacen de Origen:
-                                </TableHead>
-                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                  {this.state.nombreAlmacenOrigenInterno}
-                                </TableHead>
-                              </TableRow>
+                          <TableRow>
+                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                              Almacen de Origen:
+                            </TableHead>
+                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                              {this.state.nombreAlmacenOrigenInterno}
+                            </TableHead>
+                          </TableRow>
 
-                              <TableRow>
-                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                                  Almacen de Destino:
-                                </TableHead>
-                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                  {this.state.nombreAlmacenDestinoInterno}
-                                </TableHead>
-                              </TableRow>
-                            </>
-                          )
-                        }
-                        {
-                          this.state.idTipoTraslado === 'TT0002' && (
-                            <>
-                              <TableRow>
-                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                                  Almacen de Origen:
-                                </TableHead>
-                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                  {this.state.nombreAlmacenOriginExterno}
-                                </TableHead>
-                              </TableRow>
+                          <TableRow>
+                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                              Almacen de Destino:
+                            </TableHead>
+                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                              {this.state.nombreAlmacenDestinoInterno}
+                            </TableHead>
+                          </TableRow>
+                        </>
+                      )}
+                      {this.state.idTipoTraslado === 'TT0002' && (
+                        <>
+                          <TableRow>
+                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                              Almacen de Origen:
+                            </TableHead>
+                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                              {this.state.nombreAlmacenOriginExterno}
+                            </TableHead>
+                          </TableRow>
 
-                              <TableRow>
-                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                                  Sucursal de Destino:
-                                </TableHead>
-                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                  {this.state.nombreSucursalExterno}
-                                </TableHead>
-                              </TableRow>
+                          <TableRow>
+                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                              Sucursal de Destino:
+                            </TableHead>
+                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                              {this.state.nombreSucursalExterno}
+                            </TableHead>
+                          </TableRow>
 
-                              <TableRow>
-                                <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                                  Almacen de Destino:
-                                </TableHead>
-                                <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                                  {this.state.nombreAlmacenDestinoExterno}
-                                </TableHead>
-                              </TableRow>
-                            </>
-                          )
-                        }
-                      </TableHeader>
-                    </Table>
-                  </TableResponsive>
-                </Column>
-              </Row>
+                          <TableRow>
+                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
+                              Almacen de Destino:
+                            </TableHead>
+                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                              {this.state.nombreAlmacenDestinoExterno}
+                            </TableHead>
+                          </TableRow>
+                        </>
+                      )}
+                    </TableHeader>
+                  </Table>
+                </TableResponsive>
+              </Column>
+            </Row>
 
-              <Row>
-                <Column>
-                  <SearchInput
-                    ref={this.refProducto}
-                    autoFocus={true}
-                    label={"Filtrar por el código o nombre del producto:"}
-                    placeholder="Filtrar productos..."
-                    refValue={this.refValueProducto}
-                    data={this.state.productos}
-                    handleClearInput={this.handleClearInputProducto}
-                    handleFilter={this.handleFilterProducto}
-                    handleSelectItem={this.handleSelectItemProducto}
-                    // renderItem={(value) => (
-                    //   <>
-                    //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                    //   </>
-                    // )}
+            <Row>
+              <Column>
+                <SearchInput
+                  ref={this.refProducto}
+                  autoFocus={true}
+                  label={'Filtrar por el código o nombre del producto:'}
+                  placeholder="Filtrar productos..."
+                  refValue={this.refValueProducto}
+                  data={this.state.productos}
+                  handleClearInput={this.handleClearInputProducto}
+                  handleFilter={this.handleFilterProducto}
+                  handleSelectItem={this.handleSelectItemProducto}
+                  // renderItem={(value) => (
+                  //   <>
+                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
+                  //   </>
+                  // )}
 
-                    renderItem={(value) =>
-                      <div className="d-flex align-items-center">
-                        <Image
-                          default={images.noImage}
-                          src={value.imagen}
-                          alt={value.nombre}
-                          width={60}
-                        />
+                  renderItem={(value) => (
+                    <div className="d-flex align-items-center">
+                      <Image
+                        default={images.noImage}
+                        src={value.imagen}
+                        alt={value.nombre}
+                        width={60}
+                      />
 
-                        <div className='ml-2'>
-                          {value.codigo}
-                          <br />
-                          {value.nombre} <small>({value.categoria})</small>
-                        </div>
-                      </div>}
-                  />
-                </Column>
-              </Row>
+                      <div className="ml-2">
+                        {value.codigo}
+                        <br />
+                        {value.nombre} <small>({value.categoria})</small>
+                      </div>
+                    </div>
+                  )}
+                />
+              </Column>
+            </Row>
 
-              <Row>
-                <Column formGroup={true}>
-                  <Input
-                    label={"Ingrese alguna descripción para saber el motivo del ajuste:"}
-                    placeholder="Ingrese una observación"
-                    value={this.state.observacion}
-                    onChange={this.handleInputObservacion}
-                  />
-                </Column>
-              </Row>
+            <Row>
+              <Column formGroup={true}>
+                <Input
+                  label={
+                    'Ingrese alguna descripción para saber el motivo del ajuste:'
+                  }
+                  placeholder="Ingrese una observación"
+                  value={this.state.observacion}
+                  onChange={this.handleInputObservacion}
+                />
+              </Column>
+            </Row>
 
-              <Row>
-                <Column>
-                  <TableResponsive>
-                    <TableTitle>Lista de productos:</TableTitle>
-                    <Table className="table-striped table-bordered rounded">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead width="5%">Quitar</TableHead>
-                          <TableHead width="10%">Imagen</TableHead>
-                          <TableHead width="30%">Clave/Nombre</TableHead>
-                          <TableHead width="15%">Cantidad</TableHead>
-                          <TableHead width="15%">Almacen Origen</TableHead>
-                          <TableHead width="15%">Almacen Destino</TableHead>
-                          <TableHead width="15%">Medida</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody ref={this.refTableBody}>
-                        {this.generateBody()}
-                      </TableBody>
-                    </Table>
-                  </TableResponsive>
-                </Column>
-              </Row>
+            <Row>
+              <Column>
+                <TableResponsive>
+                  <TableTitle>Lista de productos:</TableTitle>
+                  <Table className="table-striped table-bordered rounded">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead width="5%">Quitar</TableHead>
+                        <TableHead width="10%">Imagen</TableHead>
+                        <TableHead width="30%">Clave/Nombre</TableHead>
+                        <TableHead width="15%">Cantidad</TableHead>
+                        <TableHead width="15%">Almacen Origen</TableHead>
+                        <TableHead width="15%">Almacen Destino</TableHead>
+                        <TableHead width="15%">Medida</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody ref={this.refTableBody}>
+                      {this.generateBody()}
+                    </TableBody>
+                  </Table>
+                </TableResponsive>
+              </Column>
+            </Row>
 
-              {/* Sección de botones de acción */}
-              <Row>
-                <Column>
-                  <Button
-                    className="btn-success"
-                    onClick={this.handleSave}
-                  >
-                    <i className="fa fa-save"></i> Guardar
-                  </Button>{' '}
-                  <Button
-                    className="btn-outline-light"
-                    onClick={this.handleBack}
-                  >
-                    <i className="fa fa-arrow-left"></i> Atras
-                  </Button>{' '}
-                  <Button
-                    className="btn-outline-light"
-                    onClick={this.handleClear}
-                  >
-                    <i className="fa fa-refresh"></i> Limpiar
-                  </Button>{' '}
-                  <Button
-                    className="btn-outline-danger"
-                    onClick={() => this.props.history.goBack()}
-                  >
-                    <i className="fa fa-close"></i> Cancelar
-                  </Button>
-                </Column>
-              </Row>
-            </>
-          )
-        }
+            {/* Sección de botones de acción */}
+            <Row>
+              <Column>
+                <Button className="btn-success" onClick={this.handleSave}>
+                  <i className="fa fa-save"></i> Guardar
+                </Button>{' '}
+                <Button className="btn-outline-light" onClick={this.handleBack}>
+                  <i className="fa fa-arrow-left"></i> Atras
+                </Button>{' '}
+                <Button
+                  className="btn-outline-light"
+                  onClick={this.handleClear}
+                >
+                  <i className="fa fa-refresh"></i> Limpiar
+                </Button>{' '}
+                <Button
+                  className="btn-outline-danger"
+                  onClick={() => this.props.history.goBack()}
+                >
+                  <i className="fa fa-close"></i> Cancelar
+                </Button>
+              </Column>
+            </Row>
+          </>
+        )}
       </ContainerWrapper>
     );
   }
@@ -1193,21 +1296,19 @@ const mapStateToProps = (state) => {
   };
 };
 
-
 TrasladorCrear.propTypes = {
   token: PropTypes.shape({
     project: PropTypes.shape({
-      idSucursal: PropTypes.string
+      idSucursal: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
-
+    goBack: PropTypes.func,
+  }),
+};
 
 /**
  *

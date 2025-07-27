@@ -20,12 +20,19 @@ import Title from '../../../../components/Title';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 
 class Vehiculo extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -72,7 +79,7 @@ class Vehiculo extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -148,26 +155,29 @@ class Vehiculo extends CustomComponent {
   };
 
   handleBorrar(id) {
-    alertDialog('Vehículo', '¿Estás seguro de eliminar el vehículo?', async (accept) => {
-      if (accept) {
-        alertInfo('Vehículo', 'Procesando información...');
+    alertDialog(
+      'Vehículo',
+      '¿Estás seguro de eliminar el vehículo?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Vehículo', 'Procesando información...');
 
-        const params = {
-          idVehiculo: id,
-        };
+          const params = {
+            idVehiculo: id,
+          };
 
-        const response = await deleteVehiculo(params);
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Vehículo', response.data, () => {
-            this.loadInit();
-          });
+          const response = await deleteVehiculo(params);
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Vehículo', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Vehículo', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Vehículo', response.getMessage());
-        }
-      }
-    },
+      },
     );
   }
 
@@ -175,8 +185,8 @@ class Vehiculo extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -199,14 +209,18 @@ class Vehiculo extends CustomComponent {
           <TableCell>{item.numeroPlaca}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.preferido == 1 ? 'badge-info' : 'badge-secondary'}`}
+              className={`badge ${
+                item.preferido == 1 ? 'badge-info' : 'badge-secondary'
+              }`}
             >
               {item.preferido === 1 ? 'SI' : 'NO'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
+              className={`badge ${
+                item.estado === 1 ? 'badge-success' : 'badge-danger'
+              }`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -237,23 +251,17 @@ class Vehiculo extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Vehiculos'
-          subTitle='LISTA'
+          title="Vehiculos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadInit}
-            >
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i>
             </Button>
           </Column>
@@ -270,25 +278,28 @@ class Vehiculo extends CustomComponent {
           </Column>
         </Row>
 
-
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="25%">Marca</TableHead>
                     <TableHead width="25%">Número Placa</TableHead>
                     <TableHead width="15%">Preferida</TableHead>
                     <TableHead width="15%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

@@ -85,14 +85,14 @@ class ImpuestoAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <SpinnerView 
+        <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
 
         <Title
-          title='Impuesto'
-          subTitle='AGREGAR'
+          title="Impuesto"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -191,18 +191,14 @@ class ImpuestoAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
+            <Button className="btn-success" onClick={this.handleGuardar}>
               <i className="fa fa-save"></i> Guardar
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -217,6 +213,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedImpuestoAgregar = connect(mapStateToProps, null)(ImpuestoAgregar);
+const ConnectedImpuestoAgregar = connect(
+  mapStateToProps,
+  null,
+)(ImpuestoAgregar);
 
 export default ConnectedImpuestoAgregar;

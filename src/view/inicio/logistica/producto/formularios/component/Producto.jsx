@@ -4,10 +4,22 @@ import Input from '../../../../../../components/Input';
 import RadioButton from '../../../../../../components/RadioButton';
 import Row from '../../../../../../components/Row';
 import Select, { SelectActive } from '../../../../../../components/Select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../../components/Table';
 import TextArea from '../../../../../../components/TextArea';
 import { keyNumberFloat } from '../../../../../../helper/utils.helper';
-import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
+import {
+  A_GRANEL,
+  UNIDADES,
+  VALOR_MONETARIO,
+} from '../../../../../../model/types/tipo-tratamiento-producto';
 import ItemAlmacen from './ItemAlmacen';
 import PropTypes from 'prop-types';
 import ItemImage from './ItemImagen';
@@ -19,17 +31,24 @@ const Producto = (props) => {
 
   const { sku, refSku, handleInputSku } = props;
 
-  const { codigoBarras, refCodigoBarras, handleInputCodigoBarras, handleGenerateCodigoBarras } = props;
+  const {
+    codigoBarras,
+    refCodigoBarras,
+    handleInputCodigoBarras,
+    handleGenerateCodigoBarras,
+  } = props;
 
   const { codigoSunat, refCodigoSunat, handleSelectCodigoSunat } = props;
 
   const { idMedida, refIdMedida, handleSelectIdMedida, medidas } = props;
 
-  const { idCategoria, refIdCategoria, handleSelectIdCategoria, categorias } = props;
+  const { idCategoria, refIdCategoria, handleSelectIdCategoria, categorias } =
+    props;
 
   const { idMarca, refIdMarca, handleSelectIdMarca, marcas } = props;
 
-  const { idTipoTratamientoProducto, handleOptionTipoTratamientoProducto } = props;
+  const { idTipoTratamientoProducto, handleOptionTipoTratamientoProducto } =
+    props;
 
   const { costo, refCosto, handleInputCosto } = props;
 
@@ -51,9 +70,11 @@ const Producto = (props) => {
     handleRemoveItemInventario,
   } = props;
 
-  const { descripcionCorta, refDescripcionCorta, handleInputDescripcionCorta } = props;
+  const { descripcionCorta, refDescripcionCorta, handleInputDescripcionCorta } =
+    props;
 
-  const { descripcionLarga, refDescripcionLarga, handleInputDescripcionLarga } = props;
+  const { descripcionLarga, refDescripcionLarga, handleInputDescripcionLarga } =
+    props;
 
   const {
     detalles,
@@ -64,29 +85,13 @@ const Producto = (props) => {
     handleRemoveDetalles,
   } = props;
 
-  const {
-    imagenes,
-    handleSelectImagenes,
-    handleRemoveImagenes
-  } = props;
+  const { imagenes, handleSelectImagenes, handleRemoveImagenes } = props;
 
-  const {
-    colores,
-    coloresSeleccionados,
-    handleSelectColores
-  } = props;
+  const { colores, coloresSeleccionados, handleSelectColores } = props;
 
-  const {
-    tallas,
-    tallasSeleccionados,
-    handleSelectTallas
-  } = props;
+  const { tallas, tallasSeleccionados, handleSelectTallas } = props;
 
-  const {
-    sabores,
-    saboresSeleccionados,
-    handleSelectSabores
-  } = props;
+  const { sabores, saboresSeleccionados, handleSelectSabores } = props;
 
   return (
     <>
@@ -103,16 +108,21 @@ const Producto = (props) => {
       {/* SECTOR INFORMACIÓN GENERAL */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">1</span> INFORMACIÓN GENERAL</h6>
+          <h6>
+            <span className="badge badge-primary">1</span> INFORMACIÓN GENERAL
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-md-12" formGroup={true}>
           <Input
-            label={<>
-              Nombre del producto: <i className="fa fa-asterisk text-danger small"></i>
-            </>}
+            label={
+              <>
+                Nombre del producto:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
             className={`${nombre ? '' : 'is-invalid'}`}
             placeholder="Dijite un nombre..."
             ref={refNombre}
@@ -123,9 +133,11 @@ const Producto = (props) => {
 
         <Column className="col-md-6" formGroup={true}>
           <Input
-            label={<>
-              Código: <i className="fa fa-asterisk text-danger small"></i>
-            </>}
+            label={
+              <>
+                Código: <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
             className={`${codigo ? '' : 'is-invalid'}`}
             placeholder="Ejemplo: CAS002 ..."
             ref={refCodigo}
@@ -136,9 +148,7 @@ const Producto = (props) => {
 
         <Column className="col-md-6" formGroup={true}>
           <Input
-            label={<>
-              SKU:
-            </>}
+            label={<>SKU:</>}
             placeholder="Ejemplo: CAM-NIKE-001 ..."
             ref={refSku}
             value={sku}
@@ -149,9 +159,11 @@ const Producto = (props) => {
         <Column className="col-md-6" formGroup={true}>
           <Input
             group
-            label={<>
-              Código de Barras: <i className="bi bi-upc-scan"></i>
-            </>}
+            label={
+              <>
+                Código de Barras: <i className="bi bi-upc-scan"></i>
+              </>
+            }
             placeholder="Ejemplo: 1234567890123 ..."
             ref={refCodigoBarras}
             value={codigoBarras}
@@ -170,7 +182,7 @@ const Producto = (props) => {
 
         <Column className="col-md-6" formGroup={true}>
           <Select
-            label={"Marca:"}
+            label={'Marca:'}
             ref={refIdMarca}
             value={idMarca}
             onChange={handleSelectIdMarca}
@@ -186,9 +198,12 @@ const Producto = (props) => {
 
         <Column className="col-md-6" formGroup={true}>
           <Select
-            label={<>
-              Unidad de medida: <i className="fa fa-asterisk text-danger small"></i>
-            </>}
+            label={
+              <>
+                Unidad de medida:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
             className={`${idMedida ? '' : 'is-invalid'}`}
             ref={refIdMedida}
             value={idMedida}
@@ -205,9 +220,11 @@ const Producto = (props) => {
 
         <Column className="col-md-6" formGroup={true}>
           <Select
-            label={<>
-              Categoria: <i className="fa fa-asterisk text-danger small"></i>
-            </>}
+            label={
+              <>
+                Categoria: <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
             className={`form-control ${idCategoria ? '' : 'is-invalid'}`}
             ref={refIdCategoria}
             value={idCategoria}
@@ -224,7 +241,7 @@ const Producto = (props) => {
 
         <Column className="col-md-6" formGroup={true}>
           <Select
-            label={"Código producto SUNAT:"}
+            label={'Código producto SUNAT:'}
             ref={refCodigoSunat}
             value={codigoSunat}
             onChange={handleSelectCodigoSunat}
@@ -239,7 +256,9 @@ const Producto = (props) => {
       {/* OPCIONES DE VENTA */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">2</span> FORMA DE VENTA</h6>
+          <h6>
+            <span className="badge badge-primary">2</span> FORMA DE VENTA
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
@@ -253,7 +272,7 @@ const Producto = (props) => {
 
         <Column formGroup={true}>
           <RadioButton
-            className='form-check-inline'
+            className="form-check-inline"
             id={UNIDADES}
             value={UNIDADES}
             name="ckTipoTratamiento"
@@ -266,7 +285,7 @@ const Producto = (props) => {
 
         <Column formGroup={true}>
           <RadioButton
-            className='form-check-inline'
+            className="form-check-inline"
             id={VALOR_MONETARIO}
             value={VALOR_MONETARIO}
             name="ckTipoTratamiento"
@@ -279,7 +298,7 @@ const Producto = (props) => {
 
         <Column formGroup={true}>
           <RadioButton
-            className='form-check-inline'
+            className="form-check-inline"
             id={A_GRANEL}
             value={A_GRANEL}
             name="ckTipoTratamiento"
@@ -294,7 +313,9 @@ const Producto = (props) => {
       {/* SECTOR COSTO */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">3</span> COSTO</h6>
+          <h6>
+            <span className="badge badge-primary">3</span> COSTO
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
@@ -305,9 +326,12 @@ const Producto = (props) => {
 
         <Column className="col-lg-3 col-md-12" formGroup={true}>
           <Input
-            label={<>
-              Costo inicial: <i className="fa fa-asterisk text-danger small"></i>
-            </>}
+            label={
+              <>
+                Costo inicial:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
             className={`${costo ? '' : 'is-invalid'}`}
             placeholder="S/ 0.00"
             ref={refCosto}
@@ -321,7 +345,9 @@ const Producto = (props) => {
       {/* SECTOR PRECIO */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">4</span> PRECIO</h6>
+          <h6>
+            <span className="badge badge-primary">4</span> PRECIO
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
@@ -332,9 +358,12 @@ const Producto = (props) => {
 
         <Column className="col-lg-3 col-md-12" formGroup={true}>
           <Input
-            label={<>
-              Precio base: <i className="fa fa-asterisk text-danger small"></i>
-            </>}
+            label={
+              <>
+                Precio base:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
             className={`${precio ? '' : 'is-invalid'}`}
             placeholder=" S/ 0.00"
             ref={refPrecio}
@@ -347,52 +376,52 @@ const Producto = (props) => {
         <Column className="col-12" formGroup={true}>
           {precios.length !== 0 && (
             <TableResponsive>
-              <Table ref={refPrecios} className={"table-bordered"}>
+              <Table ref={refPrecios} className={'table-bordered'}>
                 <TableHeader>
                   <TableRow>
                     <TableHead scope="col">#</TableHead>
                     <TableHead scope="col">Nombre</TableHead>
                     <TableHead scope="col">Precio</TableHead>
-                    <TableHead className="text-center" scope="col">Quitar</TableHead>
+                    <TableHead className="text-center" scope="col">
+                      Quitar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    precios.map((item, index) => {
-                      return (
-                        <TableRow key={index}>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell>
-                            <Input
-                              placeholder="Ingrese el nombre del precio..."
-                              value={item.nombre}
-                              onChange={(event) =>
-                                handleInputNombrePrecios(event, item.id)
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              placeholder="0.00"
-                              value={item.precio}
-                              onChange={(event) =>
-                                handleInputPrecioPrecios(event, item.id)
-                              }
-                              onKeyDown={keyNumberFloat}
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              className="btn-danger"
-                              onClick={() => handleRemovePrecios(item.id)}
-                            >
-                              <i className="fa fa-remove"></i>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  }
+                  {precios.map((item, index) => {
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="Ingrese el nombre del precio..."
+                            value={item.nombre}
+                            onChange={(event) =>
+                              handleInputNombrePrecios(event, item.id)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="0.00"
+                            value={item.precio}
+                            onChange={(event) =>
+                              handleInputPrecioPrecios(event, item.id)
+                            }
+                            onKeyDown={keyNumberFloat}
+                          />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            className="btn-danger"
+                            onClick={() => handleRemovePrecios(item.id)}
+                          >
+                            <i className="fa fa-remove"></i>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -400,9 +429,7 @@ const Producto = (props) => {
         </Column>
 
         <Column className="col-12" formGroup={true}>
-          <Button
-            className="text-success"
-            onClick={handleAddPrecios}>
+          <Button className="text-success" onClick={handleAddPrecios}>
             <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
           </Button>
         </Column>
@@ -411,16 +438,16 @@ const Producto = (props) => {
       {/* SECTOR INVENTARIO */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">5</span> INVENTARIO INICIAL</h6>
+          <h6>
+            <span className="badge badge-primary">5</span> INVENTARIO INICIAL
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-12" formGroup={true}>
           {!activarInventario && (
-            <label>
-              Activo solo al momento de registrar.
-            </label>
+            <label>Activo solo al momento de registrar.</label>
           )}
 
           {activarInventario && (
@@ -464,22 +491,22 @@ const Producto = (props) => {
       {/* SECTOR DE DESCRIPCIÓN */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">6</span> DESCRIPCIÓN </h6>
+          <h6>
+            <span className="badge badge-primary">6</span> DESCRIPCIÓN{' '}
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-12" formGroup={true}>
-          <label>
-            Agregar un resumen del producto
-          </label>
+          <label>Agregar un resumen del producto</label>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-md-12" formGroup={true}>
           <TextArea
-            label={"Descripción Corta:"}
+            label={'Descripción Corta:'}
             rows={3}
             ref={refDescripcionCorta}
             value={descripcionCorta}
@@ -489,7 +516,7 @@ const Producto = (props) => {
 
         <Column className="col-md-12" formGroup={true}>
           <TextArea
-            label={"Descripción Larga:"}
+            label={'Descripción Larga:'}
             rows={6}
             ref={refDescripcionLarga}
             value={descripcionLarga}
@@ -501,19 +528,20 @@ const Producto = (props) => {
       {/* SECTOR DE DETALLES */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">7</span> DETALLES O CARACTERISTICAS </h6>
+          <h6>
+            <span className="badge badge-primary">7</span> DETALLES O
+            CARACTERISTICAS{' '}
+          </h6>
         </Column>
 
         <Column className="col-12" formGroup={true}>
-          <label>
-            Agregar la lista de caracteristicas
-          </label>
+          <label>Agregar la lista de caracteristicas</label>
         </Column>
 
         <Column>
           {detalles.length !== 0 && (
             <TableResponsive>
-              <Table ref={refDetalles} className={"table-bordered"}>
+              <Table ref={refDetalles} className={'table-bordered'}>
                 <TableHeader>
                   <TableRow>
                     <TableHead scope="col">#</TableHead>
@@ -523,42 +551,40 @@ const Producto = (props) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    detalles.map((item, index) => {
-                      return (
-                        <TableRow key={index}>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell>
-                            <Input
-                              placeholder="Ejemplo (Medida)"
-                              value={item.nombre}
-                              onChange={(event) =>
-                                handleInputNombreDetalles(event, item.id)
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TextArea
-                              rows={6}
-                              placeholder="Ejemplo (100m x 200m)"
-                              value={item.valor}
-                              onChange={(event) =>
-                                handleInputValorDetalles(event, item.id)
-                              }
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              className="btn-danger"
-                              onClick={() => handleRemoveDetalles(item.id)}
-                            >
-                              <i className="fa fa-remove"></i>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  }
+                  {detalles.map((item, index) => {
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="Ejemplo (Medida)"
+                            value={item.nombre}
+                            onChange={(event) =>
+                              handleInputNombreDetalles(event, item.id)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextArea
+                            rows={6}
+                            placeholder="Ejemplo (100m x 200m)"
+                            value={item.valor}
+                            onChange={(event) =>
+                              handleInputValorDetalles(event, item.id)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            className="btn-danger"
+                            onClick={() => handleRemoveDetalles(item.id)}
+                          >
+                            <i className="fa fa-remove"></i>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -566,9 +592,7 @@ const Producto = (props) => {
         </Column>
 
         <Column className="col-md-12" formGroup={true}>
-          <Button
-            className="text-success"
-            onClick={handleAddDetalles}>
+          <Button className="text-success" onClick={handleAddDetalles}>
             <i className="fa fa-plus-circle"></i> Agregar Detalles
           </Button>
         </Column>
@@ -577,17 +601,24 @@ const Producto = (props) => {
       {/* SECTOR DE IMAGENES */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">8</span> IMAGENES </h6>
+          <h6>
+            <span className="badge badge-primary">8</span> IMAGENES{' '}
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-12" formGroup={true}>
           <label>
-            Agregar las imagenes que sean mas atractivas para el usuario. <b className='text-danger'>Las imagenes no debe superar los 500 KB.</b>
+            Agregar las imagenes que sean mas atractivas para el usuario.{' '}
+            <b className="text-danger">
+              Las imagenes no debe superar los 500 KB.
+            </b>
           </label>
           <label>
-            Las imágenes deben tener un tamaño de <b>800 x 800 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).
+            Las imágenes deben tener un tamaño de <b>800 x 800 píxeles</b> para
+            que se visualicen correctamente en la página web (formato
+            recomendado *.webp).
           </label>
         </Column>
 
@@ -603,21 +634,23 @@ const Producto = (props) => {
       {/* SECTOR DE COLORES */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">9</span> COLORES </h6>
+          <h6>
+            <span className="badge badge-primary">9</span> COLORES{' '}
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-12" formGroup={true}>
-          <label>
-            Agregar los tipos de colores
-          </label>
+          <label>Agregar los tipos de colores</label>
         </Column>
 
         <Column className="col-12" formGroup={true}>
-          <div className='d-flex flex-wrap gap-3'>
+          <div className="d-flex flex-wrap gap-3">
             {colores.map((item, index) => {
-              const active = coloresSeleccionados.some((select) => select.idAtributo === item.idAtributo)
+              const active = coloresSeleccionados.some(
+                (select) => select.idAtributo === item.idAtributo,
+              );
               return (
                 <SelectActive
                   key={index}
@@ -636,21 +669,23 @@ const Producto = (props) => {
       {/* SECTOR DE TALLAS */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">10</span> TALLAS </h6>
+          <h6>
+            <span className="badge badge-primary">10</span> TALLAS{' '}
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-12" formGroup={true}>
-          <label>
-            Agregar los tipos de talla
-          </label>
+          <label>Agregar los tipos de talla</label>
         </Column>
 
         <Column className="col-12" formGroup={true}>
-          <div className='d-flex flex-wrap gap-3'>
+          <div className="d-flex flex-wrap gap-3">
             {tallas.map((item, index) => {
-              const active = tallasSeleccionados.some((select) => select.idAtributo === item.idAtributo)
+              const active = tallasSeleccionados.some(
+                (select) => select.idAtributo === item.idAtributo,
+              );
               return (
                 <SelectActive
                   key={index}
@@ -668,21 +703,23 @@ const Producto = (props) => {
       {/* SECTOR DE SABORES */}
       <Row>
         <Column className="col-12" formGroup={true}>
-          <h6><span className="badge badge-primary">11</span> SABORES </h6>
+          <h6>
+            <span className="badge badge-primary">11</span> SABORES{' '}
+          </h6>
         </Column>
 
         <div className="dropdown-divider"></div>
 
         <Column className="col-12" formGroup={true}>
-          <label>
-            Agregar los tipos de sabores
-          </label>
+          <label>Agregar los tipos de sabores</label>
         </Column>
 
         <Column className="col-12" formGroup={true}>
-          <div className='d-flex flex-wrap gap-3'>
+          <div className="d-flex flex-wrap gap-3">
             {sabores.map((item, index) => {
-              const active = saboresSeleccionados.some((select) => select.idAtributo === item.idAtributo)
+              const active = saboresSeleccionados.some(
+                (select) => select.idAtributo === item.idAtributo,
+              );
               return (
                 <SelectActive
                   key={index}
@@ -790,6 +827,6 @@ Producto.propTypes = {
   sabores: PropTypes.array,
   saboresSeleccionados: PropTypes.array,
   handleSelectSabores: PropTypes.func,
-}
+};
 
 export default Producto;

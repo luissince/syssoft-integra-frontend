@@ -3,9 +3,16 @@ import PropTypes from 'prop-types';
 // import { io } from "socket.io-client";
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { addNotification, clearNoticacion } from '../../redux/noticacionSlice.js';
+import {
+  addNotification,
+  clearNoticacion,
+} from '../../redux/noticacionSlice.js';
 import { projectClose, signOut } from '../../redux/principalSlice.js';
-import { clearSucursal, setEmpresa, setMonedaNacional } from '../../redux/predeterminadoSlice.js';
+import {
+  clearSucursal,
+  setEmpresa,
+  setMonedaNacional,
+} from '../../redux/predeterminadoSlice.js';
 
 import Bienvenido from './bienvenido/Bienvenido.jsx';
 import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
@@ -18,17 +25,14 @@ import Notifications from './notificacion/Notifications.jsx';
 
 const Dashboard = React.lazy(() => import('./dashboard/Dashboard.jsx'));
 
-import
-Seguridad, {
+import Seguridad, {
   Perfiles,
   PerfilAgregar,
   PerfilEditar,
-
   Usuarios,
   UsuarioAgregar,
   UsuarioEditar,
   UsuarioResetear,
-
   Accesos,
 } from './seguridad/index.jsx';
 
@@ -37,28 +41,22 @@ import Facturacion, {
   VentaCrear,
   VentaCrearEscritorio,
   VentaDetalle,
-
   Cobros,
   CobroCrear,
   CobroDetalle,
-
   Cotizaciones,
   CotizacioneCrear,
   CotizacioneEditar,
   CotizacionDetalle,
-
   GuiaRemision,
   GuiaRemisionCrear,
   GuiaRemisionEditar,
   GuiaRemisionDetalle,
-
   NotaCredito,
   NotaCreditoProceso,
   NotaCreditoDetalle,
-
   CuentasPorCobrar,
   CuentasPorCobrarAbonar,
-
   Pedidos,
   PedidoCrear,
   PedidoEditar,
@@ -70,37 +68,29 @@ import Logistica, {
   ProductoAgregar,
   ProductoEditar,
   ProductoDetalle,
-
   LogisticaAjuste,
   LogisticaAjusteCrear,
   LogisticaAjusteDetalle,
-
   Traslado,
   TrasladoCrear,
   TrasladoDetalle,
-
   Inventario,
-
   Kardex,
-
   Catalogos,
   CatalogoCrear,
   CatalogoEditar,
-  CatalogoDetalle
+  CatalogoDetalle,
 } from './logistica/index.jsx';
 
 import Tesoreria, {
   Gastos,
   GastoCrear,
   GastoDetalle,
-
   Compras,
   CompraCrear,
   CompraDetalle,
-
   CuentasPorPagar,
   CuentasPorPagarAmortizar,
-
   OrdenCompras,
   OrdenCompraCrear,
   OrdenCompraEditar,
@@ -121,46 +111,35 @@ import Configuracion, {
   Almacenes,
   AlmacenAgregar,
   AlmacenEditar,
-
   Categorias,
   CategoriaAgregar,
   CategoriaEditar,
-
   Medidas,
   MedidaAgregar,
   MedidaEditar,
-
   Monedas,
   MonedaAgregar,
   MonedaEditar,
-
   Comprobantes,
   ComprobanteAgregar,
   ComprobanteEditar,
-
   Impuestos,
   ImpuestoAgregar,
   ImpuestoEditar,
-
   Vehiculos,
   VehiculoAgregar,
   VehiculoEditar,
-
   Empresa,
   EmpresaEditar,
-
   Sucursales,
   SucursalAgregar,
   SucursalEditar,
-
   Conceptos,
   ConceptoAgregar,
   ConceptoEditar,
-
   Marcas,
   MarcaAgregar,
   MarcaEditar,
-
   Atributos,
   AtributosAgregar,
   AtributosEditar,
@@ -176,17 +155,13 @@ import Reporte, {
   RepCpeSunat,
 } from './reporte/index.jsx';
 
-import CpeSunat, {
-  CpeElectronicos,
-  CpeConsultar,
-} from './cpesunat/index.jsx';
+import CpeSunat, { CpeElectronicos, CpeConsultar } from './cpesunat/index.jsx';
 
 import Finanzas, {
   Bancos,
   BancoDetalle,
   BancoAgregar,
   BancoEditar,
-
   Transacciones,
 } from './finanzas/index.jsx';
 
@@ -214,7 +189,6 @@ import { SpinnerView } from '../../components/Spinner.jsx';
  * @extends React.Component
  */
 class Inicio extends React.Component {
-
   /**
    *
    * Constructor
@@ -312,8 +286,8 @@ class Inicio extends React.Component {
     this.setState({
       rutaLogo: empresa.data.rutaLogo,
       loading: false,
-    })
-  }
+    });
+  };
 
   // ------------------------------------------------------------------------
   // Carga los datos del sidebar
@@ -323,7 +297,9 @@ class Inicio extends React.Component {
 
     if (!refSideBar || !refSideBar.current) return;
 
-    const collapsibleItems = refSideBar.current.querySelectorAll('ul li .pro-inner-item[data-bs-toggle="collapse"]',);
+    const collapsibleItems = refSideBar.current.querySelectorAll(
+      'ul li .pro-inner-item[data-bs-toggle="collapse"]',
+    );
 
     collapsibleItems.forEach((element) => {
       element.parentNode
@@ -789,7 +765,6 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <TrasladoDetalle {...props} />}
           />
-
 
           <Route
             path={`${path}/logistica/catalogo`}
@@ -1303,13 +1278,12 @@ Inicio.propTypes = {
   projectClose: PropTypes.func,
   match: PropTypes.object,
   location: PropTypes.shape({
-    pathname: PropTypes.string
+    pathname: PropTypes.string,
   }),
   clearSucursal: PropTypes.func,
   clearNoticacion: PropTypes.func,
   setMonedaNacional: PropTypes.func,
-  setEmpresa: PropTypes.func
-
+  setEmpresa: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -1327,7 +1301,7 @@ const mapDispatchToProps = {
   clearNoticacion,
   setMonedaNacional,
   setEmpresa,
-}
+};
 
 const ConnectedInicio = connect(mapStateToProps, mapDispatchToProps)(Inicio);
 

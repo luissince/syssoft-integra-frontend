@@ -70,7 +70,10 @@ class Paginacion extends React.Component {
 
   renderClassicPagination() {
     const { paginacion, totalPaginacion } = this.props;
-    const pageNumbers = Array.from({ length: totalPaginacion }, (_, i) => i + 1);
+    const pageNumbers = Array.from(
+      { length: totalPaginacion },
+      (_, i) => i + 1,
+    );
     const renderPageNumbers = pageNumbers.map((number, index) => {
       if (number < this.upperPageBound + 1 && number > this.lowerPageBound) {
         return (
@@ -102,11 +105,7 @@ class Paginacion extends React.Component {
 
     const renderButton = (label, onClick, disabled) => (
       <li className={`page-item ${disabled ? 'disabled' : ''}`}>
-        <button
-          className="page-link"
-          onClick={onClick}
-          disabled={disabled}
-        >
+        <button className="page-link" onClick={onClick} disabled={disabled}>
           {label}
         </button>
       </li>
@@ -119,11 +118,20 @@ class Paginacion extends React.Component {
         </div>
         <div className="col-sm-12 col-md-7 d-flex justify-content-end">
           <ul className="pagination m-0">
-            {renderButton('Ante.', this.btnPrevClick, this.isPrevBtnActive === 'disabled')}
+            {renderButton(
+              'Ante.',
+              this.btnPrevClick,
+              this.isPrevBtnActive === 'disabled',
+            )}
             {this.lowerPageBound >= 1 && renderDots(this.btnDecrementClick)}
             {renderPageNumbers}
-            {totalPaginacion > this.upperPageBound && renderDots(this.btnIncrementClick)}
-            {renderButton('Sigui.', this.btnNextClick, this.isNextBtnActive === 'disabled')}
+            {totalPaginacion > this.upperPageBound &&
+              renderDots(this.btnIncrementClick)}
+            {renderButton(
+              'Sigui.',
+              this.btnNextClick,
+              this.isNextBtnActive === 'disabled',
+            )}
           </ul>
         </div>
       </div>
@@ -132,7 +140,10 @@ class Paginacion extends React.Component {
 
   renderModernPagination() {
     const { paginacion, totalPaginacion } = this.props;
-    const pageNumbers = Array.from({ length: totalPaginacion }, (_, i) => i + 1);
+    const pageNumbers = Array.from(
+      { length: totalPaginacion },
+      (_, i) => i + 1,
+    );
     const renderPageNumbers = pageNumbers.map((number, index) => {
       if (number < this.upperPageBound + 1 && number > this.lowerPageBound) {
         return (
@@ -174,8 +185,18 @@ class Paginacion extends React.Component {
               : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
           }`}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={d}
+            />
           </svg>
         </button>
       );
@@ -184,15 +205,25 @@ class Paginacion extends React.Component {
     return (
       <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
         <div className="flex items-center justify-between w-full">
-          <div className="text-sm text-gray-700">
-            {this.messagePaginacion}
-          </div>
+          <div className="text-sm text-gray-700">{this.messagePaginacion}</div>
           <div className="flex items-center space-x-2">
-            <ArrowButton direction="prev" onClick={this.btnPrevClick} disabled={this.isPrevBtnActive === 'disabled'} />
-            {this.lowerPageBound >= 1 && <DotButton onClick={this.btnDecrementClick} />}
+            <ArrowButton
+              direction="prev"
+              onClick={this.btnPrevClick}
+              disabled={this.isPrevBtnActive === 'disabled'}
+            />
+            {this.lowerPageBound >= 1 && (
+              <DotButton onClick={this.btnDecrementClick} />
+            )}
             {renderPageNumbers}
-            {totalPaginacion > this.upperPageBound && <DotButton onClick={this.btnIncrementClick} />}
-            <ArrowButton direction="next" onClick={this.btnNextClick} disabled={this.isNextBtnActive === 'disabled'} />
+            {totalPaginacion > this.upperPageBound && (
+              <DotButton onClick={this.btnIncrementClick} />
+            )}
+            <ArrowButton
+              direction="next"
+              onClick={this.btnNextClick}
+              disabled={this.isNextBtnActive === 'disabled'}
+            />
           </div>
         </div>
       </div>
@@ -200,9 +231,17 @@ class Paginacion extends React.Component {
   }
 
   render() {
-    const { className = "", restart, totalPaginacion, data, theme = 'classic' } = this.props;
+    const {
+      className = '',
+      restart,
+      totalPaginacion,
+      data,
+      theme = 'classic',
+    } = this.props;
 
-    this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1 ? '1 Página' : `${totalPaginacion} Páginas`}`;
+    this.messagePaginacion = `Mostrando ${data.length} de ${
+      totalPaginacion === 1 ? '1 Página' : `${totalPaginacion} Páginas`
+    }`;
 
     if (restart) {
       this.upperPageBound = 3;
@@ -213,7 +252,9 @@ class Paginacion extends React.Component {
 
     return (
       <div className={className}>
-        {theme === 'modern' ? this.renderModernPagination() : this.renderClassicPagination()}
+        {theme === 'modern'
+          ? this.renderModernPagination()
+          : this.renderClassicPagination()}
       </div>
     );
   }

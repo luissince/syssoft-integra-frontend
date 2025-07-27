@@ -7,15 +7,14 @@ import Button from './Button';
 
 /**
  * Componente que representa una funcionalidad específica.
- * 
+ *
  * @component
  * @param {Object} props - The component accepts text and onClick as props
  * @extends React.Component
- * 
+ *
  * @returns {JSX.Element} The rendered search input component.
  */
 class SearchInput extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -27,7 +26,10 @@ class SearchInput extends React.Component {
     this.refContentResult = React.createRef();
 
     this.debounceTime = this.props.debounceTime || 250;
-    this.debouncedSearch = this.debounce(this.props.handleFilter, this.debounceTime);
+    this.debouncedSearch = this.debounce(
+      this.props.handleFilter,
+      this.debounceTime,
+    );
     this.selectItem = false;
   }
 
@@ -45,22 +47,25 @@ class SearchInput extends React.Component {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func(...args), delay);
     };
-  }
+  };
 
   initialize = (data, select = true) => {
     this.setState({ searchTerm: data });
     this.selectItem = select;
-  }
+  };
 
   restart = async () => {
-    this.setState({
-      searchTerm: '',
-      highlightedIndex: -1
-    }, () => {
-      this.selectItem = false;
-      this.props.refValue.current.focus();
-    });
-  }
+    this.setState(
+      {
+        searchTerm: '',
+        highlightedIndex: -1,
+      },
+      () => {
+        this.selectItem = false;
+        this.props.refValue.current.focus();
+      },
+    );
+  };
 
   handleWindowClick = (event) => {
     const parent = this.refContentResult.current;
@@ -73,7 +78,7 @@ class SearchInput extends React.Component {
 
     this.props.handleClearInput();
     this.setState({ highlightedIndex: -1 });
-  }
+  };
 
   handleKeyDown = (event) => {
     const { data } = this.props;
@@ -85,16 +90,25 @@ class SearchInput extends React.Component {
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      this.setState(prevState => ({
-        highlightedIndex: Math.min(prevState.highlightedIndex + 1, data.length - 1),
-      }), () => this.scrollToHighlighted());
+      this.setState(
+        (prevState) => ({
+          highlightedIndex: Math.min(
+            prevState.highlightedIndex + 1,
+            data.length - 1,
+          ),
+        }),
+        () => this.scrollToHighlighted(),
+      );
     }
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      this.setState(prevState => ({
-        highlightedIndex: Math.max(prevState.highlightedIndex - 1, -1)
-      }), () => this.scrollToHighlighted());
+      this.setState(
+        (prevState) => ({
+          highlightedIndex: Math.max(prevState.highlightedIndex - 1, -1),
+        }),
+        () => this.scrollToHighlighted(),
+      );
     }
 
     if (event.key === 'Enter') {
@@ -110,7 +124,7 @@ class SearchInput extends React.Component {
       this.props.handleClearInput();
       this.setState({ highlightedIndex: -1 });
     }
-  }
+  };
 
   scrollToHighlighted = () => {
     const { highlightedIndex } = this.state;
@@ -122,13 +136,16 @@ class SearchInput extends React.Component {
         const elementRect = highlightedElement.getBoundingClientRect();
 
         if (elementRect.bottom > containerRect.bottom) {
-          container.scrollTop = highlightedElement.offsetTop + highlightedElement.clientHeight - container.clientHeight;
+          container.scrollTop =
+            highlightedElement.offsetTop +
+            highlightedElement.clientHeight -
+            container.clientHeight;
         } else if (elementRect.top < containerRect.top) {
           container.scrollTop = highlightedElement.offsetTop;
         }
       }
     }
-  }
+  };
 
   // handleKeyUp = (event) => {
   //   event.stopPropagation();
@@ -219,7 +236,7 @@ class SearchInput extends React.Component {
     }
     this.selectItem = false;
     this.debouncedSearch(value);
-  }
+  };
 
   handleFocus = () => {
     if (!this.props.refValue) {
@@ -231,7 +248,7 @@ class SearchInput extends React.Component {
       const length = input.value.length;
       input.setSelectionRange(length, length);
     }
-  }
+  };
 
   handleMouseDown = () => {
     if (!this.props.refValue) {
@@ -245,7 +262,7 @@ class SearchInput extends React.Component {
         input.setSelectionRange(length, length);
       }, 0);
     }
-  }
+  };
 
   render() {
     const { classNameContainer, disabled } = this.props;
@@ -261,7 +278,13 @@ class SearchInput extends React.Component {
     const { searchTerm, highlightedIndex } = this.state;
 
     return (
-      <div className={`${classNameContainer ? classNameContainer : "form-group position-relative"}`}>
+      <div
+        className={`${
+          classNameContainer
+            ? classNameContainer
+            : 'form-group position-relative'
+        }`}
+      >
         <Input
           autoFocus={autoFocus}
           group={true}
@@ -293,31 +316,29 @@ class SearchInput extends React.Component {
             </>
           }
         />
-        {
-          !isEmpty(data) && (
-            <ul
-              className="dataResult"
-              ref={this.refContentResult}
+        {!isEmpty(data) && (
+          <ul
+            className="dataResult"
+            ref={this.refContentResult}
             // tabIndex="-1"
             // onKeyDown={this.handleKeyDown}
-            >
-              {
-                data.map((value, index) => (
-                  <Button
-                    key={index}
-                    contentClassName={`list-group-item list-group-item-action ${index === highlightedIndex ? 'active' : ''}`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleSelectItem(value);
-                    }}
-                  >
-                    {renderItem(value)}
-                  </Button>
-                ))
-              }
-            </ul>
-          )
-        }
+          >
+            {data.map((value, index) => (
+              <Button
+                key={index}
+                contentClassName={`list-group-item list-group-item-action ${
+                  index === highlightedIndex ? 'active' : ''
+                }`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleSelectItem(value);
+                }}
+              >
+                {renderItem(value)}
+              </Button>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }
@@ -344,6 +365,6 @@ SearchInput.propTypes = {
   renderIconRight: PropTypes.element,
 
   customButton: PropTypes.element,
-}
+};
 
 export default SearchInput;

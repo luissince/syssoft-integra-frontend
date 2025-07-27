@@ -42,7 +42,7 @@ const principalSlice = createSlice({
     },
     config: (state, action) => {
       state.isLoading = false;
-      state.isSignIn = false
+      state.isSignIn = false;
       state.isConfig = action.payload.isConfig;
     },
     configSave: (state) => {
@@ -56,5 +56,15 @@ const principalSlice = createSlice({
   },
 });
 
-export const { initSession, restoreToken, signIn, signOut, projectActive, projectClose, config, configSave, updatePrincipal } = principalSlice.actions;
+export const {
+  initSession,
+  restoreToken,
+  signIn,
+  signOut,
+  projectActive,
+  projectClose,
+  config,
+  configSave,
+  updatePrincipal,
+} = principalSlice.actions;
 export default principalSlice.reducer;

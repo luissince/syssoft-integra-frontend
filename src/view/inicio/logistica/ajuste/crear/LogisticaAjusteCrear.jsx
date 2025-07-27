@@ -5,7 +5,7 @@ import {
   isEmpty,
   keyNumberFloat,
   rounded,
-  validateNumericInputs
+  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
@@ -21,7 +21,10 @@ import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import SearchInput from '../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
-import { DECREMENTO, INCREMENTO } from '../../../../../model/types/forma-ajuste';
+import {
+  DECREMENTO,
+  INCREMENTO,
+} from '../../../../../model/types/forma-ajuste';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -30,7 +33,16 @@ import Select from '../../../../../components/Select';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
@@ -43,7 +55,6 @@ import { alertKit } from 'alert-kit';
  * @extends React.Component
  */
 class LogisticaAjusteCrear extends CustomComponent {
-
   /**
    * Inicializa un nuevo componente.
    * @param {Object} props - Las propiedades pasadas al componente.
@@ -87,7 +98,7 @@ class LogisticaAjusteCrear extends CustomComponent {
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    this.initial = { ...this.state }
+    this.initial = { ...this.state };
 
     // Referencial al padre
     this.refTableBody = React.createRef();
@@ -202,7 +213,9 @@ class LogisticaAjusteCrear extends CustomComponent {
   }
 
   addProducto(producto, lotes = null) {
-    const exists = this.state.detalles.find((item) => item.idProducto === producto.idProducto);
+    const exists = this.state.detalles.find(
+      (item) => item.idProducto === producto.idProducto,
+    );
 
     if (exists) {
       alertKit.warning({
@@ -253,7 +266,7 @@ class LogisticaAjusteCrear extends CustomComponent {
       productos: [],
       producto: null,
     });
-  }
+  };
 
   handleFilterProducto = async (value) => {
     const searchWord = value;
@@ -272,12 +285,14 @@ class LogisticaAjusteCrear extends CustomComponent {
     const productos = await this.fetchFiltrarProducto(params);
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
-    const filteredProductos = productos.filter((item) => item.idTipoProducto !== SERVICIO);
+    const filteredProductos = productos.filter(
+      (item) => item.idTipoProducto !== SERVICIO,
+    );
 
     this.setState({
       productos: filteredProductos,
     });
-  }
+  };
 
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
@@ -285,14 +300,17 @@ class LogisticaAjusteCrear extends CustomComponent {
     if (value.lote === 1) {
       this.handleOpenLote(value);
     } else {
-      this.setState({
-        producto: value,
-        productos: [],
-      }, () => {
-        this.addProducto(value);
-      });
+      this.setState(
+        {
+          producto: value,
+          productos: [],
+        },
+        () => {
+          this.addProducto(value);
+        },
+      );
     }
-  }
+  };
 
   handleSelectMetodoAjuste = (event) => {
     this.setState({ idMotivoAjuste: event.target.value });
@@ -300,62 +318,77 @@ class LogisticaAjusteCrear extends CustomComponent {
 
   handleOptionTipoAjuste = (event) => {
     this.setState({ idTipoAjuste: event.target.value });
-  }
+  };
 
   handleSelectAlmacen = (event) => {
     this.setState({ idAlmacen: event.target.value });
-  }
+  };
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoAjuste)) {
-      alertKit.warning({
-        title: 'Ajuste',
-        message: 'Seleccione el tipo de ajuste.',
-      }, () => {
-        this.refIdTipoAjuste.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Ajuste',
+          message: 'Seleccione el tipo de ajuste.',
+        },
+        () => {
+          this.refIdTipoAjuste.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idMotivoAjuste)) {
-      alertKit.warning({
-        title: 'Ajuste',
-        message: 'Seleccione el motivo del ajuste.',
-      }, () => {
-        this.refIdMotivoAjuste.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Ajuste',
+          message: 'Seleccione el motivo del ajuste.',
+        },
+        () => {
+          this.refIdMotivoAjuste.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      alertKit.warning({
-        title: 'Ajuste',
-        message: 'Seleccione el almacen.',
-      }, () => {
-        this.refIdAlmacen.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Ajuste',
+          message: 'Seleccione el almacen.',
+        },
+        () => {
+          this.refIdAlmacen.current.focus();
+        },
+      );
       return;
     }
 
     this.setState({
-      nombreMotivoAjuste: this.refIdMotivoAjuste.current.options[this.refIdMotivoAjuste.current.selectedIndex].innerText,
-      nombreAlmacen: this.refIdAlmacen.current.options[this.refIdAlmacen.current.selectedIndex].innerText,
+      nombreMotivoAjuste:
+        this.refIdMotivoAjuste.current.options[
+          this.refIdMotivoAjuste.current.selectedIndex
+        ].innerText,
+      nombreAlmacen:
+        this.refIdAlmacen.current.options[
+          this.refIdAlmacen.current.selectedIndex
+        ].innerText,
       paso: 2,
     });
-  }
+  };
 
   handleInputObservacion = (event) => {
     this.setState({
       observacion: event.target.value,
     });
-  }
+  };
 
   handleRemoveDetalle = (idProducto) => {
     const detalles = this.state.detalles.filter(
       (item) => item.idProducto !== idProducto,
     );
     this.setState({ detalles });
-  }
+  };
 
   handleInputDetalle = (event, idProducto) => {
     const { value } = event.target;
@@ -364,20 +397,26 @@ class LogisticaAjusteCrear extends CustomComponent {
         item.idProducto === idProducto ? { ...item, cantidad: value } : item,
       ),
     }));
-  }
+  };
 
   handleFocusInputTable = (event, isLastRow) => {
     if (event.key === 'Enter' && !isLastRow) {
-      const nextInput = event.target.parentElement.parentElement.nextElementSibling.querySelector('input',);
+      const nextInput =
+        event.target.parentElement.parentElement.nextElementSibling.querySelector(
+          'input',
+        );
       nextInput.focus();
       nextInput.select();
     }
     if (event.key === 'Enter' && isLastRow) {
-      const firstInput = event.target.parentElement.parentElement.parentElement.querySelector('input',);
+      const firstInput =
+        event.target.parentElement.parentElement.parentElement.querySelector(
+          'input',
+        );
       firstInput.focus();
       firstInput.select();
     }
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal lote
@@ -385,19 +424,22 @@ class LogisticaAjusteCrear extends CustomComponent {
   handleOpenLote = async (producto) => {
     this.setState({ isOpenLote: true });
     await this.refModalLote.current.loadDatos(producto);
-  }
+  };
 
   handleCloseLote = () => {
     this.setState({ isOpenLote: false });
-  }
+  };
 
   handleSaveLote = async (producto, lotes) => {
-    this.setState({
-      producto: producto,
-      productos: [],
-    }, () => {
-      this.addProducto(producto, lotes);
-    });
+    this.setState(
+      {
+        producto: producto,
+        productos: [],
+      },
+      () => {
+        this.addProducto(producto, lotes);
+      },
+    );
   };
 
   //------------------------------------------------------------------------------------------
@@ -405,87 +447,109 @@ class LogisticaAjusteCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleSave = () => {
     if (isEmpty(this.state.detalles)) {
-      alertKit.warning({
-        title: 'Ajuste',
-        message: 'Agregue productos en la lista para continuar.',
-      }, () => {
-        this.refValueProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Ajuste',
+          message: 'Agregue productos en la lista para continuar.',
+        },
+        () => {
+          this.refValueProducto.current.focus();
+        },
+      );
       return;
     }
 
-    if (!isEmpty(this.state.detalles.filter(item => !item.lotes && getNumber(item.cantidad) <= 0))) {
-      alertKit.warning({
-        title: 'Ajuste',
-        message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
-      }, () => {
-        validateNumericInputs(this.refTableBody);
-      });
+    if (
+      !isEmpty(
+        this.state.detalles.filter(
+          (item) => !item.lotes && getNumber(item.cantidad) <= 0,
+        ),
+      )
+    ) {
+      alertKit.warning(
+        {
+          title: 'Ajuste',
+          message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
+        },
+        () => {
+          validateNumericInputs(this.refTableBody);
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      title: 'Ajuste',
-      message: '¿Está seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Ajuste',
+        message: '¿Está seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idTipoAjuste: this.state.idTipoAjuste,
+            idMotivoAjuste: this.state.idMotivoAjuste,
+            idAlmacen: this.state.idAlmacen,
+            idSucursal: this.state.idSucursal,
+            observacion: this.state.observacion,
+            idUsuario: this.state.idUsuario,
+            detalles: this.state.detalles,
+          };
+
+          alertKit.loading({
+            message: 'Procesando petición...',
+          });
+
+          const response = await createAjuste(data);
+
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Ajuste',
+                message: response.data,
+              },
+              () => {
+                this.clearView();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              title: 'Ajuste',
+              message: response.getMessage(),
+            });
+          }
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          idTipoAjuste: this.state.idTipoAjuste,
-          idMotivoAjuste: this.state.idMotivoAjuste,
-          idAlmacen: this.state.idAlmacen,
-          idSucursal: this.state.idSucursal,
-          observacion: this.state.observacion,
-          idUsuario: this.state.idUsuario,
-          detalles: this.state.detalles,
-        };
-
-        alertKit.loading({
-          message: 'Procesando petición...',
-        });
-
-        const response = await createAjuste(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: 'Ajuste',
-            message: response.data,
-          }, () => {
-            this.clearView();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.warning({
-            title: 'Ajuste',
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
-  }
+    );
+  };
 
   handleBack = () => {
     this.setState({
       paso: 1,
-      detalles: []
-    })
-  }
+      detalles: [],
+    });
+  };
 
   handleClear = () => {
-    alertDialog('Ajuste', '¿Está seguro de continuar, se va limpiar toda la información?', async (accept) => {
-      if (accept) {
-        this.clearView();
-      }
-    });
-  }
+    alertDialog(
+      'Ajuste',
+      '¿Está seguro de continuar, se va limpiar toda la información?',
+      async (accept) => {
+        if (accept) {
+          this.clearView();
+        }
+      },
+    );
+  };
 
   /*
     |--------------------------------------------------------------------------
@@ -517,7 +581,12 @@ class LogisticaAjusteCrear extends CustomComponent {
     return this.state.detalles.map((item, index) => {
       const isLastRow = index === this.state.detalles.length - 1;
 
-      const cantidad = item.lotes ? item.lotes.reduce((acum, lote) => acum + getNumber(lote.cantidadAjustar), 0) : item.cantidad;
+      const cantidad = item.lotes
+        ? item.lotes.reduce(
+            (acum, lote) => acum + getNumber(lote.cantidadAjustar),
+            0,
+          )
+        : item.cantidad;
 
       let diferencia = 0;
 
@@ -552,42 +621,34 @@ class LogisticaAjusteCrear extends CustomComponent {
             {item.nombre}
           </TableCell>
           <TableCell>
-            {
-              item.lotes && (
-                <small className="text-info">
-                  <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
-                </small>
-              )
-            }
+            {item.lotes && (
+              <small className="text-info">
+                <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
+              </small>
+            )}
 
-            {
-              !item.lotes && (
-                <Input
-                  value={cantidad}
-                  placeholder="0"
-                  onChange={(event) =>
-                    this.handleInputDetalle(event, item.idProducto)
-                  }
-                  onKeyDown={keyNumberFloat}
-                  onKeyUp={(event) => this.handleFocusInputTable(event, isLastRow)}
-                />
-              )
-            }
+            {!item.lotes && (
+              <Input
+                value={cantidad}
+                placeholder="0"
+                onChange={(event) =>
+                  this.handleInputDetalle(event, item.idProducto)
+                }
+                onKeyDown={keyNumberFloat}
+                onKeyUp={(event) =>
+                  this.handleFocusInputTable(event, isLastRow)
+                }
+              />
+            )}
           </TableCell>
           <TableCell>
-            {
-              item.lotes && rounded(cantidad)
-            }
-            {
-              !item.lotes && rounded(cantidad)
-            }
+            {item.lotes && rounded(cantidad)}
+            {!item.lotes && rounded(cantidad)}
           </TableCell>
-          <TableCell className={`${diferencia <= 0 ? "text-danger" : ""}`}>
+          <TableCell className={`${diferencia <= 0 ? 'text-danger' : ''}`}>
             {rounded(diferencia)}
           </TableCell>
-          <TableCell>
-            {item.unidad}
-          </TableCell>
+          <TableCell>{item.unidad}</TableCell>
         </TableRow>
       );
     });
@@ -622,7 +683,8 @@ class LogisticaAjusteCrear extends CustomComponent {
               <Column>
                 <div className="form-group">
                   <p>
-                    <i className="bi bi-card-list"></i> Defína alguna opciones antes de continuar.
+                    <i className="bi bi-card-list"></i> Defína alguna opciones
+                    antes de continuar.
                   </p>
                 </div>
               </Column>
@@ -640,7 +702,8 @@ class LogisticaAjusteCrear extends CustomComponent {
                   checked={this.state.idTipoAjuste === INCREMENTO}
                   onChange={this.handleOptionTipoAjuste}
                 >
-                  <i className="bi bi-plus-circle-fill text-success"></i> Incremento
+                  <i className="bi bi-plus-circle-fill text-success"></i>{' '}
+                  Incremento
                 </RadioButton>
 
                 <RadioButton
@@ -650,7 +713,8 @@ class LogisticaAjusteCrear extends CustomComponent {
                   checked={this.state.idTipoAjuste === DECREMENTO}
                   onChange={this.handleOptionTipoAjuste}
                 >
-                  <i className="bi bi-dash-circle-fill text-danger"></i> Decremento
+                  <i className="bi bi-dash-circle-fill text-danger"></i>{' '}
+                  Decremento
                 </RadioButton>
               </Column>
             </Row>
@@ -658,7 +722,7 @@ class LogisticaAjusteCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Select
-                  label={"Seleccione el motivo del ajuste:"}
+                  label={'Seleccione el motivo del ajuste:'}
                   ref={this.refIdMotivoAjuste}
                   value={this.state.idMotivoAjuste}
                   onChange={this.handleSelectMetodoAjuste}
@@ -678,7 +742,7 @@ class LogisticaAjusteCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Select
-                  label={"Seleccione el almacen:"}
+                  label={'Seleccione el almacen:'}
                   ref={this.refIdAlmacen}
                   value={this.state.idAlmacen}
                   onChange={this.handleSelectAlmacen}
@@ -697,10 +761,7 @@ class LogisticaAjusteCrear extends CustomComponent {
 
             <Row>
               <Column formGroup={true}>
-                <Button
-                  className="btn-primary"
-                  onClick={this.handleSiguiente}
-                >
+                <Button className="btn-primary" onClick={this.handleSiguiente}>
                   <i className="fa fa-arrow-right"></i> Siguiente
                 </Button>{' '}
                 <Button
@@ -768,7 +829,7 @@ class LogisticaAjusteCrear extends CustomComponent {
                 <SearchInput
                   ref={this.refProducto}
                   autoFocus={true}
-                  label={"Filtrar por el código o nombre del producto:"}
+                  label={'Filtrar por el código o nombre del producto:'}
                   placeholder="Filtrar productos..."
                   refValue={this.refValueProducto}
                   data={this.state.productos}
@@ -781,7 +842,7 @@ class LogisticaAjusteCrear extends CustomComponent {
                   //   </>
                   // )}
 
-                  renderItem={(value) =>
+                  renderItem={(value) => (
                     <div className="d-flex align-items-center">
                       <Image
                         default={images.noImage}
@@ -790,12 +851,13 @@ class LogisticaAjusteCrear extends CustomComponent {
                         width={60}
                       />
 
-                      <div className='ml-2'>
+                      <div className="ml-2">
                         {value.codigo}
                         <br />
                         {value.nombre} <small>({value.categoria})</small>
                       </div>
-                    </div>}
+                    </div>
+                  )}
                   renderIconLeft={<i className="bi bi-cart4"></i>}
                 />
               </Column>
@@ -804,7 +866,9 @@ class LogisticaAjusteCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={" Ingrese alguna descripción para saber el motivo del ajuste:"}
+                  label={
+                    ' Ingrese alguna descripción para saber el motivo del ajuste:'
+                  }
                   placeholder="Ingrese una observación"
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}
@@ -838,27 +902,22 @@ class LogisticaAjusteCrear extends CustomComponent {
 
             <Row>
               <Column>
-                <Button
-                  className="btn-success"
-                  onClick={this.handleSave}>
+                <Button className="btn-success" onClick={this.handleSave}>
                   <i className="fa fa-save"></i> Guardar
-                </Button>
-                {' '}
-                <Button
-                  className="btn-outline-light"
-                  onClick={this.handleBack}>
+                </Button>{' '}
+                <Button className="btn-outline-light" onClick={this.handleBack}>
                   <i className="fa fa-arrow-left"></i> Atras
-                </Button>
-                {' '}
+                </Button>{' '}
                 <Button
                   className="btn-outline-light"
-                  onClick={this.handleClear}>
+                  onClick={this.handleClear}
+                >
                   <i className="fa fa-trash"></i> Limpiar
-                </Button>
-                {' '}
+                </Button>{' '}
                 <Button
                   className="btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}>
+                  onClick={() => this.props.history.goBack()}
+                >
                   <i className="fa fa-close"></i> Cancelar
                 </Button>
               </Column>
@@ -882,23 +941,26 @@ const mapStateToProps = (state) => {
 
 LogisticaAjusteCrear.propTypes = {
   history: PropTypes.shape({
-    goBack: PropTypes.func
+    goBack: PropTypes.func,
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
-      idSucursal: PropTypes.string
+      idSucursal: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
+      idUsuario: PropTypes.string,
     }),
-  })
-}
+  }),
+};
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedAjusteCrear = connect(mapStateToProps, null)(LogisticaAjusteCrear);
+const ConnectedAjusteCrear = connect(
+  mapStateToProps,
+  null,
+)(LogisticaAjusteCrear);
 
 export default ConnectedAjusteCrear;

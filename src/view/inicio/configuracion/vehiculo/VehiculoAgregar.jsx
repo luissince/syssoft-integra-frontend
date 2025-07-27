@@ -19,7 +19,6 @@ import Column from '../../../../components/Column';
 import { SpinnerView } from '../../../../components/Spinner';
 
 class VehiculoAgregar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -82,14 +81,14 @@ class VehiculoAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-        <SpinnerView 
+        <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
 
         <Title
-          title='Vehículo'
-          subTitle='AGREGAR'
+          title="Vehículo"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -116,7 +115,8 @@ class VehiculoAgregar extends CustomComponent {
           <div className="col-md-6 col-12">
             <div className="form-group">
               <label htmlFor="numeroPlaca" className="col-form-label">
-                Número de Placa: <i className="fa fa-asterisk text-danger small"></i>
+                Número de Placa:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <input
                 type="text"
@@ -177,18 +177,14 @@ class VehiculoAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
+            <Button className="btn-success" onClick={this.handleGuardar}>
               <i className="fa fa-save"></i> Guardar
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -203,6 +199,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedVehiculoAgregar = connect(mapStateToProps, null)(VehiculoAgregar);
+const ConnectedVehiculoAgregar = connect(
+  mapStateToProps,
+  null,
+)(VehiculoAgregar);
 
 export default ConnectedVehiculoAgregar;

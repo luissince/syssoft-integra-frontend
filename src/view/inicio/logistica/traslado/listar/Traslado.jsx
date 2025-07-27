@@ -28,17 +28,27 @@ import Row from '../../../../../components/Row';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import Input from '../../../../../components/Input';
 import Button from '../../../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import Search from '../../../../../components/Search';
-import { setListaTrasladoData, setListaTrasladoPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaTrasladoData,
+  setListaTrasladoPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class Traslado extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -89,14 +99,24 @@ class Traslado extends CustomComponent {
   }
 
   loadingData = async () => {
-    if (this.props.trasladoLista && this.props.trasladoLista.data && this.props.trasladoLista.paginacion) {
-      this.setState(this.props.trasladoLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.trasladoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.trasladoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.trasladoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.trasladoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.trasladoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.trasladoLista.paginacion.messagePaginacion;
+    if (
+      this.props.trasladoLista &&
+      this.props.trasladoLista.data &&
+      this.props.trasladoLista.paginacion
+    ) {
+      this.setState(this.props.trasladoLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.trasladoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.trasladoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.trasladoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.trasladoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.trasladoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.trasladoLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.trasladoLista.data.buscar);
     } else {
@@ -105,19 +125,22 @@ class Traslado extends CustomComponent {
         this.fetchSucursal(),
       ]);
 
-      this.setState({
-        tipoTraslado,
-        sucursales,
-        initialLoad: false,
-      }, async () => {
-        await this.loadingInit();
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          tipoTraslado,
+          sucursales,
+          initialLoad: false,
+        },
+        async () => {
+          await this.loadingInit();
+          this.updateReduxState();
+        },
+      );
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaTrasladoData(this.state)
+    this.props.setListaTrasladoData(this.state);
     this.props.setListaTrasladoPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -134,7 +157,7 @@ class Traslado extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
-  }
+  };
 
   async searchSucursal() {
     if (this.state.loading) return;
@@ -152,7 +175,7 @@ class Traslado extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   async searchFechas() {
     if (this.state.loading) return;
@@ -221,13 +244,16 @@ class Traslado extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -291,8 +317,8 @@ class Traslado extends CustomComponent {
   handleSelectSucursal = (event) => {
     this.setState({ idSucursal: event.target.value }, async () => {
       this.searchSucursal();
-    })
-  }
+    });
+  };
 
   handleAgregar = () => {
     this.props.history.push({
@@ -308,28 +334,31 @@ class Traslado extends CustomComponent {
   };
 
   handleCancelar = (idTraslado) => {
-    alertDialog('Traslado', '¿Estás seguro de anular el traslado?', async (acccept) => {
-      if (acccept) {
-        alertInfo('Traslado', 'Procesando información...');
+    alertDialog(
+      'Traslado',
+      '¿Estás seguro de anular el traslado?',
+      async (acccept) => {
+        if (acccept) {
+          alertInfo('Traslado', 'Procesando información...');
 
-        const params = {
-          idTraslado: idTraslado,
-          idUsuario: this.state.idUsuario,
-        };
+          const params = {
+            idTraslado: idTraslado,
+            idUsuario: this.state.idUsuario,
+          };
 
-        const response = await cancelTraslado(params);
+          const response = await cancelTraslado(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Ajuste', response.data, () => {
-            this.loadingInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Ajuste', response.data, () => {
+              this.loadingInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Ajuste', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Ajuste', response.getMessage());
-        }
-      }
-    },
+      },
     );
   };
 
@@ -337,8 +366,8 @@ class Traslado extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
-          message='Cargando información de la tabla...'
+          colSpan="9"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -364,13 +393,20 @@ class Traslado extends CustomComponent {
       return (
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>{item.fecha} <br />{formatTime(item.hora)}</TableCell>
-          <TableCell>{item.tipo}<br />{item.motivo}</TableCell>
+          <TableCell>
+            {item.fecha} <br />
+            {formatTime(item.hora)}
+          </TableCell>
+          <TableCell>
+            {item.tipo}
+            <br />
+            {item.motivo}
+          </TableCell>
           <TableCell>{item.almacenOrigen}</TableCell>
           <TableCell>{item.almacenDestino}</TableCell>
           <TableCell>{item.observacion}</TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell className='text-center'>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idTraslado)}
@@ -378,7 +414,7 @@ class Traslado extends CustomComponent {
               <i className="bi bi-eye"></i>
             </Button>
           </TableCell>
-          <TableCell className='text-center'>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idTraslado)}
@@ -389,38 +425,34 @@ class Traslado extends CustomComponent {
         </TableRow>
       );
     });
-  }
+  };
 
   render() {
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
-        // body={<>
-        //   <div className='d-flex flex-column align-items-center'>
-        //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
-        //     <Button
-        //       className='btn-danger'>
-        //       <i className='fa fa-refresh'></i> Recargar
-        //     </Button>
-        //   </div>
-        // </>}
+          // body={<>
+          //   <div className='d-flex flex-column align-items-center'>
+          //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+          //     <Button
+          //       className='btn-danger'>
+          //       <i className='fa fa-refresh'></i> Recargar
+          //     </Button>
+          //   </div>
+          // </>}
         />
 
         <Title
-          title='Traslado'
-          subTitle='LISTA'
+          title="Traslado"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
             <Button
@@ -435,7 +467,7 @@ class Traslado extends CustomComponent {
         <Row>
           <Column className="col-md-3" formGroup={true}>
             <Select
-              label={"Tipo:"}
+              label={'Tipo:'}
               value={this.state.idTipoTraslado}
               onChange={this.handleSelectTipoTraslado}
             >
@@ -451,7 +483,7 @@ class Traslado extends CustomComponent {
           <Column className="col-md-3 col-sm-12" formGroup={true}>
             <Input
               type="date"
-              label={"Fecha Inicio:"}
+              label={'Fecha Inicio:'}
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
             />
@@ -459,7 +491,7 @@ class Traslado extends CustomComponent {
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
             <Input
-              label={"Fecha Final:"}
+              label={'Fecha Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -468,15 +500,15 @@ class Traslado extends CustomComponent {
 
           <Column className="col-md-3 col-sm-12" formGroup={true}>
             <Select
-              label={"Sucursal:"}
+              label={'Sucursal:'}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >
-              {
-                this.state.sucursales.map((item, index) => (
-                  <option key={index} value={item.idSucursal}>{item.nombre}</option>
-                ))
-              }
+              {this.state.sucursales.map((item, index) => (
+                <option key={index} value={item.idSucursal}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
@@ -496,23 +528,27 @@ class Traslado extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="15%">Fecha y Hora</TableHead>
                     <TableHead width="15%">Tipo / Motivo</TableHead>
                     <TableHead width="15%">Almacen Origen</TableHead>
                     <TableHead width="15%">Almacen Destino</TableHead>
                     <TableHead width="20%">Observación</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -543,13 +579,13 @@ Traslado.propTypes = {
   }).isRequired,
   trasladoLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaTrasladoData: PropTypes.func,
   setListaTrasladoPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
-}
+  location: PropTypes.object,
+};
 
 /**
  *
@@ -558,17 +594,20 @@ Traslado.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    trasladoLista: state.predeterminado.trasladoLista
+    trasladoLista: state.predeterminado.trasladoLista,
   };
 };
 
-const mapDispatchToProps = { setListaTrasladoData, setListaTrasladoPaginacion }
+const mapDispatchToProps = { setListaTrasladoData, setListaTrasladoPaginacion };
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedTraslado = connect(mapStateToProps, mapDispatchToProps)(Traslado);
+const ConnectedTraslado = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Traslado);
 
 export default ConnectedTraslado;

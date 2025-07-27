@@ -9,18 +9,18 @@ import PropTypes from 'prop-types';
  * @param {React.Ref} ref - Referencia al elemento DOM.
  * @returns {JSX.Element} Componente de fila.
  */
-const Row = forwardRef(({ className = "", children }, ref) => {
-    return (
-        <div ref={ref} className={`row ${className}`}>
-            {children}
-        </div>
-    );
+const Row = forwardRef(({ className = '', children }, ref) => {
+  return (
+    <div ref={ref} className={`row ${className}`}>
+      {children}
+    </div>
+  );
 });
 
 // Definir propTypes para las propiedades del componente
 Row.propTypes = {
-    className: PropTypes.string,
-    children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired,
 };
 
 // Opcional: para mejor visualización en React DevTools

@@ -12,31 +12,35 @@ import Column from './Column';
  * @returns {JSX.Element} Componente de título.
  */
 const Title = ({ title, subTitle, icon, handleGoBack }) => {
-    return (
-        <Row>
-            <Column formGroup={true}>
-                    <h5>
-                        {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
-                        {handleGoBack !== undefined &&
-                            <span className='mr-2' role="button" onClick={handleGoBack}>
-                                <i className="bi bi-arrow-left-short"></i>
-                            </span>}
-                        {/* Título principal */}
-                        {title}
-                        {/* Renderiza el subtítulo y el icono si se proporciona */}
-                        <small className="text-secondary"> {subTitle} {icon}</small>
-                    </h5>
-            </Column>
-        </Row>
-    );
-}
+  return (
+    <Row>
+      <Column formGroup={true}>
+        <h5>
+          {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
+          {handleGoBack !== undefined && (
+            <span className="mr-2" role="button" onClick={handleGoBack}>
+              <i className="bi bi-arrow-left-short"></i>
+            </span>
+          )}
+          {/* Título principal */}
+          {title}
+          {/* Renderiza el subtítulo y el icono si se proporciona */}
+          <small className="text-secondary">
+            {' '}
+            {subTitle} {icon}
+          </small>
+        </h5>
+      </Column>
+    </Row>
+  );
+};
 
 // Definir propTypes para las propiedades del componente
 Title.propTypes = {
-    title: PropTypes.string.isRequired, // Título es requerido y debe ser una cadena
-    subTitle: PropTypes.string.isRequired, // Subtítulo es requerido y debe ser una cadena
-    icon: PropTypes.element, // Icono es opcional y debe ser una función
-    handleGoBack: PropTypes.func // handleGoBack es opcional y debe ser una función
-}
+  title: PropTypes.string.isRequired, // Título es requerido y debe ser una cadena
+  subTitle: PropTypes.string.isRequired, // Subtítulo es requerido y debe ser una cadena
+  icon: PropTypes.element, // Icono es opcional y debe ser una función
+  handleGoBack: PropTypes.func, // handleGoBack es opcional y debe ser una función
+};
 
 export default Title;

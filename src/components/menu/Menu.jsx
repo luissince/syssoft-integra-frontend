@@ -4,13 +4,7 @@ import { isEmpty } from '../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Image from '../Image';
 
-const Menu = ({
-  refSideBar,
-  url,
-  project,
-  userToken,
-  rutaLogo
-}) => {
+const Menu = ({ refSideBar, url, project, userToken, rutaLogo }) => {
   const onEventOverlay = () => {
     refSideBar.current.classList.remove('toggled');
   };
@@ -24,7 +18,7 @@ const Menu = ({
               default={images.icono}
               src={rutaLogo}
               className="rounded-circle d-block mx-auto mb-2 object-contain"
-              alt={"Logo"}
+              alt={'Logo'}
               width={130}
             />
             <h6 className="m-0">GESTIONA TU EMPRESA</h6>
@@ -33,73 +27,74 @@ const Menu = ({
           <ul className="list-unstyled components">
             <p>{project.nombre}</p>
             <div className="line"></div>
-            {
-              userToken.menus.map((menu, index) => {
-                if (isEmpty(menu.subMenus) && menu.estado === 1) {
-                  return (
-                    <li key={index}>
-                      <NavLink
-                        to={`${url}/${menu.ruta}`}
-                        className="pro-inner-item"
-                        activeClassName="active-link"
-                        role="button"
-                        id={`${menu.ruta}`}
-                        onClick={() => {
-                          if (refSideBar.current) {
-                            refSideBar.current.classList.remove('toggled');
-                          }
-                        }}
-                      >
-                        <span className="pro-icon-wrapper">
-                          <span className="pro-icon">
-                            <i className={menu.icon}></i>
-                          </span>
+            {userToken.menus.map((menu, index) => {
+              if (isEmpty(menu.subMenus) && menu.estado === 1) {
+                return (
+                  <li key={index}>
+                    <NavLink
+                      to={`${url}/${menu.ruta}`}
+                      className="pro-inner-item"
+                      activeClassName="active-link"
+                      role="button"
+                      id={`${menu.ruta}`}
+                      onClick={() => {
+                        if (refSideBar.current) {
+                          refSideBar.current.classList.remove('toggled');
+                        }
+                      }}
+                    >
+                      <span className="pro-icon-wrapper">
+                        <span className="pro-icon">
+                          <i className={menu.icon}></i>
                         </span>
-                        <span className="pro-item-content">{menu.nombre}</span>
-                      </NavLink>
-                    </li>
-                  );
-                }
+                      </span>
+                      <span className="pro-item-content">{menu.nombre}</span>
+                    </NavLink>
+                  </li>
+                );
+              }
 
-                if (menu.subMenus.filter((submenu) => submenu.estado === 1).length !== 0) {
-                  return (
-                    <li key={index}>
-                      <NavLink
-                        to={`${url}/${menu.ruta}`}
-                        className="pro-inner-item"
-                        activeClassName="active-link"
-                        role="button"
-                        id={`${menu.ruta}`}
-                        onClick={() => {
-                          if (refSideBar.current) {
-                            refSideBar.current.classList.remove('toggled');
+              if (
+                menu.subMenus.filter((submenu) => submenu.estado === 1)
+                  .length !== 0
+              ) {
+                return (
+                  <li key={index}>
+                    <NavLink
+                      to={`${url}/${menu.ruta}`}
+                      className="pro-inner-item"
+                      activeClassName="active-link"
+                      role="button"
+                      id={`${menu.ruta}`}
+                      onClick={() => {
+                        if (refSideBar.current) {
+                          refSideBar.current.classList.remove('toggled');
+                        }
+                      }}
+                    >
+                      <span className="pro-icon-wrapper">
+                        <span className="pro-icon">
+                          <i className={menu.icon}></i>
+                        </span>
+                      </span>
+                      <span className="pro-item-content">{menu.nombre}</span>
+                      <span className="suffix-wrapper">
+                        <span className="badge yellow">
+                          {
+                            menu.subMenus.filter(
+                              (submenu) => submenu.estado === 1,
+                            ).length
                           }
-                        }}
-                      >
-                        <span className="pro-icon-wrapper">
-                          <span className="pro-icon">
-                            <i className={menu.icon}></i>
-                          </span>
                         </span>
-                        <span className="pro-item-content">{menu.nombre}</span>
-                        <span className="suffix-wrapper">
-                          <span className="badge yellow">
-                            {
-                              menu.subMenus.filter(
-                                (submenu) => submenu.estado === 1,
-                              ).length
-                            }
-                          </span>
-                        </span>
-                        <span className="pro-arrow-wrapper">
-                          <span className="bi bi-arrow-right-circle-fill"></span>
-                        </span>
-                      </NavLink>
-                    </li>
-                  );
-                }
-              })
-            }
+                      </span>
+                      <span className="pro-arrow-wrapper">
+                        <span className="bi bi-arrow-right-circle-fill"></span>
+                      </span>
+                    </NavLink>
+                  </li>
+                );
+              }
+            })}
 
             {/* {userToken.menus.map((menu, index) => {
               if (isEmpty(menu.subMenus) && menu.estado === 1) {
@@ -230,7 +225,7 @@ const Menu = ({
                 {userToken.nombres + ' ' + userToken.apellidos}
               </span>
             </li>
-            <li className='text-center mt-3'>
+            <li className="text-center mt-3">
               <span>VERSIÓN {import.meta.env.VITE_APP_VERSION}</span>
             </li>
           </ul>
@@ -257,6 +252,5 @@ Menu.propTypes = {
   userToken: PropTypes.object,
   rutaLogo: PropTypes.string,
 };
-
 
 export default Menu;

@@ -26,7 +26,6 @@ import Input from '../../../../components/Input';
  * @extends React.Component
  */
 class MonedaAgregar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -91,19 +90,21 @@ class MonedaAgregar extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-
         <Title
-          title='Moneda'
-          subTitle='AGREGAR'
+          title="Moneda"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
-
 
         <Row>
           <Column className="form-group col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTxtNombre}
               value={this.state.nombre}
               onChange={(event) =>
@@ -116,7 +117,12 @@ class MonedaAgregar extends CustomComponent {
           <Column className="form-group col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>Código ISO: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Código ISO:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTxtCodIso}
               value={this.state.codIso}
               onChange={(event) =>
@@ -131,7 +137,7 @@ class MonedaAgregar extends CustomComponent {
           <Column className="form-group col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={"Simbolo"}
+              label={'Simbolo'}
               ref={this.refTxtSimbolo}
               value={this.state.simbolo}
               onChange={(event) =>
@@ -143,32 +149,28 @@ class MonedaAgregar extends CustomComponent {
 
           <Column className="form-group col-md-6" formGroup={true}>
             <Switches
-              label={"Estado:"}
-              id={"cbEstado"}
+              label={'Estado:'}
+              id={'cbEstado'}
               checked={this.state.estado}
               onChange={(value) =>
                 this.setState({ estado: value.target.checked })
               }
             >
-              {this.state.estado ? "Activo" : "Inactivo"}
+              {this.state.estado ? 'Activo' : 'Inactivo'}
             </Switches>
           </Column>
         </Row>
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-success" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -180,14 +182,14 @@ class MonedaAgregar extends CustomComponent {
 MonedaAgregar.propTypes = {
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
-  })
-}
+      idUsuario: PropTypes.string,
+    }),
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

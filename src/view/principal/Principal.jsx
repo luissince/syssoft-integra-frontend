@@ -3,7 +3,10 @@ import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { isEmpty } from '../../helper/utils.helper';
 import CustomComponent from '../../model/class/custom-component';
-import { configEmpresa, initSucursales } from '../../network/rest/principal.network';
+import {
+  configEmpresa,
+  initSucursales,
+} from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
@@ -24,7 +27,6 @@ import { images } from '../../helper';
  * @extends React.Component
  */
 class Principal extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -140,7 +142,7 @@ class Principal extends CustomComponent {
       const projectToken = window.localStorage.getItem('project');
       if (projectToken !== null) {
         this.props.projectActive({
-          project: JSON.parse(projectToken)
+          project: JSON.parse(projectToken),
         });
       }
     }
@@ -152,24 +154,26 @@ class Principal extends CustomComponent {
       return;
     }
 
-    const sucursales = this.state.cache.filter((item) => item.nombre.toUpperCase().includes(value.toUpperCase()),);
+    const sucursales = this.state.cache.filter((item) =>
+      item.nombre.toUpperCase().includes(value.toUpperCase()),
+    );
     this.setState({ sucursales });
-  }
+  };
 
   handleSignOut = async () => {
     window.localStorage.removeItem('login');
     window.localStorage.removeItem('project');
     window.location.href = '/';
-  }
+  };
 
   handleIngresar = (item) => {
     const proyect = item;
 
     window.localStorage.setItem('project', JSON.stringify(proyect));
     this.props.projectActive({
-      project: JSON.parse(window.localStorage.getItem('project'))
+      project: JSON.parse(window.localStorage.getItem('project')),
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -220,7 +224,7 @@ class Principal extends CustomComponent {
           rutaImage={this.state.rutaLogo}
           razonSocial={this.state.razonSocial}
           nombreEmpresa={this.state.nombreEmpresa}
-          documento={"RUC: " + this.state.documento}
+          documento={'RUC: ' + this.state.documento}
           handleSignOut={this.handleSignOut}
         />
 
@@ -266,7 +270,7 @@ Principal.propTypes = {
   projectActive: PropTypes.func,
   clearPredeterminado: PropTypes.func,
   clearNoticacion: PropTypes.func,
-}
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -274,8 +278,16 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = { signOut, projectActive, clearPredeterminado, clearNoticacion };
+const mapDispatchToProps = {
+  signOut,
+  projectActive,
+  clearPredeterminado,
+  clearNoticacion,
+};
 
-const ConnectedPrincipal = connect(mapStateToProps, mapDispatchToProps)(Principal);
+const ConnectedPrincipal = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Principal);
 
 export default ConnectedPrincipal;

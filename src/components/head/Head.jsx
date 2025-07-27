@@ -6,8 +6,12 @@ import { FACTURACION, REALIZAR_VENTA, VENTAS } from '../../model/types/menu';
 import Button from '../Button';
 
 const Menu = (props) => {
-
-  const add = getStatePrivilegio(props.token.userToken.menus, FACTURACION, VENTAS, REALIZAR_VENTA);
+  const add = getStatePrivilegio(
+    props.token.userToken.menus,
+    FACTURACION,
+    VENTAS,
+    REALIZAR_VENTA,
+  );
 
   const handleSignIn = () => {
     window.localStorage.removeItem('login');
@@ -20,7 +24,7 @@ const Menu = (props) => {
     props.clearSucursal();
     props.clearNoticacion();
     props.projectClose();
-  }
+  };
 
   return (
     <header className="app-header">
@@ -35,14 +39,18 @@ const Menu = (props) => {
 
       <ul className="app-nav">
         {/* Navegar al menú de navegación */}
-        {add && <div className="dropdown">
-          <Link
-            className="app-nav__item"
-            to={`${props.match.url}/facturacion/ventas/crear`}>
-            {' '}
-            <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva venta
-          </Link>
-        </div>}
+        {add && (
+          <div className="dropdown">
+            <Link
+              className="app-nav__item"
+              to={`${props.match.url}/facturacion/ventas/crear`}
+            >
+              {' '}
+              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva
+              venta
+            </Link>
+          </div>
+        )}
 
         {/* Lista de notificaciones */}
         <div className="dropdown">
@@ -62,25 +70,25 @@ const Menu = (props) => {
             <div className="app-notification__content">
               {props.notificaciones.length !== 0
                 ? props.notificaciones.map((item, index) => (
-                  <li key={index}>
-                    <div className="app-notification__item">
-                      <span className="app-notification__icon">
-                        <span className="fa-stack fa-lg">
-                          <i className="fa fa-circle fa-stack-2x text-primary"></i>
-                          <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
+                    <li key={index}>
+                      <div className="app-notification__item">
+                        <span className="app-notification__icon">
+                          <span className="fa-stack fa-lg">
+                            <i className="fa fa-circle fa-stack-2x text-primary"></i>
+                            <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
+                          </span>
                         </span>
-                      </span>
-                      <div>
-                        <p className="app-notification__message">
-                          {item.cantidad} {item.nombre}
-                        </p>
-                        <p className="app-notification__meta">
-                          {item.estado}
-                        </p>
+                        <div>
+                          <p className="app-notification__message">
+                            {item.cantidad} {item.nombre}
+                          </p>
+                          <p className="app-notification__meta">
+                            {item.estado}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))
+                    </li>
+                  ))
                 : null}
             </div>
             {props.notificaciones.length == 0 ? (
@@ -111,11 +119,7 @@ const Menu = (props) => {
           </a>
           <ul className="dropdown-menu settings-menu dropdown-menu-right">
             <li className="user-header">
-              <img
-                src={images.usuario}
-                className="img-circle"
-                alt="Usuario"
-              />
+              <img src={images.usuario} className="img-circle" alt="Usuario" />
               <p>
                 <span>
                   {props.token.userToken.nombres +
@@ -129,17 +133,11 @@ const Menu = (props) => {
               </p>
             </li>
             <li className="user-footer">
-              <Button
-                className="btn-secondary"
-                onClick={handleCloseSucursal}
-              >
+              <Button className="btn-secondary" onClick={handleCloseSucursal}>
                 <i className="fa fa-sign-out fa-sm"></i> Cerrar Sucursal
               </Button>
 
-              <Button
-                className="btn-secondary"
-                onClick={handleSignIn}
-              >
+              <Button className="btn-secondary" onClick={handleSignIn}>
                 <i className="fa fa-window-close fa-sm"></i> Cerrar Sesión
               </Button>
             </li>
@@ -148,11 +146,11 @@ const Menu = (props) => {
       </ul>
     </header>
   );
-}
+};
 
 Menu.propTypes = {
   history: PropTypes.shape({
-    push: PropTypes.func
+    push: PropTypes.func,
   }),
   signOut: PropTypes.func,
 
@@ -163,7 +161,7 @@ Menu.propTypes = {
   onToggleSidebar: PropTypes.func,
   notificaciones: PropTypes.array,
   match: PropTypes.shape({
-    url: PropTypes.string
+    url: PropTypes.string,
   }),
   token: PropTypes.shape({
     userToken: PropTypes.shape({
@@ -171,8 +169,8 @@ Menu.propTypes = {
       apellidos: PropTypes.string,
       rol: PropTypes.string,
       menus: PropTypes.array,
-    })
-  })
-}
+    }),
+  }),
+};
 
 export default Menu;

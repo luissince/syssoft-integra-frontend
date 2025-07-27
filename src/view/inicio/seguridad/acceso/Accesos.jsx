@@ -33,7 +33,6 @@ import CheckBox from '../../../../components/Checks.jsx';
  * @extends React.Component
  */
 class Accesos extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -69,9 +68,7 @@ class Accesos extends CustomComponent {
   }
 
   loadData = async () => {
-    const [perfiles] = await Promise.all([
-      this.fetchComboPerfil()
-    ]);
+    const [perfiles] = await Promise.all([this.fetchComboPerfil()]);
 
     this.setState({
       perfiles,
@@ -144,7 +141,10 @@ class Accesos extends CustomComponent {
 
       await this.setStateAsync({
         menus: menus,
-        sucursales: response.data.perfilSucursales.map(item=>({...item, estado: item.estado === 1 ? true : false})),
+        sucursales: response.data.perfilSucursales.map((item) => ({
+          ...item,
+          estado: item.estado === 1 ? true : false,
+        })),
         loading: false,
       });
 
@@ -173,7 +173,7 @@ class Accesos extends CustomComponent {
         messageWarning: 'Seleccione el perfil.',
       });
     }
-  }
+  };
 
   handleCheckMenu = async (event) => {
     const { value } = event.target;
@@ -208,16 +208,16 @@ class Accesos extends CustomComponent {
 
   handleCheckSucursal = async (event) => {
     const { value } = event.target;
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       sucursales: prevState.sucursales.map((item) => {
         if (item.idSucursal === value) {
           return {
             ...item,
             estado: item.estado ? false : true,
-          }
+          };
         }
         return item;
-      })
+      }),
     }));
   };
 
@@ -234,7 +234,7 @@ class Accesos extends CustomComponent {
         const data = {
           idPerfil: this.state.idPerfil,
           menus: this.state.menus,
-          sucursales: this.state.sucursales
+          sucursales: this.state.sucursales,
         };
 
         alertInfo('Acceso', 'Procesando información...');
@@ -303,11 +303,10 @@ class Accesos extends CustomComponent {
         />
 
         <Title
-          title='Accesos'
-          subTitle='LISTA'
+          title="Accesos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
-
 
         {this.state.messageWarning !== '' ? (
           <div className="alert alert-warning" role="alert">
@@ -320,19 +319,17 @@ class Accesos extends CustomComponent {
           <Column className="col-12" formGroup={true}>
             <Select
               group={true}
-              label={"Perfil:"}
+              label={'Perfil:'}
               ref={this.refIdPerfil}
               value={this.state.idPerfil}
               onChange={this.onChangePerfil}
             >
               <option value="">- Seleccione -</option>
-              {
-                this.state.perfiles.map((item, index) => (
-                  <option key={index} value={item.idPerfil}>
-                    {item.descripcion}
-                  </option>
-                ))
-              }
+              {this.state.perfiles.map((item, index) => (
+                <option key={index} value={item.idPerfil}>
+                  {item.descripcion}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
@@ -349,24 +346,22 @@ class Accesos extends CustomComponent {
           </Column>
           <Column className="col-md-6" formGroup={true}>
             <h6>Principal - Sucursal</h6>
-            <ul className='list-unstyled'>
-              {
-                this.state.sucursales.map((item, index) => {
-                  return (
-                    <li key={index}>
-                      <CheckBox
-                        className='form-check-inline'
-                        id={`id${item.idSucursal}`}
-                        value={item.idSucursal}
-                        checked={item.estado}
-                        onChange={this.handleCheckSucursal}
-                      >
-                        {item.nombre}
-                      </CheckBox>
-                    </li>
-                  );
-                })
-              }
+            <ul className="list-unstyled">
+              {this.state.sucursales.map((item, index) => {
+                return (
+                  <li key={index}>
+                    <CheckBox
+                      className="form-check-inline"
+                      id={`id${item.idSucursal}`}
+                      value={item.idSucursal}
+                      checked={item.estado}
+                      onChange={this.handleCheckSucursal}
+                    >
+                      {item.nombre}
+                    </CheckBox>
+                  </li>
+                );
+              })}
             </ul>
           </Column>
         </Row>
@@ -376,21 +371,18 @@ class Accesos extends CustomComponent {
             <Button
               className="btn-success"
               onClick={() => this.onEventGuardar()}
-            // disabled={!this.state.save}
+              // disabled={!this.state.save}
             >
               <i className="fa fa-save"></i> Guardar
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-warning"
               onClick={() => this.onEventUpdateData()}
-            // disabled={!this.state.update}
+              // disabled={!this.state.update}
             >
               <i className="fa fa-refresh"></i> Resetear
-            </Button>
-            {' '}
-            <Button
-              className="btn-outline-danger">
+            </Button>{' '}
+            <Button className="btn-outline-danger">
               <i className="fa fa-close"></i> Cancelar
             </Button>
           </Column>
@@ -419,7 +411,9 @@ const OptionsList = ({ options, handleCheck, hasParentUl = false }) => {
             )}
 
             <CheckBox
-              className={`form-check-inline ${hasChildren ? 'ml-2' : ''} ${hasParentUl ? 'ml-2' : ''}`} // Agrega clases según el contexto
+              className={`form-check-inline ${hasChildren ? 'ml-2' : ''} ${
+                hasParentUl ? 'ml-2' : ''
+              }`} // Agrega clases según el contexto
               id={`id${option.nombre}`}
               value={value}
               checked={option.estado === 1 ? true : false}
@@ -446,13 +440,13 @@ OptionsList.propTypes = {
   options: PropTypes.array,
   handleCheck: PropTypes.func,
   hasParentUl: PropTypes.bool,
-}
+};
 
 Accesos.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func,
   }),
-}
+};
 
 const mapStateToProps = (state) => {
   return {

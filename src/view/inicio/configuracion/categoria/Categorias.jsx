@@ -17,7 +17,15 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
@@ -82,7 +90,7 @@ class Categorias extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -176,35 +184,39 @@ class Categorias extends CustomComponent {
   };
 
   handleDelete = (id) => {
-    alertDialog('Categoría', '¿Estás seguro de eliminar la Categoría?', async (accept) => {
-      if (accept) {
-        const params = {
-          idCategoria: id,
-        };
+    alertDialog(
+      'Categoría',
+      '¿Estás seguro de eliminar la Categoría?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idCategoria: id,
+          };
 
-        alertInfo('Categoría', 'Se esta procesando la petición...');
+          alertInfo('Categoría', 'Se esta procesando la petición...');
 
-        const response = await removeCategoria(params);
+          const response = await removeCategoria(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Categoría', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Categoría', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Categoría', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Categoría', response.getMessage());
-        }
-      }
-    });
+      },
+    );
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='7'
-          message='Cargando información de la tabla...'
+          colSpan="7"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -246,7 +258,7 @@ class Categorias extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idCategoria)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -255,7 +267,7 @@ class Categorias extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idCategoria)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -269,24 +281,17 @@ class Categorias extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Categorias'
-          subTitle='LISTA'
+          title="Categorias"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -306,22 +311,28 @@ class Categorias extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Código</TableHead>
                     <TableHead width="25%">Nombre</TableHead>
                     <TableHead width="30%">Descripción</TableHead>
                     <TableHead width="10%">Imagen</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

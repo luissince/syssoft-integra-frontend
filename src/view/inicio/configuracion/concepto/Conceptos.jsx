@@ -23,7 +23,15 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { TIPO_CONCEPTO_INGRESO } from '../../../../model/types/tipo-concepto';
 
 class Conceptos extends CustomComponent {
@@ -82,7 +90,7 @@ class Conceptos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -116,7 +124,10 @@ class Conceptos extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listConceptos(params, this.abortControllerTable.signal);
+    const response = await listConceptos(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
@@ -190,8 +201,8 @@ class Conceptos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='7'
-          message='Cargando información de la tabla...'
+          colSpan="7"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -199,15 +210,25 @@ class Conceptos extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="7">¡No hay datos registrados!</TableCell>
+          <TableCell className="text-center" colSpan="7">
+            ¡No hay datos registrados!
+          </TableCell>
         </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
-
-      const tipoConcepto = item.idTipoConcepto === TIPO_CONCEPTO_INGRESO ? <span className='text-success'>INGRESO <i className='fa fa-arrow-down'></i></span> : <span className='text-danger'>EGRESO <i className='fa fa-arrow-up'></i></span>;
-      const sistema = item.sistema === 1 ? "SISTEMA" : "LIBRE";
+      const tipoConcepto =
+        item.idTipoConcepto === TIPO_CONCEPTO_INGRESO ? (
+          <span className="text-success">
+            INGRESO <i className="fa fa-arrow-down"></i>
+          </span>
+        ) : (
+          <span className="text-danger">
+            EGRESO <i className="fa fa-arrow-up"></i>
+          </span>
+        );
+      const sistema = item.sistema === 1 ? 'SISTEMA' : 'LIBRE';
 
       return (
         <TableRow key={index}>
@@ -224,7 +245,7 @@ class Conceptos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idConcepto)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -233,7 +254,7 @@ class Conceptos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idConcepto)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -247,24 +268,17 @@ class Conceptos extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Conceptos'
-          subTitle='LISTA'
+          title="Conceptos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -284,21 +298,25 @@ class Conceptos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="25%">Concepto</TableHead>
                     <TableHead width="20%">Tipo Concepto</TableHead>
                     <TableHead width="10%">Sistema</TableHead>
                     <TableHead width="10%">Creacion</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

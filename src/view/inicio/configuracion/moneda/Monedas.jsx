@@ -23,7 +23,15 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 
 /**
@@ -92,7 +100,7 @@ class Monedas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -166,27 +174,30 @@ class Monedas extends CustomComponent {
   };
 
   handleBorrar(idMoneda) {
-    alertDialog('Moneda', '¿Estás seguro de eliminar la moneda?', async (accept) => {
-      if (accept) {
-        const params = {
-          idMoneda: idMoneda,
-        };
+    alertDialog(
+      'Moneda',
+      '¿Estás seguro de eliminar la moneda?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idMoneda: idMoneda,
+          };
 
-        alertInfo('Moneda', 'Procesando información...');
+          alertInfo('Moneda', 'Procesando información...');
 
-        const response = await deleteMoneda(params);
+          const response = await deleteMoneda(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Moneda', response.data);
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Moneda', response.data);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertWarning('Moneda', response.getType());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Moneda', response.getType());
-        }
-      }
-    },
+      },
     );
   }
 
@@ -194,8 +205,8 @@ class Monedas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -222,8 +233,9 @@ class Monedas extends CustomComponent {
         );
 
       const nmEstado = item.estado === 1 ? 'ACTIVO' : 'INACTIVO';
-      const bgEstado = `badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
-        }`;
+      const bgEstado = `badge ${
+        item.estado === 1 ? 'badge-success' : 'badge-danger'
+      }`;
 
       return (
         <TableRow key={index}>
@@ -239,7 +251,7 @@ class Monedas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idMoneda)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -248,7 +260,7 @@ class Monedas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idMoneda)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -262,8 +274,8 @@ class Monedas extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Monedas'
-          subTitle='LISTA'
+          title="Monedas"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -272,15 +284,11 @@ class Monedas extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-            // disabled={!this.state.add}
+              // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i>
             </Button>
           </Column>
@@ -300,22 +308,26 @@ class Monedas extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-striped table-bordered rounded"}>
+              <Table className={'table-striped table-bordered rounded'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="25%">Moneda</TableHead>
                     <TableHead width="15%">Codigo ISO</TableHead>
                     <TableHead width="10%">Símbolo</TableHead>
                     <TableHead width="10%">Nacional</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -337,14 +349,14 @@ class Monedas extends CustomComponent {
 Monedas.propTypes = {
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
-    pathname: PropTypes.string
+    pathname: PropTypes.string,
   }),
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
-  })
-}
+      idUsuario: PropTypes.string,
+    }),
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

@@ -7,7 +7,7 @@ class ErrorResponse {
   status = 400;
 
   constructor(error) {
-    this.init(error)
+    this.init(error);
   }
 
   init(error) {

@@ -27,7 +27,9 @@ class Tree {
           }
 
           if (li.querySelector('ul') === null) {
-            if (li.querySelector('input').classList.contains('display-initial')) {
+            if (
+              li.querySelector('input').classList.contains('display-initial')
+            ) {
               li.querySelector('input').classList.replace(
                 'display-initial',
                 'display-none',
@@ -42,9 +44,13 @@ class Tree {
         });
 
         if (elem.querySelector('input').classList.contains('display-initial')) {
-          elem.querySelector('input').classList.replace('display-initial', 'display-none');
+          elem
+            .querySelector('input')
+            .classList.replace('display-initial', 'display-none');
         } else {
-          elem.querySelector('input').classList.replace('display-none', 'display-initial');
+          elem
+            .querySelector('input')
+            .classList.replace('display-none', 'display-initial');
         }
       });
     });

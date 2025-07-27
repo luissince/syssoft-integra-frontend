@@ -10,9 +10,9 @@ const ItemCard = ({ item, handleIngresar }) => {
         <div className="card">
           <Image
             default={images.noImage}
-            src={ `${item.imagen}`}
-            alt={"Imagen de la sucursal"}
-            className={"card-img-top"}
+            src={`${item.imagen}`}
+            alt={'Imagen de la sucursal'}
+            className={'card-img-top'}
           />
           <div className="card-body m-2">
             <h6 className="text-primary font-weight-bold text-center">
@@ -20,7 +20,7 @@ const ItemCard = ({ item, handleIngresar }) => {
             </h6>
             <h6 className="text-secondary text-center">{item.direccion}</h6>
             <Button
-              className='btn-block btn-outline-primary'
+              className="btn-block btn-outline-primary"
               onClick={() => handleIngresar(item)}
             >
               <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
@@ -30,12 +30,11 @@ const ItemCard = ({ item, handleIngresar }) => {
       </div>
     </div>
   );
-}
-
+};
 
 ItemCard.propTypes = {
   item: PropTypes.object.isRequired,
-  handleIngresar: PropTypes.func.isRequired
+  handleIngresar: PropTypes.func.isRequired,
 };
 
 export default ItemCard;

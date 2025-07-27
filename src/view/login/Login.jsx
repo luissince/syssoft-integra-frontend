@@ -16,7 +16,6 @@ import { isEmpty } from '../../helper/utils.helper';
  * @extends React.Component
  */
 class Login extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -78,22 +77,21 @@ class Login extends CustomComponent {
   eventFocused = () => {
     const userToken = window.localStorage.getItem('login');
     if (userToken === null) {
-      return
+      return;
     }
 
     const projectToken = window.localStorage.getItem('project');
     if (projectToken !== null) {
       this.props.signIn({
         token: JSON.parse(userToken),
-        project: JSON.parse(projectToken)
+        project: JSON.parse(projectToken),
       });
     } else {
       this.props.signIn({
         token: JSON.parse(userToken),
-        project: null
+        project: null,
       });
     }
-
   };
 
   /*
@@ -160,7 +158,7 @@ class Login extends CustomComponent {
 
     this.props.signIn({
       token: response.data,
-      project: null
+      project: null,
     });
   };
 
@@ -233,17 +231,13 @@ class Login extends CustomComponent {
 
             <Form
               loading={this.state.loading}
-
               message={this.state.message}
-
               username={this.state.username}
               usernameRef={this.usernameRef}
               handleChangeUsername={this.handleChangeUsername}
-
               password={this.state.password}
               passwordRef={this.passwordRef}
               handleChangePassword={this.handleChangePassword}
-              
               lookPassword={this.state.lookPassword}
               handleViewPassword={this.handleViewPassword}
               handleSendForm={this.handleSendForm}
@@ -258,9 +252,9 @@ class Login extends CustomComponent {
 Login.propTypes = {
   signIn: PropTypes.func,
   token: PropTypes.shape({
-    userToken: PropTypes.object
-  })
-}
+    userToken: PropTypes.object,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -268,7 +262,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = { signIn }
+const mapDispatchToProps = { signIn };
 
 const ConnectedLogin = connect(mapStateToProps, mapDispatchToProps)(Login);
 

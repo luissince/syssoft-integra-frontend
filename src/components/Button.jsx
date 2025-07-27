@@ -22,33 +22,38 @@ import { NavLink } from 'react-router-dom';
  * </Button>
  */
 
-const Button = forwardRef(({
-    refButton,
-    contentClassName = "",
-    className = "",
-    type="button",
-    children,
-    ...rest // ← Aquí van las demás props como onChange, value, etc.
-}, ref) => {
+const Button = forwardRef(
+  (
+    {
+      refButton,
+      contentClassName = '',
+      className = '',
+      type = 'button',
+      children,
+      ...rest // ← Aquí van las demás props como onChange, value, etc.
+    },
+    ref,
+  ) => {
     return (
-        <button
-            ref={ref}
-            type={type}
-            className={contentClassName ? contentClassName : `btn ${className}`}
-            {...rest}>
-            {children}
-        </button>
+      <button
+        ref={ref}
+        type={type}
+        className={contentClassName ? contentClassName : `btn ${className}`}
+        {...rest}
+      >
+        {children}
+      </button>
     );
-
-});
+  },
+);
 
 Button.displayName = 'Button';
 
 Button.propTypes = {
-    contentClassName: PropTypes.string,
-    type: PropTypes.string,
-    className: PropTypes.string,
-    children: PropTypes.node,
+  contentClassName: PropTypes.string,
+  type: PropTypes.string,
+  className: PropTypes.string,
+  children: PropTypes.node,
 };
 
 export default Button;
@@ -76,24 +81,23 @@ export default Button;
  */
 
 const ButtonMenu = ({ icon, path, title, category }) => {
-    return (
-        <NavLink
-            to={path}
-            className="d-flex flex-column align-items-center btn btn-link text-dark border-0">
-            <i className={`${icon} text-5xl mb-2`} ></i>
-            <p className="text-base m-0">{title}</p>
-            <p className="text-sm text-primary m-0">{category}</p>
-        </NavLink>
-    );
-}
+  return (
+    <NavLink
+      to={path}
+      className="d-flex flex-column align-items-center btn btn-link text-dark border-0"
+    >
+      <i className={`${icon} text-5xl mb-2`}></i>
+      <p className="text-base m-0">{title}</p>
+      <p className="text-sm text-primary m-0">{category}</p>
+    </NavLink>
+  );
+};
 
 ButtonMenu.propTypes = {
-    icon: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    category: PropTypes.string.isRequired,
-}
+  icon: PropTypes.string.isRequired,
+  path: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  category: PropTypes.string.isRequired,
+};
 
-export {
-    ButtonMenu
-}
+export { ButtonMenu };

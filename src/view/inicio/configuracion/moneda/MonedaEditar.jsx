@@ -30,7 +30,6 @@ import { Switches } from '../../../../components/Checks';
  * @extends React.Component
  */
 class MonedaEditar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -71,9 +70,7 @@ class MonedaEditar extends CustomComponent {
   }
 
   async loadingData(idMoneda) {
-    const [moneda] = await Promise.all([
-      this.fetchGetIdMoneda(idMoneda)
-    ]);
+    const [moneda] = await Promise.all([this.fetchGetIdMoneda(idMoneda)]);
 
     this.setState({
       nombre: moneda.nombre,
@@ -157,8 +154,8 @@ class MonedaEditar extends CustomComponent {
         />
 
         <Title
-          title='Moneda'
-          subTitle='EDITAR'
+          title="Moneda"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -166,7 +163,11 @@ class MonedaEditar extends CustomComponent {
           <Column className="form-group col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTxtNombre}
               value={this.state.nombre}
               onChange={(event) =>
@@ -179,7 +180,12 @@ class MonedaEditar extends CustomComponent {
           <Column className="form-group col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>Código ISO: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Código ISO:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTxtCodIso}
               value={this.state.codIso}
               onChange={(event) =>
@@ -194,7 +200,7 @@ class MonedaEditar extends CustomComponent {
           <Column className="form-group col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={"Simbolo"}
+              label={'Simbolo'}
               ref={this.refTxtSimbolo}
               value={this.state.simbolo}
               onChange={(event) =>
@@ -206,32 +212,28 @@ class MonedaEditar extends CustomComponent {
 
           <Column className="form-group col-md-6" formGroup={true}>
             <Switches
-              label={"Estado:"}
-              id={"cbEstado"}
+              label={'Estado:'}
+              id={'cbEstado'}
               checked={this.state.estado}
               onChange={(value) =>
                 this.setState({ estado: value.target.checked })
               }
             >
-              {this.state.estado ? "Activo" : "Inactivo"}
+              {this.state.estado ? 'Activo' : 'Inactivo'}
             </Switches>
           </Column>
         </Row>
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -243,14 +245,14 @@ class MonedaEditar extends CustomComponent {
 MonedaEditar.propTypes = {
   history: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
-  })
-}
+      idUsuario: PropTypes.string,
+    }),
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

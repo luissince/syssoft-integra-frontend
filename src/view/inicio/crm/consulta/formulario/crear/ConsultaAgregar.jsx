@@ -151,8 +151,8 @@ class ConsultaAgregar extends CustomComponent {
         />
 
         <Title
-          title='Banco'
-          subTitle='AGREGAR'
+          title="Banco"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -299,7 +299,10 @@ class ConsultaAgregar extends CustomComponent {
                   this.setState({ preferido: value.target.checked })
                 }
               />
-              <label className="custom-control-label" htmlFor="preferidoChecked">
+              <label
+                className="custom-control-label"
+                htmlFor="preferidoChecked"
+              >
                 {this.state.preferido ? 'Si' : 'No'}
               </label>
             </div>
@@ -330,17 +333,14 @@ class ConsultaAgregar extends CustomComponent {
 
         <Row>
           <Column>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i>  Guardar
+            <Button className="btn-success" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -355,6 +355,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedConsultaAgregar = connect(mapStateToProps, null)(ConsultaAgregar);
+const ConnectedConsultaAgregar = connect(
+  mapStateToProps,
+  null,
+)(ConsultaAgregar);
 
 export default ConnectedConsultaAgregar;

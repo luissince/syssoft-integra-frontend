@@ -2,9 +2,17 @@ import React from 'react';
 import Button from '../../../../../../../components/Button';
 import Input from '../../../../../../../components/Input';
 import { images } from '../../../../../../../helper';
-import { formatNumberWithZeros, isEmpty, numberFormat } from '../../../../../../../helper/utils.helper';
+import {
+  formatNumberWithZeros,
+  isEmpty,
+  numberFormat,
+} from '../../../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../../../model/class/custom-component';
-import { A_GRANEL, UNIDADES, VALOR_MONETARIO } from '../../../../../../../model/types/tipo-tratamiento-producto';
+import {
+  A_GRANEL,
+  UNIDADES,
+  VALOR_MONETARIO,
+} from '../../../../../../../model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
 import { filtrarProductoVenta } from '../../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../../model/class/response';
@@ -17,7 +25,6 @@ import Search from '../../../../../../../components/Search';
  * @extends React.Component
  */
 class InvoiceView extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -29,9 +36,9 @@ class InvoiceView extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-    }
+    };
 
-    this.initial = { ...this.state }
+    this.initial = { ...this.state };
 
     this.refSearch = React.createRef();
 
@@ -49,30 +56,29 @@ class InvoiceView extends CustomComponent {
     this.setState(this.initial, () => {
       this.refSearch.current.restart();
       this.refProducto.current.focus();
-    })
-  }
+    });
+  };
 
   setInitialData = (state) => {
     this.setState(state);
     this.refSearch.current.initialize(state.buscar);
-  }
+  };
 
   handleSelectTipo = (tipo) => {
     this.setState({ tipo: tipo }, () => {
       this.refProducto.current.focus();
-    })
-  }
+    });
+  };
 
   handleInputBuscar = async (event) => {
-    this.setState({ buscar: event.target.value })
+    this.setState({ buscar: event.target.value });
     if (isEmpty(event.target.value)) {
-      this.props.handleUpdateProductos([], false, true)
+      this.props.handleUpdateProductos([], false, true);
     }
-  }
+  };
 
   handleSearchCodBar = async (event) => {
     if (event.key === 'Enter') {
-
       this.setState({
         loading: true,
       });
@@ -89,12 +95,12 @@ class InvoiceView extends CustomComponent {
       const response = await filtrarProductoVenta(params);
       if (response instanceof SuccessReponse) {
         if (!isEmpty(response.data.lists)) {
-          this.props.handleAddItem(response.data.lists[0])
+          this.props.handleAddItem(response.data.lists[0]);
         }
 
         this.setState({
           loading: false,
-          buscar: ''
+          buscar: '',
         });
         this.refProducto.current.focus();
       }
@@ -104,7 +110,7 @@ class InvoiceView extends CustomComponent {
 
         this.setState({
           loading: false,
-          buscar: ''
+          buscar: '',
         });
         this.refProducto.current.focus();
       }
@@ -124,7 +130,7 @@ class InvoiceView extends CustomComponent {
 
       // this.setState({ loading: false, producto: '' });
     }
-  }
+  };
 
   handleSearchText = async (text) => {
     if (this.state.loading) return;
@@ -132,18 +138,18 @@ class InvoiceView extends CustomComponent {
     if (isEmpty(text)) {
       this.props.handleUpdateProductos([], false, true);
       return;
-    };
+    }
 
     this.props.handleUpdateProductos([], true);
     await this.setStateAsync({ paginacion: 1, buscar: text });
     this.fillTable(0, text.trim());
     await this.setStateAsync({ tipo: 0 });
-  }
+  };
 
   handlePaginacion = async (listid) => {
     await this.setStateAsync({ paginacion: listid });
     this.handleSelectPaginacion();
-  }
+  };
 
   handleSelectPaginacion = () => {
     switch (this.state.tipo) {
@@ -151,7 +157,7 @@ class InvoiceView extends CustomComponent {
         this.fillTable(0, this.state.buscar);
         break;
     }
-  }
+  };
 
   fillTable = async (tipo, buscar) => {
     // this.setState({
@@ -243,7 +249,7 @@ class InvoiceView extends CustomComponent {
         loading: false,
       });
     }
-  }
+  };
 
   render() {
     const {
@@ -252,15 +258,10 @@ class InvoiceView extends CustomComponent {
       handleAddItem,
       productos,
       cotizacion,
-      pedido
+      pedido,
     } = this.props;
 
-    const {
-      buscar,
-      tipo,
-      loading,
-      totalPaginacion
-    } = this.state;
+    const { buscar, tipo, loading, totalPaginacion } = this.state;
 
     return (
       <div className="h-100 d-flex flex-column items position-relative ">
@@ -270,7 +271,6 @@ class InvoiceView extends CustomComponent {
           buscar={buscar}
           tipo={tipo}
           handleSelectTipo={this.handleSelectTipo}
-
           handleInputBuscar={this.handleInputBuscar}
           handleSearchCodBar={this.handleSearchCodBar}
           handleSearchText={this.handleSearchText}
@@ -286,30 +286,33 @@ class InvoiceView extends CustomComponent {
           handleStarProduct={handleStarProduct}
         />
 
-        <div className='w-100 bottom-0 bg-white' style={{ borderTop: '1px solid #e1e7ee', flex: '1 1 3.5rem' }}>
-          <div className='px-3 py-3 d-flex align-items-center'>
-            {
-              cotizacion && <>
-                <span className='mr-1'>
+        <div
+          className="w-100 bottom-0 bg-white"
+          style={{ borderTop: '1px solid #e1e7ee', flex: '1 1 3.5rem' }}
+        >
+          <div className="px-3 py-3 d-flex align-items-center">
+            {cotizacion && (
+              <>
+                <span className="mr-1">
                   <img src={images.cotizacion} width={22} /> COTIZACIÓN:
                 </span>
-                <h6 className='p-0 m-0'>
-                  {cotizacion.serie}-{formatNumberWithZeros(cotizacion.numeracion)}
+                <h6 className="p-0 m-0">
+                  {cotizacion.serie}-
+                  {formatNumberWithZeros(cotizacion.numeracion)}
                 </h6>
               </>
-            }
+            )}
 
-            {
-              pedido &&
+            {pedido && (
               <>
-                <span className='mr-1'>
+                <span className="mr-1">
                   <img src={images.invoice} width={22} /> PEDIDO:
                 </span>
-                <h6 className='p-0 m-0'>
+                <h6 className="p-0 m-0">
                   {pedido.serie}-{formatNumberWithZeros(pedido.numeracion)}
                 </h6>
               </>
-            }
+            )}
           </div>
         </div>
       </div>
@@ -326,7 +329,7 @@ const ItemSearch = (props) => {
     handleSelectTipo,
     handleInputBuscar,
     handleSearchCodBar,
-    handleSearchText
+    handleSearchText,
   } = props;
 
   return (
@@ -335,21 +338,25 @@ const ItemSearch = (props) => {
         <div className="input-group">
           <div className="input-group-prepend">
             <Button
-              className={`${tipo === 1 ? "btn-primary " : "btn-outline-primary"} px-3`}
+              className={`${
+                tipo === 1 ? 'btn-primary ' : 'btn-outline-primary'
+              } px-3`}
               onClick={() => handleSelectTipo(1)}
             >
-              <i className='fa fa-barcode'></i>
+              <i className="fa fa-barcode"></i>
             </Button>
 
             <Button
-              className={`${tipo === 0 ? "btn-primary" : "btn-outline-primary"}`}
+              className={`${
+                tipo === 0 ? 'btn-primary' : 'btn-outline-primary'
+              }`}
               onClick={() => handleSelectTipo(0)}
             >
-              <i className='fa fa-search px-1'></i>
+              <i className="fa fa-search px-1"></i>
             </Button>
           </div>
           {
-            tipo === 1 ?
+            tipo === 1 ? (
               <Input
                 className="border border-primary"
                 placeholder={`Buscar código de barras...`}
@@ -359,7 +366,7 @@ const ItemSearch = (props) => {
                 onKeyDown={handleSearchCodBar}
                 autoFocus={true}
               />
-              :
+            ) : (
               <Search
                 ref={refSearch}
                 className="border border-primary"
@@ -367,6 +374,7 @@ const ItemSearch = (props) => {
                 refInput={refProducto}
                 onSearch={handleSearchText}
               />
+            )
             // <Input
             //   className="border border-success"
             //   placeholder={`Buscar por código, nombres.`}
@@ -377,14 +385,13 @@ const ItemSearch = (props) => {
             //   autoFocus={true}
             // />
           }
-
         </div>
       </div>
       {/* <button className='btn btn-outline-success d-flex align-items-center justify-content-center' style={{ minWidth: "10rem" }}>
                 <div className='mr-2'>Nuevo producto</div>
                 <img src={images.add} alt='Agregar Producto' />
             </button> */}
-    </div >
+    </div>
   );
 };
 
@@ -399,17 +406,17 @@ class ListSearchItems extends React.Component {
   handleScroll() {
     const { loading, totalPaginacion } = this.props;
 
-    if (loading)
-      return;
+    if (loading) return;
 
-
-    if (this.index >= totalPaginacion)
-      return;
-
+    if (this.index >= totalPaginacion) return;
 
     if (this.refScroll.current) {
       const container = this.refScroll.current;
-      if (container.scrollTop + container.clientHeight >= container.scrollHeight && !this.props.loading) {
+      if (
+        container.scrollTop + container.clientHeight >=
+          container.scrollHeight &&
+        !this.props.loading
+      ) {
         this.index++;
         this.props.handlePaginacion(this.index);
       }
@@ -459,25 +466,24 @@ class ListSearchItems extends React.Component {
               codiso={codiso}
               producto={item}
               handleAddItem={() => {
-                handleAddItem(item)
+                handleAddItem(item);
                 refProducto.current.focus();
               }}
               handleStarProduct={handleStarProduct}
             />
           ))}
 
-          {loading &&
+          {loading && (
             <div className="p-2 w-100 d-flex flex-column align-items-center justify-content-center">
               <span className="loader-one"></span>
               <p className="text-secondary mt-5 text-base">Buscando ...</p>
             </div>
-          }
+          )}
         </div>
       </div>
     );
   }
 }
-
 
 const ItemView = (props) => {
   const { codiso } = props;
@@ -494,29 +500,41 @@ const ItemView = (props) => {
     negativo,
     imagen,
     almacen,
-    idTipoTratamientoProducto
+    idTipoTratamientoProducto,
   } = props.producto;
 
-  const {
-    handleAddItem,
-    handleStarProduct,
-  } = props;
+  const { handleAddItem, handleStarProduct } = props;
 
   const cssNegativo =
-    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 1 ? 'text-danger' : 'text-success';
+    tipo !== 'PRODUCTO'
+      ? ''
+      : tipo === 'PRODUCTO' && negativo === 1
+        ? 'text-danger'
+        : 'text-success';
   const detalleNegativo =
-    tipo !== 'PRODUCTO' ? '' : tipo === 'PRODUCTO' && negativo === 1 ? 'VENTA SIN CONTROL DE STOCK' : 'VENTA CON CONTROL DE STOCK';
+    tipo !== 'PRODUCTO'
+      ? ''
+      : tipo === 'PRODUCTO' && negativo === 1
+        ? 'VENTA SIN CONTROL DE STOCK'
+        : 'VENTA CON CONTROL DE STOCK';
 
-  const tipoTratamiento = idTipoTratamientoProducto === UNIDADES ? "EN UNIDADES"
-    : idTipoTratamientoProducto === VALOR_MONETARIO ? "VALOR MONETARIO"
-      : idTipoTratamientoProducto === A_GRANEL ? "A GRANEL" : "SERVICIO"
+  const tipoTratamiento =
+    idTipoTratamientoProducto === UNIDADES
+      ? 'EN UNIDADES'
+      : idTipoTratamientoProducto === VALOR_MONETARIO
+        ? 'VALOR MONETARIO'
+        : idTipoTratamientoProducto === A_GRANEL
+          ? 'A GRANEL'
+          : 'SERVICIO';
 
   return (
     <Button
-      contentClassName={`item-view ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''}`}
+      contentClassName={`item-view ${
+        tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''
+      }`}
       onClick={handleAddItem}
     >
-      <div className='position-absolute ml-1 mt-1 badge badge-danger'>
+      <div className="position-absolute ml-1 mt-1 badge badge-danger">
         {tipoTratamiento}
       </div>
       <div
@@ -531,25 +549,30 @@ const ItemView = (props) => {
         }}
       >
         {preferido === 1 && (
-          <i
-            className="fa fa-star text-white"
-            style={{ fontSize: '25px' }}
-          ></i>
+          <i className="fa fa-star text-white" style={{ fontSize: '25px' }}></i>
         )}
         {preferido === 0 && (
           <i
             className="fa fa-star-o text-white"
-            style={{ fontSize: '25px' }}></i>
+            style={{ fontSize: '25px' }}
+          ></i>
         )}
       </div>
       <div className="item-view_describe">
         <p
-          className={`item-view_describe-title ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''} position-absolute`}
+          className={`item-view_describe-title ${
+            tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
+          } position-absolute`}
         >
           {tipo === 'PRODUCTO' ? `INV. ${cantidad}` : `SERVICIO`}
         </p>
         <div className="item-view_describe-image">
-          <img src={imagen ? imagen : images.sale} alt="Venta" width={96} height={96} />
+          <img
+            src={imagen ? imagen : images.sale}
+            alt="Venta"
+            width={96}
+            height={96}
+          />
         </div>
       </div>
       <span className="text-center d-block w-100 my-1">
@@ -563,15 +586,15 @@ const ItemView = (props) => {
         {detalleNegativo}
       </span>
       <span className="text-center d-block w-100 ml-1 mr-1 mt-1 mb-3">
-        <span className='text-xl'>{numberFormat(precio, codiso)}</span> <span className='text-sm'>x {medida}</span>
+        <span className="text-xl">{numberFormat(precio, codiso)}</span>{' '}
+        <span className="text-sm">x {medida}</span>
       </span>
-      <span className='text-left d-block w-100 ml-1 mr-1 mt-1 text-sm'>
+      <span className="text-left d-block w-100 ml-1 mr-1 mt-1 text-sm">
         Almacen: {almacen}
       </span>
     </Button>
   );
 };
-
 
 InvoiceView.propTypes = {
   idSucursal: PropTypes.string.isRequired,
@@ -583,7 +606,7 @@ InvoiceView.propTypes = {
   handleUpdateProductos: PropTypes.func.isRequired,
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,
-}
+};
 
 ItemSearch.propTypes = {
   refProducto: PropTypes.object.isRequired,
@@ -593,8 +616,8 @@ ItemSearch.propTypes = {
   handleSelectTipo: PropTypes.func.isRequired,
   handleInputBuscar: PropTypes.func.isRequired,
   handleSearchCodBar: PropTypes.func.isRequired,
-  handleSearchText: PropTypes.func.isRequired
-}
+  handleSearchText: PropTypes.func.isRequired,
+};
 
 ItemView.propTypes = {
   codiso: PropTypes.string.isRequired,
@@ -610,11 +633,11 @@ ItemView.propTypes = {
     negativo: PropTypes.number.isRequired,
     imagen: PropTypes.string,
     almacen: PropTypes.string,
-    idTipoTratamientoProducto: PropTypes.string
+    idTipoTratamientoProducto: PropTypes.string,
   }),
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,
-}
+};
 
 ListSearchItems.propTypes = {
   refProducto: PropTypes.object.isRequired,
@@ -625,6 +648,6 @@ ListSearchItems.propTypes = {
   handlePaginacion: PropTypes.func.isRequired,
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,
-}
+};
 
 export default InvoiceView;

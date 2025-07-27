@@ -27,7 +27,10 @@ const Form = (props) => {
     <div className="col-lg-6 mb-5 mb-lg-0">
       <div className="card">
         <div className="card-body py-5 px-md-5">
-          <form onSubmit={handleSendForm} className='flex flex-col items-center gap-y-4'>
+          <form
+            onSubmit={handleSendForm}
+            className="flex flex-col items-center gap-y-4"
+          >
             <img
               className="mb-4"
               // src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
@@ -35,6 +38,8 @@ const Form = (props) => {
               alt="Logo"
               width="160"
             />
+
+            <p>Ingrese su usuario y contraseña para iniciar sesión</p>
 
             {message !== '' && (
               <div
@@ -75,26 +80,34 @@ const Form = (props) => {
                 placeholder="Ingrese su contraseña"
                 buttonRight={
                   <Button
-                    className={"btn-outline-secondary"}
+                    className={'btn-outline-secondary'}
                     onClick={handleViewPassword}
                   >
-                    <i className={lookPassword ? 'fa fa-eye' : 'fa fa-eye-slash'} ></i>
+                    <i
+                      className={lookPassword ? 'fa fa-eye' : 'fa fa-eye-slash'}
+                    ></i>
                   </Button>
                 }
               />
             </div>
 
             <Button
-              type={"submit"}
-              className={"btn-primary btn-block mb-3"}
-              text={" Iniciar Sesión"}
+              type={'submit'}
+              className={'btn-primary btn-block mb-3'}
+              text={' Iniciar Sesión'}
             >
               <i className="fa fa-arrow-right"></i>
             </Button>
 
             <div className="flex items-center flex-col gap-y-2">
-              <p className="uppercase">{__APP_TITLE__} © {new Date().getFullYear()}</p>
-              <p className='my-0'>VERSIÓN {__APP_VERSION__}</p>
+              <p className="uppercase">
+                {__APP_TITLE__} © {new Date().getFullYear()}
+              </p>
+              <p className="my-0">VERSIÓN {__APP_VERSION__}</p>
+              <span className="text-gray-400 text-xs">
+                Aplicación para uso de la empresa{' '}
+                {import.meta.env.VITE_APP_NAME}
+              </span>
             </div>
           </form>
         </div>
@@ -120,6 +133,5 @@ Form.propTypes = {
   handleViewPassword: PropTypes.func,
   handleSendForm: PropTypes.func,
 };
-
 
 export default Form;

@@ -19,7 +19,15 @@ import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
@@ -82,7 +90,7 @@ class Sucursales extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -160,23 +168,26 @@ class Sucursales extends CustomComponent {
   };
 
   handleBorrar = (idSucursal) => {
-    alertDialog('Sucursal', '¿Estás seguro de eliminar el sucursal?', async (accept) => {
-      if (accept) {
-        alertInfo('Sucursal', 'Procesando información...');
+    alertDialog(
+      'Sucursal',
+      '¿Estás seguro de eliminar el sucursal?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Sucursal', 'Procesando información...');
 
-        const response = await deleteSucursal(idSucursal);
+          const response = await deleteSucursal(idSucursal);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Sucursal', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Sucursal', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Sucursal', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Sucursal', response.getMessage());
-        }
-      }
-    },
+      },
     );
   };
 
@@ -184,7 +195,7 @@ class Sucursales extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='7'
+          colSpan="7"
           message={'Cargando información de la tabla...'}
         />
       );
@@ -226,7 +237,7 @@ class Sucursales extends CustomComponent {
             <Image
               default={images.noImage}
               src={item.imagen}
-              alt={"Imagen"}
+              alt={'Imagen'}
               width={96}
             />
           </TableCell>
@@ -234,7 +245,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idSucursal)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -243,7 +254,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idSucursal)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -257,25 +268,21 @@ class Sucursales extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Sucursales'
-          subTitle='LISTA'
+          title="Sucursales"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
-
 
         <Row>
           <Column formGroup={true}>
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-            // disabled={!this.state.add}
+              // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadInit}
-            >
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -295,22 +302,32 @@ class Sucursales extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="20%">Nombre</TableHead>
                     <TableHead width="40%">Dirección</TableHead>
-                    <TableHead width="10%" className="text-center">Principal</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="10%" className="text-center">Imagen</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Principal
+                    </TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Imagen
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

@@ -11,13 +11,25 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { detailGasto, documentsPdfInvoicesGasto } from '../../../../../network/rest/principal.network';
+import {
+  detailGasto,
+  documentsPdfInvoicesGasto,
+} from '../../../../../network/rest/principal.network';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
 
@@ -26,7 +38,6 @@ import pdfVisualizer from 'pdf-visualizer';
  * @extends React.Component
  */
 class GastoDetalle extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -99,20 +110,26 @@ class GastoDetalle extends CustomComponent {
   */
 
   async loadDataId(id) {
-    const [gasto] = await Promise.all([
-      this.fetchDetailGasto(id)
-    ]);
+    const [gasto] = await Promise.all([this.fetchDetailGasto(id)]);
 
     if (gasto === null) {
       this.props.history.goBack();
       return;
     }
 
-    const suma = gasto.detalles.reduce((acumulador, item) => acumulador + item.monto * item.cantidad, 0);
+    const suma = gasto.detalles.reduce(
+      (acumulador, item) => acumulador + item.monto * item.cantidad,
+      0,
+    );
 
     this.setState({
       idGasto: id,
-      comprobante: gasto.cabecera.comprobante + ' ' + gasto.cabecera.serie + '-' + gasto.cabecera.numeracion,
+      comprobante:
+        gasto.cabecera.comprobante +
+        ' ' +
+        gasto.cabecera.serie +
+        '-' +
+        gasto.cabecera.numeracion,
       cliente: gasto.cabecera.documento + ' ' + gasto.cabecera.informacion,
       fecha: gasto.cabecera.fecha + ' ' + formatTime(gasto.cabecera.hora),
       observacion: gasto.cabecera.observacion,
@@ -170,7 +187,7 @@ class GastoDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -189,30 +206,26 @@ class GastoDetalle extends CustomComponent {
   */
 
   renderDetalles() {
-    return (
-      this.state.detalles.map((item, index) => {
-        return (
-          <TableRow key={index}>
-            <TableCell>{++index}</TableCell>
-            <TableCell>{item.nombre}</TableCell>
-            <TableCell>{rounded(item.cantidad)}</TableCell>
-            <TableCell>
-              {numberFormat(item.monto, this.state.codiso)}
-            </TableCell>
-            <TableCell>
-              {numberFormat(
-                item.cantidad * item.monto,
-                this.state.codiso,
-              )}
-            </TableCell>
-          </TableRow>
-        );
-      })
-    );
+    return this.state.detalles.map((item, index) => {
+      return (
+        <TableRow key={index}>
+          <TableCell>{++index}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>{rounded(item.cantidad)}</TableCell>
+          <TableCell>{numberFormat(item.monto, this.state.codiso)}</TableCell>
+          <TableCell>
+            {numberFormat(item.cantidad * item.monto, this.state.codiso)}
+          </TableCell>
+        </TableRow>
+      );
+    });
   }
 
   renderTotal() {
-    const total = this.state.detalles.reduce((acumulador, item) => acumulador + item.monto * item.cantidad, 0);
+    const total = this.state.detalles.reduce(
+      (acumulador, item) => acumulador + item.monto * item.cantidad,
+      0,
+    );
 
     return (
       <TableRow>
@@ -235,49 +248,47 @@ class GastoDetalle extends CustomComponent {
       );
     }
 
-    return (
-      this.state.transaccion.map((item, index) => {
-        return (
-          <React.Fragment key={index}>
-            <TableRow className="table-success">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>
-                <span>{item.fecha}</span>
-                <br />
-                <span>{formatTime(item.hora)}</span>
-              </TableCell>
-              <TableCell>{item.concepto}</TableCell>
-              <TableCell>{item.nota}</TableCell>
-              <TableCell colSpan={2}>{item.usuario}</TableCell>
-            </TableRow>
+    return this.state.transaccion.map((item, index) => {
+      return (
+        <React.Fragment key={index}>
+          <TableRow className="table-success">
+            <TableCell>{index + 1}</TableCell>
+            <TableCell>
+              <span>{item.fecha}</span>
+              <br />
+              <span>{formatTime(item.hora)}</span>
+            </TableCell>
+            <TableCell>{item.concepto}</TableCell>
+            <TableCell>{item.nota}</TableCell>
+            <TableCell colSpan={2}>{item.usuario}</TableCell>
+          </TableRow>
 
-            <TableRow>
-              <TableCell className="text-center">#</TableCell>
-              <TableCell>Banco</TableCell>
-              <TableCell>Monto</TableCell>
-              <TableCell>Observación</TableCell>
-            </TableRow>
-            {
-              item.detalles.map((detalle, index) => {
-                return (
-                  <tr key={index}>
-                    <TableCell className="text-center">{index + 1}</TableCell>
-                    <TableCell>{detalle.nombre}</TableCell>
-                    <TableCell>{numberFormat(detalle.monto, this.state.codiso)}</TableCell>
-                    <TableCell colSpan={2}>{detalle.observacion}</TableCell>
-                  </tr>
-                );
-              })
-            }
-            <TableRow>
-              <TableCell colSpan="5">
-                <hr />
-              </TableCell>
-            </TableRow>
-          </React.Fragment>
-        );
-      })
-    );
+          <TableRow>
+            <TableCell className="text-center">#</TableCell>
+            <TableCell>Banco</TableCell>
+            <TableCell>Monto</TableCell>
+            <TableCell>Observación</TableCell>
+          </TableRow>
+          {item.detalles.map((detalle, index) => {
+            return (
+              <tr key={index}>
+                <TableCell className="text-center">{index + 1}</TableCell>
+                <TableCell>{detalle.nombre}</TableCell>
+                <TableCell>
+                  {numberFormat(detalle.monto, this.state.codiso)}
+                </TableCell>
+                <TableCell colSpan={2}>{detalle.observacion}</TableCell>
+              </tr>
+            );
+          })}
+          <TableRow>
+            <TableCell colSpan="5">
+              <hr />
+            </TableCell>
+          </TableRow>
+        </React.Fragment>
+      );
+    });
   }
 
   render() {
@@ -289,8 +300,8 @@ class GastoDetalle extends CustomComponent {
         />
 
         <Title
-          title='Gasto'
-          subTitle='DETALLE'
+          title="Gasto"
+          subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -301,15 +312,13 @@ class GastoDetalle extends CustomComponent {
               onClick={this.handlePrint.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrint.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrint.bind(this, '58mm')}
@@ -404,7 +413,7 @@ class GastoDetalle extends CustomComponent {
           <Column>
             <TableResponsive>
               <TableTitle>Detalles</TableTitle>
-              <Table className={"able-light table-striped"}>
+              <Table className={'able-light table-striped'}>
                 <TableHeader className="thead-dark">
                   <TableRow>
                     <TableHead>#</TableHead>
@@ -414,9 +423,7 @@ class GastoDetalle extends CustomComponent {
                     <TableHead>Total</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderDetalles()}
-                </TableBody>
+                <TableBody>{this.renderDetalles()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -425,10 +432,8 @@ class GastoDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-8 col-md-8 col-sm-12 col-12"></Column>
           <Column className="col-lg-4 col-md-4 col-sm-12 col-12">
-            <Table classNameContent='w-100'>
-              <TableHeader>
-                {this.renderTotal()}
-              </TableHeader>
+            <Table classNameContent="w-100">
+              <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>
         </Row>
@@ -437,7 +442,7 @@ class GastoDetalle extends CustomComponent {
           <Column>
             <TableResponsive>
               <TableTitle>Transacciones</TableTitle>
-              <Table className={"able-light table-striped"}>
+              <Table className={'able-light table-striped'}>
                 <TableHeader className="thead-dark">
                   <TableRow>
                     <TableHead>#</TableHead>
@@ -447,9 +452,7 @@ class GastoDetalle extends CustomComponent {
                     <TableHead>Usuario</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderTransaciones()}
-                </TableBody>
+                <TableBody>{this.renderTransaciones()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -473,7 +476,6 @@ GastoDetalle.propTypes = {
     search: PropTypes.string,
   }),
 };
-
 
 const mapStateToProps = (state) => {
   return {

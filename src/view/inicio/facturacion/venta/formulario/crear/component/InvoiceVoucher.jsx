@@ -36,6 +36,6 @@ InvoiceVoucher.propTypes = {
   idComprobante: PropTypes.string.isRequired,
 
   handleSelectComprobante: PropTypes.func.isRequired,
-}
+};
 
 export default InvoiceVoucher;

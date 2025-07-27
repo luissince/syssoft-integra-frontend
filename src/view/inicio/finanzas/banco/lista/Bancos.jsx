@@ -21,11 +21,22 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
-import { setListaBancoData, setListaBancoPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaBancoData,
+  setListaBancoPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 
 /**
@@ -33,7 +44,6 @@ import React from 'react';
  * @extends React.Component
  */
 class Bancos extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -69,24 +79,34 @@ class Bancos extends CustomComponent {
   }
 
   loadingData = async () => {
-    if (this.props.bancoLista && this.props.bancoLista.data && this.props.bancoLista.paginacion) {
-      this.setState(this.props.bancoLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.bancoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.bancoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.bancoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.bancoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.bancoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.bancoLista.paginacion.messagePaginacion;
+    if (
+      this.props.bancoLista &&
+      this.props.bancoLista.data &&
+      this.props.bancoLista.paginacion
+    ) {
+      this.setState(this.props.bancoLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.bancoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.bancoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.bancoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.bancoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.bancoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.bancoLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.bancoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaBancoData(this.state)
+    this.props.setListaBancoData(this.state);
     this.props.setListaBancoPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -113,7 +133,7 @@ class Bancos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -151,15 +171,20 @@ class Bancos extends CustomComponent {
     const response = await listBancos(data, this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -195,24 +220,27 @@ class Bancos extends CustomComponent {
   };
 
   handleBorrar = (idBanco) => {
-    alertDialog('Banco', '¿Estás seguro de eliminar el banco?', async (accept) => {
-      if (accept) {
-        alertInfo('Banco', 'Procesando información...');
+    alertDialog(
+      'Banco',
+      '¿Estás seguro de eliminar el banco?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Banco', 'Procesando información...');
 
-        const params = { idBanco: idBanco };
-        const response = await deleteBanco(params);
+          const params = { idBanco: idBanco };
+          const response = await deleteBanco(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Banco', response.data, () => {
-            this.loadingInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Banco', response.data, () => {
+              this.loadingInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Banco', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Banco', response.getMessage());
-        }
-      }
-    },
+      },
     );
   };
 
@@ -220,7 +248,7 @@ class Bancos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
+          colSpan="9"
           message={'Cargando información de la tabla...'}
         />
       );
@@ -242,12 +270,18 @@ class Bancos extends CustomComponent {
           <TableCell>{item.tipoCuenta.toUpperCase()}</TableCell>
           <TableCell>{item.moneda}</TableCell>
           <TableCell>{item.numCuenta}</TableCell>
-          <TableCell className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}>{numberFormat(item.saldo, item.codiso)}</TableCell>
+          <TableCell
+            className={`text-right ${
+              item.saldo >= 0 ? 'text-success' : 'text-danger'
+            }`}
+          >
+            {numberFormat(item.saldo, item.codiso)}
+          </TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idBanco)}
-            // disabled={!this.state.view}
+              // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -257,7 +291,7 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idBanco)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -267,7 +301,7 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idBanco)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -281,8 +315,8 @@ class Bancos extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Bancos'
-          subTitle='LISTA'
+          title="Bancos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -291,11 +325,10 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleCrear}
-            // disabled={!this.state.add}
+              // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-outline-secondary"
               onClick={this.loadingInit}
@@ -320,23 +353,30 @@ class Bancos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Nombre</TableHead>
                     <TableHead width="15%">Tipo Cuenta</TableHead>
                     <TableHead width="10%">Moneda</TableHead>
                     <TableHead width="20%">Número Cuenta</TableHead>
                     <TableHead width="10%">Saldo</TableHead>
-                    <TableHead width="5%" className="text-center"> Detalle </TableHead>
-                    <TableHead width="5%" className="text-center">Editar </TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      {' '}
+                      Detalle{' '}
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar{' '}
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -367,7 +407,7 @@ Bancos.propTypes = {
   }),
   bancoLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaBancoData: PropTypes.func,
   setListaBancoPaginacion: PropTypes.func,
@@ -380,11 +420,11 @@ Bancos.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    bancoLista: state.predeterminado.bancoLista
+    bancoLista: state.predeterminado.bancoLista,
   };
 };
 
-const mapDispatchToProps = { setListaBancoData, setListaBancoPaginacion }
+const mapDispatchToProps = { setListaBancoData, setListaBancoPaginacion };
 
 const ConnectedBancos = connect(mapStateToProps, mapDispatchToProps)(Bancos);
 

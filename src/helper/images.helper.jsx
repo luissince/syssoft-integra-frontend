@@ -104,5 +104,5 @@ export {
   phone,
   directory,
   configuracion,
-  whatsapp
+  whatsapp,
 };

@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  isEmpty,
-  imageBase64,
-} from '../../../../helper/utils.helper';
+import { isEmpty, imageBase64 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -27,7 +24,7 @@ class CategoriaAgregar extends React.Component {
       nombre: '',
       descripcion: '',
       imagen: {
-        url: images.noImage
+        url: images.noImage,
       },
       estado: false,
       publicar: false,
@@ -64,12 +61,16 @@ class CategoriaAgregar extends React.Component {
     if (!isEmpty(files)) {
       const file = files[0];
       let url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } = await imageBase64(file);
+      const { size, base64String, extension, width, height } =
+        await imageBase64(file);
 
       if (size > 500) {
         alertKit.warning({
-          title: "Categoría",
-          message: "La imagen " + file.name + " tiene que tener un tamaño de menos de 500 KB"
+          title: 'Categoría',
+          message:
+            'La imagen ' +
+            file.name +
+            ' tiene que tener un tamaño de menos de 500 KB',
         });
         return;
       }
@@ -81,55 +82,57 @@ class CategoriaAgregar extends React.Component {
           width: width,
           height: height,
           size: size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         imagen: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
     event.target.value = null;
   };
 
-
   handleClearImage = () => {
     this.setState({
       imagen: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
-  }
+  };
 
   handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
       alertKit.warning({
-        title: "Categoría",
-        message: "!Ingrese el nombre de la categoría!",
+        title: 'Categoría',
+        message: '!Ingrese el nombre de la categoría!',
         onClose: () => {
           this.refNombre.current.focus();
-        }
+        },
       });
       return;
     }
 
-    alertKit.question({
-      title: "Categoría",
-      message: '¿Estás seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Categoría',
+        message: '¿Estás seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          await this.handleGuardarProcess();
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-        await this.handleGuardarProcess();
-      }
-    });
+    );
   };
 
   handleGuardarProcess = async () => {
@@ -150,7 +153,7 @@ class CategoriaAgregar extends React.Component {
 
     if (response instanceof SuccessReponse) {
       alertKit.success({
-        title: "Categoría",
+        title: 'Categoría',
         message: response.data,
         onClose: () => {
           this.props.history.goBack();
@@ -162,18 +165,18 @@ class CategoriaAgregar extends React.Component {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        title: "Categoría",
+        title: 'Categoría',
         message: response.getMessage(),
       });
     }
-  }
+  };
 
   render() {
     return (
       <ContainerWrapper>
         <Title
-          title='Categoría'
-          subTitle='AGREGAR'
+          title="Categoría"
+          subTitle="AGREGAR"
           icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -182,7 +185,7 @@ class CategoriaAgregar extends React.Component {
           <Column formGroup={true}>
             <Input
               autoFocus
-              label={"Código:"}
+              label={'Código:'}
               placeholder="Ingrese el código"
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
@@ -193,7 +196,11 @@ class CategoriaAgregar extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre:<i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese el nombre"
               ref={this.refNombre}
               value={this.state.nombre}
@@ -205,7 +212,7 @@ class CategoriaAgregar extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Descripción"}
+              label={'Descripción'}
               placeholder="Ingrese la descripción"
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
@@ -238,14 +245,19 @@ class CategoriaAgregar extends React.Component {
         <Row>
           <Column className="col-12" formGroup={true}>
             <label>
-              Agregar las imagenes para el icono. <b className='text-danger'>La imagen no deben superar los 500KB(Kilobytes).</b>
+              Agregar las imagenes para el icono.{' '}
+              <b className="text-danger">
+                La imagen no deben superar los 500KB(Kilobytes).
+              </b>
             </label>
             <label>
-              Las imágenes deben tener un tamaño de <b>300 x 200 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).
+              Las imágenes deben tener un tamaño de <b>300 x 200 píxeles</b>{' '}
+              para que se visualicen correctamente en la página web (formato
+              recomendado *.webp).
             </label>
           </Column>
 
-          <Column className={"col-md-4 col-12"} formGroup={true}>
+          <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
@@ -265,14 +277,13 @@ class CategoriaAgregar extends React.Component {
               className="btn-success"
               onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -281,17 +292,16 @@ class CategoriaAgregar extends React.Component {
   }
 }
 
-
 CategoriaAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -299,6 +309,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedCategoriaAgregar = connect(mapStateToProps, null)(CategoriaAgregar);
+const ConnectedCategoriaAgregar = connect(
+  mapStateToProps,
+  null,
+)(CategoriaAgregar);
 
 export default ConnectedCategoriaAgregar;

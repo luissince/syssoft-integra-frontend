@@ -25,28 +25,48 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
+import {
+  CONTADO,
+  CREDITO_FIJO,
+  CREDITO_VARIABLE,
+} from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
 import ModalElegirInterfaz from './component/ModalElejirInterfaz';
 import Button from '../../../../../components/Button';
-import { setListaVentaData, setListaVentaPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaVentaData,
+  setListaVentaPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
 import Search from '../../../../../components/Search';
 import { Link } from 'react-router-dom';
-import { ANULAR_VENTA, FACTURACION, REALIZAR_VENTA, VENTAS, VISUALIZAR_VENTA } from '../../../../../model/types/menu';
+import {
+  ANULAR_VENTA,
+  FACTURACION,
+  REALIZAR_VENTA,
+  VENTAS,
+  VISUALIZAR_VENTA,
+} from '../../../../../model/types/menu';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class Ventas extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -84,9 +104,24 @@ class Ventas extends CustomComponent {
       isOpenElegirInterfaz: false,
 
       // Atributos para privilegios
-      create: getStatePrivilegio(this.props.token.userToken.menus, FACTURACION, VENTAS, REALIZAR_VENTA),
-      view: getStatePrivilegio(this.props.token.userToken.menus, FACTURACION, VENTAS, VISUALIZAR_VENTA),
-      remove: getStatePrivilegio(this.props.token.userToken.menus, FACTURACION, VENTAS, ANULAR_VENTA),
+      create: getStatePrivilegio(
+        this.props.token.userToken.menus,
+        FACTURACION,
+        VENTAS,
+        REALIZAR_VENTA,
+      ),
+      view: getStatePrivilegio(
+        this.props.token.userToken.menus,
+        FACTURACION,
+        VENTAS,
+        VISUALIZAR_VENTA,
+      ),
+      remove: getStatePrivilegio(
+        this.props.token.userToken.menus,
+        FACTURACION,
+        VENTAS,
+        ANULAR_VENTA,
+      ),
     };
 
     this.refPaginacion = React.createRef();
@@ -114,16 +149,15 @@ class Ventas extends CustomComponent {
   */
 
   /**
-  * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
-  */
+   * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
+   */
   async componentDidMount() {
     await this.loadingData();
   }
 
-
   /**
-  * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
-  */
+   * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
+   */
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
@@ -143,31 +177,44 @@ class Ventas extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (this.props.ventaLista && this.props.ventaLista.data && this.props.ventaLista.paginacion) {
-      this.setState(this.props.ventaLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.ventaLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.ventaLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.ventaLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.ventaLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.ventaLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.ventaLista.paginacion.messagePaginacion;
+    if (
+      this.props.ventaLista &&
+      this.props.ventaLista.data &&
+      this.props.ventaLista.paginacion
+    ) {
+      this.setState(this.props.ventaLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.ventaLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.ventaLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.ventaLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.ventaLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.ventaLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.ventaLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.ventaLista.data.buscar);
     } else {
       const [comprobantes] = await Promise.all([this.fetchComprobante(VENTA)]);
 
-      this.setState({
-        comprobantes,
-        initialLoad: false,
-      }, async () => {
-        await this.loadingInit();
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          comprobantes,
+          initialLoad: false,
+        },
+        async () => {
+          await this.loadingInit();
+          this.updateReduxState();
+        },
+      );
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaVentaData(this.state)
+    this.props.setListaVentaData(this.state);
     this.props.setListaVentaPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -180,8 +227,8 @@ class Ventas extends CustomComponent {
 
   async fetchComprobante(tipo) {
     const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
+      tipo: tipo,
+      idSucursal: this.state.idSucursal,
     };
 
     const response = await comboComprobante(
@@ -201,14 +248,14 @@ class Ventas extends CustomComponent {
   }
 
   loadingInit = async () => {
-    if (!this.state.view) return;  
+    if (!this.state.view) return;
 
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
-  }
+  };
 
   searchText = async (text) => {
     if (this.state.loading) return;
@@ -218,7 +265,7 @@ class Ventas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   async searchOpciones() {
     if (this.state.loading) return;
@@ -233,7 +280,7 @@ class Ventas extends CustomComponent {
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
-  }
+  };
 
   onEventPaginacion = () => {
     switch (this.state.opcion) {
@@ -249,7 +296,7 @@ class Ventas extends CustomComponent {
       default:
         this.fillTable(0);
     }
-  }
+  };
 
   fillTable = async (opcion, buscar = '') => {
     this.setState({
@@ -277,13 +324,16 @@ class Ventas extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -296,7 +346,7 @@ class Ventas extends CustomComponent {
         messageTable: response.getMessage(),
       });
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -316,69 +366,72 @@ class Ventas extends CustomComponent {
 
   handleCrearClasico = () => {
     this.props.history.push(`${this.props.location.pathname}/crear`);
-  }
+  };
 
   handleInputFechaInico = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleInputFechaFinal = (event) => {
     this.setState({ fechaFinal: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleSelectComprobante = (event) => {
     this.setState({ idComprobante: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleDetalle = (idVenta) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idVenta=' + idVenta,
     });
-  }
+  };
 
   handleCancelar(idVenta) {
-    if(!this.state.remove){
-      alertWarning("Venta", "No tiene privilegios para anular ventas");
+    if (!this.state.remove) {
+      alertWarning('Venta', 'No tiene privilegios para anular ventas');
       return;
     }
 
-    alertDialog('Venta', '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.', async (accept) => {
-      if (accept) {
-        const params = {
-          idVenta: idVenta,
-          idUsuario: this.state.idUsuario,
-        };
+    alertDialog(
+      'Venta',
+      '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idVenta: idVenta,
+            idUsuario: this.state.idUsuario,
+          };
 
-        alertInfo("Venta", "Procesando información...")
+          alertInfo('Venta', 'Procesando información...');
 
-        const response = await cancelVenta(params);
+          const response = await cancelVenta(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Venta', response.data, () => {
-            this.loadingInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Venta', response.data, () => {
+              this.loadingInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertWarning('Venta', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Venta', response.getMessage());
-        }
-      }
-    },
+      },
     );
   }
 
@@ -402,8 +455,8 @@ class Ventas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='10'
-          message='Cargando información de la tabla...'
+          colSpan="10"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -411,55 +464,82 @@ class Ventas extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="10">¡No hay datos registrados!</TableCell>
+          <TableCell className="text-center" colSpan="10">
+            ¡No hay datos registrados!
+          </TableCell>
         </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1 ? <span className="text-success">COBRADO</span> : item.estado === 2 ? <span className="text-warning">POR COBRAR</span> : item.estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="text-success">COBRADO</span>
+        ) : item.estado === 2 ? (
+          <span className="text-warning">POR COBRAR</span>
+        ) : item.estado === 3 ? (
+          <span className="text-danger">ANULADO</span>
+        ) : (
+          <span className="text-primary">POR LLEVAR</span>
+        );
 
-      const tipo = item.idFormaPago === CONTADO ? "CONTADO" : item.idFormaPago === CREDITO_FIJO ? "CREDITO FIJO" : item.idFormaPago === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
+      const tipo =
+        item.idFormaPago === CONTADO
+          ? 'CONTADO'
+          : item.idFormaPago === CREDITO_FIJO
+            ? 'CREDITO FIJO'
+            : item.idFormaPago === CREDITO_VARIABLE
+              ? 'CRÉDITO VARIABLE'
+              : 'PAGO ADELTANDO';
 
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>{item.fecha}<br />{formatTime(item.hora)}</TableCell>
-          <TableCell>{item.tipoDocumento} - {item.documento}<br />{item.informacion}</TableCell>
-          <TableCell>{item.comprobante}<br />{item.serie + '-' + formatNumberWithZeros(item.numeracion)}</TableCell>
+          <TableCell>
+            {item.fecha}
+            <br />
+            {formatTime(item.hora)}
+          </TableCell>
+          <TableCell>
+            {item.tipoDocumento} - {item.documento}
+            <br />
+            {item.informacion}
+          </TableCell>
+          <TableCell>
+            {item.comprobante}
+            <br />
+            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
+          </TableCell>
           <TableCell>{tipo}</TableCell>
           <TableCell className="text-center">{estado}</TableCell>
-          <TableCell className="text-center"> {numberFormat(item.total, item.codiso)} </TableCell>
+          <TableCell className="text-center">
+            {' '}
+            {numberFormat(item.total, item.codiso)}{' '}
+          </TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idVenta)}
-            // disabled={!this.state.view}
+              // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
           </TableCell>
           <TableCell className="text-center">
-            {
-              item.guiaRemision === 1 && (
-                <span
-                  className="btn btn-outline-success btn-sm"
-                >
-                  <i className="fa fa-check"></i>
-                </span>
-              )
-            }
+            {item.guiaRemision === 1 && (
+              <span className="btn btn-outline-success btn-sm">
+                <i className="fa fa-check"></i>
+              </span>
+            )}
 
-           {
-              item.guiaRemision === 0 && (
-                <Link
-                  to={getPathNavigation("guia-create", item.idVenta)}
-                  className="btn btn-outline-secondary btn-sm"
-                >
-                  <i className="fa fa-truck"></i>
-                </Link>
-              )
-            }
+            {item.guiaRemision === 0 && (
+              <Link
+                to={getPathNavigation('guia-create', item.idVenta)}
+                className="btn btn-outline-secondary btn-sm"
+              >
+                <i className="fa fa-truck"></i>
+              </Link>
+            )}
           </TableCell>
           <TableCell className="text-center">
             <Button
@@ -480,38 +560,37 @@ class Ventas extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenElegirInterfaz = () => {
-    if(!this.state.create){
-      alertWarning("Venta", "No tiene privilegios para crear ventas");
-      return
+    if (!this.state.create) {
+      alertWarning('Venta', 'No tiene privilegios para crear ventas');
+      return;
     }
 
-    this.setState({ isOpenElegirInterfaz: true })
-  }
+    this.setState({ isOpenElegirInterfaz: true });
+  };
 
   handleCloseElegirInterfaz = () => {
     this.setState({ isOpenElegirInterfaz: false });
-  }
+  };
 
   handleInterfazClasico = () => {
     this.props.history.push(`${this.props.location.pathname}/crear-clasico`);
-  }
+  };
 
   handleInterfazModerno = () => {
     this.props.history.push(`${this.props.location.pathname}/crear`);
-  }
+  };
 
   render() {
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
         />
 
         <Title
-          title='Ventas'
-          subTitle='LISTA'
+          title="Ventas"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -519,7 +598,6 @@ class Ventas extends CustomComponent {
           refModal={this.refModalElegirInterfaz}
           isOpen={this.state.isOpenElegirInterfaz}
           handleClose={this.handleCloseElegirInterfaz}
-
           handleInterfazClasico={this.handleInterfazClasico}
           handleInterfazModerno={this.handleInterfazModerno}
         />
@@ -527,15 +605,14 @@ class Ventas extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Button
-              className='btn-outline-info'
+              className="btn-outline-info"
               onClick={this.handleOpenElegirInterfaz}
               disabled={!this.state.create}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
-              className='btn-outline-secondary'
+              className="btn-outline-secondary"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
@@ -544,49 +621,61 @@ class Ventas extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Inicio:"}
+              label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Final:"}
+              label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Comprobantes:"}
+              label={'Comprobantes:'}
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
             >
               <option value="">TODOS</option>
-              {
-                this.state.comprobantes.map((item, index) => (
-                  <option key={index} value={item.idComprobante}>{item.nombre} - {item.serie}</option>
-                ))
-              }
+              {this.state.comprobantes.map((item, index) => (
+                <option key={index} value={item.idComprobante}>
+                  {item.nombre} - {item.serie}
+                </option>
+              ))}
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Estados:"}
+              label={'Estados:'}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value='0'>TODOS</option>
-              <option value='1'>COBRADO</option>
-              <option value='2'>POR COBRAR</option>
-              <option value='3'>ANULADO</option>
+              <option value="0">TODOS</option>
+              <option value="1">COBRADO</option>
+              <option value="2">POR COBRAR</option>
+              <option value="3">ANULADO</option>
             </Select>
           </Column>
         </Row>
@@ -606,24 +695,34 @@ class Ventas extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="18%">Cliente</TableHead>
                     <TableHead width="12%">Comprobante</TableHead>
                     <TableHead width="10%">Forma de Cobro</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="10%" className="text-center">Total</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Guía</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Total
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Guía
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -654,22 +753,22 @@ Ventas.propTypes = {
   }).isRequired,
   ventaLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaVentaData: PropTypes.func,
   setListaVentaPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
+  location: PropTypes.object,
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    ventaLista: state.predeterminado.ventaLista
+    ventaLista: state.predeterminado.ventaLista,
   };
 };
 
-const mapDispatchToProps = { setListaVentaData, setListaVentaPaginacion }
+const mapDispatchToProps = { setListaVentaData, setListaVentaPaginacion };
 
 /**
  *

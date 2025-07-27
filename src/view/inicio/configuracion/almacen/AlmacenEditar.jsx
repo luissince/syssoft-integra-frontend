@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  isEmpty,
-  isText,
-} from '../../../../helper/utils.helper';
+import { isEmpty, isText } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 import { connect } from 'react-redux';
@@ -32,11 +29,10 @@ import Select from '../../../../components/Select';
  * @extends React.Component
  */
 class AlmacenEditar extends CustomComponent {
-
   /**
-  *
-  * Constructor
-  */
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -113,7 +109,7 @@ class AlmacenEditar extends CustomComponent {
   async loadingData(id) {
     const [tipoAlmacenes, almacen] = await Promise.all([
       this.fetchComboTipoAlmacen(),
-      this.fetchGetIdAlmacen(id)
+      this.fetchGetIdAlmacen(id),
     ]);
 
     const ubigeo = {
@@ -247,7 +243,14 @@ class AlmacenEditar extends CustomComponent {
 
   handleSelectItemUbigeo = (value) => {
     this.refUbigeo.current.initialize(
-      value.departamento + ' - ' + value.provincia + ' - ' + value.distrito + ' (' + value.ubigeo + ')'
+      value.departamento +
+        ' - ' +
+        value.provincia +
+        ' - ' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
     );
     this.setState({
       ubigeos: [],
@@ -255,125 +258,129 @@ class AlmacenEditar extends CustomComponent {
     });
   };
 
-
   handleSave() {
     if (isEmpty(this.state.nombre)) {
       alertKit.warning({
-        title: "Almacén",
-        message: "!Ingrese el nombre del almacén!",
+        title: 'Almacén',
+        message: '!Ingrese el nombre del almacén!',
         onClose: () => {
           this.refNombre.current.focus();
-        }
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.idTipoAlmacen)) {
       alertKit.warning({
-        title: "Almacén",
-        message: "!Selecciona el tipo almacén!",
+        title: 'Almacén',
+        message: '!Selecciona el tipo almacén!',
         onClose: () => {
           this.refTipoAlmacen.current.focus();
-        }
+        },
       });
       return;
     }
 
-
     if (isEmpty(this.state.direccion)) {
       alertKit.warning({
-        title: "Almacén",
-        message: "!Ingrese la dirección del almacén!",
+        title: 'Almacén',
+        message: '!Ingrese la dirección del almacén!',
         onClose: () => {
           this.refDireccion.current.focus();
-        }
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.idUbigeo)) {
       alertKit.warning({
-        title: "Almacén",
-        message: "!Ingrese su ubigeo!",
+        title: 'Almacén',
+        message: '!Ingrese su ubigeo!',
         onClose: () => {
           this.refValueUbigeo.current.focus();
-        }
+        },
       });
       return;
     }
 
-    alertKit.question({
-      title: "Almacén",
-      message: "¿Estás seguro de continuar?",
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Almacén',
+        message: '¿Estás seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          alertKit.loading({
+            message: 'Procesando información...',
+          });
+
+          const data = {
+            nombre: this.state.nombre.trim(),
+            idTipoAlmacen: this.state.idTipoAlmacen,
+            direccion: this.state.direccion.trim(),
+            idUbigeo: this.state.idUbigeo,
+            codigoSunat: this.state.codigoSunat.toString().trim(),
+            observacion: this.state.observacion,
+            predefinido: this.state.predefinido,
+            idSucursal: this.state.idSucursal,
+            idUsuario: this.state.idUsuario,
+            idAlmacen: this.state.idAlmacen,
+          };
+
+          const response = await updateAlmacen(data);
+          if (response instanceof SuccessReponse) {
+            alertKit.success({
+              title: 'Almacén',
+              message: response.data,
+              onClose: () => {
+                this.props.history.goBack();
+              },
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertKit.warning({
+              title: 'Almacén',
+              message: response.getMessage(),
+              onClose: () => {
+                this.refNombre.current.focus();
+              },
+            });
+          }
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const data = {
-          nombre: this.state.nombre.trim(),
-          idTipoAlmacen: this.state.idTipoAlmacen,
-          direccion: this.state.direccion.trim(),
-          idUbigeo: this.state.idUbigeo,
-          codigoSunat: this.state.codigoSunat.toString().trim(),
-          observacion: this.state.observacion,
-          predefinido: this.state.predefinido,
-          idSucursal: this.state.idSucursal,
-          idUsuario: this.state.idUsuario,
-          idAlmacen: this.state.idAlmacen,
-        };
-
-        const response = await updateAlmacen(data);
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Almacén",
-            message: response.data,
-            onClose: () => {
-              this.props.history.goBack();
-            }
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertKit.warning({
-            title: "Almacén",
-            message: response.getMessage(),
-            onClose: () => {
-              this.refNombre.current.focus();
-            }
-          });
-        }
-      }
-    });
+    );
   }
 
   render() {
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
 
         <Title
-          title='Almacen'
-          subTitle='EDITAR'
+          title="Almacen"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={<>Nombre del Almacén:{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre del Almacén:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refNombre}
               value={this.state.nombre}
               onChange={this.handleInputNombre}
@@ -383,25 +390,35 @@ class AlmacenEditar extends CustomComponent {
 
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
-              label={<>Tipo Almacen:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo Almacen:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTipoAlmacen}
               value={this.state.idTipoAlmacen}
               onChange={this.handleSelectTipoAlmacen}
             >
               <option value="">-- Seleccione un tipo de almacen --</option>
-              {
-                this.state.tipoAlmacenes.map((item, index) => (
-                  <option key={index} value={item.idTipoAlmacen}>{item.nombre}</option>
-                ))
-              }
+              {this.state.tipoAlmacenes.map((item, index) => (
+                <option key={index} value={item.idTipoAlmacen}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-12' formGroup={true}>
+          <Column className="col-md-12" formGroup={true}>
             <Input
-              label={<>Dirección: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Dirección:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refDireccion}
               value={this.state.direccion}
               onChange={this.handleInputDescripcion}
@@ -411,10 +428,14 @@ class AlmacenEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-12' formGroup={true}>
+          <Column className="col-md-12" formGroup={true}>
             <SearchInput
               ref={this.refUbigeo}
-              label={<>Ubigeo: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Filtrar productos..."
               refValue={this.refValueUbigeo}
               data={this.state.ubigeos}
@@ -423,15 +444,14 @@ class AlmacenEditar extends CustomComponent {
               handleSelectItem={this.handleSelectItemUbigeo}
               renderItem={(value) => (
                 <>
-                  {
-                    value.departamento
-                    + ' - ' +
-                    value.provincia
-                    + ' - ' +
-                    value.distrito
-                    +
-                    ' (' + value.ubigeo + ')'
-                  }
+                  {value.departamento +
+                    ' - ' +
+                    value.provincia +
+                    ' - ' +
+                    value.distrito +
+                    ' (' +
+                    value.ubigeo +
+                    ')'}
                 </>
               )}
             />
@@ -439,22 +459,22 @@ class AlmacenEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Input
-              label={"Código SUNAT:"}
+              label={'Código SUNAT:'}
               value={this.state.codigoSunat}
               onChange={this.handleInputCodigoSunat}
             />
           </Column>
 
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Preferido:"}
-              id={"cbPreferido"}
+              label={'Preferido:'}
+              id={'cbPreferido'}
               checked={this.state.predefinido}
               onChange={this.handleSelectPredefinido}
             >
-              {this.state.predefinido ? "Si" : "No"}
+              {this.state.predefinido ? 'Si' : 'No'}
             </Switches>
           </Column>
         </Row>
@@ -462,36 +482,34 @@ class AlmacenEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <TextArea
-              label={"Observaciones:"}
+              label={'Observaciones:'}
               rows={3}
               value={this.state.observacion}
-              onChange={this.handleInputObservacion} />
+              onChange={this.handleInputObservacion}
+            />
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-12' formGroup={true}>
+          <Column className="col-md-12" formGroup={true}>
             <label>
               Los campos marcados con{' '}
-              <i className="fa fa-asterisk text-danger small"></i> son obligatorios
+              <i className="fa fa-asterisk text-danger small"></i> son
+              obligatorios
             </label>
           </Column>
         </Row>
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={() => this.handleSave()}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={() => this.handleSave()}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

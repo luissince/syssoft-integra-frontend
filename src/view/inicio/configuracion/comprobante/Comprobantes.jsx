@@ -19,7 +19,15 @@ import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Search from '../../../../components/Search';
 import Button from '../../../../components/Button';
@@ -81,7 +89,7 @@ class Comprobantes extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -159,29 +167,32 @@ class Comprobantes extends CustomComponent {
   };
 
   handleBorrar(idComprobante) {
-    alertDialog('Comprobante', '¿Estás seguro de eliminar el comprobante?', async (accept) => {
-      if (accept) {
-        const params = {
-          idComprobante: idComprobante,
-        };
+    alertDialog(
+      'Comprobante',
+      '¿Estás seguro de eliminar el comprobante?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idComprobante: idComprobante,
+          };
 
-        alertInfo('Comprobante', 'Procesando información...');
+          alertInfo('Comprobante', 'Procesando información...');
 
-        const response = await deleteComprobante(params);
+          const response = await deleteComprobante(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Comprobante', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Comprobante', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertWarning('Comprobante', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Comprobante', response.getMessage());
-        }
-      }
-    },
+      },
     );
   }
 
@@ -189,8 +200,8 @@ class Comprobantes extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='10'
-          message='Cargando información de la tabla...'
+          colSpan="10"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -214,10 +225,20 @@ class Comprobantes extends CustomComponent {
           <TableCell>{item.serie}</TableCell>
           <TableCell>{item.numeracion}</TableCell>
           <TableCell className="text-center">
-            <div className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'}`}>{item.preferida === 1 ? 'Si' : 'No'}</div>
+            <div
+              className={`badge ${
+                item.preferida === 1 ? 'badge-info' : 'badge-danger'
+              }`}
+            >
+              {item.preferida === 1 ? 'Si' : 'No'}
+            </div>
           </TableCell>
           <TableCell className="text-center">
-            <div className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}>
+            <div
+              className={`badge ${
+                item.estado === 1 ? 'badge-success' : 'badge-danger'
+              }`}
+            >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
           </TableCell>
@@ -225,7 +246,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idComprobante)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -234,7 +255,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idComprobante)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -248,8 +269,8 @@ class Comprobantes extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Comprobantes'
-          subTitle='LISTA'
+          title="Comprobantes"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -258,14 +279,11 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-            // disabled={!this.state.add}
+              // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadInit}
-            >
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i>
             </Button>
           </Column>
@@ -285,23 +303,27 @@ class Comprobantes extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="15%">Tipo Comprobante</TableHead>
                     <TableHead width="20%">Nombre</TableHead>
                     <TableHead width="15%">Serie</TableHead>
                     <TableHead width="10%">Numeración</TableHead>
                     <TableHead width="10%">Preferida</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Edición</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Edición
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

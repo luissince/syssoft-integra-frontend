@@ -13,7 +13,7 @@ const notificationSlice = createSlice({
     },
     clearNoticacion: (state) => {
       state.notifications = [];
-    }
+    },
   },
 });
 

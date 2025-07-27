@@ -3,14 +3,13 @@ import { images } from '../../../../../../../helper';
 import PropTypes from 'prop-types';
 
 const InvoiceTicket = (props) => {
-
   const { nombreComporbante } = props;
   const {
     handleOpenPreImpresion,
     handleOpenVenta,
     handleOpenCotizacion,
     handleOpenPedido,
-    handleOpenOptions
+    handleOpenOptions,
   } = props;
 
   return (
@@ -75,6 +74,6 @@ InvoiceTicket.propTypes = {
   handleOpenCotizacion: PropTypes.func,
   handleOpenPedido: PropTypes.func,
   handleOpenOptions: PropTypes.func.isRequired,
-}
+};
 
 export default InvoiceTicket;

@@ -1,5 +1,5 @@
-import { ContainerMenu } from "../../../components/Container";
-import { connect } from "react-redux";
+import { ContainerMenu } from '../../../components/Container';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import Gastos from './gasto/lista/Gastos.jsx';
@@ -19,52 +19,49 @@ import OrdenCompraEditar from './orden-compra/formularios/editar/OrdenCompraEdit
 import OrdenCompraDetalle from './orden-compra/detalle/OrdenCompraDetalle.jsx';
 
 export {
-    Gastos,
-    GastoCrear,
-    GastoDetalle,
-
-    Compras,
-    CompraCrear,
-    CompraDetalle,
-
-    CuentasPorPagar,
-    CuentasPorPagarAmortizar,
-
-    OrdenCompras,
-    OrdenCompraCrear,
-    OrdenCompraEditar,    
-    OrdenCompraDetalle,
-}
+  Gastos,
+  GastoCrear,
+  GastoDetalle,
+  Compras,
+  CompraCrear,
+  CompraDetalle,
+  CuentasPorPagar,
+  CuentasPorPagarAmortizar,
+  OrdenCompras,
+  OrdenCompraCrear,
+  OrdenCompraEditar,
+  OrdenCompraDetalle,
+};
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 const Tesoreria = (props) => {
-    return (
-        <ContainerMenu
-            title={"Seleccione el módulo correspondiente"}
-            subMenus={props.token.userToken.menus[4].subMenus}
-            url={props.match.url}
-        />
-    );
-}
+  return (
+    <ContainerMenu
+      title={'Seleccione el módulo correspondiente'}
+      subMenus={props.token.userToken.menus[4].subMenus}
+      url={props.match.url}
+    />
+  );
+};
 
 Tesoreria.propTypes = {
-    token: PropTypes.shape({
-        userToken: PropTypes.shape({
-            menus: PropTypes.array.isRequired,
-        }).isRequired,
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      menus: PropTypes.array.isRequired,
     }).isRequired,
-    match: PropTypes.shape({
-        url: PropTypes.string
-    })
-}
+  }).isRequired,
+  match: PropTypes.shape({
+    url: PropTypes.string,
+  }),
+};
 
 const mapStateToProps = (state) => {
-    return {
-        token: state.principal,
-    };
+  return {
+    token: state.principal,
+  };
 };
 
 const ConnectedTesoreria = connect(mapStateToProps, null)(Tesoreria);

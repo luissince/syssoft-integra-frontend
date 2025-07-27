@@ -18,11 +18,22 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
-import { setListaConsultaData, setListaConsultaPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaConsultaData,
+  setListaConsultaPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
 
@@ -31,7 +42,6 @@ import { alertKit } from 'alert-kit';
  * @extends React.Component
  */
 class Consultas extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -67,24 +77,34 @@ class Consultas extends CustomComponent {
   }
 
   loadingData = async () => {
-    if (this.props.consultaLista && this.props.consultaLista.data && this.props.consultaLista.paginacion) {
-      this.setState(this.props.consultaLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.consultaLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.consultaLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.consultaLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.consultaLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.consultaLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.consultaLista.paginacion.messagePaginacion;
+    if (
+      this.props.consultaLista &&
+      this.props.consultaLista.data &&
+      this.props.consultaLista.paginacion
+    ) {
+      this.setState(this.props.consultaLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.consultaLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.consultaLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.consultaLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.consultaLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.consultaLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.consultaLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.consultaLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaConsultaData(this.state)
+    this.props.setListaConsultaData(this.state);
     this.props.setListaConsultaPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -111,7 +131,7 @@ class Consultas extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -145,18 +165,26 @@ class Consultas extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listConsultas(data, this.abortControllerTable.signal);
+    const response = await listConsultas(
+      data,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -170,7 +198,6 @@ class Consultas extends CustomComponent {
       });
     }
   };
-
 
   handleEditar = (idConsulta) => {
     this.props.history.push({
@@ -187,38 +214,39 @@ class Consultas extends CustomComponent {
   };
 
   handleBorrar = (idConsulta) => {
-    alertKit.question({
-      title: "Consulta",
-      message: "¿Estás seguro de eliminar la consulta?",
-    }, async (accept) => {
-      if (accept) {
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await deleteConsulta(idConsulta);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Consulta",
-            message: response.data,
-            onClose: () => {
-              this.loadingInit();
-            },
+    alertKit.question(
+      {
+        title: 'Consulta',
+        message: '¿Estás seguro de eliminar la consulta?',
+      },
+      async (accept) => {
+        if (accept) {
+          alertKit.loading({
+            message: 'Procesando información...',
           });
-        }
 
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
+          const response = await deleteConsulta(idConsulta);
 
-          alertKit.warning({
-            title: "Consulta",
-            message: response.getMessage(),
-          });
+          if (response instanceof SuccessReponse) {
+            alertKit.success({
+              title: 'Consulta',
+              message: response.data,
+              onClose: () => {
+                this.loadingInit();
+              },
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              title: 'Consulta',
+              message: response.getMessage(),
+            });
+          }
         }
-      }
-    },
+      },
     );
   };
 
@@ -226,7 +254,7 @@ class Consultas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
+          colSpan="9"
           message={'Cargando información de la tabla...'}
         />
       );
@@ -241,23 +269,30 @@ class Consultas extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1
-        ? <span className="badge badge-success">ACTIVO</span>
-        : <span className="badge badge-danger">ANULADO</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="badge badge-success">ACTIVO</span>
+        ) : (
+          <span className="badge badge-danger">ANULADO</span>
+        );
 
       return (
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>{item.fecha} <br /> {formatTime(item.hora)}</TableCell>
+          <TableCell>
+            {item.fecha} <br /> {formatTime(item.hora)}
+          </TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell>{item.asunto}</TableCell>
-          <TableCell>{item.email.toUpperCase()} <br /> {item.celular} </TableCell>
+          <TableCell>
+            {item.email.toUpperCase()} <br /> {item.celular}{' '}
+          </TableCell>
           <TableCell>{estado}</TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idConsulta)}
-            // disabled={!this.state.view}
+              // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -267,7 +302,7 @@ class Consultas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idConsulta)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -277,7 +312,7 @@ class Consultas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idConsulta)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -291,8 +326,8 @@ class Consultas extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Consulta'
-          subTitle='LISTA'
+          title="Consulta"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -322,23 +357,30 @@ class Consultas extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Persona</TableHead>
                     <TableHead width="20%">Asunto</TableHead>
                     <TableHead width="20%">Contacto</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center"> Detalle </TableHead>
-                    <TableHead width="5%" className="text-center">Editar </TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      {' '}
+                      Detalle{' '}
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar{' '}
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -369,7 +411,7 @@ Consultas.propTypes = {
   }),
   consultaLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaConsultaData: PropTypes.func,
   setListaConsultaPaginacion: PropTypes.func,
@@ -382,12 +424,15 @@ Consultas.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    consultaLista: state.predeterminado.consultaLista
+    consultaLista: state.predeterminado.consultaLista,
   };
 };
 
-const mapDispatchToProps = { setListaConsultaData, setListaConsultaPaginacion }
+const mapDispatchToProps = { setListaConsultaData, setListaConsultaPaginacion };
 
-const ConnectedConsultas = connect(mapStateToProps, mapDispatchToProps)(Consultas);
+const ConnectedConsultas = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Consultas);
 
 export default ConnectedConsultas;

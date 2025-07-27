@@ -1,6 +1,4 @@
-import {
-  isEmpty,
-} from '../../../../helper/utils.helper';
+import { isEmpty } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import { listAtributo } from '../../../../network/rest/principal.network';
@@ -13,11 +11,22 @@ import CustomComponent from '../../../../model/class/custom-component';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
-import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_TALLA } from '../../../../model/types/tipo-atributo';
+import {
+  TIPO_ATRIBUTO_COLOR,
+  TIPO_ATRIBUTO_TALLA,
+} from '../../../../model/types/tipo-atributo';
 import { alertKit } from 'alert-kit';
 
 class Atributos extends CustomComponent {
@@ -78,7 +87,7 @@ class Atributos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -172,52 +181,58 @@ class Atributos extends CustomComponent {
   };
 
   handleDelete = (id) => {
-    alertKit.question({
-      title: "Color",
-      message: '¿Estás seguro de eliminar la Color?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Color',
+        message: '¿Estás seguro de eliminar la Color?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idAtributo: id,
+          };
+
+          alertKit.loading({
+            message: 'Procesando información...',
+          });
+
+          const response = await removeAtributo(params);
+
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Color',
+                message: response.data,
+              },
+              () => {
+                this.loadInit();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertKit.warning({
+              title: 'Color',
+              message: response.getMessage(),
+            });
+          }
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-        const params = {
-          idAtributo: id,
-        };
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await removeAtributo(params);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Color",
-            message: response.data,
-          }, () => {
-            this.loadInit();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertKit.warning({
-            title: "Color",
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
+    );
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='7'
-          message='Cargando información de la tabla...'
+          colSpan="7"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -246,27 +261,25 @@ class Atributos extends CustomComponent {
           <TableCell>{item.tipoAtributo.nombre}</TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell>
-            {
-              item.tipoAtributo.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
-                <>
-                  <span className='px-2 py-1 mr-2' style={{ background: item.hexadecimal }}></span>  {item.hexadecimal}
-                </>
-              )
-            }
-            {
-              item.tipoAtributo.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
-                <>
-                  {item.valor}
-                </>
-              )
-            }
+            {item.tipoAtributo.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
+              <>
+                <span
+                  className="px-2 py-1 mr-2"
+                  style={{ background: item.hexadecimal }}
+                ></span>{' '}
+                {item.hexadecimal}
+              </>
+            )}
+            {item.tipoAtributo.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
+              <>{item.valor}</>
+            )}
           </TableCell>
           <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idAtributo)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -275,7 +288,7 @@ class Atributos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idAtributo)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -289,24 +302,17 @@ class Atributos extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Atributos'
-          subTitle='LISTA'
+          title="Atributos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -326,21 +332,27 @@ class Atributos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead className="text-center" width="5%">#</TableHead>
+                    <TableHead className="text-center" width="5%">
+                      #
+                    </TableHead>
                     <TableHead width="15%">Tipo</TableHead>
                     <TableHead width="20%">Nombre</TableHead>
                     <TableHead width="25%">Valor</TableHead>
-                    <TableHead className="text-center" width="10%">Estado</TableHead>
-                    <TableHead className="text-center" width="5%">Editar</TableHead>
-                    <TableHead className="text-center" width="5%">Eliminar</TableHead>
+                    <TableHead className="text-center" width="10%">
+                      Estado
+                    </TableHead>
+                    <TableHead className="text-center" width="5%">
+                      Editar
+                    </TableHead>
+                    <TableHead className="text-center" width="5%">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

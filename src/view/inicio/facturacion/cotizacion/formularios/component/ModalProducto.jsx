@@ -5,7 +5,12 @@ import Select from '../../../../../../components/Select';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
-import { alertWarning, handlePasteFloat, isEmpty, isNumeric } from '../../../../../../helper/utils.helper';
+import {
+  alertWarning,
+  handlePasteFloat,
+  isEmpty,
+  isNumeric,
+} from '../../../../../../helper/utils.helper';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import Button from '../../../../../../components/Button';
 import { comboMedida } from '../../../../../../network/rest/principal.network';
@@ -18,7 +23,6 @@ import { CANCELED } from '../../../../../../model/types/types';
  * @extends React.Component
  */
 class ModalProducto extends Component {
-
   constructor(props) {
     super(props);
 
@@ -33,8 +37,8 @@ class ModalProducto extends Component {
       idMedida: '',
       tipoProducto: '',
 
-      medidas: []
-    }
+      medidas: [],
+    };
 
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
@@ -55,27 +59,30 @@ class ModalProducto extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState({
-        medidas: response.data,
-        idProducto: producto.idProducto,
-        codigo: producto.codigo,
-        // cantidad: producto.cantidad ?? 1,
-        cantidad: 1,
-        precio: producto.precio,
-        descripcion: producto.nombre,
-        imagen: producto.imagen,
-        idMedida: producto.idMedida,
-        tipoProducto: producto.tipoProducto,
-        loading: false
-      }, () => {
-        if (producto.tipoProducto === "SERVICIO") {
-          this.refPrecio.current.focus();
-          this.refPrecio.current.select();
-        } else {
-          this.refCantidad.current.focus();
-          this.refCantidad.current.select();
-        }
-      })
+      this.setState(
+        {
+          medidas: response.data,
+          idProducto: producto.idProducto,
+          codigo: producto.codigo,
+          // cantidad: producto.cantidad ?? 1,
+          cantidad: 1,
+          precio: producto.precio,
+          descripcion: producto.nombre,
+          imagen: producto.imagen,
+          idMedida: producto.idMedida,
+          tipoProducto: producto.tipoProducto,
+          loading: false,
+        },
+        () => {
+          if (producto.tipoProducto === 'SERVICIO') {
+            this.refPrecio.current.focus();
+            this.refPrecio.current.select();
+          } else {
+            this.refCantidad.current.focus();
+            this.refCantidad.current.select();
+          }
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -84,11 +91,9 @@ class ModalProducto extends Component {
       this.peticion = false;
       this.abortController = null;
     }
-  }
+  };
 
-  handleOnOpen = () => {
-
-  }
+  handleOnOpen = () => {};
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -108,11 +113,11 @@ class ModalProducto extends Component {
       idMedida: '',
       tipoProducto: '',
 
-      medidas: []
-    })
+      medidas: [],
+    });
 
     this.peticion = false;
-  }
+  };
 
   handleInputCantidad = (event) => {
     this.setState({ cantidad: event.target.value });
@@ -128,10 +133,19 @@ class ModalProducto extends Component {
 
   handleSelectMedida = (event) => {
     this.setState({ idMedida: event.target.value });
-  }
+  };
 
   handleOnSubmit = async () => {
-    const { idProducto, codigo, descripcion, cantidad, imagen, tipoProducto, precio, idMedida } = this.state;
+    const {
+      idProducto,
+      codigo,
+      descripcion,
+      cantidad,
+      imagen,
+      tipoProducto,
+      precio,
+      idMedida,
+    } = this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
@@ -143,9 +157,13 @@ class ModalProducto extends Component {
     }
 
     if (parseFloat(cantidad) <= 0) {
-      alertWarning('Cotización', 'La cantidad no puede ser menor a cero.', () => {
-        this.refCantidad.current.focus();
-      });
+      alertWarning(
+        'Cotización',
+        'La cantidad no puede ser menor a cero.',
+        () => {
+          this.refCantidad.current.focus();
+        },
+      );
       return;
     }
 
@@ -177,16 +195,18 @@ class ModalProducto extends Component {
       return;
     }
 
-    const nuevoDetalles = detalles.map(item => ({ ...item }));
+    const nuevoDetalles = detalles.map((item) => ({ ...item }));
 
-    const existeDetalle = nuevoDetalles.find((item) => item.idProducto === idProducto);
+    const existeDetalle = nuevoDetalles.find(
+      (item) => item.idProducto === idProducto,
+    );
 
     const impuesto = impuestos.find((item) => item.idImpuesto === idImpuesto);
 
     const medida = this.state.medidas.find((item) => item.idMedida == idMedida);
 
     if (existeDetalle) {
-      if (tipoProducto === "SERVICIO") {
+      if (tipoProducto === 'SERVICIO') {
         existeDetalle.precio = Number(precio);
       } else {
         existeDetalle.cantidad = Number(cantidad);
@@ -215,23 +235,17 @@ class ModalProducto extends Component {
       nuevoDetalles.push(data);
     }
 
-    this.props.handleSave(nuevoDetalles, await this.refModal.current.handleOnClose());
+    this.props.handleSave(
+      nuevoDetalles,
+      await this.refModal.current.handleOnClose(),
+    );
   };
 
   render() {
-    const {
-      loading,
-      cantidad,
-      precio,
-      descripcion,
-      idMedida,
-      tipoProducto
-    } = this.state;
+    const { loading, cantidad, precio, descripcion, idMedida, tipoProducto } =
+      this.state;
 
-    const {
-      isOpen,
-      onClose,
-    } = this.props;
+    const { isOpen, onClose } = this.props;
 
     return (
       <CustomModalForm
@@ -245,17 +259,15 @@ class ModalProducto extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView
-              loading={loading}
-              message={"Cargando datos..."} />
+            <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={"Cantidad:"}
-                  disabled={tipoProducto === "SERVICIO"}
-                  placeholder={"0.00"}
-                  role={"float"}
+                  label={'Cantidad:'}
+                  disabled={tipoProducto === 'SERVICIO'}
+                  placeholder={'0.00'}
+                  role={'float'}
                   ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
@@ -265,9 +277,9 @@ class ModalProducto extends Component {
 
               <Column formGroup={true}>
                 <Input
-                  label={"Precio:"}
-                  placeholder={"0.00"}
-                  role={"float"}
+                  label={'Precio:'}
+                  placeholder={'0.00'}
+                  role={'float'}
                   ref={this.refPrecio}
                   value={precio}
                   onChange={this.handleInputPrecio}
@@ -279,8 +291,8 @@ class ModalProducto extends Component {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={"Descripción:"}
-                  placeholder={"Datos del producto..."}
+                  label={'Descripción:'}
+                  placeholder={'Datos del producto...'}
                   ref={this.refDescripcion}
                   value={descripcion}
                   onChange={this.handleInputDescripcion}
@@ -291,16 +303,17 @@ class ModalProducto extends Component {
             <Row>
               <Column formGroup={true}>
                 <Select
-                  label={"Unidad de Medida:"}
+                  label={'Unidad de Medida:'}
                   ref={this.refMedida}
                   value={idMedida}
-                  onChange={this.handleSelectMedida}>
-                  <option value={""}>- Seleccione -</option>
-                  {
-                    this.state.medidas.map((item, index) => (
-                      <option key={index} value={item.idMedida}>{item.nombre}</option>
-                    ))
-                  }
+                  onChange={this.handleSelectMedida}
+                >
+                  <option value={''}>- Seleccione -</option>
+                  {this.state.medidas.map((item, index) => (
+                    <option key={index} value={item.idMedida}>
+                      {item.nombre}
+                    </option>
+                  ))}
                 </Select>
               </Column>
             </Row>
@@ -308,14 +321,13 @@ class ModalProducto extends Component {
         }
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-primary">
+            <Button type="submit" className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -333,7 +345,7 @@ ModalProducto.propTypes = {
   impuestos: PropTypes.array,
   detalles: PropTypes.array,
 
-  handleSave: PropTypes.func
+  handleSave: PropTypes.func,
 };
 
 export default ModalProducto;

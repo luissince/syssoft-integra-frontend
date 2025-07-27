@@ -196,8 +196,8 @@ class CobroCrear extends CustomComponent {
 
   async fetchComprobante(tipo) {
     const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
+      tipo: tipo,
+      idSucursal: this.state.idSucursal,
     };
 
     const response = await comboComprobante(
@@ -305,12 +305,15 @@ class CobroCrear extends CustomComponent {
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState({
-      concepto: value,
-      conceptos: [],
-    }, () => {
-      this.refMonto.current.focus();
-    });
+    this.setState(
+      {
+        concepto: value,
+        conceptos: [],
+      },
+      () => {
+        this.refMonto.current.focus();
+      },
+    );
   };
 
   //------------------------------------------------------------------------------------------
@@ -345,7 +348,9 @@ class CobroCrear extends CustomComponent {
   };
 
   handleSelectItemCliente = (value) => {
-    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
+    this.refCliente.current.initialize(
+      value.documento + ' - ' + value.informacion,
+    );
     this.setState({
       cliente: value,
       clientes: [],
@@ -360,27 +365,37 @@ class CobroCrear extends CustomComponent {
     const { concepto, idComprobante, monto, cliente, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Ingreso', 'Seleccione su concepto.', () => this.refValueConcepto.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione su concepto.', () =>
+        this.refValueConcepto.current.focus(),
+      );
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Ingreso', 'Ingrese el monto.', () => this.refMonto.current.focus());
+      this.alert.warning('Ingreso', 'Ingrese el monto.', () =>
+        this.refMonto.current.focus(),
+      );
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Ingreso', 'Seleccione su comprobante.', () => this.refComprobante.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione su comprobante.', () =>
+        this.refComprobante.current.focus(),
+      );
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Ingreso', 'Seleccione un cliente.', () => this.refValueCliente.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione un cliente.', () =>
+        this.refValueCliente.current.focus(),
+      );
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Ingreso', 'Seleccione su moneda.', () => this.refMoneda.current.focus());
+      this.alert.warning('Ingreso', 'Seleccione su moneda.', () =>
+        this.refMoneda.current.focus(),
+      );
       return;
     }
 
@@ -388,11 +403,15 @@ class CobroCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog("Ingreso", "¿Está seguro de limpiar el Ingreso?", (accept) => {
-      if (accept) {
-        this.clearView();
-      }
-    });
+    this.alert.dialog(
+      'Ingreso',
+      '¿Está seguro de limpiar el Ingreso?',
+      (accept) => {
+        if (accept) {
+          this.clearView();
+        }
+      },
+    );
   };
 
   handleCerrar = () => {
@@ -404,10 +423,15 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenModalTerminal = () => {
-    this.setState({ isOpenTerminal: true })
-  }
+    this.setState({ isOpenTerminal: true });
+  };
 
-  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
+  handleProcessContado = (
+    idFormaPago,
+    metodoPagosLista,
+    notaTransacion,
+    callback = async function () {},
+  ) => {
     const {
       cliente,
       idUsuario,
@@ -417,73 +441,77 @@ class CobroCrear extends CustomComponent {
       observacion,
       nota,
       concepto,
-      monto
+      monto,
     } = this.state;
 
-    this.alert.dialog('Ingreso', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: idFormaPago,
-          idPersona: cliente.idPersona,
-          idUsuario: idUsuario,
-          idMoneda: idMoneda,
-          idSucursal: idSucursal,
-          idComprobante: idComprobante,
-          idConcepto: concepto.idConcepto,
-          monto: monto,
-          estado: 1,
-          observacion,
-          nota,
-          notaTransacion,
-          bancosAgregados: metodoPagosLista,
-        };
+    this.alert.dialog(
+      'Ingreso',
+      '¿Estás seguro de continuar?',
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idFormaPago: idFormaPago,
+            idPersona: cliente.idPersona,
+            idUsuario: idUsuario,
+            idMoneda: idMoneda,
+            idSucursal: idSucursal,
+            idComprobante: idComprobante,
+            idConcepto: concepto.idConcepto,
+            monto: monto,
+            estado: 1,
+            observacion,
+            nota,
+            notaTransacion,
+            bancosAgregados: metodoPagosLista,
+          };
 
-        await callback();
-        this.alert.information('Ingreso', 'Procesando información...');
+          await callback();
+          this.alert.information('Ingreso', 'Procesando información...');
 
-        const response = await createCobro(data);
+          const response = await createCobro(data);
 
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idCobro);
+          if (response instanceof SuccessReponse) {
+            this.alert.close();
+            this.handleOpenImpresion(response.data.idCobro);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            this.alert.warning('Ingreso', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          this.alert.warning('Ingreso', response.getMessage());
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleCloseModalTerminal = async () => {
-    this.setState({ isOpenTerminal: false })
-  }
+    this.setState({ isOpenTerminal: false });
+  };
 
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
   handleOpenImpresion = (idCobro) => {
-    this.setState({ isOpenImpresion: true, idCobro: idCobro })
-  }
+    this.setState({ isOpenImpresion: true, idCobro: idCobro });
+  };
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false });
-  }
+  };
 
   handlePrinterImpresion = (size) => {
     printJS({
       printable: documentsPdfInvoicesCobro(this.state.idCobro, size),
       type: 'pdf',
       showModal: true,
-      modalMessage: "Recuperando documento...",
+      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
-      }
-    })
-  }
+      },
+    });
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -510,26 +538,24 @@ class CobroCrear extends CustomComponent {
         />
 
         <ModalTransaccion
-          tipo={"Ingreso"}
-          title={"Completar Ingreso"}
+          tipo={'Ingreso'}
+          title={'Completar Ingreso'}
           isOpen={this.state.isOpenTerminal}
-
           idSucursal={this.state.idSucursal}
           disabledCreditoFijo={true}
           codiso={this.state.codiso}
-          importeTotal={isNumeric(this.state.monto) ? Number(this.state.monto) : 0}
-
+          importeTotal={
+            isNumeric(this.state.monto) ? Number(this.state.monto) : 0
+          }
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => { }}
+          handleProcessCredito={() => {}}
         />
 
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-
           clear={this.clearView}
-
           handleClose={this.handleCloseImpresion}
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
@@ -537,17 +563,20 @@ class CobroCrear extends CustomComponent {
         />
 
         <Title
-          title='Ingreso'
-          subTitle='AGREGAR'
+          title="Ingreso"
+          subTitle="AGREGAR"
           handleGoBack={() => this.handleCerrar()}
         />
 
         <Row>
           {/* Filtrar */}
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <SearchInput
               group={true}
-              label={"Concepto:"}
+              label={'Concepto:'}
               ref={this.refConcepto}
               autoFocus={true}
               placeholder="Filtrar conceptos..."
@@ -561,10 +590,13 @@ class CobroCrear extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
               group={true}
-              label={"Tipo de Moneda:"}
+              label={'Tipo de Moneda:'}
               iconLeft={<i className="bi bi-cash"></i>}
               ref={this.refMoneda}
               value={this.state.idMoneda}
@@ -582,10 +614,13 @@ class CobroCrear extends CustomComponent {
 
         <Row>
           {/* Precio */}
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
               group={true}
-              label={"Monto:"}
+              label={'Monto:'}
               iconLeft={<i className="bi bi-cash-coin"></i>}
               ref={this.refMonto}
               value={this.state.monto}
@@ -595,10 +630,13 @@ class CobroCrear extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <SearchInput
               group={true}
-              label={"Cliente:"}
+              label={'Cliente:'}
               ref={this.refCliente}
               placeholder="Filtrar clientes..."
               refValue={this.refValueCliente}
@@ -606,7 +644,9 @@ class CobroCrear extends CustomComponent {
               handleClearInput={this.handleClearInputCliente}
               handleFilter={this.handleFilterCliente}
               handleSelectItem={this.handleSelectItemCliente}
-              renderItem={(value) => <>{value.documento + ' - ' + value.informacion}</>}
+              renderItem={(value) => (
+                <>{value.documento + ' - ' + value.informacion}</>
+              )}
               renderIconLeft={<i className="bi bi-person-circle"></i>}
             />
           </Column>
@@ -616,7 +656,7 @@ class CobroCrear extends CustomComponent {
           <Column formGroup={true}>
             <Select
               group={true}
-              label={"Comprobante:"}
+              label={'Comprobante:'}
               iconLeft={<i className="bi bi-receipt"></i>}
               ref={this.refComprobante}
               value={this.state.idComprobante}
@@ -636,7 +676,7 @@ class CobroCrear extends CustomComponent {
           <Column formGroup={true}>
             <TextArea
               group={true}
-              label={"Observación:"}
+              label={'Observación:'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
               ref={this.refObservacion}
               value={this.state.observacion}
@@ -650,7 +690,7 @@ class CobroCrear extends CustomComponent {
           <Column formGroup={true}>
             <TextArea
               group={true}
-              label={"Nota (Visible el los reportes):"}
+              label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
               ref={this.refONota}
               value={this.state.nota}
@@ -662,22 +702,13 @@ class CobroCrear extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
+            <Button className="btn-success" onClick={this.handleGuardar}>
               <i className="fa fa-save"></i> Guardar
             </Button>{' '}
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleLimpiar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleLimpiar}>
               <i className="fa fa-trash"></i> Limpiar
             </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={this.handleCerrar}
-            >
+            <Button className="btn-outline-danger" onClick={this.handleCerrar}>
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>

@@ -30,7 +30,10 @@ const DetalleImagen = (props) => {
   return (
     <>
       <Row>
-        <Column className="col-12 flex items-center justify-center" formGroup={true}>
+        <Column
+          className="col-12 flex items-center justify-center"
+          formGroup={true}
+        >
           <ImageUpload
             label="Imagen principal del producto"
             subtitle="Las imagenes no debe superar los 500 KB."
@@ -112,21 +115,21 @@ const DetalleImagen = (props) => {
         </Column>
       </Row>
 
-
-      {idTipoProducto === PRODUCTO && (<Row>
-        <Column className="col-md-12" formGroup={true}>
-          <Switches
-            id="customSwitchLote"
-            checked={lote}
-            onChange={handleSelectLote}
-          >
-            <div className="font-weight-bold text-black-50 ">Lote</div>
-            <div className="text-black-50">
-              Controla si el producto usa lote para manejar sus cantidades.
-            </div>
-          </Switches>
-        </Column>
-      </Row>
+      {idTipoProducto === PRODUCTO && (
+        <Row>
+          <Column className="col-md-12" formGroup={true}>
+            <Switches
+              id="customSwitchLote"
+              checked={lote}
+              onChange={handleSelectLote}
+            >
+              <div className="font-weight-bold text-black-50 ">Lote</div>
+              <div className="text-black-50">
+                Controla si el producto usa lote para manejar sus cantidades.
+              </div>
+            </Switches>
+          </Column>
+        </Row>
       )}
 
       <Row>
@@ -144,22 +147,15 @@ const DetalleImagen = (props) => {
         </Column>
       </Row>
 
-
       <Row>
         <Column className="col-md-6" formGroup={true}>
-          <Button
-            className="btn-success btn-block"
-            onClick={handleRegistrar}
-          >
-            <i className='fa fa-save'></i> Guardar
+          <Button className="btn-success btn-block" onClick={handleRegistrar}>
+            <i className="fa fa-save"></i> Guardar
           </Button>
         </Column>
         <Column className="col-md-6" formGroup={true}>
-          <Button
-            className="btn-secondary btn-block"
-            onClick={handleCerrar}
-          >
-            <i className='fa fa-close'></i>  Cerrar
+          <Button className="btn-secondary btn-block" onClick={handleCerrar}>
+            <i className="fa fa-close"></i> Cerrar
           </Button>
         </Column>
       </Row>
@@ -191,6 +187,6 @@ DetalleImagen.propTypes = {
 
   handleRegistrar: PropTypes.func,
   handleCerrar: PropTypes.func,
-}
+};
 
 export default DetalleImagen;

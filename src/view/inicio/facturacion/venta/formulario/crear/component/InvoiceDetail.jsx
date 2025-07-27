@@ -1,7 +1,12 @@
 import { images } from '../../../../../../../helper';
 import { numberFormat } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
-import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../../../model/types/tipo-tratamiento-producto';
+import {
+  A_GRANEL,
+  SERVICIO,
+  UNIDADES,
+  VALOR_MONETARIO,
+} from '../../../../../../../model/types/tipo-tratamiento-producto';
 import Button from '../../../../../../../components/Button';
 import Image from '../../../../../../../components/Image';
 
@@ -31,9 +36,13 @@ const InvoiceDetail = (props) => {
     <div className="invoice-item">
       <div className="h-100">
         {detalleVenta.map((producto, index) => {
-          const cantidad = producto.idTipoTratamientoProducto === SERVICIO
-            ? producto.cantidad
-            : producto.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+          const cantidad =
+            producto.idTipoTratamientoProducto === SERVICIO
+              ? producto.cantidad
+              : producto.inventarios.reduce(
+                  (acc, current) => acc + current.cantidad,
+                  0,
+                );
 
           return (
             <div
@@ -48,14 +57,14 @@ const InvoiceDetail = (props) => {
                         className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
                         onClick={() => handleEdit(producto)}
                       >
-                        <i className='fa fa-edit text-secondary text-xl'></i>
+                        <i className="fa fa-edit text-secondary text-xl"></i>
                       </button>
 
                       <button
                         className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
                         onClick={() => handleRemove(producto)}
                       >
-                        <i className='fa fa-trash text-secondary text-xl'></i>
+                        <i className="fa fa-trash text-secondary text-xl"></i>
                       </button>
                     </div>
 
@@ -65,7 +74,7 @@ const InvoiceDetail = (props) => {
                       alt={producto.nombreProducto}
                       width={80}
                       height={80}
-                      className='object-contain'
+                      className="object-contain"
                     />
 
                     <div className="invoice-item_add-item-describe d-flex flex-column text-break text-truncate text-nowrap">
@@ -76,65 +85,83 @@ const InvoiceDetail = (props) => {
                       </div>
 
                       <div className="invoice-item_add-item-describe-price d-flex align-items-center text-break text-truncate text-nowrap text-base">
-                        {
-                          producto.idTipoTratamientoProducto === VALOR_MONETARIO && (
-                            <>
-                              {numberFormat(producto.precio, codiso)}
-                            </>
-                          )
-                        }
+                        {producto.idTipoTratamientoProducto ===
+                          VALOR_MONETARIO && (
+                          <>{numberFormat(producto.precio, codiso)}</>
+                        )}
 
-                        {
-                          producto.idTipoTratamientoProducto !== VALOR_MONETARIO && (
-                            <>
-                              {numberFormat(producto.precio, codiso)} <span className='text-xs ml-1'>x {producto.medida}</span>
-                            </>
-                          )
-                        }
+                        {producto.idTipoTratamientoProducto !==
+                          VALOR_MONETARIO && (
+                          <>
+                            {numberFormat(producto.precio, codiso)}{' '}
+                            <span className="text-xs ml-1">
+                              x {producto.medida}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
 
                     <div className="invoice-item_add-item-quantity-container d-none d-sm-flex flex-column  align-items-center justify-content-center">
                       {producto.idTipoTratamientoProducto === SERVICIO && (
-                        <div key={index} className="d-flex flex-column align-items-center">
-                          <div className="d-flex">
-                          </div>
+                        <div
+                          key={index}
+                          className="d-flex flex-column align-items-center"
+                        >
+                          <div className="d-flex"></div>
                         </div>
                       )}
 
-                      {(producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) && producto.inventarios.map((item, index) => (
-                        <div key={index} className="d-flex flex-column align-items-center">
-                          <div>
-                            <span className='text-secondary'>{item.almacen}</span>
-                          </div>
-
-                          <div className="d-flex">
-                            <Button
-                              className="m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handleMinus(producto, item.idInventario)}
-                            >
-                              <i className='fa fa-minus text-secondary text-xl'></i>
-                            </Button>
-                            <div className="item_quantity d-flex justify-content-center align-items-center">
-                              {item.cantidad}
+                      {(producto.idTipoTratamientoProducto === UNIDADES ||
+                        producto.idTipoTratamientoProducto === A_GRANEL) &&
+                        producto.inventarios.map((item, index) => (
+                          <div
+                            key={index}
+                            className="d-flex flex-column align-items-center"
+                          >
+                            <div>
+                              <span className="text-secondary">
+                                {item.almacen}
+                              </span>
                             </div>
-                            <Button
-                              className="m-0 d-flex justify-content-center align-items-center pointer"
-                              onClick={() => handlePlus(producto, item.idInventario)}
-                            >
-                              <i className='fa fa-plus text-secondary text-xl'></i>
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
 
-                      {producto.idTipoTratamientoProducto === VALOR_MONETARIO && producto.inventarios.map((item, index) => (
-                        <div key={index} className="d-flex flex-column align-items-center">
-                          <div>
-                            <span className='text-secondary'>{item.almacen}</span>
+                            <div className="d-flex">
+                              <Button
+                                className="m-0 d-flex justify-content-center align-items-center pointer"
+                                onClick={() =>
+                                  handleMinus(producto, item.idInventario)
+                                }
+                              >
+                                <i className="fa fa-minus text-secondary text-xl"></i>
+                              </Button>
+                              <div className="item_quantity d-flex justify-content-center align-items-center">
+                                {item.cantidad}
+                              </div>
+                              <Button
+                                className="m-0 d-flex justify-content-center align-items-center pointer"
+                                onClick={() =>
+                                  handlePlus(producto, item.idInventario)
+                                }
+                              >
+                                <i className="fa fa-plus text-secondary text-xl"></i>
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+
+                      {producto.idTipoTratamientoProducto === VALOR_MONETARIO &&
+                        producto.inventarios.map((item, index) => (
+                          <div
+                            key={index}
+                            className="d-flex flex-column align-items-center"
+                          >
+                            <div>
+                              <span className="text-secondary">
+                                {item.almacen}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                     </div>
 
                     <div className="invoice-item_add-item-total">
@@ -161,6 +188,6 @@ InvoiceDetail.propTypes = {
   handlePlus: PropTypes.func.isRequired,
   handleMinus: PropTypes.func.isRequired,
   handleRemove: PropTypes.func.isRequired,
-}
+};
 
 export default InvoiceDetail;

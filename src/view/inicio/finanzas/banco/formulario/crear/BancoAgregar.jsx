@@ -153,17 +153,21 @@ class BancoAgregar extends CustomComponent {
         />
 
         <Title
-          title='Banco'
-          subTitle='AGREGAR'
+          title="Banco"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
-
 
         <Row>
           <Column className="col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>Nombre Banco: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre Banco:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTxtNombre}
               placeholder="BCP, BBVA, etc"
               value={this.state.nombre}
@@ -176,7 +180,12 @@ class BancoAgregar extends CustomComponent {
           <Column className="col-md-6" formGroup={true}>
             <Select
               group={true}
-              label={<>Tipo de Cuenta: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo de Cuenta:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTipoCuenta}
               value={this.state.tipoCuenta}
               onChange={(event) =>
@@ -195,7 +204,11 @@ class BancoAgregar extends CustomComponent {
           <Column className="col-md-6" formGroup={true}>
             <Select
               group={true}
-              label={<>Moneda: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Moneda: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTxtMoneda}
               value={this.state.idMoneda}
               onChange={(event) =>
@@ -239,8 +252,8 @@ class BancoAgregar extends CustomComponent {
 
           <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Vuelto:"}
-              id={"vueltoChecked"}
+              label={'Vuelto:'}
+              id={'vueltoChecked'}
               checked={this.state.vuelto}
               onChange={(value) =>
                 this.setState({ vuelto: value.target.checked })
@@ -254,8 +267,8 @@ class BancoAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Estado:"}
-              id={"estadoChecked"}
+              label={'Estado:'}
+              id={'estadoChecked'}
               checked={this.state.estado}
               onChange={(value) =>
                 this.setState({ estado: value.target.checked })
@@ -267,8 +280,8 @@ class BancoAgregar extends CustomComponent {
 
           <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Preferido:"}
-              id={"preferidoChecked"}
+              label={'Preferido:'}
+              id={'preferidoChecked'}
               checked={this.state.preferido}
               onChange={(value) =>
                 this.setState({ preferido: value.target.checked })
@@ -282,8 +295,8 @@ class BancoAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Mostrar en Reporte:"}
-              id={"reporteChecked"}
+              label={'Mostrar en Reporte:'}
+              id={'reporteChecked'}
               checked={this.state.reporte}
               onChange={(value) =>
                 this.setState({ reporte: value.target.checked })
@@ -295,17 +308,14 @@ class BancoAgregar extends CustomComponent {
         </Row>
         <Row>
           <Column>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i>  Guardar
+            <Button className="btn-success" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

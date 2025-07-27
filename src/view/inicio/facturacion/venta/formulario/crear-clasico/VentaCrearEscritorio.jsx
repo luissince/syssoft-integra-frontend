@@ -37,20 +37,35 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import CustomComponent from '../../../../../../model/class/custom-component';
-import {
-  VENTA,
-} from '../../../../../../model/types/tipo-comprobante';
+import { VENTA } from '../../../../../../model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
-import { A_GRANEL, SERVICIO, UNIDADES, VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
-import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../../../../../../model/types/tipo-cliente';
+import {
+  A_GRANEL,
+  SERVICIO,
+  UNIDADES,
+  VALOR_MONETARIO,
+} from '../../../../../../model/types/tipo-tratamiento-producto';
+import {
+  CLIENTE_JURIDICO,
+  CLIENTE_NATURAL,
+} from '../../../../../../model/types/tipo-cliente';
 import { CONTADO } from '../../../../../../model/types/forma-pago';
 import ModalProdcutos from '../common/ModalProductos';
-import { getDni, getRuc } from '../../../../../../network/rest/apisperu.network';
+import {
+  getDni,
+  getRuc,
+} from '../../../../../../network/rest/apisperu.network';
 import { images } from '../../../../../../helper';
 import Input from '../../../../../../components/Input';
 import Select from '../../../../../../components/Select';
 import Button from '../../../../../../components/Button';
-import { clearCrearVentaClasico, setCrearVentaClasicoLocal, setCrearVentaClasicoState, setProductosFavoritos, starProduct } from '../../../../../../redux/predeterminadoSlice';
+import {
+  clearCrearVentaClasico,
+  setCrearVentaClasicoLocal,
+  setCrearVentaClasicoState,
+  setProductosFavoritos,
+  starProduct,
+} from '../../../../../../redux/predeterminadoSlice';
 import RadioButton from '../../../../../../components/RadioButton';
 import SearchInput from '../../../../../../components/SearchInput';
 import ModalVenta from '../common/ModalVenta';
@@ -64,9 +79,19 @@ import ModalPrecios from './component/ModalPrecios';
 import ModalCantidad from './component/ModalCantidad';
 import ModalDatos from './component/ModalDatos';
 import ModalTransaccion from '../../../../../../components/ModalTransaccion';
-import { ModalImpresion, ModalPreImpresion } from '../../../../../../components/MultiModal';
+import {
+  ModalImpresion,
+  ModalPreImpresion,
+} from '../../../../../../components/MultiModal';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../../../../../components/Table';
 import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { RUC } from '../../../../../../model/types/tipo-documento';
@@ -76,7 +101,6 @@ import { RUC } from '../../../../../../model/types/tipo-documento';
  * @extends React.Component
  */
 class VentaCrearEscritorio extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -253,7 +277,7 @@ class VentaCrearEscritorio extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown)
+    document.addEventListener('keydown', this.handleDocumentKeyDown);
     await this.loadingData();
   }
 
@@ -261,7 +285,7 @@ class VentaCrearEscritorio extends CustomComponent {
    * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
    */
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown)
+    document.removeEventListener('keydown', this.handleDocumentKeyDown);
 
     this.abortControllerView.abort();
     this.abortControllerCotizacion.abort();
@@ -287,7 +311,11 @@ class VentaCrearEscritorio extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (this.props.ventaCrearClasico && this.props.ventaCrearClasico.state && this.props.ventaCrearClasico.local) {
+    if (
+      this.props.ventaCrearClasico &&
+      this.props.ventaCrearClasico.state &&
+      this.props.ventaCrearClasico.local
+    ) {
       this.setState(this.props.ventaCrearClasico.state, () => {
         this.index = this.props.ventaCrearClasico.local.index;
 
@@ -299,7 +327,7 @@ class VentaCrearEscritorio extends CustomComponent {
           celular: this.props.ventaCrearClasico.state.numeroCelular,
           email: this.props.ventaCrearClasico.state.email,
           direccion: this.props.ventaCrearClasico.state.direccion,
-        }
+        };
 
         this.handleSelectItemCliente(cliente);
       });
@@ -310,20 +338,22 @@ class VentaCrearEscritorio extends CustomComponent {
         impuestos,
         predeterminado,
         tiposDocumentos,
-        almacenes
+        almacenes,
       ] = await Promise.all([
         this.fetchComprobante(VENTA),
         this.fetchMoneda(),
         this.fetchImpuesto(),
-        this.fetchPersonaPredeterminado({ cliente: "1" }),
+        this.fetchPersonaPredeterminado({ cliente: '1' }),
         this.fetchTipoDocumento(),
-        this.fetchAlmacen({ idSucursal: this.state.idSucursal })
+        this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
       ]);
 
       const comprobantes = [...venta];
       const monedaFilter = monedas.find((item) => item.nacional === 1);
       const impuestoFilter = impuestos.find((item) => item.preferido === 1);
-      const comprobanteFilter = comprobantes.find((item) => item.preferida === 1);
+      const comprobanteFilter = comprobantes.find(
+        (item) => item.preferida === 1,
+      );
       const almacenFilter = almacenes.find((item) => item.predefinido === 1);
 
       if (typeof predeterminado === 'object') {
@@ -337,10 +367,18 @@ class VentaCrearEscritorio extends CustomComponent {
         almacenes,
 
         idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
-        nombreComporbante: !comprobanteFilter ? "Ninguno" : comprobanteFilter.nombre,
+        nombreComporbante: !comprobanteFilter
+          ? 'Ninguno'
+          : comprobanteFilter.nombre,
 
-        idTipoCliente: typeof predeterminado === 'object' ? predeterminado.idTipoCliente : '',
-        idTipoDocumento: typeof predeterminado === 'object' ? predeterminado.idTipoDocumento : '',
+        idTipoCliente:
+          typeof predeterminado === 'object'
+            ? predeterminado.idTipoCliente
+            : '',
+        idTipoDocumento:
+          typeof predeterminado === 'object'
+            ? predeterminado.idTipoDocumento
+            : '',
 
         idMoneda: monedaFilter ? monedaFilter.idMoneda : '',
         codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
@@ -354,7 +392,10 @@ class VentaCrearEscritorio extends CustomComponent {
         loading: false,
       });
 
-      const productos = await this.fetchProductoPreferidos({ idSucursal: this.state.idSucursal, idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '' });
+      const productos = await this.fetchProductoPreferidos({
+        idSucursal: this.state.idSucursal,
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+      });
       this.props.setProductosFavoritos(productos);
       this.redCodigoBarras.current.focus();
       this.updateReduxState();
@@ -362,10 +403,10 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   updateReduxState() {
-    this.props.setCrearVentaClasicoState(this.state)
+    this.props.setCrearVentaClasicoState(this.state);
     this.props.setCrearVentaClasicoLocal({
-      index: this.index
-    })
+      index: this.index,
+    });
   }
 
   clearView = () => {
@@ -376,13 +417,13 @@ class VentaCrearEscritorio extends CustomComponent {
       this.index = -1;
 
       this.updateReduxState();
-    })
-  }
+    });
+  };
 
   async fetchComprobante(tipo) {
     const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
+      tipo: tipo,
+      idSucursal: this.state.idSucursal,
     };
 
     const response = await comboComprobante(
@@ -429,7 +470,6 @@ class VentaCrearEscritorio extends CustomComponent {
     }
   }
 
-
   async fetchPersonaPredeterminado(params) {
     const response = await getPreferidoPersona(params);
 
@@ -447,7 +487,7 @@ class VentaCrearEscritorio extends CustomComponent {
   async fetchProductoPreferidos(params) {
     const response = await preferidosProducto(
       params,
-      this.abortControllerView.signal
+      this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
@@ -468,7 +508,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     const response = await obtenerListaPrecioProducto(
       params,
-      this.abortControllerView.signal
+      this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
@@ -483,9 +523,7 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   async fetchTipoDocumento() {
-    const response = await comboTipoDocumento(
-      this.abortControllerView.signal,
-    );
+    const response = await comboTipoDocumento(this.abortControllerView.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -515,7 +553,7 @@ class VentaCrearEscritorio extends CustomComponent {
   async fetchAlmacen(params) {
     const response = await comboAlmacen(
       params,
-      this.abortControllerView.signal
+      this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
@@ -529,10 +567,10 @@ class VentaCrearEscritorio extends CustomComponent {
     }
   }
 
-  async reloadProductoPreferidos(callback = function () { }) {
+  async reloadProductoPreferidos(callback = function () {}) {
     const productos = await this.fetchProductoPreferidos({
       idSucursal: this.state.idSucursal,
-      idAlmacen: this.state.idAlmacen
+      idAlmacen: this.state.idAlmacen,
     });
     this.props.setProductosFavoritos(productos);
     await this.setStateAsync({ productos: productos });
@@ -540,17 +578,21 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   calculateTotal = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       importeTotal: prevState.detalleVenta.reduce((accumulator, item) => {
-        const cantidad = item.idTipoTratamientoProducto === SERVICIO
-          ? item.cantidad
-          : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+        const cantidad =
+          item.idTipoTratamientoProducto === SERVICIO
+            ? item.cantidad
+            : item.inventarios.reduce(
+                (acc, current) => acc + current.cantidad,
+                0,
+              );
 
         const totalProductPrice = item.precio * cantidad;
         return accumulator + totalProductPrice;
-      }, 0)
+      }, 0),
     }));
-  }
+  };
 
   addItemDetalle = (producto, precio, cantidad, index = -1) => {
     const { almacenes, idAlmacen, idImpuesto, detalleVenta } = this.state;
@@ -559,10 +601,12 @@ class VentaCrearEscritorio extends CustomComponent {
     const detalles = structuredClone(detalleVenta);
 
     // Encontrar el almacén actual
-    const almacen = almacenes.find(item => item.idAlmacen == idAlmacen);
+    const almacen = almacenes.find((item) => item.idAlmacen == idAlmacen);
 
     // Buscar si el producto ya existe en los detalles
-    const existingItem = detalles.find((item) => item.idProducto === producto.idProducto);
+    const existingItem = detalles.find(
+      (item) => item.idProducto === producto.idProducto,
+    );
 
     // Función auxiliar para crear un nuevo inventario
     const createInventory = (can) => ({
@@ -589,9 +633,10 @@ class VentaCrearEscritorio extends CustomComponent {
     // Lógica principal basada en el tipo de tratamiento del producto
     if (producto.idTipoTratamientoProducto === UNIDADES) {
       if (!existingItem) {
-
         const newItem = createNewItem(Number(producto.precio));
-        newItem.inventarios = [createInventory(cantidad ? Number(producto.cantidad) : 1)];
+        newItem.inventarios = [
+          createInventory(cantidad ? Number(producto.cantidad) : 1),
+        ];
 
         return [...detalles, newItem];
       } else {
@@ -605,7 +650,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
       if (!existingItem) {
-
         const newItem = createNewItem(Number(precio));
         newItem.inventarios = [createInventory(1)];
 
@@ -617,7 +661,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
       if (!existingItem) {
-
         const newItem = createNewItem(Number(producto.precio));
         newItem.inventarios = [createInventory(Number(cantidad))];
 
@@ -633,8 +676,9 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (producto.idTipoTratamientoProducto === SERVICIO) {
       if (!existingItem) {
-
-        const newItem = createNewItem(precio ? Number(precio) : Number(producto.precio));
+        const newItem = createNewItem(
+          precio ? Number(precio) : Number(producto.precio),
+        );
         newItem.cantidad = 1;
 
         return [...detalles, newItem];
@@ -642,18 +686,24 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     return detalles;
-  }
+  };
 
   generateTotals = () => {
     const { codiso, detalleVenta, impuestos } = this.state;
 
     const subTotal = detalleVenta.reduce((accumulator, item) => {
-      const cantidad = item.idTipoTratamientoProducto === SERVICIO
-        ? item.cantidad
-        : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+      const cantidad =
+        item.idTipoTratamientoProducto === SERVICIO
+          ? item.cantidad
+          : item.inventarios.reduce(
+              (acc, current) => acc + current.cantidad,
+              0,
+            );
 
       const precio = item.precio;
-      const filter = impuestos.filter((imp) => imp.idImpuesto === item.idImpuesto);
+      const filter = impuestos.filter(
+        (imp) => imp.idImpuesto === item.idImpuesto,
+      );
       const impuesto = filter.length > 0 ? filter[0].porcentaje : 0;
 
       const total = cantidad * precio;
@@ -667,9 +717,13 @@ class VentaCrearEscritorio extends CustomComponent {
         );
 
         if (impuesto) {
-          const cantidad = item.idTipoTratamientoProducto === SERVICIO
-            ? item.cantidad
-            : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+          const cantidad =
+            item.idTipoTratamientoProducto === SERVICIO
+              ? item.cantidad
+              : item.inventarios.reduce(
+                  (acc, current) => acc + current.cantidad,
+                  0,
+                );
 
           const total = cantidad * item.precio;
           const subTotal = calculateTaxBruto(impuesto.porcentaje, total);
@@ -695,41 +749,57 @@ class VentaCrearEscritorio extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <div key={index} className='d-flex justify-content-between justify-content-between'>
-            <span className='text-sm'>{impuesto.nombre}:</span>
-            <span className='text-sm text-right'>{numberFormat(impuesto.valor, codiso)}</span>
+          <div
+            key={index}
+            className="d-flex justify-content-between justify-content-between"
+          >
+            <span className="text-sm">{impuesto.nombre}:</span>
+            <span className="text-sm text-right">
+              {numberFormat(impuesto.valor, codiso)}
+            </span>
           </div>
         );
       });
     };
 
     const total = detalleVenta.reduce((accumulator, item) => {
-      const cantidad = item.idTipoTratamientoProducto === SERVICIO
-        ? item.cantidad
-        : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+      const cantidad =
+        item.idTipoTratamientoProducto === SERVICIO
+          ? item.cantidad
+          : item.inventarios.reduce(
+              (acc, current) => acc + current.cantidad,
+              0,
+            );
 
       const totalProductPrice = item.precio * cantidad;
       return accumulator + totalProductPrice;
     }, 0);
 
     return (
-      <div className='p-2' style={{ borderTop: '1px solid #cbd5e1' }}>
-        <div className='w-100' style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
-          <div className='d-flex justify-content-between'>
-            <span className='text-sm'>Sub Total:</span>
-            <span className='text-sm text-right'>{numberFormat(subTotal, codiso)}</span>
+      <div className="p-2" style={{ borderTop: '1px solid #cbd5e1' }}>
+        <div
+          className="w-100"
+          style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}
+        >
+          <div className="d-flex justify-content-between">
+            <span className="text-sm">Sub Total:</span>
+            <span className="text-sm text-right">
+              {numberFormat(subTotal, codiso)}
+            </span>
           </div>
 
           {impuestosTotal()}
 
-          <div className='d-flex justify-content-between'>
-            <span className='text-base'>Total:</span>
-            <span className='text-base text-right'>{numberFormat(total, codiso)}</span>
+          <div className="d-flex justify-content-between">
+            <span className="text-base">Total:</span>
+            <span className="text-base text-right">
+              {numberFormat(total, codiso)}
+            </span>
           </div>
         </div>
       </div>
     );
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -748,18 +818,39 @@ class VentaCrearEscritorio extends CustomComponent {
   */
 
   handleDocumentKeyDown = (event) => {
-    if (event.key === 'F1' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (
+      event.key === 'F1' &&
+      !this.state.isOpenProductos &&
+      !this.state.isOpenImpresion &&
+      !this.state.isOpenTerminal &&
+      !this.state.isOpenAgregar &&
+      !this.state.isOpenCotizacion &&
+      !this.state.isOpenCotizacion &&
+      !this.state.isOpenVenta
+    ) {
       this.handleOpenSale();
     }
 
-    if (event.key === 'F2' && !this.state.isOpenProductos && !this.state.isOpenImpresion && !this.state.isOpenTerminal && !this.state.isOpenAgregar && !this.state.isOpenCotizacion && !this.state.isOpenCotizacion && !this.state.isOpenVenta) {
+    if (
+      event.key === 'F2' &&
+      !this.state.isOpenProductos &&
+      !this.state.isOpenImpresion &&
+      !this.state.isOpenTerminal &&
+      !this.state.isOpenAgregar &&
+      !this.state.isOpenCotizacion &&
+      !this.state.isOpenCotizacion &&
+      !this.state.isOpenVenta
+    ) {
       this.handleOpenProductos();
     }
 
-    if ((event.ctrlKey || event.metaKey) && (event.key === 'd' || event.key === 'D')) {
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      (event.key === 'd' || event.key === 'D')
+    ) {
       this.redCodigoBarras.current.focus();
     }
-  }
+  };
 
   handleAddItem = async (producto) => {
     if (producto.precio <= 0) {
@@ -767,7 +858,10 @@ class VentaCrearEscritorio extends CustomComponent {
       return;
     }
 
-    if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
+    if (
+      producto.idTipoTratamientoProducto === UNIDADES ||
+      producto.idTipoTratamientoProducto === SERVICIO
+    ) {
       const detalles = this.addItemDetalle(producto, null, null);
 
       this.setState({ detalleVenta: detalles }, () => {
@@ -777,36 +871,48 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      this.handleOpenAgregar("Ingrese el valor monetario (S/, $ u otro) del producto o el total.", "Monto:", producto);
+      this.handleOpenAgregar(
+        'Ingrese el valor monetario (S/, $ u otro) del producto o el total.',
+        'Monto:',
+        producto,
+      );
     }
 
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
-      this.handleOpenAgregar("Ingrese el peso del producto (KM, GM u otro).", "Peso:", producto);
+      this.handleOpenAgregar(
+        'Ingrese el peso del producto (KM, GM u otro).',
+        'Peso:',
+        producto,
+      );
     }
-  }
+  };
 
   handleRemoveItem = (producto) => {
-    this.setState(prevState => ({
-      detalleVenta: prevState.detalleVenta.filter(item => item.idProducto !== producto.idProducto).map((item, index) => ({
-        ...item,
-        id: ++index,
-      }))
-    }), () => {
-      if (isEmpty(this.state.detalleVenta)) {
-        this.index = -1;
-      }
-    });
+    this.setState(
+      (prevState) => ({
+        detalleVenta: prevState.detalleVenta
+          .filter((item) => item.idProducto !== producto.idProducto)
+          .map((item, index) => ({
+            ...item,
+            id: ++index,
+          })),
+      }),
+      () => {
+        if (isEmpty(this.state.detalleVenta)) {
+          this.index = -1;
+        }
+      },
+    );
 
     this.calculateTotal();
-  }
+  };
 
   handleInputCodigoBarras = (event) => {
-    this.setState({ codigoBarras: event.target.value })
-  }
+    this.setState({ codigoBarras: event.target.value });
+  };
 
   handleOnKeyDownCodigoBarras = async (event) => {
     if (event.key === 'Enter') {
-
       this.setState({
         loading: true,
         msgLoading: 'Buscando producto...',
@@ -824,7 +930,7 @@ class VentaCrearEscritorio extends CustomComponent {
       const response = await filtrarProductoVenta(params);
       if (response instanceof SuccessReponse) {
         if (!isEmpty(response.data.lists)) {
-          this.handleAddItem(response.data.lists[0])
+          this.handleAddItem(response.data.lists[0]);
         }
 
         this.setState({
@@ -844,10 +950,12 @@ class VentaCrearEscritorio extends CustomComponent {
         this.redCodigoBarras.current.focus();
       }
     }
-  }
+  };
 
   handleOpenSale = async () => {
-    const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
+    const tipoDocumento = this.state.tiposDocumentos.find(
+      (item) => item.idTipoDocumento === this.state.idTipoDocumento,
+    );
 
     if (isEmpty(this.state.detalleVenta)) {
       this.alert.warning('Venta', 'La lista de productos esta vacía.', () => {
@@ -877,10 +985,18 @@ class VentaCrearEscritorio extends CustomComponent {
       return;
     }
 
-    if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.numeroDocumento.length) {
-      this.alert.warning("Venta", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
-        this.refNumeroDocumento.current.focus();
-      })
+    if (
+      tipoDocumento &&
+      tipoDocumento.obligado === 1 &&
+      tipoDocumento.longitud !== this.state.numeroDocumento.length
+    ) {
+      this.alert.warning(
+        'Venta',
+        `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+        () => {
+          this.refNumeroDocumento.current.focus();
+        },
+      );
       return;
     }
 
@@ -900,39 +1016,53 @@ class VentaCrearEscritorio extends CustomComponent {
         numeroCelular: text(this.state.numeroCelular),
         email: text(this.state.email),
         direccion: text(this.state.direccion),
-      }
+      },
     });
 
     this.handleOpenModalTerminal();
-  }
+  };
 
   handleClearSale = async () => {
-    this.alert.dialog("Venta", "Los productos serán eliminados de la venta actual ¿Desea continuar?", async (accept) => {
-      if (accept) {
-        this.clearView()
-      }
-    })
-  }
+    this.alert.dialog(
+      'Venta',
+      'Los productos serán eliminados de la venta actual ¿Desea continuar?',
+      async (accept) => {
+        if (accept) {
+          this.clearView();
+        }
+      },
+    );
+  };
 
   handleSelectComprobante = (event) => {
-    const comprobante = this.state.comprobantes.find(item => item.idComprobante == event.target.value);
+    const comprobante = this.state.comprobantes.find(
+      (item) => item.idComprobante == event.target.value,
+    );
 
-    this.setState({
-      idComprobante: event.target.value,
-      nombreComporbante: !comprobante ? "Ninguno" : comprobante.nombre
-    }, () => {
-      this.updateReduxState();
-    });
-  }
+    this.setState(
+      {
+        idComprobante: event.target.value,
+        nombreComporbante: !comprobante ? 'Ninguno' : comprobante.nombre,
+      },
+      () => {
+        this.updateReduxState();
+      },
+    );
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal terminal
   //------------------------------------------------------------------------------------------
   handleOpenModalTerminal = () => {
-    this.setState({ isOpenTerminal: true })
-  }
+    this.setState({ isOpenTerminal: true });
+  };
 
-  handleProcessContado = (idFormaPago, metodoPagosLista, notaTransacion, callback = async function () { }) => {
+  handleProcessContado = (
+    idFormaPago,
+    metodoPagosLista,
+    notaTransacion,
+    callback = async function () {},
+  ) => {
     const {
       nuevoCliente,
       idUsuario,
@@ -944,52 +1074,59 @@ class VentaCrearEscritorio extends CustomComponent {
       cotizacion,
       observacion,
       nota,
-      detalleVenta
+      detalleVenta,
     } = this.state;
 
-    this.alert.dialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: idFormaPago,
-          idComprobante: idComprobante,
-          idMoneda: idMoneda,
-          idImpuesto: idImpuesto,
-          idCliente: cliente.idPersona,
-          idSucursal: idSucursal,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          estado: 1,
-          nuevoCliente: nuevoCliente,
-          idCotizacion: cotizacion && cotizacion.idCotizacion || null,
-          detalleVenta: detalleVenta,
-          notaTransacion,
-          bancosAgregados: metodoPagosLista,
-        };
+    this.alert.dialog(
+      'Venta',
+      '¿Estás seguro de continuar?',
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idFormaPago: idFormaPago,
+            idComprobante: idComprobante,
+            idMoneda: idMoneda,
+            idImpuesto: idImpuesto,
+            idCliente: cliente.idPersona,
+            idSucursal: idSucursal,
+            observacion: observacion,
+            nota: nota,
+            idUsuario: idUsuario,
+            estado: 1,
+            nuevoCliente: nuevoCliente,
+            idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
+            detalleVenta: detalleVenta,
+            notaTransacion,
+            bancosAgregados: metodoPagosLista,
+          };
 
-        await callback();
-        this.alert.information('Venta', 'Procesando venta...');
+          await callback();
+          this.alert.information('Venta', 'Procesando venta...');
 
-        const response = await createVenta(data);
+          const response = await createVenta(data);
 
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idVenta);
-        }
+          if (response instanceof SuccessReponse) {
+            this.alert.close();
+            this.handleOpenImpresion(response.data.idVenta);
+          }
 
-        if (response instanceof ErrorResponse) {
-          if (response.getBody() !== '') {
-            const body = response.getBody().map((item) =>
-              `<tr>
+          if (response instanceof ErrorResponse) {
+            if (response.getBody() !== '') {
+              const body = response.getBody().map(
+                (item) =>
+                  `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
-                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                  <td>${formatDecimal(
+                    item.cantidadActual - item.cantidadReal,
+                  )}</td>
                 </tr>`,
-            );
+              );
 
-            this.alert.html('Venta',
-              `<div class="d-flex flex-column align-items-center">
+              this.alert.html(
+                'Venta',
+                `<div class="d-flex flex-column align-items-center">
                     <h5>Productos con cantidades faltantes</h5>
                     <table class="table">
                         <thead>
@@ -1005,16 +1142,24 @@ class VentaCrearEscritorio extends CustomComponent {
                         </tbody>
                     </table>
                 </div>`,
-            );
-          } else {
-            this.alert.warning('Venta', response.getMessage());
+              );
+            } else {
+              this.alert.warning('Venta', response.getMessage());
+            }
           }
         }
-      }
-    });
-  }
+      },
+    );
+  };
 
-  handleProcessCredito = (idFormaPago, numeroCuotas, frecuenciaPago, importeTotal, notaTransacion, callback = async function () { }) => {
+  handleProcessCredito = (
+    idFormaPago,
+    numeroCuotas,
+    frecuenciaPago,
+    importeTotal,
+    notaTransacion,
+    callback = async function () {},
+  ) => {
     const {
       nuevoCliente,
       idUsuario,
@@ -1026,54 +1171,61 @@ class VentaCrearEscritorio extends CustomComponent {
       cotizacion,
       observacion,
       nota,
-      detalleVenta
+      detalleVenta,
     } = this.state;
 
-    this.alert.dialog('Venta', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idFormaPago: idFormaPago,
-          idComprobante: idComprobante,
-          idMoneda: idMoneda,
-          idImpuesto: idImpuesto,
-          idCliente: cliente.idPersona,
-          idSucursal: idSucursal,
-          observacion: observacion,
-          nota: nota,
-          idUsuario: idUsuario,
-          estado: 2,
-          nuevoCliente: nuevoCliente,
-          idCotizacion: cotizacion && cotizacion.idCotizacion || null,
-          detalleVenta: detalleVenta,
-          numeroCuotas: numeroCuotas,
-          frecuenciaPago: frecuenciaPago,
-          notaTransacion,
-          importeTotal: importeTotal
-        };
+    this.alert.dialog(
+      'Venta',
+      '¿Estás seguro de continuar?',
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idFormaPago: idFormaPago,
+            idComprobante: idComprobante,
+            idMoneda: idMoneda,
+            idImpuesto: idImpuesto,
+            idCliente: cliente.idPersona,
+            idSucursal: idSucursal,
+            observacion: observacion,
+            nota: nota,
+            idUsuario: idUsuario,
+            estado: 2,
+            nuevoCliente: nuevoCliente,
+            idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
+            detalleVenta: detalleVenta,
+            numeroCuotas: numeroCuotas,
+            frecuenciaPago: frecuenciaPago,
+            notaTransacion,
+            importeTotal: importeTotal,
+          };
 
-        await callback();
-        this.alert.information('Venta', 'Procesando venta...');
+          await callback();
+          this.alert.information('Venta', 'Procesando venta...');
 
-        const response = await createVenta(data);
+          const response = await createVenta(data);
 
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idVenta);
-        }
+          if (response instanceof SuccessReponse) {
+            this.alert.close();
+            this.handleOpenImpresion(response.data.idVenta);
+          }
 
-        if (response instanceof ErrorResponse) {
-          if (response.getBody() !== '') {
-            const body = response.getBody().map((item) =>
-              `<tr>
+          if (response instanceof ErrorResponse) {
+            if (response.getBody() !== '') {
+              const body = response.getBody().map(
+                (item) =>
+                  `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
-                  <td>${formatDecimal(item.cantidadActual - item.cantidadReal)}</td>
+                  <td>${formatDecimal(
+                    item.cantidadActual - item.cantidadReal,
+                  )}</td>
                 </tr>`,
-            );
+              );
 
-            this.alert.html('Venta',
-              `<div class="d-flex flex-column align-items-center">
+              this.alert.html(
+                'Venta',
+                `<div class="d-flex flex-column align-items-center">
                     <h5>Productos con cantidades faltantes</h5>
                     <table class="table">
                         <thead>
@@ -1089,18 +1241,19 @@ class VentaCrearEscritorio extends CustomComponent {
                         </tbody>
                     </table>
                 </div>`,
-            );
-          } else {
-            this.alert.warning('Venta', response.getMessage());
+              );
+            } else {
+              this.alert.warning('Venta', response.getMessage());
+            }
           }
         }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleCloseModalTerminal = async () => {
-    this.setState({ isOpenTerminal: false })
-  }
+    this.setState({ isOpenTerminal: false });
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de productos
@@ -1122,13 +1275,13 @@ class VentaCrearEscritorio extends CustomComponent {
       return;
     }
     this.setState({ isOpenProductos: true });
-  }
+  };
 
   handleCloseProductos = () => {
     this.setState({ isOpenProductos: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal agregar
@@ -1136,13 +1289,13 @@ class VentaCrearEscritorio extends CustomComponent {
   handleOpenAgregar = (titulo, subTitulo, producto) => {
     this.setState({ isOpenAgregar: true });
     this.refModalAgregar.current.loadDatos(titulo, subTitulo, producto);
-  }
+  };
 
   handleCloseAgregar = () => {
     this.setState({ isOpenAgregar: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSaveAgregar = async (producto, cantidad) => {
     let detalles = structuredClone(this.state.detalleVenta);
@@ -1159,7 +1312,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.updateReduxState();
       this.calculateTotal();
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal precios
@@ -1170,34 +1323,40 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ isOpenPrecios: true });
       this.refModalPrecios.current.loadDatos(item);
     }
-  }
+  };
 
   handleClosePrecios = () => {
     this.setState({ isOpenPrecios: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSavePrecios = (producto, precio) => {
-    if (producto.precio !== precio && producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      this.alert.warning('Venta', 'Los productos a granel no se puede cambia el precio.');
+    if (
+      producto.precio !== precio &&
+      producto.idTipoTratamientoProducto === VALOR_MONETARIO
+    ) {
+      this.alert.warning(
+        'Venta',
+        'Los productos a granel no se puede cambia el precio.',
+      );
       return;
     }
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       detalleVenta: prevState.detalleVenta.map((item) => {
         if (item.idProducto === producto.idProducto) {
           return {
             ...item,
-            precio
-          }
+            precio,
+          };
         }
-        return item
-      })
+        return item;
+      }),
     }));
 
     this.calculateTotal();
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal cantidad
@@ -1208,13 +1367,13 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ isOpenCantidad: true });
       this.refModalCantidad.current.loadDatos(item);
     }
-  }
+  };
 
   handleCloseCantidad = () => {
     this.setState({ isOpenCantidad: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSaveCantidad = async (idProducto, inventarios) => {
     this.setState((prevState) => ({
@@ -1222,18 +1381,18 @@ class VentaCrearEscritorio extends CustomComponent {
         if (item.idProducto === idProducto) {
           return {
             ...item,
-            inventarios: inventarios
-          }
+            inventarios: inventarios,
+          };
         } else {
           return {
-            ...item
-          }
+            ...item,
+          };
         }
-      })
+      }),
     }));
 
     this.calculateTotal();
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal datos
@@ -1246,29 +1405,29 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     // this.refModalAgregar.current.loadDatos(titulo, subTitulo, producto);
-  }
+  };
 
   handleCloseDatos = () => {
     this.setState({ isOpenDatos: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSaveDatos = async (producto, descripcion) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       detalleVenta: prevState.detalleVenta.map((item) => {
         if (item.idProducto === producto.idProducto) {
           return {
             ...item,
-            nombreProducto: descripcion
-          }
+            nombreProducto: descripcion,
+          };
         }
-        return item
-      })
+        return item;
+      }),
     }));
 
     this.calculateTotal();
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de cotización
@@ -1276,37 +1435,43 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleOpenCotizacion = () => {
     this.setState({ isOpenCotizacion: true });
-  }
+  };
 
   handleCloseCotizacion = () => {
     this.setState({ isOpenCotizacion: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSeleccionarCotizacion = async (cotizacion) => {
     this.handleCloseCotizacion();
 
     this.setState({
       loading: true,
-      msgLoading: "Obteniendos datos de la cotización.",
+      msgLoading: 'Obteniendos datos de la cotización.',
       detalleVenta: [],
       cotizacion: null,
     });
 
     const params = {
       idCotizacion: cotizacion.idCotizacion,
-      idAlmacen: this.state.idAlmacen
+      idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await forSaleCotizacion(params, this.abortControllerCotizacion.signal);
+    const response = await forSaleCotizacion(
+      params,
+      this.abortControllerCotizacion.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-
       if (isEmpty(response.data.productos)) {
-        this.alert.warning('Venta', 'La cotización no tiene productos, ya que fue utilizado para la venta.', () => {
-          this.clearView();
-        });
+        this.alert.warning(
+          'Venta',
+          'La cotización no tiene productos, ya que fue utilizado para la venta.',
+          () => {
+            this.clearView();
+          },
+        );
         return;
       }
 
@@ -1314,24 +1479,42 @@ class VentaCrearEscritorio extends CustomComponent {
 
       const detalles = response.data.productos.flatMap((producto, index) => {
         if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
-          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+          return this.addItemDetalle(
+            producto,
+            null,
+            producto.cantidad,
+            index + 1,
+          );
         }
 
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          return this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index + 1);
+          return this.addItemDetalle(
+            producto,
+            producto.cantidad * producto.precio,
+            null,
+            index + 1,
+          );
         }
 
         if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+          return this.addItemDetalle(
+            producto,
+            null,
+            producto.cantidad,
+            index + 1,
+          );
         }
 
         return [];
       });
 
-      this.setState({ cotizacion, detalleVenta: detalles, loading: false }, () => {
-        this.updateReduxState();
-        this.calculateTotal();
-      });
+      this.setState(
+        { cotizacion, detalleVenta: detalles, loading: false },
+        () => {
+          this.updateReduxState();
+          this.calculateTotal();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -1340,9 +1523,9 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning("Venta", response.getMessage())
+      this.alert.warning('Venta', response.getMessage());
     }
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Opciones de pedido
@@ -1350,19 +1533,19 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleOpenPedido = () => {
     this.setState({ isOpenPedido: true });
-  }
+  };
 
   handleClosePedido = () => {
     this.setState({ isOpenPedido: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSeleccionarPedido = async (pedido) => {
     this.handleCloseCotizacion();
     this.setState({
       loading: true,
-      msgLoading: "Obteniendos datos del pedido.",
+      msgLoading: 'Obteniendos datos del pedido.',
       detalleVenta: [],
       cotizacion: null,
       pedido: null,
@@ -1370,16 +1553,23 @@ class VentaCrearEscritorio extends CustomComponent {
 
     const params = {
       idPedido: pedido.idPedido,
-      idAlmacen: this.state.idAlmacen
+      idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await forSalePedido(params, this.abortControllerPedido.signal);
+    const response = await forSalePedido(
+      params,
+      this.abortControllerPedido.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        this.alert.warning('Venta', 'El pedido no tiene productos, ya que fue utilizado para la venta.', () => {
-          this.clearView();
-        });
+        this.alert.warning(
+          'Venta',
+          'El pedido no tiene productos, ya que fue utilizado para la venta.',
+          () => {
+            this.clearView();
+          },
+        );
         return;
       }
 
@@ -1387,15 +1577,30 @@ class VentaCrearEscritorio extends CustomComponent {
 
       const detalles = response.data.productos.flatMap((producto, index) => {
         if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
-          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+          return this.addItemDetalle(
+            producto,
+            null,
+            producto.cantidad,
+            index + 1,
+          );
         }
 
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          return this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index + 1);
+          return this.addItemDetalle(
+            producto,
+            producto.cantidad * producto.precio,
+            null,
+            index + 1,
+          );
         }
 
         if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+          return this.addItemDetalle(
+            producto,
+            null,
+            producto.cantidad,
+            index + 1,
+          );
         }
 
         return []; // En caso de que no entre en ninguna condición
@@ -1413,9 +1618,9 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning("Venta", response.getMessage())
+      this.alert.warning('Venta', response.getMessage());
     }
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de venta
@@ -1423,44 +1628,62 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleOpenVenta = () => {
     this.setState({ isOpenVenta: true });
-  }
+  };
 
   handleCloseVenta = () => {
     this.setState({ isOpenVenta: false }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleSeleccionarVenta = async (idVenta) => {
     this.handleCloseVenta();
     this.setState({
       loading: true,
-      msgLoading: "Obteniendos datos de la venta.",
+      msgLoading: 'Obteniendos datos de la venta.',
       detalleVenta: [],
-      cotizacion: null
+      cotizacion: null,
     });
 
     const params = {
       idVenta: idVenta,
-      idAlmacen: this.state.idAlmacen
+      idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailOnlyVentaVenta(params, this.abortControllerVenta.signal);
+    const response = await detailOnlyVentaVenta(
+      params,
+      this.abortControllerVenta.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
         if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
-          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+          return this.addItemDetalle(
+            producto,
+            null,
+            producto.cantidad,
+            index + 1,
+          );
         }
 
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          return this.addItemDetalle(producto, producto.cantidad * producto.precio, null, index + 1);
+          return this.addItemDetalle(
+            producto,
+            producto.cantidad * producto.precio,
+            null,
+            index + 1,
+          );
         }
 
         if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          return this.addItemDetalle(producto, null, producto.cantidad, index + 1);
+          return this.addItemDetalle(
+            producto,
+            null,
+            producto.cantidad,
+            index + 1,
+          );
         }
 
         return []; // En caso de que no entre en ninguna condición
@@ -1478,9 +1701,9 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning("Venta", response.getMessage())
+      this.alert.warning('Venta', response.getMessage());
     }
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal impresión
@@ -1488,81 +1711,99 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleOpenImpresion = (idVenta) => {
     this.setState({ isOpenImpresion: true, idVenta: idVenta });
-  }
+  };
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false });
-  }
+  };
 
   handlePrinterImpresion = (size) => {
     printJS({
       printable: documentsPdfInvoicesVenta(this.state.idVenta, size),
       type: 'pdf',
       showModal: true,
-      modalMessage: "Recuperando documento...",
+      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
-      }
-    })
-  }
+      },
+    });
+  };
 
   //------------------------------------------------------------------------------------------
   // Opciones de pre impresión
   //------------------------------------------------------------------------------------------
 
   handleOpenPreImpresion = () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, detalleVenta } = this.state;
+    const { idComprobante, cliente, idMoneda, idImpuesto, detalleVenta } =
+      this.state;
 
     if (isEmpty(idComprobante)) {
       this.alert.warning('Venta', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus()
+        this.refComprobante.current.focus(),
       );
       return;
     }
 
     if (isEmpty(cliente)) {
       this.alert.warning('Venta', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus()
+        this.refCliente.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idMoneda)) {
       this.alert.warning('Venta', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus()
+        this.refMoneda.current.focus(),
       );
       return;
     }
 
     if (isEmpty(idImpuesto)) {
       this.alert.warning('Venta', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus()
+        this.refImpuesto.current.focus(),
       );
       return;
     }
 
     if (isEmpty(detalleVenta)) {
-      this.alert.warning('Venta', 'Agregar algún producto a la lista.', () => { });
+      this.alert.warning(
+        'Venta',
+        'Agregar algún producto a la lista.',
+        () => {},
+      );
       return;
     }
 
-    this.setState({ isOpenPreImpresion: true })
-  }
+    this.setState({ isOpenPreImpresion: true });
+  };
 
   handleProcessPreImpresion = async (type, abort, success, error) => {
-    const { idComprobante, cliente, idMoneda, idUsuario, idSucursal, observacion, nota, detalleVenta } = this.state;
+    const {
+      idComprobante,
+      cliente,
+      idMoneda,
+      idUsuario,
+      idSucursal,
+      observacion,
+      nota,
+      detalleVenta,
+    } = this.state;
 
-    const response = await obtenerPreVentaPdf({
-      idComprobante: idComprobante,
-      idCliente: cliente.idPersona,
-      idMoneda: idMoneda,
-      idUsuario: idUsuario,
-      idSucursal: idSucursal,
-      observacion: observacion,
-      nota: nota,
-      detalle: detalleVenta
-    }, type, abort.signal);
+    const response = await obtenerPreVentaPdf(
+      {
+        idComprobante: idComprobante,
+        idCliente: cliente.idPersona,
+        idMoneda: idMoneda,
+        idUsuario: idUsuario,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        nota: nota,
+        detalle: detalleVenta,
+      },
+      type,
+      abort.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const base64 = await readDataFile(response.data);
@@ -1573,7 +1814,7 @@ class VentaCrearEscritorio extends CustomComponent {
         printable: base64,
         type: 'pdf',
         base64: true,
-        onPrintDialogClose: this.handleClosePreImpresion
+        onPrintDialogClose: this.handleClosePreImpresion,
       });
     }
 
@@ -1582,59 +1823,66 @@ class VentaCrearEscritorio extends CustomComponent {
 
       error();
 
-      this.alert.warning("Venta", response.getMessage());
+      this.alert.warning('Venta', response.getMessage());
     }
-  }
+  };
 
   handleClosePreImpresion = () => {
-    this.setState({ isOpenPreImpresion: false })
-  }
+    this.setState({ isOpenPreImpresion: false });
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal cliente
   //------------------------------------------------------------------------------------------
 
   handleSelectTipoCliente = (event) => {
-    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' }, () => {
-      this.updateReduxState();
-    });
-  }
+    this.setState(
+      { idTipoCliente: event.target.value, idTipoDocumento: '' },
+      () => {
+        this.updateReduxState();
+      },
+    );
+  };
 
   handleSelectTipoDocumento = (event) => {
     this.setState({ idTipoDocumento: event.target.value }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleInputInformacion = (event) => {
     this.setState({ informacion: event.target.value }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleInputNumeroCelular = (event) => {
     this.setState({ numeroCelular: event.target.value }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleInputEmail = (event) => {
     this.setState({ email: event.target.value }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleInputDireccion = (event) => {
     this.setState({ direccion: event.target.value }, () => {
       this.updateReduxState();
     });
-  }
+  };
 
   handleGetApiReniec = async () => {
     if (this.state.numeroDocumento.length !== 8) {
-      this.alert.warning("Venta", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.', () => {
-        this.refNumeroDocumento.current.focus();
-      })
+      this.alert.warning(
+        'Venta',
+        'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+        () => {
+          this.refNumeroDocumento.current.focus();
+        },
+      );
       return;
     }
 
@@ -1645,43 +1893,64 @@ class VentaCrearEscritorio extends CustomComponent {
       msgLoadingCliente: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(this.state.numeroDocumento, this.abortControllerCliente.signal);
+    const response = await getDni(
+      this.state.numeroDocumento,
+      this.abortControllerCliente.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-      this.setState({
-        numeroDocumento: convertNullText(response.data.dni),
-        informacion: convertNullText(response.data.apellidoPaterno) + ' ' + convertNullText(response.data.apellidoMaterno) + ' ' + convertNullText(response.data.nombres),
-        loadingCliente: false,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          numeroDocumento: convertNullText(response.data.dni),
+          informacion:
+            convertNullText(response.data.apellidoPaterno) +
+            ' ' +
+            convertNullText(response.data.apellidoMaterno) +
+            ' ' +
+            convertNullText(response.data.nombres),
+          loadingCliente: false,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) {
-        this.setState({
-          loadingCliente: false,
-        }, () => {
-          this.updateReduxState();
-        });
+        this.setState(
+          {
+            loadingCliente: false,
+          },
+          () => {
+            this.updateReduxState();
+          },
+        );
         return;
       }
 
       this.alert.warning('Venta', response.getMessage(), () => {
-        this.setState({
-          loadingCliente: false,
-        }, () => {
-          this.updateReduxState();
-        });
+        this.setState(
+          {
+            loadingCliente: false,
+          },
+          () => {
+            this.updateReduxState();
+          },
+        );
       });
     }
   };
 
   handleGetApiSunat = async () => {
     if (this.state.numeroDocumento.length !== 11) {
-      this.alert.warning("Venta", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.', () => {
-        this.refNumeroDocumento.current.focus();
-      })
+      this.alert.warning(
+        'Venta',
+        'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+        () => {
+          this.refNumeroDocumento.current.focus();
+        },
+      );
       return;
     }
 
@@ -1692,17 +1961,23 @@ class VentaCrearEscritorio extends CustomComponent {
       msgLoadingCliente: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.numeroDocumento, this.abortControllerCliente.signal);
+    const response = await getRuc(
+      this.state.numeroDocumento,
+      this.abortControllerCliente.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-      this.setState({
-        numeroDocumento: convertNullText(response.data.ruc),
-        informacion: convertNullText(response.data.razonSocial),
-        direccion: convertNullText(response.data.direccion),
-        loadingCliente: false,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          numeroDocumento: convertNullText(response.data.ruc),
+          informacion: convertNullText(response.data.razonSocial),
+          direccion: convertNullText(response.data.direccion),
+          loadingCliente: false,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -1714,11 +1989,14 @@ class VentaCrearEscritorio extends CustomComponent {
       }
 
       this.alert.warning('Venta', response.getMessage(), () => {
-        this.setState({
-          loadingCliente: false,
-        }, () => {
-          this.updateReduxState();
-        });
+        this.setState(
+          {
+            loadingCliente: false,
+          },
+          () => {
+            this.updateReduxState();
+          },
+        );
       });
     }
   };
@@ -1728,21 +2006,24 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputCliente = () => {
-    this.setState({
-      clientes: [],
-      cliente: null,
-      idTipoCliente: CLIENTE_NATURAL,
-      idTipoDocumento: '',
-      numeroDocumento: '',
-      informacion: '',
-      numeroCelular: '',
-      email: '',
-      direccion: '',
-      nuevoCliente: null,
-    }, () => {
-      this.updateReduxState();
-    });
-  }
+    this.setState(
+      {
+        clientes: [],
+        cliente: null,
+        idTipoCliente: CLIENTE_NATURAL,
+        idTipoDocumento: '',
+        numeroDocumento: '',
+        informacion: '',
+        numeroCelular: '',
+        email: '',
+        direccion: '',
+        nuevoCliente: null,
+      },
+      () => {
+        this.updateReduxState();
+      },
+    );
+  };
 
   handleFilterCliente = async (text) => {
     const searchWord = text;
@@ -1754,40 +2035,43 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     const params = {
-      "opcion": 1,
-      "filter": searchWord,
-      "cliente": true,
+      opcion: 1,
+      filter: searchWord,
+      cliente: true,
     };
 
-    const clientes = await this.fetchFiltrarPersona(params)
+    const clientes = await this.fetchFiltrarPersona(params);
 
     this.setState({
       clientes: clientes,
     });
-  }
+  };
 
   handleSetValueCliente = (value) => {
     this.setState({
-      numeroDocumento: value
+      numeroDocumento: value,
     });
-  }
+  };
 
   handleSelectItemCliente = (value) => {
     this.refPersona.current.initialize(value.documento);
-    this.setState({
-      clientes: [],
-      cliente: value,
-      idTipoCliente: value.idTipoCliente,
-      idTipoDocumento: value.idTipoDocumento,
-      numeroDocumento: value.documento,
-      informacion: value.informacion,
-      numeroCelular: value.celular,
-      email: value.email,
-      direccion: value.direccion,
-    }, () => {
-      this.updateReduxState();
-    });
-  }
+    this.setState(
+      {
+        clientes: [],
+        cliente: value,
+        idTipoCliente: value.idTipoCliente,
+        idTipoDocumento: value.idTipoDocumento,
+        numeroDocumento: value.documento,
+        informacion: value.informacion,
+        numeroCelular: value.celular,
+        email: value.email,
+        direccion: value.direccion,
+      },
+      () => {
+        this.updateReduxState();
+      },
+    );
+  };
 
   //------------------------------------------------------------------------------------------
   // Opciones de configuración
@@ -1804,9 +2088,9 @@ class VentaCrearEscritorio extends CustomComponent {
         idAlmacen: this.state.idAlmacen,
         observacion: this.state.observacion,
         nota: this.state.nota,
-      }
-    })
-  }
+      },
+    });
+  };
 
   handleCloseOptions = () => {
     const invoice = document.getElementById(this.idSidebarConfiguration);
@@ -1818,35 +2102,39 @@ class VentaCrearEscritorio extends CustomComponent {
         idAlmacen: this.state.cacheConfiguracion.idAlmacen,
         observacion: this.state.cacheConfiguracion.observacion,
         nota: this.state.cacheConfiguracion.nota,
-      })
+      });
     }
 
     invoice.classList.remove('toggled');
-  }
+  };
 
   handleSelectIdImpuesto = (event) => {
-    this.setState({ idImpuesto: event.target.value })
-  }
+    this.setState({ idImpuesto: event.target.value });
+  };
 
   handleSelectIdMoneda = (event) => {
-    this.setState({ idMoneda: event.target.value })
-  }
+    this.setState({ idMoneda: event.target.value });
+  };
 
-  handleSelectIdIdAlmacen = async (event, active = false, callback = function () { }) => {
+  handleSelectIdIdAlmacen = async (
+    event,
+    active = false,
+    callback = function () {},
+  ) => {
     this.setState({ idAlmacen: event.target.value }, () => {
       if (active) {
         this.reloadProductoPreferidos(callback);
       }
-    })
-  }
+    });
+  };
 
   handleInputObservacion = (event) => {
-    this.setState({ observacion: event.target.value })
-  }
+    this.setState({ observacion: event.target.value });
+  };
 
   handleInputNota = (event) => {
-    this.setState({ nota: event.target.value })
-  }
+    this.setState({ nota: event.target.value });
+  };
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
@@ -1875,20 +2163,24 @@ class VentaCrearEscritorio extends CustomComponent {
       idImpuesto: this.state.idImpuesto,
     }));
 
-    const moneda = this.state.monedas.find((item) => item.idMoneda === this.state.idMoneda)
+    const moneda = this.state.monedas.find(
+      (item) => item.idMoneda === this.state.idMoneda,
+    );
 
-    this.setState({
-      idMoneda: moneda.idMoneda,
-      codiso: moneda.codiso,
-      detalleVenta,
-    }, async () => {
-      this.reloadProductoPreferidos();
+    this.setState(
+      {
+        idMoneda: moneda.idMoneda,
+        codiso: moneda.codiso,
+        detalleVenta,
+      },
+      async () => {
+        this.reloadProductoPreferidos();
 
-      const invoice = document.getElementById(this.idSidebarConfiguration);
-      invoice.classList.remove('toggled');
-    });
-  }
-
+        const invoice = document.getElementById(this.idSidebarConfiguration);
+        invoice.classList.remove('toggled');
+      },
+    );
+  };
 
   //------------------------------------------------------------------------------------------
   // Eventos de la tabla
@@ -1914,12 +2206,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (event.key === 'Enter') {
       if (this.index >= 0) {
-        this.handleOpenDatos()
+        this.handleOpenDatos();
         event.preventDefault();
         event.stopPropagation();
       }
     }
-  }
+  };
 
   handleOnClick = async (event) => {
     const { rowIndex, children } = getRowCellIndex(event);
@@ -1928,7 +2220,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     this.index = rowIndex;
     this.updateSelection(children);
-  }
+  };
 
   handleOnDbClick = async (event) => {
     const { rowIndex, cellIndex, children } = getRowCellIndex(event);
@@ -1949,15 +2241,15 @@ class VentaCrearEscritorio extends CustomComponent {
     if (cellIndex === 5) {
       this.handleOpenPrecios();
     }
-  }
+  };
 
   updateSelection = (children) => {
-    children.forEach(row => row.classList.remove("table-active"));
+    children.forEach((row) => row.classList.remove('table-active'));
 
     const selectedChild = children[this.index];
-    selectedChild.classList.add("table-active");
+    selectedChild.classList.add('table-active');
     selectedChild.scrollIntoView({ block: 'center' });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -1978,21 +2270,22 @@ class VentaCrearEscritorio extends CustomComponent {
   generateBody() {
     const { detalleVenta, codiso } = this.state;
     return detalleVenta.map((producto, key) => {
-
-      const cantidad = producto.idTipoTratamientoProducto === SERVICIO
-        ? producto.cantidad
-        : producto.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
+      const cantidad =
+        producto.idTipoTratamientoProducto === SERVICIO
+          ? producto.cantidad
+          : producto.inventarios.reduce(
+              (acc, current) => acc + current.cantidad,
+              0,
+            );
 
       return (
-        <TableRow
-          key={key}
-          className='bg-white'
-        >
-          <TableCell className='text-center'>{producto.id}</TableCell>
-          <TableCell className='text-center'>
+        <TableRow key={key} className="bg-white">
+          <TableCell className="text-center">{producto.id}</TableCell>
+          <TableCell className="text-center">
             <Button
-              className='btn-outline-danger'
-              onClick={() => this.handleRemoveItem(producto)}>
+              className="btn-outline-danger"
+              onClick={() => this.handleRemoveItem(producto)}
+            >
               <i className="bi bi-trash"></i>
             </Button>
           </TableCell>
@@ -2004,24 +2297,34 @@ class VentaCrearEscritorio extends CustomComponent {
               width={70}
             />
           </TableCell>
-          <TableCell className='text-center'>
+          <TableCell className="text-center">
             {producto.idTipoTratamientoProducto === SERVICIO && (
               <p>{rounded(producto.cantidad)}</p>
             )}
 
-            {(producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === A_GRANEL) && producto.inventarios.map((item, index) => (
-              <div key={index} className={`${producto.inventarios.length - 1 === index ? "" : " border-bottom  mb-2"} `}>
-                <span>{item.almacen}</span>
-                <p className='my-1'>{rounded(item.cantidad)}</p>
-              </div>
-            ))}
+            {(producto.idTipoTratamientoProducto === UNIDADES ||
+              producto.idTipoTratamientoProducto === A_GRANEL) &&
+              producto.inventarios.map((item, index) => (
+                <div
+                  key={index}
+                  className={`${
+                    producto.inventarios.length - 1 === index
+                      ? ''
+                      : ' border-bottom  mb-2'
+                  } `}
+                >
+                  <span>{item.almacen}</span>
+                  <p className="my-1">{rounded(item.cantidad)}</p>
+                </div>
+              ))}
 
-            {producto.idTipoTratamientoProducto === VALOR_MONETARIO && producto.inventarios.map((item, index) => (
-              <div key={index}>
-                <span>{item.almacen}</span>
-                <p className='my-1'>{rounded(item.cantidad)}</p>
-              </div>
-            ))}
+            {producto.idTipoTratamientoProducto === VALOR_MONETARIO &&
+              producto.inventarios.map((item, index) => (
+                <div key={index}>
+                  <span>{item.almacen}</span>
+                  <p className="my-1">{rounded(item.cantidad)}</p>
+                </div>
+              ))}
             {/* {
               producto.idTipoTratamientoProducto === SERVICIO ?
                 <span key={key}>{rounded(producto.cantidad)}</span>
@@ -2031,14 +2334,18 @@ class VentaCrearEscritorio extends CustomComponent {
                 ))
             } */}
           </TableCell>
-          <TableCell className='text-left'>
+          <TableCell className="text-left">
             {producto.codigo}
             <br />
             {producto.nombreProducto}
           </TableCell>
-          <TableCell className='text-center'>{numberFormat(producto.precio, codiso)}</TableCell>
+          <TableCell className="text-center">
+            {numberFormat(producto.precio, codiso)}
+          </TableCell>
           {/* <td className='text-center'>0%</td> */}
-          <TableCell className='text-center'>{numberFormat(producto.precio * cantidad, codiso)}</TableCell>
+          <TableCell className="text-center">
+            {numberFormat(producto.precio * cantidad, codiso)}
+          </TableCell>
         </TableRow>
       );
     });
@@ -2053,14 +2360,12 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         <ModalTransaccion
-          tipo={"Venta"}
-          title={"Completar Venta"}
+          tipo={'Venta'}
+          title={'Completar Venta'}
           isOpen={this.state.isOpenTerminal}
-
           idSucursal={this.state.idSucursal}
           codiso={this.state.codiso}
           importeTotal={this.state.importeTotal}
-
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
           handleProcessCredito={this.handleProcessCredito}
@@ -2071,7 +2376,6 @@ class VentaCrearEscritorio extends CustomComponent {
           isOpen={this.state.isOpenImpresion}
           clear={this.clearView}
           handleClose={this.handleCloseImpresion}
-
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
@@ -2079,7 +2383,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
         <ModalPreImpresion
           isOpen={this.state.isOpenPreImpresion}
-
           handleClose={this.handleClosePreImpresion}
           handleProcess={this.handleProcessPreImpresion}
         />
@@ -2090,12 +2393,10 @@ class VentaCrearEscritorio extends CustomComponent {
           productos={this.props.productos}
           codiso={this.state.codiso}
           idSucursal={this.state.idSucursal}
-
           almacenes={this.state.almacenes}
           refAlmacen={this.refAlmacen}
           idAlmacen={this.state.idAlmacen}
           handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
-
           handleClose={this.handleCloseProductos}
           handleSeleccionar={this.handleAddItem}
         />
@@ -2126,30 +2427,24 @@ class VentaCrearEscritorio extends CustomComponent {
 
         <SidebarConfiguration
           idSidebarConfiguration={this.idSidebarConfiguration}
-
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
           idImpuesto={this.state.idImpuesto}
           handleSelectIdImpuesto={this.handleSelectIdImpuesto}
-
           monedas={this.state.monedas}
           refMoneda={this.refMoneda}
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
-
           almacenes={this.state.almacenes}
           refAlmacen={this.refAlmacen}
           idAlmacen={this.state.idAlmacen}
           handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
-
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
-
           refNota={this.refNota}
           nota={this.state.nota}
           handleInputNota={this.handleInputNota}
-
           handleSaveOptions={this.handleSaveOptions}
           handleCloseOptions={this.handleCloseOptions}
         />
@@ -2198,19 +2493,21 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         {/* Cuerpo princiapl */}
-        <div className='bg-white w-100 h-100 d-flex flex-column overflow-auto'>
-          <div className='d-flex w-100 h-100 p-3'>
+        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
+          <div className="d-flex w-100 h-100 p-3">
             {/* Lado izquierdo */}
-            <div className='w-100 d-flex flex-column position-relative mr-1 overflow-auto' style={{
-              flex: '1 1 100%',
-              border: '1px solid #cbd5e1',
-            }}>
-
-              <div className='mb-3 pl-3 pt-3 pr-3 pb-0'>
-                <div className='d-flex w-100'>
-                  <div className='d-flex align-items-center mr-1'>
-                    <img src={images.barcode} width={22} className='mr-1' />
-                    <label className='m-0'> CTRL+D</label>
+            <div
+              className="w-100 d-flex flex-column position-relative mr-1 overflow-auto"
+              style={{
+                flex: '1 1 100%',
+                border: '1px solid #cbd5e1',
+              }}
+            >
+              <div className="mb-3 pl-3 pt-3 pr-3 pb-0">
+                <div className="d-flex w-100">
+                  <div className="d-flex align-items-center mr-1">
+                    <img src={images.barcode} width={22} className="mr-1" />
+                    <label className="m-0"> CTRL+D</label>
                   </div>
 
                   <Input
@@ -2218,109 +2515,124 @@ class VentaCrearEscritorio extends CustomComponent {
                     value={this.state.codigoBarras}
                     onChange={this.handleInputCodigoBarras}
                     onKeyDown={this.handleOnKeyDownCodigoBarras}
-                    placeholder='Ingrese el código de barras o clave alterna... '
+                    placeholder="Ingrese el código de barras o clave alterna... "
                   />
                 </div>
               </div>
 
-              {
-                isEmpty(this.state.detalleVenta) && (
-                  <div className='h-100 pl-3 pr-3 pb-3'>
-                    <div className='h-100 d-flex flex-column align-items-center justify-content-center text-center'
-                      style={{
-                        border: '1px solid #cbd5e1',
-                      }}>
-                      <img
-                        src={images.basket}
-                        className='mb-1'
-                        alt='Icono de basket'
-                      />
-                      <span className='text-base'>Aquí verás los productos que elijas en tu próxima venta</span>
-                    </div>
-                  </div>
-                )
-              }
-
-              {
-                !isEmpty(this.state.detalleVenta) && (
+              {isEmpty(this.state.detalleVenta) && (
+                <div className="h-100 pl-3 pr-3 pb-3">
                   <div
-                    className='h-100 overflow-auto pt-0 pr-3 pb-3 pl-3'
-                    onKeyDown={this.handleKeyDownTable}>
-                    <Table
-                      ref={this.refTable}
-                      tabIndex="0"
-                      onClick={this.handleOnClick}
-                      onDoubleClick={this.handleOnDbClick}
-                      className={"table table-bordered table-hover table-sticky"}>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-center" width="5%">#</TableHead>
-                          <TableHead className="text-center" width="5%">Quitar</TableHead>
-                          <TableHead className="text-center" width="5%">Imagen</TableHead>
-                          <TableHead width="10%">Almacen/Cantidad</TableHead>
-                          <TableHead width="20%">Descripción</TableHead>
-                          <TableHead width="10%">Precio</TableHead>
-                          {/* <th width="10%">Descuento</th> */}
-                          <TableHead width="10%">Importe</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {this.generateBody()}
-                      </TableBody>
-                    </Table>
+                    className="h-100 d-flex flex-column align-items-center justify-content-center text-center"
+                    style={{
+                      border: '1px solid #cbd5e1',
+                    }}
+                  >
+                    <img
+                      src={images.basket}
+                      className="mb-1"
+                      alt="Icono de basket"
+                    />
+                    <span className="text-base">
+                      Aquí verás los productos que elijas en tu próxima venta
+                    </span>
                   </div>
-                )
-              }
+                </div>
+              )}
+
+              {!isEmpty(this.state.detalleVenta) && (
+                <div
+                  className="h-100 overflow-auto pt-0 pr-3 pb-3 pl-3"
+                  onKeyDown={this.handleKeyDownTable}
+                >
+                  <Table
+                    ref={this.refTable}
+                    tabIndex="0"
+                    onClick={this.handleOnClick}
+                    onDoubleClick={this.handleOnDbClick}
+                    className={'table table-bordered table-hover table-sticky'}
+                  >
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-center" width="5%">
+                          #
+                        </TableHead>
+                        <TableHead className="text-center" width="5%">
+                          Quitar
+                        </TableHead>
+                        <TableHead className="text-center" width="5%">
+                          Imagen
+                        </TableHead>
+                        <TableHead width="10%">Almacen/Cantidad</TableHead>
+                        <TableHead width="20%">Descripción</TableHead>
+                        <TableHead width="10%">Precio</TableHead>
+                        {/* <th width="10%">Descuento</th> */}
+                        <TableHead width="10%">Importe</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>{this.generateBody()}</TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
 
             {/* Lado derecho */}
             <div
-              className='d-flex flex-column position-relative ml-1 overflow-auto'
+              className="d-flex flex-column position-relative ml-1 overflow-auto"
               style={{
                 flex: '0 0 40%',
                 width: '450px',
                 maxWidth: '450px',
                 border: '1px solid #cbd5e1',
-              }}>
-
+              }}
+            >
               <SpinnerView
                 loading={this.state.loadingCliente}
                 message={this.state.msgLoadingCliente}
-                body={<>
-                  <div className='mt-2'>
-                    <Button className='btn-danger'
-                      onClick={() => {
-                        if (this.abortControllerCliente) {
-                          this.abortControllerCliente.abort();
-                        }
-                      }}>
-                      Cancelar petición <i className='fa fa-close'></i>
-                    </Button>
-                  </div>
-                </>}
+                body={
+                  <>
+                    <div className="mt-2">
+                      <Button
+                        className="btn-danger"
+                        onClick={() => {
+                          if (this.abortControllerCliente) {
+                            this.abortControllerCliente.abort();
+                          }
+                        }}
+                      >
+                        Cancelar petición <i className="fa fa-close"></i>
+                      </Button>
+                    </div>
+                  </>
+                }
               />
 
               <div>
                 <Button
-                  className={"btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3 rounded-0"}
+                  className={
+                    'btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3 rounded-0'
+                  }
                   onClick={this.handleOpenSale}
                 >
                   <div>Cobrar (F1)</div>
-                  <div>{numberFormat(this.state.importeTotal, this.state.codiso)}</div>
+                  <div>
+                    {numberFormat(this.state.importeTotal, this.state.codiso)}
+                  </div>
                 </Button>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.recibo} width={22} />
                   </div>
                   <Select
                     title="Comprobantes de venta"
                     ref={this.refComprobante}
                     value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}>
-                    <option value={""}>Tipos de comprobante</option>
+                    onChange={this.handleSelectComprobante}
+                  >
+                    <option value={''}>Tipos de comprobante</option>
                     {this.state.comprobantes.map((item, index) => (
                       <option key={index} value={item.idComprobante}>
                         {item.nombre} ({item.serie})
@@ -2330,39 +2642,49 @@ class VentaCrearEscritorio extends CustomComponent {
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center justify-content-between'>
+              <div className="p-2">
+                <div className="d-flex align-items-center justify-content-between">
                   <RadioButton
-                    className='form-check-inline'
-                    name='ckTipoCliente'
+                    className="form-check-inline"
+                    name="ckTipoCliente"
                     id={CLIENTE_NATURAL}
                     value={CLIENTE_NATURAL}
                     checked={this.state.idTipoCliente === CLIENTE_NATURAL}
                     onChange={(event) => {
-                      this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' }, () => {
-                        this.updateReduxState();
-                      });
+                      this.setState(
+                        {
+                          idTipoCliente: event.target.value,
+                          idTipoDocumento: '',
+                        },
+                        () => {
+                          this.updateReduxState();
+                        },
+                      );
                     }}
                   >
-                    <i className="bi bi-person"></i> Persona Natural {this.state.idTipoCliente === CLIENTE_NATURAL && "(" + this.state.numeroDocumento.length + ")"}
+                    <i className="bi bi-person"></i> Persona Natural{' '}
+                    {this.state.idTipoCliente === CLIENTE_NATURAL &&
+                      '(' + this.state.numeroDocumento.length + ')'}
                   </RadioButton>
 
                   <RadioButton
-                    className='form-check-inline'
-                    name='ckTipoCliente'
+                    className="form-check-inline"
+                    name="ckTipoCliente"
                     id={CLIENTE_JURIDICO}
                     value={CLIENTE_JURIDICO}
                     checked={this.state.idTipoCliente === CLIENTE_JURIDICO}
                     onChange={this.handleSelectTipoCliente}
                   >
-                    <i className="bi bi-building"></i> Persona Juridica {this.state.idTipoCliente === CLIENTE_JURIDICO && "(" + this.state.numeroDocumento.length + ")"}
+                    <i className="bi bi-building"></i> Persona Juridica{' '}
+                    {this.state.idTipoCliente === CLIENTE_JURIDICO &&
+                      '(' + this.state.numeroDocumento.length + ')'}
                   </RadioButton>
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.options} width={22} />
                   </div>
                   <Select
@@ -2370,32 +2692,30 @@ class VentaCrearEscritorio extends CustomComponent {
                     ref={this.refIdTipoDocumento}
                     onChange={this.handleSelectTipoDocumento}
                   >
-                    <option value={""}>Tipo de documento</option>
-                    {
-                      this.state.idTipoCliente === CLIENTE_NATURAL && (
-                        this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
+                    <option value={''}>Tipo de documento</option>
+                    {this.state.idTipoCliente === CLIENTE_NATURAL &&
+                      this.state.tiposDocumentos
+                        .filter((item) => item.idTipoDocumento !== RUC)
+                        .map((item, index) => (
                           <option key={index} value={item.idTipoDocumento}>
                             {item.nombre}
                           </option>
-                        ))
-                      )
-                    }
-                    {
-                      this.state.idTipoCliente === CLIENTE_JURIDICO && (
-                        this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
+                        ))}
+                    {this.state.idTipoCliente === CLIENTE_JURIDICO &&
+                      this.state.tiposDocumentos
+                        .filter((item) => item.idTipoDocumento === RUC)
+                        .map((item, index) => (
                           <option key={index} value={item.idTipoDocumento}>
                             {item.nombre}
                           </option>
-                        ))
-                      )
-                    }
+                        ))}
                   </Select>
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.search_color} width={22} />
                   </div>
                   <div className="invoice-client w-100">
@@ -2411,48 +2731,48 @@ class VentaCrearEscritorio extends CustomComponent {
                       handleSetValue={this.handleSetValueCliente}
                       customButton={
                         <>
-                          {
-                            this.state.idTipoCliente === CLIENTE_NATURAL && (
-                              <Button
-                                className="btn-outline-secondary"
-                                title="Reniec"
-                                onClick={this.handleGetApiReniec}
-                              >
-                                <img src={images.reniec} alt="Reniec" width="12" />
-                              </Button>
-                            )
-                          }
-                          {
-                            this.state.idTipoCliente === CLIENTE_JURIDICO && (
-                              <Button
-                                className="btn-outline-secondary"
-                                title="Sunat"
-                                onClick={this.handleGetApiSunat}
-                              >
-                                <img src={images.sunat} alt="Sunat" width="12" />
-                              </Button>
-                            )
-                          }
+                          {this.state.idTipoCliente === CLIENTE_NATURAL && (
+                            <Button
+                              className="btn-outline-secondary"
+                              title="Reniec"
+                              onClick={this.handleGetApiReniec}
+                            >
+                              <img
+                                src={images.reniec}
+                                alt="Reniec"
+                                width="12"
+                              />
+                            </Button>
+                          )}
+                          {this.state.idTipoCliente === CLIENTE_JURIDICO && (
+                            <Button
+                              className="btn-outline-secondary"
+                              title="Sunat"
+                              onClick={this.handleGetApiSunat}
+                            >
+                              <img src={images.sunat} alt="Sunat" width="12" />
+                            </Button>
+                          )}
                         </>
                       }
-                      renderItem={(value) =>
-                        <>
-                          {value.documento + " - " + value.informacion}
-                        </>
-                      }
+                      renderItem={(value) => (
+                        <>{value.documento + ' - ' + value.informacion}</>
+                      )}
                     />
                   </div>
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.client} width={22} />
                   </div>
                   <Input
                     placeholder={
-                      this.state.idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
+                      this.state.idTipoCliente === CLIENTE_NATURAL
+                        ? 'Ingrese sus Apellidos y Nombres'
+                        : 'Ingrese su Razón Social'
                     }
                     ref={this.refInformacion}
                     value={this.state.informacion}
@@ -2461,9 +2781,9 @@ class VentaCrearEscritorio extends CustomComponent {
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.phone} width={22} />
                   </div>
                   <Input
@@ -2476,13 +2796,13 @@ class VentaCrearEscritorio extends CustomComponent {
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.email} width={22} />
                   </div>
                   <Input
-                    placeholder='Ingrese su correo electrónico del cliente'
+                    placeholder="Ingrese su correo electrónico del cliente"
                     ref={this.refEmail}
                     value={this.state.email}
                     onChange={this.handleInputEmail}
@@ -2490,9 +2810,9 @@ class VentaCrearEscritorio extends CustomComponent {
                 </div>
               </div>
 
-              <div className='p-2'>
-                <div className='d-flex align-items-center'>
-                  <div className='mr-1'>
+              <div className="p-2">
+                <div className="d-flex align-items-center">
+                  <div className="mr-1">
                     <img src={images.directory} width={22} />
                   </div>
                   <Input
@@ -2509,32 +2829,34 @@ class VentaCrearEscritorio extends CustomComponent {
         </div>
 
         {/* Crear mas instancias */}
-        <div className='bg-white w-100 d-flex position-relative' style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}>
-          <div className='px-3 d-flex justify-content-center align-items-center'>
-            {
-              this.state.cotizacion &&
+        <div
+          className="bg-white w-100 d-flex position-relative"
+          style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}
+        >
+          <div className="px-3 d-flex justify-content-center align-items-center">
+            {this.state.cotizacion && (
               <>
-                <span className='mr-1'>
+                <span className="mr-1">
                   <img src={images.cotizacion} width={22} /> COTIZACIÓN:
                 </span>
-                <h6 className='p-0 m-0'>
-                  {this.state.cotizacion.serie}-{formatNumberWithZeros(this.state.cotizacion.numeracion)}
+                <h6 className="p-0 m-0">
+                  {this.state.cotizacion.serie}-
+                  {formatNumberWithZeros(this.state.cotizacion.numeracion)}
                 </h6>
               </>
-            }
+            )}
 
-            {
-              this.state.pedido &&
+            {this.state.pedido && (
               <>
-                <span className='mr-1'>
+                <span className="mr-1">
                   <img src={images.invoice} width={22} /> PEDIDO:
                 </span>
-                <h6 className='p-0 m-0'>
-                  {this.state.pedido.serie}-{formatNumberWithZeros(this.state.pedido.numeracion)}
+                <h6 className="p-0 m-0">
+                  {this.state.pedido.serie}-
+                  {formatNumberWithZeros(this.state.pedido.numeracion)}
                 </h6>
               </>
-            }
-
+            )}
           </div>
           {/* <div className='d-flex position-relative w-100 h-100' style={{ paddingRight: '4.4rem', }}> */}
           {/* <div className='d-flex position-relative'>
@@ -2611,7 +2933,7 @@ const mapStateToProps = (state) => {
   return {
     token: state.principal,
     productos: state.predeterminado.productos,
-    ventaCrearClasico: state.predeterminado.ventaCrearClasico
+    ventaCrearClasico: state.predeterminado.ventaCrearClasico,
   };
 };
 
@@ -2628,6 +2950,9 @@ const mapDispatchToProps = {
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedVentaCrearEscritorio = connect(mapStateToProps, mapDispatchToProps)(VentaCrearEscritorio);
+const ConnectedVentaCrearEscritorio = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(VentaCrearEscritorio);
 
 export default ConnectedVentaCrearEscritorio;

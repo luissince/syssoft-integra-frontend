@@ -2,9 +2,7 @@ import React from 'react';
 import '../../resource/css/loader.css';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import {
-  validToken,
-} from '../../network/rest/principal.network';
+import { validToken } from '../../network/rest/principal.network';
 
 import { CANCELED } from '../../model/types/types';
 import ErrorResponse from '../../model/class/error-response';
@@ -15,7 +13,6 @@ import { config, restoreToken } from '../../redux/principalSlice';
  * @extends React.Component
  */
 class Loader extends React.Component {
-
   /**
    *
    * Constructor
@@ -55,7 +52,7 @@ class Loader extends React.Component {
 
     this.props.restoreToken({
       token: login,
-      project: project
+      project: project,
     });
   }
 
@@ -83,7 +80,7 @@ class Loader extends React.Component {
 
     this.props.restoreToken({
       token: null,
-      project: null
+      project: null,
     });
   }
 
@@ -147,7 +144,7 @@ class Loader extends React.Component {
 Loader.propTypes = {
   restoreToken: PropTypes.func,
   config: PropTypes.func,
-}
+};
 
 const mapStateToProps = (state) => {
   return {

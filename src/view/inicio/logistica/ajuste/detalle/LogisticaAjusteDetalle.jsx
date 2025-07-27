@@ -1,7 +1,4 @@
-import {
-  formatTime,
-  rounded,
-} from '../../../../../helper/utils.helper';
+import { formatTime, rounded } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import SuccessReponse from '../../../../../model/class/response';
@@ -13,7 +10,16 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerView } from '../../../../../components/Spinner';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
@@ -59,9 +65,7 @@ class LogisticaAjusteDetalle extends CustomComponent {
   }
 
   async loadDataId(id) {
-    const [ajuste] = await Promise.all([
-      this.fetchDetalleAjuste(id)
-    ]);
+    const [ajuste] = await Promise.all([this.fetchDetalleAjuste(id)]);
 
     this.setState({
       tipo: ajuste.cabecera.tipo,
@@ -122,15 +126,13 @@ class LogisticaAjusteDetalle extends CustomComponent {
               // onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               // onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               // onClick={this.handlePrintInvoices.bind(this, '58mm')}
@@ -190,8 +192,9 @@ class LogisticaAjusteDetalle extends CustomComponent {
                       Estado
                     </TableHead>
                     <TableHead
-                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${estado === 1 ? 'text-success' : 'text-danger'
-                        }`}
+                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${
+                        estado === 1 ? 'text-success' : 'text-danger'
+                      }`}
                     >
                       {estado === 1 ? 'ACTIVO' : 'ANULADO'}
                     </TableHead>
@@ -206,7 +209,7 @@ class LogisticaAjusteDetalle extends CustomComponent {
           <Column>
             <TableResponsive>
               <TableTitle>Detalles</TableTitle>
-              <Table className={"table-light table-striped"}>
+              <Table className={'table-light table-striped'}>
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
@@ -218,31 +221,29 @@ class LogisticaAjusteDetalle extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    this.state.detalles.map((item, index) => {
-                      return (
-                        <TableRow key={index}>
-                          <TableCell className="text-center">{item.id}</TableCell>
-                          <TableCell className="text-center">
-                            <Image
-                              default={images.noImage}
-                              src={item.imagen}
-                              alt={item.producto}
-                              width={100}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {item.codigo}
-                            <br />
-                            {item.producto}
-                          </TableCell>
-                          <TableCell>{item.categoria}</TableCell>
-                          <TableCell>{rounded(item.cantidad)}</TableCell>
-                          <TableCell>{item.unidad}</TableCell>
-                        </TableRow>
-                      );
-                    })
-                  }
+                  {this.state.detalles.map((item, index) => {
+                    return (
+                      <TableRow key={index}>
+                        <TableCell className="text-center">{item.id}</TableCell>
+                        <TableCell className="text-center">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            width={100}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {item.codigo}
+                          <br />
+                          {item.producto}
+                        </TableCell>
+                        <TableCell>{item.categoria}</TableCell>
+                        <TableCell>{rounded(item.cantidad)}</TableCell>
+                        <TableCell>{item.unidad}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -267,6 +268,9 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedAjusteDetalle = connect(mapStateToProps, null)(LogisticaAjusteDetalle);
+const ConnectedAjusteDetalle = connect(
+  mapStateToProps,
+  null,
+)(LogisticaAjusteDetalle);
 
 export default ConnectedAjusteDetalle;

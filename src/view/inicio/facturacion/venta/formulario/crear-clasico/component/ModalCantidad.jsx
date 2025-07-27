@@ -7,20 +7,19 @@ import {
   focusOnFirstInvalidInput,
   handlePasteFloat,
   isNumeric,
-  validateNumericInputs
+  validateNumericInputs,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../../components/Button';
 import Column from '../../../../../../../components/Column';
 
 class ModalCantidad extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       idProducto: '',
-      inventarios: []
-    }
+      inventarios: [],
+    };
 
     this.refModal = React.createRef();
     this.refContenedor = React.createRef();
@@ -29,19 +28,19 @@ class ModalCantidad extends Component {
   loadDatos = (producto) => {
     this.setState({
       idProducto: producto.idProducto,
-      inventarios: producto && producto.inventarios || []
-    })
-  }
+      inventarios: (producto && producto.inventarios) || [],
+    });
+  };
 
   handleOpenModal = () => {
-    focusOnFirstInvalidInput(this.refContenedor)
-  }
+    focusOnFirstInvalidInput(this.refContenedor);
+  };
 
   handleOnHiddenModal = async () => {
     this.setState({
-      producto: null
-    })
-  }
+      producto: null,
+    });
+  };
 
   handleInputChange = (event, idAlmacen) => {
     const { value } = event.target;
@@ -57,23 +56,23 @@ class ModalCantidad extends Component {
     const { handleSave } = this.props;
 
     // Función para validar la cantidad de un inventario
-    const isValidInventory = inventario =>
+    const isValidInventory = (inventario) =>
       isNumeric(inventario.cantidad) && Number(inventario.cantidad) > 0;
 
     // Verificar si todos los inventarios tienen cantidades válidas
     const allValid = inventarios.every(isValidInventory);
 
     if (!allValid) {
-      alertWarning("Venta", "Ingrese la cantidad de cada almacen.", () => {
+      alertWarning('Venta', 'Ingrese la cantidad de cada almacen.', () => {
         validateNumericInputs(this.refContenedor);
       });
       return;
     }
 
     // Convertir la cantidad de cada inventario a número
-    const newInventarios = inventarios.map(inventario => ({
+    const newInventarios = inventarios.map((inventario) => ({
       ...inventario,
-      cantidad: Number(inventario.cantidad)
+      cantidad: Number(inventario.cantidad),
     }));
 
     // Guardar los inventarios válidos
@@ -81,7 +80,7 @@ class ModalCantidad extends Component {
 
     // Cerrar el modal
     await this.refModal.current.handleOnClose();
-  }
+  };
 
   render() {
     const { producto, inventarios } = this.state;
@@ -106,40 +105,42 @@ class ModalCantidad extends Component {
               </Column>
             </Row>
 
-            <div
-              ref={this.refContenedor}>
-              {
-                inventarios.map((inventario, index) => {
-                  return (
-                    <Row key={index}>
-                      <Column formGroup={true}>
-                        <Input
-                          label={<>Ingrese su nueva cantidad del almacen ({inventario.almacen}):</>}
-                          placeholder={"0.00"}
-                          role={"float"}
-                          value={inventario.cantidad}
-                          onChange={(event) => this.handleInputChange(event, inventario.idAlmacen)}
-                          onPaste={handlePasteFloat}
-                        />
-                      </Column>
-                    </Row>
-                  );
-                })
-              }
+            <div ref={this.refContenedor}>
+              {inventarios.map((inventario, index) => {
+                return (
+                  <Row key={index}>
+                    <Column formGroup={true}>
+                      <Input
+                        label={
+                          <>
+                            Ingrese su nueva cantidad del almacen (
+                            {inventario.almacen}):
+                          </>
+                        }
+                        placeholder={'0.00'}
+                        role={'float'}
+                        value={inventario.cantidad}
+                        onChange={(event) =>
+                          this.handleInputChange(event, inventario.idAlmacen)
+                        }
+                        onPaste={handlePasteFloat}
+                      />
+                    </Column>
+                  </Row>
+                );
+              })}
             </div>
           </>
         }
-
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-success">
+            <Button type="submit" className="btn-success">
               <i className="fa fa-save"></i> Guardar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -154,6 +155,6 @@ ModalCantidad.propTypes = {
   onClose: PropTypes.func.isRequired,
 
   handleSave: PropTypes.func.isRequired,
-}
+};
 
 export default ModalCantidad;

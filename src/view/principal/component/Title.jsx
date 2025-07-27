@@ -1,11 +1,17 @@
-import Button from "../../../components/Button";
-import Column from "../../../components/Column";
-import Image from "../../../components/Image";
-import Row from "../../../components/Row";
-import { images } from "../../../helper";
+import Button from '../../../components/Button';
+import Column from '../../../components/Column';
+import Image from '../../../components/Image';
+import Row from '../../../components/Row';
+import { images } from '../../../helper';
 import PropTypes from 'prop-types';
 
-const Title = ({ rutaImage, razonSocial, nombreEmpresa, documento, handleSignOut }) => {
+const Title = ({
+  rutaImage,
+  razonSocial,
+  nombreEmpresa,
+  documento,
+  handleSignOut,
+}) => {
   return (
     <Row>
       <Column className="col-md-3 col-12">
@@ -15,7 +21,7 @@ const Title = ({ rutaImage, razonSocial, nombreEmpresa, documento, handleSignOut
               default={images.icono}
               src={`${rutaImage}`}
               className="d-block mx-auto mb-2"
-              alt={"Logo"}
+              alt={'Logo'}
               width={140}
             />
           </div>
@@ -35,10 +41,7 @@ const Title = ({ rutaImage, razonSocial, nombreEmpresa, documento, handleSignOut
       <Column className="col-md-3 col-12">
         <div className="d-flex h-100 justify-content-end align-items-center">
           <div className="form-group">
-            <Button
-              className="btn-danger"
-              onClick={handleSignOut}
-            >
+            <Button className="btn-danger" onClick={handleSignOut}>
               <i className="fa fa-power-off"></i>
             </Button>
           </div>
@@ -46,7 +49,7 @@ const Title = ({ rutaImage, razonSocial, nombreEmpresa, documento, handleSignOut
       </Column>
     </Row>
   );
-}
+};
 
 Title.propTypes = {
   rutaImage: PropTypes.string,

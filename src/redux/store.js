@@ -10,11 +10,11 @@ const reducer = combineReducers({
   predeterminado: predeterminadoReducer,
   principal: principalReduce,
   download: downloadReducer,
-})
+});
 
 const store = configureStore({
   reducer: reducer,
-  devTools: import.meta.env.VITE_APP_ENV === "development"
+  devTools: import.meta.env.VITE_APP_ENV === 'development',
 });
 
 export default store;

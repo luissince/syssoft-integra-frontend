@@ -22,7 +22,15 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import { SpinnerTable } from '../../../../../components/Spinner';
@@ -114,7 +122,7 @@ class Cobros extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -205,7 +213,9 @@ class Cobros extends CustomComponent {
   };
 
   handleAnular = (idCobro) => {
-    alertDialog('Ingreso', '¿Está seguro de que desea eliminar el Ingreso? Esta operación no se puede deshacer.',
+    alertDialog(
+      'Ingreso',
+      '¿Está seguro de que desea eliminar el Ingreso? Esta operación no se puede deshacer.',
       async (value) => {
         if (value) {
           const params = {
@@ -253,8 +263,8 @@ class Cobros extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -287,11 +297,11 @@ class Cobros extends CustomComponent {
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </TableCell>
           <TableCell className="text-center">
-            {
-              item.estado === 1
-                ? <span className="text-success">ACTIVO</span>
-                : <span className="text-danger">ANULADO</span>
-            }
+            {item.estado === 1 ? (
+              <span className="text-success">ACTIVO</span>
+            ) : (
+              <span className="text-danger">ANULADO</span>
+            )}
           </TableCell>
           <TableCell className="text-center">
             {numberFormat(item.monto, item.codiso)}
@@ -300,7 +310,7 @@ class Cobros extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idCobro)}
-            // disabled={!this.state.view}
+              // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -309,7 +319,7 @@ class Cobros extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleAnular(item.idCobro)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
             </Button>
@@ -323,24 +333,17 @@ class Cobros extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Ingresos'
-          subTitle='LISTA'
+          title="Ingresos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleCrear}
-            >
+            <Button className="btn-outline-info" onClick={this.handleCrear}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -360,22 +363,28 @@ class Cobros extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Cliente</TableHead>
                     <TableHead width="15%">Comprobante</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="10%" className="text-center">Monto</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Monto
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

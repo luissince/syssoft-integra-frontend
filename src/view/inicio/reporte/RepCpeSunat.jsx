@@ -1,5 +1,16 @@
 import PropTypes from 'prop-types';
-import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, LabelList, Cell } from 'recharts'
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LabelList,
+  Cell,
+} from 'recharts';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -11,22 +22,42 @@ import { Card, CardBody, CardTitle } from '../../../components/Card';
 import Select from '../../../components/Select';
 import Button from '../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
-import { comboSucursal, dashboardSunat, documentsExcelCompra, documentsPdfReportsCompra } from '../../../network/rest/principal.network';
-import { alertWarning, getCurrentMonth, getCurrentYear, guId, months, numberFormat, years } from '../../../helper/utils.helper';
+import {
+  comboSucursal,
+  dashboardSunat,
+  documentsExcelCompra,
+  documentsPdfReportsCompra,
+} from '../../../network/rest/principal.network';
+import {
+  alertWarning,
+  getCurrentMonth,
+  getCurrentYear,
+  guId,
+  months,
+  numberFormat,
+  years,
+} from '../../../helper/utils.helper';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import SuccessReponse from '../../../model/class/response';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../components/Table';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class RepCpeSunat extends CustomComponent {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
@@ -34,7 +65,7 @@ class RepCpeSunat extends CustomComponent {
 
     this.state = {
       loading: false,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
 
       codIso: this.props.moneda.codiso ?? '',
 
@@ -72,9 +103,7 @@ class RepCpeSunat extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {
-
-  }
+  componentWillUnmount() {}
 
   /*
   |--------------------------------------------------------------------------
@@ -93,7 +122,7 @@ class RepCpeSunat extends CustomComponent {
   loadingInit = async () => {
     this.setState({
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
     });
 
     const sucursalResponse = await comboSucursal(
@@ -103,9 +132,13 @@ class RepCpeSunat extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning('Reporte Financiero', sucursalResponse.getMessage(), async () => {
-        await this.loadingInit();
-      });
+      alertWarning(
+        'Reporte Financiero',
+        sucursalResponse.getMessage(),
+        async () => {
+          await this.loadingInit();
+        },
+      );
       return;
     }
 
@@ -113,33 +146,33 @@ class RepCpeSunat extends CustomComponent {
       sucursales: sucursalResponse.data,
     });
     await this.loadingData();
-  }
+  };
 
   paginacionContext = async () => {
     if (this.state.paginacion === this.state.totalPaginacion) return;
 
     await this.setStateAsync({ paginacion: this.state.paginacion + 1 });
     await this.loadingData();
-  }
+  };
 
   loadingData = async (borrarLista = false) => {
     await this.setStateAsync({
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
       lista: borrarLista ? [] : this.state.lista,
       paginacion: borrarLista ? 1 : this.state.paginacion,
     });
 
     const params = {
-      'month': this.state.month,
-      'year': this.state.year,
-      'idSucursal': this.state.idSucursal,
-    }
+      month: this.state.month,
+      year: this.state.year,
+      idSucursal: this.state.idSucursal,
+    };
 
     const dashboard = await dashboardSunat(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Financiero', dashboard.getMessage())
+      alertWarning('Reporte Financiero', dashboard.getMessage());
       return;
     }
 
@@ -148,10 +181,9 @@ class RepCpeSunat extends CustomComponent {
     this.setState({
       ventas: dashboard.data.ventas,
       ventasCompras: dashboard.data.ventasCompras,
-      loading: false
+      loading: false,
     });
-  }
-
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -170,23 +202,22 @@ class RepCpeSunat extends CustomComponent {
   */
 
   handleSelectMonth = (event) => {
-    this.setState({ month: event.target.value, }, async () => {
+    this.setState({ month: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleSelectYear = (event) => {
-    this.setState({ year: event.target.value, }, async () => {
+    this.setState({ year: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleSelectSucursal = (event) => {
-    this.setState({ idSucursal: event.target.value, }, async () => {
+    this.setState({ idSucursal: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
-
+  };
 
   handleOpenPdf = async () => {
     await pdfVisualizer.init({
@@ -195,14 +226,13 @@ class RepCpeSunat extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handleDownloadExcel = async () => {
     const id = guId();
     const url = documentsExcelCompra();
     this.props.downloadFileAsync({ id, url });
-  }
-
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -228,8 +258,8 @@ class RepCpeSunat extends CustomComponent {
         />
 
         <Title
-          title='Reporte CPE Sunat'
-          subTitle='DASHBOARD'
+          title="Reporte CPE Sunat"
+          subTitle="DASHBOARD"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -245,59 +275,63 @@ class RepCpeSunat extends CustomComponent {
               className="btn-outline-success"
               onClick={this.handleDownloadExcel}>
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
-            </Button> */}
-            {" "}
-            <Button
-              className="btn-outline-light"
-              onClick={this.loadingInit}>
+            </Button> */}{' '}
+            <Button className="btn-outline-light" onClick={this.loadingInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Mes:"}
+              label={'Mes:'}
               value={this.state.month}
               onChange={this.handleSelectMonth}
             >
-              {
-                this.state.months.map((item, index) => (
-                  <option key={index} value={item.value}>{item.label}</option>
-                ))
-              }
+              {this.state.months.map((item, index) => (
+                <option key={index} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Año:"}
+              label={'Año:'}
               value={this.state.year}
               onChange={this.handleSelectYear}
             >
-              {
-                this.state.years.map((item, index) => (
-                  <option key={index} value={item.value}>{item.label}</option>
-                ))
-              }
+              {this.state.years.map((item, index) => (
+                <option key={index} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Sucursal:"}
+              label={'Sucursal:'}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >
               <option value="">TODOS</option>
-              {
-                this.state.sucursales.map((item, index) => (
-                  <option key={index} value={item.idSucursal}>
-                    {index + 1 + '.- ' + item.nombre}
-                  </option>
-                ))
-              }
+              {this.state.sucursales.map((item, index) => (
+                <option key={index} value={item.idSucursal}>
+                  {index + 1 + '.- ' + item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
@@ -320,10 +354,15 @@ class RepCpeSunat extends CustomComponent {
                       {this.state.ventas.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell className="p-2 border flex items-center">
-                            <span className="px-2 py-1 mr-2" style={{ backgroundColor: item.color }}></span>
+                            <span
+                              className="px-2 py-1 mr-2"
+                              style={{ backgroundColor: item.color }}
+                            ></span>
                             {item.nombre}
                           </TableCell>
-                          <td className="p-2 border text-right">{numberFormat(item.total, this.state.codIso)}</td>
+                          <td className="p-2 border text-right">
+                            {numberFormat(item.total, this.state.codIso)}
+                          </td>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -331,12 +370,23 @@ class RepCpeSunat extends CustomComponent {
                 </TableResponsive>
 
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart width={600} height={300} data={this.state.ventas} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                  <BarChart
+                    width={600}
+                    height={300}
+                    data={this.state.ventas}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="opacity-50"
+                    />
                     <XAxis dataKey="nombre" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [numberFormat(value, this.state.codIso), 'Monto']}
+                      formatter={(value) => [
+                        numberFormat(value, this.state.codIso),
+                        'Monto',
+                      ]}
                     />
                     <Legend />
                     <Bar dataKey="total" name="Monto">
@@ -352,7 +402,7 @@ class RepCpeSunat extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-lg-12' formGroup={true}>
+          <Column className="col-lg-12" formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Ventas vs Compras</CardTitle>
@@ -369,17 +419,25 @@ class RepCpeSunat extends CustomComponent {
                     <XAxis dataKey="tipo" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [numberFormat(value, this.state.codIso), 'Monto']}
+                      formatter={(value) => [
+                        numberFormat(value, this.state.codIso),
+                        'Monto',
+                      ]}
                     />
                     <Legend />
-                    <Bar name="Total" dataKey="total" fill="#000000"  >
+                    <Bar name="Total" dataKey="total" fill="#000000">
                       <LabelList
                         dataKey="Total"
                         content={(props) => {
                           const { x, y, width, value } = props;
                           return (
                             <g>
-                              <text x={x + width / 2} y={y ? y - 5 : 0} fontSize={15} textAnchor="middle">
+                              <text
+                                x={x + width / 2}
+                                y={y ? y - 5 : 0}
+                                fontSize={15}
+                                textAnchor="middle"
+                              >
                                 {numberFormat(value, this.state.codIso)}
                               </text>
                             </g>
@@ -424,6 +482,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedRepCpeSunat = connect(mapStateToProps, mapDispatchToProps)(RepCpeSunat);
+const ConnectedRepCpeSunat = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(RepCpeSunat);
 
 export default ConnectedRepCpeSunat;

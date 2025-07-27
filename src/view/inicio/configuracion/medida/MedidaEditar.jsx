@@ -62,9 +62,7 @@ class MedidaEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [medida] = await Promise.all([
-      this.fetchObtenerMedida(id)
-    ]);
+    const [medida] = await Promise.all([this.fetchObtenerMedida(id)]);
 
     this.setState({
       idMedida: id,
@@ -162,8 +160,8 @@ class MedidaEditar extends CustomComponent {
         />
 
         <Title
-          title='Medida'
-          subTitle='EDITAR'
+          title="Medida"
+          subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -244,18 +242,14 @@ class MedidaEditar extends CustomComponent {
 
         <Row>
           <Column>
-            <Button
-              className="btn-warning"
-              onClick={() => this.handleEditar()}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={() => this.handleEditar()}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -267,13 +261,13 @@ class MedidaEditar extends CustomComponent {
 MedidaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

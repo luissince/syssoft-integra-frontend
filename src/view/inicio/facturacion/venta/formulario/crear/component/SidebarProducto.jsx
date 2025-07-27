@@ -1,4 +1,9 @@
-import { handlePasteFloat, isEmpty, keyNumberFloat, rounded } from '../../../../../../../helper/utils.helper';
+import {
+  handlePasteFloat,
+  isEmpty,
+  keyNumberFloat,
+  rounded,
+} from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { UNIDADES } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import { SpinnerView } from '../../../../../../../components/Spinner';
@@ -9,7 +14,6 @@ import Row from '../../../../../../../components/Row';
 import Column from '../../../../../../../components/Column';
 
 const SidebarProducto = (props) => {
-
   const { idSidebar, loading, producto } = props;
 
   const { refPrecio, refBonificacion, refDescripcion } = props;
@@ -36,10 +40,7 @@ const SidebarProducto = (props) => {
           </Button>
 
           <div className="card-body h-100 overflow-y-auto">
-            <SpinnerView
-              loading={loading}
-              message={"Cargando datos..."}
-            />
+            <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             <Row>
               <Column formGroup={true}>
@@ -54,7 +55,12 @@ const SidebarProducto = (props) => {
               <Column formGroup={true}>
                 <Input
                   autoFocus={true}
-                  label={<>Precio: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      Precio:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="0.00"
                   ref={refPrecio}
                   onKeyDown={keyNumberFloat}
@@ -66,7 +72,7 @@ const SidebarProducto = (props) => {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={"Bonificación:"}
+                  label={'Bonificación:'}
                   placeholder="0"
                   ref={refBonificacion}
                   onKeyDown={keyNumberFloat}
@@ -78,7 +84,12 @@ const SidebarProducto = (props) => {
             <Row>
               <Column formGroup={true}>
                 <TextArea
-                  label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      Descripción:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="Ingrese los datos del producto"
                   ref={refDescripcion}
                 />
@@ -95,65 +106,72 @@ const SidebarProducto = (props) => {
                       contentClassName="list-group-item list-group-item-action"
                       onClick={() => handleSeleccionar(item)}
                     >
-                    <i className='fa fa-hand-pointer-o'></i>  {item.nombre} - {item.valor}
+                      <i className="fa fa-hand-pointer-o"></i> {item.nombre} -{' '}
+                      {item.valor}
                     </Button>
                   ))}
                 </ul>
-
               </Column>
             </Row>
-            {
-              producto && producto.idTipoTratamientoProducto === UNIDADES && (
-                <Row>
-                  <Column formGroup={true}>
-                    <label>Cantidad por Almacen:</label>
-                    <ul className="list-group">
-                      {producto.inventarios.map((item, index) => (
-                        <li key={index} className="list-group-item">
-                          <div className='d-flex justify-content-between flex-row'>
-                            <div className='d-flex align-items-center gap-2'>
-                              <i className="bi bi-house text-muted"></i>
-                              <span className='text-sm'>{item.almacen}</span>
-                            </div>
-                            <div>
-                              <span className='text-sm'>cantidad: {rounded(item.cantidad)}</span>
-                            </div>
+            {producto && producto.idTipoTratamientoProducto === UNIDADES && (
+              <Row>
+                <Column formGroup={true}>
+                  <label>Cantidad por Almacen:</label>
+                  <ul className="list-group">
+                    {producto.inventarios.map((item, index) => (
+                      <li key={index} className="list-group-item">
+                        <div className="d-flex justify-content-between flex-row">
+                          <div className="d-flex align-items-center gap-2">
+                            <i className="bi bi-house text-muted"></i>
+                            <span className="text-sm">{item.almacen}</span>
                           </div>
-                        </li>
-                      ))}
-                    </ul>
+                          <div>
+                            <span className="text-sm">
+                              cantidad: {rounded(item.cantidad)}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
 
-                    {
-                      !isEmpty(producto.inventarios) && !isEmpty(producto.inventarios.filter(item => !isEmpty(item.lotes))) && (
-                        <>
-                          <label className='mt-3'>Lotes:</label>
-                          <ul className="list-group">
-                            {producto.inventarios.map((inv, index) => {
-                              const lotes = inv.lotes;
+                  {!isEmpty(producto.inventarios) &&
+                    !isEmpty(
+                      producto.inventarios.filter(
+                        (item) => !isEmpty(item.lotes),
+                      ),
+                    ) && (
+                      <>
+                        <label className="mt-3">Lotes:</label>
+                        <ul className="list-group">
+                          {producto.inventarios.map((inv, index) => {
+                            const lotes = inv.lotes;
 
-                              return lotes.map((lote, index) => (
-                                <li key={index} className="list-group-item">
-                                  <div className='d-flex justify-content-between flex-row'>
-                                    <div className='d-flex align-items-center gap-2'>
-                                      <i className="bi bi-box text-muted"></i>
-                                      <span className='text-sm'>{lote.codigoLote}</span>
-                                    </div>
-                                    <div>
-                                      <span className='text-sm'>cantidad: {rounded(lote.cantidadSeleccionada)}</span>
-                                    </div>
+                            return lotes.map((lote, index) => (
+                              <li key={index} className="list-group-item">
+                                <div className="d-flex justify-content-between flex-row">
+                                  <div className="d-flex align-items-center gap-2">
+                                    <i className="bi bi-box text-muted"></i>
+                                    <span className="text-sm">
+                                      {lote.codigoLote}
+                                    </span>
                                   </div>
-                                </li>
-                              ));
-                            })}
-                          </ul>
-                        </>
-                      )
-                    }
-
-                  </Column>
-                </Row>
-              )
-            }
+                                  <div>
+                                    <span className="text-sm">
+                                      cantidad:{' '}
+                                      {rounded(lote.cantidadSeleccionada)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </li>
+                            ));
+                          })}
+                        </ul>
+                      </>
+                    )}
+                </Column>
+              </Row>
+            )}
           </div>
 
           <div className="card-footer bg-white">
@@ -197,6 +215,6 @@ SidebarProducto.propTypes = {
   listPrecio: PropTypes.any.isRequired,
   handleSave: PropTypes.func.isRequired,
   handleClose: PropTypes.func.isRequired,
-}
+};
 
 export default SidebarProducto;

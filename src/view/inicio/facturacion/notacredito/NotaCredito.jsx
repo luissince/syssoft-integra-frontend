@@ -72,7 +72,7 @@ class NotaCredito extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });

@@ -3,7 +3,7 @@ import SearchInput from '../../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 
 const InvoiceClient = (props) => {
-  const { placeholder,refCliente, refValueCliente, clientes } = props;
+  const { placeholder, refCliente, refValueCliente, clientes } = props;
 
   const { handleClearInput, handleFilter, handleSelectItem } = props;
 
@@ -22,16 +22,15 @@ const InvoiceClient = (props) => {
         customButton={
           <Button
             className="btn-outline-primary d-flex align-items-center"
-            onClick={handleOpenCliente}>
-            <i className='fa fa-user-plus'></i>
+            onClick={handleOpenCliente}
+          >
+            <i className="fa fa-user-plus"></i>
             <div className="ml-2">Nuevo</div>
           </Button>
         }
-        renderItem={(value) =>
-          <>
-            {value.documento + ' - ' + value.informacion}
-          </>
-        }
+        renderItem={(value) => (
+          <>{value.documento + ' - ' + value.informacion}</>
+        )}
       />
     </div>
   );
@@ -48,6 +47,6 @@ InvoiceClient.propTypes = {
   handleSelectItem: PropTypes.func.isRequired,
 
   handleOpenCliente: PropTypes.func.isRequired,
-}
+};
 
 export default InvoiceClient;

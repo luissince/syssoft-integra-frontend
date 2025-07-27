@@ -24,7 +24,10 @@ import {
 import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { CLIENTE_NATURAL, CLIENTE_JURIDICO } from '../../../../../model/types/tipo-cliente';
+import {
+  CLIENTE_NATURAL,
+  CLIENTE_JURIDICO,
+} from '../../../../../model/types/tipo-cliente';
 import SearchInput from '../../../../../components/SearchInput';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
@@ -42,7 +45,6 @@ import { RUC } from '../../../../../model/types/tipo-documento';
  * @extends React.Component
  */
 class PersonaAgregar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -114,12 +116,10 @@ class PersonaAgregar extends CustomComponent {
         msgLoading: 'Se produjo un error un interno, intente nuevamente.',
       });
     }
-  }
+  };
 
   async fetchTipoDocumento() {
-    const response = await comboTipoDocumento(
-      this.abortController.signal,
-    );
+    const response = await comboTipoDocumento(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -133,62 +133,66 @@ class PersonaAgregar extends CustomComponent {
   }
 
   handleTipoCliente = (event) => {
-    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' })
-  }
+    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' });
+  };
 
   handleSelectTipoDocumento = (event) => {
     this.setState({ idTipoDocumento: event.target.value });
-  }
+  };
 
   handleInputNumeroDocumento = (event) => {
     this.setState({ documento: event.target.value });
-  }
+  };
 
   handleInputInformacion = (event) => {
     this.setState({ informacion: event.target.value });
-  }
+  };
 
   handleSelectGenero = (event) => {
     this.setState({ genero: event.target.value });
-  }
+  };
 
   handleSelectEstadoCvil = (event) => {
     this.setState({ estadoCivil: event.target.value });
-  }
+  };
 
   handleInputFechaNacimiento = (event) => {
     this.setState({ fechaNacimiento: event.target.value });
-  }
+  };
 
   handleInputObservacion = (event) => {
     this.setState({ observacion: event.target.value });
-  }
+  };
 
   handleInputCelular = (event) => {
     this.setState({ celular: event.target.value });
-  }
+  };
 
   handleInputTelefono = (event) => {
     this.setState({ telefono: event.target.value });
-  }
+  };
 
   handleInputEmail = (event) => {
     this.setState({ email: event.target.value });
-  }
+  };
 
   handleInputDireccion = (event) => {
     this.setState({ direccion: event.target.value });
-  }
+  };
 
   handleInputEstado = (value) => {
     this.setState({ estado: value.target.checked });
-  }
+  };
 
   handleGetApiReniec = async () => {
     if (this.state.documento.length !== 8) {
-      alertWarning("Persona", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.', () => {
-        this.refDocumento.current.focus();
-      })
+      alertWarning(
+        'Persona',
+        'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+        () => {
+          this.refDocumento.current.focus();
+        },
+      );
       return;
     }
 
@@ -202,7 +206,12 @@ class PersonaAgregar extends CustomComponent {
     if (response instanceof SuccessReponse) {
       this.setState({
         documento: convertNullText(response.data.dni),
-        informacion: convertNullText(response.data.apellidoPaterno) + ' ' + convertNullText(response.data.apellidoMaterno) + ' ' + convertNullText(response.data.nombres),
+        informacion:
+          convertNullText(response.data.apellidoPaterno) +
+          ' ' +
+          convertNullText(response.data.apellidoMaterno) +
+          ' ' +
+          convertNullText(response.data.nombres),
         loading: false,
       });
     }
@@ -214,13 +223,17 @@ class PersonaAgregar extends CustomComponent {
         });
       });
     }
-  }
+  };
 
   handleGetApiSunat = async () => {
     if (this.state.documento.length !== 11) {
-      alertWarning("Persona", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.', () => {
-        this.refDocumentoPj.current.focus();
-      })
+      alertWarning(
+        'Persona',
+        'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+        () => {
+          this.refDocumentoPj.current.focus();
+        },
+      );
       return;
     }
 
@@ -247,7 +260,7 @@ class PersonaAgregar extends CustomComponent {
         });
       });
     }
-  }
+  };
 
   handleFilterUbigeo = async (text) => {
     const searchWord = text;
@@ -273,64 +286,74 @@ class PersonaAgregar extends CustomComponent {
 
       this.setState({ ubigeos: [] });
     }
-  }
+  };
 
   handleSelectItemUbigeo = (value) => {
     this.refUbigeo.current.initialize(
       value.departamento +
-      '-' +
-      value.provincia +
-      '-' +
-      value.distrito +
-      ' (' +
-      value.ubigeo +
-      ')'
+        '-' +
+        value.provincia +
+        '-' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
     );
     this.setState({
       ubigeos: [],
       idUbigeo: value.idUbigeo,
     });
-  }
+  };
 
   handleClearInputUbigeo = () => {
     this.setState({ ubigeos: [], idUbigeo: '' });
-  }
+  };
 
   handleGuardar = () => {
-    const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
+    const tipoDocumento = this.state.tiposDocumentos.find(
+      (item) => item.idTipoDocumento === this.state.idTipoDocumento,
+    );
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      alertWarning("Persona", 'Seleccione el tipo de documento.', () => {
+      alertWarning('Persona', 'Seleccione el tipo de documento.', () => {
         this.refTipoDocumento.current.focus();
-      })
+      });
       return;
     }
 
     if (isEmpty(this.state.documento)) {
-      alertWarning("Persona", 'Ingrese el número de documento.', () => {
+      alertWarning('Persona', 'Ingrese el número de documento.', () => {
         this.refDocumento.current.focus();
-      })
+      });
       return;
     }
 
-    if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.documento.length) {
-      alertWarning("Persona", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
-        this.refDocumento.current.focus();
-      })
+    if (
+      tipoDocumento &&
+      tipoDocumento.obligado === 1 &&
+      tipoDocumento.longitud !== this.state.documento.length
+    ) {
+      alertWarning(
+        'Persona',
+        `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+        () => {
+          this.refDocumento.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      alertWarning("Persona", 'Ingrese los apellidos y nombres.', () => {
+      alertWarning('Persona', 'Ingrese los apellidos y nombres.', () => {
         this.refInformacion.current.focus();
-      })
+      });
       return;
     }
 
     if (this.state.conductor && isEmpty(this.state.licenciaConductir)) {
-      alertWarning("Persona", 'Ingrese el número de licencia.', () => {
+      alertWarning('Persona', 'Ingrese el número de licencia.', () => {
         this.refLicenciaConducir.current.focus();
-      })
+      });
       return;
     }
 
@@ -373,7 +396,7 @@ class PersonaAgregar extends CustomComponent {
         }
       }
     });
-  }
+  };
 
   render() {
     const {
@@ -394,7 +417,6 @@ class PersonaAgregar extends CustomComponent {
 
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
@@ -409,7 +431,8 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column>
             <label>
-              Tipo de Persona: <i className="fa fa-asterisk text-danger small"></i>
+              Tipo de Persona:{' '}
+              <i className="fa fa-asterisk text-danger small"></i>
             </label>
           </Column>
         </Row>
@@ -417,8 +440,8 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <RadioButton
-              className='form-check-inline'
-              name='rbTipoCliente'
+              className="form-check-inline"
+              name="rbTipoCliente"
               id={CLIENTE_NATURAL}
               value={CLIENTE_NATURAL}
               checked={idTipoCliente === CLIENTE_NATURAL}
@@ -428,8 +451,8 @@ class PersonaAgregar extends CustomComponent {
             </RadioButton>
 
             <RadioButton
-              className='form-check-inline'
-              name='rbTipoCliente'
+              className="form-check-inline"
+              name="rbTipoCliente"
               id={CLIENTE_JURIDICO}
               value={CLIENTE_JURIDICO}
               checked={idTipoCliente === CLIENTE_JURIDICO}
@@ -441,49 +464,58 @@ class PersonaAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Select
-              label={<>Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo Documento:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
               ref={this.refTipoDocumento}
               onChange={this.handleSelectTipoDocumento}
             >
               <option value="">-- Seleccione --</option>
-              {
-                idTipoCliente === CLIENTE_NATURAL && (
-                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
+              {idTipoCliente === CLIENTE_NATURAL &&
+                this.state.tiposDocumentos
+                  .filter((item) => item.idTipoDocumento !== RUC)
+                  .map((item, index) => (
                     <option key={index} value={item.idTipoDocumento}>
                       {item.nombre}
                     </option>
-                  ))
-                )
-              }
-              {
-                idTipoCliente === CLIENTE_JURIDICO && (
-                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
+                  ))}
+              {idTipoCliente === CLIENTE_JURIDICO &&
+                this.state.tiposDocumentos
+                  .filter((item) => item.idTipoDocumento === RUC)
+                  .map((item, index) => (
                     <option key={index} value={item.idTipoDocumento}>
                       {item.nombre}
                     </option>
-                  ))
-                )
-              }
+                  ))}
             </Select>
           </Column>
 
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
               group={true}
-              label={<>   N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  {' '}
+                  N° de documento ({documento.length}):{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
               value={documento}
               onChange={this.handleInputNumeroDocumento}
               onKeyDown={keyNumberInteger}
               placeholder="00000000"
-              buttonRight={<>
-                {
-                  idTipoCliente === CLIENTE_NATURAL && (
+              buttonRight={
+                <>
+                  {idTipoCliente === CLIENTE_NATURAL && (
                     <Button
                       className="btn-outline-secondary"
                       title="Reniec"
@@ -491,10 +523,8 @@ class PersonaAgregar extends CustomComponent {
                     >
                       <img src={images.reniec} alt="Reniec" width="12" />
                     </Button>
-                  )
-                }
-                {
-                  idTipoCliente === CLIENTE_JURIDICO && (
+                  )}
+                  {idTipoCliente === CLIENTE_JURIDICO && (
                     <Button
                       className="btn-outline-secondary"
                       title="Sunat"
@@ -502,9 +532,9 @@ class PersonaAgregar extends CustomComponent {
                     >
                       <img src={images.sunat} alt="Sunat" width="12" />
                     </Button>
-                  )
-                }
-              </>}
+                  )}
+                </>
+              }
             />
           </Column>
         </Row>
@@ -512,11 +542,13 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>
-                {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-                {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-                {' '}<i className="fa fa-asterisk text-danger small"></i>
-              </>}
+              label={
+                <>
+                  {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+                  {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}
               value={informacion}
@@ -533,66 +565,69 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <label>
-              Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
+              Tipo de Roles:{' '}
+              <i className="fa fa-asterisk text-danger small"></i>
             </label>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-4 col-12' formGroup={true}>
+          <Column className="col-md-4 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnCliente"
               checked={this.state.cliente}
               onChange={(event) => {
-                this.setState({ cliente: event.target.checked })
-              }}>
+                this.setState({ cliente: event.target.checked });
+              }}
+            >
               Cliente
             </CheckBox>
           </Column>
 
-          <Column className='col-md-4 col-12' formGroup={true}>
+          <Column className="col-md-4 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnProveedor"
               checked={this.state.proveedor}
               onChange={(event) => {
-                this.setState({ proveedor: event.target.checked })
-              }}>
+                this.setState({ proveedor: event.target.checked });
+              }}
+            >
               Proveedor
             </CheckBox>
           </Column>
 
-          <Column className='col-md-4 col-12' formGroup={true}>
+          <Column className="col-md-4 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnConductor"
               checked={this.state.conductor}
               onChange={(event) => {
-                this.setState({ conductor: event.target.checked })
-              }}>
+                this.setState({ conductor: event.target.checked });
+              }}
+            >
               Conductor
             </CheckBox>
-            {
-              this.state.conductor && (
-                <Row>
-                  <Column>
-                    <Input
-                      placeholder='Número de licencia de conducir'
-                      ref={this.refLicenciaConducir}
-                      value={this.state.licenciaConductir}
-                      onChange={(event) => {
-                        this.setState({ licenciaConductir: event.target.value })
-                      }} />
-                  </Column>
-                </Row>
-              )
-            }
+            {this.state.conductor && (
+              <Row>
+                <Column>
+                  <Input
+                    placeholder="Número de licencia de conducir"
+                    ref={this.refLicenciaConducir}
+                    value={this.state.licenciaConductir}
+                    onChange={(event) => {
+                      this.setState({ licenciaConductir: event.target.value });
+                    }}
+                  />
+                </Column>
+              </Row>
+            )}
           </Column>
         </Row>
 
-        {idTipoCliente === 'TC0001' &&
+        {idTipoCliente === 'TC0001' && (
           <Row>
-            <Column className='col-md-4' formGroup={true}>
+            <Column className="col-md-4" formGroup={true}>
               <Select
-                label={"Genero:"}
+                label={'Genero:'}
                 ref={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
@@ -603,9 +638,9 @@ class PersonaAgregar extends CustomComponent {
               </Select>
             </Column>
 
-            <Column className='col-md-4' formGroup={true}>
+            <Column className="col-md-4" formGroup={true}>
               <Select
-                label={"Estado Civil:"}
+                label={'Estado Civil:'}
                 value={estadoCivil}
                 onChange={this.handleSelectEstadoCvil}
               >
@@ -617,9 +652,9 @@ class PersonaAgregar extends CustomComponent {
               </Select>
             </Column>
 
-            <Column className='col-md-4' formGroup={true}>
+            <Column className="col-md-4" formGroup={true}>
               <Input
-                label={"Fecha de Nacimiento:"}
+                label={'Fecha de Nacimiento:'}
                 type="date"
                 ref={this.refFechaNacimiento}
                 value={fechaNacimiento}
@@ -627,12 +662,12 @@ class PersonaAgregar extends CustomComponent {
               />
             </Column>
           </Row>
-        }
+        )}
 
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Observación:"}
+              label={'Observación:'}
               value={observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -641,9 +676,9 @@ class PersonaAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={"N° de Celular:"}
+              label={'N° de Celular:'}
               value={celular}
               ref={this.refCelular}
               onChange={this.handleInputCelular}
@@ -652,9 +687,9 @@ class PersonaAgregar extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={"N° de Telefono:"}
+              label={'N° de Telefono:'}
               value={telefono}
               ref={this.refTelefono}
               onChange={this.handleInputTelefono}
@@ -667,7 +702,7 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"E-Mail:"}
+              label={'E-Mail:'}
               type="email"
               value={email}
               onChange={this.handleInputEmail}
@@ -679,7 +714,7 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Dirección:"}
+              label={'Dirección:'}
               refInput={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
@@ -692,14 +727,14 @@ class PersonaAgregar extends CustomComponent {
           <Column formGroup={true}>
             <SearchInput
               ref={this.refUbigeo}
-              label={"Ubigeo:"}
+              label={'Ubigeo:'}
               placeholder="Escribe para iniciar a filtrar..."
               refValue={this.refValueUbigeo}
               data={this.state.ubigeos}
               handleClearInput={this.handleClearInputUbigeo}
               handleFilter={this.handleFilterUbigeo}
               handleSelectItem={this.handleSelectItemUbigeo}
-              renderItem={(value) =>
+              renderItem={(value) => (
                 <>
                   {value.departamento +
                     '-' +
@@ -710,16 +745,16 @@ class PersonaAgregar extends CustomComponent {
                     value.ubigeo +
                     ')'}
                 </>
-              }
+              )}
             />
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Switches
-              label={"Estado:"}
-              id={"stEstado"}
+              label={'Estado:'}
+              id={'stEstado'}
               checked={estado}
               onChange={this.handleInputEstado}
             >
@@ -730,18 +765,14 @@ class PersonaAgregar extends CustomComponent {
 
         <Row>
           <Column>
+            <Button className="btn-success" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
-              className='btn-success'
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-danger'
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cancelar
+              <i className="fa fa-close"></i> Cancelar
             </Button>
           </Column>
         </Row>

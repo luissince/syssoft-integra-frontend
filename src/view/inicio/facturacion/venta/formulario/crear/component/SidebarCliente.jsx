@@ -1,15 +1,22 @@
-import Button from "../../../../../../../components/Button";
-import Column from "../../../../../../../components/Column";
-import Input from "../../../../../../../components/Input";
-import RadioButton from "../../../../../../../components/RadioButton";
-import Row from "../../../../../../../components/Row";
-import Select from "../../../../../../../components/Select";
-import { SpinnerView } from "../../../../../../../components/Spinner";
-import { images } from "../../../../../../../helper";
-import { handlePasteInteger, keyNumberInteger, keyNumberPhone } from "../../../../../../../helper/utils.helper";
-import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from "../../../../../../../model/types/tipo-cliente";
+import Button from '../../../../../../../components/Button';
+import Column from '../../../../../../../components/Column';
+import Input from '../../../../../../../components/Input';
+import RadioButton from '../../../../../../../components/RadioButton';
+import Row from '../../../../../../../components/Row';
+import Select from '../../../../../../../components/Select';
+import { SpinnerView } from '../../../../../../../components/Spinner';
+import { images } from '../../../../../../../helper';
+import {
+  handlePasteInteger,
+  keyNumberInteger,
+  keyNumberPhone,
+} from '../../../../../../../helper/utils.helper';
+import {
+  CLIENTE_JURIDICO,
+  CLIENTE_NATURAL,
+} from '../../../../../../../model/types/tipo-cliente';
 import PropTypes from 'prop-types';
-import { RUC } from "../../../../../../../model/types/tipo-documento";
+import { RUC } from '../../../../../../../model/types/tipo-documento';
 
 const SidebarCliente = (props) => {
   // Desestructurar props para extraer valores específicos
@@ -21,9 +28,16 @@ const SidebarCliente = (props) => {
 
   const { tiposDocumentos } = props;
 
-  const { refIdTipoDocumento, idTipoDocumento, handleSelectIdTipoDocumento } = props;
+  const { refIdTipoDocumento, idTipoDocumento, handleSelectIdTipoDocumento } =
+    props;
 
-  const { refNumeroDocumento, numeroDocumento, handleInputNumeroDocumento, handleApiReniec, handleApiSunat } = props;
+  const {
+    refNumeroDocumento,
+    numeroDocumento,
+    handleInputNumeroDocumento,
+    handleApiReniec,
+    handleApiSunat,
+  } = props;
 
   const { refInformacion, informacion, handleInputInformacion } = props;
 
@@ -51,22 +65,20 @@ const SidebarCliente = (props) => {
 
           {/* Cuerpo de la tarjeta que contiene el contenido principal del modal */}
           <div className="card-body h-100 overflow-y-auto">
-            <SpinnerView
-              loading={loading}
-              message={"Cargando datos..."}
-            />
+            <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             {/* Navegación por pestañas para Persona Natural y Persona Jurídica */}
             <Row>
               <Column className="col-md-12">
                 <label>
-                  Tipo de Persona: <i className="fa fa-asterisk text-danger small"></i>
+                  Tipo de Persona:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
                 </label>
               </Column>
 
               <Column formGroup={true}>
                 <RadioButton
-                  className='form-check-inline'
+                  className="form-check-inline"
                   name="ckTipoPersona"
                   id={CLIENTE_NATURAL}
                   value={CLIENTE_NATURAL}
@@ -77,7 +89,7 @@ const SidebarCliente = (props) => {
                 </RadioButton>
 
                 <RadioButton
-                  className='form-check-inline'
+                  className="form-check-inline"
                   name="ckTipoPersona"
                   id={CLIENTE_JURIDICO}
                   value={CLIENTE_JURIDICO}
@@ -92,29 +104,34 @@ const SidebarCliente = (props) => {
             <Row>
               <Column formGroup={true}>
                 <Select
-                  label={<> Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      {' '}
+                      Tipo Documento:{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   ref={refIdTipoDocumento}
                   value={idTipoDocumento}
-                  onChange={handleSelectIdTipoDocumento}>
-                  <option value={""}>- Seleccione -</option>
-                  {
-                    idTipoCliente === CLIENTE_NATURAL && (
-                      tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
+                  onChange={handleSelectIdTipoDocumento}
+                >
+                  <option value={''}>- Seleccione -</option>
+                  {idTipoCliente === CLIENTE_NATURAL &&
+                    tiposDocumentos
+                      .filter((item) => item.idTipoDocumento !== RUC)
+                      .map((item, index) => (
                         <option key={index} value={item.idTipoDocumento}>
                           {item.nombre}
                         </option>
-                      ))
-                    )
-                  }
-                  {
-                    idTipoCliente === CLIENTE_JURIDICO && (
-                      tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
+                      ))}
+                  {idTipoCliente === CLIENTE_JURIDICO &&
+                    tiposDocumentos
+                      .filter((item) => item.idTipoDocumento === RUC)
+                      .map((item, index) => (
                         <option key={index} value={item.idTipoDocumento}>
                           {item.nombre}
                         </option>
-                      ))
-                    )
-                  }
+                      ))}
                 </Select>
               </Column>
             </Row>
@@ -124,16 +141,22 @@ const SidebarCliente = (props) => {
                 <Input
                   autoFocus={true}
                   group={true}
-                  label={<> N° de documento ({numeroDocumento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      {' '}
+                      N° de documento ({numeroDocumento.length}):{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="00000000"
                   ref={refNumeroDocumento}
                   value={numeroDocumento}
                   onChange={handleInputNumeroDocumento}
                   onKeyDown={keyNumberInteger}
                   onPaste={handlePasteInteger}
-                  buttonRight={<>
-                    {
-                      idTipoCliente === CLIENTE_NATURAL && (
+                  buttonRight={
+                    <>
+                      {idTipoCliente === CLIENTE_NATURAL && (
                         <Button
                           className="btn-outline-secondary"
                           title="Reniec"
@@ -141,10 +164,8 @@ const SidebarCliente = (props) => {
                         >
                           <img src={images.reniec} alt="Reniec" width="12" />
                         </Button>
-                      )
-                    }
-                    {
-                      idTipoCliente === CLIENTE_JURIDICO && (
+                      )}
+                      {idTipoCliente === CLIENTE_JURIDICO && (
                         <Button
                           className="btn-outline-secondary"
                           title="Sunat"
@@ -152,9 +173,9 @@ const SidebarCliente = (props) => {
                         >
                           <img src={images.sunat} alt="Sunat" width="12" />
                         </Button>
-                      )
-                    }
-                  </>}
+                      )}
+                    </>
+                  }
                 />
               </Column>
             </Row>
@@ -162,13 +183,18 @@ const SidebarCliente = (props) => {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={<>
-                    {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-                    {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </>}
+                  label={
+                    <>
+                      {idTipoCliente === CLIENTE_NATURAL &&
+                        'Apellidos y Nombres:'}
+                      {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder={
-                    idTipoCliente === CLIENTE_NATURAL ? 'Ingrese sus Apellidos y Nombres' : 'Ingrese su Razón Social'
+                    idTipoCliente === CLIENTE_NATURAL
+                      ? 'Ingrese sus Apellidos y Nombres'
+                      : 'Ingrese su Razón Social'
                   }
                   ref={refInformacion}
                   value={informacion}
@@ -180,7 +206,7 @@ const SidebarCliente = (props) => {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={"N° de Celular:"}
+                  label={'N° de Celular:'}
                   placeholder="Ingrese el número de celular."
                   onKeyDown={keyNumberPhone}
                   ref={refNumeroCelular}
@@ -193,7 +219,7 @@ const SidebarCliente = (props) => {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={" Dirección:"}
+                  label={' Dirección:'}
                   placeholder="Ingrese la dirección"
                   ref={refDireccion}
                   value={direccion}
@@ -207,18 +233,19 @@ const SidebarCliente = (props) => {
           <div className="card-footer bg-white">
             <div className="d-flex align-items-center justify-content-between">
               <span className="d-block">
-                Campos obligatorios <i className="fa fa-asterisk text-danger small"></i>
+                Campos obligatorios{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
               </span>
               <div>
                 <Button
                   className="btn-outline-success mr-2"
                   onClick={handleSave}
-                  text={"Aceptar"}
+                  text={'Aceptar'}
                 />
                 <Button
                   className="btn-outline-secondary"
                   onClick={handleClose}
-                  text={"Cancelar"}
+                  text={'Cancelar'}
                 />
               </div>
             </div>
@@ -264,6 +291,6 @@ SidebarCliente.propTypes = {
 
   handleSave: PropTypes.func.isRequired,
   handleClose: PropTypes.func.isRequired,
-}
+};
 
 export default SidebarCliente;

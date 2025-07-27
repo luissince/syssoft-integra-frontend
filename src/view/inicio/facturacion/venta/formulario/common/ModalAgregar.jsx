@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { alertWarning, handlePasteFloat, isNumeric } from '../../../../../../helper/utils.helper';
+import {
+  alertWarning,
+  handlePasteFloat,
+  isNumeric,
+} from '../../../../../../helper/utils.helper';
 import { VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Row from '../../../../../../components/Row';
@@ -13,15 +17,14 @@ import Button from '../../../../../../components/Button';
  * @extends React.Component
  */
 class ModalAgregar extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       titulo: '',
       subTitulo: '',
       cantidad: '',
-      producto: null
-    }
+      producto: null,
+    };
 
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
@@ -31,56 +34,65 @@ class ModalAgregar extends Component {
     this.setState({
       titulo,
       subTitulo,
-      producto
-    })
-  }
+      producto,
+    });
+  };
 
-  handleOpenModal = () => {
-
-  }
+  handleOpenModal = () => {};
 
   handleOnHiddenModal = async () => {
     this.setState({
       titulo: '',
       subTitulo: '',
       cantidad: '',
-      producto: null
-    })
-  }
+      producto: null,
+    });
+  };
 
   handleInputCantidad = (event) => {
-    this.setState({ cantidad: event.target.value })
-  }
+    this.setState({ cantidad: event.target.value });
+  };
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.cantidad)) {
-      alertWarning("Venta", "Ingrese el valor solicitado.", () => {
+      alertWarning('Venta', 'Ingrese el valor solicitado.', () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
-    if(this.state.cantidad <= 0){
-      alertWarning("Venta", "La cantidad no puede ser menor a 0 o igual a 0.", () => {
-        this.refCantidad.current.focus();
-      });
+    if (this.state.cantidad <= 0) {
+      alertWarning(
+        'Venta',
+        'La cantidad no puede ser menor a 0 o igual a 0.',
+        () => {
+          this.refCantidad.current.focus();
+        },
+      );
       return;
     }
 
     if (this.state.producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      const existingItem = this.props.detalleVenta.find((item) => item.idProducto === this.state.producto.idProducto);
+      const existingItem = this.props.detalleVenta.find(
+        (item) => item.idProducto === this.state.producto.idProducto,
+      );
       if (existingItem) {
-        const existingInventario = existingItem.inventarios.some(item => item.idInventario === this.state.producto.idInventario);
+        const existingInventario = existingItem.inventarios.some(
+          (item) => item.idInventario === this.state.producto.idInventario,
+        );
         if (!existingInventario) {
-          alertWarning("Venta", "Los productos con valor monetario se trabajan con un solo almacen y sin unidades.");
+          alertWarning(
+            'Venta',
+            'Los productos con valor monetario se trabajan con un solo almacen y sin unidades.',
+          );
           return;
         }
       }
     }
 
-    await this.refModal.current.handleOnClose()
+    await this.refModal.current.handleOnClose();
     this.props.handleAdd(this.state.producto, this.state.cantidad);
-  }
+  };
 
   render() {
     const { titulo, subTitulo, cantidad } = this.state;
@@ -110,8 +122,8 @@ class ModalAgregar extends Component {
                 <Input
                   autoFocus={true}
                   label={subTitulo}
-                  placeholder={"0.00"}
-                  role={"float"}
+                  placeholder={'0.00'}
+                  role={'float'}
                   ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
@@ -121,17 +133,15 @@ class ModalAgregar extends Component {
             </Row>
           </>
         }
-
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-primary">
+            <Button type="submit" className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -146,6 +156,6 @@ ModalAgregar.propTypes = {
   onClose: PropTypes.func.isRequired,
   detalleVenta: PropTypes.array.isRequired,
   handleAdd: PropTypes.func.isRequired,
-}
+};
 
 export default ModalAgregar;

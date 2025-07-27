@@ -2,11 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { alertDialog, alertInfo, alertSuccess, alertWarning, currentDate, formatNumberWithZeros, formatTime, isEmpty } from '../../../../../helper/utils.helper';
+import {
+  alertDialog,
+  alertInfo,
+  alertSuccess,
+  alertWarning,
+  currentDate,
+  formatNumberWithZeros,
+  formatTime,
+  isEmpty,
+} from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import SuccessReponse from '../../../../../model/class/response';
-import { cancelGuiaRemision, listGuiaRemision } from '../../../../../network/rest/principal.network';
+import {
+  cancelGuiaRemision,
+  listGuiaRemision,
+} from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
@@ -14,9 +26,20 @@ import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Search from '../../../../../components/Search';
 import Button from '../../../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Paginacion from '../../../../../components/Paginacion';
-import { setListaGuiaRemisionData, setListaGuiaRemisionPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaGuiaRemisionData,
+  setListaGuiaRemisionPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import Select from '../../../../../components/Select';
 import Input from '../../../../../components/Input';
 
@@ -25,7 +48,6 @@ import Input from '../../../../../components/Input';
  * @extends React.Component
  */
 class GuiaRemision extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -98,24 +120,36 @@ class GuiaRemision extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (this.props.guiaRemisionLista && this.props.guiaRemisionLista.data && this.props.guiaRemisionLista.paginacion) {
-      this.setState(this.props.guiaRemisionLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.guiaRemisionLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.guiaRemisionLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.guiaRemisionLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.guiaRemisionLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.guiaRemisionLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.guiaRemisionLista.paginacion.messagePaginacion;
+    if (
+      this.props.guiaRemisionLista &&
+      this.props.guiaRemisionLista.data &&
+      this.props.guiaRemisionLista.paginacion
+    ) {
+      this.setState(this.props.guiaRemisionLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.guiaRemisionLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.guiaRemisionLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.guiaRemisionLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.guiaRemisionLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.guiaRemisionLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.guiaRemisionLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.guiaRemisionLista.data.buscar);
+      this.refSearch.current.initialize(
+        this.props.guiaRemisionLista.data.buscar,
+      );
     } else {
       await this.loadingInit();
       this.updateReduxState();
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaGuiaRemisionData(this.state)
+    this.props.setListaGuiaRemisionData(this.state);
     this.props.setListaGuiaRemisionPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -132,7 +166,7 @@ class GuiaRemision extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
-  }
+  };
 
   searchText = async (text) => {
     if (this.state.loading) return;
@@ -142,7 +176,7 @@ class GuiaRemision extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   async searchOpciones() {
     if (this.state.loading) return;
@@ -157,12 +191,12 @@ class GuiaRemision extends CustomComponent {
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
-  }
+  };
 
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0,);
+        this.fillTable(0);
         break;
       case 1:
         this.fillTable(1, this.state.buscar);
@@ -173,7 +207,7 @@ class GuiaRemision extends CustomComponent {
       default:
         this.fillTable(0);
     }
-  }
+  };
 
   fillTable = async (opcion, buscar = '') => {
     this.setState({
@@ -193,20 +227,26 @@ class GuiaRemision extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listGuiaRemision(params, this.abortControllerTable.signal);
+    const response = await listGuiaRemision(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -219,7 +259,7 @@ class GuiaRemision extends CustomComponent {
         messageTable: response.getMessage(),
       });
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -241,64 +281,67 @@ class GuiaRemision extends CustomComponent {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/crear`,
     });
-  }
+  };
 
   handleEditar = (idGuiaRemision) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
       search: '?idGuiaRemision=' + idGuiaRemision,
     });
-  }
+  };
 
   handleDetalle = (idGuiaRemision) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idGuiaRemision=' + idGuiaRemision,
     });
-  }
+  };
 
   handleAnular = (idGuiaRemision) => {
-    alertDialog('Guia Remisión', '¿Estás seguro de anular la guía de remisión?', async (accept) => {
-      if (accept) {
-        const params = {
-          idGuiaRemision: idGuiaRemision
+    alertDialog(
+      'Guia Remisión',
+      '¿Estás seguro de anular la guía de remisión?',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idGuiaRemision: idGuiaRemision,
+          };
+
+          alertInfo('Guia Remisión', 'Procesando petición...');
+
+          const response = await cancelGuiaRemision(params);
+
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Guia Remisión', response.data, async () => {
+              await this.loadingInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Guia Remisión', response.getMessage());
+          }
         }
-
-        alertInfo("Guia Remisión", "Procesando petición...")
-
-        const response = await cancelGuiaRemision(params);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess("Guia Remisión", response.data, async () => {
-            await this.loadingInit()
-          })
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning("Guia Remisión", response.getMessage())
-        }
-      }
-    });
-  }
+      },
+    );
+  };
 
   handleInputFechaInico = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleInputFechaFinal = (event) => {
     this.setState({ fechaFinal: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
-
+    });
+  };
 
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -320,8 +363,8 @@ class GuiaRemision extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
-          message='Cargando información de la tabla...'
+          colSpan="9"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -329,13 +372,20 @@ class GuiaRemision extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="9">¡No hay datos registrados!</TableCell>
+          <TableCell className="text-center" colSpan="9">
+            ¡No hay datos registrados!
+          </TableCell>
         </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
-      const estado = item.estado === 1 ? <span className="text-success">ACTIVO</span> : <span className="text-danger">ANULADO</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="text-success">ACTIVO</span>
+        ) : (
+          <span className="text-danger">ANULADO</span>
+        );
 
       return (
         <TableRow key={index}>
@@ -360,10 +410,8 @@ class GuiaRemision extends CustomComponent {
             <br />
             {item.serieRef}-{formatNumberWithZeros(item.numeracionRef)}
           </TableCell>
+          <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-center">
-            {estado}
-          </TableCell>
-          <TableCell className='text-center'>
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idGuiaRemision)}
@@ -371,7 +419,7 @@ class GuiaRemision extends CustomComponent {
               <i className="fa fa-eye"></i>
             </Button>
           </TableCell>
-          <TableCell className='text-center'>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idGuiaRemision)}
@@ -379,7 +427,7 @@ class GuiaRemision extends CustomComponent {
               <i className="fa fa-pencil"></i>
             </Button>
           </TableCell>
-          <TableCell className='text-center'>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleAnular(item.idGuiaRemision)}
@@ -388,7 +436,7 @@ class GuiaRemision extends CustomComponent {
             </Button>
           </TableCell>
         </TableRow>
-      )
+      );
     });
   }
 
@@ -396,22 +444,18 @@ class GuiaRemision extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Guía de Remisión'
-          subTitle='LISTA'
+          title="Guía de Remisión"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleCrear}
-            >
+            <Button className="btn-outline-info" onClick={this.handleCrear}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
-              className='btn-outline-secondary'
+              className="btn-outline-secondary"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
@@ -420,33 +464,42 @@ class GuiaRemision extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Inicio:"}
+              label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Final:"}
+              label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Estados:"}
+              label={'Estados:'}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value='-1'>TODOS</option>
-              <option value='1'>ACTIVO</option>
-              <option value='3'>ANULADO</option>
+              <option value="-1">TODOS</option>
+              <option value="1">ACTIVO</option>
+              <option value="3">ANULADO</option>
             </Select>
           </Column>
         </Row>
@@ -466,23 +519,31 @@ class GuiaRemision extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Cliente</TableHead>
                     <TableHead width="20%">Comprobante</TableHead>
                     <TableHead width="15%">referencia</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Mostrar</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Mostrar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -513,23 +574,29 @@ GuiaRemision.propTypes = {
   }).isRequired,
   guiaRemisionLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaGuiaRemisionData: PropTypes.func,
   setListaGuiaRemisionPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
+  location: PropTypes.object,
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    guiaRemisionLista: state.predeterminado.guiaRemisionLista
+    guiaRemisionLista: state.predeterminado.guiaRemisionLista,
   };
 };
 
-const mapDispatchToProps = { setListaGuiaRemisionData, setListaGuiaRemisionPaginacion }
+const mapDispatchToProps = {
+  setListaGuiaRemisionData,
+  setListaGuiaRemisionPaginacion,
+};
 
-const ConnectedGuiaRemision = connect(mapStateToProps, mapDispatchToProps)(GuiaRemision);
+const ConnectedGuiaRemision = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(GuiaRemision);
 
 export default ConnectedGuiaRemision;

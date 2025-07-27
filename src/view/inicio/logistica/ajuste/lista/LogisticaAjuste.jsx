@@ -25,9 +25,20 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Search from '../../../../../components/Search';
-import { setListaAjusteData, setListaAjustePaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaAjusteData,
+  setListaAjustePaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
@@ -37,7 +48,6 @@ import Select from '../../../../../components/Select';
  * @extends React.Component
  */
 class LogisticaAjuste extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -90,33 +100,44 @@ class LogisticaAjuste extends CustomComponent {
   }
 
   async loadingData() {
-    if (this.props.ajusteLista && this.props.ajusteLista.data && this.props.ajusteLista.paginacion) {
-      this.setState(this.props.ajusteLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.ajusteLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.ajusteLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.ajusteLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.ajusteLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.ajusteLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.ajusteLista.paginacion.messagePaginacion;
+    if (
+      this.props.ajusteLista &&
+      this.props.ajusteLista.data &&
+      this.props.ajusteLista.paginacion
+    ) {
+      this.setState(this.props.ajusteLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.ajusteLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.ajusteLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.ajusteLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.ajusteLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.ajusteLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.ajusteLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.ajusteLista.data.buscar);
     } else {
-      const [tipoAjuste] = await Promise.all([
-        this.fetchComboTipoAjuste()
-      ]);
+      const [tipoAjuste] = await Promise.all([this.fetchComboTipoAjuste()]);
 
-      this.setState({
-        tipoAjuste,
-        initialLoad: false,
-      }, async () => {
-        await this.loadingInit();
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          tipoAjuste,
+          initialLoad: false,
+        },
+        async () => {
+          await this.loadingInit();
+          this.updateReduxState();
+        },
+      );
     }
   }
 
   updateReduxState() {
-    this.props.setListaAjusteData(this.state)
+    this.props.setListaAjusteData(this.state);
     this.props.setListaAjustePaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -143,7 +164,7 @@ class LogisticaAjuste extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -194,13 +215,16 @@ class LogisticaAjuste extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -293,8 +317,8 @@ class LogisticaAjuste extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -327,8 +351,15 @@ class LogisticaAjuste extends CustomComponent {
       return (
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>{item.fecha} <br />{formatTime(item.hora)}</TableCell>
-          <TableCell>{iconTipoAjuste} {item.ajuste}<br />{item.motivo}</TableCell>
+          <TableCell>
+            {item.fecha} <br />
+            {formatTime(item.hora)}
+          </TableCell>
+          <TableCell>
+            {iconTipoAjuste} {item.ajuste}
+            <br />
+            {item.motivo}
+          </TableCell>
           <TableCell>{item.observacion}</TableCell>
           <TableCell>{item.almacen}</TableCell>
           <TableCell>{estado}</TableCell>
@@ -369,10 +400,7 @@ class LogisticaAjuste extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
             <Button
@@ -387,7 +415,7 @@ class LogisticaAjuste extends CustomComponent {
         <Row>
           <Column className="col-md-3" formGroup={true}>
             <Select
-              label={"Tipo:"}
+              label={'Tipo:'}
               value={this.state.idTipoAjuste}
               onChange={this.handleSelectTipoAjuste}
             >
@@ -400,18 +428,24 @@ class LogisticaAjuste extends CustomComponent {
             </Select>
           </Column>
 
-          <Column className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha Inicio:"}
+              label={'Fecha Inicio:'}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
             />
           </Column>
 
-          <Column className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha Final:"}
+              label={'Fecha Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -434,22 +468,26 @@ class LogisticaAjuste extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="15%">Fecha y Hora</TableHead>
                     <TableHead width="15%">Tipo de Movimiento</TableHead>
                     <TableHead width="20%">Observación</TableHead>
                     <TableHead width="15%">Almacen</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -480,13 +518,13 @@ LogisticaAjuste.propTypes = {
   }).isRequired,
   ajusteLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaAjusteData: PropTypes.func,
   setListaAjustePaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
-}
+  location: PropTypes.object,
+};
 
 /**
  *
@@ -495,16 +533,19 @@ LogisticaAjuste.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    ajusteLista: state.predeterminado.ajusteLista
+    ajusteLista: state.predeterminado.ajusteLista,
   };
 };
 
-const mapDispatchToProps = { setListaAjusteData, setListaAjustePaginacion }
+const mapDispatchToProps = { setListaAjusteData, setListaAjustePaginacion };
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedAjuste = connect(mapStateToProps, mapDispatchToProps)(LogisticaAjuste);
+const ConnectedAjuste = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(LogisticaAjuste);
 
 export default ConnectedAjuste;

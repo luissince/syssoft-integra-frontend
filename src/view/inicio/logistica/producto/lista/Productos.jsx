@@ -24,11 +24,22 @@ import Title from '../../../../../components/Title';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
-import { setListaProductoData, setListaProductoPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaProductoData,
+  setListaProductoPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 
 /**
@@ -36,7 +47,6 @@ import React from 'react';
  * @extends React.Component
  */
 class Productos extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -91,14 +101,24 @@ class Productos extends CustomComponent {
   }
 
   async loadingData() {
-    if (this.props.productoLista && this.props.productoLista.data && this.props.productoLista.paginacion) {
-      this.setState(this.props.productoLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.productoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.productoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.productoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.productoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.productoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.productoLista.paginacion.messagePaginacion;
+    if (
+      this.props.productoLista &&
+      this.props.productoLista.data &&
+      this.props.productoLista.paginacion
+    ) {
+      this.setState(this.props.productoLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.productoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.productoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.productoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.productoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.productoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.productoLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.productoLista.data.buscar);
     } else {
@@ -108,7 +128,7 @@ class Productos extends CustomComponent {
   }
 
   updateReduxState() {
-    this.props.setListaProductoData(this.state)
+    this.props.setListaProductoData(this.state);
     this.props.setListaProductoPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -135,7 +155,7 @@ class Productos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -179,13 +199,16 @@ class Productos extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -252,8 +275,8 @@ class Productos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='10'
-          message='Cargando información de la tabla...'
+          colSpan="10"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -314,8 +337,17 @@ class Productos extends CustomComponent {
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
           <TableCell>{tipo()}</TableCell>
-          <TableCell>{item.codigo}<br /><b>{item.nombre}</b>{' '}{item.preferido === 1 && (<i className="fa fa-star text-warning"></i>)}</TableCell>
-          <TableCell className="text-right">{numberFormat(item.precio, this.state.codiso)}</TableCell>
+          <TableCell>
+            {item.codigo}
+            <br />
+            <b>{item.nombre}</b>{' '}
+            {item.preferido === 1 && (
+              <i className="fa fa-star text-warning"></i>
+            )}
+          </TableCell>
+          <TableCell className="text-right">
+            {numberFormat(item.precio, this.state.codiso)}
+          </TableCell>
           <TableCell>{item.medida}</TableCell>
           <TableCell>{item.categoria}</TableCell>
           <TableCell className="text-center">{estado}</TableCell>
@@ -329,7 +361,7 @@ class Productos extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <Button
-              className='btn-outline-warning btn-sm'
+              className="btn-outline-warning btn-sm"
               title="Editar"
               // disabled={!this.state.edit}
               onClick={() => this.handleEditar(item.idProducto)}
@@ -339,13 +371,13 @@ class Productos extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <Button
-              className='btn-outline-danger btn-sm'
+              className="btn-outline-danger btn-sm"
               title="Anular"
               // disabled={!this.state.remove}
               onClick={() => this.handleEliminar(item.idProducto)}
             >
               <i className="bi bi-trash"></i>
-              </Button>
+            </Button>
           </TableCell>
         </TableRow>
       );
@@ -356,17 +388,14 @@ class Productos extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Productos'
-          subTitle='LISTA'
+          title="Productos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
             <Button
@@ -393,24 +422,32 @@ class Productos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="15%">Tipo/Venta</TableHead>
                     <TableHead width="25%">Nombre</TableHead>
                     <TableHead width="15%">Precio</TableHead>
                     <TableHead width="10%">Medida</TableHead>
                     <TableHead width="10%">Categoría</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="10%" className="text-center">Imagen</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Imagen
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -442,24 +479,27 @@ Productos.propTypes = {
   moneda: PropTypes.object,
   productoLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaProductoData: PropTypes.func,
   setListaProductoPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
-}
+  location: PropTypes.object,
+};
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
     moneda: state.predeterminado.moneda,
-    productoLista: state.predeterminado.productoLista
+    productoLista: state.predeterminado.productoLista,
   };
 };
 
-const mapDispatchToProps = { setListaProductoData, setListaProductoPaginacion }
+const mapDispatchToProps = { setListaProductoData, setListaProductoPaginacion };
 
-const ConnectedProductos = connect(mapStateToProps, mapDispatchToProps)(Productos);
+const ConnectedProductos = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Productos);
 
 export default ConnectedProductos;

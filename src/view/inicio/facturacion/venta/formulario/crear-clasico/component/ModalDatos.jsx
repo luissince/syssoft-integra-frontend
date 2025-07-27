@@ -11,13 +11,12 @@ import Button from '../../../../../../../components/Button';
 import Column from '../../../../../../../components/Column';
 
 class ModalDatos extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       informacion: '',
-      producto: null
-    }
+      producto: null,
+    };
 
     this.refModal = React.createRef();
     this.refInformacion = React.createRef();
@@ -26,36 +25,40 @@ class ModalDatos extends Component {
   loadDatos = (producto) => {
     this.setState({
       informacion: producto.nombreProducto,
-      producto
-    })
-  }
+      producto,
+    });
+  };
 
   handleOnOpen = () => {
     this.refInformacion.current.select();
-  }
+  };
 
   handleOnHidden = async () => {
     this.setState({
       informacion: '',
-      producto: null
-    })
-  }
+      producto: null,
+    });
+  };
 
   handleInputInformacion = (event) => {
-    this.setState({ informacion: event.target.value })
-  }
+    this.setState({ informacion: event.target.value });
+  };
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.informacion)) {
-      alertWarning("Venta", "Ingrese la nueva descripción del producto.", () => {
-        this.refInformacion.current.focus();
-      })
+      alertWarning(
+        'Venta',
+        'Ingrese la nueva descripción del producto.',
+        () => {
+          this.refInformacion.current.focus();
+        },
+      );
       return;
     }
 
     this.props.handleSave(this.state.producto, this.state.informacion);
-    await this.refModal.current.handleOnClose()
-  }
+    await this.refModal.current.handleOnClose();
+  };
 
   render() {
     const { informacion, producto } = this.state;
@@ -84,8 +87,8 @@ class ModalDatos extends Component {
               <Column formGroup={true}>
                 <Input
                   autoFocus={true}
-                  label={"Ingrese su nueva descripción:"}
-                  placeholder={"descripción"}
+                  label={'Ingrese su nueva descripción:'}
+                  placeholder={'descripción'}
                   ref={this.refInformacion}
                   value={informacion}
                   onChange={this.handleInputInformacion}
@@ -94,17 +97,15 @@ class ModalDatos extends Component {
             </Row>
           </>
         }
-
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-success">
+            <Button type="submit" className="btn-success">
               <i className="fa fa-save"></i> Guardar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -119,6 +120,6 @@ ModalDatos.propTypes = {
   onClose: PropTypes.func.isRequired,
 
   handleSave: PropTypes.func.isRequired,
-}
+};
 
 export default ModalDatos;

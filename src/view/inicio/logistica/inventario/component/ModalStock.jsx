@@ -8,7 +8,10 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
 import { alertKit } from 'alert-kit';
 import { isNumeric } from '../../../../../helper/utils.helper';
-import { getStockInventario, updateStockInventario } from '../../../../../network/rest/principal.network';
+import {
+  getStockInventario,
+  updateStockInventario,
+} from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -20,7 +23,6 @@ import Image from '@/components/Image';
  * @extends React.Component
  */
 class CustomModalStock extends Component {
-
   /**
    *
    * Constructor
@@ -36,7 +38,7 @@ class CustomModalStock extends Component {
       imagen: null,
       stockMinimo: '',
       stockMaximo: '',
-    }
+    };
 
     this.initial = { ...this.state };
 
@@ -79,15 +81,18 @@ class CustomModalStock extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState({
-        nombre: producto.producto,
-        imagen: producto.imagen,
-        stockMinimo: response.data.cantidadMinima,
-        stockMaximo: response.data.cantidadMaxima,
-        loading: false,
-      }, () => {
-        this.refStockMinimo.current.focus();
-      });
+      this.setState(
+        {
+          nombre: producto.producto,
+          imagen: producto.imagen,
+          stockMinimo: response.data.cantidadMinima,
+          stockMaximo: response.data.cantidadMaxima,
+          loading: false,
+        },
+        () => {
+          this.refStockMinimo.current.focus();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -96,7 +101,7 @@ class CustomModalStock extends Component {
       this.peticion = false;
       this.abortController = null;
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -114,9 +119,7 @@ class CustomModalStock extends Component {
   |
   */
 
-  handleOnOpen = () => {
-
-  }
+  handleOnOpen = () => {};
 
   handleOnHidden = () => {
     if (!this.peticion) {
@@ -127,7 +130,7 @@ class CustomModalStock extends Component {
 
     this.setState(this.initial);
     this.peticion = false;
-  }
+  };
 
   handleInputStockMinimo = (event) => {
     this.setState({ stockMinimo: event.target.value });
@@ -139,64 +142,76 @@ class CustomModalStock extends Component {
 
   handleOnSubmit = () => {
     if (!isNumeric(this.state.stockMinimo)) {
-      alertKit.warning({
-        title: "Inventario",
-        message: "Ingrese el stock mínimo.",
-      }, () => {
-        this.refStockMinimo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Inventario',
+          message: 'Ingrese el stock mínimo.',
+        },
+        () => {
+          this.refStockMinimo.current.focus();
+        },
+      );
       return;
     }
 
     if (!isNumeric(this.state.stockMaximo)) {
-      alertKit.warning({
-        title: "Inventario",
-        message: "Ingrese el stock máximo.",
-      }, () => {
-        this.refStockMaximo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Inventario',
+          message: 'Ingrese el stock máximo.',
+        },
+        () => {
+          this.refStockMaximo.current.focus();
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      title: "Inventario",
-      message: "¿Estás seguro de continuar?",
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          stockMinimo: this.state.stockMinimo,
-          stockMaximo: this.state.stockMaximo,
-          idInventario: this.idInventario,
-        };
+    alertKit.question(
+      {
+        title: 'Inventario',
+        message: '¿Estás seguro de continuar?',
+      },
+      async (accept) => {
+        if (accept) {
+          const data = {
+            stockMinimo: this.state.stockMinimo,
+            stockMaximo: this.state.stockMaximo,
+            idInventario: this.idInventario,
+          };
 
-        await this.refModal.current.handleOnClose()
+          await this.refModal.current.handleOnClose();
 
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await updateStockInventario(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Inventario",
-            message: response.data,
-          }, () => {
-            this.props.handleSave();
+          alertKit.loading({
+            message: 'Procesando información...',
           });
-        }
 
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
+          const response = await updateStockInventario(data);
 
-          alertKit.warning({
-            title: "Inventario",
-            message: response.getMessage(),
-          });
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Inventario',
+                message: response.data,
+              },
+              () => {
+                this.props.handleSave();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              title: 'Inventario',
+              message: response.getMessage(),
+            });
+          }
         }
-      }
-    });
-  }
+      },
+    );
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -225,10 +240,7 @@ class CustomModalStock extends Component {
       stockMaximo,
     } = this.state;
 
-    const {
-      isOpen,
-      onClose,
-    } = this.props;
+    const { isOpen, onClose } = this.props;
 
     return (
       <CustomModalForm
@@ -246,7 +258,9 @@ class CustomModalStock extends Component {
 
             {/* Producto + Imagen */}
             <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">{nombre}</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                {nombre}
+              </h2>
               <Image
                 default={images.noImage}
                 src={imagen}
@@ -318,6 +332,6 @@ CustomModalStock.propTypes = {
   onClose: PropTypes.func.isRequired,
 
   handleSave: PropTypes.func.isRequired,
-}
+};
 
 export default CustomModalStock;

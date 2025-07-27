@@ -5,18 +5,11 @@ import CustomComponent from '../../../../../model/class/custom-component';
 class ProductoDetalle extends CustomComponent {
   constructor(props) {
     super(props);
-    this.state = {
-
-    };
+    this.state = {};
   }
 
   render() {
-    return (
-      <ContainerWrapper>
-
-
-      </ContainerWrapper>
-    );
+    return <ContainerWrapper></ContainerWrapper>;
   }
 }
 
@@ -26,6 +19,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedProductoDetalle = connect(mapStateToProps, null)(ProductoDetalle);
+const ConnectedProductoDetalle = connect(
+  mapStateToProps,
+  null,
+)(ProductoDetalle);
 
 export default ConnectedProductoDetalle;

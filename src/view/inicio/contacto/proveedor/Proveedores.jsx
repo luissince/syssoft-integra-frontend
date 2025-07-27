@@ -22,7 +22,15 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 
 /**
@@ -30,11 +38,10 @@ import { SpinnerTable } from '../../../../components/Spinner';
  * @extends React.Component
  */
 class Proveedores extends CustomComponent {
-
   /**
-  *
-  * Constructor
-  */
+   *
+   * Constructor
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -109,7 +116,7 @@ class Proveedores extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -143,10 +150,15 @@ class Proveedores extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listPersonasProveedor(params, this.abortControllerTable.signal,);
+    const response = await listPersonasProveedor(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),);
+      const totalPaginacion = parseInt(
+        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+      );
 
       this.setState({
         loading: false,
@@ -166,7 +178,6 @@ class Proveedores extends CustomComponent {
       });
     }
   };
-
 
   /*
   |--------------------------------------------------------------------------
@@ -199,28 +210,32 @@ class Proveedores extends CustomComponent {
   }
 
   handlePreferred(idPersona) {
-    alertDialog('Proveedor', '¿Está seguro de que desea hacer el proveedor preferido?', async (accept) => {
-      if (accept) {
-        alertInfo('Proveedor', 'Procesando información...');
+    alertDialog(
+      'Proveedor',
+      '¿Está seguro de que desea hacer el proveedor preferido?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Proveedor', 'Procesando información...');
 
-        const params = {
-          idPersona: idPersona,
-          rol: "2",
-        };
+          const params = {
+            idPersona: idPersona,
+            rol: '2',
+          };
 
-        const response = await preferredPersona(params);
+          const response = await preferredPersona(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Proveedor', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Proveedor', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Proveedor', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Proveedor', response.getMessage());
-        }
-      }
-    });
+      },
+    );
   }
   /*
  |--------------------------------------------------------------------------
@@ -242,8 +257,8 @@ class Proveedores extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
-          message='Cargando información de la tabla...'
+          colSpan="9"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -274,14 +289,18 @@ class Proveedores extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${item.proveedorPreferido === 1 ? 'badge-info' : 'badge-secondary'}`}
+              className={`badge ${
+                item.proveedorPreferido === 1 ? 'badge-info' : 'badge-secondary'
+              }`}
             >
               {item.proveedorPreferido === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
+              className={`badge ${
+                item.estado === 1 ? 'badge-success' : 'badge-danger'
+              }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </span>
@@ -311,17 +330,14 @@ class Proveedores extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Proveedores'
-          subTitle='LISTA'
+          title="Proveedores"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadInit}
-            >
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
@@ -341,23 +357,27 @@ class Proveedores extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">DNI / RUC</TableHead>
                     <TableHead width="20%">Cliente</TableHead>
                     <TableHead width="10%">Cel. / Tel.</TableHead>
                     <TableHead width="15%">Dirección</TableHead>
                     <TableHead width="7%">Predeterminado</TableHead>
                     <TableHead width="7%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Preferido</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Preferido
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -390,9 +410,9 @@ Proveedores.propTypes = {
     push: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    pathname: PropTypes.string
+    pathname: PropTypes.string,
   }),
-}
+};
 
 const mapStateToProps = (state) => {
   return {

@@ -25,10 +25,7 @@ const SidebarConfiguration = (props) => {
       <div className="side-modal_wrapper">
         <div className="card h-100 border-0 rounded-0">
           <div className="card-header">Configuración</div>
-          <Button
-            contentClassName="close"
-            onClick={handleCloseOptions}
-          >
+          <Button contentClassName="close" onClick={handleCloseOptions}>
             <span>&times;</span>
           </Button>
 
@@ -36,8 +33,7 @@ const SidebarConfiguration = (props) => {
             <Row>
               <Column formGroup={true}>
                 <label>
-                  Impuesto:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Impuesto: <i className="fa fa-asterisk text-danger small"></i>
                 </label>
                 <Select
                   title="Lista de Impuestos"
@@ -76,26 +72,29 @@ const SidebarConfiguration = (props) => {
               </Column>
             </Row>
 
-            {refAlmacen && <Row>
-              <Column formGroup={true}>
-                <label>
-                  Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                </label>
-                <Select
-                  title="Lista de Almacenes"
-                  ref={refAlmacen}
-                  value={idAlmacen}
-                  onChange={handleSelectIdIdAlmacen}
-                >
-                  <option value="">-- Almacen --</option>
-                  {almacenes.map((item, index) => (
-                    <option key={index} value={item.idAlmacen}>
-                      {item.nombre}
-                    </option>
-                  ))}
-                </Select>
-              </Column>
-            </Row>}
+            {refAlmacen && (
+              <Row>
+                <Column formGroup={true}>
+                  <label>
+                    Almacen:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>{' '}
+                  </label>
+                  <Select
+                    title="Lista de Almacenes"
+                    ref={refAlmacen}
+                    value={idAlmacen}
+                    onChange={handleSelectIdIdAlmacen}
+                  >
+                    <option value="">-- Almacen --</option>
+                    {almacenes.map((item, index) => (
+                      <option key={index} value={item.idAlmacen}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
+                </Column>
+              </Row>
+            )}
 
             <Row>
               <Column formGroup={true}>
@@ -133,13 +132,13 @@ const SidebarConfiguration = (props) => {
                   className="btn-outline-success mr-2"
                   onClick={handleSaveOptions}
                 >
-                  <i className='fa fa-save'></i> Guardar
+                  <i className="fa fa-save"></i> Guardar
                 </Button>
                 <Button
                   className="btn-outline-secondary "
                   onClick={handleCloseOptions}
                 >
-                  <i className='fa fa-close'></i> Cancelar
+                  <i className="fa fa-close"></i> Cancelar
                 </Button>
               </div>
             </div>
@@ -148,10 +147,7 @@ const SidebarConfiguration = (props) => {
 
         <div className="side-modal_bottom"></div>
       </div>
-      <div
-        className="side-modal_overlay"
-        onClick={handleCloseOptions}
-      ></div>
+      <div className="side-modal_overlay" onClick={handleCloseOptions}></div>
     </div>
   );
 };
@@ -184,7 +180,6 @@ SidebarConfiguration.propTypes = {
 
   handleSaveOptions: PropTypes.func.isRequired,
   handleCloseOptions: PropTypes.func.isRequired,
-}
-
+};
 
 export default SidebarConfiguration;

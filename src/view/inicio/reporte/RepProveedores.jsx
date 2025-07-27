@@ -1,6 +1,15 @@
 import PropTypes from 'prop-types';
-import { XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ScatterChart, ZAxis, Scatter } from 'recharts'
-import { CreditCard, ShoppingCart, Truck } from 'lucide-react'
+import {
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ScatterChart,
+  ZAxis,
+  Scatter,
+} from 'recharts';
+import { CreditCard, ShoppingCart, Truck } from 'lucide-react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import { SpinnerView } from '../../../components/Spinner';
@@ -10,11 +19,29 @@ import Button from '../../../components/Button';
 import Column from '../../../components/Column';
 import Input from '../../../components/Input';
 import Select from '../../../components/Select';
-import { Card, CardBody, CardDescription, CardHeader, CardText, CardTitle } from '../../../components/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import {
+  Card,
+  CardBody,
+  CardDescription,
+  CardHeader,
+  CardText,
+  CardTitle,
+} from '../../../components/Card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../components/Table';
 import CustomComponent from '../../../model/class/custom-component';
 import pdfVisualizer from 'pdf-visualizer';
-import { documentsExcelPersonaProveedor, documentsPdfReportsPersonaProveedor } from '../../../network/rest/principal.network';
+import {
+  documentsExcelPersonaProveedor,
+  documentsPdfReportsPersonaProveedor,
+} from '../../../network/rest/principal.network';
 import { guId } from '../../../helper/utils.helper';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 
@@ -23,16 +50,15 @@ import { downloadFileAsync } from '../../../redux/downloadSlice';
  * @extends React.Component
  */
 class RepProveedores extends CustomComponent {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
     };
   }
 
@@ -50,13 +76,9 @@ class RepProveedores extends CustomComponent {
   |
   */
 
-  async componentDidMount() {
+  async componentDidMount() {}
 
-  }
-
-  componentWillUnmount() {
-
-  }
+  componentWillUnmount() {}
 
   /*
   |--------------------------------------------------------------------------
@@ -71,7 +93,6 @@ class RepProveedores extends CustomComponent {
   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
   |
   */
-
 
   /*
   |--------------------------------------------------------------------------
@@ -89,7 +110,6 @@ class RepProveedores extends CustomComponent {
   |
   */
 
-
   handleOpenPdf = async () => {
     await pdfVisualizer.init({
       url: documentsPdfReportsPersonaProveedor(),
@@ -97,13 +117,13 @@ class RepProveedores extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handleDownloadExcel = async () => {
     const id = guId();
     const url = documentsExcelPersonaProveedor();
     this.props.downloadFileAsync({ id, url });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -122,14 +142,43 @@ class RepProveedores extends CustomComponent {
   */
 
   render() {
-
     const data = [
-      { proveedor: 'Proveedor A', precio: 100, rotacion: 50, producto: 'Producto 1' },
-      { proveedor: 'Proveedor B', precio: 120, rotacion: 30, producto: 'Producto 1' },
-      { proveedor: 'Proveedor C', precio: 90, rotacion: 70, producto: 'Producto 1' },
-      { proveedor: 'Proveedor A', precio: 200, rotacion: 20, producto: 'Producto 2' },
-      { proveedor: 'Proveedor B', precio: 180, rotacion: 40, producto: 'Producto 2' },
-      { proveedor: 'Proveedor C', precio: 220, rotacion: 10, producto: 'Producto 2' },
+      {
+        proveedor: 'Proveedor A',
+        precio: 100,
+        rotacion: 50,
+        producto: 'Producto 1',
+      },
+      {
+        proveedor: 'Proveedor B',
+        precio: 120,
+        rotacion: 30,
+        producto: 'Producto 1',
+      },
+      {
+        proveedor: 'Proveedor C',
+        precio: 90,
+        rotacion: 70,
+        producto: 'Producto 1',
+      },
+      {
+        proveedor: 'Proveedor A',
+        precio: 200,
+        rotacion: 20,
+        producto: 'Producto 2',
+      },
+      {
+        proveedor: 'Proveedor B',
+        precio: 180,
+        rotacion: 40,
+        producto: 'Producto 2',
+      },
+      {
+        proveedor: 'Proveedor C',
+        precio: 220,
+        rotacion: 10,
+        producto: 'Producto 2',
+      },
     ];
 
     return (
@@ -140,8 +189,8 @@ class RepProveedores extends CustomComponent {
         />
 
         <Title
-          title='Reporte Cliente'
-          subTitle='DASHBOARD'
+          title="Reporte Cliente"
+          subTitle="DASHBOARD"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -168,48 +217,57 @@ class RepProveedores extends CustomComponent {
         </Row> */}
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Input
-              label={"Fecha de Inicio:"}
-              type="date"
-            />
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Input label={'Fecha de Inicio:'} type="date" />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Input
-              label={"Fecha de Final:"}
-              type="date"
-            />
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Input label={'Fecha de Final:'} type="date" />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Select
-              label={"Sucursal:"}
-            >
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Select label={'Sucursal:'}>
               <option value="">TODOS</option>
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Usuario:"}
+              label={'Usuario:'}
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value='0'>TODOS</option>
-              <option value='1'>COBRADO</option>
-              <option value='2'>POR COBRAR</option>
-              <option value='3'>ANULADO</option>
+              <option value="0">TODOS</option>
+              <option value="1">COBRADO</option>
+              <option value="2">POR COBRAR</option>
+              <option value="3">ANULADO</option>
             </Select>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-4 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Total Proveedores</CardTitle>
-                <Truck className='text-secondary' />
+              <CardHeader className="d-flex flex-row align-items-center justify-content-between">
+                <CardTitle className="text-base m-0">
+                  Total Proveedores
+                </CardTitle>
+                <Truck className="text-secondary" />
               </CardHeader>
               <CardBody>
                 <CardText>1,234</CardText>
@@ -218,28 +276,42 @@ class RepProveedores extends CustomComponent {
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-4 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Gastos en Proveedores</CardTitle>
-                <ShoppingCart className='text-secondary' />
+              <CardHeader className="d-flex flex-row align-items-center justify-content-between">
+                <CardTitle className="text-base m-0">
+                  Gastos en Proveedores
+                </CardTitle>
+                <ShoppingCart className="text-secondary" />
               </CardHeader>
               <CardBody>
                 <CardText>$54,321</CardText>
-                <p className="text-xs text-secondary">-2.5% desde el mes pasado</p>
+                <p className="text-xs text-secondary">
+                  -2.5% desde el mes pasado
+                </p>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-4 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-4 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
-              <CardHeader className='d-flex flex-row align-items-center justify-content-between'>
-                <CardTitle className='text-base m-0'>Proveedores por Pagar</CardTitle>
-                <CreditCard className='text-secondary' />
+              <CardHeader className="d-flex flex-row align-items-center justify-content-between">
+                <CardTitle className="text-base m-0">
+                  Proveedores por Pagar
+                </CardTitle>
+                <CreditCard className="text-secondary" />
               </CardHeader>
               <CardBody>
                 <CardText>$8,765</CardText>
-                <p className="text-xs text-secondary">7 proveedores con pagos pendientes</p>
+                <p className="text-xs text-secondary">
+                  7 proveedores con pagos pendientes
+                </p>
               </CardBody>
             </Card>
           </Column>
@@ -249,15 +321,30 @@ class RepProveedores extends CustomComponent {
           <Column formGroup={true}>
             <Card>
               <CardHeader>
-                <CardTitle>Comparación de Proveedores: Precio vs. Rotación de Productos</CardTitle>
-                <CardDescription>El tamaño de la burbuja representa la cantidad de producto disponible</CardDescription>
+                <CardTitle>
+                  Comparación de Proveedores: Precio vs. Rotación de Productos
+                </CardTitle>
+                <CardDescription>
+                  El tamaño de la burbuja representa la cantidad de producto
+                  disponible
+                </CardDescription>
               </CardHeader>
               <CardBody>
                 <ResponsiveContainer width="100%" height={400}>
-                  <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <ScatterChart
+                    margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                  >
                     <XAxis dataKey="precio" name="Precio" unit="$" />
-                    <YAxis dataKey="proveedor" name="Proveedor" type="category" />
-                    <ZAxis dataKey="rotacion" range={[100, 1000]} name="Rotación" />
+                    <YAxis
+                      dataKey="proveedor"
+                      name="Proveedor"
+                      type="category"
+                    />
+                    <ZAxis
+                      dataKey="rotacion"
+                      range={[100, 1000]}
+                      name="Rotación"
+                    />
                     <Tooltip cursor={{ strokeDasharray: '3 3' }} />
                     <Legend />
                     <Scatter name="Productos" data={data} fill="#8884d8" />
@@ -279,9 +366,15 @@ class RepProveedores extends CustomComponent {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="30%">Nombre del Proveedor</TableHead>
-                        <TableHead className="text-secondary" width="30%">Última Venta</TableHead>
-                        <TableHead className="text-secondary" width="35%">Total de Ventas</TableHead>
+                        <TableHead className="text-secondary" width="30%">
+                          Nombre del Proveedor
+                        </TableHead>
+                        <TableHead className="text-secondary" width="30%">
+                          Última Venta
+                        </TableHead>
+                        <TableHead className="text-secondary" width="35%">
+                          Total de Ventas
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -299,7 +392,7 @@ class RepProveedores extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardHeader>
                 <CardTitle>Productos Más Vendidos por Proveedor</CardTitle>
@@ -310,9 +403,15 @@ class RepProveedores extends CustomComponent {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="10%">Proveedor</TableHead>
-                        <TableHead className="text-secondary" width="10%">Producto</TableHead>
-                        <TableHead className="text-secondary" width="15%">Cantidad</TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Proveedor
+                        </TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Producto
+                        </TableHead>
+                        <TableHead className="text-secondary" width="15%">
+                          Cantidad
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -328,19 +427,25 @@ class RepProveedores extends CustomComponent {
             </Card>
           </Column>
 
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardHeader>
                 <CardTitle>Top 5 Proveedores</CardTitle>
-                <CardDescription>Proveedores con mayor volumen de ventas</CardDescription>
+                <CardDescription>
+                  Proveedores con mayor volumen de ventas
+                </CardDescription>
               </CardHeader>
               <CardBody>
                 <TableResponsive>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="10%">Nombre</TableHead>
-                        <TableHead className="text-secondary" width="15%">Ventas Totales</TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Nombre
+                        </TableHead>
+                        <TableHead className="text-secondary" width="15%">
+                          Ventas Totales
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -380,6 +485,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedRepProveedores = connect(mapStateToProps, mapDispatchToProps)(RepProveedores);;
+const ConnectedRepProveedores = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(RepProveedores);
 
 export default ConnectedRepProveedores;

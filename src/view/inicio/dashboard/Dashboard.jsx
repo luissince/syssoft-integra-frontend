@@ -5,13 +5,43 @@ import ContainerWrapper from '../../../components/Container';
 import { SpinnerView } from '../../../components/Spinner';
 import Row from '../../../components/Row';
 import Column from '../../../components/Column';
-import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardText,
+  CardTitle,
+} from '../../../components/Card';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../components/Table';
 import Title from '../../../components/Title';
 import { ArrowDownIcon, ArrowUpIcon, DollarSign, FileText } from 'lucide-react';
 import { dashboardInit } from '../../../network/rest/principal.network';
-import { isEmpty, months, numberFormat, rounded } from '../../../helper/utils.helper';
+import {
+  isEmpty,
+  months,
+  numberFormat,
+  rounded,
+} from '../../../helper/utils.helper';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import { OperationsSummary } from '@/components/ui/operations-summary';
@@ -25,16 +55,15 @@ import { RecentActivity } from '@/components/ui/recent-activity';
  * @extends React.Component
  */
 class Dashboard extends React.Component {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
 
       codIso: this.props.moneda.codiso ?? '',
       idSucursal: this.props.token.project.idSucursal,
@@ -53,7 +82,7 @@ class Dashboard extends React.Component {
 
       totalSucursales: 0,
       inventarios: [],
-    }
+    };
     this.abortControllerView = new AbortController();
   }
 
@@ -96,7 +125,7 @@ class Dashboard extends React.Component {
   loadingInit = async () => {
     const params = {
       idSucursal: this.state.idSucursal,
-    }
+    };
 
     const responde = await dashboardInit(
       params,
@@ -114,7 +143,7 @@ class Dashboard extends React.Component {
 
     this.setState(responde.data);
     this.setState({ loading: false });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -131,7 +160,6 @@ class Dashboard extends React.Component {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
-
 
   /*
   |--------------------------------------------------------------------------
@@ -153,7 +181,9 @@ class Dashboard extends React.Component {
     if (isEmpty(this.state.sucursales)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="4">¡No hay datos para mostrar!</TableCell>
+          <TableCell className="text-center" colSpan="4">
+            ¡No hay datos para mostrar!
+          </TableCell>
         </TableRow>
       );
     }
@@ -166,7 +196,9 @@ class Dashboard extends React.Component {
           <TableCell>{item.id}</TableCell>
           <TableCell>{item.sucursal}</TableCell>
           <TableCell>{numberFormat(item.total, this.state.codIso)} </TableCell>
-          <TableCell className={`text-center`}>{rounded(item.rendimiento, 0)} %</TableCell>
+          <TableCell className={`text-center`}>
+            {rounded(item.rendimiento, 0)} %
+          </TableCell>
         </TableRow>
       );
     });
@@ -202,7 +234,6 @@ class Dashboard extends React.Component {
     //   { estado: '31-60 días', valor: 12000, color: '#f97316' },
     //   { estado: '> 60 días', valor: 8000, color: '#dc2626' },
     // ];
-
 
     return (
       <ContainerWrapper>
@@ -470,7 +501,7 @@ Dashboard.propTypes = {
   token: PropTypes.shape({
     project: PropTypes.shape({
       idSucursal: PropTypes.string,
-    })
+    }),
   }),
   moneda: PropTypes.shape({
     codiso: PropTypes.string,

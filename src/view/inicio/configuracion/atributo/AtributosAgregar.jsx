@@ -10,7 +10,10 @@ import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import ContainerWrapper from '../../../../components/Container';
-import { addAtributo, comboTipoAtributo } from '../../../../network/rest/principal.network';
+import {
+  addAtributo,
+  comboTipoAtributo,
+} from '../../../../network/rest/principal.network';
 import Title from '../../../../components/Title';
 import PropTypes from 'prop-types';
 import Row from '../../../../components/Row';
@@ -20,7 +23,10 @@ import { Switches } from '../../../../components/Checks';
 import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
 import { CANCELED } from '../../../../model/types/types';
-import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_TALLA } from '../../../../model/types/tipo-atributo';
+import {
+  TIPO_ATRIBUTO_COLOR,
+  TIPO_ATRIBUTO_TALLA,
+} from '../../../../model/types/tipo-atributo';
 
 class AtributosAgregar extends React.Component {
   constructor(props) {
@@ -55,9 +61,7 @@ class AtributosAgregar extends React.Component {
   }
 
   async loadingData() {
-    const [tipoAtributos] = await Promise.all([
-      this.fetchComboTipoAtributo(),
-    ]);
+    const [tipoAtributos] = await Promise.all([this.fetchComboTipoAtributo()]);
 
     this.setState({
       tipoAtributos,
@@ -153,8 +157,8 @@ class AtributosAgregar extends React.Component {
     return (
       <ContainerWrapper>
         <Title
-          title='Atributo'
-          subTitle='AGREGAR'
+          title="Atributo"
+          subTitle="AGREGAR"
           icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -162,17 +166,22 @@ class AtributosAgregar extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Select
-              label={<>Tipo Atributo:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo Atributo:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTipoAtributo}
               value={this.state.idTipoAtributo}
               onChange={this.handleSelectTipoAtributo}
             >
               <option value="">-- Seleccione un tipo de atributo --</option>
-              {
-                this.state.tipoAtributos.map((item, index) => (
-                  <option key={index} value={item.idTipoAtributo}>{item.nombre}</option>
-                ))
-              }
+              {this.state.tipoAtributos.map((item, index) => (
+                <option key={index} value={item.idTipoAtributo}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
@@ -180,7 +189,11 @@ class AtributosAgregar extends React.Component {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre:<i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese el nombre"
               ref={this.refNombre}
               value={this.state.nombre}
@@ -189,38 +202,38 @@ class AtributosAgregar extends React.Component {
           </Column>
         </Row>
 
-        {
-          this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={"Color"}
-                  type='color'
-                  placeholder="Ingrese su color"
-                  ref={this.refHexadecimal}
-                  value={this.state.hexadecimal}
-                  onChange={this.handleInputHexacimal}
-                />
-              </Column>
-            </Row>
-          )
-        }
+        {this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
+          <Row>
+            <Column formGroup={true}>
+              <Input
+                label={'Color'}
+                type="color"
+                placeholder="Ingrese su color"
+                ref={this.refHexadecimal}
+                value={this.state.hexadecimal}
+                onChange={this.handleInputHexacimal}
+              />
+            </Column>
+          </Row>
+        )}
 
-        {
-          this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={<>Valor:<i className="fa fa-asterisk text-danger small"></i></>}
-                  placeholder="Ingrese su valor"
-                  ref={this.refValor}
-                  value={this.state.valor}
-                  onChange={this.handleInputValor}
-                />
-              </Column>
-            </Row>
-          )
-        }
+        {this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
+          <Row>
+            <Column formGroup={true}>
+              <Input
+                label={
+                  <>
+                    Valor:<i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                placeholder="Ingrese su valor"
+                ref={this.refValor}
+                value={this.state.valor}
+                onChange={this.handleInputValor}
+              />
+            </Column>
+          </Row>
+        )}
 
         <Row>
           <Column formGroup={true}>
@@ -240,14 +253,13 @@ class AtributosAgregar extends React.Component {
               className="btn-success"
               onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -259,13 +271,13 @@ class AtributosAgregar extends React.Component {
 AtributosAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -273,6 +285,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedAtributosAgregar = connect(mapStateToProps, null)(AtributosAgregar);
+const ConnectedAtributosAgregar = connect(
+  mapStateToProps,
+  null,
+)(AtributosAgregar);
 
 export default ConnectedAtributosAgregar;

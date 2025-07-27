@@ -22,7 +22,15 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 
 class Impuestos extends CustomComponent {
@@ -83,7 +91,7 @@ class Impuestos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -117,7 +125,10 @@ class Impuestos extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listImpuesto(params, this.abortControllerTable.signal);
+    const response = await listImpuesto(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
@@ -157,26 +168,29 @@ class Impuestos extends CustomComponent {
   };
 
   handleBorrar(idImpuesto) {
-    alertDialog('Impuesto', '¿Estás seguro de eliminar la moneda?', async (accept) => {
-      if (accept) {
-        alertInfo('Impuesto', 'Procesando información...');
+    alertDialog(
+      'Impuesto',
+      '¿Estás seguro de eliminar la moneda?',
+      async (accept) => {
+        if (accept) {
+          alertInfo('Impuesto', 'Procesando información...');
 
-        const params = {
-          idImpuesto: idImpuesto,
-        };
+          const params = {
+            idImpuesto: idImpuesto,
+          };
 
-        const response = await deleteImpuesto(params);
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Impuesto', response.data, () => {
-            this.loadingInit();
-          });
+          const response = await deleteImpuesto(params);
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Impuesto', response.data, () => {
+              this.loadingInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertWarning('Impuesto', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Impuesto', response.getMessage());
-        }
-      }
-    },
+      },
     );
   }
 
@@ -184,8 +198,8 @@ class Impuestos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='9'
-          message='Cargando información de la tabla...'
+          colSpan="9"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -207,14 +221,18 @@ class Impuestos extends CustomComponent {
           <TableCell>{item.codigo}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.preferido === 1 ? 'badge-info' : 'badge-secondary'}`}
+              className={`badge ${
+                item.preferido === 1 ? 'badge-info' : 'badge-secondary'
+              }`}
             >
               {item.preferido ? 'SI' : 'NO'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'}`}
+              className={`badge ${
+                item.estado === 1 ? 'badge-success' : 'badge-danger'
+              }`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -223,7 +241,7 @@ class Impuestos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idImpuesto)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -232,7 +250,7 @@ class Impuestos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idImpuesto)}
-            // disabled={!this.state.remove}
+              // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -245,19 +263,15 @@ class Impuestos extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-
         <Title
-          title='Impuestos'
-          subTitle='LISTA'
+          title="Impuestos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleAgregar}
-            >
+            <Button className="btn-outline-info" onClick={this.handleAgregar}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
             <Button
@@ -284,22 +298,27 @@ class Impuestos extends CustomComponent {
         <Row>
           <Column className="col-md-12 col-sm-12">
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="40%">Nombre</TableHead>
                     <TableHead width="15%">Porcentaje</TableHead>
                     <TableHead width="15%">Código</TableHead>
                     <TableHead width="15%">Preferida</TableHead>
                     <TableHead width="15%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center"> Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      {' '}
+                      Editar
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Eliminar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generarBody()}
-                </TableBody>
+                <TableBody>{this.generarBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

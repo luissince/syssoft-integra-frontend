@@ -1,5 +1,5 @@
-import { ContainerMenu } from "../../../components/Container";
-import { connect } from "react-redux";
+import { ContainerMenu } from '../../../components/Container';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import Ventas from './venta/lista/Ventas.jsx';
@@ -31,70 +31,64 @@ import CuentasPorCobrarAbonar from './cuenta-cobrar/crear/CuentasPorCobrarAbonar
 import Pedidos from './pedido/lista/Pedidos.jsx';
 import PedidoCrear from './pedido/formularios/crear/PedidoCrear.jsx';
 import PedidoEditar from './pedido/formularios/editar/PedidoEditar.jsx';
-import PedidoDetalle from './pedido/detalle/PedidoDetalle.jsx'; 
+import PedidoDetalle from './pedido/detalle/PedidoDetalle.jsx';
 
 export {
-    Ventas,
-    VentaCrear,
-    VentaCrearEscritorio,
-    VentaDetalle,
-
-    Cobros,
-    CobroCrear,
-    CobroDetalle,
-
-    Cotizaciones,
-    CotizacioneCrear,
-    CotizacioneEditar,
-    CotizacionDetalle,
-
-    GuiaRemision,
-    GuiaRemisionCrear,
-    GuiaRemisionEditar,
-    GuiaRemisionDetalle,
-
-    NotaCredito,
-    NotaCreditoProceso,
-    NotaCreditoDetalle,
-
-    CuentasPorCobrar,        
-    CuentasPorCobrarAbonar,
-
-    Pedidos,
-    PedidoCrear,
-    PedidoEditar,    
-    PedidoDetalle,
-}
+  Ventas,
+  VentaCrear,
+  VentaCrearEscritorio,
+  VentaDetalle,
+  Cobros,
+  CobroCrear,
+  CobroDetalle,
+  Cotizaciones,
+  CotizacioneCrear,
+  CotizacioneEditar,
+  CotizacionDetalle,
+  GuiaRemision,
+  GuiaRemisionCrear,
+  GuiaRemisionEditar,
+  GuiaRemisionDetalle,
+  NotaCredito,
+  NotaCreditoProceso,
+  NotaCreditoDetalle,
+  CuentasPorCobrar,
+  CuentasPorCobrarAbonar,
+  Pedidos,
+  PedidoCrear,
+  PedidoEditar,
+  PedidoDetalle,
+};
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 const Facturacion = (props) => {
-    return (
-        <ContainerMenu
-            title={"Seleccione el módulo correspondiente"}
-            subMenus={props.token.userToken.menus[2].subMenus}
-            url={props.match.url}
-        />
-    );
-}
+  return (
+    <ContainerMenu
+      title={'Seleccione el módulo correspondiente'}
+      subMenus={props.token.userToken.menus[2].subMenus}
+      url={props.match.url}
+    />
+  );
+};
 
 Facturacion.propTypes = {
-    token: PropTypes.shape({
-        userToken: PropTypes.shape({
-            menus: PropTypes.array.isRequired,
-        }).isRequired,
+  token: PropTypes.shape({
+    userToken: PropTypes.shape({
+      menus: PropTypes.array.isRequired,
     }).isRequired,
-    match: PropTypes.shape({
-        url: PropTypes.string
-    })
-}
+  }).isRequired,
+  match: PropTypes.shape({
+    url: PropTypes.string,
+  }),
+};
 
 const mapStateToProps = (state) => {
-    return {
-        token: state.principal,
-    };
+  return {
+    token: state.principal,
+  };
 };
 
 const ConnectedFacturacion = connect(mapStateToProps, null)(Facturacion);

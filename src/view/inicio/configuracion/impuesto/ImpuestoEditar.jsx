@@ -65,9 +65,7 @@ class ImpuestoEditar extends CustomComponent {
   }
 
   loadingData = async (id) => {
-    const [impuesto] = await Promise.all([
-      this.fetchGetIdImpuesto(id)
-    ]);
+    const [impuesto] = await Promise.all([this.fetchGetIdImpuesto(id)]);
 
     this.setState({
       idImpuesto: impuesto.idImpuesto,
@@ -149,8 +147,8 @@ class ImpuestoEditar extends CustomComponent {
         />
 
         <Title
-          title='Impuesto'
-          subTitle='EDITAR'
+          title="Impuesto"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -249,18 +247,14 @@ class ImpuestoEditar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

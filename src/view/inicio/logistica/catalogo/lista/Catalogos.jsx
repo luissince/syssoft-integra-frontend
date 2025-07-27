@@ -1,5 +1,9 @@
 import ContainerWrapper from '../../../../../components/Container';
-import { currentDate, formatTime, isEmpty } from '../../../../../helper/utils.helper';
+import {
+  currentDate,
+  formatTime,
+  isEmpty,
+} from '../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../model/class/custom-component';
 import { listCatalogo } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -9,14 +13,25 @@ import { connect } from 'react-redux';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Paginacion from '../../../../../components/Paginacion';
 import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import Input from '../../../../../components/Input';
 import PropTypes from 'prop-types';
-import { setListaCatalogoData, setListaCatalogoPaginacion } from '../../../../../redux/predeterminadoSlice';
+import {
+  setListaCatalogoData,
+  setListaCatalogoPaginacion,
+} from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 
 /**
@@ -24,7 +39,6 @@ import React from 'react';
  * @extends React.Component
  */
 class Catalogos extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -74,7 +88,7 @@ class Catalogos extends CustomComponent {
   */
 
   async componentDidMount() {
-    await this.loadingData()
+    await this.loadingData();
   }
 
   componentWillUnmount() {
@@ -96,24 +110,34 @@ class Catalogos extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (this.props.catalogoLista && this.props.catalogoLista.data && this.props.catalogoLista.paginacion) {
-      this.setState(this.props.catalogoLista.data)
-      this.refPaginacion.current.upperPageBound = this.props.catalogoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound = this.props.catalogoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive = this.props.catalogoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive = this.props.catalogoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound = this.props.catalogoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = this.props.catalogoLista.paginacion.messagePaginacion;
+    if (
+      this.props.catalogoLista &&
+      this.props.catalogoLista.data &&
+      this.props.catalogoLista.paginacion
+    ) {
+      this.setState(this.props.catalogoLista.data);
+      this.refPaginacion.current.upperPageBound =
+        this.props.catalogoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound =
+        this.props.catalogoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive =
+        this.props.catalogoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive =
+        this.props.catalogoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound =
+        this.props.catalogoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion =
+        this.props.catalogoLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(this.props.catalogoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
     }
-  }
+  };
 
   updateReduxState() {
-    this.props.setListaCatalogoData(this.state)
+    this.props.setListaCatalogoData(this.state);
     this.props.setListaCatalogoPaginacion({
       upperPageBound: this.refPaginacion.current.upperPageBound,
       lowerPageBound: this.refPaginacion.current.lowerPageBound,
@@ -140,7 +164,7 @@ class Catalogos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   async searchOpciones() {
     if (this.state.loading) return;
@@ -190,20 +214,26 @@ class Catalogos extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listCatalogo(params, this.abortControllerTable.signal);
+    const response = await listCatalogo(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
+      this.setState(
+        {
+          loading: false,
+          lista: response.data.result,
+          totalPaginacion: totalPaginacion,
+        },
+        () => {
+          this.updateReduxState();
+        },
+      );
     }
 
     if (response instanceof ErrorResponse) {
@@ -216,7 +246,7 @@ class Catalogos extends CustomComponent {
         messageTable: response.getMessage(),
       });
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -238,33 +268,33 @@ class Catalogos extends CustomComponent {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/crear`,
     });
-  }
+  };
 
   handleEditar = (idCatalogo) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
       search: '?idCatalogo=' + idCatalogo,
     });
-  }
+  };
 
   handleDetalle = (idCatalogo) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idCatalogo=' + idCatalogo,
     });
-  }
+  };
 
   handleInputFechaInico = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   handleInputFechaFinal = (event) => {
     this.setState({ fechaFinal: event.target.value }, () => {
       this.searchOpciones();
-    })
-  }
+    });
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -288,8 +318,8 @@ class Catalogos extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan='5'
-          message='Cargando información de la tabla...'
+          colSpan="5"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -297,7 +327,9 @@ class Catalogos extends CustomComponent {
     if (isEmpty(lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="5">¡No hay datos registrados!</TableCell>
+          <TableCell className="text-center" colSpan="5">
+            ¡No hay datos registrados!
+          </TableCell>
         </TableRow>
       );
     }
@@ -306,13 +338,18 @@ class Catalogos extends CustomComponent {
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>{item.fecha}<br />{formatTime(item.hora)}</TableCell>
+          <TableCell>
+            {item.fecha}
+            <br />
+            {formatTime(item.hora)}
+          </TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-primary btn-sm"
               title="Detalle"
-              onClick={() => this.handleDetalle(item.idCatalogo)}>
+              onClick={() => this.handleDetalle(item.idCatalogo)}
+            >
               <i className="fa fa-eye"></i>
             </Button>
           </TableCell>
@@ -320,7 +357,8 @@ class Catalogos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               title="Editar"
-              onClick={() => this.handleEditar(item.idCatalogo)}>
+              onClick={() => this.handleEditar(item.idCatalogo)}
+            >
               <i className="fa fa-edit"></i>
             </Button>
           </TableCell>
@@ -333,40 +371,44 @@ class Catalogos extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Catálogo'
-          subTitle='LISTA'
+          title="Catálogo"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-outline-info"
-              onClick={this.handleCrear}>
+            <Button className="btn-outline-info" onClick={this.handleCrear}>
               <i className="bi bi-file-plus"></i> Crear Catálogo
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-outline-secondary"
-              onClick={this.loadingInit}>
+              onClick={this.loadingInit}
+            >
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Inicio:"}
+              label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Final:"}
+              label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
@@ -389,19 +431,23 @@ class Catalogos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="25%">Nombre</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderBody()}
-                </TableBody>
+                <TableBody>{this.renderBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -432,23 +478,26 @@ Catalogos.propTypes = {
   }).isRequired,
   catalogoLista: PropTypes.shape({
     data: PropTypes.object,
-    paginacion: PropTypes.object
+    paginacion: PropTypes.object,
   }),
   setListaCatalogoData: PropTypes.func,
   setListaCatalogoPaginacion: PropTypes.func,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
-}
+  location: PropTypes.object,
+};
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
-    catalogoLista: state.predeterminado.catalogoLista
+    catalogoLista: state.predeterminado.catalogoLista,
   };
 };
 
-const mapDispatchToProps = { setListaCatalogoData, setListaCatalogoPaginacion }
+const mapDispatchToProps = { setListaCatalogoData, setListaCatalogoPaginacion };
 
-const ConnectedCatalogos = connect(mapStateToProps, mapDispatchToProps)(Catalogos);
+const ConnectedCatalogos = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Catalogos);
 
 export default ConnectedCatalogos;

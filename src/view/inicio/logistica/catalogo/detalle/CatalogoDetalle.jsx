@@ -1,13 +1,29 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { alertWarning, formatTime, isText } from '../../../../../helper/utils.helper';
+import {
+  alertWarning,
+  formatTime,
+  isText,
+} from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { detailCatalogo, documentsPdfCatalogo } from '../../../../../network/rest/principal.network';
+import {
+  detailCatalogo,
+  documentsPdfCatalogo,
+} from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
@@ -21,7 +37,6 @@ import { images } from '../../../../../helper';
  * @extends React.Component
  */
 class CatalogoDetalle extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -98,17 +113,12 @@ class CatalogoDetalle extends CustomComponent {
     response instanceof SuccessReponse;
     const { cabecera, detalles } = response.data;
 
-    const {
-      nombre,
-      fecha,
-      hora,
-      usuario,
-    } = cabecera;
+    const { nombre, fecha, hora, usuario } = cabecera;
 
     this.setState({
       idCatalogo: id,
       nombre,
-      fechaHora: fecha + " " + formatTime(hora),
+      fechaHora: fecha + ' ' + formatTime(hora),
       usuario,
 
       detalles: detalles,
@@ -118,7 +128,7 @@ class CatalogoDetalle extends CustomComponent {
 
   close = () => {
     this.props.history.goBack();
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -147,7 +157,7 @@ class CatalogoDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -174,28 +184,28 @@ class CatalogoDetalle extends CustomComponent {
         />
 
         <Title
-          title='Catálogo'
-          subTitle='DETALLE'
+          title="Catálogo"
+          subTitle="DETALLE"
           handleGoBack={() => this.close()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintA4}
-            >
+            <Button className="btn-light" onClick={this.handlePrintA4}>
               <i className="fa fa-print"></i> A4
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-6 col-sm-12 col-12"
+            formGroup={true}
+          >
             <TableResponsive>
               <Table>
                 <TableHeader>
-                <TableRow>
+                  <TableRow>
                     <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Nombre:
                     </TableHead>
@@ -232,32 +242,34 @@ class CatalogoDetalle extends CustomComponent {
               <Table className="table-light table-striped">
                 <TableHeader className="table-dark">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="20%" className="text-center">Imagen</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
+                    <TableHead width="20%" className="text-center">
+                      Imagen
+                    </TableHead>
                     <TableHead width="50%">Producto</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    this.state.detalles.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="text-center">{item.id}</TableCell>
-                        <TableCell className="text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={100}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {item.codigo}
-                          <br />
-                          {item.nombre}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  }
+                  {this.state.detalles.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="text-center">{item.id}</TableCell>
+                      <TableCell className="text-center">
+                        <Image
+                          default={images.noImage}
+                          src={item.imagen}
+                          alt={item.nombre}
+                          width={100}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {item.codigo}
+                        <br />
+                        {item.nombre}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -273,7 +285,7 @@ CatalogoDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
 };
 

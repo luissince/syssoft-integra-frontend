@@ -25,15 +25,27 @@ import Producto from '../component/Producto';
 import Servicio from '../component/Servicio';
 import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
-import { SERVICIO, UNIDADES } from '../../../../../../model/types/tipo-tratamiento-producto';
+import {
+  SERVICIO,
+  UNIDADES,
+} from '../../../../../../model/types/tipo-tratamiento-producto';
 import Title from '../../../../../../components/Title';
 import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import ModalInventario from '../component/ModalInventario';
 import ModalProducto from '../component/ModalProducto';
-import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_SABOR, TIPO_ATRIBUTO_TALLA } from '../../../../../../model/types/tipo-atributo';
-import { TabContent, TabHead, TabHeader, TabPane } from '../../../../../../components/Tab';
+import {
+  TIPO_ATRIBUTO_COLOR,
+  TIPO_ATRIBUTO_SABOR,
+  TIPO_ATRIBUTO_TALLA,
+} from '../../../../../../model/types/tipo-atributo';
+import {
+  TabContent,
+  TabHead,
+  TabHeader,
+  TabPane,
+} from '../../../../../../components/Tab';
 import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 /**
@@ -41,7 +53,6 @@ import { alertKit } from 'alert-kit';
  * @extends React.Component
  */
 class ProductoAgregar extends CustomComponent {
-
   /**
    * Inicializa un nuevo componente.
    * @param {Object} props - Las propiedades pasadas al componente.
@@ -137,7 +148,6 @@ class ProductoAgregar extends CustomComponent {
       coloresCombo: [],
       tallasCombo: [],
       saboresCombo: [],
-
 
       // Atributos del modal inventario
       isOpenInventario: false,
@@ -262,14 +272,15 @@ class ProductoAgregar extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   loadingData = async () => {
-    const [medidas, categorias, marcas, colores, tallas, sabores,] = await Promise.all([
-      this.fetchComboMedida(),
-      this.fetchComboCategoria(),
-      this.fetchComboMarca(),
-      this.fetchComboColor(TIPO_ATRIBUTO_COLOR),
-      this.fetchComboColor(TIPO_ATRIBUTO_TALLA),
-      this.fetchComboColor(TIPO_ATRIBUTO_SABOR),
-    ]);
+    const [medidas, categorias, marcas, colores, tallas, sabores] =
+      await Promise.all([
+        this.fetchComboMedida(),
+        this.fetchComboCategoria(),
+        this.fetchComboMarca(),
+        this.fetchComboColor(TIPO_ATRIBUTO_COLOR),
+        this.fetchComboColor(TIPO_ATRIBUTO_TALLA),
+        this.fetchComboColor(TIPO_ATRIBUTO_SABOR),
+      ]);
 
     await this.setStateAsync({
       medidas,
@@ -324,11 +335,10 @@ class ProductoAgregar extends CustomComponent {
     }
   }
 
-
   async fetchComboColor(id) {
     const params = {
-      idTipoAtributo: id
-    }
+      idTipoAtributo: id,
+    };
     const response = await comboAtributo(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
@@ -362,7 +372,7 @@ class ProductoAgregar extends CustomComponent {
   // Acciones del modal inventario
   //------------------------------------------------------------------------------------------
   handleOpenModalInventario = () => {
-    this.setState({ isOpenInventario: true })
+    this.setState({ isOpenInventario: true });
     this.refModalInventario.current.loadDatos();
   };
 
@@ -370,7 +380,7 @@ class ProductoAgregar extends CustomComponent {
     this.setState({ isOpenInventario: false });
   };
 
-  handleAddInventario = async (item, callback = async function () { }) => {
+  handleAddInventario = async (item, callback = async function () {}) => {
     this.setState((prevState) => ({
       inventariosProducto: [...prevState.inventariosProducto, item],
     }));
@@ -380,22 +390,24 @@ class ProductoAgregar extends CustomComponent {
 
   handleRemoveInventario = (idAlmacen) => {
     this.setState((prevState) => ({
-      inventariosProducto: prevState.inventariosProducto.filter((item) => item.idAlmacen !== idAlmacen)
-    }));;
+      inventariosProducto: prevState.inventariosProducto.filter(
+        (item) => item.idAlmacen !== idAlmacen,
+      ),
+    }));
   };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
   //------------------------------------------------------------------------------------------
   handleOpenModalProducto = () => {
-    this.setState({ isOpenProducto: true })
+    this.setState({ isOpenProducto: true });
   };
 
   handleCloseProducto = async () => {
     this.setState({ isOpenProducto: false });
   };
 
-  handleAddProducto = async (item, callback = async function () { }) => {
+  handleAddProducto = async (item, callback = async function () {}) => {
     this.setState((prevState) => ({
       combos: [...prevState.combos, item],
     }));
@@ -405,7 +417,7 @@ class ProductoAgregar extends CustomComponent {
 
   handleRemoveProducto = (idProducto) => {
     this.setState((prevState) => ({
-      combos: prevState.combos.filter((item) => item.idProducto !== idProducto)
+      combos: prevState.combos.filter((item) => item.idProducto !== idProducto),
     }));
   };
 
@@ -502,7 +514,6 @@ class ProductoAgregar extends CustomComponent {
     });
   };
 
-
   handleInputPrecioProducto = (event) => {
     this.setState({
       precioProducto: event.target.value,
@@ -540,10 +551,12 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRemovePreciosProducto = (id) => {
-    const precios = this.state.precios.filter((item) => item.id !== id).map((item, index) => ({
-      ...item,
-      id: index + 1
-    }));
+    const precios = this.state.precios
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
     this.setState({ precios });
   };
 
@@ -578,10 +591,12 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRemoveDetallesProducto = (id) => {
-    const detallesProducto = this.state.detallesProducto.filter((item) => item.id !== id).map((item, index) => ({
-      ...item,
-      id: index + 1
-    }));
+    const detallesProducto = this.state.detallesProducto
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
     this.setState({ detallesProducto });
   };
 
@@ -594,40 +609,58 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleSelectColoresProducto = (color) => {
-    if (this.state.coloresProducto.some((item) => item.idAtributo === color.idAtributo)) {
-      const coloresProducto = this.state.coloresProducto.filter((item) => item.idAtributo !== color.idAtributo);
+    if (
+      this.state.coloresProducto.some(
+        (item) => item.idAtributo === color.idAtributo,
+      )
+    ) {
+      const coloresProducto = this.state.coloresProducto.filter(
+        (item) => item.idAtributo !== color.idAtributo,
+      );
       this.setState({
-        coloresProducto: coloresProducto
+        coloresProducto: coloresProducto,
       });
     } else {
       this.setState((prevState) => ({
-        coloresProducto: [...prevState.coloresProducto, color]
+        coloresProducto: [...prevState.coloresProducto, color],
       }));
     }
   };
 
   handleSelectTallasProducto = (talla) => {
-    if (this.state.tallasProducto.some((item) => item.idAtributo === talla.idAtributo)) {
-      const tallasProducto = this.state.tallasProducto.filter((item) => item.idAtributo !== talla.idAtributo);
+    if (
+      this.state.tallasProducto.some(
+        (item) => item.idAtributo === talla.idAtributo,
+      )
+    ) {
+      const tallasProducto = this.state.tallasProducto.filter(
+        (item) => item.idAtributo !== talla.idAtributo,
+      );
       this.setState({
-        tallasProducto: tallasProducto
+        tallasProducto: tallasProducto,
       });
     } else {
       this.setState((prevState) => ({
-        tallasProducto: [...prevState.tallasProducto, talla]
+        tallasProducto: [...prevState.tallasProducto, talla],
       }));
     }
   };
 
   handleSelectSaboresProducto = (sabor) => {
-    if (this.state.saboresProducto.some((item) => item.idAtributo === sabor.idAtributo)) {
-      const saboresProducto = this.state.saboresProducto.filter((item) => item.idAtributo !== sabor.idAtributo);
+    if (
+      this.state.saboresProducto.some(
+        (item) => item.idAtributo === sabor.idAtributo,
+      )
+    ) {
+      const saboresProducto = this.state.saboresProducto.filter(
+        (item) => item.idAtributo !== sabor.idAtributo,
+      );
       this.setState({
-        saboresProducto: saboresProducto
+        saboresProducto: saboresProducto,
       });
     } else {
       this.setState((prevState) => ({
-        saboresProducto: [...prevState.saboresProducto, sabor]
+        saboresProducto: [...prevState.saboresProducto, sabor],
       }));
     }
   };
@@ -739,10 +772,12 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRemoveDetallesServicio = (id) => {
-    const detallesServicio = this.state.detallesServicio.filter((item) => item.id !== id).map((item, index) => ({
-      ...item,
-      id: index + 1
-    }));
+    const detallesServicio = this.state.detallesServicio
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
     this.setState({ detallesServicio });
   };
 
@@ -755,40 +790,58 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleSelectColoresServicio = (color) => {
-    if (this.state.coloresServicio.some((item) => item.idAtributo === color.idAtributo)) {
-      const coloresServicio = this.state.coloresServicio.filter((item) => item.idAtributo !== color.idAtributo);
+    if (
+      this.state.coloresServicio.some(
+        (item) => item.idAtributo === color.idAtributo,
+      )
+    ) {
+      const coloresServicio = this.state.coloresServicio.filter(
+        (item) => item.idAtributo !== color.idAtributo,
+      );
       this.setState({
-        coloresServicio: coloresServicio
+        coloresServicio: coloresServicio,
       });
     } else {
       this.setState((prevState) => ({
-        coloresServicio: [...prevState.coloresServicio, color]
+        coloresServicio: [...prevState.coloresServicio, color],
       }));
     }
   };
 
   handleSelectTallasServicio = (talla) => {
-    if (this.state.tallasServicio.some((item) => item.idAtributo === talla.idAtributo)) {
-      const tallasServicio = this.state.tallasServicio.filter((item) => item.idAtributo !== talla.idAtributo);
+    if (
+      this.state.tallasServicio.some(
+        (item) => item.idAtributo === talla.idAtributo,
+      )
+    ) {
+      const tallasServicio = this.state.tallasServicio.filter(
+        (item) => item.idAtributo !== talla.idAtributo,
+      );
       this.setState({
-        tallasServicio: tallasServicio
+        tallasServicio: tallasServicio,
       });
     } else {
       this.setState((prevState) => ({
-        tallasServicio: [...prevState.tallasServicio, talla]
+        tallasServicio: [...prevState.tallasServicio, talla],
       }));
     }
   };
 
   handleSelectSaboresServicio = (sabor) => {
-    if (this.state.saboresServicio.some((item) => item.idAtributo === sabor.idAtributo)) {
-      const saboresServicio = this.state.saboresServicio.filter((item) => item.idAtributo !== sabor.idAtributo);
+    if (
+      this.state.saboresServicio.some(
+        (item) => item.idAtributo === sabor.idAtributo,
+      )
+    ) {
+      const saboresServicio = this.state.saboresServicio.filter(
+        (item) => item.idAtributo !== sabor.idAtributo,
+      );
       this.setState({
-        saboresServicio: saboresServicio
+        saboresServicio: saboresServicio,
       });
     } else {
       this.setState((prevState) => ({
-        saboresServicio: [...prevState.saboresServicio, sabor]
+        saboresServicio: [...prevState.saboresServicio, sabor],
       }));
     }
   };
@@ -849,7 +902,7 @@ class ProductoAgregar extends CustomComponent {
     this.setState({
       idMarcaCombo: event.target.value,
     });
-  }
+  };
 
   handleInputDescripcionCortaCombo = (event) => {
     this.setState({
@@ -900,10 +953,12 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleRemoveDetallesCombo = (id) => {
-    const detallesCombo = this.state.detallesCombo.filter((item) => item.id !== id).map((item, index) => ({
-      ...item,
-      id: index + 1
-    }));
+    const detallesCombo = this.state.detallesCombo
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
     this.setState({ detallesCombo });
   };
 
@@ -916,40 +971,58 @@ class ProductoAgregar extends CustomComponent {
   };
 
   handleSelectColoresCombo = (color) => {
-    if (this.state.coloresCombo.some((item) => item.idAtributo === color.idAtributo)) {
-      const coloresCombo = this.state.coloresCombo.filter((item) => item.idAtributo !== color.idAtributo);
+    if (
+      this.state.coloresCombo.some(
+        (item) => item.idAtributo === color.idAtributo,
+      )
+    ) {
+      const coloresCombo = this.state.coloresCombo.filter(
+        (item) => item.idAtributo !== color.idAtributo,
+      );
       this.setState({
-        coloresCombo: coloresCombo
+        coloresCombo: coloresCombo,
       });
     } else {
       this.setState((prevState) => ({
-        coloresCombo: [...prevState.coloresCombo, color]
+        coloresCombo: [...prevState.coloresCombo, color],
       }));
     }
   };
 
   handleSelectTallasCombo = (talla) => {
-    if (this.state.tallasCombo.some((item) => item.idAtributo === talla.idAtributo)) {
-      const tallasCombo = this.state.tallasCombo.filter((item) => item.idAtributo !== talla.idAtributo);
+    if (
+      this.state.tallasCombo.some(
+        (item) => item.idAtributo === talla.idAtributo,
+      )
+    ) {
+      const tallasCombo = this.state.tallasCombo.filter(
+        (item) => item.idAtributo !== talla.idAtributo,
+      );
       this.setState({
-        tallasCombo: tallasCombo
+        tallasCombo: tallasCombo,
       });
     } else {
       this.setState((prevState) => ({
-        tallasCombo: [...prevState.tallasCombo, talla]
+        tallasCombo: [...prevState.tallasCombo, talla],
       }));
     }
   };
 
   handleSelectSaboresCombo = (sabor) => {
-    if (this.state.saboresCombo.some((item) => item.idAtributo === sabor.idAtributo)) {
-      const saboresCombo = this.state.saboresCombo.filter((item) => item.idAtributo !== sabor.idAtributo);
+    if (
+      this.state.saboresCombo.some(
+        (item) => item.idAtributo === sabor.idAtributo,
+      )
+    ) {
+      const saboresCombo = this.state.saboresCombo.filter(
+        (item) => item.idAtributo !== sabor.idAtributo,
+      );
       this.setState({
-        saboresCombo: saboresCombo
+        saboresCombo: saboresCombo,
       });
     } else {
       this.setState((prevState) => ({
-        saboresCombo: [...prevState.saboresCombo, sabor]
+        saboresCombo: [...prevState.saboresCombo, sabor],
       }));
     }
   };
@@ -967,8 +1040,8 @@ class ProductoAgregar extends CustomComponent {
       const logoSend = await imageBase64(file);
       if (logoSend.size > 500) {
         alertKit.warning({
-          title: "Producto",
-          message: "La imagen a subir tiene que ser menor a 500 KB."
+          title: 'Producto',
+          message: 'La imagen a subir tiene que ser menor a 500 KB.',
         });
       }
       this.setState({
@@ -979,14 +1052,14 @@ class ProductoAgregar extends CustomComponent {
           width: logoSend.width,
           height: logoSend.height,
           size: logoSend.size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         imagen: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -996,8 +1069,8 @@ class ProductoAgregar extends CustomComponent {
   handleRemoveImagen = () => {
     this.setState({
       imagen: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
   };
 
@@ -1037,447 +1110,561 @@ class ProductoAgregar extends CustomComponent {
 
   handleSaveProducto = () => {
     if (isEmpty(this.state.nombreProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Ingrese el nombre del producto.',
-      }, () => {
-        this.refNombreProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Ingrese el nombre del producto.',
+        },
+        () => {
+          this.refNombreProducto.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.codigoProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Ingrese el código del producto.',
-      }, () => {
-        this.refCodigoProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Ingrese el código del producto.',
+        },
+        () => {
+          this.refCodigoProducto.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idMedidaProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Seleccione la medida.',
-      }, () => {
-        this.refIdMedidaProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Seleccione la medida.',
+        },
+        () => {
+          this.refIdMedidaProducto.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idCategoriaProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Seleccione la categoría.',
-      }, () => {
-        this.refIdCategoriaProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Seleccione la categoría.',
+        },
+        () => {
+          this.refIdCategoriaProducto.current.focus();
+        },
+      );
       return;
     }
 
     if (!isNumeric(this.state.costoProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Ingrese el costo.',
-      }, () => {
-        this.refCostoProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Ingrese el costo.',
+        },
+        () => {
+          this.refCostoProducto.current.focus();
+        },
+      );
       return;
     }
 
     if (!isNumeric(this.state.precioProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Ingrese el precio.',
-      }, () => {
-        this.refPrecioProducto.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Ingrese el precio.',
+        },
+        () => {
+          this.refPrecioProducto.current.focus();
+        },
+      );
       return;
     }
 
-    if (parseFloat(this.state.precioProducto) <= parseFloat(this.state.costoProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'El costo no debe ser mayor o igual al precio.',
-      }, () => {
-        this.refCostoProducto.current.focus();
-      });
+    if (
+      parseFloat(this.state.precioProducto) <=
+      parseFloat(this.state.costoProducto)
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'El costo no debe ser mayor o igual al precio.',
+        },
+        () => {
+          this.refCostoProducto.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Hay precios sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refPreciosProducto, 'string');
-      });
+    if (
+      this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Hay precios sin nombre..',
+        },
+        () => {
+          validateNumericInputs(this.refPreciosProducto, 'string');
+        },
+      );
       return;
     }
 
-    if (this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Hay precios sin valor.',
-      }, () => {
-        validateNumericInputs(this.refPreciosProducto);
-      });
+    if (
+      this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Hay precios sin valor.',
+        },
+        () => {
+          validateNumericInputs(this.refPreciosProducto);
+        },
+      );
       return;
     }
 
-    if (this.state.detallesProducto.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Hay detalle sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refDetallesProducto, 'string');
-      });
+    if (
+      this.state.detallesProducto.filter((item) => isEmpty(item.nombre))
+        .length !== 0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Hay detalle sin nombre..',
+        },
+        () => {
+          validateNumericInputs(this.refDetallesProducto, 'string');
+        },
+      );
       return;
     }
 
-    if (this.state.detallesProducto.filter((item) => isEmpty(item.valor)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Hay detalle sin valor.',
-      }, () => {
-        validateNumericInputs(this.refDetallesProducto);
-      });
+    if (
+      this.state.detallesProducto.filter((item) => isEmpty(item.valor))
+        .length !== 0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto',
+          message: 'Hay detalle sin valor.',
+        },
+        () => {
+          validateNumericInputs(this.refDetallesProducto);
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      title: 'Producto',
-      message: '¿Estás seguro de continuar?',
-    }, async (accept) => {
-      if (accept) {
+    alertKit.question(
+      {
+        title: 'Producto',
+        message: '¿Estás seguro de continuar?',
+      },
+      async (accept) => {
+        if (accept) {
+          alertKit.loading({ message: 'Procesando información...' });
 
-        alertKit.loading({ message: 'Procesando información...', });
+          const data = {
+            idTipoProducto: this.state.idTipoProducto,
+            nombre: this.state.nombreProducto,
+            codigo: this.state.codigoProducto,
+            sku: this.state.skuProducto,
+            codigoBarras: this.state.codigoBarrasProducto,
+            idCodigoSunat: this.state.codigoSunatProducto,
+            idMedida: this.state.idMedidaProducto,
+            idCategoria: this.state.idCategoriaProducto,
+            idMarca: this.state.idMarcaProducto,
+            descripcionCorta: this.state.descripcionCortaProducto,
+            descripcionLarga: this.state.descripcionLargaProducto,
+            idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
+            costo: this.state.costoProducto,
+            precio: this.state.precioProducto,
+            inventarios: this.state.inventariosProducto,
+            precios: this.state.precios,
+            lote: this.state.lote,
+            publicar: this.state.publicar,
+            negativo: this.state.negativo,
+            preferido: this.state.preferido,
+            estado: this.state.estado,
 
-        const data = {
-          idTipoProducto: this.state.idTipoProducto,
-          nombre: this.state.nombreProducto,
-          codigo: this.state.codigoProducto,
-          sku: this.state.skuProducto,
-          codigoBarras: this.state.codigoBarrasProducto,
-          idCodigoSunat: this.state.codigoSunatProducto,
-          idMedida: this.state.idMedidaProducto,
-          idCategoria: this.state.idCategoriaProducto,
-          idMarca: this.state.idMarcaProducto,
-          descripcionCorta: this.state.descripcionCortaProducto,
-          descripcionLarga: this.state.descripcionLargaProducto,
-          idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
-          costo: this.state.costoProducto,
-          precio: this.state.precioProducto,
-          inventarios: this.state.inventariosProducto,
-          precios: this.state.precios,
-          lote: this.state.lote,
-          publicar: this.state.publicar,
-          negativo: this.state.negativo,
-          preferido: this.state.preferido,
-          estado: this.state.estado,
+            detalles: this.state.detallesProducto,
+            imagenes: this.state.imagenesProducto,
+            colores: this.state.coloresProducto,
+            tallas: this.state.tallasProducto,
+            sabores: this.state.saboresProducto,
 
-          detalles: this.state.detallesProducto,
-          imagenes: this.state.imagenesProducto,
-          colores: this.state.coloresProducto,
-          tallas: this.state.tallasProducto,
-          sabores: this.state.saboresProducto,
+            imagen: this.state.imagen,
 
-          imagen: this.state.imagen,
+            idUsuario: this.state.idUsuario,
+          };
 
-          idUsuario: this.state.idUsuario,
-        };
+          const response = await addProducto(data);
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Producto',
+                message: response.data,
+              },
+              () => {
+                this.props.history.goBack();
+              },
+            );
+          }
 
-        const response = await addProducto(data);
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: 'Producto',
-            message: response.data,
-          }, () => {
-            this.props.history.goBack();
-          });
+          if (response instanceof ErrorResponse) {
+            alertKit.warning({
+              title: 'Producto',
+              message: response.getMessage(),
+            });
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-
-          alertKit.warning({
-            title: 'Producto',
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
+      },
+    );
   };
 
   handleSaveServicio = () => {
     if (isEmpty(this.state.nombreServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el nombre del servicio.',
-      }, () => {
-        this.refNombreServicio.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Ingrese el nombre del servicio.',
+        },
+        () => {
+          this.refNombreServicio.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.codigoServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el código del servicio.',
-      }, () => {
-        this.refCodigoServicio.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Ingrese el código del servicio.',
+        },
+        () => {
+          this.refCodigoServicio.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idMedidaServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Seleccione la medida.',
-      }, () => {
-        this.refIdMedidaServicio.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Seleccione la medida.',
+        },
+        () => {
+          this.refIdMedidaServicio.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idCategoriaServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Seleccione la categoría.',
-      }, () => {
-        this.refIdCategoriaServicio.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Seleccione la categoría.',
+        },
+        () => {
+          this.refIdCategoriaServicio.current.focus();
+        },
+      );
       return;
     }
 
     if (!isNumeric(this.state.precioServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el precio.',
-      }, () => {
-        this.refPrecioServicio.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Ingrese el precio.',
+        },
+        () => {
+          this.refPrecioServicio.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.detallesServicio.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Hay detalle sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refDetallesServicio, 'string');
-      });
+    if (
+      this.state.detallesServicio.filter((item) => isEmpty(item.nombre))
+        .length !== 0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Hay detalle sin nombre..',
+        },
+        () => {
+          validateNumericInputs(this.refDetallesServicio, 'string');
+        },
+      );
       return;
     }
 
-    if (this.state.detallesServicio.filter((item) => isEmpty(item.valor)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Hay detalle sin valor.',
-      }, () => {
-        validateNumericInputs(this.refDetallesServicio);
-      });
+    if (
+      this.state.detallesServicio.filter((item) => isEmpty(item.valor))
+        .length !== 0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Hay detalle sin valor.',
+        },
+        () => {
+          validateNumericInputs(this.refDetallesServicio);
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      title: 'Producto - Servicio',
-      message: '¿Estás seguro de continuar?',
-    }, async (accept) => {
-      if (accept) {
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const data = {
-          idTipoProducto: this.state.idTipoProducto,
-          nombre: this.state.nombreServicio,
-          codigo: this.state.codigoServicio,
-          sku: this.state.skuServicio,
-          codigoBarras: this.state.codigoBarrasServicio,
-          idCodigoSunat: this.state.codigoSunatServicio,
-          idMedida: this.state.idMedidaServicio,
-          idCategoria: this.state.idCategoriaServicio,
-          idMarca: this.state.idMarcaServicio,
-          descripcionCorta: this.state.descripcionCortaServicio,
-          descripcionLarga: this.state.descripcionLargaServicio,
-          idTipoTratamientoProducto: SERVICIO,
-          precio: this.state.precioServicio,
-          costo: 0,
-          inventarios: [],
-          precios: [],
-          lote: this.state.lote,
-          publicar: this.state.publicar,
-          negativo: false,
-          preferido: this.state.preferido,
-          estado: this.state.estado,
-
-          detalles: this.state.detallesServicio,
-          imagenes: this.state.imagenesServicio,
-          colores: this.state.coloresServicio,
-          tallas: this.state.tallasServicio,
-          sabores: this.state.saboresServicio,
-
-          imagen: this.state.imagen,
-
-          idUsuario: this.state.idUsuario,
-        };
-
-        const response = await addProducto(data);
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: 'Producto - Servicio',
-            message: response.data,
-          }, () => {
-            this.props.history.goBack();
+    alertKit.question(
+      {
+        title: 'Producto - Servicio',
+        message: '¿Estás seguro de continuar?',
+      },
+      async (accept) => {
+        if (accept) {
+          alertKit.loading({
+            message: 'Procesando información...',
           });
-        }
 
-        if (response instanceof ErrorResponse) {
-          alertKit.warning({
-            title: 'Producto - Servicio',
-            message: response.getMessage(),
-          });
+          const data = {
+            idTipoProducto: this.state.idTipoProducto,
+            nombre: this.state.nombreServicio,
+            codigo: this.state.codigoServicio,
+            sku: this.state.skuServicio,
+            codigoBarras: this.state.codigoBarrasServicio,
+            idCodigoSunat: this.state.codigoSunatServicio,
+            idMedida: this.state.idMedidaServicio,
+            idCategoria: this.state.idCategoriaServicio,
+            idMarca: this.state.idMarcaServicio,
+            descripcionCorta: this.state.descripcionCortaServicio,
+            descripcionLarga: this.state.descripcionLargaServicio,
+            idTipoTratamientoProducto: SERVICIO,
+            precio: this.state.precioServicio,
+            costo: 0,
+            inventarios: [],
+            precios: [],
+            lote: this.state.lote,
+            publicar: this.state.publicar,
+            negativo: false,
+            preferido: this.state.preferido,
+            estado: this.state.estado,
+
+            detalles: this.state.detallesServicio,
+            imagenes: this.state.imagenesServicio,
+            colores: this.state.coloresServicio,
+            tallas: this.state.tallasServicio,
+            sabores: this.state.saboresServicio,
+
+            imagen: this.state.imagen,
+
+            idUsuario: this.state.idUsuario,
+          };
+
+          const response = await addProducto(data);
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Producto - Servicio',
+                message: response.data,
+              },
+              () => {
+                this.props.history.goBack();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertKit.warning({
+              title: 'Producto - Servicio',
+              message: response.getMessage(),
+            });
+          }
         }
-      }
-    });
+      },
+    );
   };
 
   handleSaveCombo = () => {
     if (isEmpty(this.state.nombreCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Ingrese el nombre del combo.',
-      }, () => {
-        this.refNombreCombo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Combo',
+          message: 'Ingrese el nombre del combo.',
+        },
+        () => {
+          this.refNombreCombo.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.codigoCombo)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el código del combo.',
-      }, () => {
-        this.refCodigoCombo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Servicio',
+          message: 'Ingrese el código del combo.',
+        },
+        () => {
+          this.refCodigoCombo.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idMedidaCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Seleccione la medida.',
-      }, () => {
-        this.refIdMedidaCombo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Combo',
+          message: 'Seleccione la medida.',
+        },
+        () => {
+          this.refIdMedidaCombo.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idCategoriaCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Seleccione la categoría.',
-      }, () => {
-        this.refIdCategoriaCombo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Combo',
+          message: 'Seleccione la categoría.',
+        },
+        () => {
+          this.refIdCategoriaCombo.current.focus();
+        },
+      );
       return;
     }
 
     if (!isNumeric(this.state.precioCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Ingrese el precio.',
-      }, () => {
-        this.refPrecioCombo.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Producto - Combo',
+          message: 'Ingrese el precio.',
+        },
+        () => {
+          this.refPrecioCombo.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.detallesCombo.filter((item) => isEmpty(item.nombre)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Hay detalle sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refDetallesCombo, 'string');
-      });
+    if (
+      this.state.detallesCombo.filter((item) => isEmpty(item.nombre)).length !==
+      0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto - Combo',
+          message: 'Hay detalle sin nombre..',
+        },
+        () => {
+          validateNumericInputs(this.refDetallesCombo, 'string');
+        },
+      );
       return;
     }
 
-    if (this.state.detallesCombo.filter((item) => isEmpty(item.valor)).length !== 0) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Hay detalle sin valor.',
-      }, () => {
-        validateNumericInputs(this.refDetallesCombo);
-      });
+    if (
+      this.state.detallesCombo.filter((item) => isEmpty(item.valor)).length !==
+      0
+    ) {
+      alertKit.warning(
+        {
+          title: 'Producto - Combo',
+          message: 'Hay detalle sin valor.',
+        },
+        () => {
+          validateNumericInputs(this.refDetallesCombo);
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      title: 'Producto - Combo',
-      message: '¿Estás seguro de continuar?',
-    }, async (accept) => {
-      if (accept) {
-        
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const data = {
-          idTipoProducto: this.state.idTipoProducto,
-          nombre: this.state.nombreCombo,
-          codigo: this.state.codigoCombo,
-          sku: this.state.skuCombo,
-          codigoBarras: this.state.codigoBarrasCombo,
-          idCodigoSunat: this.state.codigoSunatCombo,
-          idMedida: this.state.idMedidaCombo,
-          idCategoria: this.state.idCategoriaCombo,
-          idMarca: this.state.idMarcaCombo,
-          descripcionCorta: this.state.descripcionCortaCombo,
-          descripcionLarga: this.state.descripcionLargaCombo,
-          idTipoTratamientoProducto: UNIDADES,
-          costo: 0,
-          precio: this.state.precioCombo,
-          combos: [],
-          inventarios: this.state.inventariosCombo,
-          precios: [],
-          lote: this.state.lote,
-          publicar: this.state.publicar,
-          negativo: false,
-          preferido: this.state.preferido,
-          estado: this.state.estado,
-
-          detalles: this.state.detallesCombo,
-          imagenes: this.state.imagenesCombo,
-          colores: this.state.coloresCombo,
-          tallas: this.state.tallasCombo,
-          sabores: this.state.saboresCombo,
-
-          imagen: this.state.imagen,
-
-          idUsuario: this.state.idUsuario,
-        };
-
-        const response = await addProducto(data);
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: 'Producto - Combo',
-            message: response.data,
-          }, () => {
-            this.props.history.goBack();
+    alertKit.question(
+      {
+        title: 'Producto - Combo',
+        message: '¿Estás seguro de continuar?',
+      },
+      async (accept) => {
+        if (accept) {
+          alertKit.loading({
+            message: 'Procesando información...',
           });
-        }
 
-        if (response instanceof ErrorResponse) {
-          alertKit.warning({
-            title: 'Producto - Combo',
-            message: response.getMessage(),
-          });
+          const data = {
+            idTipoProducto: this.state.idTipoProducto,
+            nombre: this.state.nombreCombo,
+            codigo: this.state.codigoCombo,
+            sku: this.state.skuCombo,
+            codigoBarras: this.state.codigoBarrasCombo,
+            idCodigoSunat: this.state.codigoSunatCombo,
+            idMedida: this.state.idMedidaCombo,
+            idCategoria: this.state.idCategoriaCombo,
+            idMarca: this.state.idMarcaCombo,
+            descripcionCorta: this.state.descripcionCortaCombo,
+            descripcionLarga: this.state.descripcionLargaCombo,
+            idTipoTratamientoProducto: UNIDADES,
+            costo: 0,
+            precio: this.state.precioCombo,
+            combos: [],
+            inventarios: this.state.inventariosCombo,
+            precios: [],
+            lote: this.state.lote,
+            publicar: this.state.publicar,
+            negativo: false,
+            preferido: this.state.preferido,
+            estado: this.state.estado,
+
+            detalles: this.state.detallesCombo,
+            imagenes: this.state.imagenesCombo,
+            colores: this.state.coloresCombo,
+            tallas: this.state.tallasCombo,
+            sabores: this.state.saboresCombo,
+
+            imagen: this.state.imagen,
+
+            idUsuario: this.state.idUsuario,
+          };
+
+          const response = await addProducto(data);
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Producto - Combo',
+                message: response.data,
+              },
+              () => {
+                this.props.history.goBack();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertKit.warning({
+              title: 'Producto - Combo',
+              message: response.getMessage(),
+            });
+          }
         }
-      }
-    });
+      },
+    );
   };
 
   handleRegistrar = () => {
@@ -1516,23 +1703,59 @@ class ProductoAgregar extends CustomComponent {
   render() {
     const { idTipoProducto } = this.state;
 
-    const { nombreProducto, codigoProducto, skuProducto, codigoBarrasProducto, codigoSunatProducto } = this.state;
+    const {
+      nombreProducto,
+      codigoProducto,
+      skuProducto,
+      codigoBarrasProducto,
+      codigoSunatProducto,
+    } = this.state;
 
-    const { idMedidaProducto, idCategoriaProducto, idMarcaProducto, descripcionCortaProducto, descripcionLargaProducto } = this.state;
+    const {
+      idMedidaProducto,
+      idCategoriaProducto,
+      idMarcaProducto,
+      descripcionCortaProducto,
+      descripcionLargaProducto,
+    } = this.state;
 
     const { idTipoTratamientoProducto } = this.state;
 
     const { precioProducto, costoProducto, precios } = this.state;
 
-    const { nombreServicio, codigoServicio, skuServicio, codigoBarrasServicio, codigoSunatServicio } = this.state;
+    const {
+      nombreServicio,
+      codigoServicio,
+      skuServicio,
+      codigoBarrasServicio,
+      codigoSunatServicio,
+    } = this.state;
 
-    const { idMedidaServicio, idCategoriaServicio, idMarcaServicio, descripcionCortaServicio, descripcionLargaServicio } = this.state;
+    const {
+      idMedidaServicio,
+      idCategoriaServicio,
+      idMarcaServicio,
+      descripcionCortaServicio,
+      descripcionLargaServicio,
+    } = this.state;
 
     const { precioServicio } = this.state;
 
-    const { nombreCombo, codigoCombo, skuCombo, codigoBarrasCombo, codigoSunatCombo } = this.state;
+    const {
+      nombreCombo,
+      codigoCombo,
+      skuCombo,
+      codigoBarrasCombo,
+      codigoSunatCombo,
+    } = this.state;
 
-    const { idMedidaCombo, idCategoriaCombo, idMarcaCombo, descripcionCortaCombo, descripcionLargaCombo } = this.state;
+    const {
+      idMedidaCombo,
+      idCategoriaCombo,
+      idMarcaCombo,
+      descripcionCortaCombo,
+      descripcionLargaCombo,
+    } = this.state;
 
     const { precioCombo, combos } = this.state;
 
@@ -1553,15 +1776,27 @@ class ProductoAgregar extends CustomComponent {
 
     const { imagenesProducto, imagenesServicio, imagenesCombo } = this.state;
 
-    const { colores, coloresProducto, coloresServicio, coloresCombo } = this.state;
+    const { colores, coloresProducto, coloresServicio, coloresCombo } =
+      this.state;
 
     const { tallas, tallasProducto, tallasServicio, tallasCombo } = this.state;
 
-    const { sabores, saboresProducto, saboresServicio, saboresCombo } = this.state;
+    const { sabores, saboresProducto, saboresServicio, saboresCombo } =
+      this.state;
 
-    const nombre = idTipoProducto === PRODUCTO ? nombreProducto : idTipoProducto === SERVICIO ? nombreServicio : nombreCombo;
+    const nombre =
+      idTipoProducto === PRODUCTO
+        ? nombreProducto
+        : idTipoProducto === SERVICIO
+          ? nombreServicio
+          : nombreCombo;
 
-    const precio = idTipoProducto === PRODUCTO ? precioProducto : idTipoProducto === SERVICIO ? precioServicio : precioCombo;
+    const precio =
+      idTipoProducto === PRODUCTO
+        ? precioProducto
+        : idTipoProducto === SERVICIO
+          ? precioServicio
+          : precioCombo;
 
     return (
       <ContainerWrapper>
@@ -1569,18 +1804,14 @@ class ProductoAgregar extends CustomComponent {
           ref={this.refModalInventario}
           isOpen={this.state.isOpenInventario}
           onClose={this.handleCloseInventario}
-
           inventarios={this.state.inventariosProducto}
-
           handleAddInventario={this.handleAddInventario}
         />
 
         <ModalProducto
           isOpen={this.state.isOpenProducto}
           onClose={this.handleCloseProducto}
-
           combos={this.state.combos}
-
           handleAddProducto={this.handleAddProducto}
         />
 
@@ -1590,9 +1821,9 @@ class ProductoAgregar extends CustomComponent {
         />
 
         <Title
-          title='Producto'
-          subTitle='AGREGAR'
-          icon={<i className='fa fa-plus'></i>}
+          title="Producto"
+          subTitle="AGREGAR"
+          icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -1611,268 +1842,271 @@ class ProductoAgregar extends CustomComponent {
                     }
                   }}
                 >
-                  <TabHead id='producto' isActive={true}>
+                  <TabHead id="producto" isActive={true}>
                     <i className="bi bi-info-circle"></i> Producto
                   </TabHead>
 
-                  <TabHead id='servicio'>
+                  <TabHead id="servicio">
                     <i className="bi bi-card-checklist"></i> Servicio
                   </TabHead>
 
-                  <TabHead id='combo'>
+                  <TabHead id="combo">
                     <i className="bi bi-border-all"></i> Combo
                   </TabHead>
                 </TabHeader>
 
                 <TabContent>
-                  <TabPane id='producto' isActive={true}>
+                  <TabPane id="producto" isActive={true}>
                     <Producto
                       nombre={nombreProducto}
                       refNombre={this.refNombreProducto}
                       handleSelectNombre={this.handleInputNombreProducto}
-
                       codigo={codigoProducto}
                       refCodigo={this.refCodigoProducto}
                       handleInputCodigo={this.handleInputCodigoProducto}
-
                       sku={skuProducto}
                       refSku={this.refSkuProducto}
                       handleInputSku={this.handleInputSkuProducto}
-
                       codigoBarras={codigoBarrasProducto}
                       refCodigoBarras={this.refCodigoBarrasProducto}
-                      handleInputCodigoBarras={this.handleInputCodigoBarrasProducto}
-                      handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasProducto}
-
+                      handleInputCodigoBarras={
+                        this.handleInputCodigoBarrasProducto
+                      }
+                      handleGenerateCodigoBarras={
+                        this.handleGenerateCodigoBarrasProducto
+                      }
                       codigoSunat={codigoSunatProducto}
                       refCodigoSunat={this.refCodigoSunatProducto}
-                      handleSelectCodigoSunat={this.handleSelectCodigoSunatProducto}
-
+                      handleSelectCodigoSunat={
+                        this.handleSelectCodigoSunatProducto
+                      }
                       idMedida={idMedidaProducto}
                       refIdMedida={this.refIdMedidaProducto}
                       handleSelectIdMedida={this.handleSelectIdMedidaProducto}
                       medidas={medidas}
-
                       idCategoria={idCategoriaProducto}
                       refIdCategoria={this.refIdCategoriaProducto}
-                      handleSelectIdCategoria={this.handleSelectIdCategoriaProducto}
+                      handleSelectIdCategoria={
+                        this.handleSelectIdCategoriaProducto
+                      }
                       categorias={categorias}
-
                       idMarca={idMarcaProducto}
                       refIdMarca={this.refIdMarcaProducto}
                       handleSelectIdMarca={this.handleSelectIdMarcaProducto}
                       marcas={marcas}
-
                       descripcionCorta={descripcionCortaProducto}
                       refDescripcionCorta={this.refDescripcionCortaProducto}
-                      handleInputDescripcionCorta={this.handleInputDescripcionCortaProducto}
-
+                      handleInputDescripcionCorta={
+                        this.handleInputDescripcionCortaProducto
+                      }
                       descripcionLarga={descripcionLargaProducto}
                       refDescripcionLarga={this.refDescripcionLargaProducto}
-                      handleInputDescripcionLarga={this.handleInputDescripcionLargaProducto}
-
+                      handleInputDescripcionLarga={
+                        this.handleInputDescripcionLargaProducto
+                      }
                       idTipoTratamientoProducto={idTipoTratamientoProducto}
-                      handleOptionTipoTratamientoProducto={this.handleOptionTipoTratamientoProducto}
-
+                      handleOptionTipoTratamientoProducto={
+                        this.handleOptionTipoTratamientoProducto
+                      }
                       costo={costoProducto}
                       refCosto={this.refCostoProducto}
                       handleInputCosto={this.handleInputCostoProducto}
-
                       precio={precioProducto}
                       refPrecio={this.refPrecioProducto}
                       handleInputPrecio={this.handleInputPrecioProducto}
-
                       precios={precios}
                       refPrecios={this.refPreciosProducto}
-                      handleInputNombrePrecios={this.handleInputNombrePreciosProducto}
-                      handleInputPrecioPrecios={this.handleInputPrecioPreciosProducto}
+                      handleInputNombrePrecios={
+                        this.handleInputNombrePreciosProducto
+                      }
+                      handleInputPrecioPrecios={
+                        this.handleInputPrecioPreciosProducto
+                      }
                       handleAddPrecios={this.handleAddPreciosProducto}
                       handleRemovePrecios={this.handleRemovePreciosProducto}
                       activarInventario={true}
-
                       inventarios={this.state.inventariosProducto}
                       handleOpenModalInventario={this.handleOpenModalInventario}
                       handleRemoveItemInventario={this.handleRemoveInventario}
-
                       detalles={detallesProducto}
                       refDetalles={this.refDetallesProducto}
-                      handleInputNombreDetalles={this.handleInputNombreDetallesProducto}
-                      handleInputValorDetalles={this.handleInputValorDetallesProducto}
+                      handleInputNombreDetalles={
+                        this.handleInputNombreDetallesProducto
+                      }
+                      handleInputValorDetalles={
+                        this.handleInputValorDetallesProducto
+                      }
                       handleAddDetalles={this.handleAddDetallesProducto}
                       handleRemoveDetalles={this.handleRemoveDetallesProducto}
-
                       imagenes={imagenesProducto}
                       handleSelectImagenes={this.handleSelectImagenesProducto}
                       handleRemoveImagenes={this.handleRemoveImagenesProducto}
-
                       colores={colores}
                       coloresSeleccionados={coloresProducto}
                       handleSelectColores={this.handleSelectColoresProducto}
-
                       tallas={tallas}
                       tallasSeleccionados={tallasProducto}
                       handleSelectTallas={this.handleSelectTallasProducto}
-
                       sabores={sabores}
                       saboresSeleccionados={saboresProducto}
                       handleSelectSabores={this.handleSelectSaboresProducto}
                     />
                   </TabPane>
 
-                  <TabPane id='servicio'>
+                  <TabPane id="servicio">
                     <Servicio
                       nombre={nombreServicio}
                       refNombre={this.refNombreServicio}
                       handleSelectNombre={this.handleInputNombreServicio}
-
                       codigo={codigoServicio}
                       refCodigo={this.refCodigoServicio}
                       handleInputCodigo={this.handleInputCodigoServicio}
-
                       sku={skuServicio}
                       refSku={this.refSkuServicio}
                       handleInputSku={this.handleInputSkuServicio}
-
                       codigoBarras={codigoBarrasServicio}
                       refCodigoBarras={this.refCodigoBarrasServicio}
-                      handleInputCodigoBarras={this.handleInputCodigoBarrasServicio}
-                      handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasServicio}
-
+                      handleInputCodigoBarras={
+                        this.handleInputCodigoBarrasServicio
+                      }
+                      handleGenerateCodigoBarras={
+                        this.handleGenerateCodigoBarrasServicio
+                      }
                       codigoSunat={codigoSunatServicio}
                       refCodigoSunat={this.refCodigoSunatServicio}
-                      handleSelectCodigoSunat={this.handleSelectCodigoSunatServicio}
-
+                      handleSelectCodigoSunat={
+                        this.handleSelectCodigoSunatServicio
+                      }
                       idMedida={idMedidaServicio}
                       refIdMedida={this.refIdMedidaServicio}
                       handleSelectIdMedida={this.handleSelectIdMedidaServicio}
                       medidas={medidas}
-
                       idCategoria={idCategoriaServicio}
                       refIdCategoria={this.refIdCategoriaServicio}
-                      handleSelectIdCategoria={this.handleSelectIdCategoriaServicio}
+                      handleSelectIdCategoria={
+                        this.handleSelectIdCategoriaServicio
+                      }
                       categorias={categorias}
-
                       idMarca={idMarcaServicio}
                       refIdMarca={this.refIdMarcaServicio}
                       handleSelectIdMarca={this.handleSelectIdMarcaServicio}
                       marcas={marcas}
-
                       descripcionCorta={descripcionCortaServicio}
                       refDescripcionCorta={this.refDescripcionCortaServicio}
-                      handleInputDescripcionCorta={this.handleInpuDescripcionCortaServicio}
-
+                      handleInputDescripcionCorta={
+                        this.handleInpuDescripcionCortaServicio
+                      }
                       descripcionLarga={descripcionLargaServicio}
                       refDescripcionLarga={this.refDescripcionLargaServicio}
-                      handleInputDescripcionLarga={this.handleInpuDescripcionLargaServicio}
-
+                      handleInputDescripcionLarga={
+                        this.handleInpuDescripcionLargaServicio
+                      }
                       precio={precioServicio}
                       refPrecio={this.refPrecioServicio}
                       handleInputPrecio={this.handleInpuPrecioServicio}
-
                       detalles={detallesServicio}
                       refDetalles={this.refDetallesServicio}
-                      handleInputNombreDetalles={this.handleInputNombreDetallesServicio}
-                      handleInputValorDetalles={this.handleInputValorDetallesServicio}
+                      handleInputNombreDetalles={
+                        this.handleInputNombreDetallesServicio
+                      }
+                      handleInputValorDetalles={
+                        this.handleInputValorDetallesServicio
+                      }
                       handleAddDetalles={this.handleAddDetallesServicio}
                       handleRemoveDetalles={this.handleRemoveDetallesServicio}
-
                       imagenes={imagenesServicio}
                       handleSelectImagenes={this.handleSelectImagenesServicio}
                       handleRemoveImagenes={this.handleRemoveImagenesServicio}
-
                       colores={colores}
                       coloresSeleccionados={coloresServicio}
                       handleSelectColores={this.handleSelectColoresServicio}
-
                       tallas={tallas}
                       tallasSeleccionados={tallasServicio}
                       handleSelectTallas={this.handleSelectTallasServicio}
-
                       sabores={sabores}
                       saboresSeleccionados={saboresServicio}
                       handleSelectSabores={this.handleSelectSaboresServicio}
                     />
                   </TabPane>
 
-                  <TabPane id='combo' >
+                  <TabPane id="combo">
                     <Combo
                       nombre={nombreCombo}
                       refNombre={this.refNombreCombo}
                       handleSelectNombre={this.handleInputNombreCombo}
-
                       codigo={codigoCombo}
                       refCodigo={this.refCodigoCombo}
                       handleInputCodigo={this.handleInputCodigoCombo}
-
                       sku={skuCombo}
                       refSku={this.refSkuCombo}
                       handleInputSku={this.handleInputSkuCombo}
-
                       codigoBarras={codigoBarrasCombo}
                       refCodigoBarras={this.refCodigoBarrasCombo}
-                      handleInputCodigoBarras={this.handleInputCodigoBarrasCombo}
-                      handleGenerateCodigoBarras={this.handleGenerateCodigoBarrasCombo}
-
+                      handleInputCodigoBarras={
+                        this.handleInputCodigoBarrasCombo
+                      }
+                      handleGenerateCodigoBarras={
+                        this.handleGenerateCodigoBarrasCombo
+                      }
                       codigoSunat={codigoSunatCombo}
                       refCodigoSunat={this.refCodigoSunatCombo}
-                      handleSelectCodigoSunat={this.handleSelectCodigoSunatCombo}
-
+                      handleSelectCodigoSunat={
+                        this.handleSelectCodigoSunatCombo
+                      }
                       idMedida={idMedidaCombo}
                       refIdMedida={this.refIdMedidaCombo}
                       handleSelectIdMedida={this.handleSelectIdMedidaCombo}
                       medidas={medidas}
-
                       idCategoria={idCategoriaCombo}
                       refIdCategoria={this.refIdCategoriaCombo}
-                      handleSelectIdCategoria={this.handleSelectIdCategoriaCombo}
+                      handleSelectIdCategoria={
+                        this.handleSelectIdCategoriaCombo
+                      }
                       categorias={categorias}
-
                       idMarca={idMarcaCombo}
                       refIdMarca={this.refIdMarcaCombo}
                       handleSelectIdMarca={this.handleSelectIdMarcaCombo}
                       marcas={marcas}
-
                       descripcionCorta={descripcionCortaCombo}
                       refDescripcionCorta={this.refDescripcionCortaCombo}
-                      handleInputDescripcionCorta={this.handleInputDescripcionCortaCombo}
-
+                      handleInputDescripcionCorta={
+                        this.handleInputDescripcionCortaCombo
+                      }
                       descripcionLarga={descripcionLargaCombo}
                       refDescripcionLarga={this.refDescripcionLargaCombo}
-                      handleInputDescripcionLarga={this.handleInputDescripcionLargaCombo}
-
+                      handleInputDescripcionLarga={
+                        this.handleInputDescripcionLargaCombo
+                      }
                       precio={precioCombo}
                       refPrecio={this.refPrecioCombo}
                       handleInputPrecio={this.handleInputPrecioCombo}
                       combos={combos}
-
                       handleOpenModalProducto={this.handleOpenModalProducto}
                       handleInputCantidadCombos={this.handleInputCantidadCombos}
                       handleRemoveItemCombo={this.handleRemoveProducto}
-
                       activarInventario={false}
                       inventarios={this.state.inventariosCombo}
-                      handleAddItemInventario={() => { }}
-                      handleRemoveItemInventario={() => { }}
-
+                      handleAddItemInventario={() => {}}
+                      handleRemoveItemInventario={() => {}}
                       detalles={detallesCombo}
                       refDetalles={this.refDetallesCombo}
-                      handleInputNombreDetalles={this.handleInputNombreDetallesCombo}
-                      handleInputValorDetalles={this.handleInputValorDetallesCombo}
+                      handleInputNombreDetalles={
+                        this.handleInputNombreDetallesCombo
+                      }
+                      handleInputValorDetalles={
+                        this.handleInputValorDetallesCombo
+                      }
                       handleAddDetalles={this.handleAddDetallesCombo}
                       handleRemoveDetalles={this.handleRemoveDetallesCombo}
-
                       imagenes={imagenesCombo}
                       handleSelectImagenes={this.handleSelectImagenesCombo}
                       handleRemoveImagenes={this.handleRemoveImagenesCombo}
-
                       colores={colores}
                       coloresSeleccionados={coloresCombo}
                       handleSelectColores={this.handleSelectColoresCombo}
-
                       tallas={tallas}
                       tallasSeleccionados={tallasCombo}
                       handleSelectTallas={this.handleSelectTallasCombo}
-
                       sabores={sabores}
                       saboresSeleccionados={saboresCombo}
                       handleSelectSabores={this.handleSelectSaboresCombo}
@@ -1892,22 +2126,16 @@ class ProductoAgregar extends CustomComponent {
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={nombre}
               precio={precio}
-
               lote={lote}
               handleSelectLote={this.handleSelectLote}
-
               publicar={publicar}
               handleSelectPublico={this.handleSelectPublico}
-
               negativo={negativo}
               handleSelectNegativo={this.handleSelectNegativo}
-
               preferido={preferido}
               handleSelectPreferido={this.handleSelectPreferido}
-
               estado={estado}
               handleSelectEstado={this.handleSelectEstado}
-
               handleRegistrar={this.handleRegistrar}
             />
           </Column>
@@ -1930,18 +2158,21 @@ const mapStateToProps = (state) => {
 ProductoAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 /**
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedProductoAgregar = connect(mapStateToProps, null)(ProductoAgregar);
+const ConnectedProductoAgregar = connect(
+  mapStateToProps,
+  null,
+)(ProductoAgregar);
 
 export default ConnectedProductoAgregar;

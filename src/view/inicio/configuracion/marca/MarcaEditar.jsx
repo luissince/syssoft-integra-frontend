@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  isText,
-  isEmpty,
-  imageBase64,
-} from '../../../../helper/utils.helper';
+import { isText, isEmpty, imageBase64 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -39,7 +35,7 @@ class MarcaEditar extends CustomComponent {
       nombre: '',
       descripcion: '',
       imagen: {
-        url: images.noImage
+        url: images.noImage,
       },
       estado: false,
       publicar: false,
@@ -68,9 +64,7 @@ class MarcaEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [marca] = await Promise.all([
-      this.fetchObtenerMarca(id),
-    ]);
+    const [marca] = await Promise.all([this.fetchObtenerMarca(id)]);
 
     this.setState({
       idMarca: marca.idMarca,
@@ -78,9 +72,8 @@ class MarcaEditar extends CustomComponent {
       nombre: marca.nombre,
       descripcion: marca.descripcion,
       estado: marca.estado === 1 ? true : false,
-      imagen: marca.imagen ??
-      {
-        url: images.noImage
+      imagen: marca.imagen ?? {
+        url: images.noImage,
       },
       loading: false,
     });
@@ -120,7 +113,6 @@ class MarcaEditar extends CustomComponent {
     this.setState({ estado: event.target.checked });
   };
 
-
   handleSelectPublicar = (event) => {
     this.setState({ publicar: event.target.checked });
   };
@@ -131,20 +123,27 @@ class MarcaEditar extends CustomComponent {
     if (!isEmpty(files)) {
       const file = files[0];
       let url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } = await imageBase64(file);
+      const { size, base64String, extension, width, height } =
+        await imageBase64(file);
 
       if (width !== 300 || height !== 200) {
         alertKit.warning({
-          title: "Categoría",
-          message: "La imagen " + file.name + " tiene que tener un aspecto de 300 x 200 pixeles"
+          title: 'Categoría',
+          message:
+            'La imagen ' +
+            file.name +
+            ' tiene que tener un aspecto de 300 x 200 pixeles',
         });
         return;
       }
 
       if (size > 500) {
         alertKit.warning({
-          title: "Categoría",
-          message: "La imagen " + file.name + " tiene que tener un tamaño de menos de 500 KB"
+          title: 'Categoría',
+          message:
+            'La imagen ' +
+            file.name +
+            ' tiene que tener un tamaño de menos de 500 KB',
         });
         return;
       }
@@ -156,14 +155,14 @@ class MarcaEditar extends CustomComponent {
           width: width,
           height: height,
           size: size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         imagen: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -173,10 +172,10 @@ class MarcaEditar extends CustomComponent {
   handleClearImage = () => {
     this.setState({
       imagen: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
-  }
+  };
 
   handleEditar = async () => {
     if (isEmpty(this.state.nombre)) {
@@ -190,51 +189,54 @@ class MarcaEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question({
-      title: 'Marca',
-      message: '¿Está seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Marca',
+        message: '¿Está seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idMarca: this.state.idMarca,
+            codigo: this.state.codigo,
+            nombre: this.state.nombre,
+            descripcion: this.state.descripcion,
+            estado: this.state.estado,
+            imagen: this.state.imagen,
+            idUsuario: this.state.idUsuario,
+          };
+
+          alertKit.loading({
+            message: 'Procesando información...',
+          });
+
+          const response = await updateMarca(data);
+
+          if (response instanceof SuccessReponse) {
+            alertKit.success({
+              title: 'Marca',
+              message: response.data,
+              onClose: () => {
+                this.props.history.goBack();
+              },
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            alertKit.warning({
+              title: 'marca',
+              message: response.getMessage(),
+            });
+          }
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          idMarca: this.state.idMarca,
-          codigo: this.state.codigo,
-          nombre: this.state.nombre,
-          descripcion: this.state.descripcion,
-          estado: this.state.estado,
-          imagen: this.state.imagen,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await updateMarca(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: 'Marca',
-            message: response.data,
-            onClose: () => {
-              this.props.history.goBack();
-            },
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertKit.warning({
-            title: 'marca',
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
+    );
   };
 
   render() {
@@ -246,8 +248,8 @@ class MarcaEditar extends CustomComponent {
         />
 
         <Title
-          title='Marca'
-          subTitle='EDITAR'
+          title="Marca"
+          subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -256,7 +258,7 @@ class MarcaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               autoFocus
-              label={"Código:"}
+              label={'Código:'}
               placeholder="Ingrese el código"
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
@@ -267,7 +269,11 @@ class MarcaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre:<i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese el nombre"
               ref={this.refNombre}
               value={this.state.nombre}
@@ -276,11 +282,10 @@ class MarcaEditar extends CustomComponent {
           </Column>
         </Row>
 
-
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Descripción"}
+              label={'Descripción'}
               placeholder="Ingrese la descripción"
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
@@ -313,14 +318,19 @@ class MarcaEditar extends CustomComponent {
         <Row>
           <Column className="col-12" formGroup={true}>
             <label>
-              Agregar las imagenes para el icono. <b className='text-danger'>La imagen no deben superar los 500KB(Kilobytes).</b>
+              Agregar las imagenes para el icono.{' '}
+              <b className="text-danger">
+                La imagen no deben superar los 500KB(Kilobytes).
+              </b>
             </label>
             <label>
-              Las imágenes deben tener un tamaño de <b>300 x 200 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).
+              Las imágenes deben tener un tamaño de <b>300 x 200 píxeles</b>{' '}
+              para que se visualicen correctamente en la página web (formato
+              recomendado *.webp).
             </label>
           </Column>
 
-          <Column className={"col-md-4 col-12"} formGroup={true}>
+          <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
@@ -336,18 +346,14 @@ class MarcaEditar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={() => this.handleEditar()}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={() => this.handleEditar()}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -359,13 +365,13 @@ class MarcaEditar extends CustomComponent {
 MarcaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

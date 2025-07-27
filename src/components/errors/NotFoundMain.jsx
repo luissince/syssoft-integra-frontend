@@ -5,11 +5,11 @@ const NotFoundMain = (props) => {
   return (
     <div className="px-4 py-5 my-5 text-center w-100">
       <Image
-              default={images.noImage}
-              src={images.icono}
-              alt={"Logo"}
-              width={150}
-            />
+        default={images.noImage}
+        src={images.icono}
+        alt={'Logo'}
+        width={150}
+      />
       <h1 className="display-5 fw-bold">Error 404 página no encontrada</h1>
       <div className="col-lg-6 mx-auto">
         <p className="lead mb-4">

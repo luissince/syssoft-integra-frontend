@@ -27,7 +27,10 @@ import {
 import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { CLIENTE_NATURAL, CLIENTE_JURIDICO } from '../../../../../model/types/tipo-cliente';
+import {
+  CLIENTE_NATURAL,
+  CLIENTE_JURIDICO,
+} from '../../../../../model/types/tipo-cliente';
 import SearchInput from '../../../../../components/SearchInput';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
@@ -45,7 +48,6 @@ import { RUC } from '../../../../../model/types/tipo-documento';
  * @extends React.Component
  */
 class PersonaEditar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -122,7 +124,9 @@ class PersonaEditar extends CustomComponent {
     ]);
 
     if (cliente === null) {
-      this.setState({ msgLoading: 'Se produjo un error un interno, intente nuevamente.', });
+      this.setState({
+        msgLoading: 'Se produjo un error un interno, intente nuevamente.',
+      });
       return;
     }
 
@@ -157,12 +161,10 @@ class PersonaEditar extends CustomComponent {
 
       loading: false,
     });
-  }
+  };
 
   async fetchTipoDocumento() {
-    const response = await comboTipoDocumento(
-      this.abortController.signal,
-    );
+    const response = await comboTipoDocumento(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -176,10 +178,7 @@ class PersonaEditar extends CustomComponent {
   }
 
   async fetchIdPersona(params) {
-    const response = await getIdPersona(
-      params,
-      this.abortController.signal,
-    );
+    const response = await getIdPersona(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -192,48 +191,47 @@ class PersonaEditar extends CustomComponent {
     }
   }
 
-
   handleTipoCliente = (event) => {
-    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' })
-  }
+    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' });
+  };
 
   handleSelectTipoDocumento = (event) => {
     this.setState({ idTipoDocumento: event.target.value });
-  }
+  };
 
   handleInputNumeroDocumento = (event) => {
     this.setState({ documento: event.target.value });
-  }
+  };
 
   handleInputInformacion = (event) => {
     this.setState({ informacion: event.target.value });
-  }
+  };
 
   handleSelectGenero = (event) => {
     this.setState({ genero: event.target.value });
-  }
+  };
 
   handleSelectEstadoCvil = (event) => {
     this.setState({ estadoCivil: event.target.value });
-  }
+  };
 
   handleInputFechaNacimiento = (event) => {
     this.setState({ fechaNacimiento: event.target.value });
-  }
+  };
 
   handleInputObservacion = (event) => {
     this.setState({ observacion: event.target.value });
-  }
+  };
 
   handleInputCelular = (event) => {
     this.setState({
       celular: event.target.value,
     });
-  }
+  };
 
   handleInputTelefono = (event) => {
     this.setState({ telefono: event.target.value });
-  }
+  };
 
   handleInputEmail = (event) => {
     this.setState({ email: event.target.value });
@@ -241,15 +239,18 @@ class PersonaEditar extends CustomComponent {
 
   handleInputDireccion = (event) => {
     this.setState({ direccion: event.target.value });
-  }
+  };
 
   handleInputEstado = (value) => {
     this.setState({ estado: value.target.checked });
-  }
+  };
 
   handleGetApiReniec = async () => {
     if (this.state.documento.length !== 8) {
-      alertWarning("Persona", 'Para iniciar la busqueda en número dni debe tener 8 caracteres.')
+      alertWarning(
+        'Persona',
+        'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+      );
       return;
     }
 
@@ -280,11 +281,14 @@ class PersonaEditar extends CustomComponent {
         });
       });
     }
-  }
+  };
 
   handleGetApiSunat = async () => {
     if (this.state.documento.length !== 11) {
-      alertWarning("Persona", 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.')
+      alertWarning(
+        'Persona',
+        'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+      );
       return;
     }
 
@@ -311,7 +315,7 @@ class PersonaEditar extends CustomComponent {
         });
       });
     }
-  }
+  };
 
   handleFilterUbigeo = async (text) => {
     const searchWord = text;
@@ -337,65 +341,74 @@ class PersonaEditar extends CustomComponent {
 
       this.setState({ ubigeos: [] });
     }
-  }
+  };
 
   handleSelectItemUbigeo = (value) => {
     this.refUbigeo.current.initialize(
       value.departamento +
-      '-' +
-      value.provincia +
-      '-' +
-      value.distrito +
-      ' (' +
-      value.ubigeo +
-      ')'
+        '-' +
+        value.provincia +
+        '-' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
     );
     this.setState({
       ubigeos: [],
       idUbigeo: value.idUbigeo,
     });
-  }
-
+  };
 
   handleClearInputUbigeo = () => {
     this.setState({ ubigeos: [], idUbigeo: '' });
-  }
+  };
 
   handleGuardar = () => {
-    const tipoDocumento = this.state.tiposDocumentos.find(item => item.idTipoDocumento === this.state.idTipoDocumento);
+    const tipoDocumento = this.state.tiposDocumentos.find(
+      (item) => item.idTipoDocumento === this.state.idTipoDocumento,
+    );
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      alertWarning("Persona", 'Seleccione el tipo de documento.', () => {
+      alertWarning('Persona', 'Seleccione el tipo de documento.', () => {
         this.refTipoDocumento.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.documento)) {
-      alertWarning("Persona", 'Ingrese el número de documento.', () => {
+      alertWarning('Persona', 'Ingrese el número de documento.', () => {
         this.refDocumento.current.focus();
       });
       return;
     }
 
-    if (tipoDocumento && tipoDocumento.obligado === 1 && tipoDocumento.longitud !== this.state.documento.length) {
-      alertWarning("Persona", `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`, () => {
-        this.refDocumento.current.focus();
-      })
+    if (
+      tipoDocumento &&
+      tipoDocumento.obligado === 1 &&
+      tipoDocumento.longitud !== this.state.documento.length
+    ) {
+      alertWarning(
+        'Persona',
+        `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+        () => {
+          this.refDocumento.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      alertWarning("Persona", 'Ingrese los apellidos y nombres.', () => {
+      alertWarning('Persona', 'Ingrese los apellidos y nombres.', () => {
         this.refInformacion.current.focus();
       });
       return;
     }
 
     if (this.state.conductor && isEmpty(this.state.licenciaConductir)) {
-      alertWarning("Persona", 'Ingrese el número de licencia.', () => {
+      alertWarning('Persona', 'Ingrese el número de licencia.', () => {
         this.refLicenciaConducir.current.focus();
-      })
+      });
       return;
     }
 
@@ -413,7 +426,8 @@ class PersonaEditar extends CustomComponent {
           licenciaConducir: this.state.licenciaConductir,
           telefono: this.state.telefono.toString().trim().toUpperCase(),
           celular: this.state.celular.toString().trim().toUpperCase(),
-          fechaNacimiento: this.state.fechaNacimiento == '' ? null : this.state.fechaNacimient,
+          fechaNacimiento:
+            this.state.fechaNacimiento == '' ? null : this.state.fechaNacimient,
           email: this.state.email.trim(),
           genero: this.state.genero,
           direccion: this.state.direccion.trim().toUpperCase(),
@@ -438,7 +452,7 @@ class PersonaEditar extends CustomComponent {
         }
       }
     });
-  }
+  };
 
   render() {
     const {
@@ -459,7 +473,6 @@ class PersonaEditar extends CustomComponent {
 
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
@@ -474,7 +487,8 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column>
             <label>
-              Tipo de Persona: <i className="fa fa-asterisk text-danger small"></i>
+              Tipo de Persona:{' '}
+              <i className="fa fa-asterisk text-danger small"></i>
             </label>
           </Column>
         </Row>
@@ -482,8 +496,8 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <RadioButton
-              className='form-check-inline'
-              name='rbTipoCliente'
+              className="form-check-inline"
+              name="rbTipoCliente"
               id={CLIENTE_NATURAL}
               value={CLIENTE_NATURAL}
               checked={idTipoCliente === CLIENTE_NATURAL}
@@ -493,8 +507,8 @@ class PersonaEditar extends CustomComponent {
             </RadioButton>
 
             <RadioButton
-              className='form-check-inline'
-              name='rbTipoCliente'
+              className="form-check-inline"
+              name="rbTipoCliente"
               id={CLIENTE_JURIDICO}
               value={CLIENTE_JURIDICO}
               checked={idTipoCliente === CLIENTE_JURIDICO}
@@ -506,68 +520,75 @@ class PersonaEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Select
-              label={<>Tipo Documento: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo Documento:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
               ref={this.refTipoDocumento}
               onChange={this.handleSelectTipoDocumento}
             >
               <option value="">-- Seleccione --</option>
-              {
-                idTipoCliente === CLIENTE_NATURAL && (
-                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento !== RUC).map((item, index) => (
+              {idTipoCliente === CLIENTE_NATURAL &&
+                this.state.tiposDocumentos
+                  .filter((item) => item.idTipoDocumento !== RUC)
+                  .map((item, index) => (
                     <option key={index} value={item.idTipoDocumento}>
                       {item.nombre}
                     </option>
-                  ))
-                )
-              }
-              {
-                idTipoCliente === CLIENTE_JURIDICO && (
-                  this.state.tiposDocumentos.filter((item) => item.idTipoDocumento === RUC).map((item, index) => (
+                  ))}
+              {idTipoCliente === CLIENTE_JURIDICO &&
+                this.state.tiposDocumentos
+                  .filter((item) => item.idTipoDocumento === RUC)
+                  .map((item, index) => (
                     <option key={index} value={item.idTipoDocumento}>
                       {item.nombre}
                     </option>
-                  ))
-                )
-              }
+                  ))}
             </Select>
           </Column>
 
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
               group={true}
-              label={<> N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  {' '}
+                  N° de documento ({documento.length}):{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
               value={documento}
               onChange={this.handleInputNumeroDocumento}
               onKeyDown={keyNumberInteger}
               placeholder="00000000"
-              buttonRight={<>
-                {
-                  idTipoCliente === CLIENTE_NATURAL && (
+              buttonRight={
+                <>
+                  {idTipoCliente === CLIENTE_NATURAL && (
                     <Button
                       className="btn-outline-secondary"
                       onClick={this.handleGetApiReniec}
                     >
                       <img src={images.reniec} alt="Reniec" width="12" />
                     </Button>
-                  )
-                }
-                {
-                  idTipoCliente === CLIENTE_JURIDICO && (
+                  )}
+                  {idTipoCliente === CLIENTE_JURIDICO && (
                     <Button
                       className="btn-outline-secondary"
                       onClick={this.handleGetApiSunat}
                     >
                       <img src={images.sunat} alt="Sunat" width="12" />
                     </Button>
-                  )
-                }
-              </>}
+                  )}
+                </>
+              }
             />
           </Column>
         </Row>
@@ -575,11 +596,13 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>
-                {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-                {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
-                {' '}<i className="fa fa-asterisk text-danger small"></i>
-              </>}
+              label={
+                <>
+                  {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
+                  {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}
               value={informacion}
@@ -596,15 +619,17 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <label>
-              Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
+              Tipo de Roles:{' '}
+              <i className="fa fa-asterisk text-danger small"></i>
             </label>
 
             <CheckBox
               id="checkboxPnCliente"
               checked={this.state.cliente}
               onChange={(event) => {
-                this.setState({ cliente: event.target.checked })
-              }}>
+                this.setState({ cliente: event.target.checked });
+              }}
+            >
               Cliente
             </CheckBox>
 
@@ -612,8 +637,9 @@ class PersonaEditar extends CustomComponent {
               id="checkboxPnProveedor"
               checked={this.state.proveedor}
               onChange={(event) => {
-                this.setState({ proveedor: event.target.checked })
-              }}>
+                this.setState({ proveedor: event.target.checked });
+              }}
+            >
               Proveedor
             </CheckBox>
 
@@ -621,35 +647,35 @@ class PersonaEditar extends CustomComponent {
               id="checkboxPnConductor"
               checked={this.state.conductor}
               onChange={(event) => {
-                this.setState({ conductor: event.target.checked })
-              }}>
+                this.setState({ conductor: event.target.checked });
+              }}
+            >
               Conductor
             </CheckBox>
-            {
-              this.state.conductor && (
-                <Row>
-                  <Column>
-                    <input
-                      type='text'
-                      className='form-control'
-                      placeholder='Número de licencia de conducir'
-                      ref={this.refLicenciaConducir}
-                      value={this.state.licenciaConductir}
-                      onChange={(event) => {
-                        this.setState({ licenciaConductir: event.target.value })
-                      }} />
-                  </Column>
-                </Row>
-              )
-            }
+            {this.state.conductor && (
+              <Row>
+                <Column>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Número de licencia de conducir"
+                    ref={this.refLicenciaConducir}
+                    value={this.state.licenciaConductir}
+                    onChange={(event) => {
+                      this.setState({ licenciaConductir: event.target.value });
+                    }}
+                  />
+                </Column>
+              </Row>
+            )}
           </Column>
         </Row>
 
-        {idTipoCliente === 'TC0001' &&
+        {idTipoCliente === 'TC0001' && (
           <Row>
-            <Column className='col-md-4' formGroup={true}>
+            <Column className="col-md-4" formGroup={true}>
               <Select
-                label={"Genero:"}
+                label={'Genero:'}
                 className="form-control"
                 ref={this.refGenero}
                 value={genero}
@@ -661,9 +687,9 @@ class PersonaEditar extends CustomComponent {
               </Select>
             </Column>
 
-            <Column className='col-md-4' formGroup={true}>
+            <Column className="col-md-4" formGroup={true}>
               <Select
-                label={"Estado Civil:"}
+                label={'Estado Civil:'}
                 value={estadoCivil}
                 onChange={this.handleSelectEstadoCvil}
               >
@@ -675,9 +701,9 @@ class PersonaEditar extends CustomComponent {
               </Select>
             </Column>
 
-            <Column className='col-md-4' formGroup={true}>
+            <Column className="col-md-4" formGroup={true}>
               <Input
-                label={"Fecha de Nacimiento:"}
+                label={'Fecha de Nacimiento:'}
                 type="date"
                 ref={this.refFechaNacimiento}
                 value={fechaNacimiento}
@@ -685,12 +711,12 @@ class PersonaEditar extends CustomComponent {
               />
             </Column>
           </Row>
-        }
+        )}
 
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Observación:"}
+              label={'Observación:'}
               value={observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -699,9 +725,9 @@ class PersonaEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={"N° de Celular:"}
+              label={'N° de Celular:'}
               value={celular}
               ref={this.refCelular}
               onChange={this.handleInputCelular}
@@ -710,9 +736,9 @@ class PersonaEditar extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={"N° de Telefono:"}
+              label={'N° de Telefono:'}
               value={telefono}
               ref={this.refTelefono}
               onChange={this.handleInputTelefono}
@@ -725,7 +751,7 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"E-Mail:"}
+              label={'E-Mail:'}
               type="email"
               value={email}
               onChange={this.handleInputEmail}
@@ -737,7 +763,7 @@ class PersonaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Dirección:"}
+              label={'Dirección:'}
               ref={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
@@ -750,14 +776,14 @@ class PersonaEditar extends CustomComponent {
           <Column formGroup={true}>
             <SearchInput
               ref={this.refUbigeo}
-              label={"Ubigeo:"}
+              label={'Ubigeo:'}
               placeholder="Escribe para iniciar a filtrar..."
               refValue={this.refValueUbigeo}
               data={this.state.ubigeos}
               handleClearInput={this.handleClearInputUbigeo}
               handleFilter={this.handleFilterUbigeo}
               handleSelectItem={this.handleSelectItemUbigeo}
-              renderItem={(value) =>
+              renderItem={(value) => (
                 <>
                   {value.departamento +
                     '-' +
@@ -768,16 +794,16 @@ class PersonaEditar extends CustomComponent {
                     value.ubigeo +
                     ')'}
                 </>
-              }
+              )}
             />
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Switches
-              label={"Estado:"}
-              id={"stEstado"}
+              label={'Estado:'}
+              id={'stEstado'}
               checked={estado}
               onChange={this.handleInputEstado}
             >
@@ -788,18 +814,14 @@ class PersonaEditar extends CustomComponent {
 
         <Row>
           <Column>
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
-              className='btn-warning'
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-danger'
+              className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cancelar
+              <i className="fa fa-close"></i> Cancelar
             </Button>
           </Column>
         </Row>
@@ -822,7 +844,7 @@ PersonaEditar.propTypes = {
   }).isRequired,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
-  })
+  }),
 };
 
 const mapStateToProps = (state) => {

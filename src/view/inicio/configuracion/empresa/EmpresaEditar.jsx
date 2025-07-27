@@ -38,9 +38,8 @@ import { alertKit } from 'alert-kit';
  * @extends React.Component
  */
 class EmpresaProceso extends CustomComponent {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
@@ -200,10 +199,14 @@ class EmpresaProceso extends CustomComponent {
         idApiSunat: empresa.idApiSunat ?? '',
         claveApiSunat: empresa.claveApiSunat ?? '',
 
-        certificado: empresa.certificadoSunat ?? 'Hacer click para seleccionar su archivo.',
+        certificado:
+          empresa.certificadoSunat ??
+          'Hacer click para seleccionar su archivo.',
         claveCertificado: empresa.claveCertificadoSunat ?? '',
 
-        fireBaseCertificado: empresa.certificadoFirebase ?? 'Hacer click para seleccionar su archivo.',
+        fireBaseCertificado:
+          empresa.certificadoFirebase ??
+          'Hacer click para seleccionar su archivo.',
 
         logo: empresa.rutaLogo ?? { src: images.noImage },
         image: empresa.rutaImage ?? { src: images.noImage },
@@ -260,9 +263,12 @@ class EmpresaProceso extends CustomComponent {
     if (!isEmpty(event.target.files)) {
       this.setState({ certificado: event.target.files[0].name });
     } else {
-      this.setState({ certificado: 'Hacer click para seleccionar su archivo.' }, () => {
-        this.refFileCertificado.current.value = '';
-      });
+      this.setState(
+        { certificado: 'Hacer click para seleccionar su archivo.' },
+        () => {
+          this.refFileCertificado.current.value = '';
+        },
+      );
     }
   };
 
@@ -270,9 +276,12 @@ class EmpresaProceso extends CustomComponent {
     if (!isEmpty(event.target.files)) {
       this.setState({ fireBaseCertificado: event.target.files[0].name });
     } else {
-      this.setState({ fireBaseCertificado: 'Hacer click para seleccionar su archivo.' }, () => {
-        this.refFileFireBase.current.value = '';
-      });
+      this.setState(
+        { fireBaseCertificado: 'Hacer click para seleccionar su archivo.' },
+        () => {
+          this.refFileFireBase.current.value = '';
+        },
+      );
     }
   };
 
@@ -306,14 +315,14 @@ class EmpresaProceso extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        headerTitle: "SysSoft Integra",
-        title: "Error",
+        headerTitle: 'SysSoft Integra',
+        title: 'Error',
         message: response.getMessage(),
         onClose: () => {
           this.setState({
             loading: false,
           });
-        }
+        },
       });
     }
   }
@@ -337,9 +346,14 @@ class EmpresaProceso extends CustomComponent {
   };
 
   handleLookPasswordCertificado = () => {
-    this.setState({ lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado }, () => {
-      this.refPasswordClaveCertificado.current.focus();
-    });
+    this.setState(
+      {
+        lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado,
+      },
+      () => {
+        this.refPasswordClaveCertificado.current.focus();
+      },
+    );
   };
 
   // ------------------------------------------------------------------------
@@ -356,8 +370,11 @@ class EmpresaProceso extends CustomComponent {
 
       if (logoSend.size > 500) {
         alertKit.warning({
-          title: "Logo repote",
-          message: "El logo del reporte " + file.name + " no debe superar los 500KB(Kilobytes)."
+          title: 'Logo repote',
+          message:
+            'El logo del reporte ' +
+            file.name +
+            ' no debe superar los 500KB(Kilobytes).',
         });
         return;
       }
@@ -369,14 +386,14 @@ class EmpresaProceso extends CustomComponent {
           width: logoSend.width,
           height: logoSend.height,
           size: logoSend.size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         logo: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -393,8 +410,11 @@ class EmpresaProceso extends CustomComponent {
 
       if (logoSend.size > 500) {
         alertKit.warning({
-          title: "Logo pagina web",
-          message: "El logo pagina web " + file.name + " no debe superar los 500KB(Kilobytes)."
+          title: 'Logo pagina web',
+          message:
+            'El logo pagina web ' +
+            file.name +
+            ' no debe superar los 500KB(Kilobytes).',
         });
         return;
       }
@@ -406,14 +426,14 @@ class EmpresaProceso extends CustomComponent {
           width: logoSend.width,
           height: logoSend.height,
           size: logoSend.size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         image: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -430,8 +450,9 @@ class EmpresaProceso extends CustomComponent {
 
       if (logoSend.size > 50) {
         alertKit.warning({
-          title: "Icono",
-          message: "El icono " + file.name + " no debe superar los 50KB(Kilobytes)."
+          title: 'Icono',
+          message:
+            'El icono ' + file.name + ' no debe superar los 50KB(Kilobytes).',
         });
         return;
       }
@@ -443,14 +464,14 @@ class EmpresaProceso extends CustomComponent {
           width: logoSend.width,
           height: logoSend.height,
           size: logoSend.size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         icon: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -467,16 +488,22 @@ class EmpresaProceso extends CustomComponent {
 
       if (logoSend.width !== 1200 && logoSend.height !== 1200) {
         alertKit.warning({
-          title: "Banner",
-          message: "La imagen del banner " + file.name + " tiene que tener un aspecto de 1200 x 1200 pixeles."
+          title: 'Banner',
+          message:
+            'La imagen del banner ' +
+            file.name +
+            ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
         });
         return;
       }
 
       if (logoSend.size > 1024) {
         alertKit.warning({
-          title: "Banner",
-          message: "La imagen del banner " + file.name + " no debe superar los 1024KB(Kilobytes)."
+          title: 'Banner',
+          message:
+            'La imagen del banner ' +
+            file.name +
+            ' no debe superar los 1024KB(Kilobytes).',
         });
         return;
       }
@@ -488,14 +515,14 @@ class EmpresaProceso extends CustomComponent {
           width: logoSend.width,
           height: logoSend.height,
           size: logoSend.size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         banner: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -512,16 +539,22 @@ class EmpresaProceso extends CustomComponent {
 
       if (logoSend.width !== 1200 && logoSend.height !== 1200) {
         alertKit.warning({
-          title: "Portada",
-          message: "La imagen de la portada " + file.name + " tiene que tener un aspecto de 1200 x 1200 pixeles."
+          title: 'Portada',
+          message:
+            'La imagen de la portada ' +
+            file.name +
+            ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
         });
         return;
       }
 
       if (logoSend.size > 1024) {
         alertKit.warning({
-          title: "Portada",
-          message: "La imagen de la portada " + file.name + " no debe superar los 1024KB(Kilobytes)."
+          title: 'Portada',
+          message:
+            'La imagen de la portada ' +
+            file.name +
+            ' no debe superar los 1024KB(Kilobytes).',
         });
         return;
       }
@@ -533,14 +566,14 @@ class EmpresaProceso extends CustomComponent {
           width: logoSend.width,
           height: logoSend.height,
           size: logoSend.size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         portada: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -550,40 +583,40 @@ class EmpresaProceso extends CustomComponent {
   handleClearLogo = () => {
     this.setState({
       logo: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
-  }
+  };
 
   handleClearImage = () => {
     this.setState({
       image: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
   };
 
   handleClearIcono = () => {
     this.setState({
       icon: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
   };
 
   handleClearBanner = () => {
     this.setState({
       banner: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
   };
 
   handleClearPortada = () => {
     this.setState({
       portada: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
   };
 
@@ -592,7 +625,7 @@ class EmpresaProceso extends CustomComponent {
 
     const id = guId();
     this.props.downloadFileAsync({ id, url });
-  };
+  }
 
   // ------------------------------------------------------------------------
   // Eventos para manejo de los banners
@@ -613,40 +646,43 @@ class EmpresaProceso extends CustomComponent {
   handleGuardar = async () => {
     if (isEmpty(this.state.documento)) {
       alertKit.warning({
-        title: "Documento",
-        message: "Ingrese el número de documento.",
+        title: 'Documento',
+        message: 'Ingrese el número de documento.',
         onClose: () => {
           this.refDocumento.current.focus();
-        }
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.razonSocial)) {
       alertKit.warning({
-        title: "Razón Social",
-        message: "Ingrese la razón social.",
+        title: 'Razón Social',
+        message: 'Ingrese la razón social.',
         onClose: () => {
           this.refRazonSocial.current.focus();
-        }
+        },
       });
       return;
     }
 
-    alertKit.question({
-      title: "Empresa",
-      message: '¿Estás seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Empresa',
+        message: '¿Estás seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          await this.handleGuardarProcess();
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-        await this.handleGuardarProcess();
-      }
-    });
+    );
   };
 
   handleGuardarProcess = async () => {
@@ -654,9 +690,13 @@ class EmpresaProceso extends CustomComponent {
       message: 'Procesando información...',
     });
 
-    const certificadoSend = await convertFileBase64(this.refFileCertificado.current.files);
+    const certificadoSend = await convertFileBase64(
+      this.refFileCertificado.current.files,
+    );
 
-    const fireBaseSend = await convertFileBase64(this.refFileFireBase.current.files);
+    const fireBaseSend = await convertFileBase64(
+      this.refFileFireBase.current.files,
+    );
 
     const data = {
       documento: this.state.documento.trim(),
@@ -707,12 +747,12 @@ class EmpresaProceso extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       alertKit.success({
-        headerTitle: "SysSoft Integra",
-        title: "Empresa",
+        headerTitle: 'SysSoft Integra',
+        title: 'Empresa',
         message: response.data,
         onClose: () => {
           this.props.history.goBack();
-        }
+        },
       });
     }
 
@@ -720,14 +760,14 @@ class EmpresaProceso extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        headerTitle: "SysSoft Integra",
-        title: "Error",
+        headerTitle: 'SysSoft Integra',
+        title: 'Error',
         message: response.getMessage(),
         onClose: () => {
           this.setState({
             loading: false,
           });
-        }
+        },
       });
     }
   };
@@ -764,14 +804,21 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">1</span> Información General</h6>
+            <h6>
+              <span className="badge badge-primary">1</span> Información General
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
               group={true}
-              label={<>Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Ruc ({this.state.documento.length}):{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="10909000223"
               ref={this.refDocumento}
               value={this.state.documento}
@@ -790,9 +837,14 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
-              label={<>Razón Social: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Razón Social:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese la razón social"
               ref={this.refRazonSocial}
               value={this.state.razonSocial}
@@ -804,9 +856,14 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
-              label={<>Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre Comercial:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese el nombre comercial"
               ref={this.refNombreEmpresa}
               value={this.state.nombreEmpresa}
@@ -816,28 +873,34 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Email:</>}
               placeholder="Ingrese el nombre comercial"
               ref={this.refEmail}
               value={this.state.email}
-              onChange={(event) =>
-                this.setState({ email: event.target.value })
-              }
+              onChange={(event) => this.setState({ email: event.target.value })}
             />
           </Column>
         </Row>
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">3</span> Credenciales para envio de comprobantes electrónicos a SUNAT</h6>
+            <h6>
+              <span className="badge badge-primary">3</span> Credenciales para
+              envio de comprobantes electrónicos a SUNAT
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
-              label={<>Usuario Sol(<small>Para el envío a Sunat</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Usuario Sol(<small>Para el envío a Sunat</small>):
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Usurio secundario"
               ref={this.refUserSolSunat}
               value={this.state.usuarioSolSunat}
@@ -847,23 +910,34 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
               group={true}
-              label={<>Clave Sol(<small>Para el envío a Sunat</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Clave Sol(<small>Para el envío a Sunat</small>):
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="********"
               ref={this.refPasswordSol}
               value={this.state.claveSolSunat}
               onChange={(event) =>
                 this.setState({ claveSolSunat: event.target.value })
               }
-              type={this.state.refPasswordSol ? "text" : "password"}
+              type={this.state.refPasswordSol ? 'text' : 'password'}
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
                   onClick={this.handleLookPasswordSol}
                 >
-                  <i className={this.state.refPasswordSol ? "fa fa-eye" : "fa fa-eye-slash"}></i>
+                  <i
+                    className={
+                      this.state.refPasswordSol
+                        ? 'fa fa-eye'
+                        : 'fa fa-eye-slash'
+                    }
+                  ></i>
                 </Button>
               }
             />
@@ -871,9 +945,14 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
-              label={<>Id Api Sunat(<small>Para el envío de guía de remisión</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Id Api Sunat(<small>Para el envío de guía de remisión</small>
+                  ):<i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Usurio Api Sunat"
               ref={this.refIdApiSunat}
               value={this.state.idApiSunat}
@@ -883,23 +962,35 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
               group={true}
-              label={<>Clave Api Sunat(<small>Para el envío de guía de remisión</small>):<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Clave Api Sunat(
+                  <small>Para el envío de guía de remisión</small>):
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="********"
               ref={this.refPasswordClave}
               value={this.state.claveApiSunat}
               onChange={(event) =>
                 this.setState({ claveApiSunat: event.target.value })
               }
-              type={this.state.lookPasswordClave ? "text" : "password"}
+              type={this.state.lookPasswordClave ? 'text' : 'password'}
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
                   onClick={this.handleLookPasswordApiSunat}
                 >
-                  <i className={this.state.lookPasswordClave ? "fa fa-eye" : "fa fa-eye-slash"}></i>
+                  <i
+                    className={
+                      this.state.lookPasswordClave
+                        ? 'fa fa-eye'
+                        : 'fa fa-eye-slash'
+                    }
+                  ></i>
                 </Button>
               }
             />
@@ -908,9 +999,7 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <label>
-              Seleccionar Archivo (.p12, .pfx u otros):
-            </label>
+            <label>Seleccionar Archivo (.p12, .pfx u otros):</label>
             <input
               type="file"
               id="fileCertificado"
@@ -919,28 +1008,44 @@ class EmpresaProceso extends CustomComponent {
               ref={this.refFileCertificado}
               onChange={this.handleFileCertificado}
             />
-            <label htmlFor={"fileCertificado"} className="form-control cursor-pointer">
+            <label
+              htmlFor={'fileCertificado'}
+              className="form-control cursor-pointer"
+            >
               {this.state.certificado}
             </label>
           </Column>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
               group={true}
-              label={<>Contraseña de tu Certificado:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Contraseña de tu Certificado:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="********"
               ref={this.refPasswordClaveCertificado}
               value={this.state.claveCertificado}
               onChange={(event) =>
                 this.setState({ claveCertificado: event.target.value })
               }
-              type={this.state.lookPasswordClaveCertificado ? "text" : "password"}
+              type={
+                this.state.lookPasswordClaveCertificado ? 'text' : 'password'
+              }
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
                   onClick={this.handleLookPasswordCertificado}
                 >
-                  <i className={this.state.lookPasswordClaveCertificado ? "fa fa-eye" : "fa fa-eye-slash"}></i>
+                  <i
+                    className={
+                      this.state.lookPasswordClaveCertificado
+                        ? 'fa fa-eye'
+                        : 'fa fa-eye-slash'
+                    }
+                  ></i>
                 </Button>
               }
             />
@@ -949,7 +1054,10 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">4</span> Configuración de Firebase para subir imagenes y documentos</h6>
+            <h6>
+              <span className="badge badge-primary">4</span> Configuración de
+              Firebase para subir imagenes y documentos
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
@@ -965,7 +1073,10 @@ class EmpresaProceso extends CustomComponent {
               ref={this.refFileFireBase}
               onChange={this.handleFileFireBaseBase}
             />
-            <label htmlFor={"fileFireBase"} className="form-control cursor-pointer">
+            <label
+              htmlFor={'fileFireBase'}
+              className="form-control cursor-pointer"
+            >
               {this.state.fireBaseCertificado}
             </label>
           </Column>
@@ -973,14 +1084,24 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">5</span> Imagens para uso en la página web y reportes</h6>
+            <h6>
+              <span className="badge badge-primary">5</span> Imagens para uso en
+              la página web y reportes
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
-          <Column className={"col-md-4 col-12"} formGroup={true}>
+          <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               label="Logo reporte"
-              subtitle={<>Para mostrar en los reportes. <b className='text-danger'>La imagen no debe superar los 500KB(Kilobytes).</b></>}
+              subtitle={
+                <>
+                  Para mostrar en los reportes.{' '}
+                  <b className="text-danger">
+                    La imagen no debe superar los 500KB(Kilobytes).
+                  </b>
+                </>
+              }
               imageUrl={this.state.logo.url}
               defaultImage={images.noImage}
               alt="Logo reporte"
@@ -992,10 +1113,17 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-4 col-12"} formGroup={true}>
+          <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               label="Logo pagina web"
-              subtitle={<>Para mostrar en la página web como banner. <b className='text-danger'>La imagen no debe superar los 500KB(Kilobytes).</b></>}
+              subtitle={
+                <>
+                  Para mostrar en la página web como banner.{' '}
+                  <b className="text-danger">
+                    La imagen no debe superar los 500KB(Kilobytes).
+                  </b>
+                </>
+              }
               imageUrl={this.state.image.url}
               defaultImage={images.noImage}
               alt="Logo pagina web"
@@ -1007,10 +1135,17 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-4 col-12"} formGroup={true}>
+          <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               label="Icono"
-              subtitle={<>Para mostrar como favicon de la página web. <b className='text-danger'>La imagen no debe superar los 50KB(Kilobytes).</b></>}
+              subtitle={
+                <>
+                  Para mostrar como favicon de la página web.{' '}
+                  <b className="text-danger">
+                    La imagen no debe superar los 50KB(Kilobytes).
+                  </b>
+                </>
+              }
               imageUrl={this.state.icon.url}
               defaultImage={images.noImage}
               alt="Icono de la empresa"
@@ -1025,16 +1160,24 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">6</span> Imagenes para el banner de la página web</h6>
+            <h6>
+              <span className="badge badge-primary">6</span> Imagenes para el
+              banner de la página web
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
           <Column className="col-12" formGroup={true}>
             <label>
-              Agregar las imagenes para el banner. <b className='text-danger'>Las imagenes no debe superar los 1MB(Megabyte).</b>
+              Agregar las imagenes para el banner.{' '}
+              <b className="text-danger">
+                Las imagenes no debe superar los 1MB(Megabyte).
+              </b>
             </label>
             <label>
-              Las imágenes deben tener un tamaño de <b>1440 x 800 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).
+              Las imágenes deben tener un tamaño de <b>1440 x 800 píxeles</b>{' '}
+              para que se visualicen correctamente en la página web (formato
+              recomendado *.webp).
             </label>
           </Column>
 
@@ -1052,13 +1195,21 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">7</span> Datos para comunicación con la platadorma Whatsapp</h6>
+            <h6>
+              <span className="badge badge-primary">7</span> Datos para
+              comunicación con la platadorma Whatsapp
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Número de WhatsApp:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Número de WhatsApp:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="51999000999"
               value={this.state.numeroWhatsapp}
               onChange={(event) =>
@@ -1067,9 +1218,14 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Título del modal WhatsApp:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Título del modal WhatsApp:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Hola, ¿podemos hacer algo?"
               value={this.state.tituloWhatsapp}
               onChange={(event) =>
@@ -1080,7 +1236,7 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-12"} formGroup={true}>
+          <Column className={'col-12'} formGroup={true}>
             <TextArea
               label={<>Mensaje de WhatsApp:</>}
               rows={4}
@@ -1095,11 +1251,14 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column className="col-12" formGroup={true}>
-            <h6><span className="badge badge-primary">8</span> Información para mostrar en la pagina web</h6>
+            <h6>
+              <span className="badge badge-primary">8</span> Información para
+              mostrar en la pagina web
+            </h6>
           </Column>
           <div className="dropdown-divider"></div>
 
-          <Column className={"col-12"} formGroup={true}>
+          <Column className={'col-12'} formGroup={true}>
             <TextArea
               label={<>Información:</>}
               rows={4}
@@ -1113,11 +1272,18 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
               label="Banner de portada"
-              subtitle={<>Para mostrar en la página web y debe tener un tamaño de 1200 × 1200 pixele. <b className='text-danger'>La imagen no debe superar los 1MB(Megabytes).</b></>}
+              subtitle={
+                <>
+                  Para mostrar en la página web y debe tener un tamaño de 1200 ×
+                  1200 pixele.{' '}
+                  <b className="text-danger">
+                    La imagen no debe superar los 1MB(Megabytes).
+                  </b>
+                </>
+              }
               imageUrl={this.state.banner.url}
               defaultImage={images.noImage}
               alt="Banner de portada"
@@ -1129,11 +1295,18 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
               label="Imagen de portada"
-              subtitle={<>Para mostrar en la página web y debe tener un tamaño de 1200 × 1200 pixele. <b className='text-danger'>La imagen no debe superar los 1MB(Megabytes).</b></>}
+              subtitle={
+                <>
+                  Para mostrar en la página web y debe tener un tamaño de 1200 ×
+                  1200 pixele.{' '}
+                  <b className="text-danger">
+                    La imagen no debe superar los 1MB(Megabytes).
+                  </b>
+                </>
+              }
               imageUrl={this.state.portada.url}
               defaultImage={images.noImage}
               alt="Imagen de portada"
@@ -1147,7 +1320,7 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-12"} formGroup={true}>
+          <Column className={'col-12'} formGroup={true}>
             <TextArea
               label={<>Acerca de Nosotros:</>}
               rows={8}
@@ -1161,7 +1334,7 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <TextArea
               label={<>Políticas de Privacidad:</>}
               rows={8}
@@ -1173,7 +1346,7 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <TextArea
               label={<>Terminos y Condiciones:</>}
               rows={8}
@@ -1187,7 +1360,7 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Página Web:</>}
               placeholder="Ingrese la url de la cuenta"
@@ -1199,7 +1372,7 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Cuetan de YouTube:</>}
               placeholder="Ingrese la url de la cuenta"
@@ -1213,7 +1386,7 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Cuenta de Facebook:</>}
               placeholder="Ingrese la url de la cuenta"
@@ -1225,7 +1398,7 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Cuenta de Twitter:</>}
               placeholder="Ingrese la url de la cuenta"
@@ -1239,7 +1412,7 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Cuenta de Instagram:</>}
               placeholder="Ingrese la url de la cuenta"
@@ -1251,7 +1424,7 @@ class EmpresaProceso extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6 col-12"} formGroup={true}>
+          <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={<>Cuenta de TikTok:</>}
               placeholder="Ingrese la url de la cuenta"
@@ -1266,11 +1439,8 @@ class EmpresaProceso extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-danger"
@@ -1298,7 +1468,7 @@ EmpresaProceso.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   downloadFileAsync: PropTypes.func,
 };
@@ -1311,6 +1481,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedEmpresaProceso = connect(mapStateToProps, mapDispatchToProps)(EmpresaProceso);
+const ConnectedEmpresaProceso = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(EmpresaProceso);
 
 export default ConnectedEmpresaProceso;

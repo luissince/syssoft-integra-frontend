@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-  isEmpty,
-} from '../../../../helper/utils.helper';
+import { isEmpty } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import { loadEmpresa } from '../../../../network/rest/principal.network';
@@ -12,7 +10,15 @@ import Title from '../../../../components/Title';
 import PropTypes from 'prop-types';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Image from '../../../../components/Image';
 import Button from '../../../../components/Button';
@@ -54,7 +60,6 @@ class Empresa extends React.Component {
     const response = await loadEmpresa(this.abortControllerTable.signal);
 
     if (response instanceof SuccessReponse) {
-
       this.setState({
         loading: false,
         empresa: [...this.state.empresa, response.data],
@@ -79,8 +84,8 @@ class Empresa extends React.Component {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='7'
-          message='Cargando información de la tabla...'
+          colSpan="7"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -103,7 +108,7 @@ class Empresa extends React.Component {
             <Image
               default={images.noImage}
               src={item.rutaLogo}
-              alt={"Logo"}
+              alt={'Logo'}
               width={96}
             />
           </TableCell>
@@ -111,7 +116,7 @@ class Empresa extends React.Component {
             <Image
               default={images.noImage}
               src={item.rutaImage}
-              alt={"Imagen"}
+              alt={'Imagen'}
               width={96}
             />
           </TableCell>
@@ -119,43 +124,45 @@ class Empresa extends React.Component {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEdit(item.idEmpresa)}
-            // disabled={!this.state.edit}
+              // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
           </TableCell>
         </TableRow>
       );
-    })
+    });
   }
 
   render() {
     return (
       <ContainerWrapper>
         <Title
-          title='Empresa'
-          subTitle='LISTA'
+          title="Empresa"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">N° Documento</TableHead>
                     <TableHead width="15%">Razón Social</TableHead>
                     <TableHead width="15%">Nombre Comercial</TableHead>
                     <TableHead width="10%">Logo</TableHead>
                     <TableHead width="10%">Imagen</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Editar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -174,9 +181,9 @@ const mapStateToProps = (state) => {
 Empresa.propTypes = {
   history: PropTypes.object,
   location: PropTypes.shape({
-    pathname: PropTypes.string
-  })
-}
+    pathname: PropTypes.string,
+  }),
+};
 
 const ConnectedEmpresa = connect(mapStateToProps, null)(Empresa);
 

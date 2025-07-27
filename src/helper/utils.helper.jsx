@@ -12,7 +12,7 @@ export function sleep(time) {
 
 /**
  * Obtiene el estado de un privilegio específico dentro de un menú, submenú y privilegio dados.
- * 
+ *
  * @param {Array} menus - Lista de menús, cada uno con sus submenús y privilegios.
  * @param {string} idMenu - Id del menú en el que se encuentra el privilegio.
  * @param {string} idSubMenu - Id del submenú dentro del menú especificado.
@@ -27,15 +27,17 @@ export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
 
   try {
     // Encuentra el menú con el id especificado.
-    const menu = list.find(item => item.idMenu === idMenu);
+    const menu = list.find((item) => item.idMenu === idMenu);
     if (!menu) return false;
 
     // Encuentra el submenú con el id especificado dentro del menú.
-    const subMenu = menu.subMenus.find(item => item.idSubMenu === idSubMenu);
+    const subMenu = menu.subMenus.find((item) => item.idSubMenu === idSubMenu);
     if (!subMenu) return false;
 
     // Encuentra el privilegio con el id especificado dentro del submenú.
-    const privilegio = subMenu.privilegios.find(item => item.idPrivilegio === idPrivilegio);
+    const privilegio = subMenu.privilegios.find(
+      (item) => item.idPrivilegio === idPrivilegio,
+    );
     if (!privilegio) return false;
 
     // Retorna el estado del privilegio.
@@ -96,15 +98,22 @@ export function formatDecimal(
 
   decimalCount = Number.isInteger(decimalCount) ? Math.abs(decimalCount) : 2;
 
-  const number = Number(amount)
+  const number = Number(amount);
 
   const negativeSign = number < 0 ? '-' : '';
 
-  const roundedAmount = Math.abs(rounded(number, decimalCount)).toFixed(decimalCount);
+  const roundedAmount = Math.abs(rounded(number, decimalCount)).toFixed(
+    decimalCount,
+  );
   const [integerPart, decimalPart] = roundedAmount.split('.');
 
-  const integerFormatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousands);
-  const decimalFormatted = decimalCount ? decimal + (decimalPart || '0'.repeat(decimalCount)) : '';
+  const integerFormatted = integerPart.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    thousands,
+  );
+  const decimalFormatted = decimalCount
+    ? decimal + (decimalPart || '0'.repeat(decimalCount))
+    : '';
 
   return negativeSign + integerFormatted + decimalFormatted;
 }
@@ -130,7 +139,7 @@ export function rounded(amount, decimalCount = 2, type = 'string') {
   const parsedAmount = Math.abs(number);
   const fixedAmount = parsedAmount.toFixed(decimalCount);
 
-  const value = negativeSign + fixedAmount
+  const value = negativeSign + fixedAmount;
 
   return type === 'string' ? value : Number(value);
 }
@@ -232,7 +241,7 @@ export function currentTime() {
 
 /**
  * Obtiene los meses del año actual
- * @returns 
+ * @returns
  */
 export function months() {
   return [
@@ -283,7 +292,7 @@ export function months() {
     {
       value: 12,
       label: 'Diciembre',
-    }
+    },
   ];
 }
 
@@ -336,7 +345,7 @@ function padZeroes(num) {
 
 export function text(value) {
   if (value === null || value === undefined) {
-    return "";
+    return '';
   }
 
   if (typeof value === 'number') {
@@ -347,7 +356,7 @@ export function text(value) {
     return value.trim();
   }
 
-  return "";
+  return '';
 }
 
 export function validateDate(date) {
@@ -436,12 +445,23 @@ export function keyNumberInteger(event, enterCallback) {
   const key = event.key;
   const isDigit = /\d/.test(key);
 
-  if (!(isDigit || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
+  if (
+    !(
+      isDigit ||
+      key === 'Backspace' ||
+      key === 'Delete' ||
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'Tab' ||
+      ((event.ctrlKey || event.metaKey) && key === 'c') ||
+      ((event.ctrlKey || event.metaKey) && key === 'v')
+    )
+  ) {
     event.preventDefault();
   }
 
   // Ejecutar el callback si la tecla presionada es "Enter"
-  if (key === "Enter" && typeof enterCallback === "function") {
+  if (key === 'Enter' && typeof enterCallback === 'function') {
     enterCallback();
   }
 }
@@ -459,7 +479,19 @@ export function keyNumberFloat(event, enterCallback) {
   const isDot = key === '.';
   const hasDot = event.target.value.includes('.');
 
-  if (!(isDigit || isDot || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
+  if (
+    !(
+      isDigit ||
+      isDot ||
+      key === 'Backspace' ||
+      key === 'Delete' ||
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'Tab' ||
+      ((event.ctrlKey || event.metaKey) && key === 'c') ||
+      ((event.ctrlKey || event.metaKey) && key === 'v')
+    )
+  ) {
     event.preventDefault();
   }
 
@@ -473,7 +505,7 @@ export function keyNumberFloat(event, enterCallback) {
   }
 
   // Ejecutar el callback si la tecla presionada es "Enter"
-  if (key === "Enter" && typeof enterCallback === "function") {
+  if (key === 'Enter' && typeof enterCallback === 'function') {
     enterCallback();
   }
 }
@@ -507,12 +539,23 @@ export function keyNumberPhone(event, enterCallback) {
     event.preventDefault();
   }
 
-  if (!(isDigitOrAllowedChar || key === 'Backspace' || key === 'Delete' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Tab' || (event.ctrlKey || event.metaKey) && key === 'c' || (event.ctrlKey || event.metaKey) && key === 'v')) {
+  if (
+    !(
+      isDigitOrAllowedChar ||
+      key === 'Backspace' ||
+      key === 'Delete' ||
+      key === 'ArrowLeft' ||
+      key === 'ArrowRight' ||
+      key === 'Tab' ||
+      ((event.ctrlKey || event.metaKey) && key === 'c') ||
+      ((event.ctrlKey || event.metaKey) && key === 'v')
+    )
+  ) {
     event.preventDefault();
   }
 
   // Ejecutar el callback si la tecla presionada es "Enter"
-  if (key === "Enter" && typeof enterCallback === "function") {
+  if (key === 'Enter' && typeof enterCallback === 'function') {
     enterCallback();
   }
 }
@@ -551,8 +594,8 @@ export function debounce(func, delay) {
 
 /**
  * Formatea una cadena de fecha en un formato de "DD/MM/YYYY"
- * 
- * @param {string} date 
+ *
+ * @param {string} date
  * @returns {string} La cadena de fecha formateada.
  */
 export function formatDate(date) {
@@ -614,7 +657,8 @@ export function reorder(list, startIndex, endIndex) {
   return result;
 }
 
-export const formatBytes = (bytes) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+export const formatBytes = (bytes) =>
+  `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
 export function getRowCellIndex(event) {
   const target = event.target;
@@ -689,7 +733,6 @@ export function isEmpty(object) {
   return false;
 }
 
-
 export function limitarCadena(cadena, limite, sufijo) {
   if (cadena.length > limite) {
     return cadena.substr(0, limite) + sufijo;
@@ -717,12 +760,12 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () { }) {
+export function viewModal(id, callback = function () {}) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('shown.bs.modal', callback);
 }
 
-export function clearModal(id, callback = function () { }) {
+export function clearModal(id, callback = function () {}) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('hidden.bs.modal', callback);
 }
@@ -814,7 +857,7 @@ export function validateNumericInputs(ref, type = 'number') {
  * @param {React.RefObject} ref - Referencia a un contenedor DOM (como un <form> o <div>).
  *
  * ✔️ Uso típico: mejorar la experiencia del usuario al validar formularios.
- * 
+ *
  * 🔍 Qué hace:
  * 1. Verifica que el `ref` exista y sea válido.
  * 2. Obtiene todos los elementos `<input>` dentro del contenedor.
@@ -865,10 +908,10 @@ export function readDataFile(file) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
+      const base64 = reader.result.split(',')[1];
       resolve(base64);
     };
-    reader.onerror = error => reject(error);
+    reader.onerror = (error) => reject(error);
   });
 }
 
@@ -887,25 +930,44 @@ export function imageSizeData(data) {
 
 export function guId() {
   const s4 = () => {
-    return ((1 + crypto.getRandomValues(new Uint16Array(1))[0] / 0x10000) * 0x10000)
+    return (
+      (1 + crypto.getRandomValues(new Uint16Array(1))[0] / 0x10000) *
+      0x10000
+    )
       .toString(16)
       .substring(1);
   };
-  return (s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4());
+  return (
+    s4() +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    s4() +
+    s4()
+  );
 }
 
 export function generar128Code() {
   // Caracteres permitidos en el estándar Code 128
-  const caracteresPermitidos = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const caracteresPermitidos =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
   // Longitud del código de barras (puedes ajustarla)
   const longitudCodigo = 12;
 
-  let codigoBarras = "";
+  let codigoBarras = '';
 
   // Generar un código de barras aleatorio
   for (let i = 0; i < longitudCodigo; i++) {
-    const indiceAleatorio = Math.floor(Math.random() * caracteresPermitidos.length);
+    const indiceAleatorio = Math.floor(
+      Math.random() * caracteresPermitidos.length,
+    );
     codigoBarras += caracteresPermitidos.charAt(indiceAleatorio);
   }
 
@@ -917,7 +979,7 @@ export function generateEAN13Code() {
   let prefix = Math.floor(100 + Math.random() * 900).toString();
 
   // Generamos 9 dígitos aleatorios más para completar 12 dígitos
-  let core = "";
+  let core = '';
   for (let i = 0; i < 9; i++) {
     core += Math.floor(Math.random() * 10);
   }
@@ -938,7 +1000,7 @@ function calculateEAN13CheckDigit(code) {
 
   for (let i = 0; i < code.length; i++) {
     let digit = parseInt(code[i], 10);
-    sum += (i % 2 === 0) ? digit : digit * 3;  // Pesos alternos 1 y 3
+    sum += i % 2 === 0 ? digit : digit * 3; // Pesos alternos 1 y 3
   }
 
   let remainder = sum % 10;
@@ -946,40 +1008,40 @@ function calculateEAN13CheckDigit(code) {
 }
 
 export function getPathNavigation(opcion, idNavegacion) {
-  if (opcion == "venta" || opcion == "fac") {
-    return `/inicio/facturacion/ventas/detalle?idVenta=${idNavegacion}`
+  if (opcion == 'venta' || opcion == 'fac') {
+    return `/inicio/facturacion/ventas/detalle?idVenta=${idNavegacion}`;
   }
 
-  if (opcion == "cobro") {
-    return `/inicio/facturacion/cobros/detalle?idCobro=${idNavegacion}`
+  if (opcion == 'cobro') {
+    return `/inicio/facturacion/cobros/detalle?idCobro=${idNavegacion}`;
   }
 
-  if (opcion == "compra") {
-    return `/inicio/tesoreria/compras/detalle?idCompra=${idNavegacion}`
+  if (opcion == 'compra') {
+    return `/inicio/tesoreria/compras/detalle?idCompra=${idNavegacion}`;
   }
 
-  if (opcion == "gasto") {
-    return `/inicio/tesoreria/gastos/detalle?idGasto=${idNavegacion}`
+  if (opcion == 'gasto') {
+    return `/inicio/tesoreria/gastos/detalle?idGasto=${idNavegacion}`;
   }
 
-  if (opcion == "ajuste") {
-    return `/inicio/logistica/ajuste/detalle?idAjuste=${idNavegacion}`
+  if (opcion == 'ajuste') {
+    return `/inicio/logistica/ajuste/detalle?idAjuste=${idNavegacion}`;
   }
 
-  if (opcion == "traslado") {
-    return `/inicio/logistica/traslado/detalle?idTraslado=${idNavegacion}`
+  if (opcion == 'traslado') {
+    return `/inicio/logistica/traslado/detalle?idTraslado=${idNavegacion}`;
   }
 
-  if (opcion == "cpe") {
-    return `/inicio/cpesunat/cpeelectronicos?comprobante=${idNavegacion}`
+  if (opcion == 'cpe') {
+    return `/inicio/cpesunat/cpeelectronicos?comprobante=${idNavegacion}`;
   }
 
-  if (opcion == "guia-create") {
-    return `/inicio/facturacion/guiaremision/crear?idVenta=${idNavegacion}`
+  if (opcion == 'guia-create') {
+    return `/inicio/facturacion/guiaremision/crear?idVenta=${idNavegacion}`;
   }
 
-  if (opcion == "guia") {
-    return `/inicio/facturacion/guiaremision/detalle?idGuiaRemision=${idNavegacion}`
+  if (opcion == 'guia') {
+    return `/inicio/facturacion/guiaremision/detalle?idGuiaRemision=${idNavegacion}`;
   }
 }
 
@@ -996,7 +1058,7 @@ export function alertInfo(title, message) {
   });
 }
 
-export function alertHTML(title, html, callback = function () { }) {
+export function alertHTML(title, html, callback = function () {}) {
   Swal({
     html: html,
     showConfirmButton: false,
@@ -1010,7 +1072,7 @@ export function alertHTML(title, html, callback = function () { }) {
   });
 }
 
-export function alertSuccess(title, message, callback = function () { }) {
+export function alertSuccess(title, message, callback = function () {}) {
   Swal({
     title: title,
     text: message,
@@ -1025,7 +1087,7 @@ export function alertSuccess(title, message, callback = function () { }) {
   });
 }
 
-export function alertWarning(title, message, callback = function () { }) {
+export function alertWarning(title, message, callback = function () {}) {
   Swal({
     title: title,
     text: message,
@@ -1083,15 +1145,15 @@ export function alertInput(title, mensaje, callback) {
     title: title,
     text: mensaje,
     type: 'info',
-    input: "text",
+    input: 'text',
     onKeyDown: keyNumberFloat,
     inputPlaceholder: '0.00',
     inputAttributes: {
-      autocapitalize: "off"
+      autocapitalize: 'off',
     },
     showCancelButton: true,
     allowOutsideClick: false,
-    confirmButtonText: "Aceptar",
+    confirmButtonText: 'Aceptar',
     confirmButtonColor: '#007bff',
     cancelButtonText: 'Cancelar',
     cancelButtonColor: '#dc3545',

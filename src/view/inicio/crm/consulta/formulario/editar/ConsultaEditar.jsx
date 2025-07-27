@@ -190,8 +190,8 @@ class ConsultaEditar extends CustomComponent {
         />
 
         <Title
-          title='Banco'
-          subTitle='EDITAR'
+          title="Banco"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -338,7 +338,10 @@ class ConsultaEditar extends CustomComponent {
                   this.setState({ preferido: value.target.checked })
                 }
               />
-              <label className="custom-control-label" htmlFor="preferidoChecked">
+              <label
+                className="custom-control-label"
+                htmlFor="preferidoChecked"
+              >
                 {this.state.preferido ? 'Si' : 'No'}
               </label>
             </div>
@@ -369,17 +372,14 @@ class ConsultaEditar extends CustomComponent {
 
         <Row>
           <Column>
-            <Button
-              className="btn-warning"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i>  Guardar
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

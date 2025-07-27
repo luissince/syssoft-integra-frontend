@@ -18,7 +18,10 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import PropTypes from 'prop-types';
-import { SpinnerTransparent, SpinnerView } from '../../../../../../components/Spinner';
+import {
+  SpinnerTransparent,
+  SpinnerView,
+} from '../../../../../../components/Spinner';
 import Button from '../../../../../../components/Button';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../../components/MultiModal';
@@ -107,7 +110,7 @@ class CatalogoEditar extends CustomComponent {
   */
 
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown)
+    document.addEventListener('keydown', this.handleDocumentKeyDown);
 
     const url = this.props.location.search;
     const idCatalogo = new URLSearchParams(url).get('idCatalogo');
@@ -120,7 +123,7 @@ class CatalogoEditar extends CustomComponent {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown)
+    document.removeEventListener('keydown', this.handleDocumentKeyDown);
     this.abortController.abort();
     this.alert.close();
   }
@@ -164,7 +167,7 @@ class CatalogoEditar extends CustomComponent {
 
   close = () => {
     this.props.history.goBack();
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
@@ -202,7 +205,7 @@ class CatalogoEditar extends CustomComponent {
     if (event.key === 'F1') {
       this.handleGuardar();
     }
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Filtrar productos
@@ -238,7 +241,9 @@ class CatalogoEditar extends CustomComponent {
   };
 
   handleSelectItemProducto = (producto) => {
-    const exits = this.state.detalles.some(item => item.idProducto === producto.idProducto);
+    const exits = this.state.detalles.some(
+      (item) => item.idProducto === producto.idProducto,
+    );
     if (exits) {
       return;
     }
@@ -249,7 +254,9 @@ class CatalogoEditar extends CustomComponent {
   };
 
   handleRemoverProducto = (idProducto) => {
-    const detalles = this.state.detalles.filter(item => item.idProducto !== idProducto);
+    const detalles = this.state.detalles.filter(
+      (item) => item.idProducto !== idProducto,
+    );
     this.setState({
       detalles,
     });
@@ -275,57 +282,60 @@ class CatalogoEditar extends CustomComponent {
       return;
     }
 
-    this.alert.dialog('Catálogo', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idCatalogo: idCatalogo,
-          nombre: nombre,
-          idSucursal: idSucursal,
-          idUsuario: idUsuario,
-          productos: detalles
-        };
+    this.alert.dialog(
+      'Catálogo',
+      '¿Está seguro de continuar?',
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idCatalogo: idCatalogo,
+            nombre: nombre,
+            idSucursal: idSucursal,
+            idUsuario: idUsuario,
+            productos: detalles,
+          };
 
-        this.alert.information('Catálogo', 'Procesando información...');
+          this.alert.information('Catálogo', 'Procesando información...');
 
-        const response = await updateCatalogo(data);
+          const response = await updateCatalogo(data);
 
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idCatalogo);
+          if (response instanceof SuccessReponse) {
+            this.alert.close();
+            this.handleOpenImpresion(response.data.idCatalogo);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            this.alert.warning('Catálogo', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          this.alert.warning('Catálogo', response.getMessage());
-        }
-      }
-    });
+      },
+    );
   };
-
 
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
   handleOpenImpresion = (idCatalogo) => {
-    this.setState({ isOpenImpresion: true, idCatalogo: idCatalogo })
-  }
+    this.setState({ isOpenImpresion: true, idCatalogo: idCatalogo });
+  };
 
   handlePrinterImpresion = async () => {
     printJS({
       printable: documentsPdfCatalogo(this.state.idCatalogo),
       type: 'pdf',
       showModal: true,
-      modalMessage: "Recuperando documento...",
+      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.handleCloseImpresion();
-      }
+      },
     });
-  }
+  };
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false }, this.close());
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Procesos cerrar
@@ -361,38 +371,40 @@ class CatalogoEditar extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-
           clear={this.clearView}
-
           handleClose={this.handleCloseImpresion}
           handlePrinterA4={this.handlePrinterImpresion}
         />
 
-        <div className='bg-white w-100 h-100 d-flex flex-column overflow-auto'>
-          <div className='d-flex w-100 h-100'>
+        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
+          <div className="d-flex w-100 h-100">
             {/*  */}
-            <div className='w-100 d-flex flex-column position-relative'
+            <div
+              className="w-100 d-flex flex-column position-relative"
               style={{
                 flex: '0 0 60%',
-              }}>
-              <div className='d-flex align-items-center px-3'
-                style={{ borderBottom: '1px solid #cbd5e1' }}>
-                <div className='d-flex'>
-                  <Button
-                    className='btn btn-link'
-                    onClick={this.handleCerrar}>
+              }}
+            >
+              <div
+                className="d-flex align-items-center px-3"
+                style={{ borderBottom: '1px solid #cbd5e1' }}
+              >
+                <div className="d-flex">
+                  <Button className="btn btn-link" onClick={this.handleCerrar}>
                     <i className="bi bi-arrow-left-short text-xl text-dark"></i>
                   </Button>
                 </div>
 
-                <div className='py-3 d-flex align-items-center'>
-                  <p className='h5 my-0 ml-0 mr-1'>Editar catálogo</p>
-                  <i className='fa fa-edit text-secondary'></i>
+                <div className="py-3 d-flex align-items-center">
+                  <p className="h5 my-0 ml-0 mr-1">Editar catálogo</p>
+                  <i className="fa fa-edit text-secondary"></i>
                 </div>
               </div>
 
-              <div className='px-3 py-3'
-                style={{ borderBottom: '1px solid #cbd5e1' }}>
+              <div
+                className="px-3 py-3"
+                style={{ borderBottom: '1px solid #cbd5e1' }}
+              >
                 <Search
                   ref={this.refProducto}
                   refInput={this.refProductoValue}
@@ -417,96 +429,95 @@ class CatalogoEditar extends CustomComponent {
 
               <div
                 className={
-                  !isEmpty(this.state.productos) ?
-                    'px-3 h-100 overflow-auto p-3'
-                    :
-                    'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
+                  !isEmpty(this.state.productos)
+                    ? 'px-3 h-100 overflow-auto p-3'
+                    : 'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
                 }
                 style={{
                   backgroundColor: '#f8fafc',
-                }}>
-
-
-                {
-                  this.state.loadingProducto &&
-                  <div className='position-relative w-100 h-100 text-center'>
+                }}
+              >
+                {this.state.loadingProducto && (
+                  <div className="position-relative w-100 h-100 text-center">
                     <SpinnerTransparent
                       loading={true}
-                      message={"Buscando productos..."}
+                      message={'Buscando productos...'}
                     />
                   </div>
+                )}
 
-                }
+                {!this.state.loadingProducto &&
+                  isEmpty(this.state.productos) && (
+                    <div className="text-center position-relative">
+                      <i className="bi bi-list text-secondary text-2xl"></i>
+                      <p className="text-secondary text-base text-lg mb-0">
+                        Use la barra de busqueda para encontrar su producto.
+                      </p>
+                    </div>
+                  )}
 
-                {
-                  !this.state.loadingProducto && isEmpty(this.state.productos) &&
-                  <div className='text-center position-relative'>
-                    <i className='bi bi-list text-secondary text-2xl'></i>
-                    <p className="text-secondary text-base text-lg mb-0">
-                      Use la barra de busqueda para encontrar su producto.
-                    </p>
-                  </div>
-                }
+                <div className="d-flex justify-content-center flex-wrap gap-4">
+                  {this.state.productos.map((item, index) => (
+                    <Button
+                      key={index}
+                      className="btn-light bg-white"
+                      style={{
+                        border: '1px solid #e2e8f0',
+                        width: '16rem',
+                      }}
+                      onClick={() => this.handleSelectItemProducto(item)}
+                    >
+                      <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
+                        <Image
+                          default={images.noImage}
+                          src={item.imagen}
+                          alt={item.nombre}
+                          width={150}
+                          height={150}
+                          className="mb-2 object-contain"
+                        />
 
-                <div className='d-flex justify-content-center flex-wrap gap-4'>
-                  {
-                    this.state.productos.map((item, index) => (
-                      <Button
-                        key={index}
-                        className='btn-light bg-white'
-                        style={{
-                          border: '1px solid #e2e8f0',
-                          width: '16rem',
-                        }}
-                        onClick={() => this.handleSelectItemProducto(item)}
-                      >
-                        <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className='mb-2 object-contain'
-                          />
-
-                          <div className='d-flex justify-content-center align-items-center flex-column'>
-                            <p className='m-0 text-lg'>{item.nombre}</p>
-                            <p className='m-0 text-xl font-weight-bold'>
-                              {numberFormat(item.precio, this.state.codiso)} <small>x {item.unidad}</small>
-                            </p>
-                          </div>
+                        <div className="d-flex justify-content-center align-items-center flex-column">
+                          <p className="m-0 text-lg">{item.nombre}</p>
+                          <p className="m-0 text-xl font-weight-bold">
+                            {numberFormat(item.precio, this.state.codiso)}{' '}
+                            <small>x {item.unidad}</small>
+                          </p>
                         </div>
-                      </Button>
-                    ))
-                  }
+                      </div>
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/*  */}
             <div
-              className='d-flex flex-column position-relative bg-white'
+              className="d-flex flex-column position-relative bg-white"
               style={{
                 flex: '1 1 100%',
                 borderLeft: '1px solid #cbd5e1',
-              }}>
-
-              <div className='d-flex justify-content-between align-items-center px-3'
-                style={{ borderBottom: '1px solid #cbd5e1' }}>
-                <div className='py-3'>
-                  <p className='h5 m-0'>Resumen</p>
+              }}
+            >
+              <div
+                className="d-flex justify-content-between align-items-center px-3"
+                style={{ borderBottom: '1px solid #cbd5e1' }}
+              >
+                <div className="py-3">
+                  <p className="h5 m-0">Resumen</p>
                 </div>
               </div>
 
-              <div className='d-flex flex-column px-3 pt-3'
-                style={{ borderBottom: '1px solid #cbd5e1' }}>
-                <div className='form-group'>
+              <div
+                className="d-flex flex-column px-3 pt-3"
+                style={{ borderBottom: '1px solid #cbd5e1' }}
+              >
+                <div className="form-group">
                   <Input
                     placeholder="Ingrese el nombre del catálogo..."
                     value={this.state.nombre}
                     onChange={(event) => {
-                      this.setState({ nombre: event.target.value })
+                      this.setState({ nombre: event.target.value });
                     }}
                     ref={this.refNombre}
                   />
@@ -515,82 +526,94 @@ class CatalogoEditar extends CustomComponent {
 
               <div
                 className={
-                  isEmpty(this.state.detalles) ?
-                    'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
-                    :
-                    'd-flex flex-column text-center rounded h-100 overflow-auto'
+                  isEmpty(this.state.detalles)
+                    ? 'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
+                    : 'd-flex flex-column text-center rounded h-100 overflow-auto'
                 }
                 style={{
                   backgroundColor: '#f8fafc',
-                }}>
+                }}
+              >
+                {isEmpty(this.state.detalles) && (
+                  <div className="text-center">
+                    <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
+                    <p className="text-secondary text-base text-lg mb-0">
+                      Aquí verás los productos que elijas para tu catálogo
+                    </p>
+                  </div>
+                )}
 
-                {isEmpty(this.state.detalles) && <div className='text-center'>
-                  <i className='fa fa-shopping-basket text-secondary text-2xl'></i>
-                  <p className="text-secondary text-base text-lg mb-0">
-                    Aquí verás los productos que elijas para tu catálogo
-                  </p>
-                </div>}
+                {this.state.detalles.map((item, index) => (
+                  <div
+                    key={index}
+                    className="d-grid px-3 position-relative align-items-center bg-white"
+                    style={{
+                      gridTemplateColumns: '80% 20%',
+                      borderBottom: '1px solid #e2e8f0',
+                    }}
+                  >
+                    {/* Primera columna (imagen y texto) */}
+                    <div className="d-flex align-items-center py-3">
+                      <Image
+                        default={images.noImage}
+                        src={item.imagen}
+                        alt={item.nombre}
+                        width={80}
+                        height={80}
+                        className="object-contain"
+                      />
 
-                {
-                  this.state.detalles.map((item, index) => (
-                    <div
-                      key={index}
-                      className='d-grid px-3 position-relative align-items-center bg-white'
-                      style={{
-                        gridTemplateColumns: '80% 20%',
-                        borderBottom: '1px solid #e2e8f0',
-                      }}>
-                      {/* Primera columna (imagen y texto) */}
-                      <div className='d-flex align-items-center py-3'>
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.nombre}
-                          width={80}
-                          height={80}
-                          className='object-contain'
-                        />
-
-                        <div className='p-3 text-left'>
-                          <p className='m-0 text-sm'> {item.codigo}</p>
-                          <p className='m-0 text-base font-weight-bold text-break'>
-                            {item.nombre}
-                          </p>
-                          <p className='m-0'>{numberFormat(item.precio, this.state.codiso)}</p>
-                        </div>
-                      </div>
-
-                      {/* Segunda columna para quitar */}
-                      <div className='d-flex flex-column justify-content-end align-items-center'>
-                        <div className='d-flex align-items-end justify-content-end gap-4'>
-                          <Button className='btn-danger'
-                            onClick={() => this.handleRemoverProducto(item.idProducto)}>
-                            <i className='fa fa-minus'></i>
-                          </Button>
-                        </div>
+                      <div className="p-3 text-left">
+                        <p className="m-0 text-sm"> {item.codigo}</p>
+                        <p className="m-0 text-base font-weight-bold text-break">
+                          {item.nombre}
+                        </p>
+                        <p className="m-0">
+                          {numberFormat(item.precio, this.state.codiso)}
+                        </p>
                       </div>
                     </div>
-                  ))
-                }
+
+                    {/* Segunda columna para quitar */}
+                    <div className="d-flex flex-column justify-content-end align-items-center">
+                      <div className="d-flex align-items-end justify-content-end gap-4">
+                        <Button
+                          className="btn-danger"
+                          onClick={() =>
+                            this.handleRemoverProducto(item.idProducto)
+                          }
+                        >
+                          <i className="fa fa-minus"></i>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
+              <div
+                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
                 style={{ borderTop: '1px solid #e2e8f0' }}
               >
                 <Button
-                  className='btn-success w-100'
-                  onClick={this.handleGuardar}>
-                  <div className='d-flex justify-content-center align-items-center'>
-                    <i className='fa fa-save mr-2 text-xl'></i> <p className='m-0 text-xl'>Guardar</p>
+                  className="btn-success w-100"
+                  onClick={this.handleGuardar}
+                >
+                  <div className="d-flex justify-content-center align-items-center">
+                    <i className="fa fa-save mr-2 text-xl"></i>{' '}
+                    <p className="m-0 text-xl">Guardar</p>
                   </div>
                 </Button>
 
-                <div className='d-flex justify-content-between align-items-center text-secondary'>
-                  <p className='m-0 text-secondary'>Cantidad:</p>
-                  <p className='m-0 text-secondary'>{this.state.detalles.length === 1 ? this.state.detalles.length + " Producto" : this.state.detalles.length + " Productos"} </p>
+                <div className="d-flex justify-content-between align-items-center text-secondary">
+                  <p className="m-0 text-secondary">Cantidad:</p>
+                  <p className="m-0 text-secondary">
+                    {this.state.detalles.length === 1
+                      ? this.state.detalles.length + ' Producto'
+                      : this.state.detalles.length + ' Productos'}{' '}
+                  </p>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -612,7 +635,7 @@ CatalogoEditar.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   moneda: PropTypes.shape({
     codiso: PropTypes.string.isRequired,
@@ -629,7 +652,6 @@ const mapStateToProps = (state) => {
     moneda: state.predeterminado.moneda,
   };
 };
-
 
 /**
  *

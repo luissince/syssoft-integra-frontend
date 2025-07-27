@@ -11,24 +11,27 @@ class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchTerm: ''
+      searchTerm: '',
     };
 
     this.debounceTime = this.props.debounceTime || 250;
-    this.debouncedSearch = this.debounce(this.props.onSearch, this.debounceTime);
+    this.debouncedSearch = this.debounce(
+      this.props.onSearch,
+      this.debounceTime,
+    );
   }
 
   initialize = (data) => {
     this.setState({
-      searchTerm: data
+      searchTerm: data,
     });
-  }
+  };
 
   restart = () => {
     this.setState({
-      searchTerm: ''
+      searchTerm: '',
     });
-  }
+  };
 
   debounce = (func, delay) => {
     let timeoutId;
@@ -36,13 +39,13 @@ class Search extends React.Component {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func(...args), delay);
     };
-  }
+  };
 
   handleInputChange = (event) => {
     const value = event.target.value;
     this.setState({ searchTerm: value });
     this.debouncedSearch(value);
-  }
+  };
 
   render() {
     const { theme = 'classic' } = this.props;
@@ -80,7 +83,7 @@ class Search extends React.Component {
           onKeyDown={this.props.onKeyDown}
         />
       </div>
-    )
+    );
   }
 }
 
@@ -96,7 +99,6 @@ Search.propTypes = {
   debounceTime: PropTypes.number,
   onKeyDown: PropTypes.func,
   theme: PropTypes.oneOf(['classic', 'modern']),
-}
-
+};
 
 export default Search;

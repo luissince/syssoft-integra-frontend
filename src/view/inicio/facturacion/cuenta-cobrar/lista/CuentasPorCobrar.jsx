@@ -6,9 +6,7 @@ import {
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
-import {
-  listAccountsReceivableVenta,
-} from '../../../../../network/rest/principal.network';
+import { listAccountsReceivableVenta } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -17,7 +15,15 @@ import { SpinnerTable } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import Search from '../../../../../components/Search';
@@ -28,7 +34,6 @@ import Select from '../../../../../components/Select';
  * @extends React.Component
  */
 class CuentasPorCobrar extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -108,7 +113,7 @@ class CuentasPorCobrar extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -144,7 +149,10 @@ class CuentasPorCobrar extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listAccountsReceivableVenta(params, this.abortControllerTable.signal);
+    const response = await listAccountsReceivableVenta(
+      params,
+      this.abortControllerTable.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
@@ -191,13 +199,13 @@ class CuentasPorCobrar extends CustomComponent {
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idVenta=' + idVenta,
     });
-  }
+  };
 
   handleSelecTipo = (event) => {
     this.setState({ tipo: event.target.value }, () => {
-      this.loadingInit()
-    })
-  }
+      this.loadingInit();
+    });
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -219,8 +227,8 @@ class CuentasPorCobrar extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -228,7 +236,9 @@ class CuentasPorCobrar extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="8">¡No hay datos registrados!</TableCell>
+          <TableCell className="text-center" colSpan="8">
+            ¡No hay datos registrados!
+          </TableCell>
         </TableRow>
       );
     }
@@ -237,41 +247,55 @@ class CuentasPorCobrar extends CustomComponent {
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>{item.comprobante} <br /> {item.serie}-{formatNumberWithZeros(item.numeracion)} </TableCell>
-          <TableCell>{item.tipoDocumento} - {item.documento}<br />{item.informacion}</TableCell>
           <TableCell>
-            {item.numeroCuota === 1 ? item.numeroCuota + " CUOTA" : item.numeroCuota + " CUOTAS"}
+            {item.comprobante} <br /> {item.serie}-
+            {formatNumberWithZeros(item.numeracion)}{' '}
+          </TableCell>
+          <TableCell>
+            {item.tipoDocumento} - {item.documento}
+            <br />
+            {item.informacion}
+          </TableCell>
+          <TableCell>
+            {item.numeroCuota === 1
+              ? item.numeroCuota + ' CUOTA'
+              : item.numeroCuota + ' CUOTAS'}
             <br />
             FACTURA DE {item.frecuenciaPago} DÍAS
           </TableCell>
           <TableCell>{numberFormat(item.total, item.codiso)}</TableCell>
-          <TableCell className='text-success'>{numberFormat(item.pagado, item.codiso)}</TableCell>
-          <TableCell className='text-danger'>{numberFormat(item.total - item.pagado, item.codiso)}</TableCell>
-          <TableCell className='text-center'>
+          <TableCell className="text-success">
+            {numberFormat(item.pagado, item.codiso)}
+          </TableCell>
+          <TableCell className="text-danger">
+            {numberFormat(item.total - item.pagado, item.codiso)}
+          </TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
-              onClick={() => this.handleCobrar(item.idVenta)}>
+              onClick={() => this.handleCobrar(item.idVenta)}
+            >
               <i className="fa fa-calendar-check-o"></i>
             </Button>
           </TableCell>
         </TableRow>
       );
-    })
+    });
   }
 
   render() {
     return (
       <ContainerWrapper>
         <Title
-          title='Cuentas por Cobrar'
-          subTitle='LISTA'
+          title="Cuentas por Cobrar"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
             <Button
-              className='btn-outline-secondary'
+              className="btn-outline-secondary"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
@@ -283,7 +307,7 @@ class CuentasPorCobrar extends CustomComponent {
           <Column className="col-lg-6 col-md-6 col-sm-12" formGroup={true}>
             <Search
               group={true}
-              label={"Buscar:"}
+              label={'Buscar:'}
               iconLeft={<i className="bi bi-search"></i>}
               onSearch={this.searchText}
               placeholder="Buscar por comprobante o cliente..."
@@ -293,7 +317,7 @@ class CuentasPorCobrar extends CustomComponent {
           <Column className="col-lg-3 col-md-6 col-sm-12" formGroup={true}>
             <Select
               group
-              label={"Tipo"}
+              label={'Tipo'}
               value={this.state.tipo}
               onChange={this.handleSelecTipo}
             >
@@ -306,22 +330,24 @@ class CuentasPorCobrar extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Comprobante</TableHead>
                     <TableHead width="18%">Cliente</TableHead>
                     <TableHead width="17%">N° Cuotas / Frecuencia</TableHead>
                     <TableHead width="10%">Total</TableHead>
                     <TableHead width="10%">Cobrado</TableHead>
                     <TableHead width="10%">Por Cobrar</TableHead>
-                    <TableHead width="5%" className="text-center">Cobrar</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Cobrar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -350,7 +376,7 @@ CuentasPorCobrar.propTypes = {
     }).isRequired,
   }).isRequired,
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  location: PropTypes.object
+  location: PropTypes.object,
 };
 
 const mapStateToProps = (state) => {
@@ -359,6 +385,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedCuentasPorCobrar = connect(mapStateToProps, null)(CuentasPorCobrar);;
+const ConnectedCuentasPorCobrar = connect(
+  mapStateToProps,
+  null,
+)(CuentasPorCobrar);
 
 export default ConnectedCuentasPorCobrar;

@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getNumber, isEmpty, isNumeric, rounded } from '../../../../../helper/utils.helper';
+import {
+  getNumber,
+  isEmpty,
+  isNumeric,
+  rounded,
+} from '../../../../../helper/utils.helper';
 import { VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
 import { CustomModalForm } from '../../../../../components/CustomModal';
 import Row from '../../../../../components/Row';
@@ -14,15 +19,34 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import Image from '../../../../../components/Image';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
-import { Card, CardBody, CardHeader, CardTitle } from '../../../../../components/Card';
-import { Package, AlertTriangle, XCircle, Plus, Minus, ShoppingCart } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+} from '../../../../../components/Card';
+import {
+  Package,
+  AlertTriangle,
+  XCircle,
+  Plus,
+  Minus,
+  ShoppingCart,
+} from 'lucide-react';
 import ProgressBar from '../../../../../components/ProgressBar';
 import { alertKit } from 'alert-kit';
 import { INCREMENTO } from '@/model/types/forma-ajuste';
 
 class ModalLote extends Component {
-
   constructor(props) {
     super(props);
 
@@ -32,7 +56,7 @@ class ModalLote extends Component {
       producto: null,
       lotes: [],
       cantidadTotal: 0,
-    }
+    };
 
     this.initial = { ...this.state };
 
@@ -48,10 +72,13 @@ class ModalLote extends Component {
     this.setState({
       loading: true,
       message: 'Cargando lotes del producto...',
-      producto
+      producto,
     });
 
-    const response = await getLotesProducto(producto.idInventario, this.abortController.signal);
+    const response = await getLotesProducto(
+      producto.idInventario,
+      this.abortController.signal,
+    );
 
     if (response instanceof SuccessReponse) {
       this.peticion = true;
@@ -61,7 +88,7 @@ class ModalLote extends Component {
         return {
           ...lote,
           cantidadAjustar: '',
-        }
+        };
       });
 
       this.setState({
@@ -78,10 +105,10 @@ class ModalLote extends Component {
       this.setState({
         loading: false,
         message: response.getMessage(),
-        lotes: []
+        lotes: [],
       });
     }
-  }
+  };
 
   handleOnHiddenModal = async () => {
     if (!this.peticion) {
@@ -91,22 +118,22 @@ class ModalLote extends Component {
     }
     this.setState(this.initial);
     this.peticion = false;
-  }
+  };
 
   // Agregar cantidad a un lote específico
   handleAgregarCantidadLote = (lote, cantidad) => {
-    const lotes = this.state.lotes.map(l => {
+    const lotes = this.state.lotes.map((l) => {
       if (l.idLote === lote.idLote) {
         return {
           ...l,
-          cantidadAjustar: cantidad
+          cantidadAjustar: cantidad,
         };
       }
       return l;
     });
 
     this.setState({ lotes });
-  }
+  };
 
   determinarEstadoLote = (lote) => {
     if (lote.diasRestantes <= 0) {
@@ -114,38 +141,38 @@ class ModalLote extends Component {
         estado: 'Vencido',
         clase: 'bg-dark text-white',
         icono: 'bi bi-x-circle-fill',
-        colorBarra: 'bg-dark'
+        colorBarra: 'bg-dark',
       };
     } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
       return {
         estado: 'Próximo',
         clase: 'bg-warning text-dark',
         icono: 'bi bi-clock-fill',
-        colorBarra: 'bg-warning'
+        colorBarra: 'bg-warning',
       };
     } else if (lote.diasRestantes <= 90) {
       return {
         estado: 'Vigilar',
         clase: 'bg-info text-white',
         icono: 'bi bi-eye-fill',
-        colorBarra: 'bg-info'
+        colorBarra: 'bg-info',
       };
     } else {
       return {
         estado: 'Óptimo',
         clase: 'bg-success text-white',
         icono: 'bi bi-check-circle-fill',
-        colorBarra: 'bg-success'
+        colorBarra: 'bg-success',
       };
     }
   };
 
   handleOnSubmit = async () => {
-    const lotes = this.state.lotes.filter(lote => {
+    const lotes = this.state.lotes.filter((lote) => {
       if (getNumber(lote.cantidadAjustar) > 0) {
         return {
-          ...lote
-        }
+          ...lote,
+        };
       }
     });
 
@@ -159,7 +186,7 @@ class ModalLote extends Component {
 
     await this.refModal.current.handleOnClose();
     this.props.handleAdd(this.state.producto, lotes);
-  }
+  };
 
   generarTablaLotes = () => {
     const { lotes } = this.state;
@@ -189,11 +216,10 @@ class ModalLote extends Component {
       const diferencia = cantidad - getNumber(lote.cantidadAjustar);
 
       return (
-        <TableRow
-          key={index}>
+        <TableRow key={index}>
           <TableCell>
             <div>
-              <p className='m-0 p-0'>{lote.codigoLote}</p>
+              <p className="m-0 p-0">{lote.codigoLote}</p>
               <small className="text-muted">Lote #{index + 1}</small>
             </div>
           </TableCell>
@@ -201,7 +227,9 @@ class ModalLote extends Component {
           <TableCell>
             <div className="d-flex align-items-center gap-2">
               <strong>{rounded(cantidad)}</strong>
-              <span className="text-muted">{this.state.producto?.medida || 'unid'}</span>
+              <span className="text-muted">
+                {this.state.producto?.medida || 'unid'}
+              </span>
             </div>
             <ProgressBar
               value={rounded(accountPorcent, 0, 'number')}
@@ -213,14 +241,24 @@ class ModalLote extends Component {
           <TableCell>
             <div className="d-flex flex-column">
               <span>Venc: {lote.fechaVencimiento}</span>
-              <small className={`${lote.diasRestantes <= 30 ? 'text-danger' : lote.diasRestantes <= 90 ? 'text-warning' : 'text-muted'}`}>
+              <small
+                className={`${
+                  lote.diasRestantes <= 30
+                    ? 'text-danger'
+                    : lote.diasRestantes <= 90
+                      ? 'text-warning'
+                      : 'text-muted'
+                }`}
+              >
                 {lote.diasRestantes} días restantes
               </small>
             </div>
           </TableCell>
 
           <TableCell className="text-center">
-            <span className={`badge rounded-pill ${estadoLote.clase} d-flex align-items-center justify-content-center gap-1`}>
+            <span
+              className={`badge rounded-pill ${estadoLote.clase} d-flex align-items-center justify-content-center gap-1`}
+            >
               <i className={estadoLote.icono}></i>
               {estadoLote.estado}
             </span>
@@ -231,19 +269,19 @@ class ModalLote extends Component {
               <Input
                 role="float"
                 value={lote.cantidadAjustar}
-                onChange={(e) => this.handleAgregarCantidadLote(lote, e.target.value)}
+                onChange={(e) =>
+                  this.handleAgregarCantidadLote(lote, e.target.value)
+                }
                 placeholder="0"
               />
             )}
           </TableCell>
 
-          <TableCell className="text-center">
-            {rounded(diferencia)}
-          </TableCell>
+          <TableCell className="text-center">{rounded(diferencia)}</TableCell>
         </TableRow>
       );
     });
-  }
+  };
 
   render() {
     const {
@@ -252,21 +290,26 @@ class ModalLote extends Component {
       producto,
       lotes,
       cantidadTotal,
-      cantidadRequerida
+      cantidadRequerida,
     } = this.state;
 
     const { isOpen, onClose } = this.props;
 
     const totalLotes = lotes.length;
-    const lotesVencidos = lotes.filter(lote => lote.diasRestantes <= 0).length;
-    const lotesCriticos = lotes.filter(lote => lote.diasRestantes > 0 && lote.diasRestantes <= 30).length;
+    const lotesVencidos = lotes.filter(
+      (lote) => lote.diasRestantes <= 0,
+    ).length;
+    const lotesCriticos = lotes.filter(
+      (lote) => lote.diasRestantes > 0 && lote.diasRestantes <= 30,
+    ).length;
 
-    const idDisabled = lotes.reduce((acum, item) => {
-      if (getNumber(item.cantidadAjustar) > 0) {
-        return acum + 1;
-      }
-      return acum;
-    }, 0) <= 0;
+    const idDisabled =
+      lotes.reduce((acum, item) => {
+        if (getNumber(item.cantidadAjustar) > 0) {
+          return acum + 1;
+        }
+        return acum;
+      }, 0) <= 0;
 
     return (
       <CustomModalForm
@@ -277,14 +320,11 @@ class ModalLote extends Component {
         onClose={onClose}
         contentLabel="Modal Producto - Selección de Lotes"
         titleHeader="Seleccionar Lotes del Producto"
-        className={"modal-custom-lg"}
+        className={'modal-custom-lg'}
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView
-              loading={loading}
-              message={message}
-            />
+            <SpinnerView loading={loading} message={message} />
 
             {/* Información del producto */}
             <Row>
@@ -299,8 +339,12 @@ class ModalLote extends Component {
                       height={120}
                       className="object-contain mb-2"
                     />
-                    <h6 className="mb-1 text-center">{producto?.nombre || ''}</h6>
-                    <small className="text-muted">{producto?.codigo || ''}</small>
+                    <h6 className="mb-1 text-center">
+                      {producto?.nombre || ''}
+                    </h6>
+                    <small className="text-muted">
+                      {producto?.codigo || ''}
+                    </small>
                   </CardBody>
                 </Card>
               </Column>
@@ -311,7 +355,9 @@ class ModalLote extends Component {
                     <Card>
                       <CardHeader className="d-flex align-items-center gap-2">
                         <Package size={20} className="text-info" />
-                        <CardTitle className="text-base m-0">Total Lotes</CardTitle>
+                        <CardTitle className="text-base m-0">
+                          Total Lotes
+                        </CardTitle>
                       </CardHeader>
                       <CardBody>
                         <h4 className="text-info">{totalLotes}</h4>
@@ -322,7 +368,9 @@ class ModalLote extends Component {
                     <Card>
                       <CardHeader className="d-flex align-items-center gap-2">
                         <AlertTriangle size={20} className="text-warning" />
-                        <CardTitle className="text-base m-0">Críticos</CardTitle>
+                        <CardTitle className="text-base m-0">
+                          Críticos
+                        </CardTitle>
                       </CardHeader>
                       <CardBody>
                         <h4 className="text-warning">{lotesCriticos}</h4>
@@ -333,7 +381,9 @@ class ModalLote extends Component {
                     <Card>
                       <CardHeader className="d-flex align-items-center gap-2">
                         <XCircle size={20} className="text-danger" />
-                        <CardTitle className="text-base m-0">Vencidos</CardTitle>
+                        <CardTitle className="text-base m-0">
+                          Vencidos
+                        </CardTitle>
                       </CardHeader>
                       <CardBody>
                         <h4 className="text-danger">{lotesVencidos}</h4>
@@ -344,7 +394,9 @@ class ModalLote extends Component {
                     <Card>
                       <CardHeader className="d-flex align-items-center gap-2">
                         <ShoppingCart size={20} className="text-success" />
-                        <CardTitle className="text-base m-0">Seleccionado</CardTitle>
+                        <CardTitle className="text-base m-0">
+                          Seleccionado
+                        </CardTitle>
                       </CardHeader>
                       <CardBody>
                         <h4 className="text-success">{cantidadTotal}</h4>
@@ -371,14 +423,18 @@ class ModalLote extends Component {
                         <TableHead width="20%">Lote</TableHead>
                         <TableHead width="15%">Disponible</TableHead>
                         <TableHead width="20%">Vencimiento</TableHead>
-                        <TableHead width="12%" className="text-center">Estado</TableHead>
-                        <TableHead width="20%" className="text-center">Cantidad Ajustar</TableHead>
-                        <TableHead width="10%" className="text-center">Diferencia</TableHead>
+                        <TableHead width="12%" className="text-center">
+                          Estado
+                        </TableHead>
+                        <TableHead width="20%" className="text-center">
+                          Cantidad Ajustar
+                        </TableHead>
+                        <TableHead width="10%" className="text-center">
+                          Diferencia
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
-                      {this.generarTablaLotes()}
-                    </TableBody>
+                    <TableBody>{this.generarTablaLotes()}</TableBody>
                   </Table>
                 </TableResponsive>
               </Column>
@@ -392,7 +448,8 @@ class ModalLote extends Component {
               className="btn-primary"
               disabled={idDisabled || loading}
             >
-              <i className="fa fa-plus"></i> Agregar al carrito ({cantidadTotal})
+              <i className="fa fa-plus"></i> Agregar al carrito ({cantidadTotal}
+              )
             </Button>
             <Button
               className="btn-secondary"
@@ -411,6 +468,6 @@ ModalLote.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   handleAdd: PropTypes.func.isRequired,
-}
+};
 
 export default ModalLote;

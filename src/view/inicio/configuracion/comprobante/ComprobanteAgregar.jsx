@@ -46,7 +46,7 @@ class ComporbanteAgregar extends CustomComponent {
       numeroCampo: '',
       facturado: false,
       creditoFiscal: false,
-      anulacion: "0",
+      anulacion: '0',
 
       tipoComprobante: [],
 
@@ -126,11 +126,17 @@ class ComporbanteAgregar extends CustomComponent {
     }
 
     if (this.state.numeroCampo < 0 || this.state.numeroCampo > 128) {
-      alertWarning('Comprobante', 'El número de campo no puede ser menor que 0.', () => this.refNumeroCampo.current.focus());
+      alertWarning(
+        'Comprobante',
+        'El número de campo no puede ser menor que 0.',
+        () => this.refNumeroCampo.current.focus(),
+      );
       return;
     }
 
-    alertDialog('Comprobante', '¿Estás seguro de continuar?',
+    alertDialog(
+      'Comprobante',
+      '¿Estás seguro de continuar?',
       async (accept) => {
         if (accept) {
           alertInfo('Comprobante', 'Procesando información...');
@@ -153,7 +159,10 @@ class ComporbanteAgregar extends CustomComponent {
             idUsuario: this.state.idUsuario,
           };
 
-          const response = await addComprobante(data, this.abortController.signal);
+          const response = await addComprobante(
+            data,
+            this.abortController.signal,
+          );
 
           if (response instanceof SuccessReponse) {
             alertSuccess('Comprobante', response.data, () => {
@@ -180,8 +189,8 @@ class ComporbanteAgregar extends CustomComponent {
         />
 
         <Title
-          title='Comprobante'
-          subTitle='AGREGAR'
+          title="Comprobante"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -189,7 +198,12 @@ class ComporbanteAgregar extends CustomComponent {
           <Column formGroup={true}>
             <Select
               group={true}
-              label={<>Tipo de Comprobante: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo de Comprobante:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               className="form-control"
               id="estado"
               ref={this.refTipo}
@@ -211,7 +225,11 @@ class ComporbanteAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingresar el nombre del comprobante"
               ref={this.refNombre}
               value={this.state.nombre}
@@ -223,9 +241,13 @@ class ComporbanteAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Input
-              label={<>Serie: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Serie: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder={'B001, F001'}
               ref={this.refSerie}
               value={this.state.serie}
@@ -233,9 +255,14 @@ class ComporbanteAgregar extends CustomComponent {
             />
           </Column>
 
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Input
-              label={<>Numeración:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Numeración:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder={'1, 2, 3'}
               ref={this.refNumeracion}
               value={this.state.numeracion}
@@ -248,7 +275,7 @@ class ComporbanteAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Input
               label={<>Caracteres a Usar:</>}
               placeholder={'0, 8, 11'}
@@ -263,10 +290,10 @@ class ComporbanteAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Estado:"}
-              id={"cbEstado"}
+              label={'Estado:'}
+              id={'cbEstado'}
               checked={this.state.estado}
               onChange={(value) =>
                 this.setState({ estado: value.target.checked })
@@ -276,16 +303,16 @@ class ComporbanteAgregar extends CustomComponent {
             </Switches>
           </Column>
 
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"Preferido:"}
-              id={"cbPreferido"}
+              label={'Preferido:'}
+              id={'cbPreferido'}
               checked={this.state.preferida}
               onChange={(value) =>
                 this.setState({ preferida: value.target.checked })
               }
             >
-              {this.state.preferida ? "Si" : "No"}
+              {this.state.preferida ? 'Si' : 'No'}
             </Switches>
           </Column>
         </Row>
@@ -295,36 +322,37 @@ class ComporbanteAgregar extends CustomComponent {
         <h6>Opciones de Facturación</h6>
 
         <Row>
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"El comprobante será declarado ante la SUNAT:"}
-              id={"cbFacturado"}
+              label={'El comprobante será declarado ante la SUNAT:'}
+              id={'cbFacturado'}
               checked={this.state.facturado}
               onChange={(value) =>
                 this.setState({ facturado: value.target.checked })
               }
             >
-              {this.state.facturado ? "Si" : "No"}
+              {this.state.facturado ? 'Si' : 'No'}
             </Switches>
           </Column>
 
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <Switches
-              label={"El comprobante será utilizado para el calculo de Crédito Fiscal."}
-              id={"cbCreditoFiscal"}
+              label={
+                'El comprobante será utilizado para el calculo de Crédito Fiscal.'
+              }
+              id={'cbCreditoFiscal'}
               checked={this.state.creditoFiscal}
               onChange={(value) =>
                 this.setState({ creditoFiscal: value.target.checked })
               }
             >
-              {this.state.creditoFiscal ? "Si" : "No"}
+              {this.state.creditoFiscal ? 'Si' : 'No'}
             </Switches>
           </Column>
         </Row>
 
         <Row>
-
-          <Column className='col-md-6' formGroup={true}>
+          <Column className="col-md-6" formGroup={true}>
             <label htmlFor="nombre" className="col-form-label">
               Formas de anulación:
             </label>
@@ -332,15 +360,15 @@ class ComporbanteAgregar extends CustomComponent {
             <Row>
               <Column>
                 <RadioButton
-                  className='form-check-inline'
-                  name='inlineRadioOptions'
-                  id={"1"}
-                  value={"1"}
-                  checked={this.state.anulacion === "1"}
+                  className="form-check-inline"
+                  name="inlineRadioOptions"
+                  id={'1'}
+                  value={'1'}
+                  checked={this.state.anulacion === '1'}
                   onChange={(event) => {
                     this.setState({
-                      anulacion: event.target.value
-                    })
+                      anulacion: event.target.value,
+                    });
                   }}
                 >
                   Comunicación de baja
@@ -349,15 +377,15 @@ class ComporbanteAgregar extends CustomComponent {
 
               <Column>
                 <RadioButton
-                  className='form-check-inline'
-                  name='inlineRadioOptions'
-                  id={"2"}
-                  value={"2"}
-                  checked={this.state.anulacion === "2"}
+                  className="form-check-inline"
+                  name="inlineRadioOptions"
+                  id={'2'}
+                  value={'2'}
+                  checked={this.state.anulacion === '2'}
                   onChange={(event) => {
                     this.setState({
-                      anulacion: event.target.value
-                    })
+                      anulacion: event.target.value,
+                    });
                   }}
                 >
                   Resumen diario
@@ -368,10 +396,10 @@ class ComporbanteAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
               label={<> Nombre de Impresión:</>}
-              placeholder='Ejm: Boleta Electrónica, Factura Electrónica...'
+              placeholder="Ejm: Boleta Electrónica, Factura Electrónica..."
               value={this.state.impresion}
               onChange={(event) =>
                 this.setState({ impresion: event.target.value })
@@ -379,10 +407,10 @@ class ComporbanteAgregar extends CustomComponent {
             />
           </Column>
 
-          <Column className={"col-md-6"} formGroup={true}>
+          <Column className={'col-md-6'} formGroup={true}>
             <Input
               label={<> Código:</>}
-              placeholder='01, 06'
+              placeholder="01, 06"
               value={this.state.codigo}
               onChange={(event) =>
                 this.setState({ codigo: event.target.value })
@@ -393,18 +421,14 @@ class ComporbanteAgregar extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i>  Guardar
-            </Button>
-            {' '}
+            <Button className="btn-success" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -419,6 +443,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedComporbanteAgregar = connect(mapStateToProps, null)(ComporbanteAgregar);
+const ConnectedComporbanteAgregar = connect(
+  mapStateToProps,
+  null,
+)(ComporbanteAgregar);
 
 export default ConnectedComporbanteAgregar;

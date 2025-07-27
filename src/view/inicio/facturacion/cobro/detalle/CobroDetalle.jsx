@@ -6,7 +6,10 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailCobro, documentsPdfInvoicesCobro } from '../../../../../network/rest/principal.network';
+import {
+  detailCobro,
+  documentsPdfInvoicesCobro,
+} from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -15,7 +18,16 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -27,7 +39,6 @@ import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
  * @extends React.Component
  */
 class CobroDetalle extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -105,20 +116,26 @@ class CobroDetalle extends CustomComponent {
    */
 
   async loadDataId(id) {
-    const [cobro] = await Promise.all([
-      this.fetchDetailCobro(id)
-    ]);
+    const [cobro] = await Promise.all([this.fetchDetailCobro(id)]);
 
     if (cobro === null) {
       this.props.history.goBack();
       return;
     }
 
-    const suma = cobro.detalles.reduce((acumulador, item) => acumulador + item.monto * item.cantidad, 0);
+    const suma = cobro.detalles.reduce(
+      (acumulador, item) => acumulador + item.monto * item.cantidad,
+      0,
+    );
 
     this.setState({
       idCobro: id,
-      comprobante: cobro.cabecera.comprobante + ' ' + cobro.cabecera.serie + '-' + cobro.cabecera.numeracion,
+      comprobante:
+        cobro.cabecera.comprobante +
+        ' ' +
+        cobro.cabecera.serie +
+        '-' +
+        cobro.cabecera.numeracion,
       cliente: cobro.cabecera.documento + ' ' + cobro.cabecera.informacion,
       fecha: cobro.cabecera.fecha + ' ' + formatTime(cobro.cabecera.hora),
       observacion: cobro.cabecera.observacion,
@@ -180,7 +197,7 @@ class CobroDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de enviar WhatsApp
@@ -188,19 +205,22 @@ class CobroDetalle extends CustomComponent {
 
   handleOpenSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: true });
-  }
+  };
 
-  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+  handleProcessSendWhatsapp = async (
+    phone,
+    callback = async function () {},
+  ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
       website: paginaWeb,
-      email: email
+      email: email,
     };
 
-    const documentUrl = documentsPdfInvoicesCobro(this.state.idCobro, "A4");
+    const documentUrl = documentsPdfInvoicesCobro(this.state.idCobro, 'A4');
 
     // Crear mensaje con formato
     const message = `
@@ -221,17 +241,19 @@ class CobroDetalle extends CustomComponent {
     const cleanPhone = phone.replace(/\D/g, '');
 
     // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+      message,
+    )}`;
 
     await callback();
 
     // Abrir en una nueva ventana
     window.open(whatsappUrl, '_blank');
-  }
+  };
 
   handleCloseSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: false });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -250,26 +272,19 @@ class CobroDetalle extends CustomComponent {
    */
 
   renderDetalles() {
-    return (
-      this.state.detalles.map((item, index) => {
-        return (
-          <TableRow key={index}>
-            <TableCell>{++index}</TableCell>
-            <TableCell>{item.nombre}</TableCell>
-            <TableCell>{rounded(item.cantidad)}</TableCell>
-            <TableCell>
-              {numberFormat(item.monto, this.state.codiso)}
-            </TableCell>
-            <TableCell>
-              {numberFormat(
-                item.cantidad * item.monto,
-                this.state.codiso,
-              )}
-            </TableCell>
-          </TableRow>
-        );
-      })
-    );
+    return this.state.detalles.map((item, index) => {
+      return (
+        <TableRow key={index}>
+          <TableCell>{++index}</TableCell>
+          <TableCell>{item.nombre}</TableCell>
+          <TableCell>{rounded(item.cantidad)}</TableCell>
+          <TableCell>{numberFormat(item.monto, this.state.codiso)}</TableCell>
+          <TableCell>
+            {numberFormat(item.cantidad * item.monto, this.state.codiso)}
+          </TableCell>
+        </TableRow>
+      );
+    });
   }
 
   renderTotal() {
@@ -287,7 +302,6 @@ class CobroDetalle extends CustomComponent {
     );
   }
 
-
   renderTransaciones() {
     if (isEmpty(this.state.transaccion)) {
       return (
@@ -299,49 +313,47 @@ class CobroDetalle extends CustomComponent {
       );
     }
 
-    return (
-      this.state.transaccion.map((item, index) => {
-        return (
-          <React.Fragment key={index}>
-            <TableRow className="table-success">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>
-                <span>{item.fecha}</span>
-                <br />
-                <span>{formatTime(item.hora)}</span>
-              </TableCell>
-              <TableCell>{item.concepto}</TableCell>
-              <TableCell>{item.nota}</TableCell>
-              <TableCell>{item.usuario}</TableCell>
-            </TableRow>
+    return this.state.transaccion.map((item, index) => {
+      return (
+        <React.Fragment key={index}>
+          <TableRow className="table-success">
+            <TableCell>{index + 1}</TableCell>
+            <TableCell>
+              <span>{item.fecha}</span>
+              <br />
+              <span>{formatTime(item.hora)}</span>
+            </TableCell>
+            <TableCell>{item.concepto}</TableCell>
+            <TableCell>{item.nota}</TableCell>
+            <TableCell>{item.usuario}</TableCell>
+          </TableRow>
 
-            <TableRow>
-              <TableCell className="text-center">#</TableCell>
-              <TableCell>Banco</TableCell>
-              <TableCell>Monto</TableCell>
-              <TableCell colSpan={2}>Observación</TableCell>
-            </TableRow>
-            {
-              item.detalles.map((detalle, index) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell className="text-center">{index + 1}</TableCell>
-                    <TableCell>{detalle.nombre}</TableCell>
-                    <TableCell>{numberFormat(detalle.monto, this.state.codiso)}</TableCell>
-                    <TableCell colSpan={2}>{detalle.observacion}</TableCell>
-                  </TableRow>
-                );
-              })
-            }
-            <TableRow>
-              <TableCell colSpan="5">
-                <hr />
-              </TableCell>
-            </TableRow>
-          </React.Fragment>
-        );
-      })
-    );
+          <TableRow>
+            <TableCell className="text-center">#</TableCell>
+            <TableCell>Banco</TableCell>
+            <TableCell>Monto</TableCell>
+            <TableCell colSpan={2}>Observación</TableCell>
+          </TableRow>
+          {item.detalles.map((detalle, index) => {
+            return (
+              <TableRow key={index}>
+                <TableCell className="text-center">{index + 1}</TableCell>
+                <TableCell>{detalle.nombre}</TableCell>
+                <TableCell>
+                  {numberFormat(detalle.monto, this.state.codiso)}
+                </TableCell>
+                <TableCell colSpan={2}>{detalle.observacion}</TableCell>
+              </TableRow>
+            );
+          })}
+          <TableRow>
+            <TableCell colSpan="5">
+              <hr />
+            </TableCell>
+          </TableRow>
+        </React.Fragment>
+      );
+    });
   }
 
   render() {
@@ -353,8 +365,8 @@ class CobroDetalle extends CustomComponent {
         />
 
         <Title
-          title='Ingreso'
-          subTitle='DETALLE'
+          title="Ingreso"
+          subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -373,26 +385,20 @@ class CobroDetalle extends CustomComponent {
               onClick={this.handlePrint.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrint.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrint.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
-            </Button>
-            {' '}
-            <Button
-              className="btn-light"
-              onClick={this.handleOpenSendWhatsapp}
-            >
+            </Button>{' '}
+            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>
           </Column>
@@ -485,9 +491,7 @@ class CobroDetalle extends CustomComponent {
                     <TableHead>Total</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderDetalles()}
-                </TableBody>
+                <TableBody>{this.renderDetalles()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -496,7 +500,7 @@ class CobroDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-8 col-md-8 col-sm-12 col-12"></Column>
           <Column className="col-lg-4 col-md-4 col-sm-12 col-12">
-            <Table classNameContent='w-100'>
+            <Table classNameContent="w-100">
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>
@@ -516,9 +520,7 @@ class CobroDetalle extends CustomComponent {
                     <TableHead>Usuario</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderTransaciones()}
-                </TableBody>
+                <TableBody>{this.renderTransaciones()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -533,18 +535,18 @@ CobroDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
       razonSocial: PropTypes.string,
-    })
+    }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
       paginaWeb: PropTypes.string,
       email: PropTypes.string,
-    })
+    }),
   }),
 };
 

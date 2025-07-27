@@ -1,17 +1,35 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { alertWarning, calculateTax, calculateTaxBruto, formatNumberWithZeros, formatTime, isText, numberFormat, rounded } from '../../../../../helper/utils.helper';
+import {
+  alertWarning,
+  calculateTax,
+  calculateTaxBruto,
+  formatNumberWithZeros,
+  formatTime,
+  isText,
+  numberFormat,
+  rounded,
+} from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import { 
-  detailOrdenCompra, 
-  documentsPdfInvoicesOrdenCompra, 
-  documentsPdfListsOrdenCompra
+import {
+  detailOrdenCompra,
+  documentsPdfInvoicesOrdenCompra,
+  documentsPdfListsOrdenCompra,
 } from '../../../../../network/rest/principal.network';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Button from '../../../../../components/Button';
@@ -25,7 +43,6 @@ import { images } from '../../../../../helper';
  * @extends React.Component
  */
 class OrdenCompraDetalle extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -107,7 +124,10 @@ class OrdenCompraDetalle extends CustomComponent {
       idOrdenCompra: id,
     };
 
-    const response = await detailOrdenCompra(params, this.abortControllerView.signal);
+    const response = await detailOrdenCompra(
+      params,
+      this.abortControllerView.signal,
+    );
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
@@ -140,25 +160,32 @@ class OrdenCompraDetalle extends CustomComponent {
       observacion,
       nota,
       codiso,
-
     } = ordenCompra.cabecera;
 
-    const monto = ordenCompra.detalles.reduce((accumlate, item) => accumlate + (item.costo * item.cantidad), 0,);
+    const monto = ordenCompra.detalles.reduce(
+      (accumlate, item) => accumlate + item.costo * item.cantidad,
+      0,
+    );
 
     this.setState({
       idOrdenCompra: id,
-      fechaHora: fecha + " " + formatTime(hora),
+      fechaHora: fecha + ' ' + formatTime(hora),
 
       comprobante: comprobante,
-      serieNumeracion: serie + "-" + formatNumberWithZeros(numeracion),
+      serieNumeracion: serie + '-' + formatNumberWithZeros(numeracion),
 
-      proveedor: documento + " - " + informacion,
+      proveedor: documento + ' - ' + informacion,
       telefono: telefono,
       celular: celular,
       email: email,
       direccion: direccion,
 
-      estado: estado === 1 ? <span className='text-success'>ACTIVO</span> : <span className='text-danger'>ANULADO</span>,
+      estado:
+        estado === 1 ? (
+          <span className="text-success">ACTIVO</span>
+        ) : (
+          <span className="text-danger">ANULADO</span>
+        ),
       observacion: observacion,
       notas: nota,
       codiso: codiso,
@@ -171,7 +198,7 @@ class OrdenCompraDetalle extends CustomComponent {
 
   close = () => {
     this.props.history.goBack();
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -200,7 +227,7 @@ class OrdenCompraDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handlePrintList = async (size) => {
     await pdfVisualizer.init({
@@ -209,7 +236,7 @@ class OrdenCompraDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -252,7 +279,9 @@ class OrdenCompraDetalle extends CustomComponent {
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
 
-        const existingImpuesto = acc.find((imp) => imp.idImpuesto === item.idImpuesto,);
+        const existingImpuesto = acc.find(
+          (imp) => imp.idImpuesto === item.idImpuesto,
+        );
 
         if (existingImpuesto) {
           existingImpuesto.valor += impuestoTotal;
@@ -270,14 +299,16 @@ class OrdenCompraDetalle extends CustomComponent {
       return resultado.map((impuesto, index) => {
         return (
           <TableRow key={index}>
-            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
+              {impuesto.nombre} :
+            </TableHead>
             <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
             </TableHead>
           </TableRow>
         );
       });
-    }
+    };
     return (
       <>
         <TableRow>
@@ -307,8 +338,8 @@ class OrdenCompraDetalle extends CustomComponent {
         />
 
         <Title
-          title='Orden de Compra'
-          subTitle='DETALLE'
+          title="Orden de Compra"
+          subTitle="DETALLE"
           handleGoBack={() => this.close()}
         />
 
@@ -319,22 +350,19 @@ class OrdenCompraDetalle extends CustomComponent {
               onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintList.bind(this, 'A4')}
@@ -344,9 +372,11 @@ class OrdenCompraDetalle extends CustomComponent {
           </Column>
         </Row>
 
-
         <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-6 col-sm-12 col-12"
+            formGroup={true}
+          >
             <TableResponsive>
               <Table>
                 <TableHeader>
@@ -403,7 +433,10 @@ class OrdenCompraDetalle extends CustomComponent {
             </TableResponsive>
           </Column>
 
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-6 col-sm-12 col-12"
+            formGroup={true}
+          >
             <TableResponsive>
               <Table>
                 <TableHeader>
@@ -480,40 +513,42 @@ class OrdenCompraDetalle extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    this.state.detalles.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell className="text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.producto}
-                            width={100}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {item.codigo}
-                          <br />
-                          {item.producto}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {numberFormat(item.costo, this.state.codiso)}
-                        </TableCell>
+                  {this.state.detalles.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{item.id}</TableCell>
+                      <TableCell className="text-center">
+                        <Image
+                          default={images.noImage}
+                          src={item.imagen}
+                          alt={item.producto}
+                          width={100}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {item.codigo}
+                        <br />
+                        {item.producto}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {numberFormat(item.costo, this.state.codiso)}
+                      </TableCell>
 
-                        <TableCell>{item.categoria}</TableCell>
-                        <TableCell className="text-right">{item.impuesto}</TableCell>
-                        <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-                        <TableCell>{item.medida}</TableCell>
-                        <TableCell className="text-right">
-                          {numberFormat(
-                            item.cantidad * item.costo,
-                            this.state.codiso,
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  }
+                      <TableCell>{item.categoria}</TableCell>
+                      <TableCell className="text-right">
+                        {item.impuesto}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {rounded(item.cantidad)}
+                      </TableCell>
+                      <TableCell>{item.medida}</TableCell>
+                      <TableCell className="text-right">
+                        {numberFormat(
+                          item.cantidad * item.costo,
+                          this.state.codiso,
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -523,7 +558,7 @@ class OrdenCompraDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
           <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table classNameContent='w-100'>
+            <Table classNameContent="w-100">
               <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>
@@ -538,8 +573,8 @@ OrdenCompraDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
-  })
+    search: PropTypes.string,
+  }),
 };
 
 export default OrdenCompraDetalle;

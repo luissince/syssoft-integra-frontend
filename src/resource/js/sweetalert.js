@@ -60,7 +60,7 @@ const Swal = () => {
     useRejections: false,
     expectRejections: false,
     clearModal: false,
-    onKeyDown: null
+    onKeyDown: null,
   };
 
   var deprecatedParams = ['useRejections', 'expectRejections'];
@@ -214,16 +214,16 @@ const Swal = () => {
   var _typeof =
     typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
       ? function (obj) {
-        return typeof obj;
-      }
+          return typeof obj;
+        }
       : function (obj) {
-        return obj &&
-          typeof Symbol === 'function' &&
-          obj.constructor === Symbol &&
-          obj !== Symbol.prototype
-          ? 'symbol'
-          : typeof obj;
-      };
+          return obj &&
+            typeof Symbol === 'function' &&
+            obj.constructor === Symbol &&
+            obj !== Symbol.prototype
+            ? 'symbol'
+            : typeof obj;
+        };
 
   var _extends =
     Object.assign ||
@@ -270,8 +270,8 @@ const Swal = () => {
       if (sweetAlert$1.isDeprecatedParameter(param)) {
         warnOnce(
           'The parameter "' +
-          param +
-          '" is deprecated and will be removed in the next major release.',
+            param +
+            '" is deprecated and will be removed in the next major release.',
         );
       }
     }
@@ -583,11 +583,11 @@ const Swal = () => {
       confirmButton.style.backgroundColor =
         confirmButton.style.borderLeftColor =
         confirmButton.style.borderRightColor =
-        '';
+          '';
       cancelButton.style.backgroundColor =
         cancelButton.style.borderLeftColor =
         cancelButton.style.borderRightColor =
-        '';
+          '';
     }
 
     // CSS animation
@@ -771,7 +771,7 @@ const Swal = () => {
       default:
         error(
           'Unexpected type of argument! Expected "string" or "object", got ' +
-          _typeof(args[0]),
+            _typeof(args[0]),
         );
         return false;
     }
@@ -1422,7 +1422,7 @@ const Swal = () => {
           input.placeholder = params.inputPlaceholder;
           input.type = params.input;
           if (params.onKeyDown) {
-            input.addEventListener("keydown", params.onKeyDown)
+            input.addEventListener('keydown', params.onKeyDown);
           }
           show(input);
           break;
@@ -1520,8 +1520,8 @@ const Swal = () => {
         default:
           error(
             'Unexpected type of input! Expected "text", "email", "password", "number", "tel", "select", "radio", "checkbox", "textarea", "file" or "url", got "' +
-            params.input +
-            '"',
+              params.input +
+              '"',
           );
           break;
       }
@@ -1538,7 +1538,7 @@ const Swal = () => {
         } else {
           error(
             'Unexpected type of inputOptions! Expected object or Promise, got ' +
-            _typeof(params.inputOptions),
+              _typeof(params.inputOptions),
           );
         }
       }
@@ -1640,66 +1640,66 @@ const Swal = () => {
     sweetAlert$1.closePopup =
     sweetAlert$1.closeModal =
     sweetAlert$1.closeToast =
-    function (onComplete) {
-      var container = getContainer();
-      var popup = getPopup();
-      if (!popup) {
-        return;
-      }
-      removeClass(popup, swalClasses.show);
-      addClass(popup, swalClasses.hide);
-      clearTimeout(popup.timeout);
-
-      if (!isToast()) {
-        resetPrevState();
-        window.onkeydown = previousWindowKeyDown;
-        windowOnkeydownOverridden = false;
-      }
-
-      var removePopupAndResetState = function removePopupAndResetState() {
-        if (container.parentNode) {
-          container.parentNode.removeChild(container);
+      function (onComplete) {
+        var container = getContainer();
+        var popup = getPopup();
+        if (!popup) {
+          return;
         }
-        removeClass(
-          [document.documentElement, document.body],
-          [
-            swalClasses.shown,
-            swalClasses['no-backdrop'],
-            swalClasses['has-input'],
-            swalClasses['toast-shown'],
-          ],
-        );
+        removeClass(popup, swalClasses.show);
+        addClass(popup, swalClasses.hide);
+        clearTimeout(popup.timeout);
 
-        if (isModal()) {
-          undoScrollbar();
-          undoIOSfix();
+        if (!isToast()) {
+          resetPrevState();
+          window.onkeydown = previousWindowKeyDown;
+          windowOnkeydownOverridden = false;
+        }
+
+        var removePopupAndResetState = function removePopupAndResetState() {
+          if (container.parentNode) {
+            container.parentNode.removeChild(container);
+          }
+          removeClass(
+            [document.documentElement, document.body],
+            [
+              swalClasses.shown,
+              swalClasses['no-backdrop'],
+              swalClasses['has-input'],
+              swalClasses['toast-shown'],
+            ],
+          );
+
+          if (isModal()) {
+            undoScrollbar();
+            undoIOSfix();
+          }
+        };
+
+        // If animation is supported, animate
+        if (animationEndEvent && !hasClass(popup, swalClasses.noanimation)) {
+          popup.addEventListener(
+            animationEndEvent,
+            function swalCloseEventFinished() {
+              popup.removeEventListener(
+                animationEndEvent,
+                swalCloseEventFinished,
+              );
+              if (hasClass(popup, swalClasses.hide)) {
+                removePopupAndResetState();
+              }
+            },
+          );
+        } else {
+          // Otherwise, remove immediately
+          removePopupAndResetState();
+        }
+        if (onComplete !== null && typeof onComplete === 'function') {
+          setTimeout(function () {
+            onComplete(popup);
+          });
         }
       };
-
-      // If animation is supported, animate
-      if (animationEndEvent && !hasClass(popup, swalClasses.noanimation)) {
-        popup.addEventListener(
-          animationEndEvent,
-          function swalCloseEventFinished() {
-            popup.removeEventListener(
-              animationEndEvent,
-              swalCloseEventFinished,
-            );
-            if (hasClass(popup, swalClasses.hide)) {
-              removePopupAndResetState();
-            }
-          },
-        );
-      } else {
-        // Otherwise, remove immediately
-        removePopupAndResetState();
-      }
-      if (onComplete !== null && typeof onComplete === 'function') {
-        setTimeout(function () {
-          onComplete(popup);
-        });
-      }
-    };
 
   /*
    * Global function to click 'Confirm' button
@@ -1806,7 +1806,7 @@ const Swal = () => {
     };
   };
 
-  sweetAlert$1.noop = function () { };
+  sweetAlert$1.noop = function () {};
 
   sweetAlert$1.version = '7.3.0';
 
@@ -2157,8 +2157,8 @@ const Swal = () => {
 
   var getChildByClass = function getChildByClass(elem, className) {
     for (var i = 0; i < elem.childNodes.length; i++) {
-      const div = elem.childNodes[i]
-      if (div.id === "miDiv" && div.children.length !== 0) {
+      const div = elem.childNodes[i];
+      if (div.id === 'miDiv' && div.children.length !== 0) {
         if (hasClass(div.firstElementChild, className)) {
           return div.firstElementChild;
         }
@@ -2265,6 +2265,4 @@ const Swal = () => {
 
 export default Swal();
 
-export {
-  Swal
-}
+export { Swal };

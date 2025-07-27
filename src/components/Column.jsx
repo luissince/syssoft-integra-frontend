@@ -11,22 +11,18 @@ import PropTypes from 'prop-types';
  * @returns {JSX.Element} Componente de columna.
  */
 const Column = forwardRef(({ className, formGroup, children }, ref) => {
-    return (
-        <div ref={ref} className={className ? className : "col"}>
-            {formGroup ? (
-                <div className="form-group">
-                    {children}
-                </div>
-            ) : children}
-        </div>
-    );
+  return (
+    <div ref={ref} className={className ? className : 'col'}>
+      {formGroup ? <div className="form-group">{children}</div> : children}
+    </div>
+  );
 });
 
 // Definir propTypes para las propiedades del componente
 Column.propTypes = {
-    className: PropTypes.string,
-    formGroup: PropTypes.bool,
-    children: PropTypes.node,
+  className: PropTypes.string,
+  formGroup: PropTypes.bool,
+  children: PropTypes.node,
 };
 
 // Opcional: para mejorar en React DevTools

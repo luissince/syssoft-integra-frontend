@@ -23,7 +23,10 @@ import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
 import Input from '../../../../components/Input';
 import Button from '../../../../components/Button';
-import { TIPO_CONCEPTO_EGRESO, TIPO_CONCEPTO_INGRESO } from '../../../../model/types/tipo-concepto';
+import {
+  TIPO_CONCEPTO_EGRESO,
+  TIPO_CONCEPTO_INGRESO,
+} from '../../../../model/types/tipo-concepto';
 
 class ConceptoEditar extends CustomComponent {
   constructor(props) {
@@ -56,9 +59,7 @@ class ConceptoEditar extends CustomComponent {
   }
 
   async loadingData(idConcepto) {
-    const [concepto] = await Promise.all([
-      this.fetchGetIdConcepto(idConcepto),
-    ]);
+    const [concepto] = await Promise.all([this.fetchGetIdConcepto(idConcepto)]);
 
     this.setState({
       idConcepto: concepto.idConcepto,
@@ -140,8 +141,8 @@ class ConceptoEditar extends CustomComponent {
         />
 
         <Title
-          title='Concepto'
-          subTitle='EDITAR'
+          title="Concepto"
+          subTitle="EDITAR"
           icon={<i className="bi bi-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -150,13 +151,18 @@ class ConceptoEditar extends CustomComponent {
           <Column className="col-md-12" formGroup={true}>
             <Input
               group={true}
-              label={<>Nombre: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre: <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               value={this.state.nombre}
               ref={this.refNombre}
               onChange={(event) =>
                 this.setState({ nombre: event.target.value })
               }
-              placeholder="Ingrese el nombre del concepto" />
+              placeholder="Ingrese el nombre del concepto"
+            />
           </Column>
         </Row>
 
@@ -164,12 +170,18 @@ class ConceptoEditar extends CustomComponent {
           <Column className="col-md-12" formGroup={true}>
             <Select
               group={true}
-              label={<>Tipo de Concepto: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo de Concepto:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               value={this.state.idTipoConcepto}
               ref={this.refIdTipoConcepto}
               onChange={(event) =>
                 this.setState({ idTipoConcepto: event.target.value })
-              }>
+              }
+            >
               <option value={''}>-- Seleccione --</option>
               <option value={TIPO_CONCEPTO_INGRESO}>INGRESO</option>
               <option value={TIPO_CONCEPTO_EGRESO}>EGRESO</option>
@@ -181,29 +193,26 @@ class ConceptoEditar extends CustomComponent {
           <Column className="col-md-12" formGroup={true}>
             <Input
               group={true}
-              label={"Código"}
+              label={'Código'}
               value={this.state.codigo}
               onChange={(event) =>
                 this.setState({ codigo: event.target.value })
               }
-              placeholder="Código" />
+              placeholder="Código"
+            />
           </Column>
         </Row>
 
         <Row>
           <Column className="col-md-12" formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

@@ -81,8 +81,8 @@ class UsuarioResetear extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Usuario'
-          subTitle='CAMBIAR CONTRASEÑA'
+          title="Usuario"
+          subTitle="CAMBIAR CONTRASEÑA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -90,7 +90,7 @@ class UsuarioResetear extends CustomComponent {
           <Column formGroup={true}>
             <Input
               group={true}
-              label={">Nueva Clave:"}
+              label={'>Nueva Clave:'}
               placeholder="Nueva clave."
               ref={this.refResetClave}
               value={this.state.resetClave}
@@ -108,8 +108,7 @@ class UsuarioResetear extends CustomComponent {
               onClick={() => this.handleGuardar()}
             >
               Aceptar
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-danger"
               onClick={() => this.props.history.goBack()}
@@ -129,6 +128,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedUsuarioResetear = connect(mapStateToProps, null)(UsuarioResetear);
+const ConnectedUsuarioResetear = connect(
+  mapStateToProps,
+  null,
+)(UsuarioResetear);
 
 export default ConnectedUsuarioResetear;

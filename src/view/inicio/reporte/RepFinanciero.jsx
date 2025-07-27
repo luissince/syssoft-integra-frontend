@@ -1,6 +1,17 @@
 import PropTypes from 'prop-types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
-import { ArrowDownIcon, ArrowUpIcon, ExternalLink } from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+import { ArrowDownIcon, ArrowUpIcon, ExternalLink } from 'lucide-react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -11,27 +22,62 @@ import Column from '../../../components/Column';
 import Select from '../../../components/Select';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
-import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../components/Table';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardText,
+  CardTitle,
+} from '../../../components/Card';
 import { Link } from 'react-router-dom';
-import { alertWarning, currentDate, formatNumberWithZeros, formatTime, getPathNavigation, getStatePrivilegio, guId, isEmpty, numberFormat } from '../../../helper/utils.helper';
-import { comboSucursal, comboUsuario, dashboardTransaccion, documentsExcelCompra, documentsPdfReportsCompra, documentsPdfReportsTransaccion } from '../../../network/rest/principal.network';
+import {
+  alertWarning,
+  currentDate,
+  formatNumberWithZeros,
+  formatTime,
+  getPathNavigation,
+  getStatePrivilegio,
+  guId,
+  isEmpty,
+  numberFormat,
+} from '../../../helper/utils.helper';
+import {
+  comboSucursal,
+  comboUsuario,
+  dashboardTransaccion,
+  documentsExcelCompra,
+  documentsPdfReportsCompra,
+  documentsPdfReportsTransaccion,
+} from '../../../network/rest/principal.network';
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import React from 'react';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import SuccessReponse from '../../../model/class/response';
-import { ELEGIR_SUCURSAL, ELEGIR_USUARIO, R_FINANCIERO, REPORTES } from '../../../model/types/menu';
+import {
+  ELEGIR_SUCURSAL,
+  ELEGIR_USUARIO,
+  R_FINANCIERO,
+  REPORTES,
+} from '../../../model/types/menu';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class RepFinanciero extends CustomComponent {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
@@ -39,7 +85,7 @@ class RepFinanciero extends CustomComponent {
 
     this.state = {
       loading: false,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
@@ -62,8 +108,18 @@ class RepFinanciero extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 5,
 
-      elegirSucursal: getStatePrivilegio(this.props.token.userToken.menus, REPORTES, R_FINANCIERO, ELEGIR_SUCURSAL),
-      elegirUsuario: getStatePrivilegio(this.props.token.userToken.menus, REPORTES, R_FINANCIERO, ELEGIR_USUARIO),
+      elegirSucursal: getStatePrivilegio(
+        this.props.token.userToken.menus,
+        REPORTES,
+        R_FINANCIERO,
+        ELEGIR_SUCURSAL,
+      ),
+      elegirUsuario: getStatePrivilegio(
+        this.props.token.userToken.menus,
+        REPORTES,
+        R_FINANCIERO,
+        ELEGIR_USUARIO,
+      ),
     };
 
     this.abortControllerView = new AbortController();
@@ -87,9 +143,7 @@ class RepFinanciero extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {
-
-  }
+  componentWillUnmount() {}
 
   /*
   |--------------------------------------------------------------------------
@@ -108,7 +162,7 @@ class RepFinanciero extends CustomComponent {
   loadingInit = async () => {
     this.setState({
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
       listaPorMeses: [],
       listaPorComprobante: [],
       lista: [],
@@ -123,15 +177,17 @@ class RepFinanciero extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning('Reporte Financiero', sucursalResponse.getMessage(), async () => {
-        await this.loadingInit();
-      });
+      alertWarning(
+        'Reporte Financiero',
+        sucursalResponse.getMessage(),
+        async () => {
+          await this.loadingInit();
+        },
+      );
       return;
     }
 
-    const usuarioResponse = await comboUsuario(
-      this.abortControllerView.signal,
-    );
+    const usuarioResponse = await comboUsuario(this.abortControllerView.signal);
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
@@ -147,19 +203,19 @@ class RepFinanciero extends CustomComponent {
       usuarios: usuarioResponse.data,
     });
     await this.loadingData();
-  }
+  };
 
   paginacionContext = async () => {
     if (this.state.paginacion === this.state.totalPaginacion) return;
 
     await this.setStateAsync({ paginacion: this.state.paginacion + 1 });
     await this.loadingData();
-  }
+  };
 
   loadingData = async (borrarLista = false) => {
     await this.setStateAsync({
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
       lista: borrarLista ? [] : this.state.lista,
       paginacion: borrarLista ? 1 : this.state.paginacion,
     });
@@ -171,12 +227,12 @@ class RepFinanciero extends CustomComponent {
       idUsuario: this.state.idUsuario,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
-    }
+    };
 
     const dashboard = await dashboardTransaccion(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Financiero', dashboard.getMessage())
+      alertWarning('Reporte Financiero', dashboard.getMessage());
       return;
     }
 
@@ -194,9 +250,9 @@ class RepFinanciero extends CustomComponent {
       egreso: dashboard.data.egreso,
       lista: [...this.state.lista, ...dashboard.data.lista],
       totalPaginacion: totalPaginacion,
-      loading: false
+      loading: false,
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -218,25 +274,25 @@ class RepFinanciero extends CustomComponent {
     this.setState({ fechaInicio: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleDateFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value, }, async () => {
+    this.setState({ fechaFinal: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleSelectSucursal = (event) => {
-    this.setState({ idSucursal: event.target.value, }, async () => {
+    this.setState({ idSucursal: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleSelectUsuario = (event) => {
-    this.setState({ idUsuario: event.target.value, }, async () => {
+    this.setState({ idUsuario: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleOpenPdf = async (size) => {
     const params = {
@@ -253,13 +309,13 @@ class RepFinanciero extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handleDownloadExcel = async () => {
     const id = guId();
     const url = documentsExcelCompra();
     this.props.downloadFileAsync({ id, url });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -281,7 +337,9 @@ class RepFinanciero extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="7">¡No hay datos para mostrar!</TableCell>
+          <TableCell className="text-center" colSpan="7">
+            ¡No hay datos para mostrar!
+          </TableCell>
         </TableRow>
       );
     }
@@ -289,28 +347,52 @@ class RepFinanciero extends CustomComponent {
     let rows = [];
 
     const newRows = this.state.lista.map((item, index) => {
-      const estado = item.estado === 1
-        ? <span className="badge badge-success">ACTIVO</span>
-        : <span className="badge badge-danger">ANULADO</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="badge badge-success">ACTIVO</span>
+        ) : (
+          <span className="badge badge-danger">ANULADO</span>
+        );
 
       return (
         <TableRow key={index}>
           <TableCell>{item.id}</TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell>{item.fecha} <br /> {formatTime(item.hora)}</TableCell>
+          <TableCell>
+            {item.fecha} <br /> {formatTime(item.hora)}
+          </TableCell>
           <TableCell>{item.concepto}</TableCell>
           <TableCell>
             <Link
               to={getPathNavigation(item.tipo, item.idComprobante)}
-              className='btn-link'
+              className="btn-link"
             >
               {item.comprobante}
               <br />
-              {item.serie}-{formatNumberWithZeros(item.numeracion)} <ExternalLink width={18} height={18} />
+              {item.serie}-{formatNumberWithZeros(item.numeracion)}{' '}
+              <ExternalLink width={18} height={18} />
             </Link>
           </TableCell>
-          <TableCell className="text-right">{item.ingreso == 0 ? "" : <span><i className='fa fa-plus text-success'></i> {numberFormat(item.ingreso, item.codiso)}</span>}</TableCell>
-          <TableCell className="text-right">{item.egreso == 0 ? "" : <span><i className='fa fa-minus text-danger'></i> {numberFormat(item.egreso, item.codiso)}</span>}</TableCell>
+          <TableCell className="text-right">
+            {item.ingreso == 0 ? (
+              ''
+            ) : (
+              <span>
+                <i className="fa fa-plus text-success"></i>{' '}
+                {numberFormat(item.ingreso, item.codiso)}
+              </span>
+            )}
+          </TableCell>
+          <TableCell className="text-right">
+            {item.egreso == 0 ? (
+              ''
+            ) : (
+              <span>
+                <i className="fa fa-minus text-danger"></i>{' '}
+                {numberFormat(item.egreso, item.codiso)}
+              </span>
+            )}
+          </TableCell>
         </TableRow>
       );
     });
@@ -323,11 +405,12 @@ class RepFinanciero extends CustomComponent {
           <Button
             disabled={this.state.paginacion === this.state.totalPaginacion}
             className="btn-outline-secondary"
-            onClick={this.paginacionContext}>
-            <i className='bi bi-chevron-double-down'></i> Mostrar Más
+            onClick={this.paginacionContext}
+          >
+            <i className="bi bi-chevron-double-down"></i> Mostrar Más
           </Button>
         </TableCell>
-      </TableRow>
+      </TableRow>,
     );
 
     return rows;
@@ -342,8 +425,8 @@ class RepFinanciero extends CustomComponent {
         />
 
         <Title
-          title='Reporte Financiero'
-          subTitle='DASHBOARD'
+          title="Reporte Financiero"
+          subTitle="DASHBOARD"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -351,19 +434,20 @@ class RepFinanciero extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-outline-warning"
-              onClick={this.handleOpenPdf.bind(this, 'A4')}>
+              onClick={this.handleOpenPdf.bind(this, 'A4')}
+            >
               <i className="bi bi-file-earmark-pdf-fill"></i> Reporte A4
-            </Button>
-            {" "}
+            </Button>{' '}
             <Button
               className="btn-outline-warning"
-              onClick={this.handleOpenPdf.bind(this, '80mm')}>
+              onClick={this.handleOpenPdf.bind(this, '80mm')}
+            >
               <i className="bi bi-file-earmark-pdf-fill"></i> Reporte 80mm
-            </Button>
-            {" "}
+            </Button>{' '}
             <Button
               className="btn-outline-warning"
-              onClick={this.handleOpenPdf.bind(this, '58mm')}>
+              onClick={this.handleOpenPdf.bind(this, '58mm')}
+            >
               <i className="bi bi-file-earmark-pdf-fill"></i> Reporte 58mm
             </Button>
             {/* {" "}
@@ -371,68 +455,77 @@ class RepFinanciero extends CustomComponent {
               className="btn-outline-success"
               onClick={this.handleDownloadExcel}>
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
-            </Button> */}
-            {" "}
-            <Button
-              className="btn-outline-light"
-              onClick={this.loadingInit}>
+            </Button> */}{' '}
+            <Button className="btn-outline-light" onClick={this.loadingInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Inicio:"}
+              label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleDateFechaInicio}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Final:"}
+              label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleDateFechaFinal}
             />
           </Column>
 
-          {this.state.elegirSucursal && <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Select
-              label={"Sucursal:"}
-              value={this.state.idSucursal}
-              onChange={this.handleSelectSucursal}
+          {this.state.elegirSucursal && (
+            <Column
+              className="col-lg-3 col-md-3 col-sm-12 col-12"
+              formGroup={true}
             >
-              <option value="">TODOS</option>
-              {
-                this.state.sucursales.map((item, index) => (
+              <Select
+                label={'Sucursal:'}
+                value={this.state.idSucursal}
+                onChange={this.handleSelectSucursal}
+              >
+                <option value="">TODOS</option>
+                {this.state.sucursales.map((item, index) => (
                   <option key={index} value={item.idSucursal}>
                     {index + 1 + '.- ' + item.nombre}
                   </option>
-                ))
-              }
-            </Select>
-          </Column>}
+                ))}
+              </Select>
+            </Column>
+          )}
 
-          {this.state.elegirUsuario && <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
-            <Select
-              label={"Usuario:"}
-              value={this.state.idUsuario}
-              onChange={this.handleSelectUsuario}
+          {this.state.elegirUsuario && (
+            <Column
+              className="col-lg-3 col-md-3 col-sm-12 col-12"
+              formGroup={true}
             >
-              <option value="">TODOS</option>
-              {
-                this.state.usuarios.map((item, index) => (
+              <Select
+                label={'Usuario:'}
+                value={this.state.idUsuario}
+                onChange={this.handleSelectUsuario}
+              >
+                <option value="">TODOS</option>
+                {this.state.usuarios.map((item, index) => (
                   <option key={index} value={item.idUsuario}>
                     {item.nombres + ' ' + item.apellidos}
                   </option>
-                ))
-              }
-            </Select>
-          </Column>}
+                ))}
+              </Select>
+            </Column>
+          )}
         </Row>
 
         <Row>
@@ -440,18 +533,28 @@ class RepFinanciero extends CustomComponent {
             <Card>
               <CardBody>
                 <CardTitle>Total Restante</CardTitle>
-                <CardText>{numberFormat(this.state.totalIngreso - this.state.totalEgreso, this.state.codIso)}</CardText>
+                <CardText>
+                  {numberFormat(
+                    this.state.totalIngreso - this.state.totalEgreso,
+                    this.state.codIso,
+                  )}
+                </CardText>
               </CardBody>
             </Card>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
               <CardBody>
                 <CardTitle>Ingresos</CardTitle>
-                <CardText>{numberFormat(this.state.totalIngreso, this.state.codIso)}</CardText>
+                <CardText>
+                  {numberFormat(this.state.totalIngreso, this.state.codIso)}
+                </CardText>
                 <p className="text-sm">
                   <ArrowDownIcon className="text-success mr-1" />
                   Suma
@@ -460,11 +563,16 @@ class RepFinanciero extends CustomComponent {
             </Card>
           </Column>
 
-          <Column className='col-lg-6 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
               <CardBody>
                 <CardTitle>Egresos</CardTitle>
-                <CardText>{numberFormat(this.state.totalEgreso, this.state.codIso)}</CardText>
+                <CardText>
+                  {numberFormat(this.state.totalEgreso, this.state.codIso)}
+                </CardText>
                 <p className="text-sm">
                   <ArrowUpIcon className="text-danger mr-1" />
                   Resta
@@ -498,7 +606,7 @@ class RepFinanciero extends CustomComponent {
         </Row> */}
 
         <Row>
-          <Column className='col-12' formGroup={true}>
+          <Column className="col-12" formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Flujo de Banco</CardTitle>
@@ -509,7 +617,13 @@ class RepFinanciero extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" label="Saldo" dataKey="saldo" name='Saldo' stroke="#004099" />
+                    <Line
+                      type="monotone"
+                      label="Saldo"
+                      dataKey="saldo"
+                      name="Saldo"
+                      stroke="#004099"
+                    />
                     {/* <Line type="monotone" dataKey="gastos" stroke="#82ca9d" /> */}
                   </LineChart>
                 </ResponsiveContainer>
@@ -519,7 +633,7 @@ class RepFinanciero extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Ingresos por Concepto</CardTitle>
@@ -530,13 +644,18 @@ class RepFinanciero extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" label="Total" name='Total' fill="#004099" />
+                    <Bar
+                      dataKey="total"
+                      label="Total"
+                      name="Total"
+                      fill="#004099"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>
             </Card>
           </Column>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Egresos por Concepto</CardTitle>
@@ -547,7 +666,12 @@ class RepFinanciero extends CustomComponent {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" label="Total" name='Total' fill="#004099" />
+                    <Bar
+                      dataKey="total"
+                      label="Total"
+                      name="Total"
+                      fill="#004099"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardBody>
@@ -566,25 +690,37 @@ class RepFinanciero extends CustomComponent {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-secondary" width="5%">#</TableHead>
-                        <TableHead className="text-secondary" width="10%">Estado</TableHead>
-                        <TableHead className="text-secondary" width="15%">Fecha</TableHead>
-                        <TableHead className="text-secondary" width="20%">Concepto</TableHead>
-                        <TableHead className="text-secondary" width="15%">Referencia</TableHead>
-                        <TableHead className="text-secondary" width="10%">Ingreso</TableHead>
-                        <TableHead className="text-secondary" width="10%">Egreso</TableHead>
+                        <TableHead className="text-secondary" width="5%">
+                          #
+                        </TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Estado
+                        </TableHead>
+                        <TableHead className="text-secondary" width="15%">
+                          Fecha
+                        </TableHead>
+                        <TableHead className="text-secondary" width="20%">
+                          Concepto
+                        </TableHead>
+                        <TableHead className="text-secondary" width="15%">
+                          Referencia
+                        </TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Ingreso
+                        </TableHead>
+                        <TableHead className="text-secondary" width="10%">
+                          Egreso
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
-                      {this.renderLista()}
-                    </TableBody>
+                    <TableBody>{this.renderLista()}</TableBody>
                   </Table>
                 </TableResponsive>
               </CardBody>
             </Card>
           </Column>
         </Row>
-      </ContainerWrapper >
+      </ContainerWrapper>
     );
   }
 }
@@ -593,7 +729,7 @@ RepFinanciero.propTypes = {
   token: PropTypes.shape({
     project: PropTypes.shape({
       idSucursal: PropTypes.string,
-    })
+    }),
   }),
   moneda: PropTypes.shape({
     codiso: PropTypes.string,
@@ -611,6 +747,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedRepFinanciero = connect(mapStateToProps, mapDispatchToProps)(RepFinanciero);
+const ConnectedRepFinanciero = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(RepFinanciero);
 
 export default ConnectedRepFinanciero;

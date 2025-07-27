@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  alertWarning,
-  isEmpty,
-} from '../../../../../../helper/utils.helper';
+import { alertWarning, isEmpty } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
@@ -23,7 +20,6 @@ import { images } from '../../../../../../helper';
  * @extends React.Component
  */
 class ModalProducto extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -33,7 +29,7 @@ class ModalProducto extends CustomComponent {
 
       producto: null,
       productos: [],
-    }
+    };
 
     this.refModal = React.createRef();
     this.refProducto = React.createRef();
@@ -44,9 +40,7 @@ class ModalProducto extends CustomComponent {
     this.abortController = null;
   }
 
-  handleOnOpen = () => {
-
-  }
+  handleOnOpen = () => {};
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -62,18 +56,18 @@ class ModalProducto extends CustomComponent {
 
       producto: null,
       productos: [],
-    })
+    });
 
     this.peticion = false;
     this.abortController = null;
-  }
+  };
 
   handleClearInputProducto = () => {
     this.setState({
       productos: [],
       producto: null,
     });
-  }
+  };
 
   handleFilterProducto = async (value) => {
     const searchWord = value;
@@ -111,23 +105,26 @@ class ModalProducto extends CustomComponent {
         productos: [],
       });
     }
-  }
+  };
 
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
-    this.setState({
-      producto: value,
-      productos: [],
-      unidadMedida: value.unidad,
-      costo: value.costo
-    }, () => {
-      this.refCantidad.current.focus();
-    });
-  }
+    this.setState(
+      {
+        producto: value,
+        productos: [],
+        unidadMedida: value.unidad,
+        costo: value.costo,
+      },
+      () => {
+        this.refCantidad.current.focus();
+      },
+    );
+  };
 
   handleInputCantidad = (event) => {
-    this.setState({ cantidad: event.target.value })
-  }
+    this.setState({ cantidad: event.target.value });
+  };
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.producto)) {
@@ -145,16 +142,28 @@ class ModalProducto extends CustomComponent {
     }
 
     if (Number(this.state.cantidad) <= 0) {
-      alertWarning('Producto - Combo', 'Su cantidad tiene que se mayor a cero(0).', () => {
-        this.refCantidad.current.focus();
-      });
+      alertWarning(
+        'Producto - Combo',
+        'Su cantidad tiene que se mayor a cero(0).',
+        () => {
+          this.refCantidad.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.props.combos.find((item) => item.idProducto === this.state.producto.idProducto)) {
-      alertWarning('Producto - Combo', 'Ya se encuentra agregado el producto a la lista.', () => {
-        this.refValueProducto.current.focus();
-      });
+    if (
+      this.props.combos.find(
+        (item) => item.idProducto === this.state.producto.idProducto,
+      )
+    ) {
+      alertWarning(
+        'Producto - Combo',
+        'Ya se encuentra agregado el producto a la lista.',
+        () => {
+          this.refValueProducto.current.focus();
+        },
+      );
       return;
     }
 
@@ -165,8 +174,11 @@ class ModalProducto extends CustomComponent {
       costo: Number(this.state.producto.costo),
     };
 
-    this.props.handleAddProducto(item, await this.refModal.current.handleOnClose())
-  }
+    this.props.handleAddProducto(
+      item,
+      await this.refModal.current.handleOnClose(),
+    );
+  };
 
   render() {
     const {
@@ -174,13 +186,10 @@ class ModalProducto extends CustomComponent {
       unidadMedida,
       costo,
 
-      productos
+      productos,
     } = this.state;
 
-    const {
-      isOpen,
-      onClose,
-    } = this.props;
+    const { isOpen, onClose } = this.props;
 
     return (
       <CustomModalForm
@@ -199,7 +208,7 @@ class ModalProducto extends CustomComponent {
                 <SearchInput
                   ref={this.refProducto}
                   autoFocus={true}
-                  label={"Filtrar por el código o nombre del producto:"}
+                  label={'Filtrar por el código o nombre del producto:'}
                   placeholder="Filtrar productos..."
                   refValue={this.refValueProducto}
                   data={productos}
@@ -211,7 +220,7 @@ class ModalProducto extends CustomComponent {
                   //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
                   //   </>
                   // )}
-                  renderItem={(value) =>
+                  renderItem={(value) => (
                     <div className="d-flex align-items-center">
                       <Image
                         default={images.noImage}
@@ -220,12 +229,13 @@ class ModalProducto extends CustomComponent {
                         width={60}
                       />
 
-                      <div className='ml-2'>
+                      <div className="ml-2">
                         {value.codigo}
                         <br />
                         {value.nombre} <small>({value.categoria})</small>
                       </div>
-                    </div>}
+                    </div>
+                  )}
                 />
               </Column>
             </Row>
@@ -233,9 +243,15 @@ class ModalProducto extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={<> Cantidad <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      {' '}
+                      Cantidad{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="0"
-                  role={"float"}
+                  role={'float'}
                   ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}
@@ -246,14 +262,25 @@ class ModalProducto extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={<> Unidad de Medida <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      {' '}
+                      Unidad de Medida{' '}
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   disabled
                   value={unidadMedida}
                 />
               </Column>
               <Column formGroup={true}>
                 <Input
-                  label={<> Costo <i className="fa fa-asterisk text-danger small"></i></>}
+                  label={
+                    <>
+                      {' '}
+                      Costo <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   disabled
                   value={costo}
                 />
@@ -263,14 +290,13 @@ class ModalProducto extends CustomComponent {
         }
         footer={
           <>
-            <Button
-              type="submit"
-              className="btn-primary">
+            <Button type="submit" className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
               className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}>
+              onClick={async () => await this.refModal.current.handleOnClose()}
+            >
               <i className="fa fa-close"></i> Cerrar
             </Button>
           </>
@@ -286,7 +312,7 @@ ModalProducto.propTypes = {
 
   combos: PropTypes.array,
 
-  handleAddProducto: PropTypes.func
+  handleAddProducto: PropTypes.func,
 };
 
 export default ModalProducto;

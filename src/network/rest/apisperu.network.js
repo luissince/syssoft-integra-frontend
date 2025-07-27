@@ -15,8 +15,8 @@ export async function getDni(documento, signal) {
     instanceApisPeru.get(
       `/api/v1/dni/${documento}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE`,
       {
-        signal
-      }
+        signal,
+      },
     ),
   );
 }
@@ -26,8 +26,8 @@ export async function getRuc(documento, signal) {
     instanceApisPeru.get(
       `/api/v1/ruc/${documento}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFsZXhhbmRlcl9keF8xMEBob3RtYWlsLmNvbSJ9.6TLycBwcRyW1d-f_hhCoWK1yOWG_HJvXo8b-EoS5MhE`,
       {
-        signal
-      }
+        signal,
+      },
     ),
   );
 }

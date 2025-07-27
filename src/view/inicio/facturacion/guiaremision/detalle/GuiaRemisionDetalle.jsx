@@ -8,7 +8,10 @@ import {
   alertWarning,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { detailGuiaRemision, documentsPdfInvoicesGuiaRemision } from '../../../../../network/rest/principal.network';
+import {
+  detailGuiaRemision,
+  documentsPdfInvoicesGuiaRemision,
+} from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
@@ -18,7 +21,16 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import pdfVisualizer from 'pdf-visualizer';
 import React from 'react';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
@@ -30,7 +42,6 @@ import { images } from '../../../../../helper';
  * @extends React.Component
  */
 class GuiaRemisionDetalle extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -42,31 +53,31 @@ class GuiaRemisionDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idGuiaRemision: '',
-      fecha: "",
-      hora: "",
-      comprobante: "",
-      serie: "",
-      numeracion: "",
-      modalidadTraslado: "",
-      motivoTraslado: "",
-      fechaTraslado: "",
-      tipoPeso: "",
-      peso: "",
-      marca: "",
-      numeroPlaca: "",
-      documentoConductor: "",
-      informacionConductor: "",
-      licenciaConducir: "",
-      direccionPartida: "",
-      ubigeoPartida: "",
-      direccionLlegada: "",
-      ubigeoLlegada: "",
-      usuario: "",
+      fecha: '',
+      hora: '',
+      comprobante: '',
+      serie: '',
+      numeracion: '',
+      modalidadTraslado: '',
+      motivoTraslado: '',
+      fechaTraslado: '',
+      tipoPeso: '',
+      peso: '',
+      marca: '',
+      numeroPlaca: '',
+      documentoConductor: '',
+      informacionConductor: '',
+      licenciaConducir: '',
+      direccionPartida: '',
+      ubigeoPartida: '',
+      direccionLlegada: '',
+      ubigeoLlegada: '',
+      usuario: '',
       estado: 0,
-      comprobanteRef: "",
-      serieRef: "",
-      numeracionRef: "",
-      cliente: "",
+      comprobanteRef: '',
+      serieRef: '',
+      numeracionRef: '',
+      cliente: '',
 
       detalles: [],
 
@@ -127,7 +138,10 @@ class GuiaRemisionDetalle extends CustomComponent {
       idGuiaRemision: id,
     };
 
-    const response = await detailGuiaRemision(params, this.abortControllerView.signal);
+    const response = await detailGuiaRemision(
+      params,
+      this.abortControllerView.signal,
+    );
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
@@ -166,9 +180,8 @@ class GuiaRemisionDetalle extends CustomComponent {
       comprobanteRef,
       serieRef,
       numeracionRef,
-      cliente
+      cliente,
     } = guiaRemision.cabecera;
-
 
     this.setState({
       idGuiaRemision: id,
@@ -206,7 +219,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   close = () => {
     this.props.history.goBack();
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -235,7 +248,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de enviar WhatsApp
@@ -243,19 +256,25 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   handleOpenSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: true });
-  }
+  };
 
-  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+  handleProcessSendWhatsapp = async (
+    phone,
+    callback = async function () {},
+  ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
       website: paginaWeb,
-      email: email
+      email: email,
     };
 
-    const documentUrl = documentsPdfInvoicesGuiaRemision(this.state.idGuiaRemision, "A4");
+    const documentUrl = documentsPdfInvoicesGuiaRemision(
+      this.state.idGuiaRemision,
+      'A4',
+    );
 
     // Crear mensaje con formato
     const message = `
@@ -276,17 +295,19 @@ class GuiaRemisionDetalle extends CustomComponent {
     const cleanPhone = phone.replace(/\D/g, '');
 
     // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+      message,
+    )}`;
 
     await callback();
 
     // Abrir en una nueva ventana
     window.open(whatsappUrl, '_blank');
-  }
+  };
 
   handleCloseSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: false });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -313,8 +334,8 @@ class GuiaRemisionDetalle extends CustomComponent {
         />
 
         <Title
-          title='Guía Remisión'
-          subTitle='DETALLE'
+          title="Guía Remisión"
+          subTitle="DETALLE"
           handleGoBack={() => this.close()}
         />
 
@@ -333,26 +354,20 @@ class GuiaRemisionDetalle extends CustomComponent {
               onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
-            </Button>
-            {' '}
-            <Button
-              className="btn-light"
-              onClick={this.handleOpenSendWhatsapp}
-            >
+            </Button>{' '}
+            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>
           </Column>
@@ -375,7 +390,8 @@ class GuiaRemisionDetalle extends CustomComponent {
                     Comprobante
                   </TableHead>
                   <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.serie}-{formatNumberWithZeros(this.state.numeracion)}
+                    {this.state.serie}-
+                    {formatNumberWithZeros(this.state.numeracion)}
                   </TableHead>
                 </TableRow>
                 <TableRow>
@@ -415,7 +431,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                     Peso (KGM o TNE)
                   </TableHead>
                   <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.tipoPeso}  {this.state.peso}
+                    {this.state.tipoPeso} {this.state.peso}
                   </TableHead>
                 </TableRow>
                 <TableRow>
@@ -431,7 +447,8 @@ class GuiaRemisionDetalle extends CustomComponent {
                     Serie y Numeración
                   </TableHead>
                   <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.serieRef}-{formatNumberWithZeros(this.state.numeracionRef)}
+                    {this.state.serieRef}-
+                    {formatNumberWithZeros(this.state.numeracionRef)}
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -446,7 +463,8 @@ class GuiaRemisionDetalle extends CustomComponent {
                     Conductor
                   </TableHead>
                   <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.documentoConductor},  {this.state.informacionConductor}
+                    {this.state.documentoConductor},{' '}
+                    {this.state.informacionConductor}
                   </TableHead>
                 </TableRow>
                 <TableRow>
@@ -517,24 +535,26 @@ class GuiaRemisionDetalle extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    this.state.detalles.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="text-center">{++index}</TableCell>
-                        <TableCell className="text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={100}
-                          />
-                        </TableCell>
-                        <TableCell>{item.codigo}<br />{item.nombre}</TableCell>
-                        <TableCell>{item.medida}</TableCell>
-                        <TableCell>{rounded(item.cantidad)}</TableCell>
-                      </TableRow>
-                    ))
-                  }
+                  {this.state.detalles.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="text-center">{++index}</TableCell>
+                      <TableCell className="text-center">
+                        <Image
+                          default={images.noImage}
+                          src={item.imagen}
+                          alt={item.nombre}
+                          width={100}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {item.codigo}
+                        <br />
+                        {item.nombre}
+                      </TableCell>
+                      <TableCell>{item.medida}</TableCell>
+                      <TableCell>{rounded(item.cantidad)}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableResponsive>
@@ -560,12 +580,12 @@ GuiaRemisionDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
       razonSocial: PropTypes.string,
-    })
+    }),
   }),
 };
 
@@ -584,6 +604,9 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedGuiaRemisionDetalle = connect(mapStateToProps, null)(GuiaRemisionDetalle);
+const ConnectedGuiaRemisionDetalle = connect(
+  mapStateToProps,
+  null,
+)(GuiaRemisionDetalle);
 
 export default ConnectedGuiaRemisionDetalle;

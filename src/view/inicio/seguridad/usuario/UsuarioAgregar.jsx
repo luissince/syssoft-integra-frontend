@@ -21,7 +21,12 @@ import {
 import { CANCELED } from '../../../../model/types/types';
 import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
-import { TabContent, TabHead, TabHeader, TabPane } from '../../../../components/Tab';
+import {
+  TabContent,
+  TabHead,
+  TabHeader,
+  TabPane,
+} from '../../../../components/Tab';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Input from '../../../../components/Input';
@@ -30,7 +35,6 @@ import Select from '../../../../components/Select';
 import { Switches } from '../../../../components/Checks';
 
 class UsuarioAgregar extends CustomComponent {
-
   constructor(props) {
     super(props);
 
@@ -84,9 +88,7 @@ class UsuarioAgregar extends CustomComponent {
   }
 
   loadData = async () => {
-    const [perfiles] = await Promise.all([
-      this.fetchComboPerfil()
-    ]);
+    const [perfiles] = await Promise.all([this.fetchComboPerfil()]);
 
     this.setState({
       perfiles,
@@ -253,29 +255,34 @@ class UsuarioAgregar extends CustomComponent {
         />
 
         <Title
-          title='Usuario'
-          subTitle='AGREGAR'
+          title="Usuario"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column>
             <TabHeader>
-              <TabHead id='datos' isActive={true}>
+              <TabHead id="datos" isActive={true}>
                 <i className="bi bi-info-circle"></i> Datos
               </TabHead>
 
-              <TabHead id='login'>
+              <TabHead id="login">
                 <i className="bi bi-person-workspace"></i> Login
               </TabHead>
             </TabHeader>
 
             <TabContent>
-              <TabPane id='datos' isActive={true}>
+              <TabPane id="datos" isActive={true}>
                 <Row>
                   <Column formGroup={true}>
                     <Input
-                      label={<>Dni: <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Dni:{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese el numero de DNI"
                       ref={this.refDni}
                       value={this.state.dni}
@@ -296,10 +303,15 @@ class UsuarioAgregar extends CustomComponent {
                 </Row>
 
                 <Row>
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Nombre(s){' '}<i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Nombre(s){' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese los nombres"
                       id="nombres"
                       value={this.state.nombres}
@@ -318,10 +330,15 @@ class UsuarioAgregar extends CustomComponent {
                     />
                   </Column>
 
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Apellidos{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Apellidos{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       id="apellidos"
                       placeholder="ingrese apellidos del usuario"
                       ref={this.refApellidos}
@@ -345,7 +362,12 @@ class UsuarioAgregar extends CustomComponent {
                   <Column formGroup={true}>
                     <Select
                       group={true}
-                      label={<>Genero <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Genero{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       id="genero"
                       value={this.state.genero}
                       ref={this.refGenero}
@@ -359,7 +381,8 @@ class UsuarioAgregar extends CustomComponent {
                             genero: event.target.value,
                           });
                         }
-                      }}>
+                      }}
+                    >
                       <option value="">-- Seleccione --</option>
                       <option value="1">Masculino</option>
                       <option value="2">Femenino</option>
@@ -371,7 +394,12 @@ class UsuarioAgregar extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Dirección <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Dirección{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       id="direccion"
                       placeholder="Ingrese la dirección"
                       ref={this.refDireccion}
@@ -392,7 +420,7 @@ class UsuarioAgregar extends CustomComponent {
                 </Row>
 
                 <Row>
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
                       label={<>Telefono o celular</>}
@@ -415,10 +443,15 @@ class UsuarioAgregar extends CustomComponent {
                     />
                   </Column>
 
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Correo Electrónico <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Correo Electrónico{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       type="email"
                       id="email"
                       placeholder="Ingrese el email"
@@ -440,7 +473,7 @@ class UsuarioAgregar extends CustomComponent {
                 </Row>
               </TabPane>
 
-              <TabPane id='login'>
+              <TabPane id="login">
                 <Row>
                   <Column formGroup={true}>
                     <Select
@@ -463,7 +496,7 @@ class UsuarioAgregar extends CustomComponent {
                 </Row>
 
                 <Row>
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Select
                       group={true}
                       label={<>Representante</>}
@@ -480,14 +513,15 @@ class UsuarioAgregar extends CustomComponent {
                             representante: event.target.value,
                           });
                         }
-                      }}>
+                      }}
+                    >
                       <option value="">-- seleccione --</option>
                       <option value="1">Si</option>
                       <option value="2">No</option>
                     </Select>
                   </Column>
 
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <label htmlFor="estado">Estado</label>
                     <select
                       className="form-control"
@@ -508,7 +542,7 @@ class UsuarioAgregar extends CustomComponent {
                 <Row>
                   <Column>
                     <Switches
-                      id={"cbActiveLogin"}
+                      id={'cbActiveLogin'}
                       checked={this.state.activeLogin}
                       onChange={(value) =>
                         this.setState({ activeLogin: value.target.checked })
@@ -546,10 +580,15 @@ class UsuarioAgregar extends CustomComponent {
 
                 {this.state.tipo ? (
                   <Row>
-                    <Column className='col-md-6 col-12' formGroup={true}>
+                    <Column className="col-md-6 col-12" formGroup={true}>
                       <Input
                         group={true}
-                        label={<>Contraseña <i className="fa fa-asterisk text-danger small"></i></>}
+                        label={
+                          <>
+                            Contraseña{' '}
+                            <i className="fa fa-asterisk text-danger small"></i>
+                          </>
+                        }
                         type="password"
                         id="contraseña"
                         placeholder="********"
@@ -571,10 +610,15 @@ class UsuarioAgregar extends CustomComponent {
                       />
                     </Column>
 
-                    <Column className='col-md-6 col-12' formGroup={true}>
+                    <Column className="col-md-6 col-12" formGroup={true}>
                       <Input
                         group={true}
-                        label={<>Confirmar Contraseña <i className="fa fa-asterisk text-danger small"></i></>}
+                        label={
+                          <>
+                            Confirmar Contraseña{' '}
+                            <i className="fa fa-asterisk text-danger small"></i>
+                          </>
+                        }
                         type="password"
                         id="contraseña2"
                         value={this.state.configClave}
@@ -609,14 +653,13 @@ class UsuarioAgregar extends CustomComponent {
               className="btn-success"
               onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {" "}
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

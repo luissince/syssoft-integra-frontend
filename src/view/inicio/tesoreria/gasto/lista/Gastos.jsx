@@ -26,7 +26,15 @@ import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../components/Table';
 import Search from '../../../../../components/Search';
 
 /**
@@ -34,7 +42,6 @@ import Search from '../../../../../components/Search';
  * @extends React.Component
  */
 class Gastos extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -118,7 +125,7 @@ class Gastos extends CustomComponent {
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
-  }
+  };
 
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
@@ -209,30 +216,33 @@ class Gastos extends CustomComponent {
   };
 
   handleAnular = (idGasto) => {
-    alertDialog('Gasto', '¿Está seguro de que desea eliminar el gasto? Esta operación no se puede deshacer.', async (accept) => {
-      if (accept) {
-        const params = {
-          idGasto: idGasto,
-          idUsuario: this.state.idUsuario,
-        };
+    alertDialog(
+      'Gasto',
+      '¿Está seguro de que desea eliminar el gasto? Esta operación no se puede deshacer.',
+      async (accept) => {
+        if (accept) {
+          const params = {
+            idGasto: idGasto,
+            idUsuario: this.state.idUsuario,
+          };
 
-        alertInfo('Gasto', 'Procesando información...');
+          alertInfo('Gasto', 'Procesando información...');
 
-        const response = await cancelGasto(params);
+          const response = await cancelGasto(params);
 
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Gasto', response.data, () => {
-            this.loadInit();
-          });
+          if (response instanceof SuccessReponse) {
+            alertSuccess('Gasto', response.data, () => {
+              this.loadInit();
+            });
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertWarning('Gasto', response.getMessage());
+          }
         }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Gasto', response.getMessage());
-        }
-      }
-    },
+      },
     );
   };
 
@@ -256,8 +266,8 @@ class Gastos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan='8'
-          message='Cargando información de la tabla...'
+          colSpan="8"
+          message="Cargando información de la tabla..."
         />
       );
     }
@@ -290,11 +300,11 @@ class Gastos extends CustomComponent {
             {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
           </TableCell>
           <TableCell className="text-center">
-            {
-              item.estado === 1
-                ? <span className="text-success">ACTIVO</span>
-                : <span className="text-danger">ANULADO</span>
-            }
+            {item.estado === 1 ? (
+              <span className="text-success">ACTIVO</span>
+            ) : (
+              <span className="text-danger">ANULADO</span>
+            )}
           </TableCell>
           <TableCell className="text-right">
             {numberFormat(item.monto, item.codiso)}
@@ -324,29 +334,21 @@ class Gastos extends CustomComponent {
     return (
       <ContainerWrapper>
         <Title
-          title='Gastos'
-          subTitle='LISTA'
+          title="Gastos"
+          subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup={true}>
-            <Button
-              className='btn-outline-info'
-              onClick={this.handleCrear}
-            >
+            <Button className="btn-outline-info" onClick={this.handleCrear}>
               <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>
-            {' '}
-            <Button
-              className='btn-outline-secondary'
-              onClick={this.loadInit}
-            >
+            </Button>{' '}
+            <Button className="btn-outline-secondary" onClick={this.loadInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
-
 
         <Row>
           <Column className="col-md-6 col-sm-12" formGroup={true}>
@@ -362,22 +364,28 @@ class Gastos extends CustomComponent {
         <Row>
           <Column>
             <TableResponsive>
-              <Table className={"table-bordered"}>
+              <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Proveedor</TableHead>
                     <TableHead width="15%">Comprobante</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="10%" className="text-center">Monto</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
+                    <TableHead width="10%" className="text-center">
+                      Monto
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Detalle
+                    </TableHead>
+                    <TableHead width="5%" className="text-center">
+                      Anular
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
+                <TableBody>{this.generateBody()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>

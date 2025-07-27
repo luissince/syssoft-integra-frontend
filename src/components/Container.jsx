@@ -19,9 +19,7 @@ const ContainerWrapper = forwardRef(({ children }, ref) => {
   return (
     <main ref={ref}>
       <div className="container-xl mt-3">
-        <div className="bg-white p-3 rounded position-relative">
-          {children}
-        </div>
+        <div className="bg-white p-3 rounded position-relative">{children}</div>
       </div>
 
       <Footer />
@@ -45,17 +43,19 @@ ContainerWrapper.propTypes = {
  * @param {React.Ref} ref - Referencia hacia el elemento principal.
  * @returns {JSX.Element}
  */
-export const PosContainerWrapper = forwardRef(({ children, className = '' }, ref) => {
-  return (
-    <main className="main-pos" ref={ref}>
-      <div className="h-100">
-        <div className={`d-flex position-relative h-100 ${className}`}>
-          {children}
+export const PosContainerWrapper = forwardRef(
+  ({ children, className = '' }, ref) => {
+    return (
+      <main className="main-pos" ref={ref}>
+        <div className="h-100">
+          <div className={`d-flex position-relative h-100 ${className}`}>
+            {children}
+          </div>
         </div>
-      </div>
-    </main>
-  );
-});
+      </main>
+    );
+  },
+);
 
 PosContainerWrapper.displayName = 'PosContainerWrapper';
 
@@ -64,14 +64,12 @@ PosContainerWrapper.propTypes = {
   className: PropTypes.string,
 };
 
-
 /**
  * Componente que representa una funcionalidad específica.
  * @class
  * @extends React.Component
  */
 export class ContainerMenu extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -91,10 +89,11 @@ export class ContainerMenu extends React.Component {
       return;
     }
 
-    const subMenus = this.state.cache.filter((item) => item.nombre.toUpperCase().includes(value.toUpperCase()),);
+    const subMenus = this.state.cache.filter((item) =>
+      item.nombre.toUpperCase().includes(value.toUpperCase()),
+    );
     this.setState({ subMenus });
-  }
-
+  };
 
   handleFocus = (event) => {
     if (event.key === 'Enter') {
@@ -104,7 +103,7 @@ export class ContainerMenu extends React.Component {
       const button = buttons[0];
       button.focus();
     }
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -126,7 +125,6 @@ export class ContainerMenu extends React.Component {
     return (
       <ContainerWrapper>
         <div className="d-flex flex-column align-items-center justify-content-center">
-
           <h4 className="my-4">{this.props.title}</h4>
 
           <div className="w-100  border-bottom"></div>
@@ -135,7 +133,7 @@ export class ContainerMenu extends React.Component {
 
           <Input
             autoFocus={true}
-            placeholder={"Buscar..."}
+            placeholder={'Buscar...'}
             className="d-md-none w-100"
             value={this.state.search}
             onChange={(event) => this.handleSearch(event.target.value)}
@@ -143,7 +141,7 @@ export class ContainerMenu extends React.Component {
           />
           <Input
             autoFocus={true}
-            placeholder={"Buscar..."}
+            placeholder={'Buscar...'}
             className="d-none d-md-block w-50"
             value={this.state.search}
             onChange={(event) => this.handleSearch(event.target.value)}
@@ -154,24 +152,23 @@ export class ContainerMenu extends React.Component {
             ref={this.refContent}
             className="d-flex justify-content-center align-items-center flex-wrap  w-100 py-3"
             style={{
-              "columnGap": "50px",
-              "rowGap": "20px"
-            }}>
-            {
-              this.state.subMenus.map((item, index) => {
-                if (item.estado === 0) return null;
+              columnGap: '50px',
+              rowGap: '20px',
+            }}
+          >
+            {this.state.subMenus.map((item, index) => {
+              if (item.estado === 0) return null;
 
-                return (
-                  <ButtonMenu
-                    key={index}
-                    title={item.nombre}
-                    icon={item.icon}
-                    category={"Módulo"}
-                    path={`${this.props.url}/${item.ruta}`}
-                  />
-                );
-              })
-            }
+              return (
+                <ButtonMenu
+                  key={index}
+                  title={item.nombre}
+                  icon={item.icon}
+                  category={'Módulo'}
+                  path={`${this.props.url}/${item.ruta}`}
+                />
+              );
+            })}
           </div>
         </div>
       </ContainerWrapper>
@@ -179,12 +176,10 @@ export class ContainerMenu extends React.Component {
   }
 }
 
-
 ContainerMenu.propTypes = {
   title: PropTypes.string.isRequired,
   subMenus: PropTypes.array.isRequired,
-  url: PropTypes.string.isRequired
-}
-
+  url: PropTypes.string.isRequired,
+};
 
 export default ContainerWrapper;

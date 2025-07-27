@@ -1,6 +1,17 @@
 import PropTypes from 'prop-types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
-import { EqualIcon, ExternalLink, Minus, Plus } from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+import { EqualIcon, ExternalLink, Minus, Plus } from 'lucide-react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import CustomComponent from '../../../model/class/custom-component';
@@ -9,14 +20,43 @@ import Title from '../../../components/Title';
 import Row from '../../../components/Row';
 import Column from '../../../components/Column';
 import { Link } from 'react-router-dom';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../components/Table';
-import { Card, CardBody, CardHeader, CardText, CardTitle } from '../../../components/Card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../components/Table';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardText,
+  CardTitle,
+} from '../../../components/Card';
 import Select from '../../../components/Select';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
-import { comboSucursal, comboUsuario, dashboardVenta, documentsExcelVenta, documentsPdfReportsVenta } from '../../../network/rest/principal.network';
-import { alertWarning, currentDate, formatNumberWithZeros, formatTime, getPathNavigation, guId, isEmpty, numberFormat } from '../../../helper/utils.helper';
+import {
+  comboSucursal,
+  comboUsuario,
+  dashboardVenta,
+  documentsExcelVenta,
+  documentsPdfReportsVenta,
+} from '../../../network/rest/principal.network';
+import {
+  alertWarning,
+  currentDate,
+  formatNumberWithZeros,
+  formatTime,
+  getPathNavigation,
+  guId,
+  isEmpty,
+  numberFormat,
+} from '../../../helper/utils.helper';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import React from 'react';
 import ErrorResponse from '../../../model/class/error-response';
@@ -28,9 +68,8 @@ import SuccessReponse from '../../../model/class/response';
  * @extends React.Component
  */
 class RepVentas extends CustomComponent {
-
   /**
-   * 
+   *
    * Constructor
    */
   constructor(props) {
@@ -38,7 +77,7 @@ class RepVentas extends CustomComponent {
 
     this.state = {
       loading: false,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
 
       fechaInicial: currentDate(),
       fechaFinal: currentDate(),
@@ -91,8 +130,7 @@ class RepVentas extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {
-  }
+  componentWillUnmount() {}
 
   /*
   |--------------------------------------------------------------------------
@@ -111,7 +149,7 @@ class RepVentas extends CustomComponent {
   loadingInit = async () => {
     this.setState({
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
       listaPorMeses: [],
       listaPorComprobante: [],
       lista: [],
@@ -132,9 +170,7 @@ class RepVentas extends CustomComponent {
       return;
     }
 
-    const usuarioResponse = await comboUsuario(
-      this.abortControllerView.signal,
-    );
+    const usuarioResponse = await comboUsuario(this.abortControllerView.signal);
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
@@ -150,36 +186,36 @@ class RepVentas extends CustomComponent {
       usuarios: usuarioResponse.data,
     });
     await this.loadingData();
-  }
+  };
 
   paginacionContext = async () => {
     if (this.state.paginacion === this.state.totalPaginacion) return;
 
     await this.setStateAsync({ paginacion: this.state.paginacion + 1 });
     await this.loadingData();
-  }
+  };
 
   loadingData = async (borrarLista = false) => {
     await this.setStateAsync({
       loading: true,
-      msgLoading: "Cargando información...",
+      msgLoading: 'Cargando información...',
       lista: borrarLista ? [] : this.state.lista,
       paginacion: borrarLista ? 1 : this.state.paginacion,
     });
 
     const params = {
-      'fechaInicio': this.state.fechaInicial,
-      'fechaFinal': this.state.fechaFinal,
-      'idSucursal': this.state.idSucursal,
-      'idUsuario': this.state.idUsuario,
-      'posicionPagina': (this.state.paginacion - 1) * this.state.filasPorPagina,
-      'filasPorPagina': this.state.filasPorPagina,
-    }
+      fechaInicio: this.state.fechaInicial,
+      fechaFinal: this.state.fechaFinal,
+      idSucursal: this.state.idSucursal,
+      idUsuario: this.state.idUsuario,
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
+    };
 
     const dashboard = await dashboardVenta(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Venta', dashboard.getMessage())
+      alertWarning('Reporte Venta', dashboard.getMessage());
       return;
     }
 
@@ -199,9 +235,9 @@ class RepVentas extends CustomComponent {
       listaPorComprobante: dashboard.data.listaPorComprobante,
       lista: [...this.state.lista, ...dashboard.data.lista],
       totalPaginacion: totalPaginacion,
-      loading: false
+      loading: false,
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -223,25 +259,25 @@ class RepVentas extends CustomComponent {
     this.setState({ fechaInicial: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleDateFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value, }, async () => {
+    this.setState({ fechaFinal: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleSelectSucursal = (event) => {
-    this.setState({ idSucursal: event.target.value, }, async () => {
+    this.setState({ idSucursal: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleSelectUsuario = (event) => {
-    this.setState({ idUsuario: event.target.value, }, async () => {
+    this.setState({ idUsuario: event.target.value }, async () => {
       await this.loadingData(true);
     });
-  }
+  };
 
   handleOpenPdf = async () => {
     await pdfVisualizer.init({
@@ -250,14 +286,13 @@ class RepVentas extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   handleDownloadExcel = async () => {
     const id = guId();
     const url = documentsExcelVenta();
     this.props.downloadFileAsync({ id, url });
-  }
-
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -279,7 +314,9 @@ class RepVentas extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="7">¡No hay datos para mostrar!</TableCell>
+          <TableCell className="text-center" colSpan="7">
+            ¡No hay datos para mostrar!
+          </TableCell>
         </TableRow>
       );
     }
@@ -287,25 +324,34 @@ class RepVentas extends CustomComponent {
     let rows = [];
 
     const newRows = this.state.lista.map((item, index) => {
-      const estado = item.estado === 1
-        ? <span className="badge badge-success">COBRADO</span>
-        : item.estado === 2
-          ? <span className="badge badge-warning">POR COBRAR</span>
-          : <span className="badge badge-danger">ANULADO</span>;
+      const estado =
+        item.estado === 1 ? (
+          <span className="badge badge-success">COBRADO</span>
+        ) : item.estado === 2 ? (
+          <span className="badge badge-warning">POR COBRAR</span>
+        ) : (
+          <span className="badge badge-danger">ANULADO</span>
+        );
 
       return (
         <TableRow key={index}>
           <TableCell>{item.id}</TableCell>
-          <TableCell>{item.fecha} <br /> {formatTime(item.hora)} </TableCell>
-          <TableCell>{item.documento} <br />{item.informacion}</TableCell>
+          <TableCell>
+            {item.fecha} <br /> {formatTime(item.hora)}{' '}
+          </TableCell>
+          <TableCell>
+            {item.documento} <br />
+            {item.informacion}
+          </TableCell>
           <TableCell>
             <Link
-              to={getPathNavigation("venta", item.idVenta)}
-              className='btn-link'
+              to={getPathNavigation('venta', item.idVenta)}
+              className="btn-link"
             >
               {item.comprobante}
               <br />
-              {item.serie}-{formatNumberWithZeros(item.numeracion)} <ExternalLink width={18} height={18} />
+              {item.serie}-{formatNumberWithZeros(item.numeracion)}{' '}
+              <ExternalLink width={18} height={18} />
             </Link>
           </TableCell>
           <TableCell>{item.tipo}</TableCell>
@@ -323,11 +369,12 @@ class RepVentas extends CustomComponent {
           <Button
             disabled={this.state.paginacion === this.state.totalPaginacion}
             className="btn-outline-secondary"
-            onClick={this.paginacionContext}>
-            <i className='bi bi-chevron-double-down'></i> Mostrar Más
+            onClick={this.paginacionContext}
+          >
+            <i className="bi bi-chevron-double-down"></i> Mostrar Más
           </Button>
         </TableCell>
-      </TableRow>
+      </TableRow>,
     );
 
     return rows;
@@ -342,8 +389,8 @@ class RepVentas extends CustomComponent {
         />
 
         <Title
-          title='Reporte Ventas'
-          subTitle='DASHBOARD'
+          title="Reporte Ventas"
+          subTitle="DASHBOARD"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -361,134 +408,179 @@ class RepVentas extends CustomComponent {
               <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
             </Button>
             {" "} */}
-            <Button
-              className="btn-outline-light"
-              onClick={this.loadingInit}>
+            <Button className="btn-outline-light" onClick={this.loadingInit}>
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>
           </Column>
         </Row>
 
         <Row>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Inicio:"}
+              label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicial}
               onChange={this.handleDateFechaInicial}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Input
-              label={"Fecha de Final:"}
+              label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleDateFechaFinal}
             />
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Sucursal:"}
+              label={'Sucursal:'}
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
             >
               <option value="">TODOS</option>
-              {
-                this.state.sucursales.map((item, index) => (
-                  <option key={index} value={item.idSucursal}>
-                    {index + 1 + '.- ' + item.nombre}
-                  </option>
-                ))
-              }
+              {this.state.sucursales.map((item, index) => (
+                <option key={index} value={item.idSucursal}>
+                  {index + 1 + '.- ' + item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
 
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-12" formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-3 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Select
-              label={"Usuario:"}
+              label={'Usuario:'}
               value={this.state.idUsuario}
               onChange={this.handleSelectUsuario}
             >
-              {
-                this.state.usuarios.map((item, index) => (
-                  <option key={index} value={item.idUsuario}>
-                    {item.nombres + ' ' + item.apellidos}
-                  </option>
-                ))
-              }
+              {this.state.usuarios.map((item, index) => (
+                <option key={index} value={item.idUsuario}>
+                  {item.nombres + ' ' + item.apellidos}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
               <CardBody>
                 <CardTitle>Ventas Totales</CardTitle>
-                <CardText className={'text-success'}>{numberFormat(this.state.totalVenta, this.state.codIso)}</CardText>
+                <CardText className={'text-success'}>
+                  {numberFormat(this.state.totalVenta, this.state.codIso)}
+                </CardText>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
               <CardBody>
                 <CardTitle>Al Contado</CardTitle>
-                <CardText className={'text-primary'}>{numberFormat(this.state.totalContado, this.state.codIso)}</CardText>
+                <CardText className={'text-primary'}>
+                  {numberFormat(this.state.totalContado, this.state.codIso)}
+                </CardText>
                 <p className="text-sm">
                   <Plus className="text-green-500 mr-1" width={16} />
-                  Agregado {numberFormat(this.state.totalCobrado, this.state.codIso)}
+                  Agregado{' '}
+                  {numberFormat(this.state.totalCobrado, this.state.codIso)}
                 </p>
                 <p className="text-sm">
                   <EqualIcon className="text-green-500 mr-1" width={16} />
-                  Total {numberFormat(this.state.totalContado + this.state.totalCobrado, this.state.codIso)}
+                  Total{' '}
+                  {numberFormat(
+                    this.state.totalContado + this.state.totalCobrado,
+                    this.state.codIso,
+                  )}
                 </p>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
               <CardBody>
                 <CardTitle>Al Crédito</CardTitle>
-                <CardText className={'text-warning'}>{numberFormat(this.state.totalCredito, this.state.codIso)}</CardText>
+                <CardText className={'text-warning'}>
+                  {numberFormat(this.state.totalCredito, this.state.codIso)}
+                </CardText>
                 <p className="text-sm">
                   <Minus className="text-green-500 mr-1" width={16} />
-                  Cobrado {numberFormat(this.state.totalCobrado, this.state.codIso)}
+                  Cobrado{' '}
+                  {numberFormat(this.state.totalCobrado, this.state.codIso)}
                 </p>
                 <p className="text-sm">
                   <EqualIcon className="text-green-500 mr-1" width={16} />
-                  Restante {numberFormat(this.state.totalCredito - this.state.totalCobrado, this.state.codIso)}
+                  Restante{' '}
+                  {numberFormat(
+                    this.state.totalCredito - this.state.totalCobrado,
+                    this.state.codIso,
+                  )}
                 </p>
               </CardBody>
             </Card>
           </Column>
 
-          <Column className='col-lg-3 col-md-12 col-sm-12 col-12' formGroup={true}>
+          <Column
+            className="col-lg-3 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
             <Card>
               <CardBody>
                 <CardTitle>Anuladas</CardTitle>
-                <CardText className={'text-danger'}>{numberFormat(this.state.totalAnulado, this.state.codIso)}</CardText>
+                <CardText className={'text-danger'}>
+                  {numberFormat(this.state.totalAnulado, this.state.codIso)}
+                </CardText>
               </CardBody>
             </Card>
           </Column>
         </Row>
 
         <Row>
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Tendencia de Ventas</CardTitle>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart width={300} height={300} data={this.state.listaPorMeses}>
+                  <LineChart
+                    width={300}
+                    height={300}
+                    data={this.state.listaPorMeses}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" name={`AÑO - ${new Date().getFullYear()}`} dataKey="total" stroke="#004099" />
+                    <Line
+                      type="monotone"
+                      name={`AÑO - ${new Date().getFullYear()}`}
+                      dataKey="total"
+                      stroke="#004099"
+                    />
                     {/* <Line type="monotone" name='Años Pasado' dataKey="atras" stroke="#82ca9d" /> */}
                   </LineChart>
                 </ResponsiveContainer>
@@ -496,7 +588,7 @@ class RepVentas extends CustomComponent {
             </Card>
           </Column>
 
-          <Column className='col-xl-6 col-lg-12' formGroup={true}>
+          <Column className="col-xl-6 col-lg-12" formGroup={true}>
             <Card>
               <CardBody>
                 <CardTitle>Ventas por Comprobante</CardTitle>
@@ -535,9 +627,7 @@ class RepVentas extends CustomComponent {
                         <TableHead width="10%">Total</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody>
-                      {this.renderLista()}
-                    </TableBody>
+                    <TableBody>{this.renderLista()}</TableBody>
                   </Table>
                 </TableResponsive>
               </CardBody>
@@ -554,7 +644,7 @@ RepVentas.propTypes = {
     project: PropTypes.shape({
       idSucursal: PropTypes.string,
       nombre: PropTypes.string,
-    })
+    }),
   }),
   moneda: PropTypes.shape({
     codiso: PropTypes.string,
@@ -572,6 +662,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = { downloadFileAsync };
 
-const ConnectedRepVentas = connect(mapStateToProps, mapDispatchToProps)(RepVentas);
+const ConnectedRepVentas = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(RepVentas);
 
 export default ConnectedRepVentas;

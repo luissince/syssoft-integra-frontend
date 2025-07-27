@@ -21,7 +21,7 @@ import {
   getIdSucursal,
   getPreferidoPersona,
   getUbigeo,
-  listFiltrarVenta
+  listFiltrarVenta,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -32,7 +32,15 @@ import { SpinnerView } from '../../../../../../components/Spinner';
 import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
 import printJS from 'print-js';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow } from '../../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../../components/Table';
 import Title from '../../../../../../components/Title';
 import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
@@ -171,12 +179,14 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   async componentDidMount() {
-    const idVenta = new URLSearchParams(this.props.location.search).get('idVenta');
-    await this.loadingData()
+    const idVenta = new URLSearchParams(this.props.location.search).get(
+      'idVenta',
+    );
+    await this.loadingData();
 
     if (idVenta) {
       this.setState({
-        loading: true
+        loading: true,
       });
 
       const params = {
@@ -209,15 +219,21 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   loadingData = async () => {
-    const [comprobantes, motivoTraslado, tipoPeso, sucursal, vehiculo, conductor] =
-      await Promise.all([
-        this.fetchComprobante(GUIA_DE_REMISION),
-        this.fetchComboMotivoTraslado(),
-        this.fetchComboTipoPeso(),
-        this.fetchObtenerSucursal(),
-        this.fetchDefaultVehiculo(),
-        this.fetchPersonaPredeterminado({ conductor: "1" })
-      ]);
+    const [
+      comprobantes,
+      motivoTraslado,
+      tipoPeso,
+      sucursal,
+      vehiculo,
+      conductor,
+    ] = await Promise.all([
+      this.fetchComprobante(GUIA_DE_REMISION),
+      this.fetchComboMotivoTraslado(),
+      this.fetchComboTipoPeso(),
+      this.fetchObtenerSucursal(),
+      this.fetchDefaultVehiculo(),
+      this.fetchPersonaPredeterminado({ conductor: '1' }),
+    ]);
 
     const ubigeo = {
       idUbigeo: sucursal.idUbigeo,
@@ -228,34 +244,39 @@ class GuiaRemisionCrear extends CustomComponent {
     };
 
     if (vehiculo) {
-      this.refVehiculo.current.initialize(`${vehiculo.marca}-${vehiculo.numeroPlaca}`);
+      this.refVehiculo.current.initialize(
+        `${vehiculo.marca}-${vehiculo.numeroPlaca}`,
+      );
     }
 
     if (conductor) {
-      this.refConductor.current.initialize(`${conductor.documento}, ${conductor.informacion}`);
+      this.refConductor.current.initialize(
+        `${conductor.documento}, ${conductor.informacion}`,
+      );
     }
 
     this.handleSelectItemUbigeoPartido(ubigeo);
 
     this.setState({
       comprobantes,
-      idComprobante: comprobantes.length === 1 ? comprobantes[0].idComprobante : "",
+      idComprobante:
+        comprobantes.length === 1 ? comprobantes[0].idComprobante : '',
       motivoTraslado,
       tipoPeso,
       direccionPartida: sucursal.direccion,
       vehiculo: vehiculo ? vehiculo : null,
       conductor: conductor ? conductor : null,
-      loading: false
+      loading: false,
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
   async fetchComprobante(tipo) {
     const params = {
-      "tipo": tipo,
-      "idSucursal": this.state.idSucursal
+      tipo: tipo,
+      idSucursal: this.state.idSucursal,
     };
 
     const response = await comboComprobante(
@@ -309,10 +330,7 @@ class GuiaRemisionCrear extends CustomComponent {
   }
 
   async fetchComboTipoPeso(params) {
-    const response = await comboTipoPeso(
-      params,
-      this.abortController.signal,
-    );
+    const response = await comboTipoPeso(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -326,10 +344,7 @@ class GuiaRemisionCrear extends CustomComponent {
   }
 
   async fetchFiltrarVehiculo(params) {
-    const response = await filtrarVehiculo(
-      params,
-      this.abortController.signal,
-    );
+    const response = await filtrarVehiculo(params, this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -368,8 +383,8 @@ class GuiaRemisionCrear extends CustomComponent {
 
   async fetchObtenerSucursal() {
     const params = {
-      idSucursal: this.state.idSucursal
-    }
+      idSucursal: this.state.idSucursal,
+    };
 
     const response = await getIdSucursal(params);
 
@@ -410,8 +425,8 @@ class GuiaRemisionCrear extends CustomComponent {
 
   async fetchObtenerVentaDetalle() {
     const params = {
-      idVenta: this.state.venta.idVenta
-    }
+      idVenta: this.state.venta.idVenta,
+    };
 
     const response = await detailOnlyVenta(params);
 
@@ -435,7 +450,7 @@ class GuiaRemisionCrear extends CustomComponent {
       await this.loadingData();
       this.refFiltrarVenta.current.focus();
     });
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -457,25 +472,28 @@ class GuiaRemisionCrear extends CustomComponent {
   // Procesos impresión
   //------------------------------------------------------------------------------------------
   handleOpenImpresion = (idGuiaRemision) => {
-    this.setState({ isOpenImpresion: true, idGuiaRemision: idGuiaRemision })
-  }
+    this.setState({ isOpenImpresion: true, idGuiaRemision: idGuiaRemision });
+  };
 
   handlePrinterImpresion = (size) => {
     printJS({
-      printable: documentsPdfInvoicesGuiaRemision(this.state.idGuiaRemision, size),
+      printable: documentsPdfInvoicesGuiaRemision(
+        this.state.idGuiaRemision,
+        size,
+      ),
       type: 'pdf',
       showModal: true,
-      modalMessage: "Recuperando documento...",
+      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
-        this.clearView()
-        this.handleCloseImpresion()
-      }
-    })
-  }
+        this.clearView();
+        this.handleCloseImpresion();
+      },
+    });
+  };
 
   handleCloseImpresion = async () => {
-    this.setState({ isOpenImpresion: false })
-  }
+    this.setState({ isOpenImpresion: false });
+  };
 
   //------------------------------------------------------------------------------------------
   // Filtrar venta
@@ -510,33 +528,38 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handleSelectItemVenta = async (value) => {
-    this.refVenta.current.initialize(`${value.nombreComprobante} ${value.serie}-${value.numeracion}`)
-    this.setState({
-      venta: value,
-      direccionLlegada: value.direccion,
-      ventas: [],
-    }, async () => {
-      const ubigeo = {
-        idUbigeo: value.idUbigeo,
-        departamento: value.departamento,
-        provincia: value.provincia,
-        distrito: value.distrito,
-        ubigeo: value.ubigeo,
-      };
+    this.refVenta.current.initialize(
+      `${value.nombreComprobante} ${value.serie}-${value.numeracion}`,
+    );
+    this.setState(
+      {
+        venta: value,
+        direccionLlegada: value.direccion,
+        ventas: [],
+      },
+      async () => {
+        const ubigeo = {
+          idUbigeo: value.idUbigeo,
+          departamento: value.departamento,
+          provincia: value.provincia,
+          distrito: value.distrito,
+          ubigeo: value.ubigeo,
+        };
 
-      this.handleSelectItemUbigeoLlegada(ubigeo);
+        this.handleSelectItemUbigeoLlegada(ubigeo);
 
-      this.setState({
-        loading: true
-      });
+        this.setState({
+          loading: true,
+        });
 
-      const ventaDetalle = await this.fetchObtenerVentaDetalle();
+        const ventaDetalle = await this.fetchObtenerVentaDetalle();
 
-      this.setState({
-        detalle: ventaDetalle,
-        loading: false
-      })
-    });
+        this.setState({
+          detalle: ventaDetalle,
+          loading: false,
+        });
+      },
+    );
   };
 
   //------------------------------------------------------------------------------------------
@@ -599,7 +622,7 @@ class GuiaRemisionCrear extends CustomComponent {
     const params = {
       opcion: 1,
       filter: searchWord,
-      conductor: true
+      conductor: true,
     };
 
     const conductores = await this.fetchFiltrarConductor(params);
@@ -610,7 +633,9 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handleSelectItemConductor = (value) => {
-    this.refConductor.current.initialize(`${value.documento}, ${value.informacion}`);
+    this.refConductor.current.initialize(
+      `${value.documento}, ${value.informacion}`,
+    );
     this.setState({
       conductor: value,
       conductores: [],
@@ -639,7 +664,7 @@ class GuiaRemisionCrear extends CustomComponent {
     const params = {
       opcion: 1,
       filter: searchWord,
-      conductor: true
+      conductor: true,
     };
 
     const conductores = await this.fetchFiltrarConductor(params);
@@ -650,7 +675,9 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handleSelectItemConductorPublico = (value) => {
-    this.refConductorPublico.current.initialize(`${value.documento}, ${value.informacion}`);
+    this.refConductorPublico.current.initialize(
+      `${value.documento}, ${value.informacion}`,
+    );
     this.setState({
       conductorPublico: value,
       conductoresPublico: [],
@@ -663,7 +690,7 @@ class GuiaRemisionCrear extends CustomComponent {
   handleClearInputaUbigeoPartido = () => {
     this.setState({
       ubigeosPartida: [],
-      idUbigeoPartida: ''
+      idUbigeoPartida: '',
     });
   };
 
@@ -688,7 +715,16 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handleSelectItemUbigeoPartido = (value) => {
-    this.refUbigeoPartida.current.initialize(value.departamento + ' - ' + value.provincia + ' - ' + value.distrito + ' (' + value.ubigeo + ')');
+    this.refUbigeoPartida.current.initialize(
+      value.departamento +
+        ' - ' +
+        value.provincia +
+        ' - ' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
+    );
     this.setState({
       ubigeosPartida: [],
       idUbigeoPartida: value.idUbigeo,
@@ -701,7 +737,7 @@ class GuiaRemisionCrear extends CustomComponent {
   handleClearInputaUbigeoLlegada = () => {
     this.setState({
       ubigeosLlegada: [],
-      idUbigeoLlegada: ''
+      idUbigeoLlegada: '',
     });
   };
 
@@ -726,7 +762,16 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handleSelectItemUbigeoLlegada = (value) => {
-    this.refUbigeoLlegada.current.initialize(value.departamento + ' - ' + value.provincia + ' - ' + value.distrito + ' (' + value.ubigeo + ')');
+    this.refUbigeoLlegada.current.initialize(
+      value.departamento +
+        ' - ' +
+        value.provincia +
+        ' - ' +
+        value.distrito +
+        ' (' +
+        value.ubigeo +
+        ')',
+    );
     this.setState({
       ubigeosLlegada: [],
       idUbigeoLlegada: value.idUbigeo,
@@ -737,168 +782,239 @@ class GuiaRemisionCrear extends CustomComponent {
   // Eventos para seleccionar los comprobantes
   //------------------------------------------------------------------------------------------
   handleSelectComprobante = (event) => {
-    this.setState({ idComprobante: event.target.value })
-  }
+    this.setState({ idComprobante: event.target.value });
+  };
 
   //------------------------------------------------------------------------------------------
   // Evento para seleccionar el modalidad de traslado
   //------------------------------------------------------------------------------------------
   handleInputModalidadTraslado = (event) => {
     this.setState({ idModalidadTraslado: event.target.value }, () => {
-      if (event.target.value === "MT0001") {
+      if (event.target.value === 'MT0001') {
         this.setState({
           disabledPublica: true,
           disabledPrivado: false,
-        })
+        });
       } else {
         this.setState({
           disabledPublica: false,
           disabledPrivado: true,
-        })
+        });
       }
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Evento para guardar la guía de remisión
   //------------------------------------------------------------------------------------------
   handleSave = () => {
     if (!this.state.venta) {
-      this.alert.warning("Guía de Remisión", "Filtre una venta para continuar.", () => {
-        this.refFiltrarVenta.current.focus()
-      })
+      this.alert.warning(
+        'Guía de Remisión',
+        'Filtre una venta para continuar.',
+        () => {
+          this.refFiltrarVenta.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idComprobante)) {
-      this.alert.warning("Guía de Remisión", "Seleccione un comprobante.", () => {
-        this.refComprobante.current.focus()
-      })
+      this.alert.warning(
+        'Guía de Remisión',
+        'Seleccione un comprobante.',
+        () => {
+          this.refComprobante.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idMotivoTraslado)) {
-      this.alert.warning("Guía de Remisión", "Seleccione el motivo de traslado.", () => {
-        this.refMotivoTraslado.current.focus()
-      })
+      this.alert.warning(
+        'Guía de Remisión',
+        'Seleccione el motivo de traslado.',
+        () => {
+          this.refMotivoTraslado.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.idTipoPeso)) {
-      this.alert.warning("Guía de Remisión", "Seleccione el tipo de peso.", () => {
-        this.refTipoPeso.current.focus()
-      })
+      this.alert.warning(
+        'Guía de Remisión',
+        'Seleccione el tipo de peso.',
+        () => {
+          this.refTipoPeso.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.peso)) {
-      this.alert.warning("Guía de Remisión", "Ingrese el peso total.", () => {
-        this.refPeso.current.focus()
-      })
+      this.alert.warning('Guía de Remisión', 'Ingrese el peso total.', () => {
+        this.refPeso.current.focus();
+      });
       return;
     }
 
-    if (this.state.idModalidadTraslado === "MT0001" && isEmpty(this.state.conductorPublico)) {
-      this.alert.warning("Guía de Remisión", "Seleccione el conductor que va trandportar.", () => {
-        this.refFiltrarConductorPublico.current.focus()
-      })
+    if (
+      this.state.idModalidadTraslado === 'MT0001' &&
+      isEmpty(this.state.conductorPublico)
+    ) {
+      this.alert.warning(
+        'Guía de Remisión',
+        'Seleccione el conductor que va trandportar.',
+        () => {
+          this.refFiltrarConductorPublico.current.focus();
+        },
+      );
       return;
     }
 
-
-    if (this.state.idModalidadTraslado === "MT0002" && isEmpty(this.state.vehiculo)) {
-      this.alert.warning("Guía de Remisión", "Seleccione el vehículo que va transportar.", () => {
-        this.refFiltrarVehiculo.current.focus()
-      })
+    if (
+      this.state.idModalidadTraslado === 'MT0002' &&
+      isEmpty(this.state.vehiculo)
+    ) {
+      this.alert.warning(
+        'Guía de Remisión',
+        'Seleccione el vehículo que va transportar.',
+        () => {
+          this.refFiltrarVehiculo.current.focus();
+        },
+      );
       return;
     }
 
-    if (this.state.idModalidadTraslado === "MT0002" && isEmpty(this.state.conductor)) {
-      this.alert.warning("Guía de Remisión", "Seleccione el conductor que va transportar.", () => {
-        this.refFiltrarConductor.current.focus()
-      })
+    if (
+      this.state.idModalidadTraslado === 'MT0002' &&
+      isEmpty(this.state.conductor)
+    ) {
+      this.alert.warning(
+        'Guía de Remisión',
+        'Seleccione el conductor que va transportar.',
+        () => {
+          this.refFiltrarConductor.current.focus();
+        },
+      );
       return;
     }
-
 
     if (isEmpty(this.state.direccionPartida)) {
-      this.alert.warning("Guía de Remisión", "Ingrese la dirección de partida.", () => {
-        this.refDireccionPartida.current.focus()
-      })
+      this.alert.warning(
+        'Guía de Remisión',
+        'Ingrese la dirección de partida.',
+        () => {
+          this.refDireccionPartida.current.focus();
+        },
+      );
       return;
     }
 
-    if (isEmpty(this.state.idUbigeoPartida) || this.state.idUbigeoPartida <= 0) {
-      this.alert.warning("Guía de Remisión", "Selecciona el ubigeo de partida.", () => {
-        this.refFiltrarUbigeoPartida.current.focus()
-      })
+    if (
+      isEmpty(this.state.idUbigeoPartida) ||
+      this.state.idUbigeoPartida <= 0
+    ) {
+      this.alert.warning(
+        'Guía de Remisión',
+        'Selecciona el ubigeo de partida.',
+        () => {
+          this.refFiltrarUbigeoPartida.current.focus();
+        },
+      );
       return;
     }
 
     if (isEmpty(this.state.direccionLlegada)) {
-      this.alert.warning("Guía de Remisión", "Ingrese la dirección de llegada.", () => {
-        this.refDireccionLlegada.current.focus()
-      })
+      this.alert.warning(
+        'Guía de Remisión',
+        'Ingrese la dirección de llegada.',
+        () => {
+          this.refDireccionLlegada.current.focus();
+        },
+      );
       return;
     }
 
-    if (isEmpty(this.state.idUbigeoLlegada) || this.state.idUbigeoLlegada <= 0) {
-      this.alert.warning("Guía de Remisión", "Selecciona el ubigeo de llegada.", () => {
-        this.refFiltrarUbigeoLlegada.current.focus()
-      })
+    if (
+      isEmpty(this.state.idUbigeoLlegada) ||
+      this.state.idUbigeoLlegada <= 0
+    ) {
+      this.alert.warning(
+        'Guía de Remisión',
+        'Selecciona el ubigeo de llegada.',
+        () => {
+          this.refFiltrarUbigeoLlegada.current.focus();
+        },
+      );
       return;
     }
 
-    this.alert.dialog("Guía de Remisión", "¿Está seguro de continuar?", async (accept) => {
-      if (accept) {
-        const data = {
-          idVenta: this.state.venta.idVenta,
-          idSucursal: this.state.idSucursal,
-          idComprobante: this.state.idComprobante,
-          idModalidadTraslado: this.state.idModalidadTraslado,
-          idMotivoTraslado: this.state.idMotivoTraslado,
-          fechaTraslado: this.state.fechaTraslado,
-          idTipoPeso: this.state.idTipoPeso,
-          peso: this.state.peso,
-          idVehiculo: this.state.vehiculo.idVehiculo,
-          idConductor: this.state.idModalidadTraslado === "MT0001" ? this.state.conductorPublico.idPersona : this.state.conductor.idPersona,
-          direccionPartida: this.state.direccionPartida,
-          idUbigeoPartida: this.state.idUbigeoPartida,
-          direccionLlegada: this.state.direccionLlegada,
-          idUbigeoLlegada: this.state.idUbigeoLlegada,
-          detalle: this.state.detalle,
-          estado: 1,
-          idUsuario: this.state.idUsuario
+    this.alert.dialog(
+      'Guía de Remisión',
+      '¿Está seguro de continuar?',
+      async (accept) => {
+        if (accept) {
+          const data = {
+            idVenta: this.state.venta.idVenta,
+            idSucursal: this.state.idSucursal,
+            idComprobante: this.state.idComprobante,
+            idModalidadTraslado: this.state.idModalidadTraslado,
+            idMotivoTraslado: this.state.idMotivoTraslado,
+            fechaTraslado: this.state.fechaTraslado,
+            idTipoPeso: this.state.idTipoPeso,
+            peso: this.state.peso,
+            idVehiculo: this.state.vehiculo.idVehiculo,
+            idConductor:
+              this.state.idModalidadTraslado === 'MT0001'
+                ? this.state.conductorPublico.idPersona
+                : this.state.conductor.idPersona,
+            direccionPartida: this.state.direccionPartida,
+            idUbigeoPartida: this.state.idUbigeoPartida,
+            direccionLlegada: this.state.direccionLlegada,
+            idUbigeoLlegada: this.state.idUbigeoLlegada,
+            detalle: this.state.detalle,
+            estado: 1,
+            idUsuario: this.state.idUsuario,
+          };
+
+          this.alert.information(
+            'Guía de Remisión',
+            'Procesando información...',
+          );
+
+          const response = await createGuiaRemision(data);
+
+          if (response instanceof SuccessReponse) {
+            this.alert.close();
+            this.handleOpenImpresion(response.data.idGuiaRemision);
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            this.alert.warning('Guía de Remisión', response.getMessage());
+          }
         }
-
-        this.alert.information("Guía de Remisión", "Procesando información...")
-
-        const response = await createGuiaRemision(data);
-
-        if (response instanceof SuccessReponse) {
-          this.alert.close();
-          this.handleOpenImpresion(response.data.idGuiaRemision);
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          this.alert.warning('Guía de Remisión', response.getMessage());
-        }
-      }
-    })
-  }
+      },
+    );
+  };
 
   //------------------------------------------------------------------------------------------
   // Evento para limpiar la guía de remisión
   //------------------------------------------------------------------------------------------
   handleClear = () => {
-    this.alert.dialog("Guía de Remisión", "¿Está seguro de limpiar todo el contenido?", (accept) => {
-      if (accept) {
-        this.clearView();
-      }
-    })
-  }
+    this.alert.dialog(
+      'Guía de Remisión',
+      '¿Está seguro de limpiar todo el contenido?',
+      (accept) => {
+        if (accept) {
+          this.clearView();
+        }
+      },
+    );
+  };
 
   //------------------------------------------------------------------------------------------
   // Evento para cerrar la guía de remisión
@@ -926,7 +1042,6 @@ class GuiaRemisionCrear extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
-
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
@@ -935,9 +1050,7 @@ class GuiaRemisionCrear extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-
           clear={this.clearView}
-
           handleClose={this.handleCloseImpresion}
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
@@ -945,36 +1058,39 @@ class GuiaRemisionCrear extends CustomComponent {
         />
 
         <Title
-          title='Guía Remisión'
-          subTitle='CREAR'
-          icon={<i className='fa fa-plus'></i>}
+          title="Guía Remisión"
+          subTitle="CREAR"
+          icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.handleBack()}
         />
 
         <Row>
-          <Column className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12" formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={() => this.handleSave()}>
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {" "}
+          <Column
+            className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12"
+            formGroup={true}
+          >
+            <Button className="btn-success" onClick={() => this.handleSave()}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-info"
-              onClick={() => this.handleClear()}>
-              <i className='fa fa-trash'></i> Limpiar
-            </Button>
-            {" "}
+              onClick={() => this.handleClear()}
+            >
+              <i className="fa fa-trash"></i> Limpiar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
-              onClick={() => this.handleBack()}>
-              <i className='fa fa-close'></i> Cancelar
+              onClick={() => this.handleBack()}
+            >
+              <i className="fa fa-close"></i> Cancelar
             </Button>
           </Column>
         </Row>
 
         {/* Seleccione la venta */}
-        <h6><span className='badge badge-primary'>1</span> Venta y Guía</h6>
+        <h6>
+          <span className="badge badge-primary">1</span> Venta y Guía
+        </h6>
 
         <div className="dropdown-divider"></div>
 
@@ -983,20 +1099,27 @@ class GuiaRemisionCrear extends CustomComponent {
             <SearchInput
               ref={this.refVenta}
               autoFocus={true}
-              label={<>Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Filtrar Venta:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ejm: B001, 1, F001..."
               refValue={this.refFiltrarVenta}
               data={this.state.ventas}
               handleClearInput={this.handleClearInputVenta}
               handleFilter={this.handleFilterVenta}
               handleSelectItem={this.handleSelectItemVenta}
-              renderItem={(value) =>
+              renderItem={(value) => (
                 <>
-                  <span>{value.nombreComprobante} {value.serie}-{value.numeracion}</span>
-                  {" / "}
+                  <span>
+                    {value.nombreComprobante} {value.serie}-{value.numeracion}
+                  </span>
+                  {' / '}
                   <span>{value.informacion}</span>
                 </>
-              }
+              )}
             />
           </Column>
         </Row>
@@ -1005,45 +1128,66 @@ class GuiaRemisionCrear extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Select
-              label={<> Comprobante: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  {' '}
+                  Comprobante:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refComprobante}
               value={this.state.idComprobante}
-              onChange={this.handleSelectComprobante}>
+              onChange={this.handleSelectComprobante}
+            >
               <option value="">-- Seleccione --</option>
-              {
-                this.state.comprobantes.map((item, index) => (
-                  <option key={index} value={item.idComprobante}>{item.nombre}</option>
-                ))
-              }
+              {this.state.comprobantes.map((item, index) => (
+                <option key={index} value={item.idComprobante}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
 
         {/* Sección de los datos del cliente */}
-        <h6><span className='badge badge-primary'>2</span> Cliente</h6>
+        <h6>
+          <span className="badge badge-primary">2</span> Cliente
+        </h6>
 
         <div className="dropdown-divider"></div>
 
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i></>}
-              value={this.state.venta ? `${this.state.venta.documento} - ${this.state.venta.informacion}` : ''}
-              disabled />
+              label={
+                <>
+                  Selecciona un Cliente:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
+              value={
+                this.state.venta
+                  ? `${this.state.venta.documento} - ${this.state.venta.informacion}`
+                  : ''
+              }
+              disabled
+            />
           </Column>
         </Row>
 
         {/* Sección para modalidad traslado */}
-        <h6><span className='badge badge-primary'>3</span> Modalidad de Traslado</h6>
+        <h6>
+          <span className="badge badge-primary">3</span> Modalidad de Traslado
+        </h6>
 
         <div className="dropdown-divider"></div>
 
         <Row>
           <Column formGroup={true}>
             <RadioButton
-              id={"MT0001"}
-              value={"MT0001"}
-              name={"ckModalidadTraslado"}
+              id={'MT0001'}
+              value={'MT0001'}
+              name={'ckModalidadTraslado'}
               checked={this.state.idModalidadTraslado === 'MT0001'}
               onChange={this.handleInputModalidadTraslado}
             >
@@ -1053,9 +1197,9 @@ class GuiaRemisionCrear extends CustomComponent {
 
           <Column formGroup={true}>
             <RadioButton
-              id={"MT0002"}
-              value={"MT0002"}
-              name={"ckModalidadTraslado"}
+              id={'MT0002'}
+              value={'MT0002'}
+              name={'ckModalidadTraslado'}
               checked={this.state.idModalidadTraslado === 'MT0002'}
               onChange={this.handleInputModalidadTraslado}
             >
@@ -1065,31 +1209,44 @@ class GuiaRemisionCrear extends CustomComponent {
         </Row>
 
         {/* Sección para datos del traslado */}
-        <h6><span className='badge badge-primary'>4</span> Datos del Traslado</h6>
+        <h6>
+          <span className="badge badge-primary">4</span> Datos del Traslado
+        </h6>
 
         <div className="dropdown-divider"></div>
 
         <Row>
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Select
-              label={<>Motivo del traslado: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Motivo del traslado:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refMotivoTraslado}
               value={this.state.idMotivoTraslado}
               onChange={(event) => {
-                this.setState({ idMotivoTraslado: event.target.value })
-              }}>
+                this.setState({ idMotivoTraslado: event.target.value });
+              }}
+            >
               <option value="0">-- Seleccione comprobante --</option>
-              {
-                this.state.motivoTraslado.map((item, index) => (
-                  <option key={index} value={item.idMotivoTraslado}>{item.nombre}</option>
-                ))
-              }
+              {this.state.motivoTraslado.map((item, index) => (
+                <option key={index} value={item.idMotivoTraslado}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
 
-          <Column className='col-md-6 col-12' formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={<>Fecha traslado:{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Fecha traslado:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               type="date"
               value={this.state.fechaTraslado}
               onChange={async (event) => {
@@ -1102,29 +1259,40 @@ class GuiaRemisionCrear extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
-              label={<>Tipo Peso de Carga: <i className="fa fa-asterisk text-danger small" /></>}
+              label={
+                <>
+                  Tipo Peso de Carga:{' '}
+                  <i className="fa fa-asterisk text-danger small" />
+                </>
+              }
               ref={this.refTipoPeso}
               value={this.state.idTipoPeso}
               onChange={(event) => {
-                this.setState({ idTipoPeso: event.target.value })
-              }}>
+                this.setState({ idTipoPeso: event.target.value });
+              }}
+            >
               <option value="0">-- Seleccione --</option>
-              {
-                this.state.tipoPeso.map((item, index) => (
-                  <option key={index} value={item.idTipoPeso}>{item.nombre}</option>
-                ))
-              }
+              {this.state.tipoPeso.map((item, index) => (
+                <option key={index} value={item.idTipoPeso}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
 
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={<>Peso de la Carga:{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Peso de la Carga:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ejm: 0.00, 0"
               ref={this.refPeso}
               value={this.state.peso}
               onChange={(event) => {
-                this.setState({ peso: event.target.value })
+                this.setState({ peso: event.target.value });
               }}
               onKeyDown={keyNumberFloat}
             />
@@ -1132,7 +1300,10 @@ class GuiaRemisionCrear extends CustomComponent {
         </Row>
 
         {/* Sección de datos del vehículo */}
-        <h6><span className='badge badge-primary'>5</span> Datos del Transporte Privado</h6>
+        <h6>
+          <span className="badge badge-primary">5</span> Datos del Transporte
+          Privado
+        </h6>
 
         <div className="dropdown-divider"></div>
 
@@ -1140,7 +1311,12 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column>
             <SearchInput
               ref={this.refVehiculo}
-              label={<>Filtrar un vehículo: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Filtrar un vehículo:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               disabled={this.state.disabledPublica}
               placeholder="Filtrar por marca o número de placa..."
               refValue={this.refFiltrarVehiculo}
@@ -1148,17 +1324,22 @@ class GuiaRemisionCrear extends CustomComponent {
               handleClearInput={this.handleClearInputVehiculo}
               handleFilter={this.handleFilterVehiculo}
               handleSelectItem={this.handleSelectItemVehiculo}
-              renderItem={(value) =>
+              renderItem={(value) => (
                 <>
-                  <span>{value.marca}-{value.numeroPlaca}</span>
+                  <span>
+                    {value.marca}-{value.numeroPlaca}
+                  </span>
                 </>
-              }
+              )}
             />
           </Column>
         </Row>
 
         {/* Sección de datos del conductor */}
-        <h6><span className='badge badge-primary'>6</span> Datos del Conductor Privado</h6>
+        <h6>
+          <span className="badge badge-primary">6</span> Datos del Conductor
+          Privado
+        </h6>
 
         <div className="dropdown-divider"></div>
 
@@ -1166,7 +1347,12 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column>
             <SearchInput
               ref={this.refConductor}
-              label={<>Filtrar un Conductor (DNI): <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Filtrar un Conductor (DNI):{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               disabled={this.state.disabledPublica}
               placeholder="Por número de documento o apellidos y nombres..."
               refValue={this.refFiltrarConductor}
@@ -1174,16 +1360,21 @@ class GuiaRemisionCrear extends CustomComponent {
               handleClearInput={this.handleClearInputConductor}
               handleFilter={this.handleFilterConductor}
               handleSelectItem={this.handleSelectItemConductor}
-              renderItem={(value) =>
+              renderItem={(value) => (
                 <>
-                  <span>{value.documento}, {value.informacion}</span>
+                  <span>
+                    {value.documento}, {value.informacion}
+                  </span>
                 </>
-              }
+              )}
             />
           </Column>
         </Row>
 
-        <h6><span className='badge badge-primary'>7</span> Datos de la Empresa a Transportar - Pública</h6>
+        <h6>
+          <span className="badge badge-primary">7</span> Datos de la Empresa a
+          Transportar - Pública
+        </h6>
 
         <div className="dropdown-divider"></div>
 
@@ -1191,7 +1382,12 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column>
             <SearchInput
               ref={this.refConductorPublico}
-              label={<>Selecciona una Empresa (RUC): <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Selecciona una Empresa (RUC):{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               disabled={this.state.disabledPrivado}
               placeholder="Por número de documento o ruc..."
               refValue={this.refFiltrarConductorPublico}
@@ -1199,11 +1395,13 @@ class GuiaRemisionCrear extends CustomComponent {
               handleClearInput={this.handleClearInputConductorPublico}
               handleFilter={this.handleFilterConductorPublico}
               handleSelectItem={this.handleSelectItemConductorPublico}
-              renderItem={(value) =>
+              renderItem={(value) => (
                 <>
-                  <span>{value.documento}, {value.informacion}</span>
+                  <span>
+                    {value.documento}, {value.informacion}
+                  </span>
                 </>
-              }
+              )}
             />
           </Column>
         </Row>
@@ -1212,7 +1410,9 @@ class GuiaRemisionCrear extends CustomComponent {
 
         <Row>
           <Column className="col-md-6 col-12">
-            <h6><span className='badge badge-primary'>8</span> Punto de partida</h6>
+            <h6>
+              <span className="badge badge-primary">8</span> Punto de partida
+            </h6>
 
             <div className="dropdown-divider"></div>
 
@@ -1220,12 +1420,17 @@ class GuiaRemisionCrear extends CustomComponent {
               <Input
                 group={true}
                 iconLeft={<i className="bi bi-search"></i>}
-                label={<>Dirección Partida: <i className="fa fa-asterisk text-danger small"></i></>}
+                label={
+                  <>
+                    Dirección Partida:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
                 placeholder="Ingrese Dirección de partida..."
                 ref={this.refDireccionPartida}
                 value={this.state.direccionPartida}
                 onChange={(event) => {
-                  this.setState({ direccionPartida: event.target.value })
+                  this.setState({ direccionPartida: event.target.value });
                 }}
               />
             </div>
@@ -1233,28 +1438,33 @@ class GuiaRemisionCrear extends CustomComponent {
             <div className="form-group">
               <SearchInput
                 ref={this.refUbigeoPartida}
-                label={<>Ubigeo Partida: <i className="fa fa-asterisk text-danger small"></i></>}
+                label={
+                  <>
+                    Ubigeo Partida:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoPartida}
                 data={this.state.ubigeosPartida}
                 handleClearInput={this.handleClearInputaUbigeoPartido}
                 handleFilter={this.handleFilterUbigeoPartido}
                 handleSelectItem={this.handleSelectItemUbigeoPartido}
-                renderItem={(value) =>
+                renderItem={(value) => (
                   <>
-                    {value.departamento} -
-                    {value.provincia} -
-                    {value.distrito}
-                    ({value.ubigeo})
+                    {value.departamento} -{value.provincia} -{value.distrito}(
+                    {value.ubigeo})
                   </>
-                }
+                )}
                 renderIconLeft={<i className="bi bi-search"></i>}
               />
             </div>
           </Column>
 
           <Column className="col-md-6 col-12">
-            <h6><span className='badge badge-primary'>9</span> Punto de llegada</h6>
+            <h6>
+              <span className="badge badge-primary">9</span> Punto de llegada
+            </h6>
 
             <div className="dropdown-divider"></div>
 
@@ -1262,12 +1472,17 @@ class GuiaRemisionCrear extends CustomComponent {
               <Input
                 group={true}
                 iconLeft={<i className="bi bi-search"></i>}
-                label={<>Dirección Llegada: <i className="fa fa-asterisk text-danger small"></i></>}
+                label={
+                  <>
+                    Dirección Llegada:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
                 placeholder="Ingrese Dirección de llegada..."
                 ref={this.refDireccionLlegada}
                 value={this.state.direccionLlegada}
                 onChange={(event) => {
-                  this.setState({ direccionLlegada: event.target.value })
+                  this.setState({ direccionLlegada: event.target.value });
                 }}
               />
             </div>
@@ -1275,28 +1490,34 @@ class GuiaRemisionCrear extends CustomComponent {
             <div className="form-group">
               <SearchInput
                 ref={this.refUbigeoLlegada}
-                label={<>Ubigeo Llegada: <i className="fa fa-asterisk text-danger small"></i></>}
+                label={
+                  <>
+                    Ubigeo Llegada:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoLlegada}
                 data={this.state.ubigeosLlegada}
                 handleClearInput={this.handleClearInputaUbigeoLlegada}
                 handleFilter={this.handleFilterUbigeoLlegada}
                 handleSelectItem={this.handleSelectItemUbigeoLlegada}
-                renderItem={(value) =>
+                renderItem={(value) => (
                   <>
-                    {value.departamento} -
-                    {value.provincia} -
-                    {value.distrito}
-                    ({value.ubigeo})
+                    {value.departamento} -{value.provincia} -{value.distrito}(
+                    {value.ubigeo})
                   </>
-                }
+                )}
                 renderIconLeft={<i className="bi bi-search"></i>}
               />
             </div>
           </Column>
         </Row>
 
-        <h6><span className='badge badge-primary'>10</span> Detalle de Guía de Remisión</h6>
+        <h6>
+          <span className="badge badge-primary">10</span> Detalle de Guía de
+          Remisión
+        </h6>
 
         <Row>
           <Column>
@@ -1304,7 +1525,9 @@ class GuiaRemisionCrear extends CustomComponent {
               <Table className="table-bordered">
                 <TableHeader>
                   <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="5%" className="text-center">
+                      #
+                    </TableHead>
                     <TableHead width="10%">Código</TableHead>
                     <TableHead width="35%">Descripción</TableHead>
                     <TableHead width="15%">Und/Medida</TableHead>
@@ -1312,23 +1535,21 @@ class GuiaRemisionCrear extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {
-                    this.state.detalle.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="text-center">{++index}</TableCell>
-                        <TableCell>{item.codigo}</TableCell>
-                        <TableCell>{item.producto}</TableCell>
-                        <TableCell>{item.medida}</TableCell>
-                        <TableCell>{item.cantidad}</TableCell>
-                      </TableRow>
-                    ))
-                  }
+                  {this.state.detalle.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="text-center">{++index}</TableCell>
+                      <TableCell>{item.codigo}</TableCell>
+                      <TableCell>{item.producto}</TableCell>
+                      <TableCell>{item.medida}</TableCell>
+                      <TableCell>{item.cantidad}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableResponsive>
           </Column>
         </Row>
-      </ContainerWrapper >
+      </ContainerWrapper>
     );
   }
 }
@@ -1361,6 +1582,9 @@ const mapStateToProps = (state) => {
  *
  * Método encargado de conectar con redux y exportar la clase
  */
-const ConnectedGuiaRemisionCrear = connect(mapStateToProps, null)(GuiaRemisionCrear);
+const ConnectedGuiaRemisionCrear = connect(
+  mapStateToProps,
+  null,
+)(GuiaRemisionCrear);
 
 export default ConnectedGuiaRemisionCrear;

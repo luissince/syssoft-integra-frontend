@@ -47,58 +47,62 @@ import React from 'react';
  */
 
 const DropdownActions = ({ iconClass = 'fa fa-th-list', options = [] }) => {
-    return (
-        <div className="dropdown">
-            <a
-                className="btn btn-primary dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-            >
-                <i className={iconClass}></i>
-            </a>
+  return (
+    <div className="dropdown">
+      <a
+        className="btn btn-primary dropdown-toggle"
+        href="#"
+        role="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <i className={iconClass}></i>
+      </a>
 
-            <ul className="dropdown-menu">
-                {options.map((opt, idx) => (
-                    <li key={idx}>
-                        <a
-                            className="dropdown-item d-flex align-items-center gap-2 py-2"
-                            href="#"
-                            title={opt.tooltip}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                opt.onClick?.();
-                            }}
-                        >
-                            {
-                                typeof opt.image === 'string'
-                                    ? <img src={opt.image} width={opt.imgWidth || 22} alt={opt.tooltip || opt.label} />
-                                    : opt.image
-                            }
-                            <span> {opt.label}</span>
-                        </a>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
+      <ul className="dropdown-menu">
+        {options.map((opt, idx) => (
+          <li key={idx}>
+            <a
+              className="dropdown-item d-flex align-items-center gap-2 py-2"
+              href="#"
+              title={opt.tooltip}
+              onClick={(e) => {
+                e.preventDefault();
+                opt.onClick?.();
+              }}
+            >
+              {typeof opt.image === 'string' ? (
+                <img
+                  src={opt.image}
+                  width={opt.imgWidth || 22}
+                  alt={opt.tooltip || opt.label}
+                />
+              ) : (
+                opt.image
+              )}
+              <span> {opt.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 DropdownActions.propTypes = {
-    iconClass: PropTypes.string,
-    options: PropTypes.arrayOf(
-        PropTypes.shape({
-            image: PropTypes.oneOfType([
-                PropTypes.string,         // URL de imagen
-                PropTypes.element         // Componente React (ícono, svg, etc.)
-            ]).isRequired,
-            tooltip: PropTypes.string,
-            label: PropTypes.string.isRequired,
-            onClick: PropTypes.func.isRequired,
-            imgWidth: PropTypes.number,
-        })
-    ).isRequired,
+  iconClass: PropTypes.string,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      image: PropTypes.oneOfType([
+        PropTypes.string, // URL de imagen
+        PropTypes.element, // Componente React (ícono, svg, etc.)
+      ]).isRequired,
+      tooltip: PropTypes.string,
+      label: PropTypes.string.isRequired,
+      onClick: PropTypes.func.isRequired,
+      imgWidth: PropTypes.number,
+    }),
+  ).isRequired,
 };
 
 export default DropdownActions;

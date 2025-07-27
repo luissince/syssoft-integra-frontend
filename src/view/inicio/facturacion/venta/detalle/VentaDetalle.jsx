@@ -10,17 +10,33 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import { detailVenta, documentsPdfInvoicesVenta } from '../../../../../network/rest/principal.network';
+import {
+  detailVenta,
+  documentsPdfInvoicesVenta,
+} from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
-import { CONTADO, CREDITO_FIJO, CREDITO_VARIABLE } from '../../../../../model/types/forma-pago';
+import {
+  CONTADO,
+  CREDITO_FIJO,
+  CREDITO_VARIABLE,
+} from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableResponsive, TableRow, TableTitle } from '../../../../../components/Table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+  TableTitle,
+} from '../../../../../components/Table';
 import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -34,7 +50,6 @@ import { images } from '../../../../../helper';
  * @extends React.Component
  */
 class VentaDetalle extends CustomComponent {
-
   /**
    *
    * Constructor
@@ -63,7 +78,7 @@ class VentaDetalle extends CustomComponent {
       isOpenSendWhatsapp: false,
 
       detalles: [],
-      transaccion: []
+      transaccion: [],
     };
 
     // Referencia para el modal enviar WhatsApp
@@ -153,11 +168,30 @@ class VentaDetalle extends CustomComponent {
       nota,
     } = venta.cabecera;
 
-    const monto = venta.detalles.reduce((accumlate, item) => accumlate + (item.precio * item.cantidad), 0,);
+    const monto = venta.detalles.reduce(
+      (accumlate, item) => accumlate + item.precio * item.cantidad,
+      0,
+    );
 
-    const nuevoEstado = estado === 1 ? <span className="text-success">COBRADO</span> : estado === 2 ? <span className="text-warning">POR COBRAR</span> : estado === 3 ? <span className="text-danger">ANULADO</span> : <span className="text-primary">POR LLEVAR</span>;
+    const nuevoEstado =
+      estado === 1 ? (
+        <span className="text-success">COBRADO</span>
+      ) : estado === 2 ? (
+        <span className="text-warning">POR COBRAR</span>
+      ) : estado === 3 ? (
+        <span className="text-danger">ANULADO</span>
+      ) : (
+        <span className="text-primary">POR LLEVAR</span>
+      );
 
-    const tipo = idFormaPago === CONTADO ? "CONTADO" : idFormaPago === CREDITO_FIJO ? "CREDITO FIJO" : idFormaPago === CREDITO_VARIABLE ? "CRÉDITO VARIABLE" : "PAGO ADELTANDO";
+    const tipo =
+      idFormaPago === CONTADO
+        ? 'CONTADO'
+        : idFormaPago === CREDITO_FIJO
+          ? 'CREDITO FIJO'
+          : idFormaPago === CREDITO_VARIABLE
+            ? 'CRÉDITO VARIABLE'
+            : 'PAGO ADELTANDO';
 
     this.setState({
       idVenta: id,
@@ -184,7 +218,7 @@ class VentaDetalle extends CustomComponent {
 
   close = () => {
     this.props.history.goBack();
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -213,7 +247,7 @@ class VentaDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de enviar WhatsApp
@@ -221,19 +255,22 @@ class VentaDetalle extends CustomComponent {
 
   handleOpenSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: true });
-  }
+  };
 
-  handleProcessSendWhatsapp = async (phone, callback = async function () { }) => {
+  handleProcessSendWhatsapp = async (
+    phone,
+    callback = async function () {},
+  ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
       website: paginaWeb,
-      email: email
+      email: email,
     };
 
-    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, "A4");
+    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, 'A4');
 
     // Crear mensaje con formato
     const message = `
@@ -254,17 +291,19 @@ class VentaDetalle extends CustomComponent {
     const cleanPhone = phone.replace(/\D/g, '');
 
     // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+      message,
+    )}`;
 
     await callback();
 
     // Abrir en una nueva ventana
     window.open(whatsappUrl, '_blank');
-  }
+  };
 
   handleCloseSendWhatsapp = () => {
     this.setState({ isOpenSendWhatsapp: false });
-  }
+  };
 
   //------------------------------------------------------------------------------------------
   // Modal de enviar email
@@ -272,7 +311,7 @@ class VentaDetalle extends CustomComponent {
 
   handleSendEmail = async () => {
     // await sendEmail(this.state.idVenta);
-  }
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -291,39 +330,34 @@ class VentaDetalle extends CustomComponent {
   */
 
   renderDetalles() {
-    return (
-      this.state.detalles.map((item, index) => (
-        <TableRow key={index}>
-          <TableCell>{item.id}</TableCell>
-          <TableCell className="text-center">
-            <Image
-              default={images.noImage}
-              src={item.imagen}
-              alt={item.producto}
-              width={100}
-            />
-          </TableCell>
-          <TableCell>
-            {item.codigo}
-            <br />
-            {item.producto}
-          </TableCell>
-          <TableCell>{item.medida}</TableCell>
-          <TableCell>{item.categoria}</TableCell>
-          <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-          <TableCell className="text-right">{item.impuesto}</TableCell>
-          <TableCell className="text-right">
-            {numberFormat(item.precio, this.state.codiso)}
-          </TableCell>
-          <TableCell className="text-right">
-            {numberFormat(
-              item.cantidad * item.precio,
-              this.state.codiso,
-            )}
-          </TableCell>
-        </TableRow>
-      ))
-    );
+    return this.state.detalles.map((item, index) => (
+      <TableRow key={index}>
+        <TableCell>{item.id}</TableCell>
+        <TableCell className="text-center">
+          <Image
+            default={images.noImage}
+            src={item.imagen}
+            alt={item.producto}
+            width={100}
+          />
+        </TableCell>
+        <TableCell>
+          {item.codigo}
+          <br />
+          {item.producto}
+        </TableCell>
+        <TableCell>{item.medida}</TableCell>
+        <TableCell>{item.categoria}</TableCell>
+        <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
+        <TableCell className="text-right">{item.impuesto}</TableCell>
+        <TableCell className="text-right">
+          {numberFormat(item.precio, this.state.codiso)}
+        </TableCell>
+        <TableCell className="text-right">
+          {numberFormat(item.cantidad * item.precio, this.state.codiso)}
+        </TableCell>
+      </TableRow>
+    ));
   }
 
   renderTotal() {
@@ -351,7 +385,9 @@ class VentaDetalle extends CustomComponent {
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
 
-        const existingImpuesto = acc.find((imp) => imp.idImpuesto === item.idImpuesto,);
+        const existingImpuesto = acc.find(
+          (imp) => imp.idImpuesto === item.idImpuesto,
+        );
 
         if (existingImpuesto) {
           existingImpuesto.valor += impuestoTotal;
@@ -369,14 +405,16 @@ class VentaDetalle extends CustomComponent {
       return resultado.map((impuesto, index) => {
         return (
           <TableRow key={index}>
-            <TableHead className="text-right mb-2">{impuesto.nombre} :</TableHead>
+            <TableHead className="text-right mb-2">
+              {impuesto.nombre} :
+            </TableHead>
             <TableHead className="text-right mb-2">
               {numberFormat(impuesto.valor, this.state.codiso)}
             </TableHead>
           </TableRow>
         );
       });
-    }
+    };
 
     return (
       <>
@@ -409,49 +447,47 @@ class VentaDetalle extends CustomComponent {
       );
     }
 
-    return (
-      this.state.transaccion.map((item, index) => {
-        return (
-          <React.Fragment key={index}>
-            <TableRow className="table-success">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>
-                <span>{item.fecha}</span>
-                <br />
-                <span>{formatTime(item.hora)}</span>
-              </TableCell>
-              <TableCell>{item.concepto}</TableCell>
-              <TableCell>{item.nota}</TableCell>
-              <TableCell>{item.usuario}</TableCell>
-            </TableRow>
+    return this.state.transaccion.map((item, index) => {
+      return (
+        <React.Fragment key={index}>
+          <TableRow className="table-success">
+            <TableCell>{index + 1}</TableCell>
+            <TableCell>
+              <span>{item.fecha}</span>
+              <br />
+              <span>{formatTime(item.hora)}</span>
+            </TableCell>
+            <TableCell>{item.concepto}</TableCell>
+            <TableCell>{item.nota}</TableCell>
+            <TableCell>{item.usuario}</TableCell>
+          </TableRow>
 
-            <TableRow>
-              <TableCell className="text-center">#</TableCell>
-              <TableCell>Banco</TableCell>
-              <TableCell>Monto</TableCell>
-              <TableCell colSpan={2}>Observación</TableCell>
-            </TableRow>
-            {
-              item.detalles.map((detalle, index) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell className="text-center">{index + 1}</TableCell>
-                    <TableCell>{detalle.nombre}</TableCell>
-                    <TableCell>{numberFormat(detalle.monto, this.state.codiso)}</TableCell>
-                    <TableCell colSpan={2}>{detalle.observacion}</TableCell>
-                  </TableRow>
-                );
-              })
-            }
-            <TableRow>
-              <TableCell colSpan="5">
-                <hr />
-              </TableCell>
-            </TableRow>
-          </React.Fragment>
-        );
-      })
-    );
+          <TableRow>
+            <TableCell className="text-center">#</TableCell>
+            <TableCell>Banco</TableCell>
+            <TableCell>Monto</TableCell>
+            <TableCell colSpan={2}>Observación</TableCell>
+          </TableRow>
+          {item.detalles.map((detalle, index) => {
+            return (
+              <TableRow key={index}>
+                <TableCell className="text-center">{index + 1}</TableCell>
+                <TableCell>{detalle.nombre}</TableCell>
+                <TableCell>
+                  {numberFormat(detalle.monto, this.state.codiso)}
+                </TableCell>
+                <TableCell colSpan={2}>{detalle.observacion}</TableCell>
+              </TableRow>
+            );
+          })}
+          <TableRow>
+            <TableCell colSpan="5">
+              <hr />
+            </TableCell>
+          </TableRow>
+        </React.Fragment>
+      );
+    });
   }
 
   render() {
@@ -463,8 +499,8 @@ class VentaDetalle extends CustomComponent {
         />
 
         <Title
-          title='Venta'
-          subTitle='DETALLE'
+          title="Venta"
+          subTitle="DETALLE"
           handleGoBack={() => this.close()}
         />
 
@@ -483,26 +519,20 @@ class VentaDetalle extends CustomComponent {
               onClick={this.handlePrintInvoices.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
-            </Button>
-            {' '}
+            </Button>{' '}
             <Button
               className="btn-light"
               onClick={this.handlePrintInvoices.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
-            </Button>
-            {' '}
-            <Button
-              className="btn-light"
-              onClick={this.handleOpenSendWhatsapp}
-            >
+            </Button>{' '}
+            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
               <i className="fa fa-whatsapp"></i> Whatsapp
             </Button>
             {/* {' '}
@@ -622,9 +652,7 @@ class VentaDetalle extends CustomComponent {
                     <TableHead>Monto</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderDetalles()}
-                </TableBody>
+                <TableBody>{this.renderDetalles()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -633,10 +661,8 @@ class VentaDetalle extends CustomComponent {
         <Row>
           <Column className="col-lg-8 col-sm-12"></Column>
           <Column className="col-lg-4 col-sm-12">
-            <Table classNameContent='w-100'>
-              <TableHeader>
-                {this.renderTotal()}
-              </TableHeader>
+            <Table classNameContent="w-100">
+              <TableHeader>{this.renderTotal()}</TableHeader>
             </Table>
           </Column>
         </Row>
@@ -655,9 +681,7 @@ class VentaDetalle extends CustomComponent {
                     <TableHead>Usuario</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {this.renderTransaciones()}
-                </TableBody>
+                <TableBody>{this.renderTransaciones()}</TableBody>
               </Table>
             </TableResponsive>
           </Column>
@@ -672,18 +696,18 @@ VentaDetalle.propTypes = {
     goBack: PropTypes.func.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    search: PropTypes.string
+    search: PropTypes.string,
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
       razonSocial: PropTypes.string,
-    })
+    }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
       paginaWeb: PropTypes.string,
       email: PropTypes.string,
-    })
+    }),
   }),
 };
 

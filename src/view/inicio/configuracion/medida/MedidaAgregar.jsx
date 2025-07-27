@@ -94,12 +94,11 @@ class MedidaAgregar extends React.Component {
     return (
       <ContainerWrapper>
         <Title
-          title='Medida'
-          subTitle='AGREGAR'
+          title="Medida"
+          subTitle="AGREGAR"
           icon={<i className="fa fa-plus"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
-
 
         <div className="row">
           <div className="col">
@@ -182,14 +181,13 @@ class MedidaAgregar extends React.Component {
                 className="btn-success"
                 onClick={() => this.handleGuardar()}
               >
-                <i className='fa fa-save'></i> Guardar
-              </Button>
-              {' '}
+                <i className="fa fa-save"></i> Guardar
+              </Button>{' '}
               <Button
                 className="btn-outline-danger"
                 onClick={() => this.props.history.goBack()}
               >
-                <i className='fa fa-close'></i> Cerrar
+                <i className="fa fa-close"></i> Cerrar
               </Button>
             </div>
           </div>
@@ -202,13 +200,13 @@ class MedidaAgregar extends React.Component {
 MedidaAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {

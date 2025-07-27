@@ -22,7 +22,12 @@ import {
 import { CANCELED } from '../../../../model/types/types';
 import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
-import { TabContent, TabHead, TabHeader, TabPane } from '../../../../components/Tab';
+import {
+  TabContent,
+  TabHead,
+  TabHeader,
+  TabPane,
+} from '../../../../components/Tab';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
@@ -31,7 +36,6 @@ import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
 
 class UsuarioEditar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -262,30 +266,35 @@ class UsuarioEditar extends CustomComponent {
         />
 
         <Title
-          title='Usuario'
-          subTitle='EDITAR'
+          title="Usuario"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column>
             <TabHeader>
-              <TabHead id='datos' isActive={true}>
+              <TabHead id="datos" isActive={true}>
                 <i className="bi bi-info-circle"></i> Datos
               </TabHead>
 
-              <TabHead id='login'>
+              <TabHead id="login">
                 <i className="bi bi-person-workspace"></i> Login
               </TabHead>
             </TabHeader>
 
             <TabContent>
-              <TabPane id='datos' isActive={true}>
+              <TabPane id="datos" isActive={true}>
                 <Row>
                   <Column formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Dni: <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Dni:{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese el numero de DNI"
                       ref={this.refDni}
                       value={this.state.dni}
@@ -308,10 +317,15 @@ class UsuarioEditar extends CustomComponent {
                 </Row>
 
                 <Row>
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Nombre(s){' '}<i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Nombre(s){' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese el nombre"
                       ref={this.refNombres}
                       value={this.state.nombres}
@@ -331,10 +345,15 @@ class UsuarioEditar extends CustomComponent {
                     />
                   </Column>
 
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Apellidos{' '}<i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Apellidos{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="ingrese apellidos del usuario"
                       ref={this.refApellidos}
                       value={this.state.apellidos}
@@ -359,7 +378,12 @@ class UsuarioEditar extends CustomComponent {
                   <Column formGroup>
                     <Select
                       group={true}
-                      label={<>Genero <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Genero{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       id="genero"
                       value={this.state.genero}
                       ref={this.refGenero}
@@ -388,7 +412,12 @@ class UsuarioEditar extends CustomComponent {
                   <Column formGroup>
                     <Input
                       group={true}
-                      label={<>Dirección <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Dirección{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese la dirección"
                       ref={this.refDireccion}
                       value={this.state.direccion}
@@ -410,10 +439,15 @@ class UsuarioEditar extends CustomComponent {
                 </Row>
 
                 <Row>
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
-                      label={<>Telefono o celular <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Telefono o celular{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese el N° de telefono"
                       ref={this.refTelefono}
                       value={this.state.telefono}
@@ -434,11 +468,16 @@ class UsuarioEditar extends CustomComponent {
                     />
                   </Column>
 
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
                       type="email"
-                      label={<>Correo Electrónico <i className="fa fa-asterisk text-danger small"></i></>}
+                      label={
+                        <>
+                          Correo Electrónico{' '}
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
                       placeholder="Ingrese el email"
                       ref={this.refEmail}
                       value={this.state.email}
@@ -460,7 +499,7 @@ class UsuarioEditar extends CustomComponent {
                 </Row>
               </TabPane>
 
-              <TabPane id='login'>
+              <TabPane id="login">
                 <Row>
                   <Column formGroup={true}>
                     <Select
@@ -484,7 +523,7 @@ class UsuarioEditar extends CustomComponent {
                 </Row>
 
                 <Row>
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Select
                       group={true}
                       id="representante"
@@ -511,7 +550,7 @@ class UsuarioEditar extends CustomComponent {
                     </Select>
                   </Column>
 
-                  <Column className='col-md-6 col-12' formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Select
                       group={true}
                       id="estado"
@@ -531,7 +570,7 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column>
                     <Switches
-                      id={"cbActiveLogin"}
+                      id={'cbActiveLogin'}
                       checked={this.state.activeLogin}
                       onChange={(value) =>
                         this.setState({ activeLogin: value.target.checked })
@@ -579,14 +618,13 @@ class UsuarioEditar extends CustomComponent {
               className="btn-warning"
               onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {" "}
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i>  Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

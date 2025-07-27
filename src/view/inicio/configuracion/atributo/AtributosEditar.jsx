@@ -27,7 +27,10 @@ import Button from '../../../../components/Button';
 import { Switches } from '../../../../components/Checks';
 import Input from '../../../../components/Input';
 import Select from '../../../../components/Select';
-import { TIPO_ATRIBUTO_COLOR, TIPO_ATRIBUTO_TALLA } from '../../../../model/types/tipo-atributo';
+import {
+  TIPO_ATRIBUTO_COLOR,
+  TIPO_ATRIBUTO_TALLA,
+} from '../../../../model/types/tipo-atributo';
 
 class AtributosEditar extends CustomComponent {
   constructor(props) {
@@ -159,14 +162,20 @@ class AtributosEditar extends CustomComponent {
       return;
     }
 
-    if (this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR && isEmpty(this.state.hexadecimal)) {
+    if (
+      this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR &&
+      isEmpty(this.state.hexadecimal)
+    ) {
       alertWarning('Atributo', 'Ingrese su color', () => {
         this.refHexadecimal.current.focus();
       });
       return;
     }
 
-    if (this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA && isEmpty(this.state.valor)) {
+    if (
+      this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA &&
+      isEmpty(this.state.valor)
+    ) {
       alertWarning('Atributo', 'Ingrese su valor', () => {
         this.refValor.current.focus();
       });
@@ -211,8 +220,8 @@ class AtributosEditar extends CustomComponent {
         />
 
         <Title
-          title='Atributo'
-          subTitle='EDITAR'
+          title="Atributo"
+          subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -220,18 +229,23 @@ class AtributosEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Select
-              label={<>Tipo Atributo:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Tipo Atributo:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               ref={this.refTipoAtributo}
               value={this.state.idTipoAtributo}
               onChange={this.handleSelectTipoAtributo}
               disabled
             >
               <option value="">-- Seleccione un tipo de atributo --</option>
-              {
-                this.state.tipoAtributos.map((item, index) => (
-                  <option key={index} value={item.idTipoAtributo}>{item.nombre}</option>
-                ))
-              }
+              {this.state.tipoAtributos.map((item, index) => (
+                <option key={index} value={item.idTipoAtributo}>
+                  {item.nombre}
+                </option>
+              ))}
             </Select>
           </Column>
         </Row>
@@ -239,7 +253,11 @@ class AtributosEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre:<i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese el nombre"
               ref={this.refNombre}
               value={this.state.nombre}
@@ -248,38 +266,38 @@ class AtributosEditar extends CustomComponent {
           </Column>
         </Row>
 
-        {
-          this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={"Color"}
-                  type='color'
-                  placeholder="Ingrese su color"
-                  ref={this.refHexadecimal}
-                  value={this.state.hexadecimal}
-                  onChange={this.handleInputHexacimal}
-                />
-              </Column>
-            </Row>
-          )
-        }
+        {this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
+          <Row>
+            <Column formGroup={true}>
+              <Input
+                label={'Color'}
+                type="color"
+                placeholder="Ingrese su color"
+                ref={this.refHexadecimal}
+                value={this.state.hexadecimal}
+                onChange={this.handleInputHexacimal}
+              />
+            </Column>
+          </Row>
+        )}
 
-        {
-          this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={<>Valor:<i className="fa fa-asterisk text-danger small"></i></>}
-                  placeholder="Ingrese su valor"
-                  ref={this.refValor}
-                  value={this.state.valor}
-                  onChange={this.handleInputValor}
-                />
-              </Column>
-            </Row>
-          )
-        }
+        {this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
+          <Row>
+            <Column formGroup={true}>
+              <Input
+                label={
+                  <>
+                    Valor:<i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                placeholder="Ingrese su valor"
+                ref={this.refValor}
+                value={this.state.valor}
+                onChange={this.handleInputValor}
+              />
+            </Column>
+          </Row>
+        )}
 
         <Row>
           <Column formGroup={true}>
@@ -299,14 +317,13 @@ class AtributosEditar extends CustomComponent {
               className="btn-warning"
               onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -318,13 +335,13 @@ class AtributosEditar extends CustomComponent {
 AtributosEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -332,6 +349,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedAtributosEditar = connect(mapStateToProps, null)(AtributosEditar);
+const ConnectedAtributosEditar = connect(
+  mapStateToProps,
+  null,
+)(AtributosEditar);
 
 export default ConnectedAtributosEditar;

@@ -24,7 +24,6 @@ import Button from '../../../../components/Button';
 import { SpinnerView } from '../../../../components/Spinner';
 
 class VehiculoEditar extends CustomComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -62,9 +61,7 @@ class VehiculoEditar extends CustomComponent {
   }
 
   loadingData = async (id) => {
-    const [impuesto] = await Promise.all([
-      this.fetchGetIdVehiculo(id)
-    ]);
+    const [impuesto] = await Promise.all([this.fetchGetIdVehiculo(id)]);
 
     this.setState({
       idVehiculo: impuesto.idVehiculo,
@@ -145,8 +142,8 @@ class VehiculoEditar extends CustomComponent {
         />
 
         <Title
-          title='Vehículo'
-          subTitle='EDITAR'
+          title="Vehículo"
+          subTitle="EDITAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
@@ -173,7 +170,8 @@ class VehiculoEditar extends CustomComponent {
           <div className="col-md-6 col-12">
             <div className="form-group">
               <label htmlFor="numeroPlaca" className="col-form-label">
-                Número de Placa: <i className="fa fa-asterisk text-danger small"></i>
+                Número de Placa:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
               </label>
               <input
                 type="text"
@@ -234,18 +232,14 @@ class VehiculoEditar extends CustomComponent {
 
         <Row>
           <Column formGroup>
-            <Button
-              className="btn-warning"
-              onClick={this.handleGuardar}
-            >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+            <Button className="btn-warning" onClick={this.handleGuardar}>
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>

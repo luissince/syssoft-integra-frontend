@@ -2,9 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
-import {
-  isEmpty,
-} from '../../../../helper/utils.helper';
+import { isEmpty } from '../../../../helper/utils.helper';
 import { addPerfil } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -34,74 +32,87 @@ class PerfilAgregar extends CustomComponent {
 
   handleGuardar = () => {
     if (isEmpty(this.state.descripcion)) {
-      alertKit.warning({
-        title: "Perfil",
-        message: "!Ingrese la descripción del perfil!",
-      }, () => {
-        this.refDescripcion.current.focus();
-      });
+      alertKit.warning(
+        {
+          title: 'Perfil',
+          message: '!Ingrese la descripción del perfil!',
+        },
+        () => {
+          this.refDescripcion.current.focus();
+        },
+      );
       return;
     }
 
-    alertKit.question({
-      headerTitle: "SysSoft Integra",
-      title: "Perfil",
-      message: '¿Estás seguro de continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        headerTitle: 'SysSoft Integra',
+        title: 'Perfil',
+        message: '¿Estás seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (accept) => {
+        if (accept) {
+          const data = {
+            descripcion: this.state.descripcion.trim(),
+            idEmpresa: 'EM0001',
+            idUsuario: this.state.idUsuario,
+          };
+
+          alertKit.loading({
+            message: 'Procesando información...',
+          });
+
+          const response = await addPerfil(data);
+
+          if (response instanceof SuccessReponse) {
+            alertKit.success(
+              {
+                title: 'Perfil',
+                message: response.data,
+              },
+              () => {
+                this.props.history.goBack();
+              },
+            );
+          }
+
+          if (response instanceof ErrorResponse) {
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              title: 'Perfil',
+              message: response.getMessage(),
+            });
+          }
+        }
       },
-    }, async (accept) => {
-      if (accept) {
-
-        const data = {
-          descripcion: this.state.descripcion.trim(),
-          idEmpresa: 'EM0001',
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await addPerfil(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Perfil",
-            message: response.data,
-          }, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.warning({
-            title: "Perfil",
-            message: response.getMessage(),
-          });
-        }
-      }
-    });
+    );
   };
 
   render() {
     return (
       <ContainerWrapper>
         <Title
-          title='Perfil'
-          subTitle='AGREGAR'
+          title="Perfil"
+          subTitle="AGREGAR"
           handleGoBack={() => this.props.history.goBack()}
         />
 
         <Row>
           <Column formGroup>
             <Input
-              label={<>Descripción: <i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Descripción:{' '}
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese la descripción."
               ref={this.refDescripcion}
               value={this.state.descripcion}
@@ -112,10 +123,7 @@ class PerfilAgregar extends CustomComponent {
 
         <Row>
           <Column className="col-md-12" formGroup>
-            <Button
-              className="btn-success"
-              onClick={this.handleGuardar}
-            >
+            <Button className="btn-success" onClick={this.handleGuardar}>
               <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
@@ -136,7 +144,6 @@ const mapStateToProps = (state) => {
     token: state.principal,
   };
 };
-
 
 const ConnectedPerfilAgregar = connect(mapStateToProps, null)(PerfilAgregar);
 

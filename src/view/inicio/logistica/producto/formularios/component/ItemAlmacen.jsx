@@ -17,13 +17,15 @@ const ItemAlmacen = (props) => {
         </div>
       </Column>
 
-      <Column className="col-md-8 d-flex text-left align-items-center" formGroup={true}>
+      <Column
+        className="col-md-8 d-flex text-left align-items-center"
+        formGroup={true}
+      >
         {idAlmacen && (
           <>
             <p className="m-0">{nombreAlmacen}</p>
             <p className="m-0">
-              {cantidad} cantidad - {cantidadMinima} min - {cantidadMaxima}{' '}
-              max
+              {cantidad} cantidad - {cantidadMinima} min - {cantidadMaxima} max
             </p>
           </>
         )}
@@ -60,7 +62,7 @@ ItemAlmacen.propTypes = {
   cantidadMinima: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   cantidadMaxima: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
-  handleRemoveItemInventario: PropTypes.func
-}
+  handleRemoveItemInventario: PropTypes.func,
+};
 
 export default ItemAlmacen;

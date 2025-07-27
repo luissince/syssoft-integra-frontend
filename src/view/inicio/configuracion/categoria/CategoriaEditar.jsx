@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  isText,
-  isEmpty,
-  imageBase64,
-} from '../../../../helper/utils.helper';
+import { isText, isEmpty, imageBase64 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -39,7 +35,7 @@ class CategoriaEditar extends CustomComponent {
       nombre: '',
       descripcion: '',
       imagen: {
-        url: images.noImage
+        url: images.noImage,
       },
       estado: false,
       publicar: false,
@@ -68,9 +64,7 @@ class CategoriaEditar extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [categoria] = await Promise.all([
-      this.fetchObtenerCategoria(id),
-    ]);
+    const [categoria] = await Promise.all([this.fetchObtenerCategoria(id)]);
 
     this.setState({
       idCategoria: categoria.idCategoria,
@@ -78,9 +72,8 @@ class CategoriaEditar extends CustomComponent {
       nombre: categoria.nombre,
       descripcion: categoria.descripcion,
       estado: categoria.estado === 1 ? true : false,
-      imagen: categoria.imagen ??
-      {
-        url: images.noImage
+      imagen: categoria.imagen ?? {
+        url: images.noImage,
       },
       loading: false,
     });
@@ -130,20 +123,27 @@ class CategoriaEditar extends CustomComponent {
     if (!isEmpty(files)) {
       const file = files[0];
       let url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } = await imageBase64(file);
+      const { size, base64String, extension, width, height } =
+        await imageBase64(file);
 
       if (width !== 300 || height !== 200) {
         alertKit.warning({
-          title: "Categoría",
-          message: "La imagen " + file.name + " tiene que tener un aspecto de 300 x 200 pixeles"
+          title: 'Categoría',
+          message:
+            'La imagen ' +
+            file.name +
+            ' tiene que tener un aspecto de 300 x 200 pixeles',
         });
         return;
       }
 
       if (size > 500) {
         alertKit.warning({
-          title: "Categoría",
-          message: "La imagen " + file.name + " tiene que tener un tamaño de menos de 500 KB"
+          title: 'Categoría',
+          message:
+            'La imagen ' +
+            file.name +
+            ' tiene que tener un tamaño de menos de 500 KB',
         });
         return;
       }
@@ -155,14 +155,14 @@ class CategoriaEditar extends CustomComponent {
           width: width,
           height: height,
           size: size,
-          url: url
-        }
-      })
+          url: url,
+        },
+      });
     } else {
       this.setState({
         imagen: {
-          url: images.noImage
-        }
+          url: images.noImage,
+        },
       });
     }
 
@@ -172,37 +172,40 @@ class CategoriaEditar extends CustomComponent {
   handleClearImage = () => {
     this.setState({
       imagen: {
-        url: images.noImage
-      }
+        url: images.noImage,
+      },
     });
-  }
+  };
 
   handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
       alertKit.warning({
-        title: "Categoría",
-        message: "!Ingrese el nombre de la categoría!",
+        title: 'Categoría',
+        message: '!Ingrese el nombre de la categoría!',
         onClose: () => {
           this.refNombre.current.focus();
-        }
+        },
       });
       return;
     }
 
-    alertKit.question({
-      title: "Categoría",
-      message: "¿Estás seguro de continuar?",
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
+    alertKit.question(
+      {
+        title: 'Categoría',
+        message: '¿Estás seguro de continuar?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
       },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
+      async (confirm) => {
+        if (confirm) {
+          await this.handleGuardarProcess();
+        }
       },
-    }, async (confirm) => {
-      if (confirm) {
-        await this.handleGuardarProcess();
-      }
-    });
+    );
   };
 
   handleGuardarProcess = async () => {
@@ -224,7 +227,7 @@ class CategoriaEditar extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       alertKit.success({
-        title: "Categoría",
+        title: 'Categoría',
         message: response.data,
         onClose: () => {
           this.props.history.goBack();
@@ -236,11 +239,11 @@ class CategoriaEditar extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        title: "Categoría",
+        title: 'Categoría',
         message: response.getMessage(),
       });
     }
-  }
+  };
 
   render() {
     return (
@@ -251,8 +254,8 @@ class CategoriaEditar extends CustomComponent {
         />
 
         <Title
-          title='Categoría'
-          subTitle='EDITAR'
+          title="Categoría"
+          subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
           handleGoBack={() => this.props.history.goBack()}
         />
@@ -261,7 +264,7 @@ class CategoriaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               autoFocus
-              label={"Código:"}
+              label={'Código:'}
               placeholder="Ingrese el código"
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
@@ -272,7 +275,11 @@ class CategoriaEditar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+              label={
+                <>
+                  Nombre:<i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="Ingrese el nombre"
               ref={this.refNombre}
               value={this.state.nombre}
@@ -281,11 +288,10 @@ class CategoriaEditar extends CustomComponent {
           </Column>
         </Row>
 
-
         <Row>
           <Column formGroup={true}>
             <Input
-              label={"Descripción"}
+              label={'Descripción'}
               placeholder="Ingrese la descripción"
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
@@ -318,14 +324,19 @@ class CategoriaEditar extends CustomComponent {
         <Row>
           <Column className="col-12" formGroup={true}>
             <label>
-              Agregar las imagenes para el icono. <b className='text-danger'>La imagen no deben superar los 500KB(Kilobytes).</b>
+              Agregar las imagenes para el icono.{' '}
+              <b className="text-danger">
+                La imagen no deben superar los 500KB(Kilobytes).
+              </b>
             </label>
             <label>
-              Las imágenes deben tener un tamaño de <b>300 x 200 píxeles</b> para que se visualicen correctamente en la página web (formato recomendado *.webp).
+              Las imágenes deben tener un tamaño de <b>300 x 200 píxeles</b>{' '}
+              para que se visualicen correctamente en la página web (formato
+              recomendado *.webp).
             </label>
           </Column>
 
-          <Column className={"col-md-4 col-12"} formGroup={true}>
+          <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
@@ -345,14 +356,13 @@ class CategoriaEditar extends CustomComponent {
               className="btn-warning"
               onClick={() => this.handleGuardar()}
             >
-              <i className='fa fa-save'></i> Guardar
-            </Button>
-            {' '}
+              <i className="fa fa-save"></i> Guardar
+            </Button>{' '}
             <Button
               className="btn-outline-danger"
               onClick={() => this.props.history.goBack()}
             >
-              <i className='fa fa-close'></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </Button>
           </Column>
         </Row>
@@ -364,13 +374,13 @@ class CategoriaEditar extends CustomComponent {
 CategoriaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string
-    })
+      idUsuario: PropTypes.string,
+    }),
   }),
   history: PropTypes.shape({
-    goBack: PropTypes.func
-  })
-}
+    goBack: PropTypes.func,
+  }),
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -378,6 +388,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedCategoriaEditar = connect(mapStateToProps, null)(CategoriaEditar);
+const ConnectedCategoriaEditar = connect(
+  mapStateToProps,
+  null,
+)(CategoriaEditar);
 
 export default ConnectedCategoriaEditar;
