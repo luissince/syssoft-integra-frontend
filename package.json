@@ -16,8 +16,8 @@
     "preview": "vite preview",
     "format": "prettier --write ./src",
     "patch": "npm version patch",
-    "deploy:test": "./deploy.sh test",
-    "deploy:prod": "./deploy.sh master"
+    "deploy:test": "git switch test && git merge development && git push origin test",
+    "deploy:prod": "git switch master && git merge development && git push origin master"
   },
   "dependencies": {
     "@capacitor/android": "6.2.1",
