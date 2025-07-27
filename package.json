@@ -1,7 +1,9 @@
 {
   "name": "syssoft-integra-app",
+  "description": "SysSoft Integra aplicación de puntos de venta",
+  "appTitle": "SysSoft Integra",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "bash ./start-dev.sh",

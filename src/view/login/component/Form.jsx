@@ -27,7 +27,7 @@ const Form = (props) => {
     <div className="col-lg-6 mb-5 mb-lg-0">
       <div className="card">
         <div className="card-body py-5 px-md-5">
-          <form onSubmit={handleSendForm}>
+          <form onSubmit={handleSendForm} className='flex flex-col items-center gap-y-4'>
             <img
               className="mb-4"
               // src={`${rutaImage !== "" ? "/" + rutaImage : noimage}`}
@@ -55,7 +55,7 @@ const Form = (props) => {
               </div>
             )}
 
-            <div className="mb-4">
+            <div className="w-full">
               <Input
                 ref={usernameRef}
                 value={username}
@@ -65,7 +65,7 @@ const Form = (props) => {
               />
             </div>
 
-            <div className="mb-4">
+            <div className="w-full">
               <Input
                 group={true}
                 ref={passwordRef}
@@ -92,10 +92,9 @@ const Form = (props) => {
               <i className="fa fa-arrow-right"></i>
             </Button>
 
-            <div className="text-center">
-              <p>SysSoft Integra © {new Date().getFullYear()}</p>
-              <p className='my-0'>VERSIÓN {import.meta.env.VITE_APP_VERSION}</p>
-              <p className='my-0'>{import.meta.env.VITE_APP_NAME}</p>
+            <div className="flex items-center flex-col gap-y-2">
+              <p className="uppercase">{__APP_TITLE__} © {new Date().getFullYear()}</p>
+              <p className='my-0'>VERSIÓN {__APP_VERSION__}</p>
             </div>
           </form>
         </div>
