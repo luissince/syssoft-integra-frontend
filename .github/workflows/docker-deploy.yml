@@ -7,35 +7,25 @@ on:
       - "test"
 
 jobs:
-  build-reactjs:
+  build-reactjs-production:
     name: Build Front-End (React Js)
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          # Producción (master)
           - environment: leatsac
             service: leatsac-services
-            branch: master
           - environment: ferreteria-rym
             service: ferreteria-rym-services
-            branch: master
           - environment: importmuneli
             service: importmuneli-services
-            branch: master
           - environment: supermarketya
             service: supermarketya-services
-            branch: master
           - environment: dracoly
             service: dracoly-services
-            branch: master
           - environment: main
             service: main-services
-            branch: master
-          # Desarrollo (test)
-          - environment: desarrollo
-            service: desarrollo-services
-            branch: test
   
     environment: ${{ matrix.environment }}
 
@@ -44,7 +34,6 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Crear archivo .env
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{secrets.VITE_APP_BACK_END}}"
@@ -55,11 +44,9 @@ jobs:
           EOL
 
       - name: Construyendo contenedor ReactJs
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
 
       - name: Configure AWS credentials
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -67,46 +54,79 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/amazon-ecr-login@v1 
       
       - name: Tag front-end image
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
       - name: Push front-end image to ECR
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
-  deploy-reactjs:
+  build-reactjs-development:
+    name: Build Front-End (React Js)
+    if: github.ref == 'refs/heads/test'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - environment: desarrollo
+            service: desarrollo-services
+  
+    environment: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Crear archivo .env
+        run: |
+          cat > .env <<EOL
+          VITE_APP_BACK_END="${{secrets.VITE_APP_BACK_END}}"
+          VITE_APP_APIS_PERU="${{secrets.VITE_APP_APIS_PERU}}"
+          VITE_APP_ENV="${{vars.VITE_APP_ENV}}"
+          VITE_APP_VERSION="${{vars.VITE_APP_VERSION}}"
+          VITE_APP_NAME="${{vars.VITE_APP_NAME}}"
+          EOL
+
+      - name: Construyendo contenedor ReactJs
+        run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1 
+      
+      - name: Tag front-end image
+        run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
+
+      - name: Push front-end image to ECR
+        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
+
+  deploy-reactjs-production:
     name: Deploy Front-End (React Js)
     runs-on: webs
-    needs: build-reactjs
+    needs: build-reactjs-production
 
     strategy:
       matrix:
         include:
           - environment: leatsac
             service: leatsac-services
-            branch: master
           - environment: ferreteria-rym
             service: ferreteria-rym-services
-            branch: master
           - environment: importmuneli
             service: importmuneli-services
-            branch: master
           - environment: supermarketya
             service: supermarketya-services
-            branch: master
           - environment: dracoly
             service: dracoly-services
-            branch: master
           - environment: main
             service: main-services
-            branch: master
-          - environment: desarrollo
-            service: desarrollo-services
-            branch: test
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -118,7 +138,6 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -126,15 +145,12 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Descargar imagen desde ECR
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
 
       - name: Crear archivo Compose para ${{ matrix.environment }}
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
           cat <<EOF > docker-compose-${{ matrix.environment }}.yml
           services:
@@ -150,21 +166,75 @@ jobs:
           EOF
 
       - name: Crear y ejecutar contenedor en producción
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker compose -f docker-compose-${{ matrix.environment }}.yml up -d ${{ matrix.environment }}
 
       - name: Eliminar Compose temporal
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: rm docker-compose-${{ matrix.environment }}.yml
 
       - name: Eliminar imágenes locales
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: docker image prune -af || true
   
-  clean-ecr-images:
+  deploy-reactjs-development:
+    name: Deploy Front-End (React Js)
+    runs-on: webs
+    needs: build-reactjs-development
+
+    strategy:
+      matrix:
+        include:
+          - environment: desarrollo
+            service: desarrollo-services
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      NAME_SERVICE: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Descargar imagen desde ECR
+        run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end:${{ matrix.environment }}-latest
+
+      - name: Crear archivo Compose para ${{ matrix.environment }}
+        run: |
+          cat <<EOF > docker-compose-${{ matrix.environment }}.yml
+          services:
+            ${NAME_SERVICE}:
+              image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end:${NAME_SERVICE}-latest
+              container_name: ${NAME_SERVICE}-frontend
+              restart: always
+              networks:
+                - luis
+          networks:
+            luis:
+              external: true
+          EOF
+
+      - name: Crear y ejecutar contenedor en producción
+        run: docker compose -f docker-compose-${{ matrix.environment }}.yml up -d ${{ matrix.environment }}
+
+      - name: Eliminar Compose temporal
+        run: rm docker-compose-${{ matrix.environment }}.yml
+
+      - name: Eliminar imágenes locales
+        run: docker image prune -af || true
+  
+  clean-ecr-images-production:
     name: Borrar imágenes antiguas de ECR
     runs-on: ubuntu-latest
-    needs: deploy-reactjs
+    needs: deploy-reactjs-production
 
     strategy:
       matrix:
@@ -181,6 +251,53 @@ jobs:
             branch: master
           - environment: main
             branch: master
+    
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+    steps:
+      - name: Saltar si no es la rama del matrix
+        if: github.ref != format('refs/heads/{0}', matrix.branch)
+        run: echo "🛑 No coincide la rama actual con la del matrix. Saltando pasos." && exit 0
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Instalar jq
+        run: sudo apt-get install -y jq
+
+      - name: Borrar imágenes sin tag '${{ matrix.environment }}-latest' - Frontend
+        run: |
+          REPO="syssoftintegra/front-end"
+          TAG="${{ matrix.environment }}-latest"
+
+          echo "🔎 Buscando imágenes antiguas en $REPO (excepto $TAG)..."
+
+          aws ecr list-images --repository-name "$REPO" \
+            --query "imageIds[?type(imageTag)==\`null\` || imageTag!=\`$TAG\`]" \
+            --output json > images.json
+
+          COUNT=$(jq length images.json)
+          if [ "$COUNT" -gt 0 ]; then
+            echo "🗑️ Borrando $COUNT imágenes antiguas..."
+            aws ecr batch-delete-image --repository-name "$REPO" --image-ids file://images.json
+          else
+            echo "✅ No hay imágenes antiguas para borrar en $REPO"
+          fi
+
+  clean-ecr-images-development:
+    name: Borrar imágenes antiguas de ECR
+    runs-on: ubuntu-latest
+    needs: deploy-reactjs-development
+
+    strategy:
+      matrix:
+        include:
           - environment: desarrollo
             branch: test
     
@@ -189,8 +306,11 @@ jobs:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
     steps:
+      - name: Saltar si no es la rama del matrix
+        if: github.ref != format('refs/heads/{0}', matrix.branch)
+        run: echo "🛑 No coincide la rama actual con la del matrix. Saltando pasos." && exit 0
+
       - name: Configurar credenciales AWS
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -198,22 +318,23 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Instalar jq
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: sudo apt-get install -y jq
 
       - name: Borrar imágenes sin tag '${{ matrix.environment }}-latest' - Frontend
-        if: github.ref == 'refs/heads/${{ matrix.branch }}'
         run: |
           REPO="syssoftintegra/front-end"
+          TAG="${{ matrix.environment }}-latest"
 
-           # 1. Obtener todas las imágenes (excepto latest)
-            aws ecr list-images --repository-name $REPO \
-              --query 'imageIds[?type(imageTag)==`null` || imageTag!=`${{ matrix.environment }}-latest`]' \
-              --output json > images.json
+          echo "🔎 Buscando imágenes antiguas en $REPO (excepto $TAG)..."
 
-            # 2. Verificar si hay imágenes para borrar
-            if [ $(jq -e 'length > 0' images.json) = "true" ]; then
-              echo "Borrando $(jq length images.json) imágenes antiguas..."
-              aws ecr batch-delete-image --repository-name $REPO --image-ids file://images.json
-            else
-              echo "No hay imágenes antiguas para borrar en $REPO"
+          aws ecr list-images --repository-name "$REPO" \
+            --query "imageIds[?type(imageTag)==\`null\` || imageTag!=\`$TAG\`]" \
+            --output json > images.json
+
+          COUNT=$(jq length images.json)
+          if [ "$COUNT" -gt 0 ]; then
+            echo "🗑️ Borrando $COUNT imágenes antiguas..."
+            aws ecr batch-delete-image --repository-name "$REPO" --image-ids file://images.json
+          else
+            echo "✅ No hay imágenes antiguas para borrar en $REPO"
+          fi
