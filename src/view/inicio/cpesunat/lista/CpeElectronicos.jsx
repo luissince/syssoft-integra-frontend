@@ -3,7 +3,6 @@ import {
   formatTime,
   currentDate,
   limitarCadena,
-  alertWarning,
   isEmpty,
   formatNumberWithZeros,
   alertDialog,
@@ -67,6 +66,7 @@ import { downloadFileAsync } from '../../../../redux/downloadSlice';
 import { toastKit, ToastStyle } from 'toast-kit';
 import { Link } from 'react-router-dom';
 import DropdownActions from '../../../../components/DropdownActions';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -449,10 +449,16 @@ class CpeElectronicos extends CustomComponent {
                   },
                 );
               } else {
-                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+                alertKit.warning({
+                  title: 'Cpe Sunat',
+                  message: 'Código ' + code + ' ' + description,
+                });
               }
             } else {
-              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              alertKit.warning({
+                title: 'Cpe Sunat',
+                message: 'Código ' + code + ' ' + description,
+              });
             }
           }
 
@@ -489,10 +495,16 @@ class CpeElectronicos extends CustomComponent {
                   },
                 );
               } else {
-                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+                alertKit.warning({
+                  title: 'Cpe Sunat',
+                  message: 'Código ' + code + ' ' + description,
+                });
               }
             } else {
-              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              alertKit.warning({
+                title: 'Cpe Sunat',
+                message: 'Código ' + code + ' ' + description,
+              });
             }
           }
 
@@ -529,10 +541,16 @@ class CpeElectronicos extends CustomComponent {
                   },
                 );
               } else {
-                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+                alertKit.warning({
+                  title: 'Cpe Sunat',
+                  message: 'Código ' + code + ' ' + description,
+                });
               }
             } else {
-              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              alertKit.warning({
+                title: 'Cpe Sunat',
+                message: 'Código ' + code + ' ' + description,
+              });
             }
           }
 
@@ -569,10 +587,16 @@ class CpeElectronicos extends CustomComponent {
                   },
                 );
               } else {
-                alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+                alertKit.warning({
+                  title: 'Cpe Sunat',
+                  message: 'Código ' + code + ' ' + description,
+                });
               }
             } else {
-              alertWarning('Cpe Sunat', 'Código ' + code + ' ' + description);
+              alertKit.warning({
+                title: 'Cpe Sunat',
+                message: 'Código ' + code + ' ' + description,
+              });
             }
           }
 

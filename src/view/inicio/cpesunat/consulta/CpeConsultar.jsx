@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   guId,
   isEmpty,
 } from '../../../../helper/utils.helper';
@@ -24,6 +20,7 @@ import Column from '../../../../components/Column';
 import Title from '../../../../components/Title';
 import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -90,50 +87,80 @@ class CpeElectronicos extends React.Component {
 
   async onEventConsultarEstado() {
     if (isEmpty(this.state.ruc)) {
-      alertWarning('Empressa', 'Ingrese el número ruc de la empresa.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Ingrese el número ruc de la empresa.',
+      }, () => {
         this.refRuc.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.usuario)) {
-      alertWarning('Empressa', 'El campo usuario es requerido.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'El campo usuario es requerido.',
+      }, () => {
         this.refUsuario.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.clave)) {
-      alertWarning('Empressa', 'El campo contraseña es requerido.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'El campo contraseña es requerido.',
+      }, () => {
         this.refClave.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.tipo)) {
-      alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Seleccione tipo de documento.',
+      }, () => {
         this.refTipo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.serie)) {
-      alertWarning('Empressa', 'Ingrese una serie correcta.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Ingrese una serie correcta.',
+      }, () => {
         this.refSerie.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.correlativo)) {
-      alertWarning('Empressa', 'Ingrese un correlativo.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Ingrese un correlativo.',
+      }, () => {
         this.refCorrelativo.current.focus();
       });
       return;
     }
 
-    alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
+    alertKit.question({
+      title: 'Consultar Comprobante',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (value) => {
       if (value) {
-        alertInfo('Consulta', 'Precesanso...');
+
+        alertKit.loading({
+          message: 'Precesanso...',
+        });
 
         const response = await consultarCpeSunat(
           this.state.ruc,
@@ -149,29 +176,35 @@ class CpeElectronicos extends React.Component {
 
           if (result.state === true) {
             if (result.accepted === true) {
-              alertSuccess(
-                'Consultar Comprobante',
-                'Resultado: Código ' + result.code + ' ' + result.message,
-              );
-              this.setState({ codigo: result.code, respuesta: result.message });
+              alertKit.success({
+                title: 'Consultar Comprobante',
+                message: 'Resultado: Código ' + result.code + ' ' + result.message,
+              }, () => {
+                this.setState({ codigo: result.code, respuesta: result.message });
+              });
             } else {
-              alertWarning(
-                'Consultar Comprobante',
-                'Resultado: Código ' + result.code + ' ' + result.message,
-              );
-              this.setState({ codigo: result.code, respuesta: result.message });
+              alertKit.warning({
+                title: 'Consultar Comprobante',
+                message: 'Resultado: Código ' + result.code + ' ' + result.message,
+              }, () => {
+                this.setState({ codigo: result.code, respuesta: result.message });
+              });
             }
           } else {
-            alertWarning(
-              'Consultar Comprobante',
-              'Resultado: Código ' + result.code + ' ' + result.message,
-            );
-            this.setState({ codigo: result.code, respuesta: result.message });
+            alertKit.warning({
+              title: 'Consultar Comprobante',
+              message: 'Resultado: Código ' + result.code + ' ' + result.message,
+            }, () => {
+              this.setState({ codigo: result.code, respuesta: result.message });
+            });
           }
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Consultar Comprobante', response.getMessage());
+          alertKit.warning({
+            title: 'Consultar Comprobante',
+            message: response.getMessage(),
+          });
         }
       }
     });
@@ -179,50 +212,80 @@ class CpeElectronicos extends React.Component {
 
   async onEventConsultarCdr() {
     if (isEmpty(this.state.ruc)) {
-      alertWarning('Empressa', 'Ingrese el número ruc de la empresa.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Ingrese el número ruc de la empresa.',
+      }, () => {
         this.refRuc.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.usuario)) {
-      alertWarning('Empressa', 'El campo usuario es requerido.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'El campo usuario es requerido.',
+      }, () => {
         this.refUsuario.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.clave)) {
-      alertWarning('Empressa', 'El campo contraseña es requerido.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'El campo contraseña es requerido.',
+      }, () => {
         this.refClave.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.tipo)) {
-      alertWarning('Empressa', 'Seleccione tipo de documento.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Seleccione tipo de documento.',
+      }, () => {
         this.refTipo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.serie)) {
-      alertWarning('Empressa', 'Ingrese una serie correcta.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Ingrese una serie correcta.',
+      }, () => {
         this.refSerie.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.correlativo)) {
-      alertWarning('Empressa', 'Ingrese un correlativo.', () => {
+      alertKit.warning({
+        title: 'Consultar Comprobante',
+        message: 'Ingrese un correlativo.',
+      }, () => {
         this.refCorrelativo.current.focus();
       });
       return;
     }
 
-    alertDialog('Consulta', '¿Está seguro de continuar?', async (value) => {
+    alertKit.question({
+      title: 'Consultar Comprobante',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (value) => {
       if (value) {
-        alertInfo('Consulta', 'Precesanso...');
+
+        alertKit.loading({
+          message: 'Precesanso...',
+        });
 
         const response = await cdrCpeSunat(
           this.state.ruc,
@@ -238,12 +301,11 @@ class CpeElectronicos extends React.Component {
 
           if (result.state === true) {
             if (result.accepted === true) {
-              alertSuccess(
-                'Consultar Comprobante',
-                'Resultado: Código ' + result.code + ' ' + result.message,
-              );
-
-              const id = guId();
+              alertKit.success({
+                title: 'Consultar Comprobante',
+                message: 'Resultado: Código ' + result.code + ' ' + result.message,
+              }, () => {
+                           const id = guId();
               this.props.downloadFileAsync({
                 id,
                 url: '',
@@ -252,24 +314,32 @@ class CpeElectronicos extends React.Component {
                 content: result.xml,
               });
               this.setState({ codigo: result.code, respuesta: result.message });
+              });
+
+ 
             } else {
-              alertWarning(
-                'Consultar Comprobante',
-                'Resultado: Código ' + result.code + ' ' + result.message,
-              );
-              this.setState({ codigo: result.code, respuesta: result.message });
+              alertKit.warning({
+                title: 'Consultar Comprobante',
+                message: 'Resultado: Código ' + result.code + ' ' + result.message,
+              }, () => {
+                this.setState({ codigo: result.code, respuesta: result.message });
+              });
             }
           } else {
-            alertWarning(
-              'Consultar Comprobante',
-              'Resultado: Código ' + result.code + ' ' + result.message,
-            );
-            this.setState({ codigo: result.code, respuesta: result.message });
+            alertKit.warning({
+              title: 'Consultar Comprobante',
+              message: 'Resultado: Código ' + result.code + ' ' + result.message,
+            }, () => {
+              this.setState({ codigo: result.code, respuesta: result.message });
+            });
           }
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Consultar Comprobante', response.getMessage());
+          alertKit.warning({
+            title: 'Consultar Comprobante',
+            message: response.getMessage(),
+          });
         }
       }
     });
