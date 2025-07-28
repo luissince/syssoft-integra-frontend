@@ -470,7 +470,7 @@ class CpeElectronicos extends CustomComponent {
 
           alertKit.warning({
             title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            message: response.getMessage()
           });
         }
       }
@@ -527,7 +527,7 @@ class CpeElectronicos extends CustomComponent {
 
           alertKit.warning({
             title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            message: response.getMessage()
           });
         }
       }
@@ -584,7 +584,7 @@ class CpeElectronicos extends CustomComponent {
 
           alertKit.error({
             title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            message: response.getMessage()
           });
         }
       }
@@ -641,7 +641,7 @@ class CpeElectronicos extends CustomComponent {
 
           alertKit.error({
             title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            message: response.getMessage()
           });
         }
       }
