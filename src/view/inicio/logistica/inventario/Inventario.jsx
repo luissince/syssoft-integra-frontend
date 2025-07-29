@@ -99,6 +99,9 @@ class Inventario extends CustomComponent {
       idAlmacen: '',
       almacenes: [],
 
+      // Nuevo filtro de estado
+      estadoFiltro: '',
+
       // Atributos principales de la tabla
       loading: false,
       lista: [],
@@ -138,6 +141,14 @@ class Inventario extends CustomComponent {
     this.refModalStock = React.createRef();
 
     this.abortControllerTable = new AbortController();
+
+    // Opciones para el filtro de estado
+    this.estadosOptions = [
+      { value: '', label: 'Todos los estados' },
+      { value: 'critico', label: 'Stock Crítico' },
+      { value: 'exceso', label: 'Stock Excedente' },
+      { value: 'optimo', label: 'Stock Óptimo' },
+    ];
   }
 
   async componentDidMount() {
@@ -269,6 +280,7 @@ class Inventario extends CustomComponent {
       buscar: buscar,
       idSucursal: this.state.idSucursal,
       idAlmacen: this.state.idAlmacen,
+      estado: this.state.estadoFiltro, // Nuevo parámetro
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -345,6 +357,11 @@ class Inventario extends CustomComponent {
 
   handleSelectAlmacen = (event) => {
     this.setState({ idAlmacen: event.target.value }, () => this.loadingInit());
+  };
+
+  // Nuevo handler para el filtro de estado
+  handleSelectEstado = (event) => {
+    this.setState({ estadoFiltro: event.target.value }, () => this.loadingInit());
   };
 
   handleOpenPrinterCodBar = async (idProducto) => {
@@ -497,7 +514,7 @@ class Inventario extends CustomComponent {
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
           <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Almacén
@@ -517,6 +534,25 @@ class Inventario extends CustomComponent {
                   })}
                 </select>
               </div>
+              
+              {/* Nuevo filtro de estado */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Estado del Stock
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  value={this.state.estadoFiltro}
+                  onChange={this.handleSelectEstado}
+                >
+                  {this.estadosOptions.map((option, index) => (
+                    <option key={index} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Buscar producto
