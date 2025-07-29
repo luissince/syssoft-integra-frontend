@@ -271,12 +271,13 @@ jobs:
       - name: Borrar imágenes sin tag '${{ matrix.environment }}-latest' - Frontend
         run: |
           REPO="syssoftintegra/front-end"
-          TAG="${{ matrix.environment }}-latest"
+          ENV="${{ matrix.environment }}"
+          TAG="${ENV}-latest"
 
           echo "🔎 Buscando imágenes antiguas en $REPO (excepto $TAG)..."
 
           aws ecr list-images --repository-name "$REPO" \
-            --query "imageIds[?type(imageTag)==\`null\` || imageTag!=\`$TAG\`]" \
+            --query "imageIds[?imageTag==null || imageTag!='${TAG}']" \
             --output json > images.json
 
           COUNT=$(jq length images.json)
@@ -317,12 +318,13 @@ jobs:
       - name: Borrar imágenes sin tag '${{ matrix.environment }}-latest' - Frontend
         run: |
           REPO="syssoftintegra/front-end"
-          TAG="${{ matrix.environment }}-latest"
+          ENV="${{ matrix.environment }}"
+          TAG="${ENV}-latest"
 
           echo "🔎 Buscando imágenes antiguas en $REPO (excepto $TAG)..."
 
           aws ecr list-images --repository-name "$REPO" \
-            --query "imageIds[?type(imageTag)==\`null\` || imageTag!=\`$TAG\`]" \
+            --query "imageIds[?imageTag==null || imageTag!='${TAG}']" \
             --output json > images.json
 
           COUNT=$(jq length images.json)
