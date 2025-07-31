@@ -4,6 +4,7 @@ import {
   convertNullText,
   numberFormat,
   isEmpty,
+  getNumber,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../components/Container';
@@ -188,17 +189,15 @@ class Inventario extends CustomComponent {
 
       const almacenFilter = almacenes.find((item) => item.predefinido === 1);
 
-      this.setState(
-        {
-          almacenes,
-          idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
-          initialLoad: false,
-        },
-        async () => {
-          await this.loadingSummary();
-          await this.loadingInit();
-          this.updateReduxState();
-        },
+      this.setState({
+        almacenes,
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        initialLoad: false,
+      }, async () => {
+        await this.loadingSummary();
+        await this.loadingInit();
+        this.updateReduxState();
+      },
       );
     }
   }
@@ -214,7 +213,7 @@ class Inventario extends CustomComponent {
 
       return;
     }
-
+    
     this.setState({
       resumen: response.data,
     });
@@ -280,7 +279,7 @@ class Inventario extends CustomComponent {
       buscar: buscar,
       idSucursal: this.state.idSucursal,
       idAlmacen: this.state.idAlmacen,
-      estado: this.state.estadoFiltro, // Nuevo parámetro
+      estado: this.state.estadoFiltro,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -297,16 +296,13 @@ class Inventario extends CustomComponent {
         Math.ceil(parseFloat(total) / this.state.filasPorPagina),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -534,7 +530,7 @@ class Inventario extends CustomComponent {
                   })}
                 </select>
               </div>
-              
+
               {/* Nuevo filtro de estado */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -734,11 +730,11 @@ class Inventario extends CustomComponent {
                                       </div>
                                       {this.getLotesEnRiesgo(item.lotes) >
                                         0 && (
-                                        <div className="ml-2 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-                                          {this.getLotesEnRiesgo(item.lotes)} en
-                                          riesgo
-                                        </div>
-                                      )}
+                                          <div className="ml-2 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                                            {this.getLotesEnRiesgo(item.lotes)} en
+                                            riesgo
+                                          </div>
+                                        )}
                                     </div>
                                   )}
                                 </div>
@@ -757,7 +753,7 @@ class Inventario extends CustomComponent {
                             </td>
                             <td className="px-6 py-4">
                               <div>
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className={`text-sm font-medium ${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
                                   {item.cantidad} {item.medida}
                                 </div>
                                 <div className="text-xs text-gray-500">
@@ -766,13 +762,12 @@ class Inventario extends CustomComponent {
                                 </div>
                                 <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                                   <div
-                                    className={`h-2 rounded-full transition-all duration-300 ${
-                                      item.cantidad < item.cantidadMinima
-                                        ? 'bg-red-500'
-                                        : item.cantidad > item.cantidadMaxima
-                                          ? 'bg-blue-500'
-                                          : 'bg-green-500'
-                                    }`}
+                                    className={`h-2 rounded-full transition-all duration-300 ${item.cantidad < item.cantidadMinima
+                                      ? 'bg-red-500'
+                                      : item.cantidad > item.cantidadMaxima
+                                        ? 'bg-blue-500'
+                                        : 'bg-green-500'
+                                      }`}
                                     style={{ width: `${porcentaje}%` }}
                                   ></div>
                                 </div>
@@ -882,13 +877,12 @@ class Inventario extends CustomComponent {
                                                 Días restantes:{' '}
                                               </span>
                                               <span
-                                                className={`font-medium ${
-                                                  lote.diasRestantes <= 30
-                                                    ? 'text-red-600'
-                                                    : lote.diasRestantes <= 90
-                                                      ? 'text-orange-600'
-                                                      : 'text-gray-900'
-                                                }`}
+                                                className={`font-medium ${lote.diasRestantes <= 30
+                                                  ? 'text-red-600'
+                                                  : lote.diasRestantes <= 90
+                                                    ? 'text-orange-600'
+                                                    : 'text-gray-900'
+                                                  }`}
                                               >
                                                 {lote.diasRestantes} días
                                               </span>

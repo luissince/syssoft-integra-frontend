@@ -55,7 +55,6 @@ class ModalLote extends Component {
       message: 'Cargando datos...',
       producto: null,
       lotes: [],
-      cantidadTotal: 0,
     };
 
     this.initial = { ...this.state };
@@ -139,9 +138,9 @@ class ModalLote extends Component {
     if (lote.diasRestantes <= 0) {
       return {
         estado: 'Vencido',
-        clase: 'bg-dark text-white',
+        clase: 'bg-danger text-white',
         icono: 'bi bi-x-circle-fill',
-        colorBarra: 'bg-dark',
+        colorBarra: 'bg-danger text-white',
       };
     } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
       return {
@@ -206,7 +205,6 @@ class ModalLote extends Component {
 
     return lotes.map((lote, index) => {
       const estadoLote = this.determinarEstadoLote(lote);
-      const isDisabled = lote.cantidad <= 0 || lote.diasRestantes <= 0;
 
       const accountPorcent =
         (lote.cantidad / this.state.producto?.cantidad) * 100;
@@ -269,7 +267,6 @@ class ModalLote extends Component {
           </TableCell>
 
           <TableCell>
-            {!isDisabled && (
               <Input
                 role="float"
                 value={lote.cantidadAjustar}
@@ -278,7 +275,6 @@ class ModalLote extends Component {
                 }
                 placeholder="0"
               />
-            )}
           </TableCell>
 
           <TableCell className="text-center">{rounded(diferencia)}</TableCell>
@@ -293,7 +289,6 @@ class ModalLote extends Component {
       message,
       producto,
       lotes,
-      cantidadTotal,
       cantidadRequerida,
     } = this.state;
 
@@ -394,19 +389,6 @@ class ModalLote extends Component {
                       </CardBody>
                     </Card>
                   </Column>
-                  <Column className="col-md-3" formGroup={true}>
-                    <Card>
-                      <CardHeader className="d-flex align-items-center gap-2">
-                        <ShoppingCart size={20} className="text-success" />
-                        <CardTitle className="text-base m-0">
-                          Seleccionado
-                        </CardTitle>
-                      </CardHeader>
-                      <CardBody>
-                        <h4 className="text-success">{cantidadTotal}</h4>
-                      </CardBody>
-                    </Card>
-                  </Column>
                 </Row>
               </Column>
             </Row>
@@ -452,8 +434,7 @@ class ModalLote extends Component {
               className="btn-primary"
               disabled={idDisabled || loading}
             >
-              <i className="fa fa-plus"></i> Agregar al carrito ({cantidadTotal}
-              )
+              <i className="fa fa-plus"></i> Agregar al carrito
             </Button>
             <Button
               className="btn-secondary"

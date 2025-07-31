@@ -229,9 +229,9 @@ class ModalLote extends Component {
     if (lote.diasRestantes <= 0) {
       return {
         estado: 'Vencido',
-        clase: 'bg-dark text-white',
+        clase: 'bg-danger text-white',
         icono: 'bi bi-x-circle-fill',
-        colorBarra: 'bg-dark',
+        colorBarra: 'bg-danger',
       };
     } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
       return {
@@ -308,7 +308,6 @@ class ModalLote extends Component {
       const cantidadSeleccionada = loteSeleccionado
         ? loteSeleccionado.cantidadSeleccionada
         : 0;
-      const isDisabled = lote.cantidad <= 0 || lote.diasRestantes <= 0;
 
       return (
         <TableRow
@@ -369,7 +368,6 @@ class ModalLote extends Component {
           </TableCell>
 
           <TableCell>
-            {!isDisabled && (
               <div className="d-flex align-items-center gap-2">
                 <Input
                   role="float"
@@ -383,7 +381,6 @@ class ModalLote extends Component {
                   de {rounded(lote.cantidad)}
                 </span>
               </div>
-            )}
           </TableCell>
 
           <TableCell className="text-center">

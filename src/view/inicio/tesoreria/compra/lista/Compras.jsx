@@ -2,14 +2,10 @@ import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import Paginacion from '../../../../../components/Paginacion';
 import {
-  alertDialog,
   formatTime,
   formatNumberWithZeros,
   isEmpty,
   numberFormat,
-  alertSuccess,
-  alertWarning,
-  alertInfo,
 } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
@@ -40,6 +36,7 @@ import {
   setListaCompraPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -216,9 +213,17 @@ class Compras extends CustomComponent {
   };
 
   handleAnular = (id) => {
-    alertDialog(
-      'Compra',
-      '¿Estás seguro de anular la compra.?',
+    alertKit.question(
+      {
+        title: 'Compra',
+        message: '¿Está seguro de anular la compra?',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
+      },
       async (accept) => {
         if (accept) {
           const params = {
@@ -226,18 +231,28 @@ class Compras extends CustomComponent {
             idUsuario: this.state.idUsuario,
           };
 
-          alertInfo('Compra', 'Procesando petición...');
+          alertKit.loading({
+            message: 'Procesando petición...',
+          });
 
           const response = await cancelCompra(params);
 
           if (response instanceof SuccessReponse) {
-            alertSuccess('Compra', response.data, async () => {
+            alertKit.success({
+              title: 'Compra',
+              message: response.data,
+            }, async () => {
               await this.loadingInit();
             });
           }
 
           if (response instanceof ErrorResponse) {
-            alertWarning('Compra', response.getMessage());
+            if (response.getType() === CANCELED) return;
+
+            alertKit.warning({
+              title: 'Compra',
+              message: response.getMessage(),
+            })
           }
         }
       },

@@ -116,6 +116,8 @@ const TableCell = (props) => {
   return <td {...rest}>{children}</td>;
 };
 
+TableCell.displayName = 'TableCell';
+
 TableCell.propTypes = {
   children: PropTypes.node,
 };

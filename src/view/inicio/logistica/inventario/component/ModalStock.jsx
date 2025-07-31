@@ -36,6 +36,7 @@ class CustomModalStock extends Component {
 
       nombre: '',
       imagen: null,
+      idInventario: '',
       stockMinimo: '',
       stockMaximo: '',
     };
@@ -87,6 +88,7 @@ class CustomModalStock extends Component {
           imagen: producto.imagen,
           stockMinimo: response.data.cantidadMinima,
           stockMaximo: response.data.cantidadMaxima,
+          idInventario: producto.idInventario,
           loading: false,
         },
         () => {
@@ -177,7 +179,7 @@ class CustomModalStock extends Component {
           const data = {
             stockMinimo: this.state.stockMinimo,
             stockMaximo: this.state.stockMaximo,
-            idInventario: this.idInventario,
+            idInventario: this.state.idInventario,
           };
 
           await this.refModal.current.handleOnClose();
@@ -280,6 +282,7 @@ class CustomModalStock extends Component {
                   </label>
                   <input
                     type="text"
+                    role="float"
                     placeholder="Ingrese..."
                     ref={this.refStockMinimo}
                     value={stockMinimo}
@@ -294,6 +297,7 @@ class CustomModalStock extends Component {
                   </label>
                   <input
                     type="text"
+                    role="float"
                     placeholder="Ingrese..."
                     ref={this.refStockMaximo}
                     value={stockMaximo}

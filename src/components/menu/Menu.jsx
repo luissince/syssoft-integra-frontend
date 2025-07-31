@@ -226,7 +226,7 @@ const Menu = ({ refSideBar, url, project, userToken, rutaLogo }) => {
               </span>
             </li>
             <li className="text-center mt-3">
-              <span>VERSIÓN {import.meta.env.VITE_APP_VERSION}</span>
+              <span>VERSIÓN {__APP_VERSION__}</span>
             </li>
           </ul>
         </div>
