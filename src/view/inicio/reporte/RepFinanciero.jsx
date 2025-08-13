@@ -40,7 +40,6 @@ import {
 } from '../../../components/Card';
 import { Link } from 'react-router-dom';
 import {
-  alertWarning,
   currentDate,
   formatNumberWithZeros,
   formatTime,
@@ -70,6 +69,7 @@ import {
   R_FINANCIERO,
   REPORTES,
 } from '../../../model/types/menu';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -177,13 +177,12 @@ class RepFinanciero extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning(
-        'Reporte Financiero',
-        sucursalResponse.getMessage(),
-        async () => {
-          await this.loadingInit();
-        },
-      );
+      alertKit.warning({
+        title: 'Reporte Financiero',
+        message: sucursalResponse.getMessage(),
+      }, async () => {
+        await this.loadingInit();
+      });
       return;
     }
 
@@ -192,7 +191,10 @@ class RepFinanciero extends CustomComponent {
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
 
-      alertWarning('Reporte Venta', usuarioResponse.getMessage(), async () => {
+      alertKit.warning({
+        title: 'Reporte Venta',
+        message: usuarioResponse.getMessage(),
+      }, async () => {
         await this.loadingInit();
       });
       return;
@@ -232,7 +234,10 @@ class RepFinanciero extends CustomComponent {
     const dashboard = await dashboardTransaccion(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Financiero', dashboard.getMessage());
+      alertKit.warning({
+        title: 'Reporte Financiero',
+        message: dashboard.getMessage(),
+      });
       return;
     }
 
@@ -247,7 +252,7 @@ class RepFinanciero extends CustomComponent {
       totalEgreso: dashboard.data.egreso,
       bancos: dashboard.data.bancos,
       ingresos: dashboard.data.ingresos,
-      egreso: dashboard.data.egreso,
+      egresos: dashboard.data.egresos,
       lista: [...this.state.lista, ...dashboard.data.lista],
       totalPaginacion: totalPaginacion,
       loading: false,

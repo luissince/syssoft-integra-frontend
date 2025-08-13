@@ -70,25 +70,25 @@ const Menu = (props) => {
             <div className="app-notification__content">
               {props.notificaciones.length !== 0
                 ? props.notificaciones.map((item, index) => (
-                    <li key={index}>
-                      <div className="app-notification__item">
-                        <span className="app-notification__icon">
-                          <span className="fa-stack fa-lg">
-                            <i className="fa fa-circle fa-stack-2x text-primary"></i>
-                            <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
-                          </span>
+                  <li key={index}>
+                    <div className="app-notification__item">
+                      <span className="app-notification__icon">
+                        <span className="fa-stack fa-lg">
+                          <i className="fa fa-circle fa-stack-2x text-primary"></i>
+                          <i className="fa fa-warning fa-stack-1x fa-inverse"></i>
                         </span>
-                        <div>
-                          <p className="app-notification__message">
-                            {item.cantidad} {item.nombre}
-                          </p>
-                          <p className="app-notification__meta">
-                            {item.estado}
-                          </p>
-                        </div>
+                      </span>
+                      <div>
+                        <p className="app-notification__message">
+                          {item.cantidad} {item.nombre}
+                        </p>
+                        <p className="app-notification__meta">
+                          {item.estado}
+                        </p>
                       </div>
-                    </li>
-                  ))
+                    </div>
+                  </li>
+                ))
                 : null}
             </div>
             {props.notificaciones.length == 0 ? (
@@ -118,16 +118,13 @@ const Menu = (props) => {
             <img src={images.usuario} className="user-image" alt="Usuario" />
           </a>
           <ul className="dropdown-menu settings-menu dropdown-menu-right">
-            <li className="user-header">
+            <li className="user-header flex-column align-items-center justify-center">
               <img src={images.usuario} className="img-circle" alt="Usuario" />
               <p>
                 <span>
-                  {props.token.userToken.nombres +
-                    ' ' +
-                    props.token.userToken.apellidos}
+                  {props.token.userToken.nombres + ' ' + props.token.userToken.apellidos}
                 </span>
-                <small>
-                  {' '}
+                <small>{' '}
                   <i>{props.token.userToken.rol}</i>{' '}
                 </small>
               </p>

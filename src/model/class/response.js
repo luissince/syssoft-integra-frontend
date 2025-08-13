@@ -1,5 +1,5 @@
 class SuccessReponse {
-  data = '';
+  data = '' || {} || [];
 
   headers = {};
 

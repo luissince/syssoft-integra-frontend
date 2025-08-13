@@ -1,4 +1,4 @@
-const Menu = () => {
+const Footer = () => {
   return (
     <>
       <footer>
@@ -17,4 +17,4 @@ const Menu = () => {
     </>
   );
 };
-export default Menu;
+export default Footer;

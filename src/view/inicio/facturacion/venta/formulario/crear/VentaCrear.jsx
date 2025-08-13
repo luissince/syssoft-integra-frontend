@@ -583,13 +583,7 @@ class VentaCrear extends CustomComponent {
 
         return [...detalles, newItem];
       } else {
-        // Lógica original para productos sin lote específico
-        for (const inventario of existingItem.inventarios) {
-          if (inventario.idInventario === producto.idInventario) {
-            inventario.cantidad += 1;
-            break;
-          }
-        }
+        existingItem.precio = Number(precio);
       }
     }
 
@@ -616,31 +610,32 @@ class VentaCrear extends CustomComponent {
         newItem.cantidad = 1;
 
         return [...detalles, newItem];
-      } else {
-        // Para productos a granel con lotes múltiples
-        if (lote) {
-          const existingLoteIndex = existingItem.inventarios.findIndex(
-            (inv) => inv.lote && inv.lote.idLote === lote.idLote,
-          );
-
-          if (existingLoteIndex >= 0) {
-            existingItem.inventarios[existingLoteIndex].cantidad =
-              Number(cantidad);
-          } else {
-            existingItem.inventarios.push(
-              createInventory(Number(cantidad), lote),
-            );
-          }
-        } else {
-          // Lógica original
-          for (const inventario of existingItem.inventarios) {
-            if (inventario.idInventario === producto.idInventario) {
-              inventario.cantidad = Number(cantidad);
-              break;
-            }
-          }
-        }
       }
+      //  else {
+      //   // Para productos a granel con lotes múltiples
+      //   if (lote) {
+      //     const existingLoteIndex = existingItem.inventarios.findIndex(
+      //       (inv) => inv.lote && inv.lote.idLote === lote.idLote,
+      //     );
+
+      //     if (existingLoteIndex >= 0) {
+      //       existingItem.inventarios[existingLoteIndex].cantidad =
+      //         Number(cantidad);
+      //     } else {
+      //       existingItem.inventarios.push(
+      //         createInventory(Number(cantidad), lote),
+      //       );
+      //     }
+      //   } else {
+      //     // Lógica original
+      //     for (const inventario of existingItem.inventarios) {
+      //       if (inventario.idInventario === producto.idInventario) {
+      //         inventario.cantidad = Number(cantidad);
+      //         break;
+      //       }
+      //     }
+      //   }
+      // }
     }
 
     return detalles;
@@ -652,9 +647,9 @@ class VentaCrear extends CustomComponent {
         item.idTipoTratamientoProducto === SERVICIO
           ? item.cantidad
           : item.inventarios.reduce(
-              (acc, current) => acc + current.cantidad,
-              0,
-            );
+            (acc, current) => acc + current.cantidad,
+            0,
+          );
 
       const totalProductPrice = item.precio * cantidad;
       return accumulator + totalProductPrice;
@@ -1232,16 +1227,13 @@ class VentaCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        alertKit.warning(
-          {
-            title: 'Venta',
-            message:
-              'La cotización no tiene productos, ya que fue utilizado para la venta.',
-          },
-          () => {
-            this.clearView();
-          },
-        );
+        alertKit.warning({
+          title: 'Venta',
+          message:
+            'La cotización no tiene productos, ya que fue utilizado para la venta.',
+        }, () => {
+          this.clearView();
+        });
         return;
       }
 
@@ -1267,12 +1259,9 @@ class VentaCrear extends CustomComponent {
         return [];
       });
 
-      this.setState(
-        { cotizacion, detalleVenta: detalles, loading: false },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({ cotizacion, detalleVenta: detalles, loading: false }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -1323,16 +1312,13 @@ class VentaCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        alertKit.warning(
-          {
-            title: 'Venta',
-            message:
-              'El pedido no tiene productos, ya que fue utilizado para la venta.',
-          },
-          () => {
-            this.clearView();
-          },
-        );
+        alertKit.warning({
+          title: 'Venta',
+          message:
+            'El pedido no tiene productos, ya que fue utilizado para la venta.',
+        }, () => {
+          this.clearView();
+        });
         return;
       }
 
@@ -1517,19 +1503,16 @@ class VentaCrear extends CustomComponent {
 
   handleGetApiReniec = async () => {
     if (this.state.numeroDocumento.length !== 8) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message:
-            'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message:
+          'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1554,35 +1537,29 @@ class VentaCrear extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: response.getMessage(),
-        },
-        () => {
-          this.setState({
-            loadingCliente: false,
-          });
-        },
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loadingCliente: false,
+        });
+      });
     }
   };
 
   handleGetApiSunat = async () => {
     if (this.state.numeroDocumento.length !== 11) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message:
-            'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
-        },
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message:
+          'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        }
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1603,17 +1580,14 @@ class VentaCrear extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: response.getMessage(),
-        },
-        () => {
-          this.setState({
-            loadingCliente: false,
-          });
-        },
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loadingCliente: false,
+        });
+      });
     }
   };
 
@@ -1623,34 +1597,28 @@ class VentaCrear extends CustomComponent {
     );
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione el tipo de documento.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el tipo de documento.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refIdTipoDocumento.current.focus();
-        },
-      );
+      }, () => {
+        this.refIdTipoDocumento.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.numeroDocumento)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione el tipo de documento.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el tipo de documento.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1659,34 +1627,28 @@ class VentaCrear extends CustomComponent {
       tipoDocumento.obligado === 1 &&
       tipoDocumento.longitud !== this.state.numeroDocumento.length
     ) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      },);
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione el tipo de documento.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el tipo de documento.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refInformacion.current.focus();
-        },
-      );
+      }, () => {
+        this.refInformacion.current.focus();
+      });
       return;
     }
 
@@ -1865,35 +1827,29 @@ class VentaCrear extends CustomComponent {
     const productoActual = this.producto;
 
     if (!isNumeric(precioProducto) || Number(precioProducto) <= 0) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message:
-            'El precio del producto tiene un valor no admitido o es menor o igual a 0.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message:
+          'El precio del producto tiene un valor no admitido o es menor o igual a 0.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refPrecioProducto.current.focus();
-        },
-      );
+      }, () => {
+        this.refPrecioProducto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(descripcionProducto)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'La descripción del producto no puede ser vacía.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'La descripción del producto no puede ser vacía.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refDescripcionProducto.current.focus();
-        },
-      );
+      }, () => {
+        this.refDescripcionProducto.current.focus();
+      });
       return;
     }
 
@@ -1917,10 +1873,10 @@ class VentaCrear extends CustomComponent {
     const newDetalles = detalles.map((item) =>
       item.idProducto === productoActual.idProducto
         ? {
-            ...item,
-            nombreProducto: descripcionProducto,
-            precio: Number(precioProducto),
-          }
+          ...item,
+          nombreProducto: descripcionProducto,
+          precio: Number(precioProducto),
+        }
         : item,
     );
 
@@ -2011,18 +1967,15 @@ class VentaCrear extends CustomComponent {
     }
 
     if (isEmpty(this.state.cliente) && this.state.nuevoCliente === null) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Selecciona un cliente.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Selecciona un cliente.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refValueCliente.current.focus();
-        },
-      );
+      }, () => {
+        this.refValueCliente.current.focus();
+      });
       return;
     }
 
@@ -2030,23 +1983,21 @@ class VentaCrear extends CustomComponent {
   };
 
   handleClearSale = async () => {
-    alertKit.question(
-      {
-        title: 'Venta',
-        message:
-          'Los productos serán eliminados de la venta actual ¿Desea continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    alertKit.question({
+      title: 'Venta',
+      message:
+        'Los productos serán eliminados de la venta actual ¿Desea continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
+    }, async (accept) => {
+      if (accept) {
+        this.clearView();
+      }
+    },
     );
   };
 
@@ -2061,7 +2012,7 @@ class VentaCrear extends CustomComponent {
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       nuevoCliente,
@@ -2175,7 +2126,7 @@ class VentaCrear extends CustomComponent {
     frecuenciaPago,
     importeTotal,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       nuevoCliente,

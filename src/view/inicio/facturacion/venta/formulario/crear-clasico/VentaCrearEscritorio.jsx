@@ -567,7 +567,7 @@ class VentaCrearEscritorio extends CustomComponent {
     }
   }
 
-  async reloadProductoPreferidos(callback = function () {}) {
+  async reloadProductoPreferidos(callback = function () { }) {
     const productos = await this.fetchProductoPreferidos({
       idSucursal: this.state.idSucursal,
       idAlmacen: this.state.idAlmacen,
@@ -584,9 +584,9 @@ class VentaCrearEscritorio extends CustomComponent {
           item.idTipoTratamientoProducto === SERVICIO
             ? item.cantidad
             : item.inventarios.reduce(
-                (acc, current) => acc + current.cantidad,
-                0,
-              );
+              (acc, current) => acc + current.cantidad,
+              0,
+            );
 
         const totalProductPrice = item.precio * cantidad;
         return accumulator + totalProductPrice;
@@ -594,7 +594,7 @@ class VentaCrearEscritorio extends CustomComponent {
     }));
   };
 
-  addItemDetalle = (producto, precio, cantidad, index = -1) => {
+  addItemDetalle = (producto, precio, cantidad, index = -1, lotes = []) => {
     const { almacenes, idAlmacen, idImpuesto, detalleVenta } = this.state;
 
     // Clonar el estado actual de detalleVenta para evitar mutaciones directas
@@ -609,11 +609,12 @@ class VentaCrearEscritorio extends CustomComponent {
     );
 
     // Función auxiliar para crear un nuevo inventario
-    const createInventory = (can) => ({
+    const createInventory = (can, lotes) => ({
       idAlmacen: almacen.idAlmacen,
       almacen: almacen.nombre,
       idInventario: producto.idInventario,
       cantidad: can,
+      lotes: lotes,
     });
 
     // Función auxiliar para crear un nuevo item de detalle
@@ -633,16 +634,25 @@ class VentaCrearEscritorio extends CustomComponent {
     // Lógica principal basada en el tipo de tratamiento del producto
     if (producto.idTipoTratamientoProducto === UNIDADES) {
       if (!existingItem) {
+        const newAmount = !isEmpty(lotes)
+          ? cantidad
+          : cantidad
+            ? Number(producto.cantidad)
+            : 1;
+
         const newItem = createNewItem(Number(producto.precio));
-        newItem.inventarios = [
-          createInventory(cantidad ? Number(producto.cantidad) : 1),
-        ];
+        newItem.inventarios = [createInventory(newAmount, lotes)];
 
         return [...detalles, newItem];
       } else {
         for (const inventario of existingItem.inventarios) {
           if (inventario.idInventario === producto.idInventario) {
-            inventario.cantidad += 1;
+            if (!isEmpty(lotes)) {
+              inventario.cantidad = Number(cantidad);
+              inventario.lotes = lotes;
+            } else {
+              inventario.cantidad += 1;
+            }
           }
         }
       }
@@ -696,9 +706,9 @@ class VentaCrearEscritorio extends CustomComponent {
         item.idTipoTratamientoProducto === SERVICIO
           ? item.cantidad
           : item.inventarios.reduce(
-              (acc, current) => acc + current.cantidad,
-              0,
-            );
+            (acc, current) => acc + current.cantidad,
+            0,
+          );
 
       const precio = item.precio;
       const filter = impuestos.filter(
@@ -721,9 +731,9 @@ class VentaCrearEscritorio extends CustomComponent {
             item.idTipoTratamientoProducto === SERVICIO
               ? item.cantidad
               : item.inventarios.reduce(
-                  (acc, current) => acc + current.cantidad,
-                  0,
-                );
+                (acc, current) => acc + current.cantidad,
+                0,
+              );
 
           const total = cantidad * item.precio;
           const subTotal = calculateTaxBruto(impuesto.porcentaje, total);
@@ -767,9 +777,9 @@ class VentaCrearEscritorio extends CustomComponent {
         item.idTipoTratamientoProducto === SERVICIO
           ? item.cantidad
           : item.inventarios.reduce(
-              (acc, current) => acc + current.cantidad,
-              0,
-            );
+            (acc, current) => acc + current.cantidad,
+            0,
+          );
 
       const totalProductPrice = item.precio * cantidad;
       return accumulator + totalProductPrice;
@@ -1061,7 +1071,7 @@ class VentaCrearEscritorio extends CustomComponent {
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       nuevoCliente,
@@ -1158,7 +1168,7 @@ class VentaCrearEscritorio extends CustomComponent {
     frecuenciaPago,
     importeTotal,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       nuevoCliente,
@@ -1770,7 +1780,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.alert.warning(
         'Venta',
         'Agregar algún producto a la lista.',
-        () => {},
+        () => { },
       );
       return;
     }
@@ -2119,7 +2129,7 @@ class VentaCrearEscritorio extends CustomComponent {
   handleSelectIdIdAlmacen = async (
     event,
     active = false,
-    callback = function () {},
+    callback = function () { },
   ) => {
     this.setState({ idAlmacen: event.target.value }, () => {
       if (active) {
@@ -2274,9 +2284,9 @@ class VentaCrearEscritorio extends CustomComponent {
         producto.idTipoTratamientoProducto === SERVICIO
           ? producto.cantidad
           : producto.inventarios.reduce(
-              (acc, current) => acc + current.cantidad,
-              0,
-            );
+            (acc, current) => acc + current.cantidad,
+            0,
+          );
 
       return (
         <TableRow key={key} className="bg-white">
@@ -2307,11 +2317,10 @@ class VentaCrearEscritorio extends CustomComponent {
               producto.inventarios.map((item, index) => (
                 <div
                   key={index}
-                  className={`${
-                    producto.inventarios.length - 1 === index
-                      ? ''
-                      : ' border-bottom  mb-2'
-                  } `}
+                  className={`${producto.inventarios.length - 1 === index
+                    ? ''
+                    : ' border-bottom  mb-2'
+                    } `}
                 >
                   <span>{item.almacen}</span>
                   <p className="my-1">{rounded(item.cantidad)}</p>

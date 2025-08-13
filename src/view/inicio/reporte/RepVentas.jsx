@@ -50,6 +50,7 @@ import {
 import {
   alertWarning,
   currentDate,
+  formatDecimal,
   formatNumberWithZeros,
   formatTime,
   getPathNavigation,
@@ -232,7 +233,10 @@ class RepVentas extends CustomComponent {
       totalAnulado: dashboard.data.anulado,
       totalCobrado: dashboard.data.cobrado,
       listaPorMeses: dashboard.data.listaPorMeses,
-      listaPorComprobante: dashboard.data.listaPorComprobante,
+      listaPorComprobante: !isEmpty(dashboard.data.listaPorComprobante) ? dashboard.data.listaPorComprobante.map((item)=>({
+        ...item,
+        total: Number(formatDecimal(item.total))
+      })) : [],
       lista: [...this.state.lista, ...dashboard.data.lista],
       totalPaginacion: totalPaginacion,
       loading: false,

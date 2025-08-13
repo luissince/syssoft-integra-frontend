@@ -151,7 +151,7 @@ export function rounded(amount, decimalCount = 2, type = 'string') {
  * @param {string} [currency="PEN"] - El código de moneda (por ejemplo, "PEN" para soles peruanos).
  * @returns {string} La cantidad formateada como dinero en la moneda especificada.
  */
-export const numberFormat = (value, currency) => {
+export const numberFormat = (value, currency = 'PEN') => {
   // Definir formatos para diferentes monedas
   const formats = [
     {

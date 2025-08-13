@@ -312,9 +312,7 @@ class ModalLote extends Component {
       return (
         <TableRow
           key={index}
-          className={`${cantidadSeleccionada > 0 ? 'table-primary' : ''} ${
-            isDisabled ? 'table-secondary' : ''
-          }`}
+          className={`${cantidadSeleccionada > 0 ? 'table-primary' : ''}`}
         >
           <TableCell>
             <div>

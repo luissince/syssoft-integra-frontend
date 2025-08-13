@@ -14,16 +14,16 @@ import {
   setMonedaNacional,
 } from '../../redux/predeterminadoSlice.js';
 
-import Bienvenido from './bienvenido/Bienvenido.jsx';
-import NotFoundMain from '../../components/errors/NotFoundMain.jsx';
+import Bienvenido from './bienvenido/Bienvenido';
+import NotFoundMain from '../../components/errors/NotFoundMain';
 
-import Menu from '../../components/menu/Menu.jsx';
-import Head from '../../components/head/Head.jsx';
+import Menu from '../../components/menu/Menu';
+import Head from '../../components/head/Head';
 
-import Notifications from './notificacion/Notifications.jsx';
+import Notifications from './notificacion/Notifications';
 // import Dashboard from './dashboard/Dashboard.jsx';
 
-const Dashboard = React.lazy(() => import('./dashboard/Dashboard.jsx'));
+const Dashboard = React.lazy(() => import('./dashboard/Dashboard'));
 
 import Seguridad, {
   Perfiles,
@@ -183,6 +183,7 @@ import { CANCELED } from '../../model/types/types.js';
 import FileDownloader from '../../components/FileDownloader.jsx';
 import { images } from '../../helper/index.jsx';
 import { SpinnerView } from '../../components/Spinner.jsx';
+import { DashboardSkeleton } from '@/components/ui/skeleton';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -488,7 +489,7 @@ class Inicio extends React.Component {
           <Route
             path={`${path}/dashboard`}
             render={(props) => (
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<DashboardSkeleton />}>
                 <Dashboard {...props} />
               </Suspense>
             )}

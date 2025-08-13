@@ -1,12 +1,3 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-
 export function RecentActivity() {
   const activities = [
     {
@@ -41,22 +32,22 @@ export function RecentActivity() {
     },
   ];
 
-  const getBadgeVariant = (type: string) => {
+  const getBadgeClasses = (type) => {
     switch (type) {
       case 'venta':
-        return 'default';
+        return 'bg-blue-100 text-blue-800';
       case 'compra':
-        return 'secondary';
+        return 'bg-gray-100 text-gray-800';
       case 'cotizacion':
-        return 'outline';
+        return 'bg-transparent text-gray-800 border border-gray-500';
       case 'traslado':
-        return 'destructive';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'default';
+        return 'bg-blue-100 text-blue-800';
     }
   };
 
-  const getBadgeLabel = (type: string) => {
+  const getBadgeLabel = (type) => {
     switch (type) {
       case 'venta':
         return 'Venta';
@@ -72,33 +63,37 @@ export function RecentActivity() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Actividad Reciente</CardTitle>
-        <CardDescription>
-          Las últimas transacciones realizadas en el sistema
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Actividad Reciente</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Las últimas transacciones realizadas en el sistema
+            </p>
+          </div>
+        </div>
+        <div className="divide-y divide-gray-200">
           {activities.map((activity, index) => (
-            <div key={index} className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge variant={getBadgeVariant(activity.type)}>
-                    {getBadgeLabel(activity.type)}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {activity.date}
-                  </span>
+            <div key={index} className="py-4">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getBadgeClasses(activity.type)}`}>
+                      {getBadgeLabel(activity.type)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {activity.date}
+                    </span>
+                  </div>
+                  <p className="text-base font-medium text-gray-900">{activity.description}</p>
+                  <p className="text-sm text-gray-600">{activity.amount}</p>
                 </div>
-                <p className="text-sm">{activity.description}</p>
               </div>
-              <div className="font-medium">{activity.amount}</div>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
