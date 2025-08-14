@@ -45,6 +45,14 @@ interface DashboardData {
     sucursal: string;
     saldo: number;
   }[];
+  salesForYear: {
+    mes: number,
+    nombreMes: string,
+    totalActual: number
+    totalAnterior: number
+    actual: number
+    anterior: number
+  }[]
 }
 
 interface StatCardProps {
@@ -69,22 +77,6 @@ interface Props {
 
 const currentYear = new Date().getFullYear();
 const previousYear = currentYear - 1;
-
-const data = [
-  { mes: 'Ene', [currentYear]: 1200, [previousYear]: 1000 },
-  { mes: 'Feb', [currentYear]: 900, [previousYear]: 1100 },
-  { mes: 'Mar', [currentYear]: 1300, [previousYear]: 950 },
-  { mes: 'Abr', [currentYear]: 1500, [previousYear]: 1200 },
-  { mes: 'May', [currentYear]: 1100, [previousYear]: 1150 },
-  { mes: 'Jun', [currentYear]: 1600, [previousYear]: 1300 },
-  { mes: 'Jul', [currentYear]: 1800, [previousYear]: 1700 },
-  { mes: 'Ago', [currentYear]: 2000, [previousYear]: 1900 },
-  { mes: 'Sep', [currentYear]: 0, [previousYear]: 1800 },
-  { mes: 'Oct', [currentYear]: 0, [previousYear]: 1700 },
-  { mes: 'Nov', [currentYear]: 0, [previousYear]: 1600 },
-  { mes: 'Dic', [currentYear]: 0, [previousYear]: 1500 },
-];
-
 
 const Dashboard = ({ token, moneda }: Props) => {
   const [dateRange, setDateRange] = useState({
@@ -137,34 +129,8 @@ const Dashboard = ({ token, moneda }: Props) => {
       return;
     }
 
-    console.log(dashboardResponde.data);
     setDashboardData(dashboardResponde.data as DashboardData);
     setLoading(false);
-    // Simulate API call delay
-    // setTimeout(() => {
-    //   const mockData: DashboardData = {
-    //     totalSales: Math.floor(Math.random() * 150000) + 50000,
-    //     totalPurchases: Math.floor(Math.random() * 80000) + 20000,
-    //     creditSalesToCollect: Math.floor(Math.random() * 30000) + 5000,
-    //     creditPurchasesToPay: Math.floor(Math.random() * 25000) + 3000,
-    //     issuedDocuments: Math.floor(Math.random() * 120) + 40,
-    //     documentsToDeclare: Math.floor(Math.random() * 15) + 2,
-    //     createdQuotes: Math.floor(Math.random() * 80) + 20,
-    //     quotesLinkedToSales: Math.floor(Math.random() * 40) + 10,
-    //     branchPerformance: [
-    //       { id: 1, sucursal: 'Sucursal Central', total: 85000, rendimiento: 42.5 },
-    //       { id: 2, sucursal: 'Sucursal Norte', total: 62000, rendimiento: 31.0 },
-    //       { id: 3, sucursal: 'Sucursal Sur', total: 53000, rendimiento: 26.5 }
-    //     ],
-    //     bankBalances: [
-    //       { idBanco: 'B001', nombre: 'Banco BCP', sucursal: 'Sucursal Central', saldo: 45200 },
-    //       { idBanco: 'B002', nombre: 'Banco Interbank', sucursal: 'Sucursal Central', saldo: 32800 },
-    //       { idBanco: 'B003', nombre: 'Banco Scotiabank', sucursal: 'Sucursal Central', saldo: 28500 }
-    //     ]
-    //   };
-    //   setDashboardData(mockData);
-    //   setLoading(false);
-    // }, 1000);
   };
 
   useEffect(() => {
@@ -252,6 +218,40 @@ const Dashboard = ({ token, moneda }: Props) => {
       </div>
     </div>
   );
+
+  const SalesChart = () => {
+    const data = dashboardData.salesForYear.map((sale) => {
+      return {
+        mes: sale.nombreMes,
+        [currentYear]: sale.totalActual,
+        [previousYear]: sale.totalAnterior,
+      }
+    });
+
+    return (
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="mes" />
+          <YAxis />
+          <Tooltip />
+          <Legend formatter={(value) => `Año ${value}`} />
+          <Bar
+            dataKey={previousYear.toString()}
+            name={previousYear.toString()}
+            fill="#94a3b8" // gris
+            radius={[6, 6, 0, 0]}
+          />
+          <Bar
+            dataKey={currentYear.toString()}
+            name={currentYear.toString()}
+            fill="#3b82f6" // azul
+            radius={[6, 6, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  };
 
   if (loading) {
     return (
@@ -379,34 +379,12 @@ const Dashboard = ({ token, moneda }: Props) => {
         <BankBalanceCard />
       </div>
 
-          <div className="w-full max-w-6xl mx-auto p-4 bg-white rounded-2xl shadow-md">
-      <h2 className="text-2xl font-semibold mb-4 text-center">
-        Comparación de Ventas Mensuales: {previousYear} vs {currentYear}
-      </h2>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="mes" />
-          <YAxis />
-          <Tooltip />
-          <Legend
-            formatter={(value) => `Año ${value}`}
-          />
-          <Bar
-            dataKey={previousYear}
-            name={`Año ${previousYear}`}
-            fill="#94a3b8" // gris
-            radius={[6, 6, 0, 0]}
-          />
-          <Bar
-            dataKey={currentYear}
-            name={`Año ${currentYear}`}
-            fill="#3b82f6" // azul
-            radius={[6, 6, 0, 0]}
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+      <div className="w-full max-w-6xl mx-auto p-4 bg-white rounded-2xl shadow-md">
+        <h2 className="text-2xl font-semibold mb-4 text-center">
+          Comparación de Ventas Mensuales: {previousYear} vs {currentYear}
+        </h2>
+        <SalesChart />
+      </div>
     </ContainerWrapper>
   );
 };
