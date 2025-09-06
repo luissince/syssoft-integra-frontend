@@ -153,7 +153,6 @@ class CatalogoDetalle extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handlePrintA4 = async () => {
-
     alertKit.loading({
       message: 'Procesando información...',
     });
@@ -173,7 +172,15 @@ class CatalogoDetalle extends CustomComponent {
     }
 
     response instanceof SuccessReponse;
-    const { url } = response.data;
+    const { noPdf, url, message } = response.data;
+
+    if (noPdf) {
+      alertKit.information({
+        title: 'Catálogo',
+        message: message,
+      });
+      return;
+    }
 
     const resposeS3 = await axios.get(url, { responseType: "blob" });
     const blob = new Blob([resposeS3.data], { type: "application/pdf" });

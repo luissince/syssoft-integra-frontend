@@ -4,7 +4,9 @@ import CustomComponent from '../../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
+  currentDate,
   formatDecimal,
+  getRanurasDeTiempo,
   isEmpty,
   isText,
   numberFormat,
@@ -17,11 +19,12 @@ import {
   comboComprobante,
   comboImpuesto,
   comboMoneda,
+  comboTipoEntrega,
   documentsPdfInvoicesPedido,
   filtrarAlmacenProducto,
   filtrarPersona,
   filtrarProducto,
-  idPedido,
+  getIdPedido,
   updatePedido,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
@@ -37,7 +40,6 @@ import {
 import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
 import {
   ModalImpresion,
   ModalPersona,
@@ -46,7 +48,10 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
+import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
+import Input from '@/components/Input';
+import { alertKit } from 'alert-kit';
+import { DELIVERY_PROGRAMADO, RECOGER_PROGRAMADO } from '@/model/types/tipo-entrega';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -67,11 +72,13 @@ class PedidoEditar extends CustomComponent {
       // Atributos principales
       idPedido: '',
       idComprobante: '',
+      idTipoEntrega: '',
       idMoneda: '',
       idAlmacen: '',
       idImpuesto: '',
       observacion: '',
       nota: '',
+      instruccion: '',
 
       // Detalle del gasto
       detalles: [],
@@ -82,8 +89,14 @@ class PedidoEditar extends CustomComponent {
       impuestos: [],
       medidas: [],
       almacenes: [],
+      tiposPedido: [],
+      tiposEntrega: [],
+      fechaEntrega: currentDate(),
+      horaEntrega: '',
+      ranurasDeTiempo: getRanurasDeTiempo(),
 
       // Filtrar producto
+      loadingProducto: false,
       productos: [],
 
       // Filtrar cliente
@@ -110,8 +123,6 @@ class PedidoEditar extends CustomComponent {
 
     this.initial = { ...this.state };
 
-    this.alert = new SweetAlert();
-
     // Referencia principales
     this.refComprobante = React.createRef();
 
@@ -122,6 +133,11 @@ class PedidoEditar extends CustomComponent {
     // Filtrar cliente
     this.refCliente = React.createRef();
     this.refClienteValue = React.createRef();
+
+    // Filtrar tipo de entrega
+    this.refTipoEntrega = React.createRef();
+    this.refFechaEntrega = React.createRef();
+    this.refHoraEntrega = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -136,6 +152,7 @@ class PedidoEditar extends CustomComponent {
     this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
     this.refNota = React.createRef();
+    this.refInstruccion = React.createRef();
 
     //Anular las peticiones
     this.abortController = new AbortController();
@@ -173,7 +190,7 @@ class PedidoEditar extends CustomComponent {
 
     this.abortController.abort();
 
-    this.alert.close();
+    alertKit.close();
   }
 
   /*
@@ -191,13 +208,14 @@ class PedidoEditar extends CustomComponent {
   */
 
   loadingData = async (idPedido) => {
-    const [pedido, comprobantes, monedas, impuestos, almacenes] =
+    const [pedido, comprobantes, monedas, impuestos, almacenes, tiposEntrega] =
       await Promise.all([
-        this.fetchIdPedido({ idPedido: idPedido }),
+        this.fetchIdPedido(idPedido),
         this.fetchComprobante(PEDIDO),
         this.fetchMoneda(),
         this.fetchImpuesto(),
         this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
+        this.fetchComboTipoEntrega(),
       ]);
 
     const { cabecera, detalles } = pedido;
@@ -220,6 +238,7 @@ class PedidoEditar extends CustomComponent {
       monedas,
       impuestos,
       almacenes,
+      tiposEntrega,
 
       idImpuesto: isEmpty(cabecera.idImpuesto) ? '' : cabecera.idImpuesto,
       idComprobante: isEmpty(cabecera.idComprobante)
@@ -230,6 +249,9 @@ class PedidoEditar extends CustomComponent {
       idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
       observacion: cabecera.observacion,
       nota: cabecera.nota,
+      idTipoEntrega: cabecera.idTipoEntrega,
+      fechaEntrega: cabecera.fechaEntrega,
+      horaEntrega: cabecera.horaEntrega,
       detalles: detalles,
 
       loading: false,
@@ -244,8 +266,8 @@ class PedidoEditar extends CustomComponent {
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
 
-  async fetchIdPedido(params) {
-    const response = await idPedido(params);
+  async fetchIdPedido(idPedido) {
+    const response = await getIdPedido(idPedido);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -344,6 +366,20 @@ class PedidoEditar extends CustomComponent {
     }
   }
 
+  async fetchComboTipoEntrega() {
+    const response = await comboTipoEntrega(this.abortController.signal);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -370,19 +406,16 @@ class PedidoEditar extends CustomComponent {
     this.setState({ idComprobante: event.target.value });
   };
 
-  handleRemoverProducto = (idProducto) => {
-    const detalles = this.state.detalles
-      .filter((item) => item.idProducto !== idProducto)
-      .map((item, index) => ({
-        ...item,
-        id: ++index,
-      }));
+  handleSelectTipoEntrega = (event) => {
+    this.setState({ idTipoEntrega: event.target.value });
+  };
 
-    const total = detalles.reduce(
-      (accumulate, item) => (accumulate += item.cantidad * item.precio),
-      0,
-    );
-    this.setState({ detalles, total });
+  handleFechaEntrega = (event) => {
+    this.setState({ fechaEntrega: event.target.value });
+  };
+
+  handleSelectHoraEntrega = (event) => {
+    this.setState({ horaEntrega: event.target.value });
   };
 
   //------------------------------------------------------------------------------------------
@@ -393,9 +426,11 @@ class PedidoEditar extends CustomComponent {
     const { idImpuesto } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning(
-        'Pedido',
-        'Seleccione un impuesto para continuar.',
+      alertKit.warning(
+        {
+          title: 'Pedido',
+          message: 'Seleccione un impuesto para continuar.',
+        },
         () => {
           this.refImpuesto.current.focus();
         },
@@ -415,13 +450,29 @@ class PedidoEditar extends CustomComponent {
     this.refProductoValue.current.focus();
   };
 
-  handleSaveProducto = async (detalles, callback = async function () {}) => {
+  handleSaveProducto = async (detalles, callback = async function () { }) => {
     const total = detalles.reduce(
       (accumulate, item) => (accumulate += item.cantidad * item.precio),
       0,
     );
     this.setState({ detalles, total });
     await callback();
+  };
+
+
+  handleRemoverProducto = (idProducto) => {
+    const detalles = this.state.detalles
+      .filter((item) => item.idProducto !== idProducto)
+      .map((item, index) => ({
+        ...item,
+        id: ++index,
+      }));
+
+    const total = detalles.reduce(
+      (accumulate, item) => (accumulate += item.cantidad * item.precio),
+      0,
+    );
+    this.setState({ detalles, total });
   };
 
   //------------------------------------------------------------------------------------------
@@ -563,18 +614,28 @@ class PedidoEditar extends CustomComponent {
     this.setState({ nota: event.target.value });
   };
 
+  handleInputInstruccion = (event) => {
+    this.setState({ instruccion: event.target.value });
+  };
+
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Pedido', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione un impuesto.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Pedido', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione una moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
@@ -616,49 +677,84 @@ class PedidoEditar extends CustomComponent {
       cliente,
       idMoneda,
       idImpuesto,
+      idTipoEntrega,
+      fechaEntrega,
+      horaEntrega,
       observacion,
       nota,
       detalles,
     } = this.state;
 
     if (isEmpty(idComprobante)) {
-      this.alert.warning('Pedido', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione su comprobante.',
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Pedido', 'Seleccione un cliente.', () =>
-        this.refClienteValue.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione un cliente.',
+      }, () => {
+        this.refClienteValue.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      this.alert.warning('Pedido', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione su moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Pedido', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione el impuesto',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
+      return;
+    }
+
+    if (isEmpty(idTipoEntrega)) {
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione el tipo de entrega',
+      }, () => {
+        this.refTipoEntrega.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning('Pedido', 'Agregar algún producto a la lista.', () =>
-        this.refProductoValue.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Agregar algún producto a la lista.',
+        acceptButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
+        },
+        cancelButton: {
+          html: "<i class='fa fa-close'></i> Cancelar",
+        },
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
-    this.alert.dialog(
-      'Pedido',
-      '¿Está seguro de continuar?',
+    alertKit.question({
+      title: 'Pedido',
+      message: '¿Está seguro de continuar?',
+    },
       async (accept) => {
         if (accept) {
           const data = {
@@ -666,27 +762,36 @@ class PedidoEditar extends CustomComponent {
             idComprobante: idComprobante,
             idCliente: cliente.idPersona,
             idMoneda: idMoneda,
+            idTipoEntrega: idTipoEntrega,
+            fechaEntrega: fechaEntrega,
+            horaEntrega: horaEntrega,
             idSucursal: this.state.idSucursal,
             idUsuario: this.state.idUsuario,
             estado: 1,
             observacion: observacion,
             nota: nota,
-            detalle: detalles,
+            detalles: detalles,
           };
 
-          this.alert.information('Pedido', 'Procesando información...');
+          alertKit.loading({
+            message: 'Procesando información...',
+          });
 
           const response = await updatePedido(data);
 
           if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idPedido);
+            alertKit.close(() => {
+              this.handleOpenImpresion(response.data.idPedido);
+            });
           }
 
           if (response instanceof ErrorResponse) {
             if (response.getType() === CANCELED) return;
 
-            this.alert.warning('Pedido', response.getMessage());
+            alertKit.warning({
+              title: 'Pedido',
+              message: response.getMessage(),
+            });
           }
         }
       },
@@ -836,6 +941,8 @@ class PedidoEditar extends CustomComponent {
         />
 
         <ModalPersona
+          contentLabel="Modal Cliente"
+          titleHeader="Agregar Cliente"
           isOpen={this.state.isOpenPersona}
           onClose={this.handleCloseModalPersona}
           idUsuario={this.state.idUsuario}
@@ -843,20 +950,29 @@ class PedidoEditar extends CustomComponent {
 
         <SidebarConfiguration
           idSidebarConfiguration={this.idSidebarConfiguration}
+
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
           idImpuesto={this.state.idImpuesto}
           handleSelectIdImpuesto={this.handleSelectIdImpuesto}
+
           monedas={this.state.monedas}
           refMoneda={this.refMoneda}
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
+
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
+
           refNota={this.refNota}
           nota={this.state.nota}
           handleInputNota={this.handleInputNota}
+
+          refInstruccion={this.refInstruccion}
+          instruccion={this.state.instruccion}
+          handleInputInstruccion={this.handleInputInstruccion}
+
           handleSaveOptions={this.handleSaveOptions}
           handleCloseOptions={this.handleCloseOptions}
         />
@@ -964,7 +1080,7 @@ class PedidoEditar extends CustomComponent {
                       onClick={() => this.handleSelectItemProducto(item)}
                     >
                       <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                        <div className="d-flex justify-content-center align-items-center flex-column">
+                        <div className="d-flex justify-content-center align-items-center flex-column mb-2">
                           <Image
                             default={images.noImage}
                             src={item.imagen}
@@ -973,16 +1089,23 @@ class PedidoEditar extends CustomComponent {
                             height={150}
                             className="mb-2 object-contain"
                           />
-                          <p
-                            className={`${
-                              item.idTipoProducto === PRODUCTO &&
-                              item.cantidad <= 0
-                                ? 'badge badge-danger text-base'
-                                : 'badge badge-success text-base'
-                            } `}
-                          >
-                            INV. {formatDecimal(item.cantidad)}
-                          </p>
+                          {
+                            item.idTipoProducto === SERVICIO ? (
+                              <p className="badge badge-success text-base">
+                                SERVICIO
+                              </p>
+                            ) : (
+                              <p
+                                className={`${item.idTipoProducto === PRODUCTO &&
+                                  item.cantidad <= 0
+                                  ? 'badge badge-danger text-base'
+                                  : 'badge badge-success text-base'
+                                  } `}
+                              >
+                                STOCK: {formatDecimal(item.cantidad)}
+                              </p>
+                            )
+                          }
                         </div>
 
                         <div className="d-flex justify-content-center align-items-center flex-column">
@@ -1073,6 +1196,59 @@ class PedidoEditar extends CustomComponent {
                     }
                   />
                 </div>
+
+                <div className="form-group">
+                  <Select
+                    group={false}
+                    ref={this.refTipoEntrega}
+                    value={this.state.idTipoEntrega}
+                    onChange={this.handleSelectTipoEntrega}
+                  >
+                    <option value="">-- Tipo de entrega --</option>
+                    {
+                      this.state.tiposEntrega.map((item, index) => (
+                        <option key={index} value={item.idTipoEntrega}>
+                          {item.nombre}
+                        </option>
+                      ))
+                    }
+                  </Select>
+                </div>
+
+                {
+                  (this.state.idTipoEntrega === DELIVERY_PROGRAMADO || this.state.idTipoEntrega === RECOGER_PROGRAMADO) &&
+                  <div className="form-group">
+                    <div className='flex flex-row justify-between gap-x-4'>
+                      <div className='w-full'>
+                        <label>Fecha *</label>
+                        <Input
+                          type="date"
+                          value={this.state.fechaEntrega}
+                          ref={this.refFechaEntrega}
+                          onChange={this.handleFechaEntrega}
+                        />
+                      </div>
+
+                      <div className='w-full'>
+                        <label htmlFor="fecha-fin">Hora *</label>
+                        <Select
+                          value={this.state.horaEntrega}
+                          ref={this.refHoraEntrega}
+                          onChange={this.handleSelectHoraEntrega}
+                        >
+                          <option value="">-- Seleccionar Hora --</option>
+                          {
+                            this.state.ranurasDeTiempo.map((time, index) => (
+                              <option key={index} value={time}>
+                                {time}
+                              </option>
+                            ))
+                          }
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                }
               </div>
 
               <div

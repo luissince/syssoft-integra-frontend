@@ -46,7 +46,6 @@ import {
   UNIDADES,
   VALOR_MONETARIO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
-import { CLIENTE_NATURAL } from '../../../../../../model/types/tipo-cliente';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import {
   getDni,
@@ -144,7 +143,6 @@ class VentaCrear extends CustomComponent {
 
       // Atributos del modal cliente
       loadingCliente: false,
-      idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumento: '',
       numeroDocumento: '',
       informacion: '',
@@ -1445,7 +1443,6 @@ class VentaCrear extends CustomComponent {
     invoice.classList.add('toggled');
     this.setState({
       cacheCliente: {
-        idTipoCliente: this.state.idTipoCliente,
         idTipoDocumento: this.state.idTipoDocumento,
         numeroDocumento: this.state.numeroDocumento,
         informacion: this.state.informacion,
@@ -1463,7 +1460,6 @@ class VentaCrear extends CustomComponent {
     if (this.state.cacheCliente) {
       this.setState(
         {
-          idTipoCliente: this.state.cacheCliente.idTipoCliente,
           idTipoDocumento: this.state.cacheCliente.idTipoDocumento,
           numeroDocumento: this.state.cacheCliente.numeroDocumento,
           informacion: this.state.cacheCliente.informacion,
@@ -1475,10 +1471,6 @@ class VentaCrear extends CustomComponent {
     }
 
     invoice.classList.remove('toggled');
-  };
-
-  handleClickIdTipoCliente = (event) => {
-    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' });
   };
 
   handleSelectIdTipoDocumento = (event) => {
@@ -1653,7 +1645,6 @@ class VentaCrear extends CustomComponent {
     }
 
     const nuevoCliente = {
-      idTipoCliente: this.state.idTipoCliente,
       idTipoDocumento: this.state.idTipoDocumento,
       numeroDocumento: text(this.state.numeroDocumento),
       informacion: text(this.state.informacion),
@@ -2401,8 +2392,6 @@ class VentaCrear extends CustomComponent {
           idSidebarCliente={this.idSidebarCliente}
           loading={this.state.loadingCliente}
           tiposDocumentos={this.state.tiposDocumentos}
-          idTipoCliente={this.state.idTipoCliente}
-          handleClickIdTipoCliente={this.handleClickIdTipoCliente}
           refIdTipoDocumento={this.refIdTipoDocumento}
           idTipoDocumento={this.state.idTipoDocumento}
           handleSelectIdTipoDocumento={this.handleSelectIdTipoDocumento}

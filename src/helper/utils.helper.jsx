@@ -1007,6 +1007,17 @@ function calculateEAN13CheckDigit(code) {
   return remainder === 0 ? 0 : 10 - remainder;
 }
 
+export function getRanurasDeTiempo() {
+  const ranurasDeTiempo = []
+  for (let hour = 7; hour <= 23; hour++) {
+    for (let minute = 0; minute < 60; minute += 60) {
+      const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:00`
+      ranurasDeTiempo.push(timeString)
+    }
+  }
+  return ranurasDeTiempo
+}
+
 export function getPathNavigation(opcion, idNavegacion) {
   if (opcion == 'venta' || opcion == 'fac') {
     return `/inicio/facturacion/ventas/detalle?idVenta=${idNavegacion}`;

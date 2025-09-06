@@ -63,15 +63,15 @@ class Pedidos extends CustomComponent {
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
-      estado: '-1',
+      estado: "",
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -296,11 +296,45 @@ class Pedidos extends CustomComponent {
     );
   };
 
+  getStatusColor = (estado) => {
+    switch (estado) {
+      case "pending":
+        return "bg-yellow-500";
+      case "preparing":
+        return "bg-blue-500";
+      case "ready":
+        return "bg-green-500";
+      case "delivered":
+        return "bg-gray-500";
+      case "cancelled":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  getStatusText = (estado) => {
+    switch (estado) {
+      case "pending":
+        return "Pendiente";
+      case "preparing":
+        return "Preparando";
+      case "ready":
+        return "Listo";
+      case "delivered":
+        return "Entregado";
+      case "cancelled":
+        return "Anulado";
+      default:
+        return estado;
+    }
+  };
+
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="10"
+          colSpan="11"
           message="Cargando información de la tabla..."
         />
       );
@@ -309,7 +343,7 @@ class Pedidos extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="10">
+          <TableCell className="text-center" colSpan="11">
             ¡No hay datos registrados!
           </TableCell>
         </TableRow>
@@ -317,13 +351,6 @@ class Pedidos extends CustomComponent {
     }
 
     return this.state.lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">ACTIVO</span>
-        ) : (
-          <span className="text-danger">ANULADO</span>
-        );
-
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
@@ -342,7 +369,12 @@ class Pedidos extends CustomComponent {
             <br />
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell>
+            {item.tipoEntrega}
+          </TableCell>
+          <TableCell className={`${this.getStatusColor(item.estado)} text-center text-white`}>
+            {this.getStatusText(item.estado)}
+          </TableCell>
           <TableCell className="text-center">
             <span
               className={
@@ -446,9 +478,12 @@ class Pedidos extends CustomComponent {
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value="-1">TODOS</option>
-              <option value="1">LIGADO</option>
-              <option value="0">ANULADO</option>
+              <option value="">TODOS</option>
+              <option value="pending">PENDIENTE</option>
+              <option value="preparing">PREPARANDO</option>
+              <option value="ready">LISTO</option>
+              <option value="delivered">ENTREGADO</option>
+              <option value="cancelled">CANCELADO</option>
             </Select>
           </Column>
         </Row>
@@ -477,6 +512,7 @@ class Pedidos extends CustomComponent {
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="20%">Cliente</TableHead>
                     <TableHead width="15%">Comprobante</TableHead>
+                    <TableHead width="10%">Tipo Entrega</TableHead>
                     <TableHead width="10%" className="text-center">
                       Estado
                     </TableHead>
@@ -497,7 +533,9 @@ class Pedidos extends CustomComponent {
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>

@@ -4,6 +4,7 @@ import Row from './Row';
 import Column from './Column';
 import Button from './Button';
 import TextArea from './TextArea';
+import { Printer } from 'lucide-react';
 
 const SidebarConfiguration = (props) => {
   const { idSidebarConfiguration } = props;
@@ -17,6 +18,8 @@ const SidebarConfiguration = (props) => {
   const { refObservacion, observacion, handleInputObservacion } = props;
 
   const { refNota, nota, handleInputNota } = props;
+
+  const { refInstruccion, instruccion, handleInputInstruccion } = props;
 
   const { handleSaveOptions, handleCloseOptions } = props;
 
@@ -98,7 +101,7 @@ const SidebarConfiguration = (props) => {
 
             <Row>
               <Column formGroup={true}>
-                <label>Observación:</label>
+                <label>Observación (Visible internamente):</label>
                 <TextArea
                   placeholder="Ingrese alguna observación."
                   ref={refObservacion}
@@ -110,15 +113,39 @@ const SidebarConfiguration = (props) => {
 
             <Row>
               <Column formGroup={true}>
-                <label>Nota (Visible en los documentos impresos):</label>
+                <label>
+                  <div className='flex items-center gap-2'>
+                    <span>Nota (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
+                  </div>
+                </label>
                 <TextArea
-                  placeholder="Ingrese alguna nota."
+                  placeholder="Ingrese alguna nota o información adicional."
                   ref={refNota}
                   value={nota}
                   onChange={handleInputNota}
                 />
               </Column>
             </Row>
+
+            {
+              refInstruccion && (
+                <Row>
+                  <Column formGroup={true}>
+                    <label>
+                      <div className='flex items-center gap-2'>
+                        <span> Instrucciones (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
+                      </div> 
+                    </label>
+                    <TextArea
+                      placeholder="Ingrese las instrucciones de entrega."
+                      ref={refInstruccion}
+                      value={instruccion}
+                      onChange={handleInputInstruccion}
+                    />
+                  </Column>
+                </Row>
+              )
+            }
           </div>
 
           <div className="card-footer bg-white">
@@ -177,6 +204,10 @@ SidebarConfiguration.propTypes = {
   refNota: PropTypes.object.isRequired,
   nota: PropTypes.string.isRequired,
   handleInputNota: PropTypes.func.isRequired,
+
+  refInstruccion: PropTypes.object,
+  instruccion: PropTypes.string,
+  handleInputInstruccion: PropTypes.func,
 
   handleSaveOptions: PropTypes.func.isRequired,
   handleCloseOptions: PropTypes.func.isRequired,

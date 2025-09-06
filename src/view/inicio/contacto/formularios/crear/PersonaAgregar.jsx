@@ -5,9 +5,6 @@ import {
   keyNumberPhone,
   keyNumberInteger,
   convertNullText,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -24,10 +21,6 @@ import {
 import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
-import {
-  CLIENTE_NATURAL,
-  CLIENTE_JURIDICO,
-} from '../../../../../model/types/tipo-cliente';
 import SearchInput from '../../../../../components/SearchInput';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
@@ -39,6 +32,8 @@ import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
 import CheckBox, { Switches } from '../../../../../components/Checks';
 import { RUC } from '../../../../../model/types/tipo-documento';
+import { alertKit } from 'alert-kit';
+import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,7 +46,6 @@ class PersonaAgregar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumento: '',
       documento: '',
       informacion: '',
@@ -63,6 +57,7 @@ class PersonaAgregar extends CustomComponent {
       celular: '',
       fechaNacimiento: currentDate(),
       email: '',
+      clave: '',
       genero: '',
       direccion: '',
       idUbigeo: '',
@@ -104,36 +99,22 @@ class PersonaAgregar extends CustomComponent {
   }
 
   loadingData = async () => {
-    const documentos = await this.fetchTipoDocumento();
+    const responseListaTipoDocumento = await comboTipoDocumento(this.abortController.signal);
 
-    if (documentos.length !== 0) {
+    if (responseListaTipoDocumento instanceof ErrorResponse) {
+      if (responseListaTipoDocumento.getType() === CANCELED) return;
+
       this.setState({
-        tiposDocumentos: documentos,
-        loading: false,
-      });
-    } else {
-      this.setState({
-        msgLoading: 'Se produjo un error un interno, intente nuevamente.',
+        msgLoading: responseListaTipoDocumento.getMessage(),
       });
     }
-  };
 
-  async fetchTipoDocumento() {
-    const response = await comboTipoDocumento(this.abortController.signal);
+    console.log(responseListaTipoDocumento.data);
 
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  handleTipoCliente = (event) => {
-    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' });
+    this.setState({
+      tiposDocumentos: responseListaTipoDocumento.data,
+      loading: false,
+    });
   };
 
   handleSelectTipoDocumento = (event) => {
@@ -176,6 +157,10 @@ class PersonaAgregar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
+  handleInputClave = () => {
+    this.setState({ clave: event.target.value });
+  };
+
   handleInputDireccion = (event) => {
     this.setState({ direccion: event.target.value });
   };
@@ -186,13 +171,12 @@ class PersonaAgregar extends CustomComponent {
 
   handleGetApiReniec = async () => {
     if (this.state.documento.length !== 8) {
-      alertWarning(
-        'Persona',
-        'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Persona",
+        message: "Para iniciar la busqueda en número dni debe tener 8 caracteres.",
+      }, () => {
+        this.refDocumento.current.focus();
+      })
       return;
     }
 
@@ -217,7 +201,12 @@ class PersonaAgregar extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      alertWarning('Persona', response.getMessage(), () => {
+      if (response.getType() === CANCELED) return;
+
+      alertKit.warning({
+        title: "Persona",
+        message: response.getMessage(),
+      }, () => {
         this.setState({
           loading: false,
         });
@@ -227,13 +216,12 @@ class PersonaAgregar extends CustomComponent {
 
   handleGetApiSunat = async () => {
     if (this.state.documento.length !== 11) {
-      alertWarning(
-        'Persona',
-        'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-        () => {
-          this.refDocumentoPj.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Persona",
+        message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
+      }, () => {
+        this.refDocumentoPj.current.focus();
+      })
       return;
     }
 
@@ -254,7 +242,12 @@ class PersonaAgregar extends CustomComponent {
     }
 
     if (response instanceof ErrorResponse) {
-      alertWarning('Persona', response.getMessage(), () => {
+      if (response.getType() === CANCELED) return;
+
+      alertKit.warning({
+        title: "Persona",
+        message: response.getMessage(),
+      }, () => {
         this.setState({
           loading: false,
         });
@@ -291,13 +284,13 @@ class PersonaAgregar extends CustomComponent {
   handleSelectItemUbigeo = (value) => {
     this.refUbigeo.current.initialize(
       value.departamento +
-        '-' +
-        value.provincia +
-        '-' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      '-' +
+      value.provincia +
+      '-' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeos: [],
@@ -315,14 +308,20 @@ class PersonaAgregar extends CustomComponent {
     );
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      alertWarning('Persona', 'Seleccione el tipo de documento.', () => {
+      alertKit.warning({
+        title: "Persona",
+        message: "Seleccione el tipo de documento.",
+      }, () => {
         this.refTipoDocumento.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.documento)) {
-      alertWarning('Persona', 'Ingrese el número de documento.', () => {
+      alertKit.warning({
+        title: "Persona",
+        message: "Ingrese el número de documento.",
+      }, () => {
         this.refDocumento.current.focus();
       });
       return;
@@ -333,34 +332,47 @@ class PersonaAgregar extends CustomComponent {
       tipoDocumento.obligado === 1 &&
       tipoDocumento.longitud !== this.state.documento.length
     ) {
-      alertWarning(
-        'Persona',
-        `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Persona",
+        message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+      }, () => {
+        this.refDocumento.current.focus();
+      })
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      alertWarning('Persona', 'Ingrese los apellidos y nombres.', () => {
+      alertKit.warning({
+        title: "Persona",
+        message: "Ingrese los apellidos y nombres.",
+      }, () => {
         this.refInformacion.current.focus();
       });
       return;
     }
 
     if (this.state.conductor && isEmpty(this.state.licenciaConductir)) {
-      alertWarning('Persona', 'Ingrese el número de licencia.', () => {
+      alertKit.warning({
+        title: "Persona",
+        message: "Ingrese el número de licencia.",
+      }, () => {
         this.refLicenciaConducir.current.focus();
       });
       return;
     }
 
-    alertDialog('Persona', '¿Estás seguro de continuar?', async (accept) => {
+    alertKit.question({
+      title: "Persona",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
       if (accept) {
         const data = {
-          idTipoCliente: this.state.idTipoCliente,
           idTipoDocumento: this.state.idTipoDocumento,
           documento: this.state.documento.toString().trim(),
           informacion: this.state.informacion.trim().toUpperCase(),
@@ -372,6 +384,7 @@ class PersonaAgregar extends CustomComponent {
           celular: this.state.celular.toString().trim().toUpperCase(),
           fechaNacimiento: this.state.fechaNacimiento,
           email: this.state.email.trim(),
+          clave: this.state.clave.trim(),
           genero: this.state.genero,
           direccion: this.state.direccion.trim().toUpperCase(),
           idUbigeo: this.state.idUbigeo,
@@ -381,18 +394,27 @@ class PersonaAgregar extends CustomComponent {
           idUsuario: this.state.idUsuario,
         };
 
-        alertInfo('Persona', 'Procesando información...');
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
 
         const response = await createPersona(data);
 
         if (response instanceof SuccessReponse) {
-          alertSuccess('Persona', response.data, () => {
+          alertKit.success({
+            title: "Persona",
+            message: "Se ha creado la persona exitosamente",
+          }, () => {
             this.props.history.goBack();
           });
         }
 
         if (response instanceof ErrorResponse) {
-          alertWarning('Persona', response.getMessage());
+
+          alertKit.warning({
+            title: "Persona",
+            message: response.getMessage(),
+          })
         }
       }
     });
@@ -400,7 +422,6 @@ class PersonaAgregar extends CustomComponent {
 
   render() {
     const {
-      idTipoCliente,
       idTipoDocumento,
       documento,
       informacion,
@@ -411,17 +432,31 @@ class PersonaAgregar extends CustomComponent {
       celular,
       telefono,
       email,
+      clave,
       direccion,
       estado,
+
+      loading,
+      msgLoading,
+
+      tiposDocumentos
     } = this.state;
+
+    const tipoEntidad = tiposDocumentos.find((item) => item.idTipoDocumento === idTipoDocumento)?.tipoEntidad;
+
+    if (loading) {
+      return (
+        <ContainerWrapper>
+          <SpinnerView
+            loading={loading}
+            message={msgLoading}
+          />
+        </ContainerWrapper>
+      );
+    }
 
     return (
       <ContainerWrapper>
-        <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
-        />
-
         <Title
           title="Persona"
           subTitle="AGREGAR"
@@ -429,47 +464,11 @@ class PersonaAgregar extends CustomComponent {
         />
 
         <Row>
-          <Column>
-            <label>
-              Tipo de Persona:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
-            </label>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column formGroup={true}>
-            <RadioButton
-              className="form-check-inline"
-              name="rbTipoCliente"
-              id={CLIENTE_NATURAL}
-              value={CLIENTE_NATURAL}
-              checked={idTipoCliente === CLIENTE_NATURAL}
-              onChange={this.handleTipoCliente}
-            >
-              <i className="bi bi-person"></i> Persona Natural
-            </RadioButton>
-
-            <RadioButton
-              className="form-check-inline"
-              name="rbTipoCliente"
-              id={CLIENTE_JURIDICO}
-              value={CLIENTE_JURIDICO}
-              checked={idTipoCliente === CLIENTE_JURIDICO}
-              onChange={this.handleTipoCliente}
-            >
-              <i className="bi bi-building"></i> Persona Juridica
-            </RadioButton>
-          </Column>
-        </Row>
-
-        <Row>
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
                 <>
-                  Tipo Documento:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
@@ -478,22 +477,13 @@ class PersonaAgregar extends CustomComponent {
               onChange={this.handleSelectTipoDocumento}
             >
               <option value="">-- Seleccione --</option>
-              {idTipoCliente === CLIENTE_NATURAL &&
-                this.state.tiposDocumentos
-                  .filter((item) => item.idTipoDocumento !== RUC)
-                  .map((item, index) => (
-                    <option key={index} value={item.idTipoDocumento}>
-                      {item.nombre}
-                    </option>
-                  ))}
-              {idTipoCliente === CLIENTE_JURIDICO &&
-                this.state.tiposDocumentos
-                  .filter((item) => item.idTipoDocumento === RUC)
-                  .map((item, index) => (
-                    <option key={index} value={item.idTipoDocumento}>
-                      {item.nombre}
-                    </option>
-                  ))}
+              {
+                tiposDocumentos.map((item, index) => (
+                  <option key={index} value={item.idTipoDocumento}>
+                    {item.nombre}
+                  </option>
+                ))
+              }
             </Select>
           </Column>
 
@@ -502,9 +492,7 @@ class PersonaAgregar extends CustomComponent {
               group={true}
               label={
                 <>
-                  {' '}
-                  N° de documento ({documento.length}):{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               className={`${documento ? '' : 'is-invalid'}`}
@@ -515,16 +503,7 @@ class PersonaAgregar extends CustomComponent {
               placeholder="00000000"
               buttonRight={
                 <>
-                  {idTipoCliente === CLIENTE_NATURAL && (
-                    <Button
-                      className="btn-outline-secondary"
-                      title="Reniec"
-                      onClick={this.handleGetApiReniec}
-                    >
-                      <img src={images.reniec} alt="Reniec" width="12" />
-                    </Button>
-                  )}
-                  {idTipoCliente === CLIENTE_JURIDICO && (
+                  {tipoEntidad === JURIDICA ? (
                     <Button
                       className="btn-outline-secondary"
                       title="Sunat"
@@ -532,7 +511,17 @@ class PersonaAgregar extends CustomComponent {
                     >
                       <img src={images.sunat} alt="Sunat" width="12" />
                     </Button>
-                  )}
+                  ) :
+                    (
+                      <Button
+                        className="btn-outline-secondary"
+                        title="Reniec"
+                        onClick={this.handleGetApiReniec}
+                      >
+                        <img src={images.reniec} alt="Reniec" width="12" />
+                      </Button>
+                    )
+                  }
                 </>
               }
             />
@@ -544,8 +533,7 @@ class PersonaAgregar extends CustomComponent {
             <Input
               label={
                 <>
-                  {idTipoCliente === CLIENTE_NATURAL && 'Apellidos y Nombres:'}
-                  {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}{' '}
+                  {tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                   <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
@@ -553,11 +541,7 @@ class PersonaAgregar extends CustomComponent {
               ref={this.refInformacion}
               value={informacion}
               onChange={this.handleInputInformacion}
-              placeholder={
-                idTipoCliente === CLIENTE_NATURAL
-                  ? 'Ingrese sus Apellidos y Nombres'
-                  : 'Ingrese su Razón Social'
-              }
+              placeholder={tipoEntidad === JURIDICA ? 'Ingrese Razón Social' : 'Ingrese Apellidos y Nombres'}
             />
           </Column>
         </Row>
@@ -565,8 +549,7 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <label>
-              Tipo de Roles:{' '}
-              <i className="fa fa-asterisk text-danger small"></i>
+              Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
           </Column>
         </Row>
@@ -623,7 +606,7 @@ class PersonaAgregar extends CustomComponent {
           </Column>
         </Row>
 
-        {idTipoCliente === 'TC0001' && (
+        {tipoEntidad !== JURIDICA && (
           <Row>
             <Column className="col-md-4" formGroup={true}>
               <Select
@@ -700,7 +683,7 @@ class PersonaAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column formGroup={true}>
+          <Column className="col-md-6 col-12" formGroup={true}>
             <Input
               label={'E-Mail:'}
               type="email"
@@ -709,13 +692,23 @@ class PersonaAgregar extends CustomComponent {
               placeholder="Ingrese el email"
             />
           </Column>
+
+          <Column className="col-md-6 col-12" formGroup={true}>
+            <Input
+              label={'Contraseña:'}
+              type="password"
+              value={clave}
+              onChange={this.handleInputClave}
+              placeholder="* * * * * *"
+            />
+          </Column>
         </Row>
 
         <Row>
           <Column formGroup={true}>
             <Input
               label={'Dirección:'}
-              refInput={this.refDireccion}
+              ref={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
               placeholder="Ingrese la dirección"

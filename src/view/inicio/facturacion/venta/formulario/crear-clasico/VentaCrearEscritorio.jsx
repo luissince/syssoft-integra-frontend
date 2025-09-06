@@ -45,10 +45,6 @@ import {
   UNIDADES,
   VALOR_MONETARIO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
-import {
-  CLIENTE_JURIDICO,
-  CLIENTE_NATURAL,
-} from '../../../../../../model/types/tipo-cliente';
 import { CONTADO } from '../../../../../../model/types/forma-pago';
 import ModalProdcutos from '../common/ModalProductos';
 import {
@@ -95,6 +91,7 @@ import {
 import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { RUC } from '../../../../../../model/types/tipo-documento';
+import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -182,7 +179,6 @@ class VentaCrearEscritorio extends CustomComponent {
       // Atributos del cliente formulario
       loadingCliente: false,
       msgLoadingCliente: 'Consultado datos...',
-      idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumento: '',
       numeroDocumento: '',
       informacion: '',
@@ -320,7 +316,6 @@ class VentaCrearEscritorio extends CustomComponent {
         this.index = this.props.ventaCrearClasico.local.index;
 
         const cliente = {
-          idTipoCliente: this.props.ventaCrearClasico.state.idTipoCliente,
           idTipoDocumento: this.props.ventaCrearClasico.state.idTipoDocumento,
           documento: this.props.ventaCrearClasico.state.numeroDocumento,
           informacion: this.props.ventaCrearClasico.state.informacion,
@@ -371,10 +366,6 @@ class VentaCrearEscritorio extends CustomComponent {
           ? 'Ninguno'
           : comprobanteFilter.nombre,
 
-        idTipoCliente:
-          typeof predeterminado === 'object'
-            ? predeterminado.idTipoCliente
-            : '',
         idTipoDocumento:
           typeof predeterminado === 'object'
             ? predeterminado.idTipoDocumento
@@ -1019,7 +1010,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
     await this.setStateAsync({
       nuevoCliente: {
-        idTipoCliente: this.state.idTipoCliente,
         idTipoDocumento: this.state.idTipoDocumento,
         numeroDocumento: text(this.state.numeroDocumento),
         informacion: text(this.state.informacion),
@@ -1845,15 +1835,6 @@ class VentaCrearEscritorio extends CustomComponent {
   // Modal cliente
   //------------------------------------------------------------------------------------------
 
-  handleSelectTipoCliente = (event) => {
-    this.setState(
-      { idTipoCliente: event.target.value, idTipoDocumento: '' },
-      () => {
-        this.updateReduxState();
-      },
-    );
-  };
-
   handleSelectTipoDocumento = (event) => {
     this.setState({ idTipoDocumento: event.target.value }, () => {
       this.updateReduxState();
@@ -2016,22 +1997,19 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputCliente = () => {
-    this.setState(
-      {
-        clientes: [],
-        cliente: null,
-        idTipoCliente: CLIENTE_NATURAL,
-        idTipoDocumento: '',
-        numeroDocumento: '',
-        informacion: '',
-        numeroCelular: '',
-        email: '',
-        direccion: '',
-        nuevoCliente: null,
-      },
-      () => {
-        this.updateReduxState();
-      },
+    this.setState({
+      clientes: [],
+      cliente: null,
+      idTipoDocumento: '',
+      numeroDocumento: '',
+      informacion: '',
+      numeroCelular: '',
+      email: '',
+      direccion: '',
+      nuevoCliente: null,
+    }, () => {
+      this.updateReduxState();
+    },
     );
   };
 
@@ -2069,7 +2047,6 @@ class VentaCrearEscritorio extends CustomComponent {
       {
         clientes: [],
         cliente: value,
-        idTipoCliente: value.idTipoCliente,
         idTipoDocumento: value.idTipoDocumento,
         numeroDocumento: value.documento,
         informacion: value.informacion,
@@ -2361,6 +2338,9 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   render() {
+
+    const tipoEntidad = this.state.tiposDocumentos.find((item) => item.idTipoDocumento === this.state.idTipoDocumento)?.tipoEntidad;
+
     return (
       <PosContainerWrapper className={'flex-column bg-white'}>
         <SpinnerView
@@ -2652,46 +2632,6 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center justify-content-between">
-                  <RadioButton
-                    className="form-check-inline"
-                    name="ckTipoCliente"
-                    id={CLIENTE_NATURAL}
-                    value={CLIENTE_NATURAL}
-                    checked={this.state.idTipoCliente === CLIENTE_NATURAL}
-                    onChange={(event) => {
-                      this.setState(
-                        {
-                          idTipoCliente: event.target.value,
-                          idTipoDocumento: '',
-                        },
-                        () => {
-                          this.updateReduxState();
-                        },
-                      );
-                    }}
-                  >
-                    <i className="bi bi-person"></i> Persona Natural{' '}
-                    {this.state.idTipoCliente === CLIENTE_NATURAL &&
-                      '(' + this.state.numeroDocumento.length + ')'}
-                  </RadioButton>
-
-                  <RadioButton
-                    className="form-check-inline"
-                    name="ckTipoCliente"
-                    id={CLIENTE_JURIDICO}
-                    value={CLIENTE_JURIDICO}
-                    checked={this.state.idTipoCliente === CLIENTE_JURIDICO}
-                    onChange={this.handleSelectTipoCliente}
-                  >
-                    <i className="bi bi-building"></i> Persona Juridica{' '}
-                    {this.state.idTipoCliente === CLIENTE_JURIDICO &&
-                      '(' + this.state.numeroDocumento.length + ')'}
-                  </RadioButton>
-                </div>
-              </div>
-
-              <div className="p-2">
                 <div className="d-flex align-items-center">
                   <div className="mr-1">
                     <img src={images.options} width={22} />
@@ -2702,22 +2642,14 @@ class VentaCrearEscritorio extends CustomComponent {
                     onChange={this.handleSelectTipoDocumento}
                   >
                     <option value={''}>Tipo de documento</option>
-                    {this.state.idTipoCliente === CLIENTE_NATURAL &&
+                    {
                       this.state.tiposDocumentos
-                        .filter((item) => item.idTipoDocumento !== RUC)
                         .map((item, index) => (
                           <option key={index} value={item.idTipoDocumento}>
                             {item.nombre}
                           </option>
-                        ))}
-                    {this.state.idTipoCliente === CLIENTE_JURIDICO &&
-                      this.state.tiposDocumentos
-                        .filter((item) => item.idTipoDocumento === RUC)
-                        .map((item, index) => (
-                          <option key={index} value={item.idTipoDocumento}>
-                            {item.nombre}
-                          </option>
-                        ))}
+                        ))
+                    }
                   </Select>
                 </div>
               </div>
@@ -2740,28 +2672,32 @@ class VentaCrearEscritorio extends CustomComponent {
                       handleSetValue={this.handleSetValueCliente}
                       customButton={
                         <>
-                          {this.state.idTipoCliente === CLIENTE_NATURAL && (
-                            <Button
-                              className="btn-outline-secondary"
-                              title="Reniec"
-                              onClick={this.handleGetApiReniec}
-                            >
-                              <img
-                                src={images.reniec}
-                                alt="Reniec"
-                                width="12"
-                              />
-                            </Button>
-                          )}
-                          {this.state.idTipoCliente === CLIENTE_JURIDICO && (
-                            <Button
-                              className="btn-outline-secondary"
-                              title="Sunat"
-                              onClick={this.handleGetApiSunat}
-                            >
-                              <img src={images.sunat} alt="Sunat" width="12" />
-                            </Button>
-                          )}
+                          {
+                            tipoEntidad === JURIDICA ?
+                              (
+                                <Button
+                                  className="btn-outline-secondary"
+                                  title="Sunat"
+                                  onClick={this.handleGetApiSunat}
+                                >
+                                  <img src={images.sunat} alt="Sunat" width="12" />
+                                </Button>
+                              )
+                              :
+                              (
+                                <Button
+                                  className="btn-outline-secondary"
+                                  title="Reniec"
+                                  onClick={this.handleGetApiReniec}
+                                >
+                                  <img
+                                    src={images.reniec}
+                                    alt="Reniec"
+                                    width="12"
+                                  />
+                                </Button>
+                              )
+                          }
                         </>
                       }
                       renderItem={(value) => (
@@ -2779,9 +2715,9 @@ class VentaCrearEscritorio extends CustomComponent {
                   </div>
                   <Input
                     placeholder={
-                      this.state.idTipoCliente === CLIENTE_NATURAL
-                        ? 'Ingrese sus Apellidos y Nombres'
-                        : 'Ingrese su Razón Social'
+                      tipoEntidad === JURIDICA
+                        ? 'Ingrese Razón Social'
+                        : 'Ingrese Apellidos y Nombres'
                     }
                     ref={this.refInformacion}
                     value={this.state.informacion}

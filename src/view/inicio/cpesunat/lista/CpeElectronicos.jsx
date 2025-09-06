@@ -862,7 +862,9 @@ class CpeElectronicos extends CustomComponent {
                         item.anulacion === 1
                           ? 'Comunicación de Baja'
                           : 'Resumen Diario',
-                      label: 'Error',
+                      label: item.anulacion === 1
+                      ? 'Comunicación de Baja'
+                      : 'Resumen Diario',
                       onClick: () => {
                         const id = item.idComprobante;
                         const num =

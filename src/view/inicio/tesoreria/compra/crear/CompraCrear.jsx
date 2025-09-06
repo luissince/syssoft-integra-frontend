@@ -1227,6 +1227,8 @@ class CompraCrear extends CustomComponent {
         />
 
         <ModalPersona
+          contentLabel="Modal Proveedor"
+          titleHeader="Agregar Proveedor"
           isOpen={this.state.isOpenProveedor}
           onClose={this.handleCloseModalProveedor}
           idUsuario={this.state.idUsuario}
@@ -1385,7 +1387,7 @@ class CompraCrear extends CustomComponent {
                                   : 'badge badge-success text-base'
                               } `}
                             >
-                              INV. {formatDecimal(item.cantidad)}
+                              STOCK: {formatDecimal(item.cantidad)}
                             </p>
                           </div>
 

@@ -48,7 +48,7 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import Search from '../../../../../../components/Search';
-import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
+import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -427,7 +427,7 @@ class CotizacionEditar extends CustomComponent {
     this.refProductoValue.current.focus();
   };
 
-  handleSaveProducto = async (detalles, callback = async function () {}) => {
+  handleSaveProducto = async (detalles, callback = async function () { }) => {
     const total = detalles.reduce(
       (accumulate, item) => (accumulate += item.cantidad * item.precio),
       0,
@@ -948,6 +948,8 @@ class CotizacionEditar extends CustomComponent {
         />
 
         <ModalPersona
+          contentLabel="Modal Cliente"
+          titleHeader="Agregar Cliente"
           isOpen={this.state.isOpenPersona}
           onClose={this.handleCloseModalPersona}
           idUsuario={this.state.idUsuario}
@@ -1059,7 +1061,7 @@ class CotizacionEditar extends CustomComponent {
                   isEmpty(this.state.productos) && (
                     <div className="text-center position-relative">
                       <i className="bi bi-cart4 text-secondary text-2xl"></i>
-                      <p className="text-secondary text-base text-lg mb-0">
+                      <p className="text-secondary text-lg mb-0">
                         Use la barra de busqueda para encontrar su productos.
                       </p>
                     </div>
@@ -1077,7 +1079,7 @@ class CotizacionEditar extends CustomComponent {
                       onClick={() => this.handleSelectItemProducto(item)}
                     >
                       <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                        <div className="d-flex justify-content-center align-items-center flex-column">
+                        <div className="d-flex justify-content-center align-items-center flex-column mb-2">
                           <Image
                             default={images.noImage}
                             src={item.imagen}
@@ -1086,16 +1088,23 @@ class CotizacionEditar extends CustomComponent {
                             height={150}
                             className="mb-2 object-contain"
                           />
-                          <p
-                            className={`${
-                              item.idTipoProducto === PRODUCTO &&
-                              item.cantidad <= 0
-                                ? 'badge badge-danger text-base'
-                                : 'badge badge-success text-base'
-                            } `}
-                          >
-                            INV. {formatDecimal(item.cantidad)}
-                          </p>
+                          {
+                            item.idTipoProducto === SERVICIO ? (
+                              <p className="badge badge-success text-base">
+                                SERVICIO
+                              </p>
+                            ) : (
+                              <p
+                                className={`${item.idTipoProducto === PRODUCTO &&
+                                  item.cantidad <= 0
+                                  ? 'badge badge-danger text-base'
+                                  : 'badge badge-success text-base'
+                                  } `}
+                              >
+                                STOCK: {formatDecimal(item.cantidad)}
+                              </p>
+                            )
+                          }
                         </div>
 
                         <div className="d-flex justify-content-center align-items-center flex-column">
@@ -1201,7 +1210,7 @@ class CotizacionEditar extends CustomComponent {
                 {isEmpty(this.state.detalles) && (
                   <div className="text-center">
                     <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-base text-lg mb-0">
+                    <p className="text-secondary text-lg mb-0">
                       Aquí verás los productos que elijas en tu próxima venta
                     </p>
                   </div>

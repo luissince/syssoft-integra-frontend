@@ -1,0 +1,4 @@
+export const DELIVERY_DOMICILIO = "TE0001";
+export const RECOGER_EN_LOCAL = "TE0002";
+export const DELIVERY_PROGRAMADO = "TE0003";
+export const RECOGER_PROGRAMADO = "TE0004";
