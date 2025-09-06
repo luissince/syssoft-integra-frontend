@@ -684,7 +684,7 @@ class CotizacionEditar extends CustomComponent {
             estado: 1,
             observacion: observacion,
             nota: nota,
-            detalle: detalles,
+            detalles: detalles,
           };
 
           this.alert.information('Cotización', 'Procesando información...');
