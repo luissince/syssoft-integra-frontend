@@ -172,9 +172,9 @@ class CatalogoDetalle extends CustomComponent {
     }
 
     response instanceof SuccessReponse;
-    const { noPdf, url, message } = response.data;
+    const { status, message, url } = response.data;
 
-    if (noPdf) {
+    if (status === "procesando") {
       alertKit.information({
         title: 'Catálogo',
         message: message,
@@ -194,12 +194,6 @@ class CatalogoDetalle extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-    // await pdfVisualizer.init({
-    //   url: documentsPdfCatalogo(this.state.idCatalogo),
-    //   title: 'Catálogo',
-    //   titlePageNumber: 'Página',
-    //   titleLoading: 'Cargando...',
-    // });
   };
 
   /*

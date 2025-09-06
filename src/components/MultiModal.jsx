@@ -40,6 +40,12 @@ import { JURIDICA } from '@/model/types/tipo-entidad';
  * Modal para mostrar del impresión.
  */
 const ModalImpresion = ({
+  title = "SysSoft Integra",
+  message = "Proceso Completado",
+  subTitle = "Se guardaron correctamente los datos.",
+
+  buttonTitle = "Realizar otra Operación.",
+
   refModal,
   isOpen,
   clear,
@@ -60,19 +66,22 @@ const ModalImpresion = ({
       shouldCloseOnEsc={false}
     >
       <CustomModalContentHeader contentRef={refModal} showClose={false}>
-        SysSoft Integra
+        {title}
       </CustomModalContentHeader>
 
       <CustomModalContentBody>
         <div className="flex items-center justify-center">
           <img src={images.accept} width={64} height={64} className="mb-2" />
         </div>
-        <h5 className="text-center ">Proceso Completado</h5>
+
+        <h5 className="text-center">
+          {message}
+        </h5>
 
         <div className="dropdown-divider mb-3"></div>
 
         <div className="alert alert-primary text-center">
-          Se guardaron correctamente los datos.
+          {subTitle}
         </div>
         <div className="d-flex justify-content-center">
           <Button
@@ -85,7 +94,7 @@ const ModalImpresion = ({
           >
             <div className="flex items-center justify-between space-x-2">
               <img src={images.escoba} width={22} />{' '}
-              <span>Realizar otra Operación.</span>
+              <span>{buttonTitle}</span>
             </div>
           </Button>
         </div>
@@ -118,6 +127,12 @@ const ModalImpresion = ({
 };
 
 ModalImpresion.propTypes = {
+  title: PropTypes.string,
+  message: PropTypes.string,
+  subTitle: PropTypes.string,
+
+  buttonTitle: PropTypes.string,
+
   refModal: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   clear: PropTypes.func,
