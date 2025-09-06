@@ -5,7 +5,6 @@ import { isEmpty, numberFormat } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import {
   createCatalogo,
-  documentsPdfCatalogo,
   filtrarProducto,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
@@ -22,13 +21,12 @@ import {
   setCrearCatalogoLocal,
   setCrearCatalogoState,
 } from '../../../../../../redux/predeterminadoSlice';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../../components/MultiModal';
 import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
 import Input from '../../../../../../components/Input';
-import printJS from 'print-js';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -77,9 +75,6 @@ class CatalogoCrear extends CustomComponent {
     // Valores iniciales
     this.initial = { ...this.state };
 
-    // Objeto sweet alert
-    this.alert = new SweetAlert();
-
     // Referencias
     this.refNombre = React.createRef();
 
@@ -119,7 +114,7 @@ class CatalogoCrear extends CustomComponent {
 
     this.abortController.abort();
 
-    this.alert.close();
+    alertKit.close();
   }
 
   /*
@@ -142,7 +137,7 @@ class CatalogoCrear extends CustomComponent {
       this.props.catalogoCrear.state &&
       this.props.catalogoCrear.local
     ) {
-      this.setState(this.props.catalogoCrear.state, () => {});
+      this.setState(this.props.catalogoCrear.state, () => { });
     } else {
       this.setState(
         {
@@ -291,47 +286,65 @@ class CatalogoCrear extends CustomComponent {
     const { nombre, detalles, idSucursal, idUsuario } = this.state;
 
     if (isEmpty(nombre)) {
-      this.alert.warning('Catálogo', 'Ingrese el nombre del catálogo.', () =>
-        this.refNombre.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Catálogo',
+        message: 'Ingrese el nombre del catálogo.',
+      }, () => {
+        this.refNombre.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning('Catálogo', 'Agregar algún producto a la lista.', () =>
-        this.refProductoValue.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Catálogo',
+        message: 'Agregar algún producto a la lista.',
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
-    this.alert.dialog(
-      'Catálogo',
-      '¿Está seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            nombre: nombre,
-            idSucursal: idSucursal,
-            idUsuario: idUsuario,
-            productos: detalles,
-          };
-
-          this.alert.information('Catálogo', 'Procesando información...');
-
-          const response = await createCatalogo(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idCatalogo);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Catálogo', response.getMessage());
-          }
-        }
+    alertKit.question({
+      title: 'Catálogo',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
+      if (accept) {
+        const data = {
+          nombre: nombre,
+          idSucursal: idSucursal,
+          idUsuario: idUsuario,
+          productos: detalles,
+        };
+
+        alertKit.loading({
+          message: 'Procesando información...',
+        });
+
+        const response = await createCatalogo(data);
+
+        if (response instanceof SuccessReponse) {
+          alertKit.close(() => {
+            this.handleOpenImpresion(response.data.idCatalogo);
+          });
+        }
+
+        if (response instanceof ErrorResponse) {
+          if (response.getType() === CANCELED) return;
+
+          alertKit.warning({
+            title: 'Catálogo',
+            message: response.getMessage(),
+          });
+        }
+      }
+    },
     );
   };
 
@@ -339,15 +352,20 @@ class CatalogoCrear extends CustomComponent {
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Catálogo',
-      '¿Está seguro de limpiar el catálogo?',
-      async (accept) => {
-        if (accept) {
-          await this.clearView();
-        }
+    alertKit.question({
+      title: 'Catálogo',
+      message: '¿Estás seguro de limpiar el catálogo?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (accept) => {
+      if (accept) {
+        await this.clearView();
+      }
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -357,18 +375,6 @@ class CatalogoCrear extends CustomComponent {
     this.setState({ isOpenImpresion: true, idCatalogo: idCatalogo });
   };
 
-  handlePrinterImpresion = async () => {
-    printJS({
-      printable: documentsPdfCatalogo(this.state.idCatalogo),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: 'Recuperando documento...',
-      onPrintDialogClose: () => {
-        this.clearView();
-        this.handleCloseImpresion();
-      },
-    });
-  };
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false });
@@ -406,11 +412,13 @@ class CatalogoCrear extends CustomComponent {
         />
 
         <ModalImpresion
+          message="Se guardó correctamente su catalogo"
+          subTitle="Para imprimir el documento debe hacerlo en la sección de detalle."
+          buttonTitle="Terminar proceso"
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
           clear={this.clearView}
           handleClose={this.handleCloseImpresion}
-          handlePrinterA4={this.handlePrinterImpresion}
         />
 
         <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
@@ -487,7 +495,7 @@ class CatalogoCrear extends CustomComponent {
                   isEmpty(this.state.productos) && (
                     <div className="text-center position-relative">
                       <i className="bi bi-list text-secondary text-2xl"></i>
-                      <p className="text-secondary text-base text-lg mb-0">
+                      <p className="text-secondary text-lg mb-0">
                         Use la barra de busqueda para encontrar su producto.
                       </p>
                     </div>
@@ -580,7 +588,7 @@ class CatalogoCrear extends CustomComponent {
                 {isEmpty(this.state.detalles) && (
                   <div className="text-center">
                     <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-base text-lg mb-0">
+                    <p className="text-secondary text-lg mb-0">
                       Aquí verás los productos que elijas para tu catálogo
                     </p>
                   </div>
