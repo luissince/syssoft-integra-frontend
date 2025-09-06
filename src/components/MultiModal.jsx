@@ -9,7 +9,6 @@ import CustomModal, {
   CustomModalForm,
 } from './CustomModal';
 import { SpinnerView } from './Spinner';
-import { CLIENTE_JURIDICO, CLIENTE_NATURAL } from '../model/types/tipo-cliente';
 import {
   comboTipoDocumento,
   createPersona,
@@ -35,6 +34,7 @@ import Input from './Input';
 import SearchInput from './SearchInput';
 import { RUC } from '../model/types/tipo-documento';
 import { alertKit } from 'alert-kit';
+import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Modal para mostrar del impresión.
@@ -257,7 +257,6 @@ class ModalPersona extends Component {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumento: '',
       documento: '',
       informacion: '',
@@ -297,6 +296,8 @@ class ModalPersona extends Component {
       this.setState({
         tiposDocumentos: response.data,
         loading: false,
+      },()=>{
+        this.refTipoDocumento.current.focus();
       });
     }
 
@@ -323,7 +324,6 @@ class ModalPersona extends Component {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idTipoCliente: CLIENTE_NATURAL,
       idTipoDocumento: '',
       documento: '',
       informacion: '',
@@ -339,10 +339,6 @@ class ModalPersona extends Component {
 
     this.peticion = false;
     this.abortController = null;
-  };
-
-  handleTipoCliente = (event) => {
-    this.setState({ idTipoCliente: event.target.value, idTipoDocumento: '' });
   };
 
   handleSelectTipoDocumento = (event) => {
@@ -492,13 +488,13 @@ class ModalPersona extends Component {
   handleSelectItem = async (value) => {
     this.refUbigeo.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeos: [],
@@ -585,7 +581,6 @@ class ModalPersona extends Component {
       async (accept) => {
         if (accept) {
           const data = {
-            idTipoCliente: this.state.idTipoCliente,
             idTipoDocumento: this.state.idTipoDocumento,
             documento: this.state.documento.toString().trim().toUpperCase(),
             informacion: this.state.informacion.trim().toUpperCase(),
@@ -638,16 +633,19 @@ class ModalPersona extends Component {
 
   render() {
     const {
-      idTipoCliente,
       idTipoDocumento,
       documento,
       informacion,
       celular,
       email,
       direccion,
+
+      tiposDocumentos
     } = this.state;
 
-    const { isOpen, onClose } = this.props;
+    const { contentLabel = 'Modal Persona', titleHeader = 'Agregar Persona', isOpen, onClose } = this.props;
+
+    const tipoDocumento = tiposDocumentos.find((item) => item.idTipoDocumento === idTipoDocumento);
 
     return (
       <CustomModalForm
@@ -656,8 +654,8 @@ class ModalPersona extends Component {
         onOpen={this.handleOnOpen}
         onHidden={this.handleOnHidden}
         onClose={onClose}
-        contentLabel="Modal Proveedor"
-        titleHeader="Agregar Proveedor"
+        contentLabel={contentLabel}
+        titleHeader={titleHeader}
         onSubmit={this.handleOnSubmit}
         body={
           <>
@@ -665,41 +663,6 @@ class ModalPersona extends Component {
               loading={this.state.loading}
               message={this.state.msgLoading}
             />
-
-            <Row>
-              <Column>
-                <label>
-                  Tipo de Persona:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              </Column>
-            </Row>
-
-            <Row>
-              <Column formGroup={true}>
-                <RadioButton
-                  className="form-check-inline"
-                  name="ckTipoCliente"
-                  id={CLIENTE_NATURAL}
-                  value={CLIENTE_NATURAL}
-                  checked={idTipoCliente === CLIENTE_NATURAL}
-                  onChange={this.handleTipoCliente}
-                >
-                  <i className="bi bi-person"></i> Persona Natural
-                </RadioButton>
-
-                <RadioButton
-                  className="form-check-inline"
-                  name="ckTipoCliente"
-                  id={CLIENTE_JURIDICO}
-                  value={CLIENTE_JURIDICO}
-                  checked={idTipoCliente === CLIENTE_JURIDICO}
-                  onChange={this.handleTipoCliente}
-                >
-                  <i className="bi bi-building"></i> Persona Juridica
-                </RadioButton>
-              </Column>
-            </Row>
 
             <Row>
               <Column className="col-md-6 col-12" formGroup={true}>
@@ -715,22 +678,13 @@ class ModalPersona extends Component {
                   onChange={this.handleSelectTipoDocumento}
                 >
                   <option value="">-- Seleccione --</option>
-                  {idTipoCliente === CLIENTE_NATURAL &&
-                    this.state.tiposDocumentos
-                      .filter((item) => item.idTipoDocumento !== RUC)
-                      .map((item, index) => (
-                        <option key={index} value={item.idTipoDocumento}>
-                          {item.nombre}
-                        </option>
-                      ))}
-                  {idTipoCliente === CLIENTE_JURIDICO &&
-                    this.state.tiposDocumentos
-                      .filter((item) => item.idTipoDocumento === RUC)
-                      .map((item, index) => (
-                        <option key={index} value={item.idTipoDocumento}>
-                          {item.nombre}
-                        </option>
-                      ))}
+                  {
+                    tiposDocumentos.map((item, index) => (
+                      <option key={index} value={item.idTipoDocumento}>
+                        {item.nombre}
+                      </option>
+                    ))
+                  }
                 </Select>
               </Column>
 
@@ -739,36 +693,37 @@ class ModalPersona extends Component {
                   group={true}
                   label={
                     <>
-                      {' '}
-                      N° de documento ({documento.length}):{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
+                      N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
                     </>
                   }
                   role={'integer'}
                   ref={this.refDocumento}
                   value={documento}
                   onChange={this.handleInputNumeroDocumento}
-                  placeholder="00000000"
+                  placeholder={tipoDocumento && tipoDocumento.longitud ? `Ingrese ${tipoDocumento.longitud} dígitos` : 'Ingrese número de documento'}
                   buttonRight={
                     <>
-                      {idTipoCliente === CLIENTE_NATURAL && (
-                        <Button
-                          className="btn-outline-secondary"
-                          title="Reniec"
-                          onClick={this.handleGetApiReniec}
-                        >
-                          <img src={images.reniec} alt="Reniec" width="12" />
-                        </Button>
-                      )}
-                      {idTipoCliente === CLIENTE_JURIDICO && (
-                        <Button
-                          className="btn-outline-secondary"
-                          title="Sunat"
-                          onClick={this.handleGetApiSunat}
-                        >
-                          <img src={images.sunat} alt="Sunat" width="12" />
-                        </Button>
-                      )}
+                      {tipoDocumento && tipoDocumento.tipoEntidad === JURIDICA ?
+                        (
+                          <Button
+                            className="btn-outline-secondary"
+                            title="Sunat"
+                            onClick={this.handleGetApiSunat}
+                          >
+                            <img src={images.sunat} alt="Sunat" width="12" />
+                          </Button>
+                        )
+                        :
+                        (
+                          <Button
+                            className="btn-outline-secondary"
+                            title="Reniec"
+                            onClick={this.handleGetApiReniec}
+                          >
+                            <img src={images.reniec} alt="Reniec" width="12" />
+                          </Button>
+                        )
+                      }
                     </>
                   }
                 />
@@ -780,20 +735,14 @@ class ModalPersona extends Component {
                 <Input
                   label={
                     <>
-                      {idTipoCliente === CLIENTE_NATURAL &&
-                        'Apellidos y Nombres:'}
-                      {idTipoCliente === CLIENTE_JURIDICO && 'Razón Social:'}
+                      {tipoDocumento && tipoDocumento.tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                       <i className="fa fa-asterisk text-danger small"></i>
                     </>
                   }
                   ref={this.refInformacion}
                   value={informacion}
                   onChange={this.handleInputInformacion}
-                  placeholder={
-                    idTipoCliente === CLIENTE_NATURAL
-                      ? 'Ingrese sus Apellidos y Nombres'
-                      : 'Ingrese su Razón Social'
-                  }
+                  placeholder={tipoDocumento && tipoDocumento.tipoEntidad === JURIDICA ? 'Ingrese Razón Social' : 'Ingrese Apellidos y Nombres'}
                 />
               </Column>
             </Row>
@@ -881,6 +830,9 @@ class ModalPersona extends Component {
 }
 
 ModalPersona.propTypes = {
+  contentLabel: PropTypes.string,
+  titleHeader: PropTypes.string,
+  
   refModal: PropTypes.object,
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,

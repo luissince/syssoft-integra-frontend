@@ -419,16 +419,6 @@ class ClienteDetalle extends CustomComponent {
               <TableHeader>
                 <TableRow>
                   <TableHead className=" w-30 p-1 font-weight-normal ">
-                    Tipo de Persona:
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {(this.state.persona && this.state.persona.tipoPersona) ||
-                      '-'}
-                  </TableHead>
-                </TableRow>
-
-                <TableRow>
-                  <TableHead className=" w-30 p-1 font-weight-normal ">
                     Tipo Documento:
                   </TableHead>
                   <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">

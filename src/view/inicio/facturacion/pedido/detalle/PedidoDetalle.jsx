@@ -1,7 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   formatNumberWithZeros,
@@ -37,6 +36,7 @@ import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -66,6 +66,12 @@ class PedidoDetalle extends CustomComponent {
 
       observacion: '',
       notas: '',
+
+      idTipoEntrega: '',
+      tipoEntrega: '',
+
+      fechaEntrega: '',
+      horaEntrega: '',
 
       codiso: '',
       total: 0,
@@ -119,20 +125,19 @@ class PedidoDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(id) {
-    const params = {
-      idPedido: id,
-    };
-
+  async loadingData(idPedido) {
     const response = await detailPedido(
-      params,
+      idPedido,
       this.abortControllerView.signal,
     );
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Pedido', response.getMessage(), () => {
+      alertKit.warning({
+        title: 'Pedido',
+        message: response.getMessage(),
+      }, () => {
         this.close();
       });
       return;
@@ -159,6 +164,10 @@ class PedidoDetalle extends CustomComponent {
       estado,
       observacion,
       nota,
+      idTipoEntrega,
+      tipoEntrega,
+      fechaEntrega,
+      horaEntrega,
       codiso,
     } = pedido.cabecera;
 
@@ -168,7 +177,7 @@ class PedidoDetalle extends CustomComponent {
     );
 
     this.setState({
-      idPedido: id,
+      idPedido: idPedido,
       fechaHora: fecha + ' ' + formatTime(hora),
 
       comprobante: comprobante,
@@ -180,14 +189,13 @@ class PedidoDetalle extends CustomComponent {
       email: email,
       direccion: direccion,
 
-      estado:
-        estado === 1 ? (
-          <span className="text-success">ACTIVO</span>
-        ) : (
-          <span className="text-danger">ANULADO</span>
-        ),
+      estado: estado,
       observacion: observacion,
       notas: nota,
+      idTipoEntrega,
+      tipoEntrega,
+      fechaEntrega: fechaEntrega ?? '',
+      horaEntrega: horaEntrega ?? '',
       codiso: codiso,
       total: monto,
 
@@ -253,6 +261,40 @@ class PedidoDetalle extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
    */
+
+  getStatusColor = (estado) => {
+    switch (estado) {
+      case "pending":
+        return "bg-yellow-500";
+      case "preparing":
+        return "bg-blue-500";
+      case "ready":
+        return "bg-green-500";
+      case "delivered":
+        return "bg-gray-500";
+      case "cancelled":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  getStatusText = (estado) => {
+    switch (estado) {
+      case "pending":
+        return "Pendiente";
+      case "preparing":
+        return "Preparando";
+      case "ready":
+        return "Listo";
+      case "delivered":
+        return "Entregado";
+      case "cancelled":
+        return "Anulado";
+      default:
+        return estado;
+    }
+  };
 
   renderTotal() {
     let subTotal = 0;
@@ -428,6 +470,14 @@ class PedidoDetalle extends CustomComponent {
                       {this.state.direccion}
                     </TableHead>
                   </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Tipo Entrega
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {this.state.tipoEntrega}
+                    </TableHead>
+                  </TableRow>
                 </TableHeader>
               </Table>
             </TableResponsive>
@@ -460,8 +510,8 @@ class PedidoDetalle extends CustomComponent {
                     <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
                       Estado
                     </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.estado}
+                    <TableHead className={`border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-white ${this.getStatusColor(this.state.estado)}`}>
+                      {this.getStatusText(this.state.estado)}
                     </TableHead>
                   </TableRow>
                   <TableRow>

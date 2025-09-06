@@ -407,7 +407,7 @@ class ModalProductos extends CustomComponent {
               <>
                 {item.almacen}
                 <br />
-                INV. {rounded(item.cantidad)}
+                STOCK: {rounded(item.cantidad)}
               </>
             ) : (
               'SERVICIO'

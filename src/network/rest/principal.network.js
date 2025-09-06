@@ -1008,6 +1008,22 @@ export async function comboTipoAlmacen(signal) {
 
 /*
 |--------------------------------------------------------------------------
+| ENDPOINTS DE TIPO ENTREGA
+|--------------------------------------------------------------------------
+*/
+export async function comboTipoEntrega(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/tipo/entrega/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TIPO ENTREGA
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
 | ENDPOINTS DE COMPRA
 |--------------------------------------------------------------------------
 */
@@ -1366,19 +1382,18 @@ export async function listPedido(params, signal) {
   );
 }
 
-export async function idPedido(params, signal) {
+export async function getIdPedido(idPedido, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/pedido/id', {
+    instancePrincipal.get(`/api/pedido/id/${idPedido}`, {
       params: params,
       signal: signal,
     }),
   );
 }
 
-export async function detailPedido(params, signal) {
+export async function detailPedido(idPedido, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/pedido/detail', {
-      params: params,
+    instancePrincipal.get(`/api/pedido/detail/${idPedido}`, {
       signal: signal,
     }),
   );

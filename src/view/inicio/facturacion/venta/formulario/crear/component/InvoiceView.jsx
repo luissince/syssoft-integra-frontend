@@ -564,7 +564,7 @@ const ItemView = (props) => {
             tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
           } position-absolute`}
         >
-          {tipo === 'PRODUCTO' ? `INV. ${cantidad}` : `SERVICIO`}
+          {tipo === 'PRODUCTO' ? `STOCK: ${cantidad}` : `SERVICIO`}
         </p>
         <div className="item-view_describe-image">
           <img
