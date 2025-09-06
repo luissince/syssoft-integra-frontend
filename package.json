@@ -3,7 +3,7 @@
   "description": "SysSoft Integra aplicación de puntos de venta",
   "appTitle": "SysSoft Integra",
   "private": true,
-  "version": "1.0.22",
+  "version": "1.0.23",
   "type": "module",
   "scripts": {
     "dev": "bash ./start-dev.sh",
