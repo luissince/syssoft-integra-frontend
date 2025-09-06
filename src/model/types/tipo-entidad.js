@@ -1,2 +1,2 @@
-const JURIDICA = "JURIDICA";
-const NATURAL = "NATURAL";
+export const JURIDICA = "JURIDICA";
+export const NATURAL = "NATURAL";
