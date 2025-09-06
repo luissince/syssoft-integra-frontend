@@ -1,0 +1,2 @@
+const JURIDICA = "JURIDICA";
+const NATURAL = "NATURAL";
