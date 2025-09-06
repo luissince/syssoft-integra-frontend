@@ -471,10 +471,13 @@ export async function updateCatalogo(data) {
   );
 }
 
-export function documentsPdfCatalogo(idCatalogo) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/catalogo/documents/pdf/${idCatalogo}`;
+export async function documentsPdfCatalogo(idCatalogo) {
+  return await Resolve.create(
+    instancePrincipal.get(`/api/catalogo/documents/pdf/${idCatalogo}`),
+  );
+  // return `${
+  //   import.meta.env.VITE_APP_BACK_END
+  // }/api/catalogo/documents/pdf/${idCatalogo}`;
 }
 
 // ------------------------------------------------------------------------
