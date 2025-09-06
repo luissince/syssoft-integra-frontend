@@ -495,7 +495,7 @@ class CatalogoCrear extends CustomComponent {
                   isEmpty(this.state.productos) && (
                     <div className="text-center position-relative">
                       <i className="bi bi-list text-secondary text-2xl"></i>
-                      <p className="text-secondary text-base text-lg mb-0">
+                      <p className="text-secondary text-lg mb-0">
                         Use la barra de busqueda para encontrar su producto.
                       </p>
                     </div>
@@ -588,7 +588,7 @@ class CatalogoCrear extends CustomComponent {
                 {isEmpty(this.state.detalles) && (
                   <div className="text-center">
                     <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-base text-lg mb-0">
+                    <p className="text-secondary text-lg mb-0">
                       Aquí verás los productos que elijas para tu catálogo
                     </p>
                   </div>
