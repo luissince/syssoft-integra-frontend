@@ -31,6 +31,8 @@ import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { alertKit } from 'alert-kit';
+import axios from 'axios';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -151,12 +153,46 @@ class CatalogoDetalle extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handlePrintA4 = async () => {
+
+    alertKit.loading({
+      message: 'Procesando información...',
+    });
+
+    const response = await documentsPdfCatalogo(this.state.idCatalogo);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertKit.warning({
+        title: 'Catálogo',
+        message: response.getMessage(),
+      }, () => {
+        this.props.history.goBack();
+      });
+      return;
+    }
+
+    response instanceof SuccessReponse;
+    const { url } = response.data;
+
+    const resposeS3 = await axios.get(url, { responseType: "blob" });
+    const blob = new Blob([resposeS3.data], { type: "application/pdf" });
+    const blobUrl = URL.createObjectURL(blob);
+
+    alertKit.close();
+
     await pdfVisualizer.init({
-      url: documentsPdfCatalogo(this.state.idCatalogo),
+      url: blobUrl,
       title: 'Catálogo',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
+    // await pdfVisualizer.init({
+    //   url: documentsPdfCatalogo(this.state.idCatalogo),
+    //   title: 'Catálogo',
+    //   titlePageNumber: 'Página',
+    //   titleLoading: 'Cargando...',
+    // });
   };
 
   /*
