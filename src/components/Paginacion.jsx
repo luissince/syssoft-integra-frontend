@@ -335,6 +335,16 @@ class Paginacion extends React.Component {
       theme = 'classic'
     } = this.props;
 
+    this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1 ? '1 Página' : `${totalPaginacion} Páginas`}`;
+
+
+    if (restart) {
+      this.upperPageBound = 3;
+      this.lowerPageBound = 0;
+      this.isPrevBtnActive = 'disabled';
+      this.isNextBtnActive = '';
+    }
+
     return (
       <div className={className}>
         {theme === 'modern'
