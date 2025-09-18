@@ -1,8 +1,4 @@
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   convertNullText,
   numberFormat,
@@ -41,6 +37,7 @@ import {
   setListaProductoPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -245,30 +242,42 @@ class Productos extends CustomComponent {
   };
 
   handleEliminar = (idProducto) => {
-    alertDialog(
-      'Producto',
-      '¿Estás seguro de eliminar el producto?',
-      async (event) => {
-        if (event) {
-          alertInfo('Producto', 'Procesando información...');
-          const params = {
-            idProducto: idProducto,
-            idUsuario: this.state.idUsuario,
-          };
-
-          const response = await deleteProducto(params);
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Producto', response.data, () => {
-              this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Producto', response.getMessage());
-          }
-        }
+    alertKit.question({
+      title: 'Producto',
+      message: '¿Estás seguro de eliminar el producto?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    }, async (event) => {
+      if (event) {
+        alertKit.loading({ message: 'Procesando información...' });
+
+        const params = {
+          idProducto: idProducto,
+          idUsuario: this.state.idUsuario,
+        };
+
+        const response = await deleteProducto(params);
+
+        if (response instanceof ErrorResponse) {
+          alertKit.warning({
+            title: 'Producto',
+            message: response.getMessage(),
+          });
+          return;
+        }
+
+        alertKit.success({
+          title: 'Producto',
+          message: response.data,
+        }, () => {
+          this.loadingInit();
+        });
+      }
+    });
   };
 
   generateBody() {

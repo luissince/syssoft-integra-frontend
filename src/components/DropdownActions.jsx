@@ -63,7 +63,7 @@ const DropdownActions = ({ iconClass = 'fa fa-th-list', options = [] }) => {
         {options.map((opt, idx) => (
           <li key={idx}>
             <a
-              className="dropdown-item d-flex align-items-center gap-2 py-2"
+              className="dropdown-item d-flex align-items-center gap-2 p-2"
               href="#"
               title={opt.tooltip}
               onClick={(e) => {

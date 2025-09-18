@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import {
   numberFormat,
-  alertWarning,
   isEmpty,
   getPathNavigation,
   formatNumberWithZeros,
@@ -48,6 +47,7 @@ import {
   setListaFinanzasPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -183,13 +183,12 @@ class Transacciones extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning(
-        'Reporte Financiero',
-        sucursalResponse.getMessage(),
-        async () => {
-          await this.loadingInit();
-        },
-      );
+      alertKit.warning({
+        title: 'Transacciones',
+        message: sucursalResponse.getMessage(),
+      }, async () => {
+        await this.loadingInit();
+      });
       return;
     }
 
@@ -197,8 +196,10 @@ class Transacciones extends CustomComponent {
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
-
-      alertWarning('Reporte Venta', usuarioResponse.getMessage(), async () => {
+      alertKit.warning({
+        title: 'Transacciones',
+        message: usuarioResponse.getMessage(),
+      }, async () => {
         await this.loadingInit();
       });
       return;
@@ -283,16 +284,13 @@ class Transacciones extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -552,24 +550,18 @@ class Transacciones extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Concepto</TableHead>
                     <TableHead width="15%">Referencia</TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Estado
-                    </TableHead>
-                    <TableHead width="10%">
-                      Ingreso <i className="fa fa-arrow-down"></i>
-                    </TableHead>
-                    <TableHead width="10%">
-                      Egreso <i className="fa fa-arrow-up"></i>
-                    </TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%">Ingreso <i className="fa fa-arrow-down"></i></TableHead>
+                    <TableHead width="10%"> Egreso <i className="fa fa-arrow-up"></i></TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.renderTableBody()}</TableBody>
+                <TableBody>
+                  {this.renderTableBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>
