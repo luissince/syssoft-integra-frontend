@@ -396,9 +396,11 @@ export async function updateProducto(data) {
   return await Resolve.create(instancePrincipal.put('/api/producto', data));
 }
 
-export async function deleteProducto(idProducto) {
+export async function deleteProducto(params) {
   return await Resolve.create(
-    instancePrincipal.delete(`/api/producto/${idProducto}`),
+    instancePrincipal.delete(`/api/producto`,{
+      params: params
+    }),
   );
 }
 

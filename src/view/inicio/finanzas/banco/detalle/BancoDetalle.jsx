@@ -32,8 +32,19 @@ import {
   TableTitle,
 } from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
+import ModalTransferencia from './component/ModalTransferencia';
+import React from 'react';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends React.Component
+ */
 class BancoDetalle extends CustomComponent {
+
+  /**
+   * Inicializa un nuevo componente.
+   * @param {Object} props - Las propiedades pasadas al componente.
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -52,6 +63,8 @@ class BancoDetalle extends CustomComponent {
       lista: [],
       restart: false,
 
+      isOpenTransferencia: false,
+
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
@@ -62,7 +75,24 @@ class BancoDetalle extends CustomComponent {
 
     this.abortControllerView = new AbortController();
     this.abortControllerTable = new AbortController();
+
+    // Referencia para el modal inventario
+    this.refModalTransferencia = React.createRef();
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     const url = this.props.location.search;
@@ -79,44 +109,54 @@ class BancoDetalle extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   async loadDataId(id) {
     const params = {
       idBanco: id,
     };
 
     const response = await detailBanco(params, this.abortControllerView.signal);
-    if (response instanceof SuccessReponse) {
-      const banco = response.data.banco;
-      const monto = response.data.monto;
-
-      this.setState(
-        {
-          idBanco: id,
-          nombre: banco.nombre,
-          cci: banco.cci,
-          tipoCuenta:
-            banco.tipoCuenta === 1
-              ? 'BANCO'
-              : banco.tipoCuenta === 2
-                ? 'TARJETA'
-                : 'EFECTIVO',
-          numCuenta: banco.numCuenta,
-          moneda: banco.moneda,
-          codiso: banco.codiso,
-          saldo: monto,
-          initial: false,
-        },
-        async () => {
-          await this.loadingData();
-        },
-      );
-    }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
       this.props.history.goBack();
+      return;
     }
+
+    response instanceof SuccessReponse;
+
+    const banco = response.data.banco;
+    const monto = response.data.monto;
+
+    const tipoCuenta = banco.tipoCuenta === 1 ? 'BANCO' : banco.tipoCuenta === 2 ? 'TARJETA' : 'EFECTIVO';
+
+    this.setState({
+      idBanco: id,
+      nombre: banco.nombre,
+      cci: banco.cci,
+      tipoCuenta: tipoCuenta,
+      numCuenta: banco.numCuenta,
+      moneda: banco.moneda,
+      codiso: banco.codiso,
+      saldo: monto,
+      initial: false,
+    }, async () => {
+      await this.loadingData();
+    });
   }
 
   loadingData = async () => {
@@ -181,6 +221,22 @@ class BancoDetalle extends CustomComponent {
     }
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
   async onEventImprimir() {
     // const data = {
     //   idBanco: this.state.idBanco,
@@ -193,6 +249,33 @@ class BancoDetalle extends CustomComponent {
     // let params = new URLSearchParams({ params: ciphertext });
     // window.open('/api/banco/repdetallebanco?' + params, '_blank');
   }
+
+  //------------------------------------------------------------------------------------------
+  // Acciones del modal transferencia
+  //------------------------------------------------------------------------------------------
+  handleOpenModalTransferencia = () => {
+    this.setState({ isOpenTransferencia: true });
+  };
+
+  handleCloseModalTransferencia = () => {
+    this.setState({ isOpenTransferencia: false });
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderizado
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   generarBody() {
     if (this.state.loading) {
@@ -265,6 +348,12 @@ class BancoDetalle extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
+        <ModalTransferencia
+          refModal={this.refModalTransferencia}
+          isOpen={this.state.isOpenTransferencia}
+          onClose={this.handleCloseModalTransferencia}
+        />
+
         <SpinnerView
           loading={this.state.initial}
           message={this.state.messageLoading}
@@ -278,15 +367,15 @@ class BancoDetalle extends CustomComponent {
 
         <Row>
           <Column formGroup={true}>
-            <Button className="btn-light" onClick={this.onEventImprimir}>
+            {/* <Button className="btn-light" onClick={this.onEventImprimir}>
               <i className="fa fa-print"></i> Imprimir
-            </Button>{' '}
-            <Button className="btn-light" onClick={this.loadingInit}>
+            </Button>{' '} */}
+            {/* <Button className="btn-light" onClick={this.handleOpenModalTransferencia}>
               <i className="fa fa-plus"></i> Agregar dinero
             </Button>{' '}
-            <Button className="btn-light" onClick={this.loadingInit}>
+            <Button className="btn-light" onClick={this.handleOpenModalTransferencia}>
               <i className="fa fa-minus"></i> Disminuir dinero
-            </Button>
+            </Button> */}
           </Column>
         </Row>
 
@@ -368,7 +457,9 @@ class BancoDetalle extends CustomComponent {
                     <TableHead width="10%">Egreso</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generarBody()}</TableBody>
+                <TableBody>
+                  {this.generarBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>

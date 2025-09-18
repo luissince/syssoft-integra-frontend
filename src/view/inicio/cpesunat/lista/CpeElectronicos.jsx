@@ -1089,9 +1089,7 @@ class CpeElectronicos extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="5%">Opciones</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="10%">Comprobante</TableHead>
@@ -1101,7 +1099,9 @@ class CpeElectronicos extends CustomComponent {
                     <TableHead width="15%">Observación SUNAT</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>

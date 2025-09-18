@@ -200,16 +200,13 @@ class Ventas extends CustomComponent {
     } else {
       const [comprobantes] = await Promise.all([this.fetchComprobante(VENTA)]);
 
-      this.setState(
-        {
-          comprobantes,
-          initialLoad: false,
-        },
-        async () => {
-          await this.loadingInit();
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        comprobantes,
+        initialLoad: false,
+      }, async () => {
+        await this.loadingInit();
+        this.updateReduxState();
+      });
     }
   };
 
@@ -520,7 +517,7 @@ class Ventas extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idVenta)}
-              // disabled={!this.state.view}
+            // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -698,31 +695,21 @@ class Ventas extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="18%">Cliente</TableHead>
                     <TableHead width="12%">Comprobante</TableHead>
-                    <TableHead width="10%">Forma de Cobro</TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Estado
-                    </TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Total
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Detalle
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Guía
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Anular
-                    </TableHead>
+                    <TableHead width="10%">Tipo</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Total</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Guía</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>

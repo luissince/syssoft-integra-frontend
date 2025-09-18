@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
 import {
   numberFormat,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -38,12 +34,18 @@ import {
   setListaBancoPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class Bancos extends CustomComponent {
+
+  /**
+   * Inicializa un nuevo componente.
+   * @param {Object} props - Las propiedades pasadas al componente.
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -70,6 +72,19 @@ class Bancos extends CustomComponent {
     this.abortControllerTable = new AbortController();
   }
 
+  /*
+    |--------------------------------------------------------------------------
+    | Método de cliclo de vida
+    |--------------------------------------------------------------------------
+    |
+    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+    | de la aplicación y optimizar el rendimiento del componente.
+    |
+    */
   async componentDidMount() {
     await this.loadingData();
   }
@@ -78,6 +93,19 @@ class Bancos extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
+  /*
+    |--------------------------------------------------------------------------
+    | Métodos de acción
+    |--------------------------------------------------------------------------
+    |
+    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+    |
+    */
   loadingData = async () => {
     if (
       this.props.bancoLista &&
@@ -199,6 +227,22 @@ class Bancos extends CustomComponent {
     }
   };
 
+  /*
+    |--------------------------------------------------------------------------
+    | Método de eventos
+    |--------------------------------------------------------------------------
+    |
+    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+    |
+    */
+
   handleCrear = () => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/agregar`,
@@ -220,35 +264,55 @@ class Bancos extends CustomComponent {
   };
 
   handleBorrar = (idBanco) => {
-    alertDialog(
-      'Banco',
-      '¿Estás seguro de eliminar el banco?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Banco', 'Procesando información...');
+    alertKit.question({
+      title: 'Banco',
+      message: '¿Estás seguro de eliminar el banco?',
+    }, async (accept) => {
+      if (accept) {
+        alertKit.loading({ message: 'Procesando información...' });
 
-          const params = { idBanco: idBanco };
-          const response = await deleteBanco(params);
+        const params = { idBanco: idBanco };
+        const response = await deleteBanco(params);
 
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Banco', response.data, () => {
-              this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Banco', response.getMessage());
-          }
+        if (response instanceof ErrorResponse) {
+          alertKit.warning({
+            title: 'Banco',
+            message: response.getMessage(),
+          });
+          return;
         }
-      },
-    );
+
+        alertKit.success({
+          title: 'Banco',
+          message: response.data,
+        }, () => {
+          this.loadingInit();
+        });
+      }
+    });
   };
+
+  /*
+    |--------------------------------------------------------------------------
+    | Método de renderizado
+    |--------------------------------------------------------------------------
+    |
+    | El método render() es esencial en los componentes de React y se encarga de determinar
+    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+    | actuales del componente para determinar lo que se mostrará.
+    |
+    */
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan="11"
           message={'Cargando información de la tabla...'}
         />
       );
@@ -257,12 +321,21 @@ class Bancos extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan="11">¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
 
     return this.state.lista.map((item, index) => {
+      const estado =
+        item.estado === 1 ? (
+          <span className="text-success">ACTIVO</span>
+        ) : (
+          <span className="text-warning">INACTIVO</span>
+        );
+
+      const compartir = item.compartir === 1 ? <i className="fa fa-retweet text-green-500"></i> : <i className="fa fa-low-vision"></i>;
+
       return (
         <TableRow key={index}>
           <TableCell className="text-center">{item.id}</TableCell>
@@ -270,10 +343,10 @@ class Bancos extends CustomComponent {
           <TableCell>{item.tipoCuenta.toUpperCase()}</TableCell>
           <TableCell>{item.moneda}</TableCell>
           <TableCell>{item.numCuenta}</TableCell>
+          <TableCell className="text-center">{compartir}</TableCell>
+          <TableCell className="text-center">{item.estado}</TableCell>
           <TableCell
-            className={`text-right ${
-              item.saldo >= 0 ? 'text-success' : 'text-danger'
-            }`}
+            className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}
           >
             {numberFormat(item.saldo, item.codiso)}
           </TableCell>
@@ -281,7 +354,7 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idBanco)}
-              // disabled={!this.state.view}
+            // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -291,7 +364,7 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idBanco)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -301,7 +374,7 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idBanco)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -325,7 +398,7 @@ class Bancos extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleCrear}
-              // disabled={!this.state.add}
+            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
@@ -356,27 +429,22 @@ class Bancos extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Nombre</TableHead>
                     <TableHead width="15%">Tipo Cuenta</TableHead>
                     <TableHead width="10%">Moneda</TableHead>
                     <TableHead width="20%">Número Cuenta</TableHead>
-                    <TableHead width="10%">Saldo</TableHead>
-                    <TableHead width="5%" className="text-center">
-                      {' '}
-                      Detalle{' '}
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Editar{' '}
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Eliminar
-                    </TableHead>
+                    <TableHead width="10%" className="text-center">Compartir</TableHead>
+                    <TableHead width="10%" className="text-center">Estado</TableHead>
+                    <TableHead width="10%" className="text-center">Saldo</TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
+                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>

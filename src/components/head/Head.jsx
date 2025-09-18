@@ -118,7 +118,7 @@ const Menu = (props) => {
             <img src={images.usuario} className="user-image" alt="Usuario" />
           </a>
           <ul className="dropdown-menu settings-menu dropdown-menu-right">
-            <li className="user-header flex-column align-items-center justify-center">
+            <li className="user-header flex flex-col justify-center items-center">
               <img src={images.usuario} className="img-circle" alt="Usuario" />
               <p>
                 <span>
