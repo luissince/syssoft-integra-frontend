@@ -929,16 +929,6 @@ class LogisticaAjusteCrear extends CustomComponent {
   }
 }
 
-/**
- *
- * Método encargado de traer la información de redux
- */
-const mapStateToProps = (state) => {
-  return {
-    token: state.principal,
-  };
-};
-
 LogisticaAjusteCrear.propTypes = {
   history: PropTypes.shape({
     goBack: PropTypes.func,
@@ -951,6 +941,16 @@ LogisticaAjusteCrear.propTypes = {
       idUsuario: PropTypes.string,
     }),
   }),
+};
+
+/**
+ *
+ * Método encargado de traer la información de redux
+ */
+const mapStateToProps = (state) => {
+  return {
+    token: state.principal,
+  };
 };
 
 /**

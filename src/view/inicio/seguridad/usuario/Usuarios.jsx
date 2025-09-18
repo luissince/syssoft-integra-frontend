@@ -264,7 +264,7 @@ class Usuarios extends CustomComponent {
               <i className="bi bi-trash"></i>
             </Button>
           </TableCell>
-          <TableCell>
+          <TableCell className="text-center">
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleResetear(item.idUsuario)}

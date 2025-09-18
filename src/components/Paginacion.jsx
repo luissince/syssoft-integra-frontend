@@ -337,7 +337,6 @@ class Paginacion extends React.Component {
 
     this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1 ? '1 Página' : `${totalPaginacion} Páginas`}`;
 
-
     if (restart) {
       this.upperPageBound = 3;
       this.lowerPageBound = 0;

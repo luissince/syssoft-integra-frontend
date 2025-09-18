@@ -121,7 +121,7 @@ class CustomModalStock extends Component {
   |
   */
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = () => {
     if (!this.peticion) {
@@ -259,52 +259,48 @@ class CustomModalStock extends Component {
             <SpinnerView loading={loading} message={message} />
 
             {/* Producto + Imagen */}
-            <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                {nombre}
-              </h2>
-              <Image
-                default={images.noImage}
-                src={imagen}
-                alt={nombre}
-                width={100}
-                height={100}
-                className="object-contain rounded-md border"
-              />
-            </div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              {nombre}
+            </h2>
+            <Image
+              default={images.noImage}
+              src={imagen}
+              alt={nombre}
+              width={100}
+              height={100}
+              className="object-contain rounded-md border mb-2"
+            />
 
             {/* Formulario Stock */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock Mínimo <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    role="float"
-                    placeholder="Ingrese..."
-                    ref={this.refStockMinimo}
-                    value={stockMinimo}
-                    onChange={this.handleInputStockMinimo}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock Mínimo <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  role="float"
+                  placeholder="Ingrese..."
+                  ref={this.refStockMinimo}
+                  value={stockMinimo}
+                  onChange={this.handleInputStockMinimo}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock Máximo <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    role="float"
-                    placeholder="Ingrese..."
-                    ref={this.refStockMaximo}
-                    value={stockMaximo}
-                    onChange={this.handleInputStockMaximo}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock Máximo <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  role="float"
+                  placeholder="Ingrese..."
+                  ref={this.refStockMaximo}
+                  value={stockMaximo}
+                  onChange={this.handleInputStockMaximo}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
               </div>
             </div>
           </>
