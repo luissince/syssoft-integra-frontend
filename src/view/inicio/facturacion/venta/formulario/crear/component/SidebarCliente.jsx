@@ -193,13 +193,15 @@ const SidebarCliente = (props) => {
                 <Button
                   className="btn-outline-success mr-2"
                   onClick={handleSave}
-                  text={'Aceptar'}
-                />
+                >
+                  Aceptar
+                </Button>
                 <Button
                   className="btn-outline-secondary"
                   onClick={handleClose}
-                  text={'Cancelar'}
-                />
+                >
+                  Cancelar
+                </Button>
               </div>
             </div>
           </div>

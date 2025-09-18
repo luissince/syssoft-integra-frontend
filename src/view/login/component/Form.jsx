@@ -94,9 +94,8 @@ const Form = (props) => {
             <Button
               type={'submit'}
               className={'btn-primary btn-block mb-3'}
-              text={' Iniciar Sesión'}
             >
-              <i className="fa fa-arrow-right"></i>
+              <i className="fa fa-arrow-right"></i> Iniciar Sesión
             </Button>
 
             <div className="flex items-center flex-col gap-y-2">
