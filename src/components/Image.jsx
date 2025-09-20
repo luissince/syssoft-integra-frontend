@@ -144,8 +144,8 @@ class MultiImages extends Component {
   deleteImg = (indice, remove) => {
     const newImgs = remove
       ? this.props.images.map((element) =>
-          element.index === indice ? { ...element, remover: true } : element,
-        )
+        element.index === indice ? { ...element, remover: true } : element,
+      )
       : this.props.images.filter((element) => element.index !== indice);
 
     this.props.handleRemoveImages(newImgs);
@@ -223,7 +223,49 @@ MultiImages.defaultProps = {
 };
 export { MultiImages, ImageUpload };
 
+/**
+ * Image component with support for thumbnail view and fullscreen toggle.
+ *
+ * - Usa Bootstrap por defecto.
+ * - Si se pasa `overrideClass` y/o `overrideStyle`, se priorizan esos estilos (útil al migrar a Tailwind).
+ *
+ * @component
+ * @example
+ * // Default usage with Bootstrap styles
+ * <Image src="/path/to/image.jpg" alt="Example" />
+ *
+ * @example
+ * // Usage with Tailwind override
+ * <Image
+ *   src="/path/to/image.jpg"
+ *   alt="Example"
+ *   overrideClass="rounded-lg shadow-lg cursor-pointer"
+ * />
+ *
+ * @prop {string} [default] - Fallback image source if no image is provided.
+ * @prop {string} [src] - The main image source.
+ * @prop {string} alt - Alternative text for the image.
+ * @prop {string} [className] - Extra classes to append (Bootstrap style).
+ * @prop {string|number} [width] - Width of the image.
+ * @prop {string|number} [height] - Height of the image.
+ * @prop {string} [overrideClass] - Tailwind (or custom) classes that override Bootstrap defaults.
+ * @prop {Object} [overrideStyle] - Inline styles that override default styles.
+ */
 class Image extends Component {
+
+  /**
+   * Creates an instance of Image.
+   *
+   * @param {Object} props - React props.
+   * @param {string} [props.default] - Fallback image source.
+   * @param {string} [props.src] - Main image source.
+   * @param {string} props.alt - Alternative text.
+   * @param {string} [props.className] - CSS classes (Bootstrap).
+   * @param {string|number} [props.width] - Image width.
+   * @param {string|number} [props.height] - Image height.
+   * @param {string} [props.overrideClass] - Override CSS classes (Tailwind/custom).
+   * @param {Object} [props.overrideStyle] - Override inline styles.
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -233,10 +275,15 @@ class Image extends Component {
       className: props.className,
       width: props.width,
       height: props.height,
-      showFullScreen: false, // Estado para controlar la vista grande
+      showFullScreen: false,
     };
   }
 
+  /**
+  * Updates state when the image source changes.
+  *
+  * @param {Object} prevProps - Previous props.
+  */
   componentDidUpdate(prevProps) {
     if (prevProps.src !== this.props.src) {
       this.setState({
@@ -245,12 +292,23 @@ class Image extends Component {
     }
   }
 
+  /**
+  * Handles image loading errors by setting fallback image.
+  *
+  * @returns {void}
+  */
   handleImageError = () => {
     this.setState({
       image: this.state.default,
     });
   };
 
+  /**
+   * Toggles fullscreen mode for the image.
+   *
+   * @param {React.MouseEvent} e - Click event.
+   * @returns {void}
+   */
   toggleFullScreen = (e) => {
     e.stopPropagation();
     this.setState((prevState) => ({
@@ -258,9 +316,16 @@ class Image extends Component {
     }));
   };
 
+   /**
+   * Renders the image and fullscreen modal.
+   *
+   * @returns {JSX.Element}
+   */
   render() {
-    const { alt, className, width, height } = this.props;
+    const { alt, className, width, height, overrideClass, overrideStyle } = this.props;
     const { image, showFullScreen } = this.state;
+    const appliedClass = overrideClass || `${className} img-thumbnail`;
+    const appliedStyle = overrideStyle ? {} : { cursor: 'pointer' };
 
     return (
       <>
@@ -268,12 +333,12 @@ class Image extends Component {
         <img
           src={image}
           alt={alt}
-          className={`${className} img-thumbnail`}
+          className={appliedClass}
           width={width}
           height={height}
           onError={this.handleImageError}
-          onClick={this.toggleFullScreen} // Click para ver en grande
-          style={{ cursor: 'pointer' }} // Cursor tipo puntero
+          onClick={this.toggleFullScreen}
+          style={appliedStyle}
         />
 
         {/* Imagen en pantalla completa */}
@@ -299,12 +364,22 @@ class Image extends Component {
 }
 
 Image.propTypes = {
+  /** Fallback image source if no image is provided */
   default: PropTypes.string,
+  /** The main image source */
   src: PropTypes.string,
+  /** Alternative text for the image (required for accessibility) */
   alt: PropTypes.string.isRequired,
+  /** Extra CSS classes (Bootstrap style) */
   className: PropTypes.string,
+  /** Width of the image */
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  /** Height of the image */
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  /** Tailwind (or custom) classes that override Bootstrap defaults */
+  overrideClass: PropTypes.string,
+  /** Inline styles that override defaults */
+  overrideStyle: PropTypes.object,
 };
 
 export default Image;

@@ -17,23 +17,31 @@ const ButtonsOpciones = ({
   return (
     <div className="w-100 btn-group btn-group-toggle overflow-auto">
       <Button className="btn-light" onClick={handleOpenProductos}>
-        <img className="mb-2" src={images.producto} width={22} />
-        <p className="p-0 m-0">Producto(F2)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.producto} width={22} />
+          <p className="p-0 m-0">Producto(F2)</p>
+        </div>
       </Button>
 
       <Button className="btn-light" onClick={handleOpenPrecios}>
-        <img className="mb-2" src={images.prices} width={22} />
-        <p className="p-0 m-0">Precio(F3)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.prices} width={22} />
+          <p className="p-0 m-0">Precio(F3)</p>
+        </div>
       </Button>
 
       <Button className="btn-light" onClick={handleOpenCantidad}>
-        <img className="mb-2" src={images.plus_color} width={22} />
-        <p className="p-0 m-0">Cantidad(F4)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.plus_color} width={22} />
+          <p className="p-0 m-0">Cantidad(F4)</p>
+        </div>
       </Button>
 
       <Button className="btn-light" onClick={handleOpenDatos}>
-        <img className="mb-2" src={images.view} width={22} />
-        <p className="p-0 m-0">Datos(F5)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.view} width={22} />
+          <p className="p-0 m-0">Datos(F5)</p>
+        </div>
       </Button>
 
       {/* <Button
@@ -74,27 +82,37 @@ const ButtonsOpciones = ({
             </Button> */}
 
       <Button className="btn-light" onClick={handleOpenPedido}>
-        <img className="mb-2" src={images.invoice} width={22} />
-        <p className="p-0 m-0">Pedido(F9)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.invoice} width={22} />
+          <p className="p-0 m-0">Pedido(F9)</p>
+        </div>
       </Button>
 
       <Button className="btn-light" onClick={handleClearSale}>
-        <img className="mb-2" src={images.escoba} width={22} />
-        <p className="p-0 m-0">Limpiar(F10)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.escoba} width={22} />
+          <p className="p-0 m-0">Limpiar(F10)</p>
+        </div>
       </Button>
 
       <Button className="btn-light" onClick={handleOpenVenta}>
-        <img className="mb-2" src={images.view} width={22} />
-        <p className="p-0 m-0">Venta(F11)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.view} width={22} />
+          <p className="p-0 m-0">Venta(F11)</p>
+        </div>
       </Button>
 
       <Button className="btn-light" onClick={handleOpenCotizacion}>
-        <img className="mb-2" src={images.cotizacion} width={22} />
-        <p className="p-0 m-0">Cotización(F12)</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.cotizacion} width={22} />
+          <p className="p-0 m-0">Cotización(F12)</p>
+        </div>
       </Button>
       <Button className="btn-light" onClick={handleOpenOptions}>
-        <img className="mb-2" src={images.configuracion} width={22} />
-        <p className="p-0 m-0">Configuración</p>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.configuracion} width={22} />
+          <p className="p-0 m-0">Configuración</p>
+        </div>
       </Button>
     </div>
   );

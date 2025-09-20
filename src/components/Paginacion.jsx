@@ -89,10 +89,8 @@ class Paginacion extends React.Component {
   renderModernPagination = () => {
     const {
       className = "",
-      restart,
       totalPaginacion,
       paginacion,
-      data,
       theme = 'classic'
     } = this.props;
 
@@ -168,8 +166,8 @@ class Paginacion extends React.Component {
     };
 
     return (
-      <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
-        <div className="flex items-center justify-between w-full">
+      <div className={`flex items-center justify-between ${className}`}>
+        <div className="flex flex-col md:flex-row gap-y-2 items-center justify-between w-full">
           <div className="text-sm text-gray-700">{this.messagePaginacion}</div>
           <div className="flex items-center space-x-2">
             <ArrowButton
@@ -194,10 +192,8 @@ class Paginacion extends React.Component {
   renderClassicPagination = () => {
     const {
       className = "",
-      restart,
       totalPaginacion,
       paginacion,
-      data,
       theme = 'classic'
     } = this.props;
 
@@ -302,7 +298,7 @@ class Paginacion extends React.Component {
     }
 
     return (
-      <Row className={`${className}`}>
+      <Row className={className}>
         <Column className="col-sm-12 col-md-5">
           <div className="d-flex h-100 align-items-center">
             <span className='text-sm'>{this.messagePaginacion}</span>
@@ -327,10 +323,8 @@ class Paginacion extends React.Component {
 
   render() {
     const {
-      className = "",
       restart,
       totalPaginacion,
-      paginacion,
       data,
       theme = 'classic'
     } = this.props;
@@ -345,7 +339,7 @@ class Paginacion extends React.Component {
     }
 
     return (
-      <div className={className}>
+      <div className="overflow-auto">
         {theme === 'modern'
           ? this.renderModernPagination()
           : this.renderClassicPagination()}

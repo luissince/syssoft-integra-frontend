@@ -213,7 +213,7 @@ class Inventario extends CustomComponent {
 
       return;
     }
-    
+
     this.setState({
       resumen: response.data,
     });
@@ -938,6 +938,7 @@ class Inventario extends CustomComponent {
               paginacion={this.state.paginacion}
               fillTable={this.paginacionContext}
               restart={this.state.restart}
+              className="md:px-4 py-3 bg-white border-t border-gray-200 "
               theme="modern"
             />
           </div>

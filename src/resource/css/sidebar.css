@@ -195,16 +195,14 @@ a:focus {
   color: #004099;
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   #sidebar {
     position: fixed;
     height: 100%;
     margin-left: -270px;
-    /* left: -270px; */
   }
 
   #sidebar.toggled {
-    /* left: 0; */
     margin-left: 0px;
   }
 
@@ -216,4 +214,4 @@ a:focus {
     width: 0;
     min-width: 0;
   }
-}
+} */
