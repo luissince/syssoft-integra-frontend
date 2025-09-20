@@ -4,8 +4,12 @@ import PropTypes from 'prop-types';
 import { getStatePrivilegio } from '../../helper/utils.helper';
 import { FACTURACION, REALIZAR_VENTA, VENTAS } from '../../model/types/menu';
 import Button from '../Button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Menu = (props) => {
+
+  const isMobile = useIsMobile();
+
   const add = getStatePrivilegio(
     props.token.userToken.menus,
     FACTURACION,
@@ -28,14 +32,27 @@ const Menu = (props) => {
 
   return (
     <header className="app-header">
-      <div className="app-sidebar__title">
-        <img src={images.logo} alt="logo" />
-        <p>SYSSOFT INTEGRA</p>
-      </div>
-      <span
-        className="app-sidebar__toggle"
-        onClick={props.onToggleSidebar}
-      ></span>
+      {
+        !isMobile ? (
+          <>
+            <div className="app-sidebar__title">
+              <img src={images.logo} alt="logo" />
+              <p>SYSSOFT INTEGRA</p>
+            </div>
+            <span
+              className="app-sidebar__toggle"
+              onClick={props.onToggleSidebar}
+            ></span>
+          </>
+        )
+          :
+          (
+            <div className="flex items-center justify-center px-4 gap-x-3">
+              <img src={images.logo} alt="logo" />
+                <p className="font-bold">SYSSOFT INTEGRA</p>
+            </div>
+          )
+      }
 
       <ul className="app-nav">
         {/* Navegar al menú de navegación */}
@@ -46,8 +63,7 @@ const Menu = (props) => {
               to={`${props.match.url}/facturacion/ventas/crear`}
             >
               {' '}
-              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> Nueva
-              venta
+              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> {!isMobile ? 'Nueva venta' : ''}
             </Link>
           </div>
         )}
