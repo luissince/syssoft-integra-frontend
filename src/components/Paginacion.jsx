@@ -339,11 +339,11 @@ class Paginacion extends React.Component {
     }
 
     return (
-      <div className="overflow-auto">
+      <>
         {theme === 'modern'
           ? this.renderModernPagination()
           : this.renderClassicPagination()}
-      </div>
+      </>
     );
   }
 }

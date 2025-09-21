@@ -811,9 +811,8 @@ class ModalTransaccion extends CustomComponent {
               {/* Al contado */}
               <Column className="col-md-6 col-sm-12" formGroup={true}>
                 <Button
-                  className={`${
-                    formaPago === CONTADO ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
+                    } btn-block`}
                   title="Pago al contado"
                   disabled={disabledContado}
                   onClick={() => this.handleSelectTipoPago(CONTADO)}
@@ -832,9 +831,8 @@ class ModalTransaccion extends CustomComponent {
               {/* Crédito fijo*/}
               <Column className="col-md-6 col-sm-12">
                 <Button
-                  className={`${
-                    formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
+                  className={`${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
+                    } btn-block`}
                   title="Pago al credito"
                   disabled={disabledCreditoFijo}
                   onClick={() => this.handleSelectTipoPago(CREDITO_FIJO)}
@@ -896,20 +894,22 @@ class ModalTransaccion extends CustomComponent {
               <Row>
                 <Column ref={this.refMetodoPagoContenedor} formGroup={true}>
                   <h6>Lista de métodos:</h6>
-                  {bancosAgregados.map((item, index) => (
-                    <MetodoPago
-                      key={index}
-                      idBanco={item.idBanco}
-                      name={item.nombre}
-                      monto={item.monto}
-                      handleInputMontoBancosAgregados={
-                        this.handleInputMontoBancosAgregados
-                      }
-                      handleRemoveItemBancosAgregados={
-                        this.handleRemoveItemBancosAgregados
-                      }
-                    />
-                  ))}
+                  <div className="flex flex-col gap-2">
+                    {bancosAgregados.map((item, index) => (
+                      <MetodoPago
+                        key={index}
+                        idBanco={item.idBanco}
+                        name={item.nombre}
+                        monto={item.monto}
+                        handleInputMontoBancosAgregados={
+                          this.handleInputMontoBancosAgregados
+                        }
+                        handleRemoveItemBancosAgregados={
+                          this.handleRemoveItemBancosAgregados
+                        }
+                      />
+                    ))}
+                  </div>
                 </Column>
 
                 <Column className="col-12" formGroup={true}>

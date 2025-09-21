@@ -38,15 +38,19 @@ import {
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
+import { Layers, Star } from 'lucide-react';
+import { FaStar } from 'react-icons/fa';
+import { RxValueNone } from 'react-icons/rx';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class Productos extends CustomComponent {
+
   /**
-   *
-   * Constructor
+   * Inicializa un nuevo componente.
+   * @param {Object} props - Las propiedades pasadas al componente.
    */
   constructor(props) {
     super(props);
@@ -91,6 +95,20 @@ class Productos extends CustomComponent {
     this.abortControllerTable = new AbortController();
   }
 
+  /*
+    |--------------------------------------------------------------------------
+    | Método de cliclo de vida
+    |--------------------------------------------------------------------------
+    |
+    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+    | de la aplicación y optimizar el rendimiento del componente.
+    |
+    */
+
   async componentDidMount() {
     await this.loadingData();
   }
@@ -99,6 +117,19 @@ class Productos extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
+  /*
+    |--------------------------------------------------------------------------
+    | Métodos de acción
+    |--------------------------------------------------------------------------
+    |
+    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+    |
+    */
   async loadingData() {
     if (
       this.props.productoLista &&
@@ -223,6 +254,22 @@ class Productos extends CustomComponent {
     }
   };
 
+  /*
+    |--------------------------------------------------------------------------
+    | Método de eventos
+    |--------------------------------------------------------------------------
+    |
+    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+    |
+    */
+
   handleChangeView = (value) => {
     this.setState({ vista: value });
   };
@@ -285,6 +332,22 @@ class Productos extends CustomComponent {
       }
     });
   };
+
+  /*
+    |--------------------------------------------------------------------------
+    | Método de renderizado
+    |--------------------------------------------------------------------------
+    |
+    | El método render() es esencial en los componentes de React y se encarga de determinar
+    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+    | actuales del componente para determinar lo que se mostrará.
+    |
+    */
 
   generateBody() {
     if (this.state.loading) {
@@ -498,6 +561,9 @@ class Productos extends CustomComponent {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                       Categoría
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                      Lote
+                    </th>
                     <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-center">
                       Estado
                     </th>
@@ -515,7 +581,7 @@ class Productos extends CustomComponent {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {this.state.loading ? (
                     <tr>
-                      <td colSpan="10" className="px-6 py-12 text-center">
+                      <td colSpan="11" className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
                           <p className="text-gray-500">
@@ -526,7 +592,7 @@ class Productos extends CustomComponent {
                     </tr>
                   ) : isEmpty(this.state.lista) ? (
                     <tr>
-                      <td colSpan="10" className="px-6 py-12 text-center">
+                      <td colSpan="11" className="px-6 py-12 text-center">
                         <div className="text-gray-500">
                           <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
                           <p className="text-lg font-medium">
@@ -556,14 +622,14 @@ class Productos extends CustomComponent {
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {tipo}
-                            <div className="text-base text-gray-500">{item.venta}</div>
+                            <div className="text-sm text-gray-500">{item.venta}</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {item.nombre}
-                            </div>
                             <div className="text-sm text-gray-500">
                               {item.codigo}
+                            </div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {item.nombre}
                             </div>
                             {item.preferido === 1 && (
                               <div className="mt-1 inline-flex items-center text-yellow-500">
@@ -581,9 +647,12 @@ class Productos extends CustomComponent {
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {item.categoria}
                           </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {item.lote == 1 ? <Layers className="w-5 h-5 text-green-600" /> : <RxValueNone className="w-5 h-5 text-gray-500" />}
+                          </td>
                           <td className="px-6 py-4 text-center">
                             <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-base font-medium ${estadoClass}`}
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${estadoClass}`}
                             >
                               {item.estado === 1 ? 'Activo' : 'Inactivo'}
                             </span>
@@ -631,7 +700,7 @@ class Productos extends CustomComponent {
               paginacion={this.state.paginacion}
               fillTable={this.paginacionContext}
               restart={this.state.restart}
-              className="md:px-4 py-3 bg-white border-t border-gray-200"
+              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
               theme="modern"
             />
           </div>
@@ -669,7 +738,7 @@ class Productos extends CustomComponent {
                   return (
                     <div
                       key={index}
-                      className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden"
+                      className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden relative"
                     >
                       <div className=" bg-white flex items-center justify-center p-2">
                         <Image
@@ -679,16 +748,22 @@ class Productos extends CustomComponent {
                           overrideClass="w-full h-40 object-contain"
                         />
                       </div>
+
+                      <div className="absolute right-0 top-0">
+                        {item.preferido === 1 && (
+                          <FaStar className="w-6 h-6 text-yellow-500 m-2" />
+                        )}
+                      </div>
+
+                      <div className="absolute left-0 top-0">
+                        {item.lote == 1 ? <Layers className="w-5 h-5 text-green-600 m-2" /> : <RxValueNone className="w-5 h-5 text-gray-500 m-2" />}
+                      </div>
+
                       <div className="py-2 px-3">
                         <div className="flex justify-between items-start mb-2">
                           <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
                             {item.nombre}
                           </h5>
-                          {item.preferido === 1 && (
-                            <span className="text-yellow-500 ml-1">
-                              <i className="fa fa-star text-sm"></i>
-                            </span>
-                          )}
                         </div>
 
                         <div className="text-sm text-gray-500 mb-1">
@@ -696,7 +771,7 @@ class Productos extends CustomComponent {
                         </div>
 
                         <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Tipo:</span> {tipo} • {item.venta}
+                          <span className="font-medium">Tipo:</span> {tipo}
                         </div>
 
                         <div className="text-lg font-bold text-gray-900 mb-2">
@@ -750,7 +825,7 @@ class Productos extends CustomComponent {
               paginacion={this.state.paginacion}
               fillTable={this.paginacionContext}
               restart={this.state.restart}
-              className="md:px-2 py-3 bg-white border-t border-gray-200"
+              className="md:px-2 py-3 bg-white border-t border-gray-200 overflow-auto"
               theme="modern"
             />
           </div>
