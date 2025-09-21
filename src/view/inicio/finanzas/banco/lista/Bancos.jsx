@@ -106,6 +106,7 @@ class Bancos extends CustomComponent {
     | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
     |
     */
+   
   loadingData = async () => {
     if (
       this.props.bancoLista &&

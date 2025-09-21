@@ -207,7 +207,7 @@ class CompraCrear extends CustomComponent {
       this.props.compraCrear.local
     ) {
       await this.setStateAsync(this.props.compraCrear.state);
-      if (this.props.compraCrear.state.proveedor) {
+      if (this.props.compraCrear.state.proveedor !== null) {
         this.handleSelectItemProveedor(this.props.compraCrear.state.proveedor);
       }
     } else {
