@@ -294,8 +294,8 @@ class Productos extends CustomComponent {
     });
   };
 
-  handleEliminar = (idProducto) => {
-    alertKit.question({
+  handleEliminar = async (idProducto) => {
+    const accept = await alertKit.question({
       title: 'Producto',
       message: '¿Estás seguro de eliminar el producto?',
       acceptButton: {
@@ -304,33 +304,33 @@ class Productos extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (event) => {
-      if (event) {
-        alertKit.loading({ message: 'Procesando información...' });
-
-        const params = {
-          idProducto: idProducto,
-          idUsuario: this.state.idUsuario,
-        };
-
-        const response = await deleteProducto(params);
-
-        if (response instanceof ErrorResponse) {
-          alertKit.warning({
-            title: 'Producto',
-            message: response.getMessage(),
-          });
-          return;
-        }
-
-        alertKit.success({
-          title: 'Producto',
-          message: response.data,
-        }, () => {
-          this.loadingInit();
-        });
-      }
     });
+
+    if (accept) {
+      alertKit.loading({ message: 'Procesando información...' });
+
+      const params = {
+        idProducto: idProducto,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await deleteProducto(params);
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Producto',
+          message: response.getMessage(),
+        });
+        return;
+      }
+
+      alertKit.success({
+        title: 'Producto',
+        message: response.data,
+      }, () => {
+        this.loadingInit();
+      });
+    }
   };
 
   /*

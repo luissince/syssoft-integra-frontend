@@ -213,41 +213,41 @@ class Consultas extends CustomComponent {
     });
   };
 
-  handleBorrar = (idConsulta) => {
-    alertKit.question(
+  handleBorrar = async (idConsulta) => {
+    const accept = await alertKit.question(
       {
         title: 'Consulta',
         message: '¿Estás seguro de eliminar la consulta?',
-      },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+      });
 
-          const response = await deleteConsulta(idConsulta);
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success({
-              title: 'Consulta',
-              message: response.data,
-              onClose: () => {
-                this.loadingInit();
-              },
-            });
-          }
+      const response = await deleteConsulta(idConsulta);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Consulta',
+          message: response.data,
+          onClose: () => {
+            this.loadingInit();
+          },
+        });
+      }
 
-            alertKit.warning({
-              title: 'Consulta',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Consulta',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
@@ -292,7 +292,7 @@ class Consultas extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idConsulta)}
-              // disabled={!this.state.view}
+            // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -302,7 +302,7 @@ class Consultas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idConsulta)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -312,7 +312,7 @@ class Consultas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idConsulta)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

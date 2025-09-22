@@ -268,16 +268,18 @@ class VentaCrear extends CustomComponent {
   */
 
   loadingData = async () => {
+    const ventaCrear = this.props.ventaCrear;
+
     if (
-      this.props.ventaCrear &&
-      this.props.ventaCrear.state &&
-      this.props.ventaCrear.local
+      ventaCrear &&
+      ventaCrear.state &&
+      ventaCrear.local
     ) {
-      this.setState(this.props.ventaCrear.state, () => {
-        if (this.props.ventaCrear.state.cliente) {
-          this.handleSelectItemCliente(this.props.ventaCrear.state.cliente);
+      this.setState(ventaCrear.state, () => {
+        if (ventaCrear.state.cliente) {
+          this.handleSelectItemCliente(ventaCrear.state.cliente);
         }
-        this.refInvoiceView.current.setInitialData(this.props.ventaCrear.local);
+        this.refInvoiceView.current.setInitialData(ventaCrear.local);
       });
     } else {
       const [
@@ -344,15 +346,13 @@ class VentaCrear extends CustomComponent {
     this.props.setCrearVentaLocal(this.refInvoiceView.current.state);
   }
 
-  clearView = () => {
-    this.setState(this.initial, async () => {
-      await this.refCliente.current.restart();
-      await this.props.clearCrearVenta();
-      await this.loadingData();
-      this.refInvoiceView.current.clearDataComponents();
-
-      this.updateReduxState();
-    });
+  clearView = async () => {
+    await this.setStateAsync(this.initial)
+    await this.refCliente.current.restart();
+    await this.props.clearCrearVenta();
+    await this.loadingData();
+    this.refInvoiceView.current.clearDataComponents();
+    this.updateReduxState();
   };
 
   async fetchComprobante(tipo) {
@@ -1974,22 +1974,16 @@ class VentaCrear extends CustomComponent {
   };
 
   handleClearSale = async () => {
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Venta',
-      message:
-        'Los productos serán eliminados de la venta actual ¿Desea continuar?',
-      acceptButton: {
-        html: "<i class='fa fa-check'></i> Aceptar",
-      },
-      cancelButton: {
-        html: "<i class='fa fa-close'></i> Cancelar",
-      },
-    }, async (accept) => {
-      if (accept) {
-        this.clearView();
-      }
-    },
-    );
+      message: 'Los productos serán eliminados de la venta actual ¿Desea continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });;
+
+    if (accept) {
+      await this.clearView();
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -1999,7 +1993,7 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
@@ -2019,7 +2013,7 @@ class VentaCrear extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Venta',
         message: '¿Estás seguro de continuar?',
@@ -2029,55 +2023,55 @@ class VentaCrear extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idComprobante: idComprobante,
-            idMoneda: idMoneda,
-            idImpuesto: idImpuesto,
-            idCliente: cliente.idPersona,
-            idSucursal: idSucursal,
-            observacion: observacion,
-            nota: nota,
-            idUsuario: idUsuario,
-            estado: 1,
-            nuevoCliente: nuevoCliente,
-            idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
-            detalleVenta: detalleVenta,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
+      });
 
-          await callback();
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idComprobante: idComprobante,
+        idMoneda: idMoneda,
+        idImpuesto: idImpuesto,
+        idCliente: cliente.idPersona,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        nota: nota,
+        idUsuario: idUsuario,
+        estado: 1,
+        nuevoCliente: nuevoCliente,
+        idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
+        detalleVenta: detalleVenta,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
 
-          alertKit.loading({
-            message: 'Procesando venta...',
-          });
+      await callback();
 
-          const response = await createVenta(data);
+      alertKit.loading({
+        message: 'Procesando venta...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close();
-            this.handleOpenImpresion(response.data.idVenta);
-          }
+      const response = await createVenta(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getBody() !== '') {
-              const body = response.getBody().map(
-                (item) =>
-                  `<tr>
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idVenta);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getBody() !== '') {
+          const body = response.getBody().map(
+            (item) =>
+              `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+                item.cantidadActual - item.cantidadReal,
+              )}</td>
                 </tr>`,
-              );
+          );
 
-              const html = `
+          const html = `
               <div class="d-flex flex-column align-items-center">
                     <h5>Productos con cantidades faltantes</h5>
                     <table class="table">
@@ -2095,23 +2089,21 @@ class VentaCrear extends CustomComponent {
                     </table>
                 </div>`;
 
-              alertKit.html({
-                title: 'Venta',
-                bodyInnerHTML: html,
-              });
-            } else {
-              alertKit.warning({
-                title: 'Venta',
-                message: response.getMessage(),
-              });
-            }
-          }
+          alertKit.html({
+            title: 'Venta',
+            bodyInnerHTML: html,
+          });
+        } else {
+          alertKit.warning({
+            title: 'Venta',
+            message: response.getMessage(),
+          });
         }
-      },
-    );
+      }
+    }
   };
 
-  handleProcessCredito = (
+  handleProcessCredito = async (
     idFormaPago,
     numeroCuotas,
     frecuenciaPago,
@@ -2133,7 +2125,7 @@ class VentaCrear extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Venta',
         message: '¿Estás seguro de continuar?',
@@ -2143,58 +2135,59 @@ class VentaCrear extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idComprobante: idComprobante,
-            idMoneda: idMoneda,
-            idImpuesto: idImpuesto,
-            idCliente: cliente.idPersona,
-            idSucursal: idSucursal,
-            observacion: observacion,
-            nota: nota,
-            idUsuario: idUsuario,
-            estado: 2,
-            nuevoCliente: nuevoCliente,
-            idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
-            detalleVenta: detalleVenta,
-            numeroCuotas: numeroCuotas,
-            frecuenciaPago: frecuenciaPago,
-            notaTransacion,
-            importeTotal: importeTotal,
-          };
+      });
 
-          await callback();
-          alertKit.loading({
-            message: 'Procesando venta...',
-          });
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idComprobante: idComprobante,
+        idMoneda: idMoneda,
+        idImpuesto: idImpuesto,
+        idCliente: cliente.idPersona,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        nota: nota,
+        idUsuario: idUsuario,
+        estado: 2,
+        nuevoCliente: nuevoCliente,
+        idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
+        detalleVenta: detalleVenta,
+        numeroCuotas: numeroCuotas,
+        frecuenciaPago: frecuenciaPago,
+        notaTransacion,
+        importeTotal: importeTotal,
+      };
 
-          const response = await createVenta(data);
+      await callback();
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close();
-            this.handleOpenImpresion(response.data.idVenta);
-          }
+      alertKit.loading({
+        message: 'Procesando venta...',
+      });
 
-          if (response instanceof ErrorResponse) {
-            if (response.getBody() !== '') {
-              const body = response.getBody().map(
-                (item) =>
-                  `<tr>
+      const response = await createVenta(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idVenta);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getBody() !== '') {
+          const body = response.getBody().map(
+            (item) =>
+              `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+                item.cantidadActual - item.cantidadReal,
+              )}</td>
                 </tr>`,
-              );
+          );
 
-              this.alert.html(
-                'Venta',
-                `<div class="d-flex flex-column align-items-center">
+          this.alert.html(
+            'Venta',
+            `<div class="d-flex flex-column align-items-center">
                     <h5>Productos con cantidades faltantes</h5>
                     <table class="table">
                         <thead>
@@ -2210,17 +2203,15 @@ class VentaCrear extends CustomComponent {
                         </tbody>
                     </table>
                 </div>`,
-              );
-            } else {
-              alertKit.warning({
-                title: 'Venta',
-                message: response.getMessage(),
-              });
-            }
-          }
+          );
+        } else {
+          alertKit.warning({
+            title: 'Venta',
+            message: response.getMessage(),
+          });
         }
-      },
-    );
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {

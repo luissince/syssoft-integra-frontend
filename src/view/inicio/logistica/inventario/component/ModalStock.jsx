@@ -142,7 +142,7 @@ class CustomModalStock extends Component {
     this.setState({ stockMaximo: event.target.value });
   };
 
-  handleOnSubmit = () => {
+  handleOnSubmit = async () => {
     if (!isNumeric(this.state.stockMinimo)) {
       alertKit.warning(
         {
@@ -169,50 +169,50 @@ class CustomModalStock extends Component {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Inventario',
         message: '¿Estás seguro de continuar?',
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            stockMinimo: this.state.stockMinimo,
-            stockMaximo: this.state.stockMaximo,
-            idInventario: this.state.idInventario,
-          };
+        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+      });
 
-          await this.refModal.current.handleOnClose();
+    if (accept) {
+      const data = {
+        stockMinimo: this.state.stockMinimo,
+        stockMaximo: this.state.stockMaximo,
+        idInventario: this.state.idInventario,
+      };
 
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+      await this.refModal.current.handleOnClose();
 
-          const response = await updateStockInventario(data);
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Inventario',
-                message: response.data,
-              },
-              () => {
-                this.props.handleSave();
-              },
-            );
-          }
+      const response = await updateStockInventario(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Inventario',
+            message: response.data,
+          },
+          () => {
+            this.props.handleSave();
+          },
+        );
+      }
 
-            alertKit.warning({
-              title: 'Inventario',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Inventario',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   /*

@@ -189,7 +189,7 @@ class MarcaEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Marca',
         message: '¿Está seguro de continuar?',
@@ -199,44 +199,42 @@ class MarcaEditar extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idMarca: this.state.idMarca,
-            codigo: this.state.codigo,
-            nombre: this.state.nombre,
-            descripcion: this.state.descripcion,
-            estado: this.state.estado,
-            imagen: this.state.imagen,
-            idUsuario: this.state.idUsuario,
-          };
+      });
 
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const data = {
+        idMarca: this.state.idMarca,
+        codigo: this.state.codigo,
+        nombre: this.state.nombre,
+        descripcion: this.state.descripcion,
+        estado: this.state.estado,
+        imagen: this.state.imagen,
+        idUsuario: this.state.idUsuario,
+      };
 
-          const response = await updateMarca(data);
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success({
-              title: 'Marca',
-              message: response.data,
-              onClose: () => {
-                this.props.history.goBack();
-              },
-            });
-          }
+      const response = await updateMarca(data);
 
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'marca',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Marca',
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'marca',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

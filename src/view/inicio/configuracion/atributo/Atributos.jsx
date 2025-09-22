@@ -180,8 +180,8 @@ class Atributos extends CustomComponent {
     });
   };
 
-  handleDelete = (id) => {
-    alertKit.question(
+  handleDelete = async (id) => {
+    const accept = await alertKit.question(
       {
         title: 'Color',
         message: '¿Estás seguro de eliminar la Color?',
@@ -191,40 +191,38 @@ class Atributos extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idAtributo: id,
-          };
+      });
 
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const params = {
+        idAtributo: id,
+      };
 
-          const response = await removeAtributo(params);
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Color',
-                message: response.data,
-              },
-              () => {
-                this.loadInit();
-              },
-            );
-          }
+      const response = await removeAtributo(params);
 
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'Color',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Color',
+            message: response.data,
+          },
+          () => {
+            this.loadInit();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Color',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
@@ -279,7 +277,7 @@ class Atributos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idAtributo)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -288,7 +286,7 @@ class Atributos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idAtributo)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

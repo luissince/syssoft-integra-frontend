@@ -264,8 +264,8 @@ class OrdenCompras extends CustomComponent {
     });
   };
 
-  handleAnular = (id) => {
-    alertKit.question(
+  handleAnular = async (id) => {
+    const accept = await alertKit.question(
       {
         title: 'Orden de Compra',
         message: '¿Estás seguro de anular la orden de compra?',
@@ -275,41 +275,39 @@ class OrdenCompras extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idOrdenCompra: id,
-            idUsuario: this.state.idUsuario,
-          };
+      });
 
-          alertKit.loading({
-            message: 'Procesando petición...',
-          });
+    if (accept) {
+      const params = {
+        idOrdenCompra: id,
+        idUsuario: this.state.idUsuario,
+      };
 
-          const response = await cancelOrdenCompra(params);
+      alertKit.loading({
+        message: 'Procesando petición...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Orden de Compra',
-                message: response.data,
-              },
-              async () => {
-                await this.loadingInit();
-              },
-            );
-          }
+      const response = await cancelOrdenCompra(params);
 
-          if (response instanceof ErrorResponse) {
-            alertKit.question({
-              title: 'Orden de Compra',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Orden de Compra',
+            message: response.data,
+          },
+          async () => {
+            await this.loadingInit();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Orden de Compra',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {

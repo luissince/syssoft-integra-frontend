@@ -144,7 +144,7 @@ class Configurar extends CustomComponent {
     }
   }
 
-  onEventSave() {
+  async onEventSave() {
     if (this.state.documento === '') {
       this.refDocumento.current.focus();
       return;
@@ -155,74 +155,71 @@ class Configurar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Mi Empresa',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    const accept = await alertKit.question({
+      title: 'Mi Empresa',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          const logoSend = await imageBase64(this.refFileLogo.current.files[0]);
-          const baseLogo = logoSend ? logoSend.base64String : '';
-          const extLogo = logoSend ? logoSend.extension : '';
-
-          const imageSend = await imageBase64(
-            this.refFileImagen.current.files[0],
-          );
-          const baseImage = imageSend ? imageSend.base64String : '';
-          const extImage = imageSend ? imageSend.extension : '';
-
-          const data = {
-            documento: this.state.documento.trim(),
-            razonSocial: this.state.razonSocial.trim(),
-            nombreEmpresa: this.state.nombreEmpresa.trim(),
-            telefono: this.state.telefono.trim(),
-            celular: this.state.celular.trim(),
-            email: this.state.email.trim(),
-            web: this.state.web.trim(),
-            direccion: this.state.direccion.trim(),
-            logo: baseLogo,
-            image: baseImage,
-            extlogo: extLogo,
-            extimage: extImage,
-          };
-
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
-
-          const response = await saveEmpresa(data);
-
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Mi Empresa',
-                message: response.data,
-              },
-              () => {
-                this.props.configSave();
-                window.location.href = '/';
-              },
-            );
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertKit.warning({
-              title: 'Mi Empresa',
-              message: response.getMessage(),
-            });
-          }
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
-    );
+    });
+
+    if (accept) {
+      const logoSend = await imageBase64(this.refFileLogo.current.files[0]);
+      const baseLogo = logoSend ? logoSend.base64String : '';
+      const extLogo = logoSend ? logoSend.extension : '';
+
+      const imageSend = await imageBase64(
+        this.refFileImagen.current.files[0],
+      );
+      const baseImage = imageSend ? imageSend.base64String : '';
+      const extImage = imageSend ? imageSend.extension : '';
+
+      const data = {
+        documento: this.state.documento.trim(),
+        razonSocial: this.state.razonSocial.trim(),
+        nombreEmpresa: this.state.nombreEmpresa.trim(),
+        telefono: this.state.telefono.trim(),
+        celular: this.state.celular.trim(),
+        email: this.state.email.trim(),
+        web: this.state.web.trim(),
+        direccion: this.state.direccion.trim(),
+        logo: baseLogo,
+        image: baseImage,
+        extlogo: extLogo,
+        extimage: extImage,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await saveEmpresa(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Mi Empresa',
+            message: response.data,
+          },
+          () => {
+            this.props.configSave();
+            window.location.href = '/';
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Mi Empresa',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   render() {

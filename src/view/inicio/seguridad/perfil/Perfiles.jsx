@@ -161,69 +161,56 @@ class Perfiles extends CustomComponent {
     });
   };
 
-  handleBorrar(idPerfil) {
-    alertKit.question({
-      headerTitle: 'SysSoft Integra',
+  async handleBorrar(idPerfil) {
+    const accept = await alertKit.question({
       title: 'Perfil',
       message: '¿Estás seguro de eliminar el perfil?',
-      isMoveable: true,
-      showCloseButton: false,
-      closeOnEsc: false,
-      closeOnClickOutside: false,
-      buttons: [
-        {
-          html: "<i class='fa fa-check'></i> Aceptar",
-          primary: true,
-          class: ['btn', 'btn-primary'],
-          onClick: async () => {
-            const params = {
-              idPerfil: idPerfil,
-            };
-
-            alertKit.loading({
-              message: 'Procesando información...',
-            });
-
-            const response = await removePerfil(params);
-
-            if (response instanceof SuccessReponse) {
-              alertKit.success({
-                headerTitle: 'SysSoft Integra',
-                title: 'Perfil',
-                message: response.data,
-                buttons: [
-                  {
-                    html: "<i class='fa fa-check'></i> Aceptar",
-                    primary: true,
-                    class: ['btn', 'btn-outline-primary'],
-                    onClick: () => this.loadInit(),
-                  },
-                ],
-              });
-            }
-
-            if (response instanceof ErrorResponse) {
-              alertKit.warning({
-                headerTitle: 'SysSoft Integra',
-                title: 'Perfil',
-                message: response.getMessage(),
-                buttons: [
-                  {
-                    html: "<i class='fa fa-check'></i> Aceptar",
-                    primary: true,
-                    class: ['btn', 'btn-outline-primary'],
-                  },
-                ],
-              });
-            }
-          },
-        },
-        {
-          html: "<i class='fa fa-close'></i> Cancelar",
-          class: ['btn', 'btn-outline-danger'],
-        },
-      ],
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
     });
+
+    if (accept) {
+      const params = {
+        idPerfil: idPerfil,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await removePerfil(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          headerTitle: 'SysSoft Integra',
+          title: 'Perfil',
+          message: response.data,
+          buttons: [
+            {
+              html: "<i class='fa fa-check'></i> Aceptar",
+              primary: true,
+              class: ['btn', 'btn-outline-primary'],
+              onClick: () => this.loadInit(),
+            },
+          ],
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          headerTitle: 'SysSoft Integra',
+          title: 'Perfil',
+          message: response.getMessage(),
+          buttons: [
+            {
+              html: "<i class='fa fa-check'></i> Aceptar",
+              primary: true,
+              class: ['btn', 'btn-outline-primary'],
+            },
+          ],
+        });
+      }
+    }
   }
 
   generarBody() {
@@ -260,7 +247,7 @@ class Perfiles extends CustomComponent {
               className="btn-outline-warning btn-sm"
               title="Editar"
               onClick={() => this.handleEditar(item.idPerfil)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -269,7 +256,7 @@ class Perfiles extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idPerfil)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

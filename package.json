@@ -3,7 +3,7 @@
   "description": "SysSoft Integra aplicación de puntos de venta",
   "appTitle": "SysSoft Integra",
   "private": true,
-  "version": "1.0.24",
+  "version": "1.0.25",
   "type": "module",
   "scripts": {
     "dev": "bash ./start-dev.sh",
@@ -26,7 +26,7 @@
     "@radix-ui/react-slot": "1.2.3",
     "@reduxjs/toolkit": "2.2.3",
     "@types/react-modal": "3.16.3",
-    "alert-kit": "2.2.0",
+    "alert-kit": "^2.2.2",
     "axios": "1.7.8",
     "bootstrap-icons": "1.8.1",
     "class-variance-authority": "0.7.1",

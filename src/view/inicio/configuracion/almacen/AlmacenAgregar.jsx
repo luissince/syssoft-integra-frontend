@@ -184,13 +184,13 @@ class AlmacenAgregar extends CustomComponent {
   handleSelectItemUbigeo = (value) => {
     this.refUbigeo.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeos: [],
@@ -210,7 +210,7 @@ class AlmacenAgregar extends CustomComponent {
     this.setState({ observacion: event.target.value });
   };
 
-  handleSave() {
+  async handleSave() {
     if (isEmpty(this.state.nombre)) {
       alertKit.warning({
         title: 'Almacén',
@@ -255,61 +255,58 @@ class AlmacenAgregar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Almacén',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    const accept = await alertKit.question({
+      title: 'Almacén',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
-
-          const data = {
-            nombre: this.state.nombre.trim(),
-            idTipoAlmacen: this.state.idTipoAlmacen,
-            direccion: this.state.direccion.trim(),
-            idUbigeo: this.state.idUbigeo,
-            codigoSunat: this.state.codigoSunat.toString().trim(),
-            observacion: this.state.observacion,
-            predefinido: this.state.predefinido,
-            idSucursal: this.state.idSucursal,
-            idUsuario: this.state.idUsuario,
-          };
-
-          const response = await addAlmacen(data);
-
-          if (response instanceof SuccessReponse) {
-            alertKit.success({
-              title: 'Almacén',
-              message: response.data,
-              onClose: () => {
-                this.props.history.goBack();
-              },
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertKit.warning({
-              title: 'Almacén',
-              message: response.getMessage(),
-              onClose: () => {
-                this.refNombre.current.focus();
-              },
-            });
-          }
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
-    );
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const data = {
+        nombre: this.state.nombre.trim(),
+        idTipoAlmacen: this.state.idTipoAlmacen,
+        direccion: this.state.direccion.trim(),
+        idUbigeo: this.state.idUbigeo,
+        codigoSunat: this.state.codigoSunat.toString().trim(),
+        observacion: this.state.observacion,
+        predefinido: this.state.predefinido,
+        idSucursal: this.state.idSucursal,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await addAlmacen(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Almacén',
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Almacén',
+          message: response.getMessage(),
+          onClose: () => {
+            this.refNombre.current.focus();
+          },
+        });
+      }
+    }
   }
 
   /*

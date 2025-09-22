@@ -358,7 +358,7 @@ class PersonaEditar extends CustomComponent {
     this.setState({ ubigeos: [], idUbigeo: '' });
   };
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     const tipoDocumento = this.state.tiposDocumentos.find(
       (item) => item.idTipoDocumento === this.state.idTipoDocumento,
     );
@@ -417,7 +417,7 @@ class PersonaEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: "Persona",
       message: "¿Estás seguro de continuar?",
       acceptButton: {
@@ -426,55 +426,55 @@ class PersonaEditar extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          idPersona: this.state.idPersona,
-          idTipoDocumento: this.state.idTipoDocumento,
-          documento: this.state.documento.toString().trim(),
-          informacion: this.state.informacion.trim().toUpperCase(),
-          cliente: this.state.cliente,
-          proveedor: this.state.proveedor,
-          conductor: this.state.conductor,
-          licenciaConducir: this.state.licenciaConductir,
-          telefono: this.state.telefono.toString().trim().toUpperCase(),
-          celular: this.state.celular.toString().trim().toUpperCase(),
-          fechaNacimiento:
-            this.state.fechaNacimiento == '' ? null : this.state.fechaNacimient,
-          email: this.state.email.trim(),
-          clave: this.state.clave.trim(),
-          genero: this.state.genero,
-          direccion: this.state.direccion.trim().toUpperCase(),
-          idUbigeo: this.state.idUbigeo,
-          estadoCivil: this.state.estadoCivil,
-          estado: this.state.estado,
-          observacion: this.state.observacion.trim().toUpperCase(),
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await editPersona(data);
-        if (response instanceof SuccessReponse) {
-          alertKit.success({
-            title: "Persona",
-            message: "Se ha editado la persona exitosamente",
-          }, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-
-          alertKit.warning({
-            title: "Persona",
-            message: response.getMessage(),
-          })
-        }
-      }
     });
+
+    if (accept) {
+      const data = {
+        idPersona: this.state.idPersona,
+        idTipoDocumento: this.state.idTipoDocumento,
+        documento: this.state.documento.toString().trim(),
+        informacion: this.state.informacion.trim().toUpperCase(),
+        cliente: this.state.cliente,
+        proveedor: this.state.proveedor,
+        conductor: this.state.conductor,
+        licenciaConducir: this.state.licenciaConductir,
+        telefono: this.state.telefono.toString().trim().toUpperCase(),
+        celular: this.state.celular.toString().trim().toUpperCase(),
+        fechaNacimiento:
+          this.state.fechaNacimiento == '' ? null : this.state.fechaNacimient,
+        email: this.state.email.trim(),
+        clave: this.state.clave.trim(),
+        genero: this.state.genero,
+        direccion: this.state.direccion.trim().toUpperCase(),
+        idUbigeo: this.state.idUbigeo,
+        estadoCivil: this.state.estadoCivil,
+        estado: this.state.estado,
+        observacion: this.state.observacion.trim().toUpperCase(),
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await editPersona(data);
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Persona",
+          message: "Se ha editado la persona exitosamente",
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Persona",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   render() {
