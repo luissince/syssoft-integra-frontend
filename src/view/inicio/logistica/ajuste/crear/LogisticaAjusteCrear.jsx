@@ -445,7 +445,7 @@ class LogisticaAjusteCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones de proceso de registro
   //------------------------------------------------------------------------------------------
-  handleSave = () => {
+  handleSave = async () => {
     if (isEmpty(this.state.detalles)) {
       alertKit.warning(
         {
@@ -478,58 +478,55 @@ class LogisticaAjusteCrear extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Ajuste',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    const accept = await alertKit.question({
+      title: 'Ajuste',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idTipoAjuste: this.state.idTipoAjuste,
-            idMotivoAjuste: this.state.idMotivoAjuste,
-            idAlmacen: this.state.idAlmacen,
-            idSucursal: this.state.idSucursal,
-            observacion: this.state.observacion,
-            idUsuario: this.state.idUsuario,
-            detalles: this.state.detalles,
-          };
-
-          alertKit.loading({
-            message: 'Procesando petición...',
-          });
-
-          const response = await createAjuste(data);
-
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Ajuste',
-                message: response.data,
-              },
-              () => {
-                this.clearView();
-              },
-            );
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertKit.warning({
-              title: 'Ajuste',
-              message: response.getMessage(),
-            });
-          }
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
-    );
+    });
+
+    if (accept) {
+      const data = {
+        idTipoAjuste: this.state.idTipoAjuste,
+        idMotivoAjuste: this.state.idMotivoAjuste,
+        idAlmacen: this.state.idAlmacen,
+        idSucursal: this.state.idSucursal,
+        observacion: this.state.observacion,
+        idUsuario: this.state.idUsuario,
+        detalles: this.state.detalles,
+      };
+
+      alertKit.loading({
+        message: 'Procesando petición...',
+      });
+
+      const response = await createAjuste(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Ajuste',
+            message: response.data,
+          },
+          () => {
+            this.clearView();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Ajuste',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleBack = () => {
@@ -583,9 +580,9 @@ class LogisticaAjusteCrear extends CustomComponent {
 
       const cantidad = item.lotes
         ? item.lotes.reduce(
-            (acum, lote) => acum + getNumber(lote.cantidadAjustar),
-            0,
-          )
+          (acum, lote) => acum + getNumber(lote.cantidadAjustar),
+          0,
+        )
         : item.cantidad;
 
       let diferencia = 0;

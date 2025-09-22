@@ -666,23 +666,20 @@ class EmpresaProceso extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Empresa',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    const accept = await alertKit.question({
+      title: 'Empresa',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          await this.handleGuardarProcess();
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
-    );
+    });
+
+    if (accept) {
+      await this.handleGuardarProcess();
+    }
   };
 
   handleGuardarProcess = async () => {

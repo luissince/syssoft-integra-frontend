@@ -30,7 +30,7 @@ class PerfilAgregar extends CustomComponent {
     this.setState({ descripcion: event.target.value });
   };
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.descripcion)) {
       alertKit.warning(
         {
@@ -44,7 +44,7 @@ class PerfilAgregar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         headerTitle: 'SysSoft Integra',
         title: 'Perfil',
@@ -55,44 +55,42 @@ class PerfilAgregar extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            descripcion: this.state.descripcion.trim(),
-            idEmpresa: 'EM0001',
-            idUsuario: this.state.idUsuario,
-          };
+      });
 
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const data = {
+        descripcion: this.state.descripcion.trim(),
+        idEmpresa: 'EM0001',
+        idUsuario: this.state.idUsuario,
+      };
 
-          const response = await addPerfil(data);
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Perfil',
-                message: response.data,
-              },
-              () => {
-                this.props.history.goBack();
-              },
-            );
-          }
+      const response = await addPerfil(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Perfil',
+            message: response.data,
+          },
+          () => {
+            this.props.history.goBack();
+          },
+        );
+      }
 
-            alertKit.warning({
-              title: 'Perfil',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Perfil',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

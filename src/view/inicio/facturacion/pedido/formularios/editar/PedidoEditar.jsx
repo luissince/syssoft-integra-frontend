@@ -751,51 +751,51 @@ class PedidoEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Pedido',
       message: '¿Está seguro de continuar?',
-    },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idPedido: idPedido,
-            idComprobante: idComprobante,
-            idCliente: cliente.idPersona,
-            idMoneda: idMoneda,
-            idTipoEntrega: idTipoEntrega,
-            fechaEntrega: fechaEntrega,
-            horaEntrega: horaEntrega,
-            idSucursal: this.state.idSucursal,
-            idUsuario: this.state.idUsuario,
-            estado: 1,
-            observacion: observacion,
-            nota: nota,
-            detalles: detalles,
-          };
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const data = {
+        idPedido: idPedido,
+        idComprobante: idComprobante,
+        idCliente: cliente.idPersona,
+        idMoneda: idMoneda,
+        idTipoEntrega: idTipoEntrega,
+        fechaEntrega: fechaEntrega,
+        horaEntrega: horaEntrega,
+        idSucursal: this.state.idSucursal,
+        idUsuario: this.state.idUsuario,
+        estado: 1,
+        observacion: observacion,
+        nota: nota,
+        detalles: detalles,
+      };
 
-          const response = await updatePedido(data);
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close(() => {
-              this.handleOpenImpresion(response.data.idPedido);
-            });
-          }
+      const response = await updatePedido(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.close(() => {
+          this.handleOpenImpresion(response.data.idPedido);
+        });
+      }
 
-            alertKit.warning({
-              title: 'Pedido',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Pedido',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------

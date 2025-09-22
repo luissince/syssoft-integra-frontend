@@ -311,7 +311,7 @@ class ModalPersona extends Component {
       this.setState({
         tiposDocumentos: response.data,
         loading: false,
-      },()=>{
+      }, () => {
         this.refTipoDocumento.current.focus();
       });
     }
@@ -582,68 +582,65 @@ class ModalPersona extends Component {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Persona',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    const accept = await alertKit.question({
+      title: 'Persona',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idTipoDocumento: this.state.idTipoDocumento,
-            documento: this.state.documento.toString().trim().toUpperCase(),
-            informacion: this.state.informacion.trim().toUpperCase(),
-            cliente: true,
-            proveedor: false,
-            conductor: false,
-            licenciaConducir: '',
-            telefono: '',
-            celular: this.state.celular.toString().trim().toUpperCase(),
-            fechaNacimiento: currentDate(),
-            email: this.state.email.trim(),
-            genero: '',
-            direccion: this.state.direccion.trim().toUpperCase(),
-            idUbigeo: this.state.idUbigeo,
-            estadoCivil: '',
-            predeterminado: false,
-            estado: true,
-            observacion: '',
-            idUsuario: this.props.idUsuario,
-          };
-
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
-
-          const response = await createPersona(data);
-
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Persona',
-                message: response.data,
-              },
-              async () => {
-                await this.refModal.current.handleOnClose();
-              },
-            );
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'Persona',
-              message: response.getMessage(),
-            });
-          }
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
-    );
+    });
+
+    if (accept) {
+      const data = {
+        idTipoDocumento: this.state.idTipoDocumento,
+        documento: this.state.documento.toString().trim().toUpperCase(),
+        informacion: this.state.informacion.trim().toUpperCase(),
+        cliente: true,
+        proveedor: false,
+        conductor: false,
+        licenciaConducir: '',
+        telefono: '',
+        celular: this.state.celular.toString().trim().toUpperCase(),
+        fechaNacimiento: currentDate(),
+        email: this.state.email.trim(),
+        genero: '',
+        direccion: this.state.direccion.trim().toUpperCase(),
+        idUbigeo: this.state.idUbigeo,
+        estadoCivil: '',
+        predeterminado: false,
+        estado: true,
+        observacion: '',
+        idUsuario: this.props.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await createPersona(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Persona',
+            message: response.data,
+          },
+          async () => {
+            await this.refModal.current.handleOnClose();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Persona',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {
@@ -847,7 +844,7 @@ class ModalPersona extends Component {
 ModalPersona.propTypes = {
   contentLabel: PropTypes.string,
   titleHeader: PropTypes.string,
-  
+
   refModal: PropTypes.object,
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,

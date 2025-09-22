@@ -412,9 +412,9 @@ class CompraCrear extends CustomComponent {
       const cantidad = !item.lote
         ? item.cantidad
         : item.lotes.reduce(
-            (acumulador, item) => acumulador + Number(item.cantidad.value),
-            0,
-          );
+          (acumulador, item) => acumulador + Number(item.cantidad.value),
+          0,
+        );
       const costo = item.costo;
       return accumulate + cantidad * costo;
     }, 0);
@@ -454,14 +454,14 @@ class CompraCrear extends CustomComponent {
     this.refProductoValue.current.focus();
   };
 
-  handleSaveProducto = async (detalles, callback = async function () {}) => {
+  handleSaveProducto = async (detalles, callback = async function () { }) => {
     const total = detalles.reduce((accumulate, item) => {
       const cantidad = !item.lote
         ? item.cantidad
         : item.lotes.reduce(
-            (acumulador, item) => acumulador + Number(item.cantidad.value),
-            0,
-          );
+          (acumulador, item) => acumulador + Number(item.cantidad.value),
+          0,
+        );
       const costo = item.costo;
       return accumulate + cantidad * costo;
     }, 0);
@@ -895,17 +895,16 @@ class CompraCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    alertKit.question(
-      {
-        title: 'Compra',
-        message: '¿Está seguro de limpiar la compra?',
-      },
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
-      },
-    );
+    const accept = await alertKit.question({
+      title: 'Compra',
+      message: '¿Está seguro de limpiar la compra?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   handleCerrar = () => {
@@ -927,7 +926,7 @@ class CompraCrear extends CustomComponent {
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       idComprobante,
@@ -943,54 +942,52 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Compra',
         message: '¿Está seguro de continuar?',
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idComprobante: idComprobante,
-            idProveedor: proveedor.idPersona,
-            idImpuesto: idImpuesto,
-            idAlmacen: idAlmacenDestino,
-            idMoneda: idMoneda,
-            idOrdenCompra: (ordenCompra && ordenCompra.idOrdenCompra) || null,
-            observacion: observacion,
-            nota: nota,
-            idUsuario: idUsuario,
-            idSucursal: idSucursal,
-            estado: 1,
-            detalles: detalles,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
+      });
 
-          await callback();
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idComprobante: idComprobante,
+        idProveedor: proveedor.idPersona,
+        idImpuesto: idImpuesto,
+        idAlmacen: idAlmacenDestino,
+        idMoneda: idMoneda,
+        idOrdenCompra: (ordenCompra && ordenCompra.idOrdenCompra) || null,
+        observacion: observacion,
+        nota: nota,
+        idUsuario: idUsuario,
+        idSucursal: idSucursal,
+        estado: 1,
+        detalles: detalles,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
 
-          const response = await createCompra(data);
+      await callback();
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close();
-            this.handleOpenImpresion(response.data.idCompra);
-          }
+      const response = await createCompra(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idCompra);
+      }
 
-            alertKit.warning({
-              title: 'Compra',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Compra',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleProcessCredito = async (
@@ -999,7 +996,7 @@ class CompraCrear extends CustomComponent {
     frecuenciaPago,
     total,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       idComprobante,
@@ -1015,56 +1012,54 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Compra',
         message: '¿Está seguro de continuar?',
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idComprobante: idComprobante,
-            idProveedor: proveedor.idPersona,
-            idImpuesto: idImpuesto,
-            idAlmacen: idAlmacenDestino,
-            idMoneda: idMoneda,
-            idOrdenCompra: (ordenCompra && ordenCompra.idOrdenCompra) || null,
-            observacion: observacion,
-            nota: nota,
-            idUsuario: idUsuario,
-            idSucursal: idSucursal,
-            estado: 2,
-            numeroCuotas: numeroCuotas,
-            frecuenciaPago: frecuenciaPago,
-            detalles: detalles,
-            notaTransacion,
-            importeTotal: total,
-          };
+      });
 
-          await callback();
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idComprobante: idComprobante,
+        idProveedor: proveedor.idPersona,
+        idImpuesto: idImpuesto,
+        idAlmacen: idAlmacenDestino,
+        idMoneda: idMoneda,
+        idOrdenCompra: (ordenCompra && ordenCompra.idOrdenCompra) || null,
+        observacion: observacion,
+        nota: nota,
+        idUsuario: idUsuario,
+        idSucursal: idSucursal,
+        estado: 2,
+        numeroCuotas: numeroCuotas,
+        frecuenciaPago: frecuenciaPago,
+        detalles: detalles,
+        notaTransacion,
+        importeTotal: total,
+      };
 
-          const response = await createCompra(data);
+      await callback();
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close();
-            this.handleOpenImpresion(response.data.idCompra);
-          }
+      const response = await createCompra(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idCompra);
+      }
 
-            alertKit.warning({
-              title: 'Compra',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Compra',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -1115,9 +1110,9 @@ class CompraCrear extends CustomComponent {
       const cantidad = !item.lote
         ? item.cantidad
         : item.lotes.reduce(
-            (acumulador, item) => acumulador + Number(item.cantidad.value),
-            0,
-          );
+          (acumulador, item) => acumulador + Number(item.cantidad.value),
+          0,
+        );
       const valor = item.costo;
 
       const porcentaje = item.porcentajeImpuesto;
@@ -1136,9 +1131,9 @@ class CompraCrear extends CustomComponent {
         const cantidad = !item.lote
           ? item.cantidad
           : item.lotes.reduce(
-              (acumulador, item) => acumulador + Number(item.cantidad.value),
-              0,
-            );
+            (acumulador, item) => acumulador + Number(item.cantidad.value),
+            0,
+          );
         const total = cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
@@ -1380,12 +1375,11 @@ class CompraCrear extends CustomComponent {
                               className="mb-2 object-contain"
                             />
                             <p
-                              className={`${
-                                item.idTipoProducto === PRODUCTO &&
+                              className={`${item.idTipoProducto === PRODUCTO &&
                                 item.cantidad <= 0
-                                  ? 'badge badge-danger text-base'
-                                  : 'badge badge-success text-base'
-                              } `}
+                                ? 'badge badge-danger text-base'
+                                : 'badge badge-success text-base'
+                                } `}
                             >
                               STOCK: {formatDecimal(item.cantidad)}
                             </p>
@@ -1526,10 +1520,10 @@ class CompraCrear extends CustomComponent {
                   const cantidad = !item.lote
                     ? item.cantidad
                     : item.lotes.reduce(
-                        (acumulador, item) =>
-                          acumulador + Number(item.cantidad.value),
-                        0,
-                      );
+                      (acumulador, item) =>
+                        acumulador + Number(item.cantidad.value),
+                      0,
+                    );
                   const costo = item.costo;
 
                   return (

@@ -146,7 +146,7 @@ class CpeElectronicos extends React.Component {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Consultar Comprobante',
       message: '¿Está seguro de continuar?',
       acceptButton: {
@@ -155,41 +155,34 @@ class CpeElectronicos extends React.Component {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (value) => {
-      if (value) {
+    });
 
-        alertKit.loading({
-          message: 'Precesanso...',
-        });
+    if (accept) {
 
-        const response = await consultarCpeSunat(
-          this.state.ruc,
-          this.state.usuario,
-          this.state.clave,
-          this.state.tipo,
-          this.state.serie.toUpperCase(),
-          this.state.correlativo,
-        );
+      alertKit.loading({
+        message: 'Precesanso...',
+      });
 
-        if (response instanceof SuccessReponse) {
-          const result = response.data;
+      const response = await consultarCpeSunat(
+        this.state.ruc,
+        this.state.usuario,
+        this.state.clave,
+        this.state.tipo,
+        this.state.serie.toUpperCase(),
+        this.state.correlativo,
+      );
 
-          if (result.state === true) {
-            if (result.accepted === true) {
-              alertKit.success({
-                title: 'Consultar Comprobante',
-                message: 'Resultado: Código ' + result.code + ' ' + result.message,
-              }, () => {
-                this.setState({ codigo: result.code, respuesta: result.message });
-              });
-            } else {
-              alertKit.warning({
-                title: 'Consultar Comprobante',
-                message: 'Resultado: Código ' + result.code + ' ' + result.message,
-              }, () => {
-                this.setState({ codigo: result.code, respuesta: result.message });
-              });
-            }
+      if (response instanceof SuccessReponse) {
+        const result = response.data;
+
+        if (result.state === true) {
+          if (result.accepted === true) {
+            alertKit.success({
+              title: 'Consultar Comprobante',
+              message: 'Resultado: Código ' + result.code + ' ' + result.message,
+            }, () => {
+              this.setState({ codigo: result.code, respuesta: result.message });
+            });
           } else {
             alertKit.warning({
               title: 'Consultar Comprobante',
@@ -198,16 +191,23 @@ class CpeElectronicos extends React.Component {
               this.setState({ codigo: result.code, respuesta: result.message });
             });
           }
-        }
-
-        if (response instanceof ErrorResponse) {
+        } else {
           alertKit.warning({
             title: 'Consultar Comprobante',
-            message: response.getMessage(),
+            message: 'Resultado: Código ' + result.code + ' ' + result.message,
+          }, () => {
+            this.setState({ codigo: result.code, respuesta: result.message });
           });
         }
       }
-    });
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Consultar Comprobante',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   async onEventConsultarCdr() {
@@ -271,7 +271,7 @@ class CpeElectronicos extends React.Component {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Consultar Comprobante',
       message: '¿Está seguro de continuar?',
       acceptButton: {
@@ -280,32 +280,32 @@ class CpeElectronicos extends React.Component {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (value) => {
-      if (value) {
+    });
 
-        alertKit.loading({
-          message: 'Precesanso...',
-        });
+    if (accept) {
+      alertKit.loading({
+        message: 'Precesanso...',
+      });
 
-        const response = await cdrCpeSunat(
-          this.state.ruc,
-          this.state.usuario,
-          this.state.clave,
-          this.state.tipo,
-          this.state.serie.toUpperCase(),
-          this.state.correlativo,
-        );
+      const response = await cdrCpeSunat(
+        this.state.ruc,
+        this.state.usuario,
+        this.state.clave,
+        this.state.tipo,
+        this.state.serie.toUpperCase(),
+        this.state.correlativo,
+      );
 
-        if (response instanceof SuccessReponse) {
-          const result = response.data;
+      if (response instanceof SuccessReponse) {
+        const result = response.data;
 
-          if (result.state === true) {
-            if (result.accepted === true) {
-              alertKit.success({
-                title: 'Consultar Comprobante',
-                message: 'Resultado: Código ' + result.code + ' ' + result.message,
-              }, () => {
-                           const id = guId();
+        if (result.state === true) {
+          if (result.accepted === true) {
+            alertKit.success({
+              title: 'Consultar Comprobante',
+              message: 'Resultado: Código ' + result.code + ' ' + result.message,
+            }, () => {
+              const id = guId();
               this.props.downloadFileAsync({
                 id,
                 url: '',
@@ -314,17 +314,9 @@ class CpeElectronicos extends React.Component {
                 content: result.xml,
               });
               this.setState({ codigo: result.code, respuesta: result.message });
-              });
+            });
 
- 
-            } else {
-              alertKit.warning({
-                title: 'Consultar Comprobante',
-                message: 'Resultado: Código ' + result.code + ' ' + result.message,
-              }, () => {
-                this.setState({ codigo: result.code, respuesta: result.message });
-              });
-            }
+
           } else {
             alertKit.warning({
               title: 'Consultar Comprobante',
@@ -333,16 +325,23 @@ class CpeElectronicos extends React.Component {
               this.setState({ codigo: result.code, respuesta: result.message });
             });
           }
-        }
-
-        if (response instanceof ErrorResponse) {
+        } else {
           alertKit.warning({
             title: 'Consultar Comprobante',
-            message: response.getMessage(),
+            message: 'Resultado: Código ' + result.code + ' ' + result.message,
+          }, () => {
+            this.setState({ codigo: result.code, respuesta: result.message });
           });
         }
       }
-    });
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Consultar Comprobante',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   async onEventLimpiar() {

@@ -218,8 +218,8 @@ class Almacenes extends CustomComponent {
    * // Ejemplo de uso:
    * handleEliminar('AL0001');
    */
-  handleEliminar = (idAlmacen) => {
-    alertKit.question(
+  handleEliminar = async (idAlmacen) => {
+    const accept = await alertKit.question(
       {
         title: 'Almacén',
         message:
@@ -230,40 +230,38 @@ class Almacenes extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+      });
 
-          const params = {
-            idAlmacen: idAlmacen,
-          };
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          const response = await deleteAlmacen(params);
+      const params = {
+        idAlmacen: idAlmacen,
+      };
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Almacén',
-                message: response.data,
-              },
-              () => {
-                this.loadInit();
-              },
-            );
-          }
+      const response = await deleteAlmacen(params);
 
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'Almacén',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Almacén',
+            message: response.data,
+          },
+          () => {
+            this.loadInit();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Almacén',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
@@ -296,9 +294,8 @@ class Almacenes extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.predefinido === 1 ? 'badge-info' : 'badge-secondary'
-              }`}
+              className={`badge ${item.predefinido === 1 ? 'badge-info' : 'badge-secondary'
+                }`}
             >
               {item.predefinido === 1 ? 'SI' : 'NO'}
             </div>
