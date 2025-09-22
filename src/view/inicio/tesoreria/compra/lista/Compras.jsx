@@ -44,10 +44,10 @@ import { alertKit } from 'alert-kit';
  */
 class Compras extends CustomComponent {
 
- /**
-   * Inicializa un nuevo componente.
-   * @param {Object} props - Las propiedades pasadas al componente.
-   */
+  /**
+    * Inicializa un nuevo componente.
+    * @param {Object} props - Las propiedades pasadas al componente.
+    */
   constructor(props) {
     super(props);
 
@@ -257,8 +257,8 @@ class Compras extends CustomComponent {
     });
   };
 
-  handleAnular = (id) => {
-    alertKit.question(
+  handleAnular = async (id) => {
+    const accept = await alertKit.question(
       {
         title: 'Compra',
         message: '¿Está seguro de anular la compra?',
@@ -268,40 +268,38 @@ class Compras extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idCompra: id,
-            idUsuario: this.state.idUsuario,
-          };
+      });
 
-          alertKit.loading({
-            message: 'Procesando petición...',
-          });
+    if (accept) {
+      const params = {
+        idCompra: id,
+        idUsuario: this.state.idUsuario,
+      };
 
-          const response = await cancelCompra(params);
+      alertKit.loading({
+        message: 'Procesando petición...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success({
-              title: 'Compra',
-              message: response.data,
-            }, async () => {
-              await this.loadingInit();
-            });
-          }
+      const response = await cancelCompra(params);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Compra',
+          message: response.data,
+        }, async () => {
+          await this.loadingInit();
+        });
+      }
 
-            alertKit.warning({
-              title: 'Compra',
-              message: response.getMessage(),
-            })
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Compra',
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   /*

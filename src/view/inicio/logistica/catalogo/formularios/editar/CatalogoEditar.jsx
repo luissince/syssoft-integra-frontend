@@ -283,7 +283,7 @@ class CatalogoEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Catálogo',
       message: '¿Estás seguro de continuar?',
       acceptButton: {
@@ -292,38 +292,38 @@ class CatalogoEditar extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          idCatalogo: idCatalogo,
-          nombre: nombre,
-          idSucursal: idSucursal,
-          idUsuario: idUsuario,
-          productos: detalles,
-        };
-
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
-
-        const response = await updateCatalogo(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.close(() => {
-            this.handleOpenImpresion(response.data.idCatalogo);
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.warning({
-            title: 'Catálogo',
-            message: response.getMessage(),
-          });
-        }
-      }
     });
+
+    if (accept) {
+      const data = {
+        idCatalogo: idCatalogo,
+        nombre: nombre,
+        idSucursal: idSucursal,
+        idUsuario: idUsuario,
+        productos: detalles,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await updateCatalogo(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close(() => {
+          this.handleOpenImpresion(response.data.idCatalogo);
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Catálogo',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------

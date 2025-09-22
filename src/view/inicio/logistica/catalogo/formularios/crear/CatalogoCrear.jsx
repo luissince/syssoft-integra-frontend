@@ -305,7 +305,7 @@ class CatalogoCrear extends CustomComponent {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Catálogo',
       message: '¿Estás seguro de continuar?',
       acceptButton: {
@@ -314,45 +314,44 @@ class CatalogoCrear extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        const data = {
-          nombre: nombre,
-          idSucursal: idSucursal,
-          idUsuario: idUsuario,
-          productos: detalles,
-        };
+    });
 
-        alertKit.loading({
-          message: 'Procesando información...',
+    if (accept) {
+      const data = {
+        nombre: nombre,
+        idSucursal: idSucursal,
+        idUsuario: idUsuario,
+        productos: detalles,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await createCatalogo(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close(() => {
+          this.handleOpenImpresion(response.data.idCatalogo);
         });
-
-        const response = await createCatalogo(data);
-
-        if (response instanceof SuccessReponse) {
-          alertKit.close(() => {
-            this.handleOpenImpresion(response.data.idCatalogo);
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.warning({
-            title: 'Catálogo',
-            message: response.getMessage(),
-          });
-        }
       }
-    },
-    );
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Catálogo',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Catálogo',
       message: '¿Estás seguro de limpiar el catálogo?',
       acceptButton: {
@@ -361,11 +360,11 @@ class CatalogoCrear extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        await this.clearView();
-      }
     });
+
+    if (accept) {
+      await this.clearView();
+    }
   };
 
   //------------------------------------------------------------------------------------------

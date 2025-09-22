@@ -158,13 +158,13 @@ class SucursalAgregar extends CustomComponent {
   handleSelectItemUbigeo = (value) => {
     this.refUbigeo.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
 
     this.setState({
@@ -207,7 +207,7 @@ class SucursalAgregar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Sucursal',
         message: '¿Está seguro de continuar?',
@@ -217,53 +217,51 @@ class SucursalAgregar extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+      });
 
-          const data = {
-            //datos
-            nombre: this.state.nombre.trim().toUpperCase(),
-            telefono: this.state.telefono.trim(),
-            celular: this.state.celular.trim(),
-            email: this.state.email.trim(),
-            paginaWeb: this.state.paginaWeb.trim(),
-            direccion: this.state.direcion.trim().toUpperCase(),
-            idUbigeo: this.state.idUbigeo,
-            googleMaps: this.state.googleMaps,
-            horarioAtencion: this.state.horarioAtencion.trim(),
-            principal: this.state.principal,
-            estado: this.state.estado,
-            imagen: this.state.imagen,
-            idUsuario: this.state.idUsuario,
-          };
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          const response = await addSucursal(data);
+      const data = {
+        //datos
+        nombre: this.state.nombre.trim().toUpperCase(),
+        telefono: this.state.telefono.trim(),
+        celular: this.state.celular.trim(),
+        email: this.state.email.trim(),
+        paginaWeb: this.state.paginaWeb.trim(),
+        direccion: this.state.direcion.trim().toUpperCase(),
+        idUbigeo: this.state.idUbigeo,
+        googleMaps: this.state.googleMaps,
+        horarioAtencion: this.state.horarioAtencion.trim(),
+        principal: this.state.principal,
+        estado: this.state.estado,
+        imagen: this.state.imagen,
+        idUsuario: this.state.idUsuario,
+      };
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success({
-              title: 'Sucursal',
-              message: response.data,
-              onClose: () => {
-                this.props.history.goBack();
-              },
-            });
-          }
+      const response = await addSucursal(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Sucursal',
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          },
+        });
+      }
 
-            alertKit.warning({
-              title: 'Sucursal',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Sucursal',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

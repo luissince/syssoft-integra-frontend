@@ -422,8 +422,8 @@ class CpeElectronicos extends CustomComponent {
     });
   };
 
-  handleSendFacturar = (idVenta) => {
-    alertKit.question({
+  handleSendFacturar = async (idVenta) => {
+    const accept = await alertKit.question({
       title: 'Cpe Sunat',
       message: '¿Está seguro de enviar el comprobante electrónico?',
       acceptButton: {
@@ -432,54 +432,53 @@ class CpeElectronicos extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
+    });
 
-        const response = await facturarCpeSunat(idVenta);
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
+      const response = await facturarCpeSunat(idVenta);
 
-          if (state) {
-            if (accept) {
-              alertKit.success({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description
-              }, () => {
-                this.onEventPaginacion();
-              });
-            } else {
-              alertKit.warning({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              });
-            }
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state) {
+          if (accept) {
+            alertKit.success({
+              title: 'Cpe Sunat',
+              message: 'Código ' + code + ' ' + description
+            }, () => {
+              this.onEventPaginacion();
+            });
           } else {
             alertKit.warning({
               title: 'Cpe Sunat',
               message: 'Código ' + code + ' ' + description,
             });
           }
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
+        } else {
           alertKit.warning({
             title: 'Cpe Sunat',
-            message: response.getMessage()
+            message: 'Código ' + code + ' ' + description,
           });
         }
       }
-    },
-    );
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cpe Sunat',
+          message: response.getMessage()
+        });
+      }
+    }
   };
 
-  handleSendResumenDiario = (idVenta, comprobante) => {
-    alertKit.question({
+  handleSendResumenDiario = async (idVenta, comprobante) => {
+    const accept = await alertKit.question({
       title: 'Cpe Sunat',
       message: `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer un resumen diario?`,
       acceptButton: {
@@ -488,55 +487,54 @@ class CpeElectronicos extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
+    });
 
-        const response = await anularBoletaCpeSunat(idVenta);
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
+      const response = await anularBoletaCpeSunat(idVenta);
 
-          if (state) {
-            if (accept) {
-              alertKit.success({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              }, () => {
-                this.onEventPaginacion();
-              },
-              );
-            } else {
-              alertKit.warning({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              });
-            }
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state) {
+          if (accept) {
+            alertKit.success({
+              title: 'Cpe Sunat',
+              message: 'Código ' + code + ' ' + description,
+            }, () => {
+              this.onEventPaginacion();
+            },
+            );
           } else {
             alertKit.warning({
               title: 'Cpe Sunat',
               message: 'Código ' + code + ' ' + description,
             });
           }
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
+        } else {
           alertKit.warning({
             title: 'Cpe Sunat',
-            message: response.getMessage()
+            message: 'Código ' + code + ' ' + description,
           });
         }
       }
-    },
-    );
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cpe Sunat',
+          message: response.getMessage()
+        });
+      }
+    }
   };
 
-  handleSendComunicacionDeBaja = (idVenta, comprobante) => {
-    alertKit.question({
+  handleSendComunicacionDeBaja = async (idVenta, comprobante) => {
+    const accept = await alertKit.question({
       title: 'Cpe Sunat',
       message: `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer una comunicación de baja?`,
       acceptButton: {
@@ -545,55 +543,54 @@ class CpeElectronicos extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
+    });
 
-        const response = await anularFacturaCpeSunat(idVenta);
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
+      const response = await anularFacturaCpeSunat(idVenta);
 
-          if (state) {
-            if (accept) {
-              alertKit.success({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              }, () => {
-                this.onEventPaginacion();
-              },
-              );
-            } else {
-              alertKit.warning({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              });
-            }
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state) {
+          if (accept) {
+            alertKit.success({
+              title: 'Cpe Sunat',
+              message: 'Código ' + code + ' ' + description,
+            }, () => {
+              this.onEventPaginacion();
+            },
+            );
           } else {
             alertKit.warning({
               title: 'Cpe Sunat',
               message: 'Código ' + code + ' ' + description,
             });
           }
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.error({
+        } else {
+          alertKit.warning({
             title: 'Cpe Sunat',
-            message: response.getMessage()
+            message: 'Código ' + code + ' ' + description,
           });
         }
       }
-    },
-    );
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.error({
+          title: 'Cpe Sunat',
+          message: response.getMessage()
+        });
+      }
+    }
   };
 
-  handleSendGuiaRemision = (idGuiaRemision) => {
-    alertKit.question({
+  handleSendGuiaRemision = async (idGuiaRemision) => {
+    const accept = await alertKit.question({
       title: 'Cpe Sunat',
       message: '¿Está seguro de enviar el comprobante electrónico?',
       acceptButton: {
@@ -602,51 +599,50 @@ class CpeElectronicos extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    }, async (accept) => {
-      if (accept) {
-        alertKit.loading({
-          message: 'Procesando información...',
-        });
+    });
 
-        const response = await guiaRemisionCpeSunat(idGuiaRemision);
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-        if (response instanceof SuccessReponse) {
-          const { state, accept, code, description } = response.data;
+      const response = await guiaRemisionCpeSunat(idGuiaRemision);
 
-          if (state) {
-            if (accept) {
-              alertKit.success({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              }, () => {
-                this.onEventPaginacion();
-              },
-              );
-            } else {
-              alertKit.warning({
-                title: 'Cpe Sunat',
-                message: 'Código ' + code + ' ' + description,
-              });
-            }
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state) {
+          if (accept) {
+            alertKit.success({
+              title: 'Cpe Sunat',
+              message: 'Código ' + code + ' ' + description,
+            }, () => {
+              this.onEventPaginacion();
+            },
+            );
           } else {
             alertKit.warning({
               title: 'Cpe Sunat',
               message: 'Código ' + code + ' ' + description,
             });
           }
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertKit.error({
+        } else {
+          alertKit.warning({
             title: 'Cpe Sunat',
-            message: response.getMessage()
+            message: 'Código ' + code + ' ' + description,
           });
         }
       }
-    },
-    );
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.error({
+          title: 'Cpe Sunat',
+          message: response.getMessage()
+        });
+      }
+    }
   };
 
   handleOpenPrinter = async (idComprobante, tipo, size) => {
@@ -863,8 +859,8 @@ class CpeElectronicos extends CustomComponent {
                           ? 'Comunicación de Baja'
                           : 'Resumen Diario',
                       label: item.anulacion === 1
-                      ? 'Comunicación de Baja'
-                      : 'Resumen Diario',
+                        ? 'Comunicación de Baja'
+                        : 'Resumen Diario',
                       onClick: () => {
                         const id = item.idComprobante;
                         const num =

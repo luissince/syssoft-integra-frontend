@@ -773,7 +773,7 @@ class PedidoCrear extends CustomComponent {
       return;
     }
 
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Pedido',
       message: '¿Está seguro de continuar?',
       acceptButton: {
@@ -782,61 +782,61 @@ class PedidoCrear extends CustomComponent {
       cancelButton: {
         html: "<i class='fa fa-close'></i> Cancelar",
       },
-    },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idComprobante: idComprobante,
-            idCliente: cliente.idPersona,
-            idMoneda: idMoneda,
-            idTipoEntrega: idTipoEntrega,
-            fechaEntrega: fechaEntrega,
-            horaEntrega: horaEntrega,
-            idSucursal: this.state.idSucursal,
-            idUsuario: this.state.idUsuario,
-            estado: 1,
-            observacion: observacion,
-            nota: nota,
-            detalles: detalles,
-          };
+    });
 
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    if (accept) {
+      const data = {
+        idComprobante: idComprobante,
+        idCliente: cliente.idPersona,
+        idMoneda: idMoneda,
+        idTipoEntrega: idTipoEntrega,
+        fechaEntrega: fechaEntrega,
+        horaEntrega: horaEntrega,
+        idSucursal: this.state.idSucursal,
+        idUsuario: this.state.idUsuario,
+        estado: 1,
+        observacion: observacion,
+        nota: nota,
+        detalles: detalles,
+      };
 
-          const response = await createPedido(data);
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close(() => {
-              this.handleOpenImpresion(response.data.idPedido);
-            });
-          }
+      const response = await createPedido(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.close(() => {
+          this.handleOpenImpresion(response.data.idPedido);
+        });
+      }
 
-            alertKit.warning({
-              title: 'Pedido',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Pedido',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    alertKit.question({
+    const accept = await alertKit.question({
       title: 'Pedido',
       message: '¿Está seguro de limpiar el pedido?',
-    }, (accept) => {
-      if (accept) {
-        this.clearView();
-      }
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
     });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   //------------------------------------------------------------------------------------------

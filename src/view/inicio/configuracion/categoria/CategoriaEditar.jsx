@@ -189,7 +189,7 @@ class CategoriaEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Categoría',
         message: '¿Estás seguro de continuar?',
@@ -199,13 +199,11 @@ class CategoriaEditar extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (confirm) => {
-        if (confirm) {
-          await this.handleGuardarProcess();
-        }
-      },
-    );
+      });
+
+    if (accept) {
+      await this.handleGuardarProcess();
+    }
   };
 
   handleGuardarProcess = async () => {

@@ -490,7 +490,7 @@ class ProductoEditar extends CustomComponent {
     this.setState({ isOpenProducto: false });
   };
 
-  handleAddProducto = async (item, callback = async function () {}) => {
+  handleAddProducto = async (item, callback = async function () { }) => {
     this.setState((prevState) => ({
       combos: [...prevState.combos, item],
     }));
@@ -1190,7 +1190,7 @@ class ProductoEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Registrar
   //------------------------------------------------------------------------------------------
-  handleSaveProducto = () => {
+  handleSaveProducto = async () => {
     if (isEmpty(this.state.nombreProducto)) {
       alertKit.warning(
         {
@@ -1317,75 +1317,74 @@ class ProductoEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Producto',
-        message: '¿Estás seguro de continuar?',
-      },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    const accept = await alertKit.question({
+      title: 'Producto',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
-          const data = {
-            idProducto: this.state.idProducto,
-            nombre: this.state.nombreProducto,
-            codigo: this.state.codigoProducto,
-            sku: this.state.skuProducto,
-            codigoBarras: this.state.codigoBarrasProducto,
-            idCodigoSunat: this.state.codigoSunatProducto,
-            idMedida: this.state.idMedidaProducto,
-            idCategoria: this.state.idCategoriaProducto,
-            idMarca: this.state.idMarcaProducto,
-            descripcionCorta: this.state.descripcionCortaProducto,
-            descripcionLarga: this.state.descripcionLargaProducto,
-            idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
-            costo: this.state.costoProducto,
-            precio: this.state.precioProducto,
-            precios: this.state.precios,
-            lote: this.state.lote,
-            publicar: this.state.publicar,
-            negativo: this.state.negativo,
-            preferido: this.state.preferido,
-            estado: this.state.estado,
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-            detalles: this.state.detallesProducto,
-            imagenes: this.state.imagenesProducto,
-            colores: this.state.coloresProducto,
-            tallas: this.state.tallasProducto,
-            sabores: this.state.saboresProducto,
+      const data = {
+        idProducto: this.state.idProducto,
+        nombre: this.state.nombreProducto,
+        codigo: this.state.codigoProducto,
+        sku: this.state.skuProducto,
+        codigoBarras: this.state.codigoBarrasProducto,
+        idCodigoSunat: this.state.codigoSunatProducto,
+        idMedida: this.state.idMedidaProducto,
+        idCategoria: this.state.idCategoriaProducto,
+        idMarca: this.state.idMarcaProducto,
+        descripcionCorta: this.state.descripcionCortaProducto,
+        descripcionLarga: this.state.descripcionLargaProducto,
+        idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
+        costo: this.state.costoProducto,
+        precio: this.state.precioProducto,
+        precios: this.state.precios,
+        lote: this.state.lote,
+        publicar: this.state.publicar,
+        negativo: this.state.negativo,
+        preferido: this.state.preferido,
+        estado: this.state.estado,
 
-            imagen: this.state.imagen,
+        detalles: this.state.detallesProducto,
+        imagenes: this.state.imagenesProducto,
+        colores: this.state.coloresProducto,
+        tallas: this.state.tallasProducto,
+        sabores: this.state.saboresProducto,
 
-            idUsuario: this.state.idUsuario,
-          };
+        imagen: this.state.imagen,
 
-          const response = await updateProducto(data);
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Producto',
-                message: response.data,
-              },
-              () => {
-                this.props.history.goBack();
-              },
-            );
-          }
+        idUsuario: this.state.idUsuario,
+      };
 
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'Producto',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      const response = await updateProducto(data);
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Producto',
+            message: response.data,
+          },
+          () => {
+            this.props.history.goBack();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Producto',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
-  handleSaveServicio = () => {
+  handleSaveServicio = async () => {
     if (isEmpty(this.state.nombreServicio)) {
       alertKit.warning(
         {
@@ -1483,75 +1482,75 @@ class ProductoEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Producto - Servicio',
         message: '¿Estás seguro de continuar?',
-      },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+      });
 
-          const data = {
-            idProducto: this.state.idProducto,
-            nombre: this.state.nombreServicio,
-            codigo: this.state.codigoServicio,
-            sku: this.state.skuServicio,
-            codigoBarras: this.state.codigoBarrasServicio,
-            idCodigoSunat: this.state.codigoSunatServicio,
-            idMedida: this.state.idMedidaServicio,
-            idCategoria: this.state.idCategoriaServicio,
-            idMarca: this.state.idMarcaServicio,
-            descripcionCorta: this.state.descripcionCortaServicio,
-            descripcionLarga: this.state.descripcionLargaServicio,
-            idTipoTratamientoProducto: SERVICIO,
-            costo: 0,
-            precio: this.state.precioServicio,
-            precios: [],
-            lote: this.state.lote,
-            publicar: this.state.publicar,
-            negativo: false,
-            preferido: this.state.preferido,
-            estado: this.state.estado,
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-            detalles: this.state.detallesServicio,
-            imagenes: this.state.imagenesServicio,
-            colores: this.state.coloresServicio,
-            tallas: this.state.tallasServicio,
-            sabores: this.state.saboresServicio,
+      const data = {
+        idProducto: this.state.idProducto,
+        nombre: this.state.nombreServicio,
+        codigo: this.state.codigoServicio,
+        sku: this.state.skuServicio,
+        codigoBarras: this.state.codigoBarrasServicio,
+        idCodigoSunat: this.state.codigoSunatServicio,
+        idMedida: this.state.idMedidaServicio,
+        idCategoria: this.state.idCategoriaServicio,
+        idMarca: this.state.idMarcaServicio,
+        descripcionCorta: this.state.descripcionCortaServicio,
+        descripcionLarga: this.state.descripcionLargaServicio,
+        idTipoTratamientoProducto: SERVICIO,
+        costo: 0,
+        precio: this.state.precioServicio,
+        precios: [],
+        lote: this.state.lote,
+        publicar: this.state.publicar,
+        negativo: false,
+        preferido: this.state.preferido,
+        estado: this.state.estado,
 
-            imagen: this.state.imagen,
+        detalles: this.state.detallesServicio,
+        imagenes: this.state.imagenesServicio,
+        colores: this.state.coloresServicio,
+        tallas: this.state.tallasServicio,
+        sabores: this.state.saboresServicio,
 
-            idUsuario: this.state.idUsuario,
-          };
+        imagen: this.state.imagen,
 
-          const response = await updateProducto(data);
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Producto - Servicio',
-                message: response.getMessage(),
-              },
-              () => {
-                this.props.history.goBack();
-              },
-            );
-          }
+        idUsuario: this.state.idUsuario,
+      };
 
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'Producto - Servicio',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      const response = await updateProducto(data);
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Producto - Servicio',
+            message: response.getMessage(),
+          },
+          () => {
+            this.props.history.goBack();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Producto - Servicio',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
-  handleSaveCombo = () => {
+  handleSaveCombo = async () => {
     if (isEmpty(this.state.nombreCombo)) {
       alertKit.warning(
         {
@@ -1649,75 +1648,72 @@ class ProductoEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Producto - Combo',
-        message: '¿Estás seguro de continuar?',
-      },
-      async (accept) => {
-        if (accept) {
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
+    const accept = await alertKit.question({
+      title: 'Producto - Combo',
+      message: '¿Estás seguro de continuar?',
+    });
 
-          const data = {
-            idProducto: this.state.idProducto,
-            nombre: this.state.nombreCombo,
-            codigo: this.state.codigoCombo,
-            sku: this.state.skuCombo,
-            codigoBarras: this.state.codigoBarrasCombo,
-            idCodigoSunat: this.state.codigoSunatCombo,
-            idMedida: this.state.idMedidaCombo,
-            idCategoria: this.state.idCategoriaCombo,
-            idMarca: this.state.idMarcaCombo,
-            descripcionCorta: this.state.descripcionCortaCombo,
-            descripcionLarga: this.state.descripcionLargaCombo,
-            idTipoTratamientoProducto: UNIDADES,
-            costo: 0,
-            precio: this.state.precioCombo,
-            precios: [],
-            combos: [],
-            inventarios: [],
-            lote: this.state.lote,
-            publicar: this.state.publicar,
-            negativo: false,
-            preferido: this.state.preferido,
-            estado: this.state.estado,
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
 
-            detalles: this.state.detallesCombo,
-            imagenes: this.state.imagenesCombo,
-            colores: this.state.coloresCombo,
-            tallas: this.state.tallasCombo,
-            sabores: this.state.saboresCombo,
+      const data = {
+        idProducto: this.state.idProducto,
+        nombre: this.state.nombreCombo,
+        codigo: this.state.codigoCombo,
+        sku: this.state.skuCombo,
+        codigoBarras: this.state.codigoBarrasCombo,
+        idCodigoSunat: this.state.codigoSunatCombo,
+        idMedida: this.state.idMedidaCombo,
+        idCategoria: this.state.idCategoriaCombo,
+        idMarca: this.state.idMarcaCombo,
+        descripcionCorta: this.state.descripcionCortaCombo,
+        descripcionLarga: this.state.descripcionLargaCombo,
+        idTipoTratamientoProducto: UNIDADES,
+        costo: 0,
+        precio: this.state.precioCombo,
+        precios: [],
+        combos: [],
+        inventarios: [],
+        lote: this.state.lote,
+        publicar: this.state.publicar,
+        negativo: false,
+        preferido: this.state.preferido,
+        estado: this.state.estado,
 
-            imagen: this.state.imagen,
+        detalles: this.state.detallesCombo,
+        imagenes: this.state.imagenesCombo,
+        colores: this.state.coloresCombo,
+        tallas: this.state.tallasCombo,
+        sabores: this.state.saboresCombo,
 
-            idUsuario: this.state.idUsuario,
-          };
+        imagen: this.state.imagen,
 
-          const response = await updateProducto(data);
+        idUsuario: this.state.idUsuario,
+      };
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Producto - Combo',
-                message: response.getMessage(),
-              },
-              () => {
-                this.props.history.goBack();
-              },
-            );
-          }
+      const response = await updateProducto(data);
 
-          if (response instanceof ErrorResponse) {
-            alertKit.warning({
-              title: 'Producto - Combo',
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Producto - Combo',
+            message: response.getMessage(),
+          },
+          () => {
+            this.props.history.goBack();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Producto - Combo',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleRegistrar = () => {
@@ -1983,8 +1979,8 @@ class ProductoEditar extends CustomComponent {
                       handleRemovePrecios={this.handleRemovePreciosProducto}
                       activarInventario={false}
                       inventarios={[]}
-                      handleOpenModalInventario={() => {}}
-                      handleRemoveItemInventario={() => {}}
+                      handleOpenModalInventario={() => { }}
+                      handleRemoveItemInventario={() => { }}
                       detalles={detallesProducto}
                       refDetalles={this.refDetallesProducto}
                       handleInputNombreDetalles={
@@ -2146,8 +2142,8 @@ class ProductoEditar extends CustomComponent {
                       handleRemoveItemCombo={this.handleRemoveProducto}
                       activarInventario={false}
                       inventarios={[]}
-                      handleAddItemInventario={() => {}}
-                      handleRemoveItemInventario={() => {}}
+                      handleAddItemInventario={() => { }}
+                      handleRemoveItemInventario={() => { }}
                       detalles={detallesCombo}
                       refDetalles={this.refDetallesCombo}
                       handleInputNombreDetalles={

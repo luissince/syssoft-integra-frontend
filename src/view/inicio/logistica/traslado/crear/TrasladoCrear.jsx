@@ -634,7 +634,7 @@ class TrasladorCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones de proceso de registro
   //------------------------------------------------------------------------------------------
-  handleSave = () => {
+  handleSave = async () => {
     if (isEmpty(this.state.detalles)) {
       alertKit.warning(
         {
@@ -647,8 +647,6 @@ class TrasladorCrear extends CustomComponent {
       );
       return;
     }
-
-    console.log(this.state.detalles);
 
     if (
       !isEmpty(
@@ -669,7 +667,7 @@ class TrasladorCrear extends CustomComponent {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Traslado',
         message: '¿Está seguro de continuar?',
@@ -679,60 +677,58 @@ class TrasladorCrear extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idTipoTraslado: this.state.idTipoTraslado,
-            idMotivoTraslado: this.state.idMotivoTraslado,
-            idAlmacenOrigen:
-              this.state.idTipoTraslado === 'TT0001'
-                ? this.state.idAlmacenOrigenInterno
-                : this.state.idAlmacenOrigenExterno,
-            idAlmacenDestino:
-              this.state.idTipoTraslado === 'TT0001'
-                ? this.state.idAlmacenDestinoInterno
-                : this.state.idAlmacenDestinoExterno,
-            idSucursalDestino: this.state.idSucursalExterno,
-            idSucursal: this.state.idSucursal,
-            observacion: this.state.observacion,
-            idUsuario: this.state.idUsuario,
+      });
 
-            detalles: this.state.detalles,
-          };
+    if (accept) {
+      const data = {
+        idTipoTraslado: this.state.idTipoTraslado,
+        idMotivoTraslado: this.state.idMotivoTraslado,
+        idAlmacenOrigen:
+          this.state.idTipoTraslado === 'TT0001'
+            ? this.state.idAlmacenOrigenInterno
+            : this.state.idAlmacenOrigenExterno,
+        idAlmacenDestino:
+          this.state.idTipoTraslado === 'TT0001'
+            ? this.state.idAlmacenDestinoInterno
+            : this.state.idAlmacenDestinoExterno,
+        idSucursalDestino: this.state.idSucursalExterno,
+        idSucursal: this.state.idSucursal,
+        observacion: this.state.observacion,
+        idUsuario: this.state.idUsuario,
 
-          alertKit.loading({
-            message: 'Procesando petición...',
-          });
+        detalles: this.state.detalles,
+      };
 
-          const response = await createTraslado(data);
+      alertKit.loading({
+        message: 'Procesando petición...',
+      });
 
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Traslado',
-                message: response.data,
-              },
-              () => {
-                this.setState(this.initial, async () => {
-                  await this.loadingData();
-                  this.refIdTipoTraslado.current.focus();
-                });
-              },
-            );
-          }
+      const response = await createTraslado(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertKit.warning({
-              title: 'Traslado',
-              message: response.getMessage(),
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Traslado',
+            message: response.data,
+          },
+          () => {
+            this.setState(this.initial, async () => {
+              await this.loadingData();
+              this.refIdTipoTraslado.current.focus();
             });
-          }
-        }
-      },
-    );
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Traslado',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleBack = () => {
@@ -742,8 +738,8 @@ class TrasladorCrear extends CustomComponent {
     });
   };
 
-  handleClear = () => {
-    alertKit.question(
+  handleClear = async () => {
+    const accept = await alertKit.question(
       {
         title: 'Traslado',
         message:
@@ -754,16 +750,14 @@ class TrasladorCrear extends CustomComponent {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          this.setState(this.initial, async () => {
-            await this.loadingData();
-            this.refIdTipoTraslado.current.focus();
-          });
-        }
-      },
-    );
+      });
+
+    if (accept) {
+      this.setState(this.initial, async () => {
+        await this.loadingData();
+        this.refIdTipoTraslado.current.focus();
+      });
+    }
   };
 
   /*
@@ -798,9 +792,9 @@ class TrasladorCrear extends CustomComponent {
 
       const cantidad = item.lotes
         ? item.lotes.reduce(
-            (acum, lote) => acum + getNumber(lote.cantidadAjustar),
-            0,
-          )
+          (acum, lote) => acum + getNumber(lote.cantidadAjustar),
+          0,
+        )
         : Number(item.cantidad);
 
       const diferencia = item.actual - cantidad;

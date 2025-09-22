@@ -79,7 +79,7 @@ class PerfilEditar extends CustomComponent {
     this.setState({ descripcion: event.target.value });
   };
 
-  handleEditar = () => {
+  handleEditar = async () => {
     if (isEmpty(this.state.descripcion)) {
       alertKit.warning(
         {
@@ -93,55 +93,52 @@ class PerfilEditar extends CustomComponent {
       return;
     }
 
-    alertKit.question(
-      {
-        title: 'Perfil',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    const accept = await alertKit.question({
+      title: 'Perfil',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-      async (accept) => {
-        if (accept) {
-          const data = {
-            descripcion: this.state.descripcion.trim(),
-            idEmpresa: 'EM0001',
-            idUsuario: this.state.idUsuario,
-            idPerfil: this.state.idPerfil,
-          };
-
-          alertKit.loading({
-            message: 'Procesando información...',
-          });
-
-          const response = await updatePerfil(data);
-
-          if (response instanceof SuccessReponse) {
-            alertKit.success(
-              {
-                title: 'Perfil',
-                message: response.data,
-              },
-              () => {
-                this.props.history.goBack();
-              },
-            );
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertKit.warning({
-              subTitle: 'Perfil',
-              message: response.getMessage(),
-            });
-          }
-        }
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
       },
-    );
+    });
+
+    if (accept) {
+      const data = {
+        descripcion: this.state.descripcion.trim(),
+        idEmpresa: 'EM0001',
+        idUsuario: this.state.idUsuario,
+        idPerfil: this.state.idPerfil,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await updatePerfil(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success(
+          {
+            title: 'Perfil',
+            message: response.data,
+          },
+          () => {
+            this.props.history.goBack();
+          },
+        );
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          subTitle: 'Perfil',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

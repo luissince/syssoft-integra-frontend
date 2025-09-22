@@ -307,21 +307,23 @@ class VentaCrearEscritorio extends CustomComponent {
   */
 
   loadingData = async () => {
+    const ventaCrearClasico = this.props.ventaCrearClasico;
+    console.log('loadingData', ventaCrearClasico);
     if (
-      this.props.ventaCrearClasico &&
-      this.props.ventaCrearClasico.state &&
-      this.props.ventaCrearClasico.local
+      ventaCrearClasico &&
+      ventaCrearClasico.state &&
+      ventaCrearClasico.local
     ) {
-      this.setState(this.props.ventaCrearClasico.state, () => {
-        this.index = this.props.ventaCrearClasico.local.index;
+      this.setState(ventaCrearClasico.state, () => {
+        this.index = ventaCrearClasico.local.index;
 
         const cliente = {
-          idTipoDocumento: this.props.ventaCrearClasico.state.idTipoDocumento,
-          documento: this.props.ventaCrearClasico.state.numeroDocumento,
-          informacion: this.props.ventaCrearClasico.state.informacion,
-          celular: this.props.ventaCrearClasico.state.numeroCelular,
-          email: this.props.ventaCrearClasico.state.email,
-          direccion: this.props.ventaCrearClasico.state.direccion,
+          idTipoDocumento: ventaCrearClasico.state.idTipoDocumento,
+          documento: ventaCrearClasico.state.numeroDocumento,
+          informacion: ventaCrearClasico.state.informacion,
+          celular: ventaCrearClasico.state.numeroCelular,
+          email: ventaCrearClasico.state.email,
+          direccion: ventaCrearClasico.state.direccion,
         };
 
         this.handleSelectItemCliente(cliente);
@@ -402,6 +404,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
   clearView = () => {
     this.setState(this.initial, async () => {
+      console.log('clearView');
       await this.refPersona.current.restart();
       await this.props.clearCrearVentaClasico();
       await this.loadingData();

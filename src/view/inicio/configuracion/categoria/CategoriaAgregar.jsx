@@ -116,7 +116,7 @@ class CategoriaAgregar extends React.Component {
       return;
     }
 
-    alertKit.question(
+    const accept = await alertKit.question(
       {
         title: 'Categoría',
         message: '¿Estás seguro de continuar?',
@@ -126,13 +126,11 @@ class CategoriaAgregar extends React.Component {
         cancelButton: {
           html: "<i class='fa fa-close'></i> Cancelar",
         },
-      },
-      async (accept) => {
-        if (accept) {
-          await this.handleGuardarProcess();
-        }
-      },
-    );
+      });
+
+    if (accept) {
+      await this.handleGuardarProcess();
+    }
   };
 
   handleGuardarProcess = async () => {
