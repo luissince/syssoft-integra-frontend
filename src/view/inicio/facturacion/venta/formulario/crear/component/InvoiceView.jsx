@@ -19,6 +19,7 @@ import SuccessReponse from '../../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../../model/types/types';
 import Search from '../../../../../../../components/Search';
+import InvoiceTicket from './InvoiceTicket';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -261,10 +262,30 @@ class InvoiceView extends CustomComponent {
       pedido,
     } = this.props;
 
+    const {
+      nombreComporbante,
+      handleOpenPreImpresion,
+      handleOpenVenta,
+      handleOpenCotizacion,
+      handleOpenPedido,
+      handleOpenOptions
+    } = this.props;
+
     const { buscar, tipo, loading, totalPaginacion } = this.state;
 
     return (
       <div className="h-100 d-flex flex-column items position-relative ">
+        <div className="flex md:hidden">
+          <InvoiceTicket
+            nombreComporbante={nombreComporbante}
+            handleOpenPreImpresion={handleOpenPreImpresion}
+            handleOpenVenta={handleOpenVenta}
+            handleOpenCotizacion={handleOpenCotizacion}
+            handleOpenPedido={handleOpenPedido}
+            handleOpenOptions={handleOpenOptions}
+          />
+        </div>
+
         <ItemSearch
           refProducto={this.refProducto}
           refSearch={this.refSearch}
@@ -338,18 +359,16 @@ const ItemSearch = (props) => {
         <div className="input-group">
           <div className="input-group-prepend">
             <Button
-              className={`${
-                tipo === 1 ? 'btn-primary ' : 'btn-outline-primary'
-              } px-3`}
+              className={`${tipo === 1 ? 'btn-primary ' : 'btn-outline-primary'
+                } px-3`}
               onClick={() => handleSelectTipo(1)}
             >
               <i className="fa fa-barcode"></i>
             </Button>
 
             <Button
-              className={`${
-                tipo === 0 ? 'btn-primary' : 'btn-outline-primary'
-              }`}
+              className={`${tipo === 0 ? 'btn-primary' : 'btn-outline-primary'
+                }`}
               onClick={() => handleSelectTipo(0)}
             >
               <i className="fa fa-search px-1"></i>
@@ -414,7 +433,7 @@ class ListSearchItems extends React.Component {
       const container = this.refScroll.current;
       if (
         container.scrollTop + container.clientHeight >=
-          container.scrollHeight &&
+        container.scrollHeight &&
         !this.props.loading
       ) {
         this.index++;
@@ -529,9 +548,8 @@ const ItemView = (props) => {
 
   return (
     <Button
-      contentClassName={`item-view ${
-        tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''
-      }`}
+      contentClassName={`item-view ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''
+        }`}
       onClick={handleAddItem}
     >
       <div className="position-absolute ml-1 mt-1 badge badge-danger">
@@ -560,9 +578,8 @@ const ItemView = (props) => {
       </div>
       <div className="item-view_describe">
         <p
-          className={`item-view_describe-title ${
-            tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
-          } position-absolute`}
+          className={`item-view_describe-title ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
+            } position-absolute`}
         >
           {tipo === 'PRODUCTO' ? `STOCK: ${cantidad}` : `SERVICIO`}
         </p>
@@ -606,6 +623,13 @@ InvoiceView.propTypes = {
   handleUpdateProductos: PropTypes.func.isRequired,
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,
+
+  nombreComporbante: PropTypes.string,
+  handleOpenPreImpresion: PropTypes.func,
+  handleOpenVenta: PropTypes.func,
+  handleOpenCotizacion: PropTypes.func,
+  handleOpenPedido: PropTypes.func,
+  handleOpenOptions: PropTypes.func.isRequired,
 };
 
 ItemSearch.propTypes = {

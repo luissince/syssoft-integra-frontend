@@ -46,7 +46,7 @@ ContainerWrapper.propTypes = {
 export const PosContainerWrapper = forwardRef(
   ({ children, className = '' }, ref) => {
     return (
-      <main className="main-pos" ref={ref}>
+      <main className="main-pos mb-[60px] md:mb-0" ref={ref}>
         <div className="h-100">
           <div className={`d-flex position-relative h-100 ${className}`}>
             {children}

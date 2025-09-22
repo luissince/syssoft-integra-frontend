@@ -4,24 +4,27 @@
   /* overflow: auto; */
   border-radius: 0.5rem;
   padding: 0px;
-  width: 100%;
-  max-width: 500px;
+  width: 90%;
+  height: 80%;
+  max-width: 640px;
   animation: showCustomModal 0.3s;
   -webkit-animation: showCustomModal 0.3s;
 }
 
 .modal-custom-sm {
-  max-width: 500px;
+  max-width: 640px;
 }
 
 .modal-custom-md {
-  max-width: 800px;
+  max-width: 768px;
 }
 
 .modal-custom-lg {
   max-width: 1024px;
-  width: 80%;
-  height: 80%;
+}
+
+.modal-custom-xl {
+  max-width: 1280px;
 }
 
 .modal-custom.close-cm {

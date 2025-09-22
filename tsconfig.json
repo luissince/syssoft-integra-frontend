@@ -10,7 +10,7 @@
 
     "jsx": "react-jsx",          // soporte JSX/TSX
     "allowJs": true,             // permite .js y .jsx
-    "checkJs": false,            // analiza .js pero no lanza errores
+    "checkJs": true,            // analiza .js pero no lanza errores
     "strict": false,             // puedes poner true si ya migraste bastante
     "baseUrl": "./",
     "paths": {
