@@ -10,7 +10,7 @@ const InvoiceClient = (props) => {
   const { handleOpenCliente } = props;
 
   return (
-    <div className="invoice-client px-3 pb-3">
+    <div className="invoice-client px-3">
       <SearchInput
         ref={refCliente}
         placeholder={placeholder}

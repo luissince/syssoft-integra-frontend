@@ -5,6 +5,7 @@ import {
   formatDecimal,
   isEmpty,
   isNumeric,
+  numberFormat,
   readDataFile,
   text,
 } from '../../../../../../helper/utils.helper';
@@ -71,6 +72,9 @@ import SidebarProducto from './component/SidebarProducto';
 import ModalPedido from '../common/ModalPedido';
 import { alertKit } from 'alert-kit';
 import ModalLote from '../common/ModalLote';
+import { cn } from '@/lib/utils';
+import { CreditCard, ShoppingBag, ShoppingCart, Star, User } from 'lucide-react';
+import ContentSale from './component/ContentSale';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -152,6 +156,8 @@ class VentaCrear extends CustomComponent {
 
       // Atributos del modal producto
       loadingProducto: true,
+
+      activeTab: 'productos',
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
@@ -2218,6 +2224,10 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenTerminal: false });
   };
 
+  handleTabChange = (tab) => {
+    this.setState({ activeTab: tab });
+  };
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -2235,6 +2245,8 @@ class VentaCrear extends CustomComponent {
   */
 
   render() {
+    const { activeTab } = this.state;
+
     return (
       <PosContainerWrapper>
         <SpinnerView
@@ -2242,67 +2254,67 @@ class VentaCrear extends CustomComponent {
           message={this.state.msgLoading}
         />
 
-        <section className="invoice-left">
-          <InvoiceView
-            ref={this.refInvoiceView}
-            idSucursal={this.state.idSucursal}
-            idAlmacen={this.state.idAlmacen}
-            codiso={this.state.codiso}
-            productos={this.state.productos}
-            cotizacion={this.state.cotizacion}
-            pedido={this.state.pedido}
-            handleUpdateProductos={this.handleUpdateProductos}
-            handleAddItem={this.handleAddItem}
-            handleStarProduct={this.handleStarProduct}
-          />
-        </section>
+        <ContentSale
+          activeTab={activeTab}
+          refInvoiceView={this.refInvoiceView}
+          idSucursal={this.state.idSucursal}
+          idAlmacen={this.state.idAlmacen}
+          codiso={this.state.codiso}
+          productos={this.state.productos}
+          cotizacion={this.state.cotizacion}
+          pedido={this.state.pedido}
+          handleUpdateProductos={this.handleUpdateProductos}
+          handleAddItem={this.handleAddItem}
+          handleStarProduct={this.handleStarProduct}
 
-        <section className="invoice-right">
-          <InvoiceTicket
-            nombreComporbante={this.state.nombreComporbante}
-            handleOpenPreImpresion={this.handleOpenPreImpresion}
-            handleOpenVenta={this.handleOpenVenta}
-            handleOpenCotizacion={this.handleOpenCotizacion}
-            handleOpenPedido={this.handleOpenPedido}
-            handleOpenOptions={this.handleOpenOptions}
-          />
+          nombreComporbante={this.state.nombreComporbante}
+          handleOpenPreImpresion={this.handleOpenPreImpresion}
+          handleOpenVenta={this.handleOpenVenta}
+          handleOpenCotizacion={this.handleOpenCotizacion}
+          handleOpenPedido={this.handleOpenPedido}
+          handleOpenOptions={this.handleOpenOptions}
 
-          <InvoiceVoucher
-            refComprobante={this.refComprobante}
-            idComprobante={this.state.idComprobante}
-            comprobantes={this.state.comprobantes}
-            handleSelectComprobante={this.handleSelectComprobante}
-          />
+          refComprobante={this.refComprobante}
+          idComprobante={this.state.idComprobante}
+          comprobantes={this.state.comprobantes}
+          handleSelectComprobante={this.handleSelectComprobante}
 
-          <InvoiceClient
-            handleOpenCliente={this.handleOpenCliente}
-            placeholder="Filtrar clientes..."
-            refCliente={this.refCliente}
-            refValueCliente={this.refValueCliente}
-            clientes={this.state.clientes}
-            handleClearInput={this.handleClearInputCliente}
-            handleFilter={this.handleFilterCliente}
-            handleSelectItem={this.handleSelectItemCliente}
-          />
+          handleOpenCliente={this.handleOpenCliente}
+          refCliente={this.refCliente}
+          refValueCliente={this.refValueCliente}
+          clientes={this.state.clientes}
+          handleClearInputCliente={this.handleClearInputCliente}
+          handleFilterCliente={this.handleFilterCliente}
+          handleSelectItemCliente={this.handleSelectItemCliente}
 
-          <InvoiceDetail
-            codiso={this.state.codiso}
-            detalleVenta={this.state.detalleVenta}
-            handleMinus={this.handleMinusProducto}
-            handlePlus={this.handlePlusProducto}
-            handleEdit={this.handleEditProducto}
-            handleRemove={this.handleRemoveProducto}
-          />
+          detalleVenta={this.state.detalleVenta}
+          impuestos={this.state.impuestos}
+          handleMinusProducto={this.handleMinusProducto}
+          handlePlusProducto={this.handlePlusProducto}
+          handleEditProducto={this.handleEditProducto}
+          handleRemoveProducto={this.handleRemoveProducto}
+          handleClearSale={this.handleClearSale}
+          handleOpenSale={this.handleOpenSale}
+        />
 
-          <InvoiceFooter
-            codiso={this.state.codiso}
-            impuestos={this.state.impuestos}
-            detalleVenta={this.state.detalleVenta}
-            handleOpenSale={this.handleOpenSale}
-            handleClearSale={this.handleClearSale}
-          />
-        </section>
+        <div className="fixed bottom-[15%] right-6 z-50 md:hidden">
+          <button
+            aria-label="Ver carrito de compras"
+            className="relative p-3 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            onClick={() => this.handleTabChange(activeTab === "productos" ? "detalle" : "productos")}
+          >
+            {
+              activeTab === "productos" ? <ShoppingCart className="w-6 h-6 text-gray-700" /> : <ShoppingBag className="w-6 h-6 text-gray-700" />
+            }
+            {this.state.detalleVenta.length > 0 && (
+              <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+                {this.state.detalleVenta.length}
+              </div>
+            )}
+          </button>
+        </div>
 
+        {/* Modales de carrito */}
         <ModalTransaccion
           tipo={'Venta'}
           title={'Completar Venta'}
