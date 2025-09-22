@@ -591,7 +591,7 @@ class UsuarioAgregar extends CustomComponent {
                         }
                         type="password"
                         id="contraseña"
-                        placeholder="********"
+                        placeholder="Ingrese su contraseña"
                         disabled={!this.state.activeLogin}
                         ref={this.refClave}
                         value={this.state.clave}
@@ -606,7 +606,6 @@ class UsuarioAgregar extends CustomComponent {
                             });
                           }
                         }}
-                        onKeyDown={keyNumberFloat}
                       />
                     </Column>
 
@@ -634,7 +633,7 @@ class UsuarioAgregar extends CustomComponent {
                             });
                           }
                         }}
-                        placeholder="Ingrese contraseña nuevamente"
+                        placeholder="Ingrese nuevamente su contraseña"
                         disabled={!this.state.activeLogin}
                       />
                     </Column>
