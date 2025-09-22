@@ -349,119 +349,6 @@ class Productos extends CustomComponent {
     |
     */
 
-  generateBody() {
-    if (this.state.loading) {
-      return (
-        <SpinnerTable
-          colSpan="10"
-          message="Cargando información de la tabla..."
-        />
-      );
-    }
-
-    if (isEmpty(this.state.lista)) {
-      return (
-        <TableRow className="text-center">
-          <TableCell colSpan="10">¡No hay datos registrados!</TableCell>
-        </TableRow>
-      );
-    }
-
-    return this.state.lista.map((item, index) => {
-      const tipo = function () {
-        if (item.tipo === 'PRODUCTO') {
-          return (
-            <>
-              <span>
-                Producto <i className="bi bi-basket"></i>
-              </span>
-              <br />
-              <span>{item.venta}</span>
-            </>
-          );
-        }
-
-        if (item.tipo === 'SERVICIO') {
-          return (
-            <>
-              <span>
-                Servicio <i className="bi bi-person-workspace"></i>{' '}
-              </span>
-              <br />
-              <span>{item.venta}</span>
-            </>
-          );
-        }
-
-        return (
-          <>
-            <span>
-              Combo <i className="bi bi-fill"></i>{' '}
-            </span>
-            <br />
-            <span>{item.venta}</span>
-          </>
-        );
-      };
-
-      const estado =
-        item.estado === 1 ? (
-          <span className="badge badge-success">Activo</span>
-        ) : (
-          <span className="badge badge-danger">Inactivo</span>
-        );
-
-      return (
-        <TableRow key={index}>
-          <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>{tipo()}</TableCell>
-          <TableCell>
-            {item.codigo}
-            <br />
-            <b>{item.nombre}</b>{' '}
-            {item.preferido === 1 && (
-              <i className="fa fa-star text-warning"></i>
-            )}
-          </TableCell>
-          <TableCell className="text-right">
-            {numberFormat(item.precio, this.state.codiso)}
-          </TableCell>
-          <TableCell>{item.medida}</TableCell>
-          <TableCell>{item.categoria}</TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
-          <TableCell>
-            <Image
-              default={images.noImage}
-              src={item.imagen}
-              alt={item.nombre}
-              width={100}
-            />
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-warning btn-sm"
-              title="Editar"
-              // disabled={!this.state.edit}
-              onClick={() => this.handleEditar(item.idProducto)}
-            >
-              <i className="bi bi-pencil"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
-              title="Anular"
-              // disabled={!this.state.remove}
-              onClick={() => this.handleEliminar(item.idProducto)}
-            >
-              <i className="bi bi-trash"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
-      );
-    });
-  }
-
   render() {
     const { vista } = this.state;
 
@@ -616,7 +503,7 @@ class Productos extends CustomComponent {
                           : 'bg-red-100 text-red-800';
 
                       return (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
+                        <tr key={item.idProducto} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4 text-sm text-gray-900 text-center">
                             {item.id}
                           </td>
@@ -737,7 +624,7 @@ class Productos extends CustomComponent {
 
                   return (
                     <div
-                      key={index}
+                      key={item.idProducto}
                       className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden relative"
                     >
                       <div className=" bg-white flex items-center justify-center p-2">

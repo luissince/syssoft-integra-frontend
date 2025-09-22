@@ -308,7 +308,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
   loadingData = async () => {
     const ventaCrearClasico = this.props.ventaCrearClasico;
-    console.log('loadingData', ventaCrearClasico);
     if (
       ventaCrearClasico &&
       ventaCrearClasico.state &&
@@ -404,7 +403,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
   clearView = () => {
     this.setState(this.initial, async () => {
-      console.log('clearView');
       await this.refPersona.current.restart();
       await this.props.clearCrearVentaClasico();
       await this.loadingData();

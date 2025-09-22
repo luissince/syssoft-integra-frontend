@@ -13,8 +13,8 @@ const InvoiceTicket = (props) => {
   } = props;
 
   return (
-    <div className="invoice-ticket d-flex pl-3 align-items-center justify-content-between">
-      <div className="py-3">
+    <div className="invoice-ticket pl-3 py-2 flex flex-row align-items-center justify-content-between bg-white w-full flex-wrap">
+      <div>
         <p className="h5 m-0">{nombreComporbante}</p>
       </div>
       <div className="d-flex">

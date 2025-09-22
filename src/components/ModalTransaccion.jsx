@@ -781,18 +781,13 @@ class ModalTransaccion extends CustomComponent {
           <CustomModalContentBody>
             <SpinnerView loading={loading} message={'Cargando datos...'} />
 
-            {/* Titutlo del modal */}
-            <Row>
-              <Column>
-                <div className="text-center">
-                  <h5>
-                    TOTAL A COBRAR:{' '}
-                    <span>{numberFormat(importeTotal, codiso)}</span>
-                  </h5>
-                </div>
-              </Column>
-            </Row>
-
+            {/* Título del total a cobrar */}
+            <div className="mb-4 text-center">
+              <h3 className="text-lg font-medium text-gray-700">
+                TOTAL A COBRAR: <span className="font-bold">{numberFormat(importeTotal, codiso)}</span>
+              </h3>
+            </div>
+            
             {/* Sun titulo */}
             <Row>
               <Column className="col-md-4 col-sm-4">
