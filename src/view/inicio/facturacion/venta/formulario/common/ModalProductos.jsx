@@ -44,7 +44,7 @@ import { SpinnerTable } from '../../../../../../components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ModalProductos extends CustomComponent {
   constructor(props) {

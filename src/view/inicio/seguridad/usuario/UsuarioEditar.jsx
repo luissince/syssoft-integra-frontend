@@ -35,7 +35,12 @@ import Select from '../../../../components/Select';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class UsuarioEditar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

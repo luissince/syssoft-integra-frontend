@@ -66,7 +66,7 @@ import SuccessReponse from '../../../model/class/response';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class RepVentas extends CustomComponent {
   /**

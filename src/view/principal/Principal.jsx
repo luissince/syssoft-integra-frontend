@@ -24,7 +24,7 @@ import { images } from '../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Principal extends CustomComponent {
   /**

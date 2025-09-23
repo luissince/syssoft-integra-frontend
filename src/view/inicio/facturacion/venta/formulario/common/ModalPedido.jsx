@@ -37,7 +37,7 @@ import { CANCELED } from '../../../../../../model/types/types';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ModalPedido extends CustomComponent {
   constructor(props) {

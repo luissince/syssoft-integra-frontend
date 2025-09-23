@@ -1,5 +1,5 @@
 class SuccessReponse {
-  data = '' || {} || [];
+  data = '';
 
   headers = {};
 
@@ -12,6 +12,18 @@ class SuccessReponse {
     this.headers = response.headers;
     this.status = response.status;
     this.statusText = response.statusText;
+  }
+
+  getData() {
+    return this.data;
+  }
+
+  getHeaders() {
+    return this.headers;
+  }
+
+  getStatus() {
+    return this.status;
   }
 }
 

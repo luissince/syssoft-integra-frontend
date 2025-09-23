@@ -60,7 +60,12 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import { Link } from 'react-router-dom';
 import Button from '../../../../../components/Button';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class ClienteDetalle extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

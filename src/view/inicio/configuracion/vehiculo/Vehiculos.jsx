@@ -32,7 +32,12 @@ import {
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class Vehiculo extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

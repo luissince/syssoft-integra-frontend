@@ -76,7 +76,7 @@ class Search extends React.Component {
         <input
           type="text"
           placeholder={this.props.placeholder}
-          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          className="w-full pl-10 pr-5 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           ref={this.props.refInput}
           value={this.state.searchTerm}
           onChange={this.handleInputChange}

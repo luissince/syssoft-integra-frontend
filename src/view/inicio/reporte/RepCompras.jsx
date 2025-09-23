@@ -53,7 +53,7 @@ import { downloadFileAsync } from '../../../redux/downloadSlice';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class RepCompras extends CustomComponent {
   /**

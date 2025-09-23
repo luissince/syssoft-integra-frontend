@@ -35,7 +35,7 @@ import Search from '../../../../components/Search';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Personas extends CustomComponent {
   /**

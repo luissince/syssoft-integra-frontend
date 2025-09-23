@@ -37,7 +37,7 @@ import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class BancoDetalle extends CustomComponent {
 
