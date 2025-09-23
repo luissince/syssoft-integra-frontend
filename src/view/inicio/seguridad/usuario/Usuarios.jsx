@@ -35,7 +35,7 @@ import { SpinnerTable } from '../../../../components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Usuarios extends CustomComponent {
   constructor(props) {
@@ -210,7 +210,7 @@ class Usuarios extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="10"
+          colSpan="9"
           message="Cargando información de la tabla..."
         />
       );
@@ -219,7 +219,7 @@ class Usuarios extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="10">
+          <TableCell className="text-center" colSpan="9">
             ¡No hay datos registrados!
           </TableCell>
         </TableRow>
@@ -240,7 +240,6 @@ class Usuarios extends CustomComponent {
             {item.nombres + ', ' + item.apellidos}
           </TableCell>
           <TableCell>{item.telefono}</TableCell>
-          <TableCell>{item.email}</TableCell>
           <TableCell>{item.perfil}</TableCell>
           <TableCell>{item.representante === 1 ? 'SI' : 'NO'}</TableCell>
           <TableCell className="text-center">
@@ -250,7 +249,7 @@ class Usuarios extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idUsuario)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -259,7 +258,7 @@ class Usuarios extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idUsuario)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -268,7 +267,7 @@ class Usuarios extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleResetear(item.idUsuario)}
-              // disabled={!this.state.reset}
+            // disabled={!this.state.reset}
             >
               <i className="bi bi-key"></i>
             </Button>
@@ -315,12 +314,9 @@ class Usuarios extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
-                    <TableHead width="20%">Nombre y Apellidos</TableHead>
-                    <TableHead width="10%">Telefono</TableHead>
-                    <TableHead width="10%">Email</TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="20%">Información</TableHead>
+                    <TableHead width="15%">Contacto</TableHead>
                     <TableHead width="10%">Perfil</TableHead>
                     <TableHead width="10%">Representante</TableHead>
                     <TableHead width="5%">Estado</TableHead>

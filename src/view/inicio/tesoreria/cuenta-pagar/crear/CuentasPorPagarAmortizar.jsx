@@ -48,7 +48,7 @@ import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CuentasPorPagarAmbonar extends CustomComponent {
   constructor(props) {

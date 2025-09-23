@@ -28,7 +28,7 @@ import TextArea from '../../../../components/TextArea';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class SucursalAgregar extends CustomComponent {
   constructor(props) {

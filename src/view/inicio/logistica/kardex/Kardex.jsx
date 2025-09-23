@@ -44,7 +44,7 @@ import {
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Kardex extends CustomComponent {
   /**

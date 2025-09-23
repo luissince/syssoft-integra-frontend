@@ -17,20 +17,7 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { images } from '../../../../../helper';
 import Title from '../../../../../components/Title';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
-import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import {
   setListaProductoData,
@@ -38,13 +25,13 @@ import {
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
-import { Layers, Star } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { FaStar } from 'react-icons/fa';
 import { RxValueNone } from 'react-icons/rx';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Productos extends CustomComponent {
 
@@ -96,40 +83,47 @@ class Productos extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de cliclo de vida
-    |--------------------------------------------------------------------------
-    |
-    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
-    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
-    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
-    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
-    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
-    | de la aplicación y optimizar el rendimiento del componente.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
+  /**
+   * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
+   */
   async componentDidMount() {
     await this.loadingData();
   }
 
+  /**
+   * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
+   */
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Métodos de acción
-    |--------------------------------------------------------------------------
-    |
-    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   async loadingData() {
     if (
       this.props.productoLista &&
@@ -271,7 +265,7 @@ class Productos extends CustomComponent {
     */
 
   handleChangeView = (value) => {
-    this.setState({ vista: value });
+    this.setState({ vista: value }, () => this.updateReduxState());
   };
 
   handleAgregar = async () => {
@@ -324,9 +318,11 @@ class Productos extends CustomComponent {
         return;
       }
 
+      response instanceof SuccessReponse;
+
       alertKit.success({
         title: 'Producto',
-        message: response.data,
+        message: response.getData(),
       }, () => {
         this.loadingInit();
       });
@@ -365,14 +361,14 @@ class Productos extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
               onClick={this.handleAgregar}
             >
               <i className="bi bi-file-plus"></i>
               Nuevo Registro
             </button>
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -385,7 +381,7 @@ class Productos extends CustomComponent {
             <button
               onClick={() => this.handleChangeView('tabla')}
               className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}
             >
@@ -395,7 +391,7 @@ class Productos extends CustomComponent {
             <button
               onClick={() => this.handleChangeView('cuadricula')}
               className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}
             >
@@ -405,27 +401,31 @@ class Productos extends CustomComponent {
           </div>
         </div>
 
-        {/* Barra de búsqueda */}
-        <div className="mb-6 bg-white rounded-xl shadow-sm border p-6">
-          <div className="max-w-md">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar producto
-            </label>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search text-gray-400"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar por código o nombre..."
-              theme="modern"
-            />
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes ver los productos con diferentes filtros
+            </p>
           </div>
+        </div>
+
+        {/* Barra de búsqueda */}
+        <div className="w-full mb-4">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Buscar por código o nombre..."
+            theme="modern"
+          />
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
         {vista === 'tabla' ? (
           /* 📊 Vista Tabla */
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+          <div className="bg-white rounded-xl border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -468,7 +468,7 @@ class Productos extends CustomComponent {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {this.state.loading ? (
                     <tr>
-                      <td colSpan="11" className="px-6 py-12 text-center">
+                      <td colSpan={11} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
                           <p className="text-gray-500">
@@ -479,7 +479,7 @@ class Productos extends CustomComponent {
                     </tr>
                   ) : isEmpty(this.state.lista) ? (
                     <tr>
-                      <td colSpan="11" className="px-6 py-12 text-center">
+                      <td colSpan={11} className="px-6 py-12 text-center">
                         <div className="text-gray-500">
                           <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
                           <p className="text-lg font-medium">
@@ -599,7 +599,7 @@ class Productos extends CustomComponent {
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               </div>
             ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded-xl shadow-sm border">
+              <div className="text-center py-16 bg-white rounded-xl border">
                 <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
                 <p className="text-lg font-medium text-gray-900 mb-2">
                   No se encontraron productos
@@ -625,7 +625,7 @@ class Productos extends CustomComponent {
                   return (
                     <div
                       key={item.idProducto}
-                      className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden relative"
+                      className="bg-white rounded-xl border transition group overflow-hidden relative"
                     >
                       <div className=" bg-white flex items-center justify-center p-2">
                         <Image

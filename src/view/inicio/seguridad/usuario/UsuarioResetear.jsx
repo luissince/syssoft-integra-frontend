@@ -19,6 +19,10 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class UsuarioResetear extends CustomComponent {
   constructor(props) {
     super(props);

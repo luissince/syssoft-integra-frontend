@@ -47,7 +47,7 @@ import ModalLote from './ModalLote';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class TrasladorCrear extends CustomComponent {
   /**

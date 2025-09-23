@@ -40,7 +40,7 @@ import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class OrdenCompraDetalle extends CustomComponent {
   constructor(props) {

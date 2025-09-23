@@ -36,7 +36,7 @@ import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ModalTransaccion extends CustomComponent {
   constructor(props) {
@@ -232,25 +232,16 @@ class ModalTransaccion extends CustomComponent {
     }
 
     if (metodoPagosLista.some((item) => !isNumeric(item.monto))) {
-      alertKit.show({
+      alertKit.warning({
         title: this.state.tipo,
         message: 'Hay montos del metodo de cobro que no tiene valor.',
-        type: 'warning',
-        buttons: [
-          {
-            html: "<i class='fa fa-check'></i> Aceptar",
-            primary: true,
-            class: ['btn', 'btn-primary'],
-          },
-        ],
-        onClose: () => {
-          validateNumericInputs(this.refMetodoPagoContenedor);
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-      });
+      }, () => {
+        validateNumericInputs(this.refMetodoPagoContenedor);
 
-      // alertWarning(this.state.tipo, 'Hay montos del metodo de cobro que no tiene valor.', () => {
-      //   validateNumericInputs(this.refMetodoPagoContenedor);
-      // });
+      });
       return;
     }
 
@@ -782,12 +773,13 @@ class ModalTransaccion extends CustomComponent {
             <SpinnerView loading={loading} message={'Cargando datos...'} />
 
             {/* Título del total a cobrar */}
-            <div className="mb-4 text-center">
+            <div className="text-center">
               <h3 className="text-lg font-medium text-gray-700">
-                TOTAL A COBRAR: <span className="font-bold">{numberFormat(importeTotal, codiso)}</span>
+                TOTAL
               </h3>
+              <p className="text-3xl font-bold">{numberFormat(importeTotal, codiso)}</p>
             </div>
-            
+
             {/* Sun titulo */}
             <Row>
               <Column className="col-md-4 col-sm-4">

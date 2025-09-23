@@ -17,9 +17,10 @@ import { images } from '../../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ModalProducto extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

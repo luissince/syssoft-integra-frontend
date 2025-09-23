@@ -34,6 +34,10 @@ import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
 import { Switches } from '../../../../components/Checks';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class UsuarioAgregar extends CustomComponent {
   constructor(props) {
     super(props);

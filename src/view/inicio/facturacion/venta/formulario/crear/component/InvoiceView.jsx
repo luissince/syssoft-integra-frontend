@@ -23,7 +23,7 @@ import InvoiceTicket from './InvoiceTicket';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class InvoiceView extends CustomComponent {
   constructor(props) {

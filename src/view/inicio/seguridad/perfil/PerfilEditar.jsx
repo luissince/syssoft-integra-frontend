@@ -18,7 +18,12 @@ import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { alertKit } from 'alert-kit';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class PerfilEditar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

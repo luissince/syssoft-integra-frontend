@@ -5,13 +5,11 @@ import {
   formatDecimal,
   isEmpty,
   isNumeric,
-  numberFormat,
   readDataFile,
   text,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { PosContainerWrapper } from '../../../../../../components/Container';
-import InvoiceTicket from './component/InvoiceTicket';
 import {
   getPreferidoPersona,
   comboComprobante,
@@ -32,11 +30,6 @@ import {
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
-import InvoiceDetail from './component/InvoiceDetail';
-import InvoiceClient from './component/InvoiceClient';
-import InvoiceVoucher from './component/InvoiceVoucher';
-import InvoiceFooter from './component/InvoiceFooter';
-import InvoiceView from './component/InvoiceView';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import SidebarCliente from './component/SidebarCliente';
 import { VENTA } from '../../../../../../model/types/tipo-comprobante';
@@ -72,13 +65,12 @@ import SidebarProducto from './component/SidebarProducto';
 import ModalPedido from '../common/ModalPedido';
 import { alertKit } from 'alert-kit';
 import ModalLote from '../common/ModalLote';
-import { cn } from '@/lib/utils';
-import { CreditCard, ShoppingBag, ShoppingCart, Star, User } from 'lucide-react';
+import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import ContentSale from './component/ContentSale';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class VentaCrear extends CustomComponent {
   constructor(props) {
@@ -2300,11 +2292,11 @@ class VentaCrear extends CustomComponent {
         <div className="fixed bottom-[15%] right-6 z-50 md:hidden">
           <button
             aria-label="Ver carrito de compras"
-            className="relative p-3 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className="relative p-3 rounded-full bg-red-500 shadow-lg hover:bg-red-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             onClick={() => this.handleTabChange(activeTab === "productos" ? "detalle" : "productos")}
           >
             {
-              activeTab === "productos" ? <ShoppingCart className="w-6 h-6 text-gray-700" /> : <ShoppingBag className="w-6 h-6 text-gray-700" />
+              activeTab === "productos" ? <ShoppingCart className="w-6 h-6 text-white" /> : <ShoppingBag className="w-6 h-6 text-white" />
             }
             {this.state.detalleVenta.length > 0 && (
               <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md">

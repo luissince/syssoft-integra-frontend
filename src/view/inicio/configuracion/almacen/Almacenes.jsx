@@ -27,7 +27,12 @@ import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { alertKit } from 'alert-kit';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class Almacenes extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

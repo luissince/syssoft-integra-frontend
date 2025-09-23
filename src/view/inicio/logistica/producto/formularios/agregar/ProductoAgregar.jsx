@@ -48,9 +48,10 @@ import {
 } from '../../../../../../components/Tab';
 import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
+
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ProductoAgregar extends CustomComponent {
   /**

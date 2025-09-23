@@ -14,7 +14,12 @@ import { CANCELED } from '../../../model/types/types';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 import { SpinnerTable } from '../../../components/Spinner';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class Notications extends CustomComponent {
+  
   constructor(props) {
     super(props);
 

@@ -29,7 +29,7 @@ import { Switches } from '../../../../../../components/Checks';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class BancoEditar extends CustomComponent {
 

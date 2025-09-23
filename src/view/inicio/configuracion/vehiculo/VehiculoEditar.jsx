@@ -23,7 +23,12 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import { SpinnerView } from '../../../../components/Spinner';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class VehiculoEditar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

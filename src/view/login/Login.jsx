@@ -13,7 +13,7 @@ import { isEmpty } from '../../helper/utils.helper';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Login extends CustomComponent {
   /**
