@@ -95,7 +95,7 @@ import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class VentaCrearEscritorio extends CustomComponent {
   constructor(props) {

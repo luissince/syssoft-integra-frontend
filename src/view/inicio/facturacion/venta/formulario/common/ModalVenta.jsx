@@ -37,7 +37,7 @@ import Button from '../../../../../../components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ModalVenta extends CustomComponent {
   constructor(props) {

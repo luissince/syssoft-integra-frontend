@@ -30,7 +30,7 @@ import CheckBox from '../../../../components/Checks.jsx';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Accesos extends CustomComponent {
   constructor(props) {

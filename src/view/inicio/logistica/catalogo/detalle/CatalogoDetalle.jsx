@@ -36,7 +36,7 @@ import axios from 'axios';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CatalogoDetalle extends CustomComponent {
   constructor(props) {

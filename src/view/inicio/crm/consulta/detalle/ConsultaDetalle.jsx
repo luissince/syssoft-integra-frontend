@@ -36,7 +36,7 @@ import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ConsultaDetalle extends CustomComponent {
   /**

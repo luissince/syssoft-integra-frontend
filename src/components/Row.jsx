@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
  * @param {ReactNode} props.children - Elementos hijos del componente.
  * @param {string} [props.className] - Clase CSS adicional para el contenedor.
  * @param {React.Ref} ref - Referencia al elemento DOM.
- * @returns {JSX.Element} Componente de fila.
  */
 const Row = forwardRef(({ className = '', children }, ref) => {
   return (

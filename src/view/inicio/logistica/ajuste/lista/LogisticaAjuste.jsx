@@ -45,7 +45,7 @@ import Select from '../../../../../components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class LogisticaAjuste extends CustomComponent {
   /**

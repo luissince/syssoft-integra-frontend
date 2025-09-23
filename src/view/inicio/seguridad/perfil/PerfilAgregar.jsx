@@ -14,7 +14,12 @@ import Input from '../../../../components/Input';
 import Button from '../../../../components/Button';
 import { alertKit } from 'alert-kit';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class PerfilAgregar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

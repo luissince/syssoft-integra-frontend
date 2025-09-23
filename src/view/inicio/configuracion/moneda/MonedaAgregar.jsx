@@ -23,7 +23,7 @@ import Input from '../../../../components/Input';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class MonedaAgregar extends CustomComponent {
   constructor(props) {

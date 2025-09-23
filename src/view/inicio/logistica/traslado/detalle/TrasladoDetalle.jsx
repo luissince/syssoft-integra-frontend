@@ -28,7 +28,12 @@ import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class TrasladoDetalle extends CustomComponent {
+  
   constructor(props) {
     super(props);
 

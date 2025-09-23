@@ -34,9 +34,10 @@ import Input from '../../../../../components/Input';
 import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import printJS from 'print-js';
+
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class GastoCrear extends CustomComponent {
   /**

@@ -27,7 +27,7 @@ import { Switches } from '../../../../components/Checks';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class MonedaEditar extends CustomComponent {
   constructor(props) {

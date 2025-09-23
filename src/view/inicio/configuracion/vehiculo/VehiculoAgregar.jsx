@@ -18,7 +18,12 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import { SpinnerView } from '../../../../components/Spinner';
 
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
 class VehiculoAgregar extends CustomComponent {
+  
   constructor(props) {
     super(props);
     this.state = {

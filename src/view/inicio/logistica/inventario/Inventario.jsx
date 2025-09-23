@@ -78,7 +78,7 @@ import ProgressBar from '../../../../components/ProgressBar';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Inventario extends CustomComponent {
   /**

@@ -37,7 +37,7 @@ import { listOrdenCompra } from '../../../../../../network/rest/principal.networ
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ModalOrdenCompra extends CustomComponent {
   constructor(props) {

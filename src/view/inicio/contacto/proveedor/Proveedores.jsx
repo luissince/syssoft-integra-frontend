@@ -35,7 +35,7 @@ import { SpinnerTable } from '../../../../components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Proveedores extends CustomComponent {
   /**

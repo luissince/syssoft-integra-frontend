@@ -68,7 +68,7 @@ import Image from '@/components/Image';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class RepProductos extends CustomComponent {
   /**

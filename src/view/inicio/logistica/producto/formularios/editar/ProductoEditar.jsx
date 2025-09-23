@@ -53,7 +53,7 @@ import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class ProductoEditar extends CustomComponent {
   /**
