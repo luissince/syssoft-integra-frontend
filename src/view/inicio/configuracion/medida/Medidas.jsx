@@ -215,7 +215,7 @@ class Medidas extends CustomComponent {
     if (this.state.loading) {
       return (
         <tr>
-          <td className="text-center" colSpan="7">
+          <td className="text-center" colSpan={7}>
             {spinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
@@ -225,7 +225,7 @@ class Medidas extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr>
-          <td className="text-center" colSpan="7">
+          <td className="text-center" colSpan={7}>
             ¡No hay datos registrados!
           </td>
         </tr>

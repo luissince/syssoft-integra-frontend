@@ -2,54 +2,17 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import { SpinnerView } from '../../../components/Spinner';
-import Row from '../../../components/Row';
-import Column from '../../../components/Column';
 import Title from '../../../components/Title';
 import CustomComponent from '../../../model/class/custom-component';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
-import Button from '../../../components/Button';
-import Input from '../../../components/Input';
-import Select from '../../../components/Select';
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardText,
-  CardTitle,
-} from '../../../components/Card';
-import {
-  Box,
   ChartNoAxesCombined,
-  DollarSign,
   HandCoins,
   Package,
   ShieldCheck,
-  ShoppingBag,
-  Tag,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../components/Table';
 import ErrorResponse from '@/model/class/error-response';
 import { alertKit } from 'alert-kit';
 import {
@@ -341,11 +304,10 @@ class RepProductos extends CustomComponent {
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                currentPage === 1
+              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === 1
                   ? 'text-gray-300 cursor-not-allowed'
                   : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -369,11 +331,10 @@ class RepProductos extends CustomComponent {
               <button
                 key={page}
                 onClick={() => onPageChange(page)}
-                className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  page === currentPage
+                className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${page === currentPage
                     ? 'z-10 bg-blue-600 border-blue-600 text-white'
                     : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -396,11 +357,10 @@ class RepProductos extends CustomComponent {
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                currentPage === totalPages
+              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === totalPages
                   ? 'text-gray-300 cursor-not-allowed'
                   : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -523,7 +483,7 @@ class RepProductos extends CustomComponent {
               Análisis de productos vendidos, ganancias y estado de inventario
             </p>
           </div>
-          <div className="flex justify-between gap-x-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <input
               type="date"
               value={fechaInicial}
@@ -534,6 +494,7 @@ class RepProductos extends CustomComponent {
               }}
               className="px-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+
             <input
               type="date"
               value={fechaFinal}
@@ -585,7 +546,7 @@ class RepProductos extends CustomComponent {
         <div className="max-w-7xl mx-auto py-4">
           {/* Financial Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
               <div className="flex items-center">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <HandCoins className="h-6 w-6 text-green-600" />
@@ -601,7 +562,7 @@ class RepProductos extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
               <div className="flex items-center">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <ChartNoAxesCombined className="w-6 h-6 text-blue-60" />
@@ -617,7 +578,7 @@ class RepProductos extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
               <div className="flex items-center">
                 <div className="p-2 bg-purple-100 rounded-lg">
                   <ShieldCheck className="w-6 h-6 text-purple-600" />
@@ -633,7 +594,7 @@ class RepProductos extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
               <div className="flex items-center">
                 <div className="p-2 bg-orange-100 rounded-lg">
                   <Package className="w-6 h-6 text-orange-600" />
@@ -652,7 +613,7 @@ class RepProductos extends CustomComponent {
 
           {/* Main Products Table */}
           <div className="lg:col-span-2 mb-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
@@ -777,7 +738,7 @@ class RepProductos extends CustomComponent {
                         <td className="px-6 py-4 text-sm text-gray-900">
                           {numberFormat(
                             producto.cantidad_vendida *
-                              producto.precio_promedio,
+                            producto.precio_promedio,
                             codIso,
                           )}{' '}
                           -{' '}
@@ -812,7 +773,7 @@ class RepProductos extends CustomComponent {
           {/* Detail Products Table */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Top Selling Products */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Productos Más Vendidos
@@ -881,11 +842,10 @@ class RepProductos extends CustomComponent {
                           )
                         }
                         disabled={currentPageMasVendidos === 1}
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageMasVendidos === 1
+                        className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === 1
                             ? 'text-gray-300 cursor-not-allowed'
                             : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
@@ -901,11 +861,10 @@ class RepProductos extends CustomComponent {
                         disabled={
                           currentPageMasVendidos === totalPagesMasVendidos
                         }
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageMasVendidos === totalPagesMasVendidos
+                        className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === totalPagesMasVendidos
                             ? 'text-gray-300 cursor-not-allowed'
                             : 'text-gray-600 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -916,7 +875,7 @@ class RepProductos extends CustomComponent {
             </div>
 
             {/* Inventory Status */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 relative">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 relative">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Estado de Inventario
               </h3>
@@ -948,7 +907,7 @@ class RepProductos extends CustomComponent {
             </div>
 
             {/* Category Performance */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Rendimiento por Categoría
               </h3>
@@ -993,68 +952,66 @@ class RepProductos extends CustomComponent {
               {/* Paginación para rendimiento por categoría */}
               {rendimientoCategoria.length >
                 itemsPerPageRendimientoCategoria && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {(currentPageRendimientoCategoria - 1) *
-                        itemsPerPageRendimientoCategoria +
-                        1}
-                      -
-                      {Math.min(
-                        currentPageRendimientoCategoria *
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">
+                        {(currentPageRendimientoCategoria - 1) *
+                          itemsPerPageRendimientoCategoria +
+                          1}
+                        -
+                        {Math.min(
+                          currentPageRendimientoCategoria *
                           itemsPerPageRendimientoCategoria,
-                        rendimientoCategoria.length,
-                      )}{' '}
-                      de {rendimientoCategoria.length}
-                    </div>
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() =>
-                          this.handlePageChangeRendimientoCategoria(
-                            currentPageRendimientoCategoria - 1,
-                          )
-                        }
-                        disabled={currentPageRendimientoCategoria === 1}
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageRendimientoCategoria === 1
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <span className="px-2 py-1 text-xs text-gray-600">
-                        {currentPageRendimientoCategoria}/
-                        {totalPagesRendimientoCategoria}
-                      </span>
-                      <button
-                        onClick={() =>
-                          this.handlePageChangeRendimientoCategoria(
-                            currentPageRendimientoCategoria + 1,
-                          )
-                        }
-                        disabled={
-                          currentPageRendimientoCategoria ===
-                          totalPagesRendimientoCategoria
-                        }
-                        className={`px-2 py-1 text-xs rounded ${
-                          currentPageRendimientoCategoria ===
-                          totalPagesRendimientoCategoria
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                          rendimientoCategoria.length,
+                        )}{' '}
+                        de {rendimientoCategoria.length}
+                      </div>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() =>
+                            this.handlePageChangeRendimientoCategoria(
+                              currentPageRendimientoCategoria - 1,
+                            )
+                          }
+                          disabled={currentPageRendimientoCategoria === 1}
+                          className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria === 1
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <span className="px-2 py-1 text-xs text-gray-600">
+                          {currentPageRendimientoCategoria}/
+                          {totalPagesRendimientoCategoria}
+                        </span>
+                        <button
+                          onClick={() =>
+                            this.handlePageChangeRendimientoCategoria(
+                              currentPageRendimientoCategoria + 1,
+                            )
+                          }
+                          disabled={
+                            currentPageRendimientoCategoria ===
+                            totalPagesRendimientoCategoria
+                          }
+                          className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria ===
+                              totalPagesRendimientoCategoria
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 
           {/* Inventory Management Section */}
-          <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="mt-8 bg-white rounded-xl border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
                 Gestión de Inventario
@@ -1132,63 +1089,61 @@ class RepProductos extends CustomComponent {
                   {/* Paginación para bajo inventario */}
                   {productosConBajoInventario.length >
                     itemsPerPageBajoInventario && (
-                    <div className="mt-4 pt-4 border-t border-red-200">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-600">
-                          {(currentPageBajoInventario - 1) *
-                            itemsPerPageBajoInventario +
-                            1}
-                          -
-                          {Math.min(
-                            currentPageBajoInventario *
+                      <div className="mt-4 pt-4 border-t border-red-200">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm text-gray-600">
+                            {(currentPageBajoInventario - 1) *
+                              itemsPerPageBajoInventario +
+                              1}
+                            -
+                            {Math.min(
+                              currentPageBajoInventario *
                               itemsPerPageBajoInventario,
-                            productosConBajoInventario.length,
-                          )}{' '}
-                          de {productosConBajoInventario.length}
-                        </div>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() =>
-                              this.handlePageChangeBajoInventario(
-                                currentPageBajoInventario - 1,
-                              )
-                            }
-                            disabled={currentPageBajoInventario === 1}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageBajoInventario === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <span className="px-2 py-1 text-xs text-gray-600">
-                            {currentPageBajoInventario}/
-                            {totalPagesBajoInventario}
-                          </span>
-                          <button
-                            onClick={() =>
-                              this.handlePageChangeBajoInventario(
-                                currentPageBajoInventario + 1,
-                              )
-                            }
-                            disabled={
-                              currentPageBajoInventario ===
-                              totalPagesBajoInventario
-                            }
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageBajoInventario ===
-                              totalPagesBajoInventario
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                          >
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
+                              productosConBajoInventario.length,
+                            )}{' '}
+                            de {productosConBajoInventario.length}
+                          </div>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() =>
+                                this.handlePageChangeBajoInventario(
+                                  currentPageBajoInventario - 1,
+                                )
+                              }
+                              disabled={currentPageBajoInventario === 1}
+                              className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario === 1
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <span className="px-2 py-1 text-xs text-gray-600">
+                              {currentPageBajoInventario}/
+                              {totalPagesBajoInventario}
+                            </span>
+                            <button
+                              onClick={() =>
+                                this.handlePageChangeBajoInventario(
+                                  currentPageBajoInventario + 1,
+                                )
+                              }
+                              disabled={
+                                currentPageBajoInventario ===
+                                totalPagesBajoInventario
+                              }
+                              className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario ===
+                                  totalPagesBajoInventario
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* No Sales Products */}
@@ -1256,58 +1211,56 @@ class RepProductos extends CustomComponent {
                   {/* Paginación para sin ventas */}
                   {productosSinVentaConInventario.length >
                     itemsPerPageSinVentas && (
-                    <div className="mt-4 pt-4 border-t border-orange-200">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-600">
-                          {(currentPageSinVentas - 1) * itemsPerPageSinVentas +
-                            1}
-                          -
-                          {Math.min(
-                            currentPageSinVentas * itemsPerPageSinVentas,
-                            productosSinVentaConInventario.length,
-                          )}{' '}
-                          de {productosSinVentaConInventario.length}
-                        </div>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() =>
-                              this.handlePageChangeSinVentas(
-                                currentPageSinVentas - 1,
-                              )
-                            }
-                            disabled={currentPageSinVentas === 1}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageSinVentas === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <span className="px-2 py-1 text-xs text-gray-600">
-                            {currentPageSinVentas}/{totalPagesSinVentas}
-                          </span>
-                          <button
-                            onClick={() =>
-                              this.handlePageChangeSinVentas(
-                                currentPageSinVentas + 1,
-                              )
-                            }
-                            disabled={
-                              currentPageSinVentas === totalPagesSinVentas
-                            }
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPageSinVentas === totalPagesSinVentas
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                          >
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
+                      <div className="mt-4 pt-4 border-t border-orange-200">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm text-gray-600">
+                            {(currentPageSinVentas - 1) * itemsPerPageSinVentas +
+                              1}
+                            -
+                            {Math.min(
+                              currentPageSinVentas * itemsPerPageSinVentas,
+                              productosSinVentaConInventario.length,
+                            )}{' '}
+                            de {productosSinVentaConInventario.length}
+                          </div>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() =>
+                                this.handlePageChangeSinVentas(
+                                  currentPageSinVentas - 1,
+                                )
+                              }
+                              disabled={currentPageSinVentas === 1}
+                              className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === 1
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <span className="px-2 py-1 text-xs text-gray-600">
+                              {currentPageSinVentas}/{totalPagesSinVentas}
+                            </span>
+                            <button
+                              onClick={() =>
+                                this.handlePageChangeSinVentas(
+                                  currentPageSinVentas + 1,
+                                )
+                              }
+                              disabled={
+                                currentPageSinVentas === totalPagesSinVentas
+                              }
+                              className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === totalPagesSinVentas
+                                  ? 'text-gray-300 cursor-not-allowed'
+                                  : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             </div>

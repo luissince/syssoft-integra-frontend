@@ -2,12 +2,8 @@ import React from 'react';
 import {
   numberFormat,
   formatTime,
-  alertDialog,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   formatNumberWithZeros,
-  alertInfo,
   currentDate,
   getPathNavigation,
   getStatePrivilegio,
@@ -31,17 +27,6 @@ import {
   CREDITO_VARIABLE,
 } from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../components/Table';
 import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
 import ModalElegirInterfaz from './component/ModalElejirInterfaz';
@@ -61,6 +46,7 @@ import {
   VENTAS,
   VISUALIZAR_VENTA,
 } from '../../../../../model/types/menu';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -179,26 +165,27 @@ class Ventas extends CustomComponent {
   */
 
   loadingData = async () => {
+    const ventaLista = this.props.ventaLista;
     if (
-      this.props.ventaLista &&
-      this.props.ventaLista.data &&
-      this.props.ventaLista.paginacion
+      ventaLista &&
+      ventaLista.data &&
+      ventaLista.paginacion
     ) {
-      this.setState(this.props.ventaLista.data);
+      this.setState(ventaLista.data);
       this.refPaginacion.current.upperPageBound =
-        this.props.ventaLista.paginacion.upperPageBound;
+        ventaLista.paginacion.upperPageBound;
       this.refPaginacion.current.lowerPageBound =
-        this.props.ventaLista.paginacion.lowerPageBound;
+        ventaLista.paginacion.lowerPageBound;
       this.refPaginacion.current.isPrevBtnActive =
-        this.props.ventaLista.paginacion.isPrevBtnActive;
+        ventaLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive =
-        this.props.ventaLista.paginacion.isNextBtnActive;
+        ventaLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
-        this.props.ventaLista.paginacion.pageBound;
+        ventaLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion =
-        this.props.ventaLista.paginacion.messagePaginacion;
+        ventaLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.ventaLista.data.buscar);
+      this.refSearch.current.initialize(ventaLista.data.buscar);
     } else {
       const [comprobantes] = await Promise.all([this.fetchComprobante(VENTA)]);
 
@@ -323,16 +310,13 @@ class Ventas extends CustomComponent {
         Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -364,7 +348,7 @@ class Ventas extends CustomComponent {
   */
 
   handleChangeView = (value) => {
-    this.setState({ vista: value });
+    this.setState({ vista: value }, () => this.updateReduxState());
   };
 
   handleCrearClasico = () => {
@@ -402,40 +386,56 @@ class Ventas extends CustomComponent {
     });
   };
 
-  handleCancelar(idVenta) {
+  async handleCancelar(idVenta) {
     if (!this.state.remove) {
-      alertWarning('Venta', 'No tiene privilegios para anular ventas');
+      alertKit.warning({
+        title: 'Venta',
+        message: 'No tiene privilegios para anular ventas',
+      });
       return;
     }
 
-    alertDialog(
-      'Venta',
-      '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idVenta: idVenta,
-            idUsuario: this.state.idUsuario,
-          };
-
-          alertInfo('Venta', 'Procesando información...');
-
-          const response = await cancelVenta(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Venta', response.data, () => {
-              this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Venta', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: 'Venta',
+      message: '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idVenta: idVenta,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await cancelVenta(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Venta',
+          message: response.data,
+        }, () => {
+          this.loadingInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Venta',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   //------------------------------------------------------------------------------------------
@@ -444,7 +444,10 @@ class Ventas extends CustomComponent {
 
   handleOpenElegirInterfaz = () => {
     if (!this.state.create) {
-      alertWarning('Venta', 'No tiene privilegios para crear ventas');
+      alertKit.warning({
+        title: 'Venta',
+        message: 'No tiene privilegios para crear ventas',
+      });
       return;
     }
 
@@ -479,109 +482,6 @@ class Ventas extends CustomComponent {
   |
   */
 
-  generateBody() {
-    if (this.state.loading) {
-      return (
-        <SpinnerTable
-          colSpan="10"
-          message="Cargando información de la tabla..."
-        />
-      );
-    }
-
-    if (isEmpty(this.state.lista)) {
-      return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="10">
-            ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return this.state.lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">COBRADO</span>
-        ) : item.estado === 2 ? (
-          <span className="text-warning">POR COBRAR</span>
-        ) : item.estado === 3 ? (
-          <span className="text-danger">ANULADO</span>
-        ) : (
-          <span className="text-primary">POR LLEVAR</span>
-        );
-
-      const tipo =
-        item.idFormaPago === CONTADO
-          ? 'CONTADO'
-          : item.idFormaPago === CREDITO_FIJO
-            ? 'CREDITO FIJO'
-            : item.idFormaPago === CREDITO_VARIABLE
-              ? 'CRÉDITO VARIABLE'
-              : 'PAGO ADELTANDO';
-
-      return (
-        <TableRow key={index}>
-          <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
-          </TableCell>
-          <TableCell>
-            {item.tipoDocumento} - {item.documento}
-            <br />
-            {item.informacion}
-          </TableCell>
-          <TableCell>
-            {item.comprobante}
-            <br />
-            {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-          </TableCell>
-          <TableCell>{tipo}</TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
-          <TableCell className="text-center">
-            {' '}
-            {numberFormat(item.total, item.codiso)}{' '}
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-info btn-sm"
-              onClick={() => this.handleDetalle(item.idVenta)}
-            // disabled={!this.state.view}
-            >
-              <i className="fa fa-eye"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            {item.guiaRemision === 1 && (
-              <span className="btn btn-outline-success btn-sm">
-                <i className="fa fa-check"></i>
-              </span>
-            )}
-
-            {item.guiaRemision === 0 && (
-              <Link
-                to={getPathNavigation('guia-create', item.idVenta)}
-                className="btn btn-outline-secondary btn-sm"
-              >
-                <i className="fa fa-truck"></i>
-              </Link>
-            )}
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
-              onClick={() => this.handleCancelar(item.idVenta)}
-              disabled={!this.state.remove}
-            >
-              <i className="fa fa-remove"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
-      );
-    });
-  }
 
   render() {
     const { vista } = this.state;
@@ -647,83 +547,63 @@ class Ventas extends CustomComponent {
         </div>
 
         {/* Filtros de fechas, comprobante y estado */}
-        <div className="mb-6 bg-white rounded-xl border p-6">
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes ver las ventas echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
+            </p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha de Inicio
-              </label>
-              <Input
-                type="date"
-                value={this.state.fechaInicio}
-                onChange={this.handleInputFechaInico}
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha Final
-              </label>
-              <Input
-                type="date"
-                value={this.state.fechaFinal}
-                onChange={this.handleInputFechaFinal}
-                className="w-full"
-              />
-            </div>
+            <input
+              type="date"
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInico}
+              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Comprobante
-              </label>
-              <Select
-                value={this.state.idComprobante}
-                onChange={this.handleSelectComprobante}
-                className="w-full"
-              >
-                <option value="">TODOS</option>
-                {this.state.comprobantes.map((item) => (
-                  <option key={item.idComprobante} value={item.idComprobante}>
-                    {item.nombre} - {item.serie}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            <input
+              type="date"
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estado
-              </label>
-              <Select
-                value={this.state.estado}
-                onChange={this.handleSelectEstado}
-                className="w-full"
-              >
-                <option value="0">TODOS</option>
-                <option value="1">COBRADO</option>
-                <option value="2">POR COBRAR</option>
-                <option value="3">ANULADO</option>
-              </Select>
-            </div>
+            <select
+              value={this.state.idComprobante}
+              onChange={this.handleSelectComprobante}
+              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">TODOS</option>
+              {this.state.comprobantes.map((item) => (
+                <option key={item.idComprobante} value={item.idComprobante}>
+                  {item.nombre} - {item.serie}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={this.state.estado}
+              onChange={this.handleSelectEstado}
+              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="0">TODOS</option>
+              <option value="1">COBRADO</option>
+              <option value="2">POR COBRAR</option>
+              <option value="3">ANULADO</option>
+            </select>
           </div>
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="mb-6 bg-white rounded-xl border p-4">
-          <div className="max-w-md">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar venta(s)
-            </label>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search text-gray-400"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar por comprobante o cliente..."
-              theme="modern"
-            />
-          </div>
+        <div className="w-full mb-4">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Buscar por comprobante o cliente..."
+            theme="modern"
+          />
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}

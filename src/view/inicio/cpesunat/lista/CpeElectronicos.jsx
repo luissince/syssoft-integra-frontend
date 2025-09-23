@@ -115,6 +115,8 @@ class CpeElectronicos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
+      vista: 'tabla',
+
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -384,6 +386,10 @@ class CpeElectronicos extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
+
+  handleChangeView = (value) => {
+    this.setState({ vista: value }, () => this.updateReduxState());
+  };
 
   handleInputFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
@@ -916,6 +922,8 @@ class CpeElectronicos extends CustomComponent {
   }
 
   render() {
+    const { vista } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
@@ -937,95 +945,97 @@ class CpeElectronicos extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <span>Resumen de Boletas/Facturas/Nota Crédito/Nota Débito</span>
-          </Column>
-        </Row>
+        {/* Acciones principales + Toggle vista */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              onClick={this.loadingInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+              Recargar Vista
+            </button>
+          </div>
 
-        <Row>
-          <Column
-            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
-            formGroup={true}
-          >
-            <img src={images.sunat} alt="Estado Sunat" width="24" />{' '}
-            <span>Estados SUNAT:</span>
-          </Column>
+          {/* Toggle vista */}
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => this.handleChangeView('tabla')}
+              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
+                ? 'bg-white text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
+            >
+              <i className="bi bi-list-ul"></i>
+              <span className="hidden sm:inline">Tabla</span>
+            </button>
+            <button
+              onClick={() => this.handleChangeView('cuadricula')}
+              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
+                ? 'bg-white text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
+            >
+              <i className="bi bi-grid-3x3"></i>
+              <span className="hidden sm:inline">Cuadrícula</span>
+            </button>
+          </div>
+        </div>
 
-          <Column
-            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
-            formGroup={true}
-          >
-            <img src={images.accept} alt="Aceptado" width="24" />{' '}
-            <span>Aceptado</span>
-          </Column>
+        {/* Leyenda de estados SUNAT */}
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
+            <img src={images.sunat} alt="SUNAT" className="w-6 h-6" />
+            Estados SUNAT
+          </h4>
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <img src={images.accept} alt="Aceptado" className="w-5 h-5" />
+              <span>Aceptado</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <img src={images.unable} alt="Rechazado" className="w-5 h-5" />
+              <span>Rechazado</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <img src={images.reuse} alt="Pendiente" className="w-5 h-5" />
+              <span>Pendiente de Envío</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <img src={images.error} alt="Anulado" className="w-5 h-5" />
+              <span>Comunicación de Baja (Anulado)</span>
+            </div>
+          </div>
+        </div>
 
-          <Column
-            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
-            formGroup={true}
-          >
-            <img src={images.unable} alt="Rechazo" width="24" />{' '}
-            <span>Rechazado</span>
-          </Column>
+        {/* Filtros */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes los comprobantes electrónicos por fecha, tipo de comprobante, estado
+              SUNAT y sucursal.
+            </p>
+          </div>
 
-          <Column
-            className="col-lg-2 col-md-2 col-sm-12 col-xs-12"
-            formGroup={true}
-          >
-            <img src={images.reuse} alt="Pendiende de envío" width="24" />{' '}
-            <span>Pendiente de Envío</span>
-          </Column>
-
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-xs-12"
-            formGroup={true}
-          >
-            <img src={images.error} alt="Comunicación de baja" width="24" />{' '}
-            <span> Comunicación de Baja (Anulado)</span>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-outline-light" onClick={this.loadingInit}>
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Input
-              label={'Fecha de Inicio:'}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <input
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </Column>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Input
-              label={'Fecha de Final:'}
+            <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </Column>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Select
-              label={'Comprobantes:'}
+            <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item, index) => (
@@ -1033,85 +1043,323 @@ class CpeElectronicos extends CustomComponent {
                   {item.nombre} - {item.serie}
                 </option>
               ))}
-            </Select>
-          </Column>
+            </select>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Select
-              label={'Estados:'}
+            <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
               <option value="1">POR DECLARAR</option>
               <option value="2">POR ANULAR</option>
-            </Select>
-          </Column>
-        </Row>
+            </select>
+          </div>
+        </div>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
+        {/* Barra de búsqueda */}
+        <div className="w-full flex gap-4 mb-4">
+          <div className="w-full">
             <Search
               group={true}
-              label={'Buscar:'}
-              iconLeft={<i className="bi bi-search"></i>}
+              iconLeft={<i className="bi bi-search text-gray-400"></i>}
               ref={this.refSearch}
               onSearch={this.searchText}
-              placeholder="Ingrese los datos requeridos...."
+              placeholder="Ingrese número de comprobante o cliente..."
+              theme="modern"
             />
-          </Column>
+          </div>
 
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Select
-              label={'Sucursal:'}
+          <div className="w-full">
+            <select
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {this.state.sucursales.map((item, index) => (
                 <option key={index} value={item.idSucursal}>
                   {item.nombre}
                 </option>
               ))}
-            </Select>
-          </Column>
-        </Row>
+            </select>
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className={'table-bordered'}>
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="5%">Opciones</TableHead>
-                    <TableHead width="10%">Fecha</TableHead>
-                    <TableHead width="10%">Comprobante</TableHead>
-                    <TableHead width="15%">Cliente</TableHead>
-                    <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%">Estado </TableHead>
-                    <TableHead width="15%">Observación SUNAT</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Render condicional: Tabla o Cuadrícula */}
+        {vista === 'tabla' ? (
+          /* 📊 Vista Tabla */
+          <div className="bg-white rounded-xl border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Acciones</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Fecha</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Comprobante</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-center">Tipo</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">Estado SUNAT</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observación</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {this.state.loading ? (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+                          <p className="text-gray-500">Cargando información...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : isEmpty(this.state.lista) ? (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-12 text-center">
+                        <div className="text-gray-500">
+                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+                          <p className="text-lg font-medium">No se encontraron comprobantes</p>
+                          <p className="text-sm">Intenta cambiar los filtros</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    this.state.lista.map((item, index) => {
+                      const descripcion =
+                        item.xmlDescripcion === ''
+                          ? 'Por Generar Xml'
+                          : limitarCadena(item.xmlDescripcion, 90, '...');
 
-        <Paginacion
-          ref={this.refPaginacion}
-          loading={this.state.loading}
-          data={this.state.lista}
-          totalPaginacion={this.state.totalPaginacion}
-          paginacion={this.state.paginacion}
-          fillTable={this.paginacionContext}
-          restart={this.state.restart}
-        />
+                      const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
+                      const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+                      return (
+                        <tr key={index} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+                          <td className="px-6 py-4 text-center">
+                            <DropdownActions
+                              options={[
+                                {
+                                  image: images.pdf,
+                                  tooltip: 'PDF A4',
+                                  label: 'PDF A4',
+                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
+                                },
+                                {
+                                  image: images.invoice,
+                                  tooltip: 'PDF 80mm',
+                                  label: 'PDF Ticket',
+                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
+                                },
+                                {
+                                  image: images.invoice,
+                                  tooltip: 'PDF 58mm',
+                                  label: 'PDF Ticket',
+                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
+                                },
+                                {
+                                  image: images.xml,
+                                  tooltip: 'XML',
+                                  label: 'XML',
+                                  onClick: () => this.handleDownloadXml(item.idComprobante),
+                                },
+                                {
+                                  image: images.email,
+                                  tooltip: 'Enviar por Email',
+                                  label: 'Email',
+                                  onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
+                                },
+                                ...(item.tipo === 'fac' && item.anulacion !== 0
+                                  ? [
+                                    {
+                                      image: images.error,
+                                      tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
+                                      label: item.anulacion === 1 ? 'Com. Baja' : 'Resumen',
+                                      onClick: () => {
+                                        const id = item.idComprobante;
+                                        const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
+                                        item.anulacion === 1
+                                          ? this.handleSendComunicacionDeBaja(id, num)
+                                          : this.handleSendResumenDiario(id, num);
+                                      },
+                                    },
+                                  ]
+                                  : []),
+                              ]}
+                            />
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {item.fecha}<br />
+                            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            <Link
+                              to={getPathNavigation(item.tipo, item.idComprobante)}
+                              className="text-blue-600 hover:underline font-medium"
+                            >
+                              {item.comprobante}<br />
+                              <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            <div>{item.tipoDocumento} - {item.documento}</div>
+                            <div className="text-xs text-gray-500">{item.informacion}</div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoSunatClass}`}>
+                              {estadoSunatLabel}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            {this.renderEstado(item)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {descripcion}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <Paginacion
+              ref={this.refPaginacion}
+              loading={this.state.loading}
+              data={this.state.lista}
+              totalPaginacion={this.state.totalPaginacion}
+              paginacion={this.state.paginacion}
+              fillTable={this.paginacionContext}
+              restart={this.state.restart}
+              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+              theme="modern"
+            />
+          </div>
+        ) : (
+          /* 🟦 Vista Cuadrícula */
+          <div className="space-y-6">
+            {this.state.loading ? (
+              <div className="flex justify-center py-16">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              </div>
+            ) : isEmpty(this.state.lista) ? (
+              <div className="text-center py-16 bg-white rounded-xl border">
+                <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
+                <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron comprobantes</p>
+                <p className="text-sm text-gray-500">Intenta cambiar los filtros</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {this.state.lista.map((item, index) => {
+                  const descripcion =
+                    item.xmlDescripcion === ''
+                      ? 'Por Generar Xml'
+                      : limitarCadena(item.xmlDescripcion, 90, '...');
+
+                  const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
+                  const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden"
+                    >
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h5 className="font-semibold text-gray-900 text-sm">
+                            {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
+                          </h5>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoSunatClass}`}>
+                            {estadoSunatLabel}
+                          </span>
+                        </div>
+
+                        <div className="text-sm text-gray-600 mb-1">
+                          <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
+                        </div>
+
+                        <div className="text-sm text-gray-600 mb-1">
+                          <span className="font-medium">Cliente:</span> {item.informacion}
+                          <div className="text-sm text-gray-500">{item.tipoDocumento} - {item.documento}</div>
+                        </div>
+
+                        <div className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium">Estado SUNAT:</span>
+                          <div className="mt-1">{this.renderEstado(item)}</div>
+                        </div>
+
+                        <div className="text-sm text-gray-600 mb-3">
+                          <span className="font-medium">Observación:</span>
+                          <div className="text-sm text-gray-700 mt-1">{descripcion}</div>
+                        </div>
+
+                        <div className="pt-3 border-t border-gray-100">
+                          <DropdownActions
+                            options={[
+                              {
+                                image: images.pdf,
+                                tooltip: 'PDF A4',
+                                label: 'PDF A4',
+                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
+                              },
+                              {
+                                image: images.invoice,
+                                tooltip: 'PDF 80mm',
+                                label: 'Ticket',
+                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
+                              },
+                              {
+                                image: images.xml,
+                                tooltip: 'XML',
+                                label: 'XML',
+                                onClick: () => this.handleDownloadXml(item.idComprobante),
+                              },
+                              {
+                                image: images.email,
+                                tooltip: 'Enviar Email',
+                                label: 'Email',
+                                onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
+                              },
+                              ...(item.tipo === 'fac' && item.anulacion !== 0
+                                ? [
+                                  {
+                                    image: images.error,
+                                    tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
+                                    label: item.anulacion === 1 ? 'Com. Baja' : 'Resumen',
+                                    onClick: () => {
+                                      const id = item.idComprobante;
+                                      const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
+                                      item.anulacion === 1
+                                        ? this.handleSendComunicacionDeBaja(id, num)
+                                        : this.handleSendResumenDiario(id, num);
+                                    },
+                                  },
+                                ]
+                                : []),
+                            ]}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <Paginacion
+              ref={this.refPaginacion}
+              loading={this.state.loading}
+              data={this.state.lista}
+              totalPaginacion={this.state.totalPaginacion}
+              paginacion={this.state.paginacion}
+              fillTable={this.paginacionContext}
+              restart={this.state.restart}
+              className="md:px-2 py-3 bg-white border-t border-gray-200 overflow-auto"
+              theme="modern"
+            />
+          </div>
+        )}
       </ContainerWrapper>
     );
   }

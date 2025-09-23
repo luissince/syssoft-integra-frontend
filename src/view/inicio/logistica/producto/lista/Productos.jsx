@@ -265,7 +265,7 @@ class Productos extends CustomComponent {
     */
 
   handleChangeView = (value) => {
-    this.setState({ vista: value });
+    this.setState({ vista: value }, () => this.updateReduxState());
   };
 
   handleAgregar = async () => {
@@ -401,21 +401,25 @@ class Productos extends CustomComponent {
           </div>
         </div>
 
-        {/* Barra de búsqueda */}
-        <div className="mb-6 bg-white rounded-xl border p-4">
-          <div className="max-w-md">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar producto(s)
-            </label>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search text-gray-400"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar por código o nombre..."
-              theme="modern"
-            />
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes ver los productos con diferentes filtros
+            </p>
           </div>
+        </div>
+
+        {/* Barra de búsqueda */}
+        <div className="w-full mb-4">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Buscar por código o nombre..."
+            theme="modern"
+          />
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
