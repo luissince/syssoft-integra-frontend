@@ -70,9 +70,9 @@ const GenerarTabla: React.FC<Props> = ({
         let diferencia = 0;
 
         if (idTipoAjuste === INCREMENTO) {
-            diferencia = item.actual + cantidad;
+            diferencia = Number(item.actual) + Number(cantidad);
         } else {
-            diferencia = item.actual - cantidad;
+            diferencia = Number(item.actual) - Number(cantidad);
         }
 
         return (
