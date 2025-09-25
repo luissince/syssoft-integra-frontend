@@ -87,12 +87,14 @@ const GenerarTabla: React.FC<Props> = ({
                     </Button>
                 </TableCell>
                 <TableCell className="text-center">
-                    <Image
-                        default={images.noImage}
-                        src={item.imagen}
-                        alt={item.nombre}
-                        width={100}
-                    />
+                    <div className="flex justify-center">
+                        <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.nombre}
+                            width={100}
+                        />
+                    </div>
                 </TableCell>
                 <TableCell>
                     {item.codigo}
@@ -126,9 +128,8 @@ const GenerarTabla: React.FC<Props> = ({
                     {!item.lotes && rounded(cantidad)}
                 </TableCell>
                 <TableCell className={`${diferencia <= 0 ? 'text-danger' : ''}`}>
-                    {rounded(diferencia)}
+                    {rounded(diferencia)} <small>{item.unidad}</small>
                 </TableCell>
-                <TableCell>{item.unidad}</TableCell>
             </TableRow>
         );
     });
@@ -143,11 +144,10 @@ const GenerarTabla: React.FC<Props> = ({
                             <TableRow>
                                 <TableHead width="5%" className="text-center">Quitar</TableHead>
                                 <TableHead width="15%" className="text-center">Imagen</TableHead>
-                                <TableHead width="30%">Clave/Nombre</TableHead>
+                                <TableHead width="25%">Clave/Nombre</TableHead>
                                 <TableHead width="15%">Nueva Existencia</TableHead>
                                 <TableHead width="15%">Existencia Actual</TableHead>
                                 <TableHead width="15%">Diferencia</TableHead>
-                                <TableHead width="15%">Medida</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody ref={refTableBody}>{detailRows}</TableBody>
