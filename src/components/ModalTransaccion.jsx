@@ -33,6 +33,7 @@ import Input from './Input';
 import Select from './Select';
 import TextArea from './TextArea';
 import { alertKit } from 'alert-kit';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -1086,10 +1087,14 @@ const MetodoPago = ({
   handleInputMontoBancosAgregados,
   handleRemoveItemBancosAgregados,
 }) => {
+
+  const isMobile = useIsMobile();
+
   return (
     <Input
       autoFocus={true}
       group={true}
+      type={isMobile ? 'number' : 'text'}
       role={'float'}
       placeholder="Monto"
       value={monto}

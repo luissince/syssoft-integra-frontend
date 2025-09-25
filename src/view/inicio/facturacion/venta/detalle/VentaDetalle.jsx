@@ -244,6 +244,7 @@ class VentaDetalle extends CustomComponent {
       await this.loadAndOpenPrintModal();
     } else {
       const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
+      console.log(url);
 
       await pdfVisualizer.init({
         url: url,
@@ -307,19 +308,17 @@ class VentaDetalle extends CustomComponent {
       return;
     }
 
-     const url = documentsPdfInvoicesVenta(this.state.idVenta, "jpeg");
+     const url = documentsPdfInvoicesVenta(idVenta, selectedSize ,"jpeg");
 
-     console.log(url);
+    //  const url = "https://firebasestorage.googleapis.com/v0/b/syssoftintegra-1215c.appspot.com/o/VENTA%20N002-004640%20-%20PUBLICO%20GENERAL_pages-to-jpg-0001.jpg?alt=media&token=66270de7-3eca-406f-a3c6-f03b2ff688f0";
 
-    // Generar URL de la imagen del ticket (debe ser accesible localmente o pública)
-    const imageUrl = "https://firebasestorage.googleapis.com/v0/b/syssoftintegra-1215c.appspot.com/o/VENTA%20N002-004640%20-%20PUBLICO%20GENERAL_pages-to-jpg-0001.jpg?alt=media&token=66270de7-3eca-406f-a3c6-f03b2ff688f0";
 
     // Mapear tamaño a mm
     const widthMap = { '58mm': 58, '80mm': 80, 'A4': 210 };
     const widthMm = widthMap[selectedSize] || 58;
 
     try {
-      alertKit.loading({ title: 'Enviando a la impresora...' });
+      alertKit.loading({ message: 'Enviando a la impresora...' });
 
       await Math.printTicket({
         type: selectedPrinter.type,
@@ -329,7 +328,7 @@ class VentaDetalle extends CustomComponent {
 
         widthMm,
         message: `Venta ${this.state.comprobante}`,
-        imageUrl,
+        imageUrl: url,
       });
 
       alertKit.close(() => {

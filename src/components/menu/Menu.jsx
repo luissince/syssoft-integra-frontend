@@ -3,15 +3,7 @@ import { images } from '../../helper';
 import { isEmpty } from '../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Image from '../Image';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+import { useScreenSize } from '@/hooks/use-mobile';
 import { MoveLeft, MoveRight, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -224,9 +216,9 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
 }
 
 const Menu = ({ refSideBar, url, pathname, project, userToken, rutaLogo }) => {
-  const isMobile = useIsMobile();
+  const isScreen = useScreenSize();
 
-  if (isMobile) {
+  if (isScreen) {
     return (
       <MenuMobile
         menus={userToken.menus}

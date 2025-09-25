@@ -47,8 +47,9 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
 import { imagen } from '../../../../../helper/images.helper';
-import ModalLote from './ModalLote';
+import ModalLote from './component/ModalLote';
 import { alertKit } from 'alert-kit';
+import GenerarTabla from './component/GenerarTabla';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -564,92 +565,6 @@ class LogisticaAjusteCrear extends CustomComponent {
     |
     */
 
-  generateBody() {
-    if (isEmpty(this.state.detalles)) {
-      return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="7">
-            ¡No hay datos para mostrar!
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return this.state.detalles.map((item, index) => {
-      const isLastRow = index === this.state.detalles.length - 1;
-
-      const cantidad = item.lotes
-        ? item.lotes.reduce(
-          (acum, lote) => acum + getNumber(lote.cantidadAjustar),
-          0,
-        )
-        : item.cantidad;
-
-      let diferencia = 0;
-
-      if (this.state.idTipoAjuste === INCREMENTO) {
-        diferencia = item.actual + parseFloat(cantidad);
-      } else {
-        diferencia = item.actual - parseFloat(cantidad);
-      }
-
-      return (
-        <TableRow key={index}>
-          <TableCell>
-            <Button
-              className="btn-outline-danger btn-sm"
-              title="Anular"
-              onClick={() => this.handleRemoveDetalle(item.idProducto)}
-            >
-              <i className="bi bi-trash"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Image
-              default={images.noImage}
-              src={item.imagen}
-              alt={item.nombre}
-              width={70}
-            />
-          </TableCell>
-          <TableCell>
-            {item.codigo}
-            <br />
-            {item.nombre}
-          </TableCell>
-          <TableCell>
-            {item.lotes && (
-              <small className="text-info">
-                <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
-              </small>
-            )}
-
-            {!item.lotes && (
-              <Input
-                value={cantidad}
-                placeholder="0"
-                onChange={(event) =>
-                  this.handleInputDetalle(event, item.idProducto)
-                }
-                onKeyDown={keyNumberFloat}
-                onKeyUp={(event) =>
-                  this.handleFocusInputTable(event, isLastRow)
-                }
-              />
-            )}
-          </TableCell>
-          <TableCell>
-            {item.lotes && rounded(cantidad)}
-            {!item.lotes && rounded(cantidad)}
-          </TableCell>
-          <TableCell className={`${diferencia <= 0 ? 'text-danger' : ''}`}>
-            {rounded(diferencia)}
-          </TableCell>
-          <TableCell>{item.unidad}</TableCell>
-        </TableRow>
-      );
-    });
-  }
 
   render() {
     return (
@@ -873,29 +788,14 @@ class LogisticaAjusteCrear extends CustomComponent {
               </Column>
             </Row>
 
-            <Row>
-              <Column>
-                <TableResponsive>
-                  <TableTitle>Lista de productos:</TableTitle>
-                  <Table className="table-striped table-bordered rounded">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead width="5%">Quitar</TableHead>
-                        <TableHead width="10%">Imagen</TableHead>
-                        <TableHead width="30%">Clave/Nombre</TableHead>
-                        <TableHead width="15%">Nueva Existencia</TableHead>
-                        <TableHead width="15%">Existencia Actual</TableHead>
-                        <TableHead width="15%">Diferencia</TableHead>
-                        <TableHead width="15%">Medida</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody ref={this.refTableBody}>
-                      {this.generateBody()}
-                    </TableBody>
-                  </Table>
-                </TableResponsive>
-              </Column>
-            </Row>
+            <GenerarTabla
+              refTableBody={this.refTableBody}
+              idTipoAjuste={this.state.idTipoAjuste}
+              detalles={this.state.detalles}
+              handleRemoveDetalle={this.handleRemoveDetalle}
+              handleInputDetalle={this.handleInputDetalle}
+              handleFocusInputTable={this.handleFocusInputTable}
+            />
 
             <Row>
               <Column>
