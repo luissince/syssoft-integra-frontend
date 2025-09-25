@@ -558,20 +558,20 @@ class Ventas extends CustomComponent {
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
-              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
-              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item) => (
@@ -584,7 +584,7 @@ class Ventas extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-              className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
               <option value="1">COBRADO</option>
