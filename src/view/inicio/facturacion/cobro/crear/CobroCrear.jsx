@@ -37,7 +37,7 @@ import printJS from 'print-js';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CobroCrear extends CustomComponent {
   /**
