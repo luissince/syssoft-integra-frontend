@@ -4,11 +4,11 @@ import PropTypes from 'prop-types';
 import { getStatePrivilegio } from '../../helper/utils.helper';
 import { FACTURACION, REALIZAR_VENTA, VENTAS } from '../../model/types/menu';
 import Button from '../Button';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useScreenSize } from '@/hooks/use-mobile';
 
 const Menu = (props) => {
 
-  const isMobile = useIsMobile();
+  const isScreen = useScreenSize();
 
   const add = getStatePrivilegio(
     props.token.userToken.menus,
@@ -33,7 +33,7 @@ const Menu = (props) => {
   return (
     <header className="app-header">
       {
-        !isMobile ? (
+        !isScreen ? (
           <>
             <div className="app-sidebar__title">
               <img src={images.logo} alt="logo" />
@@ -63,7 +63,7 @@ const Menu = (props) => {
               to={`${props.match.url}/facturacion/ventas/crear`}
             >
               {' '}
-              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> {!isMobile ? 'Nueva venta' : ''}
+              <i className="fast-sale fa fa-shopping-cart fa-lg"></i> {!isScreen ? 'Nueva venta' : ''}
             </Link>
           </div>
         )}
