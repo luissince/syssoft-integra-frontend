@@ -6,7 +6,6 @@ import {
   formatTime,
   isText,
   isEmpty,
-  alertWarning,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
@@ -25,29 +24,19 @@ import {
 } from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
-import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
-import pdfVisualizer from 'pdf-visualizer';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import Math from '@/model/ts/plugins/math';
+import { alertKit } from 'alert-kit';
+import { Capacitor } from '@capacitor/core';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class VentaDetalle extends CustomComponent {
   /**
@@ -74,6 +63,11 @@ class VentaDetalle extends CustomComponent {
       usuario: '',
       observacion: '',
       nota: '',
+
+      isPrintModalOpen: false,
+      availablePrinters: null,
+      selectedPrinter: null, // { type: 'BLUETOOTH' | 'USB', address: string, name: string }
+      selectedSize: '58mm', // valor por defecto
 
       isOpenSendWhatsapp: false,
 
@@ -140,7 +134,10 @@ class VentaDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Venta', response.getMessage(), () => {
+      alertKit.warning({
+        title: 'Venta',
+        message: response.getMessage(),
+      }, () => {
         this.close();
       });
       return;
@@ -240,13 +237,111 @@ class VentaDetalle extends CustomComponent {
   // Eventos para impresión
   //------------------------------------------------------------------------------------------
 
+  // Este método se llama al hacer clic en cualquier botón de impresión
   handlePrintInvoices = async (size) => {
-    await pdfVisualizer.init({
-      url: documentsPdfInvoicesVenta(this.state.idVenta, size),
-      title: 'Venta',
-      titlePageNumber: 'Página',
-      titleLoading: 'Cargando...',
+    if (Capacitor.isNativePlatform()) {
+      this.setState({ selectedSize: size });
+      await this.loadAndOpenPrintModal();
+    } else {
+      const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
+
+      await pdfVisualizer.init({
+        url: url,
+        title: 'Venta',
+        titlePageNumber: 'Página',
+        titleLoading: 'Cargando...',
+      });
+    }
+  };
+
+  // Carga impresoras y abre el modal
+  loadAndOpenPrintModal = async (url) => {
+    try {
+      const permiso = await Math.requestBluetoothPermission();
+      if (!permiso.granted) {
+        alertKit.warning({ title: 'Impresión', message: 'Permiso de Bluetooth requerido para buscar impresoras.' }, () => {
+          this.setState({ loading: false });
+        });
+        return;
+      }
+
+      alertKit.loading({ title: 'Cargando impresoras...' });
+
+      const result = await Math.listPrinters();
+
+      this.setState({
+        availablePrinters: result,
+        isPrintModalOpen: true,
+      });
+
+      alertKit.close();
+    } catch (error) {
+      alertKit.warning({ title: 'Impresión', message: 'No se pudieron cargar las impresoras. Asegúrese de que estén encendidas y emparejadas.' });
+    }
+  };
+
+  handleSelectPrinter = (type, device) => {
+    this.setState({
+      selectedPrinter: {
+        type,
+        address: type === 'BLUETOOTH' ? device.address : '',
+        vendorId: type === 'USB' ? device.vendorId : 0,
+        productId: type === 'USB' ? device.productId : 0,
+        name: device.name,
+      },
     });
+  };
+
+  handleSelectSize = (size) => {
+    this.setState({ selectedSize: size });
+  };
+
+  handleConfirmPrint = async () => {
+    const { selectedPrinter, selectedSize, idVenta } = this.state;
+
+    if (!selectedPrinter) {
+      alertKit.warning({
+        title: 'Impresión',
+        message: 'Por favor seleccione una impresora.',
+      });
+      return;
+    }
+
+     const url = documentsPdfInvoicesVenta(this.state.idVenta, "jpeg");
+
+     console.log(url);
+
+    // Generar URL de la imagen del ticket (debe ser accesible localmente o pública)
+    const imageUrl = "https://firebasestorage.googleapis.com/v0/b/syssoftintegra-1215c.appspot.com/o/VENTA%20N002-004640%20-%20PUBLICO%20GENERAL_pages-to-jpg-0001.jpg?alt=media&token=66270de7-3eca-406f-a3c6-f03b2ff688f0";
+
+    // Mapear tamaño a mm
+    const widthMap = { '58mm': 58, '80mm': 80, 'A4': 210 };
+    const widthMm = widthMap[selectedSize] || 58;
+
+    try {
+      alertKit.loading({ title: 'Enviando a la impresora...' });
+
+      await Math.printTicket({
+        type: selectedPrinter.type,
+        address: selectedPrinter.address,
+        vendorId: selectedPrinter.vendorId,
+        productId: selectedPrinter.productId,
+
+        widthMm,
+        message: `Venta ${this.state.comprobante}`,
+        imageUrl,
+      });
+
+      alertKit.close(() => {
+        this.setState({ isPrintModalOpen: false });
+      });
+    } catch (error) {
+      alertKit.warning({ title: 'Impresión', message: 'Error al enviar a la impresora. Verifique la conexión.' });
+    }
+  };
+
+  closePrintModal = () => {
+    this.setState({ isPrintModalOpen: false });
   };
 
   //------------------------------------------------------------------------------------------
@@ -259,7 +354,7 @@ class VentaDetalle extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
@@ -331,32 +426,32 @@ class VentaDetalle extends CustomComponent {
 
   renderDetalles() {
     return this.state.detalles.map((item, index) => (
-      <TableRow key={index}>
-        <TableCell>{item.id}</TableCell>
-        <TableCell className="text-center">
+      <tr key={index} className="hover:bg-gray-50">
+        <td className="p-4 text-gray-700">{item.id}</td>
+        <td className="p-4 text-center">
           <Image
             default={images.noImage}
             src={item.imagen}
             alt={item.producto}
-            width={100}
+            width={80}
+            className="mx-auto rounded border border-gray-200"
           />
-        </TableCell>
-        <TableCell>
-          {item.codigo}
-          <br />
-          {item.producto}
-        </TableCell>
-        <TableCell>{item.medida}</TableCell>
-        <TableCell>{item.categoria}</TableCell>
-        <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-        <TableCell className="text-right">{item.impuesto}</TableCell>
-        <TableCell className="text-right">
+        </td>
+        <td className="p-4 text-gray-700">
+          <div className="font-mono text-sm text-gray-500">{item.codigo}</div>
+          <div>{item.producto}</div>
+        </td>
+        <td className="p-4 text-gray-700">{item.medida}</td>
+        <td className="p-4 text-gray-700">{item.categoria}</td>
+        <td className="p-4 text-gray-700 text-right">{rounded(item.cantidad)}</td>
+        <td className="p-4 text-gray-700 text-right">{item.impuesto}</td>
+        <td className="p-4 text-gray-700 text-right">
           {numberFormat(item.precio, this.state.codiso)}
-        </TableCell>
-        <TableCell className="text-right">
+        </td>
+        <td className="p-4 text-gray-900 font-medium text-right">
           {numberFormat(item.cantidad * item.precio, this.state.codiso)}
-        </TableCell>
-      </TableRow>
+        </td>
+      </tr>
     ));
   }
 
@@ -367,7 +462,6 @@ class VentaDetalle extends CustomComponent {
     for (const item of this.state.detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
-
       const impuesto = item.porcentaje;
 
       const valorActual = cantidad * valor;
@@ -402,92 +496,94 @@ class VentaDetalle extends CustomComponent {
         return acc;
       }, []);
 
-      return resultado.map((impuesto, index) => {
-        return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">
-              {impuesto.nombre} :
-            </TableHead>
-            <TableHead className="text-right mb-2">
-              {numberFormat(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
-        );
-      });
+      return resultado.map((impuesto, index) => (
+        <tr key={index}>
+          <th className="p-3 text-gray-600 text-right">{impuesto.nombre}:</th>
+          <td className="p-3 text-gray-900 font-medium text-right">
+            {numberFormat(impuesto.valor, this.state.codiso)}
+          </td>
+        </tr>
+      ));
     };
 
     return (
       <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
+        <tr>
+          <th className="p-3 text-gray-600 text-right">SUB TOTAL:</th>
+          <td className="p-3 text-gray-900 font-medium text-right">
             {numberFormat(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+          </td>
+        </tr>
         {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
+        <tr>
+          <td colSpan="2" className="py-2">
+            <div className="border-t border-gray-200"></div>
+          </td>
+        </tr>
+        <tr>
+          <th className="p-3 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+          <td className="p-3 text-gray-900 font-bold text-right text-lg">
             {numberFormat(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+          </td>
+        </tr>
       </>
     );
   }
-
   renderTransaciones() {
     if (isEmpty(this.state.transaccion)) {
       return (
-        <TableRow>
-          <TableCell colSpan="5" className="text-center">
+        <tr>
+          <td colSpan="5" className="p-6 text-center text-gray-500">
             No hay transacciones para mostrar.
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
       );
     }
 
-    return this.state.transaccion.map((item, index) => {
-      return (
-        <React.Fragment key={index}>
-          <TableRow className="table-success">
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>
-              <span>{item.fecha}</span>
-              <br />
-              <span>{formatTime(item.hora)}</span>
-            </TableCell>
-            <TableCell>{item.concepto}</TableCell>
-            <TableCell>{item.nota}</TableCell>
-            <TableCell>{item.usuario}</TableCell>
-          </TableRow>
+    return this.state.transaccion.map((item, index) => (
+      <React.Fragment key={index}>
+        {/* Transacción principal */}
+        <tr className="bg-green-50">
+          <td className="p-3 font-medium text-gray-800">{index + 1}</td>
+          <td className="p-3">
+            <div className="font-medium">{item.fecha}</div>
+            <div className="text-sm text-gray-600">{formatTime(item.hora)}</div>
+          </td>
+          <td className="p-3 text-gray-800">{item.concepto}</td>
+          <td className="p-3 text-gray-800">{item.nota}</td>
+          <td className="p-3 text-gray-800">{item.usuario}</td>
+        </tr>
 
-          <TableRow>
-            <TableCell className="text-center">#</TableCell>
-            <TableCell>Banco</TableCell>
-            <TableCell>Monto</TableCell>
-            <TableCell colSpan={2}>Observación</TableCell>
-          </TableRow>
-          {item.detalles.map((detalle, index) => {
-            return (
-              <TableRow key={index}>
-                <TableCell className="text-center">{index + 1}</TableCell>
-                <TableCell>{detalle.nombre}</TableCell>
-                <TableCell>
-                  {numberFormat(detalle.monto, this.state.codiso)}
-                </TableCell>
-                <TableCell colSpan={2}>{detalle.observacion}</TableCell>
-              </TableRow>
-            );
-          })}
-          <TableRow>
-            <TableCell colSpan="5">
-              <hr />
-            </TableCell>
-          </TableRow>
-        </React.Fragment>
-      );
-    });
+        {/* Encabezado de detalles */}
+        <tr className="bg-gray-50 text-sm text-gray-600">
+          <td className="p-2 text-center">#</td>
+          <td className="p-2">Banco</td>
+          <td className="p-2">Monto</td>
+          <td colSpan="2" className="p-2">Observación</td>
+        </tr>
+
+        {/* Detalles de la transacción */}
+        {item.detalles.map((detalle, idx) => (
+          <tr key={idx} className="hover:bg-gray-50">
+            <td className="p-3 text-center text-gray-600">{idx + 1}</td>
+            <td className="p-3 text-gray-700">{detalle.nombre}</td>
+            <td className="p-3 text-gray-900 font-medium">
+              {numberFormat(detalle.monto, this.state.codiso)}
+            </td>
+            <td colSpan="2" className="p-3 text-gray-700">
+              {detalle.observacion}
+            </td>
+          </tr>
+        ))}
+
+        {/* Separador visual */}
+        <tr>
+          <td colSpan="5" className="py-3">
+            <div className="border-t border-gray-200"></div>
+          </td>
+        </tr>
+      </React.Fragment>
+    ));
   }
 
   render() {
@@ -512,180 +608,234 @@ class VentaDetalle extends CustomComponent {
           handleProcess={this.handleProcessSendWhatsapp}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>{' '}
-            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
-              <i className="fa fa-whatsapp"></i> Whatsapp
-            </Button>
-            {/* {' '}
-            <Button
-              className="btn-light"
-              onClick={this.handleSendEmail}
-            >
-              <i className="fa fa-email"></i> Email
-            </Button> */}
-          </Column>
-        </Row>
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> A4
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
+          >
+            <i className="fa fa-print"></i> 80MM
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 flex items-center gap-2"
+            onClick={this.handleOpenSendWhatsapp}
+          >
+            <i className="fa fa-whatsapp"></i> WhatsApp
+          </button>
+        </div>
 
-        <Row>
-          <Column>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Comprobante
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.comprobante}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Cliente
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.cliente}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    N° de celular y correo electrónico
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.celular} - {this.state.email}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Fecha
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.fecha}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Observación
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.observacion}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Nota
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.nota}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Forma de Pago
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.formaPago}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Estado
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.estado}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Usuario
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.usuario}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Total
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {numberFormat(this.state.total, this.state.codiso)}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-            </Table>
-          </Column>
-        </Row>
+        {/* Resumen de la venta */}
+        <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="divide-y divide-gray-100">
+            {[
+              { label: 'Comprobante', value: this.state.comprobante },
+              { label: 'Cliente', value: this.state.cliente },
+              { label: 'N° de celular y correo electrónico', value: `${this.state.celular} - ${this.state.email}` },
+              { label: 'Fecha', value: this.state.fecha },
+              { label: 'Observación', value: this.state.observacion },
+              { label: 'Nota', value: this.state.nota },
+              { label: 'Forma de Pago', value: this.state.formaPago },
+              { label: 'Estado', value: this.state.estado },
+              { label: 'Usuario', value: this.state.usuario },
+              { label: 'Total', value: numberFormat(this.state.total, this.state.codiso) },
+            ].map((item, i) => (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
+                <div className="font-medium text-gray-600">{item.label}</div>
+                <div className="md:col-span-3 text-gray-900">{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader className="table-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Unidad</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Impuesto</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderDetalles()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Detalles de productos */}
+        <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-800">Detalles</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 text-left text-gray-600 text-sm">
+                <tr>
+                  <th className="p-4">#</th>
+                  <th className="p-4">Imagen</th>
+                  <th className="p-4">Producto</th>
+                  <th className="p-4">Unidad</th>
+                  <th className="p-4">Categoría</th>
+                  <th className="p-4 text-right">Cantidad</th>
+                  <th className="p-4 text-right">Impuesto</th>
+                  <th className="p-4 text-right">Precio</th>
+                  <th className="p-4 text-right">Monto</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {this.renderDetalles()}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        <Row>
-          <Column className="col-lg-8 col-sm-12"></Column>
-          <Column className="col-lg-4 col-sm-12">
-            <Table classNameContent="w-100">
-              <TableHeader>{this.renderTotal()}</TableHeader>
-            </Table>
-          </Column>
-        </Row>
+        {/* Totales (flotante a la derecha en desktop) */}
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-start-9 lg:col-span-4">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <table className="w-full text-right">
+                <tbody>
+                  {this.renderTotal()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Transacciones</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader className="table-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Fecha y Hora</TableHead>
-                    <TableHead>Concepto</TableHead>
-                    <TableHead>Nota</TableHead>
-                    <TableHead>Usuario</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderTransaciones()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Transacciones */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-800">Transacciones</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 text-left text-gray-600 text-sm">
+                <tr>
+                  <th className="p-4">#</th>
+                  <th className="p-4">Fecha y Hora</th>
+                  <th className="p-4">Concepto</th>
+                  <th className="p-4">Nota</th>
+                  <th className="p-4">Usuario</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {this.renderTransaciones()}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Modal de selección de impresora */}
+        {this.state.isPrintModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            {/* Contenedor del modal con altura máxima del 80% de la pantalla */}
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
+              {/* Cabecera */}
+              <div className="p-5 border-b border-gray-200 flex-shrink-0">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-800">Seleccionar impresora</h3>
+                  <button
+                    onClick={this.closePrintModal}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Contenido scrollable */}
+              <div className="p-5 overflow-y-auto flex-grow">
+                {/* Selector de tamaño */}
+                <div className="mb-5">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tamaño de papel</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['58mm', '80mm', 'A4'].map(size => (
+                      <button
+                        key={size}
+                        type="button"
+                        className={`px-3 py-2 text-sm rounded-lg border ${this.state.selectedSize === size
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        onClick={() => this.handleSelectSize(size)}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Impresoras Bluetooth */}
+                <div className="mb-5">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Bluetooth</h4>
+                  {this.state.availablePrinters.bluetooth.devices.length === 0 ? (
+                    <p className="text-sm text-gray-500">No hay dispositivos emparejados.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {this.state.availablePrinters.bluetooth.devices.map((dev, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className={`w-full text-left p-3 rounded-lg border ${this.state.selectedPrinter?.address === dev.address
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:bg-gray-50'
+                            }`}
+                          onClick={() => this.handleSelectPrinter('BLUETOOTH', dev)}
+                        >
+                          <div className="font-medium text-gray-800">{dev.name}</div>
+                          <div className="text-xs text-gray-500">{dev.address}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Impresoras USB */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">USB</h4>
+                  {this.state.availablePrinters.usb.devices.length === 0 ? (
+                    <p className="text-sm text-gray-500">No se detectaron impresoras USB.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {this.state.availablePrinters.usb.devices.map((dev, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className={`w-full text-left p-3 rounded-lg border ${this.state.selectedPrinter?.address === `${dev.vendorId}:${dev.productId}`
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:bg-gray-50'
+                            }`}
+                          onClick={() => this.handleSelectPrinter('USB', dev)}
+                        >
+                          <div className="font-medium text-gray-800">{dev.name}</div>
+                          <div className="text-xs text-gray-500">VID: {dev.vendorId} / PID: {dev.productId}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pie (botones) */}
+              <div className="p-5 border-t border-gray-200 flex-shrink-0 flex justify-end gap-3">
+                <button
+                  type="button"
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  onClick={this.closePrintModal}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  onClick={this.handleConfirmPrint}
+                  disabled={!this.state.selectedPrinter}
+                >
+                  Imprimir
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </ContainerWrapper>
     );
   }

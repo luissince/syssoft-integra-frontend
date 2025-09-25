@@ -647,10 +647,10 @@ export async function dashboardVenta(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesVenta(idVenta, size) {
+export function documentsPdfInvoicesVenta(idVenta, size, outputType = "pdf") {
   return `${
     import.meta.env.VITE_APP_BACK_END
-  }/api/factura/documents/pdf/invoices/${idVenta}/${size}`;
+  }/api/factura/documents/pdf/invoices/${idVenta}/${size}/${outputType}`;
 }
 
 export function documentsPdfAccountReceivableVenta(idCuota, idVenta, size) {
