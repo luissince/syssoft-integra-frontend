@@ -239,12 +239,11 @@ class VentaDetalle extends CustomComponent {
 
   // Este método se llama al hacer clic en cualquier botón de impresión
   handlePrintInvoices = async (size) => {
-    const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
-
     if (Capacitor.isNativePlatform()) {
       this.setState({ selectedSize: size });
       await this.loadAndOpenPrintModal();
     } else {
+      const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
 
       await pdfVisualizer.init({
         url: url,
@@ -256,7 +255,7 @@ class VentaDetalle extends CustomComponent {
   };
 
   // Carga impresoras y abre el modal
-  loadAndOpenPrintModal = async () => {
+  loadAndOpenPrintModal = async (url) => {
     try {
       const permiso = await Math.requestBluetoothPermission();
       if (!permiso.granted) {
@@ -307,6 +306,10 @@ class VentaDetalle extends CustomComponent {
       });
       return;
     }
+
+     const url = documentsPdfInvoicesVenta(this.state.idVenta, "jpeg");
+
+     console.log(url);
 
     // Generar URL de la imagen del ticket (debe ser accesible localmente o pública)
     const imageUrl = "https://firebasestorage.googleapis.com/v0/b/syssoftintegra-1215c.appspot.com/o/VENTA%20N002-004640%20-%20PUBLICO%20GENERAL_pages-to-jpg-0001.jpg?alt=media&token=66270de7-3eca-406f-a3c6-f03b2ff688f0";
