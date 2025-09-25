@@ -3,22 +3,20 @@ import PropTypes from 'prop-types';
 import {
   getNumber,
   isEmpty,
-  isNumeric,
   rounded,
-} from '../../../../../helper/utils.helper';
-import { VALOR_MONETARIO } from '../../../../../model/types/tipo-tratamiento-producto';
-import { CustomModalForm } from '../../../../../components/CustomModal';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Input from '../../../../../components/Input';
-import Button from '../../../../../components/Button';
-import { images } from '../../../../../helper';
-import { SpinnerView } from '../../../../../components/Spinner';
-import { getLotesProducto } from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import Image from '../../../../../components/Image';
+} from '../../../../../../helper/utils.helper';
+import { CustomModalForm } from '../../../../../../components/CustomModal';
+import Row from '../../../../../../components/Row';
+import Column from '../../../../../../components/Column';
+import Input from '../../../../../../components/Input';
+import Button from '../../../../../../components/Button';
+import { images } from '../../../../../../helper';
+import { SpinnerView } from '../../../../../../components/Spinner';
+import { getLotesProducto } from '../../../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../../../model/class/response';
+import ErrorResponse from '../../../../../../model/class/error-response';
+import { CANCELED } from '../../../../../../model/types/types';
+import Image from '../../../../../../components/Image';
 import {
   Table,
   TableBody,
@@ -27,22 +25,19 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
+} from '../../../../../../components/Table';
 import {
   Card,
   CardBody,
   CardHeader,
   CardTitle,
-} from '../../../../../components/Card';
+} from '../../../../../../components/Card';
 import {
   Package,
   AlertTriangle,
   XCircle,
-  Plus,
-  Minus,
-  ShoppingCart,
 } from 'lucide-react';
-import ProgressBar from '../../../../../components/ProgressBar';
+import ProgressBar from '../../../../../../components/ProgressBar';
 import { alertKit } from 'alert-kit';
 import { INCREMENTO } from '@/model/types/forma-ajuste';
 

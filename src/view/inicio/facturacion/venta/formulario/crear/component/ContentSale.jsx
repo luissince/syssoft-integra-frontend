@@ -1,4 +1,4 @@
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useScreenSize } from "@/hooks/use-mobile";
 import InvoiceClient from "./InvoiceClient";
 import InvoiceDetail from "./InvoiceDetail";
 import InvoiceFooter from "./InvoiceFooter";
@@ -49,11 +49,11 @@ const ContentSale = ({
     handleOpenSale,
 }) => {
 
-    const isMobile = useIsMobile();
+    const isScreen = useScreenSize();
 
     return (
         <>
-            <section className={`invoice-left ${isMobile && activeTab !== "productos" && "hidden"}`}>
+            <section className={`invoice-left ${isScreen && activeTab !== "productos" && "hidden"}`}>
                 <InvoiceView
                     ref={refInvoiceView}
                     idSucursal={idSucursal}
@@ -75,7 +75,7 @@ const ContentSale = ({
                 />
             </section>
 
-            <section className={`invoice-right flex w-full md:flex-[0_0_40%] md:max-w-[500px] ${isMobile && activeTab === "productos" && "hidden" }`}>
+            <section className={`invoice-right flex w-full md:flex-[0_0_40%] md:max-w-[500px] ${isScreen && activeTab === "productos" && "hidden" }`}>
                 <div className="hidden md:flex">
                     <InvoiceTicket
                         nombreComporbante={nombreComporbante}
