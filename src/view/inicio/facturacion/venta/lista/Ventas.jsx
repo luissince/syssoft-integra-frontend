@@ -743,8 +743,9 @@ class Ventas extends CustomComponent {
           /* 🟦 Vista Cuadrícula */
           <div className="space-y-6">
             {this.state.loading ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              <div className="flex flex-col items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+                <p className="text-gray-500">Cargando información...</p>
               </div>
             ) : isEmpty(this.state.lista) ? (
               <div className="text-center py-16 bg-white rounded-xl border">
@@ -791,8 +792,15 @@ class Ventas extends CustomComponent {
                         </div>
 
                         <div className="text-xs text-gray-600 mb-1">
-                          <span className="font-medium">Cliente:</span> {item.informacion}
-                          <div className="text-xxs text-gray-500">{item.tipoDocumento} - {item.documento}</div>
+                          <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
+                        </div>
+
+                        <div className="text-xs text-gray-600 mb-1">
+                          <span className="font-medium">N° Documento:</span> {item.documento}
+                        </div>
+
+                        <div className="text-xs text-gray-600 mb-1">
+                          <span className="font-medium">Información:</span> {item.informacion}
                         </div>
 
                         <div className="text-xs text-gray-600 mb-1">
@@ -805,7 +813,7 @@ class Ventas extends CustomComponent {
 
                         <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
                           <button
-                            className="flex-1 p-2 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition"
                             onClick={() => this.handleDetalle(item.idVenta)}
                             disabled={!this.state.view}
                             title="Ver detalle"
@@ -853,7 +861,7 @@ class Ventas extends CustomComponent {
               paginacion={this.state.paginacion}
               fillTable={this.paginacionContext}
               restart={this.state.restart}
-              className="md:px-2 py-3 bg-white border-t border-gray-200 overflow-auto"
+              className="md:px-6 py-3 bg-white border rounded-xl border-gray-200 overflow-auto"
               theme="modern"
             />
           </div>

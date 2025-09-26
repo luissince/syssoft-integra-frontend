@@ -19,7 +19,7 @@ const ContainerWrapper = forwardRef(({ children }, ref) => {
   return (
     <main className="mb-[60px] md:mb-0" ref={ref}>
       <div className="container-xl mt-3">
-        <div className="bg-white p-3 rounded position-relative">{children}</div>
+        <div className="bg-white p-3 rounded relative">{children}</div>
       </div>
 
       <Footer />
@@ -47,8 +47,8 @@ export const PosContainerWrapper = forwardRef(
   ({ children, className = '' }, ref) => {
     return (
       <main className="main-pos mb-[60px] md:mb-0" ref={ref}>
-        <div className="h-100">
-          <div className={`d-flex position-relative h-100 ${className}`}>
+        <div className="h-full">
+          <div className={`flex relative h-full ${className}`}>
             {children}
           </div>
         </div>
