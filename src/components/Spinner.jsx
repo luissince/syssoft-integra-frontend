@@ -25,8 +25,8 @@ const SpinnerView = ({ loading, message, children }) => {
   return (
     <div
       className={`${
-        loading ? 'd-block ' : 'd-none'
-      } clearfix absolute-all bg-white`}
+        loading ? 'block' : 'hidden'
+      }  absolute inset-0 bg-white z-10`}
     >
       <div className="d-flex flex-column justify-content-center align-items-center h-100">
         <div>

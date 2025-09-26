@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import Row from './Row';
 import Column from './Column';
+import { ArrowLeft } from 'lucide-react';
 
 /**
  * Componente de título.
@@ -15,21 +16,20 @@ const Title = ({ title, subTitle, icon, handleGoBack }) => {
   return (
     <Row>
       <Column formGroup={true}>
-        <h5>
+        <div className='flex items-center gap-2'>
           {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
           {handleGoBack !== undefined && (
-            <span className="mr-2" role="button" onClick={handleGoBack}>
-              <i className="bi bi-arrow-left-short"></i>
-            </span>
+            <button className="mr-2" role="button" onClick={handleGoBack}>
+              <ArrowLeft className="h-6 w-6" />
+            </button>
           )}
           {/* Título principal */}
-          {title}
+          <h5 className="m-0 p-0">{title}</h5>
           {/* Renderiza el subtítulo y el icono si se proporciona */}
-          <small className="text-secondary">
-            {' '}
+          <small className="text-gray-500">
             {subTitle} {icon}
           </small>
-        </h5>
+        </div>
       </Column>
     </Row>
   );
