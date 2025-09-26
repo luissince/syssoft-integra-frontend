@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Impresoras térmicas comunes -->
+    <usb-device vendor-id="1659" product-id="8965" />  <!-- Prolific -->
+    <usb-device vendor-id="1208" />  <!-- Epson -->
+    <usb-device vendor-id="10032" /> <!-- Rongta/HOIN -->
+    <usb-device vendor-id="8406" />  <!-- PowerLeader -->
+
+    <!-- Clase genérica de impresoras -->
+    <usb-device class="7" />
+
+    <!-- Si sabes el vendor/product ID de tu impresora específica -->
+    <!-- <usb-device vendor-id="XXXX" product-id="YYYY" /> -->
+</resources>

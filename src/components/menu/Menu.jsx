@@ -4,7 +4,7 @@ import { isEmpty } from '../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Image from '../Image';
 import { useScreenSize } from '@/hooks/use-mobile';
-import { MoveLeft, MoveRight, X } from 'lucide-react';
+import { MoveLeft, MoveRight } from 'lucide-react';
 import { useState } from 'react';
 
 const MenuMobile = ({ menus, url }) => {
@@ -12,85 +12,58 @@ const MenuMobile = ({ menus, url }) => {
   const [page, setPage] = useState(0);
 
   const activeMenus = menus.filter(menu => menu.estado === 1);
-  const totalPages = Math.ceil(activeMenus.length / pageSize);
+  const totalPages = Math.ceil(activeMenus.length / (pageSize - 1)); // porque a veces hay flecha
 
-  const start = page * pageSize;
-  const end = start + pageSize;
-  const visibleMenus = activeMenus.slice(start, end);
+  // Calculamos si habrá flechas
+  const hasPrev = page > 0;
+  const hasNext = page < totalPages - 1;
 
+  // Cantidad de menús a mostrar (reservando espacio para flechas)
+  let itemsToShow = pageSize;
+  if (hasPrev && hasNext) {
+    itemsToShow = pageSize - 2; // 2 flechas
+  } else if (hasPrev || hasNext) {
+    itemsToShow = pageSize - 1; // 1 flecha
+  }
+
+  const start = page * (pageSize - 1); // avanzamos de a 3 o según tu diseño
+  const visibleMenus = activeMenus.slice(start, start + itemsToShow);
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 bg-[#111827] border-white z-50 lg:hidden">
         <div className="flex justify-between mx-auto">
-          {
-            visibleMenus.map((menu, index) => {
-              const subMenus = menu.subMenus;
-
-              const ruta = menu.ruta;
-              const icon = menu.icon;
-              const nombre = menu.nombre;
-              return (
-                <NavLink
-                  key={index}
-                  to={`${url}/${ruta}`}
-                  className="w-full flex flex-col items-center text-gray-400 px-2 py-2 hover:text-white"
-                  activeClassName="text-white bg-[#004099]"
-                  role="button"
-                  id={`${ruta}`}
-                >
-                  <div
-                    className={"rounded-full text-muted-foreground"}
-                  >
-                    <i className={`${icon} text-xl`}></i>
-                  </div>
-                  <span
-                    className={"text-xs mt-1 text-muted-foreground"}
-                  >
-                    {nombre}
-                  </span>
-                </NavLink>
-              );
-            })
-          }
-
-
-          {/* Botón Atrás */}
-          {page > 0 && (
+          {hasPrev && (
             <button
               onClick={() => setPage(prev => prev - 1)}
-              className="w-full flex flex-col items-center px-2 py-2 rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+              className="w-full flex flex-col items-center px-2 py-2 text-gray-400 hover:text-white"
             >
               <MoveLeft className="h-6 w-6" />
-              <span className="text-xs mt-1 font-medium leading-tight">
-                Atrás
-              </span>
+              <span className="text-xs mt-1">Atrás</span>
             </button>
           )}
 
-          {/* Botón Más */}
-          {page < totalPages - 1 && (
+          {visibleMenus.map((menu, index) => (
+            <NavLink
+              key={index}
+              to={`${url}/${menu.ruta}`}
+              className="w-full flex flex-col items-center px-2 py-2 text-gray-400 hover:text-white"
+              activeClassName="text-white bg-[#004099]"
+            >
+              <i className={`${menu.icon} text-xl`} />
+              <span className="text-xs mt-1">{menu.nombre}</span>
+            </NavLink>
+          ))}
+
+
+          {hasNext && (
             <button
               onClick={() => setPage(prev => prev + 1)}
-              className="w-full flex flex-col items-center px-2 py-2 rounded-lg text-gray-400 hover:text-white transition-all duration-200"
+              className="w-full flex flex-col items-center px-2 py-2 text-gray-400 hover:text-white"
             >
               <MoveRight className="h-6 w-6" />
-              <span className="text-xs mt-1 font-medium leading-tight">
-                Más
-              </span>
+              <span className="text-xs mt-1">Más</span>
             </button>
           )}
-
-          {/* <button
-            className="w-full flex flex-col items-center px-2 py-2 rounded-lg text-gray-400 hover:text-white transition-all duration-200"
-            aria-label="Más opciones"
-          >
-            <div className="p-2 rounded-full">
-              <MoveRight className="h-6 w-6" />
-            </div>
-            <span className="text-[10px] mt-1 font-medium leading-tight">
-              Más
-            </span>
-          </button> */}
         </div>
       </nav>
     </>

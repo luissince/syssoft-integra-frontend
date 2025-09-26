@@ -780,147 +780,6 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
-  generateBody() {
-    const { loading, lista } = this.state;
-
-    if (loading) {
-      return (
-        <SpinnerTable
-          colSpan="8"
-          message="Cargando información de la tabla..."
-        />
-      );
-    }
-
-    if (isEmpty(lista)) {
-      return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="8">
-            ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return lista.map((item, index) => {
-      const descripcion =
-        item.xmlDescripcion === ''
-          ? 'Por Generar Xml'
-          : limitarCadena(item.xmlDescripcion, 90, '...');
-
-      return (
-        <TableRow key={index}>
-          <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>
-            <DropdownActions
-              options={[
-                {
-                  image: images.pdf,
-                  tooltip: 'Archivo Pdf A4',
-                  label: 'Pdf A4',
-                  onClick: () =>
-                    this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
-                },
-                {
-                  image: images.invoice,
-                  tooltip: 'Archivo Pdf 80mm',
-                  label: 'Pdf Ticket',
-                  onClick: () =>
-                    this.handleOpenPrinter(
-                      item.idComprobante,
-                      item.tipo,
-                      '80mm',
-                    ),
-                },
-                {
-                  image: images.invoice,
-                  tooltip: 'Archivo Pdf 58mm',
-                  label: 'Pdf Ticket',
-                  onClick: () =>
-                    this.handleOpenPrinter(
-                      item.idComprobante,
-                      item.tipo,
-                      '58mm',
-                    ),
-                },
-                {
-                  image: images.xml,
-                  tooltip: 'Archivo Xml',
-                  label: 'Xml',
-                  onClick: () => this.handleDownloadXml(item.idComprobante),
-                },
-                {
-                  image: images.email,
-                  tooltip: 'Enviar Correo',
-                  label: 'Email',
-                  onClick: () =>
-                    this.handleSendEmail(item.idComprobante, item.tipo),
-                },
-                ...(item.tipo === 'fac' && item.anulacion !== 0
-                  ? [
-                    {
-                      image: images.error,
-                      tooltip:
-                        item.anulacion === 1
-                          ? 'Comunicación de Baja'
-                          : 'Resumen Diario',
-                      label: item.anulacion === 1
-                        ? 'Comunicación de Baja'
-                        : 'Resumen Diario',
-                      onClick: () => {
-                        const id = item.idComprobante;
-                        const num =
-                          item.serie +
-                          '-' +
-                          formatNumberWithZeros(item.numeracion);
-                        item.anulacion === 1
-                          ? this.handleSendComunicacionDeBaja(id, num)
-                          : this.handleSendResumenDiario(id, num);
-                      },
-                    },
-                  ]
-                  : []),
-              ]}
-            />
-          </TableCell>
-          <TableCell>
-            <span>
-              {item.fecha}
-              <br />
-              {formatTime(item.hora)}
-            </span>
-          </TableCell>
-          <TableCell>
-            <Link
-              to={getPathNavigation(item.tipo, item.idComprobante)}
-              className="btn-link"
-            >
-              {item.comprobante}
-              <br />
-              {item.serie + '-' + formatNumberWithZeros(item.numeracion)}
-            </Link>
-          </TableCell>
-          <TableCell>
-            {`${item.tipoDocumento} - ${item.documento}`}
-            <br />
-            {item.informacion}
-          </TableCell>
-          <TableCell className="text-center">
-            {item.estado !== 3 ? (
-              <span className="text-success">DECLARAR</span>
-            ) : (
-              <span className="text-danger">DAR DE BAJA</span>
-            )}
-          </TableCell>
-          <TableCell className="text-center">
-            {this.renderEstado(item)}
-          </TableCell>
-          <TableCell>{descripcion}</TableCell>
-        </TableRow>
-      );
-    });
-  }
-
   render() {
     const { vista } = this.state;
 
@@ -1106,7 +965,7 @@ class CpeElectronicos extends CustomComponent {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {this.state.loading ? (
                     <tr>
-                      <td colSpan="8" className="px-6 py-12 text-center">
+                      <td colSpan={8} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
                           <p className="text-gray-500">Cargando información...</p>
@@ -1115,7 +974,7 @@ class CpeElectronicos extends CustomComponent {
                     </tr>
                   ) : isEmpty(this.state.lista) ? (
                     <tr>
-                      <td colSpan="8" className="px-6 py-12 text-center">
+                      <td colSpan={8} className="px-6 py-12 text-center">
                         <div className="text-gray-500">
                           <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
                           <p className="text-lg font-medium">No se encontraron comprobantes</p>
@@ -1147,14 +1006,14 @@ class CpeElectronicos extends CustomComponent {
                                 },
                                 {
                                   image: images.invoice,
-                                  tooltip: 'PDF 80mm',
-                                  label: 'PDF Ticket',
+                                  tooltip: 'PDF Ticket 80mm',
+                                  label: 'PDF Ticket 80mm',
                                   onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
                                 },
                                 {
                                   image: images.invoice,
-                                  tooltip: 'PDF 58mm',
-                                  label: 'PDF Ticket',
+                                  tooltip: 'PDF Ticket 58mm',
+                                  label: 'PDF Ticket 58mm',
                                   onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
                                 },
                                 {
@@ -1306,8 +1165,14 @@ class CpeElectronicos extends CustomComponent {
                               {
                                 image: images.invoice,
                                 tooltip: 'PDF 80mm',
-                                label: 'Ticket',
+                                label: 'Ticket 80mm',
                                 onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
+                              },
+                              {
+                                image: images.invoice,
+                                tooltip: 'PDF 58mm',
+                                label: 'Ticket 58mm',
+                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
                               },
                               {
                                 image: images.xml,
@@ -1326,7 +1191,7 @@ class CpeElectronicos extends CustomComponent {
                                   {
                                     image: images.error,
                                     tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                    label: item.anulacion === 1 ? 'Com. Baja' : 'Resumen',
+                                    label: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
                                     onClick: () => {
                                       const id = item.idComprobante;
                                       const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);

@@ -59,7 +59,7 @@ class VentaDetalle extends CustomComponent {
       estado: '',
       codiso: '',
       simbolo: '',
-      total: '',
+      total: 0,
       usuario: '',
       observacion: '',
       nota: '',
@@ -68,6 +68,8 @@ class VentaDetalle extends CustomComponent {
       availablePrinters: null,
       selectedPrinter: null, // { type: 'BLUETOOTH' | 'USB', address: string, name: string }
       selectedSize: '58mm', // valor por defecto
+      debugModalOpen: false,
+      debugJson: '',
 
       isOpenSendWhatsapp: false,
 
@@ -258,17 +260,27 @@ class VentaDetalle extends CustomComponent {
   // Carga impresoras y abre el modal
   loadAndOpenPrintModal = async (url) => {
     try {
-      const permiso = await Math.requestBluetoothPermission();
-      if (!permiso.granted) {
-        alertKit.warning({ title: 'Impresión', message: 'Permiso de Bluetooth requerido para buscar impresoras.' }, () => {
-          this.setState({ loading: false });
-        });
-        return;
-      }
+      // const permiso = await Math.requestBluetoothPermission();
+      // if (!permiso.granted) {
+      //   alertKit.warning({ title: 'Impresión', message: 'Permiso de Bluetooth requerido para buscar impresoras.' }, () => {
+      //     this.setState({ loading: false });
+      //   });
+      //   return;
+      // }
 
       alertKit.loading({ title: 'Cargando impresoras...' });
 
       const result = await Math.listPrinters();
+
+      // Convertir el resultado a JSON legible
+      const debugJson = JSON.stringify(result, null, 2);
+
+      // Mostrar el JSON en un modal de depuración
+      this.setState({
+        debugJson,
+        debugModalOpen: true,
+      });
+
 
       this.setState({
         availablePrinters: result,
@@ -281,16 +293,39 @@ class VentaDetalle extends CustomComponent {
     }
   };
 
-  handleSelectPrinter = (type, device) => {
-    this.setState({
-      selectedPrinter: {
-        type,
-        address: type === 'BLUETOOTH' ? device.address : '',
-        vendorId: type === 'USB' ? device.vendorId : 0,
-        productId: type === 'USB' ? device.productId : 0,
-        name: device.name,
-      },
-    });
+  handleSelectPrinter = async (type, device) => {
+    try {
+      let resultPermission;
+
+      if (type === 'BLUETOOTH') {
+        resultPermission = await Math.requestBluetoothPermission();
+      } else {
+        resultPermission = await Math.requestUsbPermission({
+          vendorId: device.vendorId,
+          productId: device.productId
+        });
+      }
+
+      console.log(resultPermission);
+
+      if (!resultPermission.success) {
+        alertKit.warning({ title: 'Impresión', message: resultPermission.message });
+      }
+
+      if (resultPermission.success) {
+        this.setState({
+          selectedPrinter: {
+            type,
+            address: type === 'BLUETOOTH' ? device.address : '',
+            vendorId: type === 'USB' ? device.vendorId : 0,
+            productId: type === 'USB' ? device.productId : 0,
+            name: device.name,
+          },
+        });
+      }
+    } catch (error) {
+      alertKit.warning({ title: 'Impresión', message: 'No se pudieron cargar las impresoras. Asegúrese de que estén encendidas y emparejadas.' });
+    }
   };
 
   handleSelectSize = (size) => {
@@ -308,10 +343,7 @@ class VentaDetalle extends CustomComponent {
       return;
     }
 
-     const url = documentsPdfInvoicesVenta(idVenta, selectedSize ,"jpeg");
-
-    //  const url = "https://firebasestorage.googleapis.com/v0/b/syssoftintegra-1215c.appspot.com/o/VENTA%20N002-004640%20-%20PUBLICO%20GENERAL_pages-to-jpg-0001.jpg?alt=media&token=66270de7-3eca-406f-a3c6-f03b2ff688f0";
-
+    const url = documentsPdfInvoicesVenta(idVenta, selectedSize, "jpeg");
 
     // Mapear tamaño a mm
     const widthMap = { '58mm': 58, '80mm': 80, 'A4': 210 };
@@ -497,8 +529,8 @@ class VentaDetalle extends CustomComponent {
 
       return resultado.map((impuesto, index) => (
         <tr key={index}>
-          <th className="p-3 text-gray-600 text-right">{impuesto.nombre}:</th>
-          <td className="p-3 text-gray-900 font-medium text-right">
+          <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
             {numberFormat(impuesto.valor, this.state.codiso)}
           </td>
         </tr>
@@ -508,20 +540,20 @@ class VentaDetalle extends CustomComponent {
     return (
       <>
         <tr>
-          <th className="p-3 text-gray-600 text-right">SUB TOTAL:</th>
-          <td className="p-3 text-gray-900 font-medium text-right">
+          <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
             {numberFormat(subTotal, this.state.codiso)}
           </td>
         </tr>
         {impuestosGenerado()}
         <tr>
-          <td colSpan="2" className="py-2">
+          <td colSpan={2} className="py-2">
             <div className="border-t border-gray-200"></div>
           </td>
         </tr>
         <tr>
-          <th className="p-3 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
-          <td className="p-3 text-gray-900 font-bold text-right text-lg">
+          <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+          <td className="p-2 text-gray-900 font-bold text-right text-lg">
             {numberFormat(total, this.state.codiso)}
           </td>
         </tr>
@@ -532,7 +564,7 @@ class VentaDetalle extends CustomComponent {
     if (isEmpty(this.state.transaccion)) {
       return (
         <tr>
-          <td colSpan="5" className="p-6 text-center text-gray-500">
+          <td colSpan={5} className="p-6 text-center text-gray-500">
             No hay transacciones para mostrar.
           </td>
         </tr>
@@ -558,7 +590,7 @@ class VentaDetalle extends CustomComponent {
           <td className="p-2 text-center">#</td>
           <td className="p-2">Banco</td>
           <td className="p-2">Monto</td>
-          <td colSpan="2" className="p-2">Observación</td>
+          <td colSpan={2} className="p-2">Observación</td>
         </tr>
 
         {/* Detalles de la transacción */}
@@ -569,7 +601,7 @@ class VentaDetalle extends CustomComponent {
             <td className="p-3 text-gray-900 font-medium">
               {numberFormat(detalle.monto, this.state.codiso)}
             </td>
-            <td colSpan="2" className="p-3 text-gray-700">
+            <td colSpan={2} className="p-3 text-gray-700">
               {detalle.observacion}
             </td>
           </tr>
@@ -577,7 +609,7 @@ class VentaDetalle extends CustomComponent {
 
         {/* Separador visual */}
         <tr>
-          <td colSpan="5" className="py-3">
+          <td colSpan={5} className="py-3">
             <div className="border-t border-gray-200"></div>
           </td>
         </tr>
@@ -610,25 +642,25 @@ class VentaDetalle extends CustomComponent {
         {/* Acciones */}
         <div className="mb-6 flex flex-wrap gap-3">
           <button
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             onClick={this.handlePrintInvoices.bind(this, 'A4')}
           >
             <i className="fa fa-print"></i> A4
           </button>
           <button
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             onClick={this.handlePrintInvoices.bind(this, '80mm')}
           >
             <i className="fa fa-print"></i> 80MM
           </button>
           <button
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
             onClick={this.handlePrintInvoices.bind(this, '58mm')}
           >
             <i className="fa fa-print"></i> 58MM
           </button>
           <button
-            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 flex items-center gap-2"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
             <i className="fa fa-whatsapp"></i> WhatsApp
@@ -636,12 +668,14 @@ class VentaDetalle extends CustomComponent {
         </div>
 
         {/* Resumen de la venta */}
-        <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="mb-8 bg-white overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
           <div className="divide-y divide-gray-100">
             {[
               { label: 'Comprobante', value: this.state.comprobante },
               { label: 'Cliente', value: this.state.cliente },
-              { label: 'N° de celular y correo electrónico', value: `${this.state.celular} - ${this.state.email}` },
+              { label: 'N° de celular', value: this.state.celular },
+              { label: 'Correo electrónico', value: this.state.email },
               { label: 'Fecha', value: this.state.fecha },
               { label: 'Observación', value: this.state.observacion },
               { label: 'Nota', value: this.state.nota },
@@ -650,7 +684,7 @@ class VentaDetalle extends CustomComponent {
               { label: 'Usuario', value: this.state.usuario },
               { label: 'Total', value: numberFormat(this.state.total, this.state.codiso) },
             ].map((item, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
+              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
                 <div className="font-medium text-gray-600">{item.label}</div>
                 <div className="md:col-span-3 text-gray-900">{item.value}</div>
               </div>
@@ -659,10 +693,8 @@ class VentaDetalle extends CustomComponent {
         </div>
 
         {/* Detalles de productos */}
-        <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Detalles</h2>
-          </div>
+        <div className="mb-8 bg-white overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-800">Detalles</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 text-left text-gray-600 text-sm">
@@ -686,9 +718,9 @@ class VentaDetalle extends CustomComponent {
         </div>
 
         {/* Totales (flotante a la derecha en desktop) */}
-        <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div className="lg:col-start-9 lg:col-span-4">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white  overflow-hidden">
               <table className="w-full text-right">
                 <tbody>
                   {this.renderTotal()}
@@ -699,10 +731,8 @@ class VentaDetalle extends CustomComponent {
         </div>
 
         {/* Transacciones */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Transacciones</h2>
-          </div>
+        <div className="bg-white overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-800">Transacciones</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 text-left text-gray-600 text-sm">
@@ -799,13 +829,13 @@ class VentaDetalle extends CustomComponent {
                         <button
                           key={i}
                           type="button"
-                          className={`w-full text-left p-3 rounded-lg border ${this.state.selectedPrinter?.address === `${dev.vendorId}:${dev.productId}`
+                          className={`w-full text-left p-3 rounded-lg border ${this.state.selectedPrinter?.vendorId === dev.vendorId && this.state.selectedPrinter?.productId === dev.productId
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 hover:bg-gray-50'
                             }`}
                           onClick={() => this.handleSelectPrinter('USB', dev)}
                         >
-                          <div className="font-medium text-gray-800">{dev.name}</div>
+                          <div className="font-medium text-gray-800">{dev.productName}</div>
                           <div className="text-xs text-gray-500">VID: {dev.vendorId} / PID: {dev.productId}</div>
                         </button>
                       ))}
@@ -830,6 +860,38 @@ class VentaDetalle extends CustomComponent {
                   disabled={!this.state.selectedPrinter}
                 >
                   Imprimir
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de depuración JSON */}
+        {this.state.debugModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
+              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-800">Resultado de listPrinters()</h3>
+                <button
+                  onClick={() => this.setState({ debugModalOpen: false })}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-4 overflow-y-auto flex-grow">
+                <pre className="text-xs bg-gray-100 p-3 rounded text-gray-800 whitespace-pre-wrap">
+                  {this.state.debugJson}
+                </pre>
+              </div>
+              <div className="p-4 border-t border-gray-200 flex justify-end">
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  onClick={() => this.setState({ debugModalOpen: false })}
+                >
+                  Cerrar
                 </button>
               </div>
             </div>
