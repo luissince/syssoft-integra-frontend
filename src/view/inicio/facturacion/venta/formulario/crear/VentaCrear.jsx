@@ -1,5 +1,4 @@
 import React from 'react';
-import printJS from 'print-js';
 import {
   convertNullText,
   formatDecimal,
@@ -67,12 +66,20 @@ import { alertKit } from 'alert-kit';
 import ModalLote from '../common/ModalLote';
 import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import ContentSale from './component/ContentSale';
+import ModalPrinter from '../../detalle/component/ModalPrinter';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class VentaCrear extends CustomComponent {
+
+  /**
+   * Crea una nueva instancia del componente Venta.
+   *
+   * @param {Object} props - Propiedades recibidas del componente padre.
+   */
   constructor(props) {
     super(props);
 
@@ -149,6 +156,10 @@ class VentaCrear extends CustomComponent {
       // Atributos del modal producto
       loadingProducto: true,
 
+      // Atributos del modal de impresión en mobil
+      isOpenModalPrinter: false,
+
+      // Opción para cambiar de vista
       activeTab: 'productos',
 
       // Id principales
@@ -698,37 +709,29 @@ class VentaCrear extends CustomComponent {
 
   handleUpdateProductos = (data, isClear = false, initial = false) => {
     if (initial) {
-      this.setState(
-        {
-          productos: this.props.productos,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        productos: this.props.productos,
+      }, () => {
+        this.updateReduxState();
+      });
       return;
     }
 
     if (isClear) {
-      this.setState(
-        {
-          productos: data,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        productos: data,
+      }, () => {
+        this.updateReduxState();
+      });
       return;
     }
 
     this.setState(
       (prevState) => ({
         productos: [...prevState.productos, data],
-      }),
-      () => {
+      }), () => {
         this.updateReduxState();
-      },
-    );
+      });
   };
 
   handleStarProduct = (producto) => {
@@ -757,36 +760,30 @@ class VentaCrear extends CustomComponent {
 
   handleAddItem = async (producto) => {
     if (isEmpty(this.state.idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione un impuesto.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un impuesto.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.handleOpenOptions();
-          this.refImpuesto.current.focus();
-        },
-      );
+      }, () => {
+        this.handleOpenOptions();
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione el almacen.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el almacen.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.handleOpenOptions();
-          this.refAlmacen.current.focus();
-        },
-      );
+      }, () => {
+        this.handleOpenOptions();
+        this.refAlmacen.current.focus();
+      });
       return;
     }
 
@@ -837,13 +834,10 @@ class VentaCrear extends CustomComponent {
       (item) => item.idComprobante == event.target.value,
     );
 
-    this.setState(
-      {
-        idComprobante: event.target.value,
-        nombreComporbante: !comprobante ? 'Ninguno' : comprobante.nombre,
-      },
-      () => this.updateReduxState(),
-    );
+    this.setState({
+      idComprobante: event.target.value,
+      nombreComporbante: !comprobante ? 'Ninguno' : comprobante.nombre,
+    }, () => this.updateReduxState());
   };
 
   //------------------------------------------------------------------------------------------
@@ -953,50 +947,41 @@ class VentaCrear extends CustomComponent {
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione un impuesto.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un impuesto.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione una moneda.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione una moneda.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refMoneda.current.focus();
-        },
-      );
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione un almacen.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un almacen.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refAlmacen.current.focus();
-        },
-      );
+      }, () => {
+        this.refAlmacen.current.focus();
+      });
       return;
     }
 
@@ -1009,21 +994,18 @@ class VentaCrear extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalleVenta,
-      },
-      async () => {
-        this.reloadProductoPreferidos();
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalleVenta,
+    }, async () => {
+      this.reloadProductoPreferidos();
 
-        const invoice = document.getElementById(this.idSidebarConfiguration);
-        invoice.classList.remove('toggled');
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove('toggled');
 
-        this.updateReduxState();
-      },
-    );
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -1035,21 +1017,37 @@ class VentaCrear extends CustomComponent {
   };
 
   handleCloseImpresion = async () => {
-    this.setState({ isOpenImpresion: false });
+    await this.setStateAsync({ isOpenImpresion: false });
   };
 
-  handlePrinterImpresion = (size) => {
-    printJS({
-      printable: documentsPdfInvoicesVenta(this.state.idVenta, size),
+  handlePrinterImpresion = async (size) => {
+    const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
+
+    pdfVisualizer.printer({
+      printable: url,
       type: 'pdf',
       showModal: true,
-      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
       },
     });
   };
+
+  //------------------------------------------------------------------------------------------
+  // Modal impresoras mobil
+  //------------------------------------------------------------------------------------------
+
+  handleOpenModalPrinter = async () => {
+    await this.handleCloseImpresion();
+    this.setState({ isOpenModalPrinter: true });
+  }
+
+  handleClosePrintModal = () => {
+    this.setState({ isOpenModalPrinter: false }, () => {
+      this.clearView();
+    });
+  }
 
   //------------------------------------------------------------------------------------------
   // Opciones de pre impresión
@@ -1060,66 +1058,54 @@ class VentaCrear extends CustomComponent {
       this.state;
 
     if (isEmpty(idComprobante)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione su comprobante.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione su comprobante.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refComprobante.current.focus();
-        },
-      );
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione un cliente.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un cliente.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refValueCliente.current.focus();
-        },
-      );
+      }, () => {
+        this.refValueCliente.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione su moneda.',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione su moneda.',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refMoneda.current.focus();
-        },
-      );
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Venta',
-          message: 'Seleccione el impuesto',
-          primaryButton: {
-            html: "<i class='fa fa-check'></i> Aceptar",
-          },
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione el impuesto',
+        primaryButton: {
+          html: "<i class='fa fa-check'></i> Aceptar",
         },
-        () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
@@ -1146,17 +1132,16 @@ class VentaCrear extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    const response = await obtenerPreVentaPdf(
-      {
-        idComprobante: idComprobante,
-        idCliente: cliente.idPersona,
-        idMoneda: idMoneda,
-        idUsuario: idUsuario,
-        idSucursal: idSucursal,
-        observacion: observacion,
-        nota: nota,
-        detalle: detalleVenta,
-      },
+    const response = await obtenerPreVentaPdf({
+      idComprobante: idComprobante,
+      idCliente: cliente.idPersona,
+      idMoneda: idMoneda,
+      idUsuario: idUsuario,
+      idSucursal: idSucursal,
+      observacion: observacion,
+      nota: nota,
+      detalle: detalleVenta,
+    },
       type,
       abort.signal,
     );
@@ -1166,11 +1151,13 @@ class VentaCrear extends CustomComponent {
 
       success();
 
-      printJS({
+      pdfVisualizer.printer({
         printable: base64,
         type: 'pdf',
         base64: true,
-        onPrintDialogClose: this.handleClosePreImpresion,
+        onPrintDialogClose: () => {
+          this.handleClosePreImpresion();
+        },
       });
     }
 
@@ -2011,17 +1998,16 @@ class VentaCrear extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    const accept = await alertKit.question(
-      {
-        title: 'Venta',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Venta',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const data = {
@@ -2324,6 +2310,7 @@ class VentaCrear extends CustomComponent {
           isOpen={this.state.isOpenImpresion}
           clear={this.clearView}
           handleClose={this.handleCloseImpresion}
+          handlePrinterMobile={this.handleOpenModalPrinter}
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
@@ -2333,6 +2320,12 @@ class VentaCrear extends CustomComponent {
           isOpen={this.state.isOpenPreImpresion}
           handleClose={this.handleClosePreImpresion}
           handleProcess={this.handleProcessPreImpresion}
+        />
+
+        <ModalPrinter
+          isOpen={this.state.isOpenModalPrinter}
+          handleClose={this.handleClosePrintModal}
+          idVenta={this.state.idVenta}
         />
 
         <ModalVenta

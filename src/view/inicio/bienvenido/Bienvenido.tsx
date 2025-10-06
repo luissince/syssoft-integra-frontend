@@ -1,7 +1,8 @@
 import ContainerWrapper from '@/components/ui/container-wrapper';
 import { useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
-const Bienvenido = () => {
+const Bienvenido = (props: RouteComponentProps) => {
   const [ventasRUS, setVentasRUS] = useState<number>(5000);
   const [ventasRER, setVentasRER] = useState<number>(20000);
   const [ventasRMT, setVentasRMT] = useState<number>(50000);

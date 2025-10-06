@@ -193,8 +193,14 @@ class Login extends CustomComponent {
   handleViewPassword = () => {
     this.setState({
       lookPassword: !this.state.lookPassword,
+    }, () => {
+      const input = this.passwordRef.current;
+      if (input) {
+        input.focus();
+        const length = input.value.length;
+        input.setSelectionRange(length, length);
+      }
     });
-    this.passwordRef.current.focus();
   };
 
   /*

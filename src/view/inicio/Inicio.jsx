@@ -168,7 +168,6 @@ import Finanzas, {
 import Crm, {
   Consultas,
   ConsultaDetalle,
-  ConsultaAgregar,
   ConsultaEditar,
 } from './crm/index.jsx';
 
@@ -180,9 +179,9 @@ import {
 import SuccessReponse from '../../model/class/response.js';
 import ErrorResponse from '../../model/class/error-response.js';
 import { CANCELED } from '../../model/types/types.js';
-import FileDownloader from '../../components/FileDownloader.jsx';
-import { images } from '../../helper/index.jsx';
-import { SpinnerView } from '../../components/Spinner.jsx';
+import FileDownloader from '../../components/FileDownloader';
+import { images } from '../../helper/index';
+import { SpinnerView } from '../../components/Spinner';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
 
 /**
