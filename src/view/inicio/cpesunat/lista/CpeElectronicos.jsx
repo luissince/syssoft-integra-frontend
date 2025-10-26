@@ -952,14 +952,14 @@ class CpeElectronicos extends CustomComponent {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Acciones</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Fecha</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Comprobante</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-center">Tipo</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">Estado SUNAT</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observación</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-5">#</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Acciones</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Fecha</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Comprobante</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Cliente</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-10">Tipo</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-10">Estado SUNAT</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Observación</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -1143,17 +1143,16 @@ class CpeElectronicos extends CustomComponent {
                           <div className="text-sm text-gray-500">{item.tipoDocumento} - {item.documento}</div>
                         </div>
 
-                        <div className="text-sm text-gray-600 mb-2">
-                          <span className="font-medium">Estado SUNAT:</span>
-                          <div className="mt-1">{this.renderEstado(item)}</div>
-                        </div>
-
                         <div className="text-sm text-gray-600 mb-3">
                           <span className="font-medium">Observación:</span>
                           <div className="text-sm text-gray-700 mt-1">{descripcion}</div>
                         </div>
 
-                        <div className="pt-3 border-t border-gray-100">
+                        <div className="pt-3 border-t border-gray-100 flex justify-between">
+                          <div className="text-sm text-gray-600 mb-2">
+                            <div className="mt-1">{this.renderEstado(item)}</div>
+                          </div>
+
                           <DropdownActions
                             options={[
                               {

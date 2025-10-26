@@ -53,6 +53,9 @@ import SidebarConfiguration from '../../../../../components/SidebarConfiguration
 import ModalOrdenCompra from './component/ModalOrdenCompra';
 import { PRODUCTO } from '../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
+import PanelIzquierdo from './component/PanelIzquierdo';
+import { th } from 'date-fns/locale';
+import PanelDerecho from './component/PanelDerecho';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -1274,342 +1277,45 @@ class CompraCrear extends CustomComponent {
         <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
           <div className="d-flex w-100 h-100">
             {/* PANEL IZQUIERDO */}
-            <div
-              className="w-100 d-flex flex-column position-relative"
-              style={{
-                flex: '0 0 60%',
-              }}
-            >
-              <div
-                className="d-flex align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="d-flex">
-                  <Button className="btn btn-link" onClick={this.handleCerrar}>
-                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
-                  </Button>
-                </div>
-
-                <div className="py-3 d-flex align-items-center">
-                  <p className="h5 m-0">
-                    Crear Compra <i className="fa fa-plus text-secondary"></i>{' '}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className="px-3 py-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <Search
-                  ref={this.refProducto}
-                  refInput={this.refProductoValue}
-                  group={true}
-                  iconLeft={<i className="bi bi-search"></i>}
-                  onSearch={this.handleFilterProducto}
-                  placeholder="Buscar..."
-                  buttonRight={
-                    <Button
-                      className="btn-outline-secondary"
-                      title="Limpiar"
-                      onClick={() => {
-                        this.refProducto.current.restart();
-                        this.refProductoValue.current.focus();
-                      }}
-                    >
-                      <i className="fa fa-close"></i>
-                    </Button>
-                  }
-                />
-              </div>
-
-              <div
-                className={
-                  !isEmpty(this.state.productos)
-                    ? 'px-3 h-100 overflow-auto p-3'
-                    : 'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {this.state.loadingProducto && (
-                  <div className="text-center position-relative">
-                    <SpinnerTransparent
-                      loading={true}
-                      message={'Buscando productos...'}
-                    />
-                  </div>
-                )}
-
-                {!this.state.loadingProducto &&
-                  isEmpty(this.state.productos) && (
-                    <div className="text-center position-relative">
-                      <i className="bi bi-cart4 text-secondary text-2xl"></i>
-                      <p className="text-secondary text-lg mb-0">
-                        Use la barra de busqueda para encontrar su producto.
-                      </p>
-                    </div>
-                  )}
-
-                {!isEmpty(this.state.productos) && (
-                  <div className="d-flex justify-content-center flex-wrap gap-4">
-                    {this.state.productos.map((item, index) => (
-                      <Button
-                        key={index}
-                        className="btn-light bg-white"
-                        style={{
-                          border: '1px solid #e2e8f0',
-                          width: '16rem',
-                        }}
-                        onClick={() => this.handleSelectItemProducto(item)}
-                      >
-                        <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                          <div className="d-flex justify-content-center align-items-center flex-column">
-                            <Image
-                              default={images.noImage}
-                              src={item.imagen}
-                              alt={item.nombre}
-                              width={150}
-                              height={150}
-                              className="mb-2 object-contain"
-                            />
-                            <p
-                              className={`${item.idTipoProducto === PRODUCTO &&
-                                item.cantidad <= 0
-                                ? 'badge badge-danger text-base'
-                                : 'badge badge-success text-base'
-                                } `}
-                            >
-                              STOCK: {formatDecimal(item.cantidad)}
-                            </p>
-                          </div>
-
-                          <div className="d-flex justify-content-center align-items-center flex-column">
-                            <p className="m-0 text-lg">{item.nombre}</p>
-                            <p className="m-0 text-xl font-weight-bold">
-                              {numberFormat(item.costo, this.state.codiso)}{' '}
-                              <small>x {item.unidad}</small>
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="w-100 text-left text-sm">
-                          Almacen: {item.almacen}
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <PanelIzquierdo
+              loadingProducto={this.state.loadingProducto}
+              productos={this.state.productos}
+              codiso={this.state.codiso}
+              refProducto={this.refProducto}
+              refProductoValue={this.refProductoValue}
+              handleCerrar={this.handleCerrar}
+              handleFilterProducto={this.handleFilterProducto}
+              handleSelectItemProducto={this.handleSelectItemProducto}
+            />
 
             {/* PANEL DERECHO  */}
-            <div
-              className="d-flex flex-column position-relative bg-white"
-              style={{
-                flex: '1 1 100%',
-                borderLeft: '1px solid #cbd5e1',
-              }}
-            >
-              <div
-                className="d-flex justify-content-between align-items-center pl-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="py-3">
-                  <p className="h5 m-0">Resumen</p>
-                </div>
+            <PanelDerecho
+              comprobantes={this.state.comprobantes}
+              refComprobante={this.refComprobante}
+              idComprobante={this.state.idComprobante}
+              handleSelectComprobante={this.handleSelectComprobante}
+              handleOpenOrdenCompra={this.handleOpenOrdenCompra}
 
-                <div className="d-flex justify-content-end">
-                  <Button
-                    className="btn-link rounded-circle h-100"
-                    onClick={this.handleOpenOrdenCompra}
-                  >
-                    <i className="bi bi-file-earmark-text text-xl text-secondary"></i>
-                  </Button>
-                  <Button className="btn-link" onClick={this.handleLimpiar}>
-                    <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
-                  </Button>
-                  <Button className="btn-link" onClick={this.handleOpenOptions}>
-                    <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
-                  </Button>
-                </div>
-              </div>
+              proveedores={this.state.proveedores}
+              refProveedor={this.refProveedor}
+              refProveedorValue={this.refProveedorValue}
+              handleFilterProveedor={this.handleFilterProveedor}
+              handleOpenModalProveedor={this.handleOpenModalProveedor}
+              handleClearInputProveedor={this.handleClearInputProveedor}
+              handleSelectItemProveedor={this.handleSelectItemProveedor}
 
-              <div
-                className="d-flex flex-column px-3 pt-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="form-group">
-                  <Select
-                    group={false}
-                    ref={this.refComprobante}
-                    value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}
-                  >
-                    <option value="">-- Comprobantes --</option>
-                    {this.state.comprobantes.map((item, index) => (
-                      <option key={index} value={item.idComprobante}>
-                        {item.nombre + ' (' + item.serie + ')'}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <div>
-                  <SearchInput
-                    ref={this.refProveedor}
-                    placeholder="Filtrar proveedores..."
-                    refValue={this.refProveedorValue}
-                    data={this.state.proveedores}
-                    handleClearInput={this.handleClearInputProveedor}
-                    handleFilter={this.handleFilterProveedor}
-                    handleSelectItem={this.handleSelectItemProveedor}
-                    customButton={
-                      <Button
-                        className="btn-outline-primary d-flex align-items-center"
-                        onClick={this.handleOpenModalProveedor}
-                      >
-                        <i className="fa fa-user-plus"></i>
-                        <div className="ml-2">Nuevo</div>
-                      </Button>
-                    }
-                    renderItem={(value) => (
-                      <>{value.documento + ' - ' + value.informacion}</>
-                    )}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <Select
-                    group={false}
-                    ref={this.refAlmacenDestino}
-                    value={this.state.idAlmacenDestino}
-                    onChange={this.handleSelectAlmacenDestino}
-                  >
-                    <option value="">-- Almacen de destino --</option>
-                    {this.state.almacenes.map((item, index) => (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
-
-              <div
-                className={
-                  isEmpty(this.state.detalles)
-                    ? 'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
-                    : 'd-flex flex-column text-center rounded h-100 overflow-auto'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {isEmpty(this.state.detalles) && (
-                  <div className="text-center">
-                    <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-lg mb-0">
-                      Aquí verás los productos que elijas en tu próxima pedido
-                    </p>
-                  </div>
-                )}
-
-                {this.state.detalles.map((item, index) => {
-                  const cantidad = !item.lote
-                    ? item.cantidad
-                    : item.lotes.reduce(
-                      (acumulador, item) =>
-                        acumulador + Number(item.cantidad.value),
-                      0,
-                    );
-                  const costo = item.costo;
-
-                  return (
-                    <div
-                      key={index}
-                      className="d-grid px-3 position-relative align-items-center bg-white"
-                      style={{
-                        gridTemplateColumns: '60% 20% 20%',
-                        borderBottom: '1px solid #e2e8f0',
-                      }}
-                    >
-                      {/* Primera columna (imagen y texto) */}
-                      <div className="d-flex align-items-center">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.nombre}
-                          width={80}
-                          height={80}
-                          className="object-contain"
-                        />
-
-                        <div className="p-3 text-left">
-                          <p className="m-0 text-sm"> {item.codigo}</p>
-                          <p className="m-0 text-base font-weight-bold text-break">
-                            {item.nombre}
-                          </p>
-                          <p className="m-0">
-                            {numberFormat(costo, this.state.codiso)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Segundo columna (costo total) y opciones */}
-                      <div className="d-flex flex-column justify-content-end align-items-center">
-                        <div className="h-100 text-xml">
-                          {rounded(cantidad)}
-                        </div>
-                      </div>
-
-                      {/* Tercera columna (costo total) y opciones */}
-                      <div className="d-flex flex-column justify-content-end align-items-center">
-                        <div className="h-100 text-lg">
-                          {numberFormat(cantidad * costo, this.state.codiso)}
-                        </div>
-
-                        <div className="d-flex align-items-end justify-content-end gap-4">
-                          <Button
-                            className="btn-link"
-                            onClick={() =>
-                              this.handleOpenModalProducto(item, 'edit')
-                            }
-                          >
-                            <i className="fa fa-edit text-secondary text-xl"></i>
-                          </Button>
-                          <Button
-                            className="btn-link"
-                            onClick={() =>
-                              this.handleRemoverProducto(item.idProducto)
-                            }
-                          >
-                            <i className="fa fa-trash text-secondary text-xl"></i>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div
-                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
-                style={{ borderTop: '1px solid #e2e8f0' }}
-              >
-                {this.renderTotal()}
-
-                <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 text-secondary">Cantidad:</p>
-                  <p className="m-0 text-secondary">
-                    {this.state.detalles.length === 1
-                      ? this.state.detalles.length + ' Producto'
-                      : this.state.detalles.length + ' Productos'}{' '}
-                  </p>
-                </div>
-              </div>
-            </div>
+              almacenes={this.state.almacenes}
+              refAlmacenDestino={this.refAlmacenDestino}
+              idAlmacenDestino={this.state.idAlmacenDestino}
+              handleSelectAlmacenDestino={this.handleSelectAlmacenDestino}
+              detalles={this.state.detalles}
+              codiso={this.state.codiso}
+              handleGuardar={this.handleGuardar}
+              handleLimpiar={this.handleLimpiar}
+              handleOpenOptions={this.handleOpenOptions}
+              handleOpenModalProducto={this.handleOpenModalProducto}
+              handleRemoverProducto={this.handleRemoverProducto}
+            />
           </div>
         </div>
       </PosContainerWrapper>

@@ -7,17 +7,24 @@ import {
     FileText,
     ClipboardCheck,
     Users,
-    Calendar,
+    CalendarIcon,
+    Building2,
 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 import { comboSucursal, dashboardInit } from "@/network/rest/api-client";
 import { CANCELED } from "@/model/types/types";
 import { alertKit } from "alert-kit";
-import { currentDate, isEmpty, numberFormat, rounded } from "@/helper/utils.helper";
+import { currentDate, formatDate, isEmpty, numberFormat, rounded } from "@/helper/utils.helper";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import BranchInterface from "@/model/ts/interface/branch.interface";
 import DashboardInterface, { StatCardInterface } from "@/model/ts/interface/dashboard.interface";
 import ErrorResponse from "@/model/class/error-response";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface Props {
     token: {
@@ -33,7 +40,7 @@ interface Props {
 const currentYear = new Date().getFullYear();
 const previousYear = currentYear - 1;
 
-const CommercialDashboard = ({ token, moneda }: Props) => {
+const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
     const [dateRange, setDateRange] = useState({
         start: currentDate(),
         end: currentDate(),
@@ -92,6 +99,19 @@ const CommercialDashboard = ({ token, moneda }: Props) => {
     useEffect(() => {
         fetchDashboardData();
     }, [dateRange, selectedBranch]);
+
+    const handleSelectStart = (selectedDate: Date) => {
+        if (selectedDate) {
+            console.log(selectedDate, format(selectedDate, "yyyy-MM-dd"));
+            setDateRange((prev) => ({ ...prev, start: format(selectedDate, "yyyy-MM-dd") }));
+        }
+    };
+
+    const handleSelectEnd = (selectedDate: Date) => {
+        if (selectedDate) {
+            setDateRange((prev) => ({ ...prev, end: format(selectedDate, "yyyy-MM-dd") }));
+        }
+    };
 
     const StatCard: React.FC<StatCardInterface> = ({ title, value, icon: Icon, color, trend, subtitle }) => (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
@@ -220,30 +240,56 @@ const CommercialDashboard = ({ token, moneda }: Props) => {
             {/* Date Range Filter */}
             <div className="mb-8 bg-white flex items-center justify-between space-x-4">
                 <div className="flex items-center space-x-4">
-                    <div>
-                        <input
-                            type="date"
-                            value={dateRange.start}
-                            onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                    <div className="space-y-2">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full justify-start  focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateRange.start ? formatDate(dateRange.start) : "Desde"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 bg-white">
+                                <Calendar
+                                    mode="single"
+                                    selected={new Date(dateRange.start)}
+                                    onSelect={handleSelectStart}
+                                    locale={es}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
-                    <div>
-                        <input
-                            type="date"
-                            value={dateRange.end}
-                            onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+
+                    <div className="space-y-2">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full justify-start  focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateRange.end ? formatDate(dateRange.end) : "Desde"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 bg-white">
+                                <Calendar
+                                    mode="single"
+                                    selected={new Date(dateRange.end)}
+                                    onSelect={handleSelectEnd}
+                                    locale={es}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
-                    <Calendar className="h-5 w-5 text-gray-600" />
+                <div>
                     <select
                         value={selectedBranch}
                         onChange={(e) => setSelectedBranch(e.target.value)}
-                        className="bg-transparent border-none text-gray-700 focus:outline-none"
+                        className={cn(
+                            "w-full px-4 py-2",
+                            "rounded-lg",
+                            "border border-gray-300 text-sm",
+                            "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                            "hover:bg-accent hover:text-accent-foreground"
+                        )}
                     >
                         {
                             branches.map((branch, index) => (

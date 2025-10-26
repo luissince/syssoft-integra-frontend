@@ -214,48 +214,50 @@ class Principal extends CustomComponent {
     }
 
     return (
-      <div className="container pt-5">
-        <SpinnerView
-          loading={this.state.loading}
-          message={this.state.loadingMessage}
-        />
+      <div className='h-full overflow-y-auto'>
+        <div className="container pt-5">
+          <SpinnerView
+            loading={this.state.loading}
+            message={this.state.loadingMessage}
+          />
 
-        <Title
-          rutaImage={this.state.rutaLogo}
-          razonSocial={this.state.razonSocial}
-          nombreEmpresa={this.state.nombreEmpresa}
-          documento={'RUC: ' + this.state.documento}
-          handleSignOut={this.handleSignOut}
-        />
+          <Title
+            rutaImage={this.state.rutaLogo}
+            razonSocial={this.state.razonSocial}
+            nombreEmpresa={this.state.nombreEmpresa}
+            documento={'RUC: ' + this.state.documento}
+            handleSignOut={this.handleSignOut}
+          />
 
-        <Row>
-          <Column className="col-md-12 col-sm-12 col-12" formGroup={true}>
-            <Input
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              className="bg-transparent"
-              type="search"
-              placeholder="Filtar por nombre de sucursal"
-              ref={this.refTxtSearch}
-              onKeyUp={(event) => this.handleSearch(event.target.value)}
-            />
-          </Column>
-        </Row>
+          <Row>
+            <Column className="col-md-12 col-sm-12 col-12" formGroup={true}>
+              <Input
+                group={true}
+                iconLeft={<i className="bi bi-search"></i>}
+                className="bg-transparent"
+                type="search"
+                placeholder="Filtar por nombre de sucursal"
+                ref={this.refTxtSearch}
+                onKeyUp={(event) => this.handleSearch(event.target.value)}
+              />
+            </Column>
+          </Row>
 
-        <Row>
-          {this.state.sucursales.map((item, index) => (
-            <ItemCard
-              key={index}
-              item={item}
-              handleIngresar={this.handleIngresar}
-            />
-          ))}
-          {isEmpty(this.state.sucursales) && (
-            <div className="col-12 d-flex justify-content-center">
-              <p className="text-center">No hay datos para mostrar.</p>
-            </div>
-          )}
-        </Row>
+          <Row>
+            {this.state.sucursales.map((item, index) => (
+              <ItemCard
+                key={index}
+                item={item}
+                handleIngresar={this.handleIngresar}
+              />
+            ))}
+            {isEmpty(this.state.sucursales) && (
+              <div className="col-12 d-flex justify-content-center">
+                <p className="text-center">No hay datos para mostrar.</p>
+              </div>
+            )}
+          </Row>
+        </div>
       </div>
     );
   }

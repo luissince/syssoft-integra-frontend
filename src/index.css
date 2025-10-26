@@ -1,4 +1,107 @@
-/* src/index.css */
+/* ================================
+   🌞 BASE DE TAILWIND Y RESET
+   ================================ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ================================
+   🎨 VARIABLES DE COLOR (Modo Claro)
+   ================================ */
+@layer base {
+  :root {
+    /* Fondo y texto principal */
+    --background: 0 0% 100%;               /* Blanco */
+    --foreground: 20 14.3% 4.1%;           /* Casi negro (texto principal) */
+
+    /* Tarjetas y popovers */
+    --card: 0 0% 100%;                     /* Blanco */
+    --card-foreground: 20 14.3% 4.1%;      /* Texto oscuro */
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+
+    /* Colores principales del sistema */
+    --primary: 215 100% 30%;               /* Azul oscuro */
+    --primary-foreground: 26 83.3% 14.1%;  /* Texto sobre el primario */
+
+    --info: 210 100% 45%;                  /* Azul brillante */
+    --warning: 39 92% 49%;                 /* Amarillo anaranjado */
+    --error: 355 78% 58%;                  /* Rojo medio */
+    --success: 136 54% 43%;                /* Verde medio */
+
+    /* Colores secundarios y neutros */
+    --secondary: 60 4.8% 95.9%;            /* Gris claro */
+    --secondary-foreground: 24 9.8% 10%;   /* Gris oscuro */
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+
+    /* Estados destructivos */
+    --destructive: 0 84.2% 60.2%;          /* Rojo vibrante */
+    --destructive-foreground: 60 9.1% 97.8%; /* Blanco cálido */
+
+    /* Bordes y entradas */
+    --border: 20 5.9% 90%;                 /* Gris claro */
+    --input: 20 5.9% 90%;
+    --ring: 38 92% 50%;                    /* Amarillo dorado */
+
+    /* Radio base de los elementos */
+    --radius: 0.5rem;
+  }
+
+  /* ================================
+     🌚 VARIABLES DE COLOR (Modo Oscuro)
+     ================================ */
+  .dark {
+    /* Fondo y texto principal */
+    --background: 20 14.3% 4.1%;           /* Gris casi negro */
+    --foreground: 60 9.1% 97.8%;           /* Casi blanco */
+
+    /* Tarjetas y popovers */
+    --card: 24 10% 10%;                    /* Gris oscuro más suave */
+    --card-foreground: 60 9.1% 97.8%;      /* Texto claro */
+    --popover: 24 10% 10%;
+    --popover-foreground: 60 9.1% 97.8%;
+
+    /* Colores principales ajustados para contraste en fondo oscuro */
+    --primary: 215 100% 60%;               /* Azul más claro */
+    --primary-foreground: 215 100% 12%;    /* Azul muy oscuro para contraste invertido */
+
+    --info: 210 100% 75%;                  /* Azul claro tipo “cielo” */
+    --warning: 39 92% 60%;                 /* Amarillo más suave, no tan chillón */
+    --error: 355 78% 70%;                  /* Rojo más claro (evita saturación excesiva) */
+    --success: 136 54% 55%;                /* Verde más luminoso */
+
+    /* Colores secundarios y neutros */
+    --secondary: 12 6.5% 15.1%;            /* Gris oscuro cálido */
+    --secondary-foreground: 60 9.1% 97.8%; /* Texto claro */
+    --muted: 12 6.5% 18%;                  /* Gris algo más visible */
+    --muted-foreground: 25 5.4% 63.9%;     /* Gris claro */
+    --accent: 12 6.5% 15.1%;               /* Igual que secundario para coherencia */
+    --accent-foreground: 60 9.1% 97.8%;
+
+    /* Estado destructivo */
+    --destructive: 0 70% 40%;              /* Rojo oscuro */
+    --destructive-foreground: 60 9.1% 97.8%;
+
+    /* Bordes e inputs */
+    --border: 12 6.5% 20%;                 /* Gris oscuro */
+    --input: 12 6.5% 20%;
+    --ring: 38 92% 60%;                    /* Dorado más suave */
+  }
+}
+
+/* ================================
+   ⚙️ APLICACIÓN DE LAS VARIABLES
+   ================================ */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

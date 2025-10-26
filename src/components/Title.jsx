@@ -20,7 +20,7 @@ const Title = ({ title, subTitle, icon, handleGoBack }) => {
           {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
           {handleGoBack !== undefined && (
             <button className="mr-2" role="button" onClick={handleGoBack}>
-              <ArrowLeft className="h-6 w-6" />
+              <ArrowLeft className="h-5 w-5" />
             </button>
           )}
           {/* Título principal */}

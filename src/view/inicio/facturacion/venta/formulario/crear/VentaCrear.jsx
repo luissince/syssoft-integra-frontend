@@ -2353,6 +2353,7 @@ class VentaCrear extends CustomComponent {
         />
 
         <SidebarConfiguration
+          menus={this.props.token.userToken.menus}
           idSidebarConfiguration={this.idSidebarConfiguration}
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
@@ -2402,6 +2403,7 @@ class VentaCrear extends CustomComponent {
         />
 
         <SidebarProducto
+          menus={this.props.token.userToken.menus}
           idSidebar={this.idSidebarProducto}
           loading={this.state.loadingProducto}
           producto={this.producto}

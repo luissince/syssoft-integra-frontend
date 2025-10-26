@@ -10,6 +10,10 @@ interface ImportMetaEnv {
   // readonly VITE_APP_TITLE: string;
 }
 
+declare const __APP_VERSION__: string;
+
+declare const __APP_TITLE__: string;
+
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }

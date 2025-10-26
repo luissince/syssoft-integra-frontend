@@ -1,6 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Settings, AlertCircle, Search, Plus, Trash2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, Search, Plus, Trash2, CalendarIcon, Building2 } from 'lucide-react';
+import { currentDate, formatDate } from '@/helper/utils.helper';
+import BranchInterface from '@/model/ts/interface/branch.interface';
+import { comboSucursal } from '@/network/rest/principal.network';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/model/types/types';
+import { alertKit } from 'alert-kit';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
 
 // Datos de prueba
 const initialSalesData: {
@@ -252,6 +263,12 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
 };
 
 const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
+    const [dateRange, setDateRange] = useState({
+        start: currentDate(),
+        end: currentDate(),
+    });
+    const [branches, setBranches] = useState<BranchInterface[]>([]);
+    const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
     const [monthlyExpenses, setMonthlyExpenses] = useState<number>(2000);
     const [salesData, setSalesData] = useState<SaleData[]>(initialSalesData);
     const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -266,6 +283,47 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
     });
     const [newExpenseName, setNewExpenseName] = useState<string>('');
     const [newExpenseAmount, setNewExpenseAmount] = useState<string>('');
+    const [loading, setLoading] = useState(true);
+
+    const abortControllerView = new AbortController();
+
+    // Mock data simulating the database procedure results
+    const fetchDashboardData = async () => {
+        setLoading(true);
+        const branchResponse = await comboSucursal(
+            abortControllerView.signal,
+        );
+
+        if (branchResponse instanceof ErrorResponse) {
+            if (branchResponse.getType() === CANCELED) return;
+
+            alertKit.warning({
+                title: 'Dashboard',
+                message: branchResponse.getMessage(),
+            });
+            return;
+        }
+
+        setBranches(branchResponse.data);
+        setLoading(false);
+    };
+
+    const handleSelectStart = (selectedDate: Date) => {
+        if (selectedDate) {
+            console.log(selectedDate, format(selectedDate, "yyyy-MM-dd"));
+            setDateRange((prev) => ({ ...prev, start: format(selectedDate, "yyyy-MM-dd") }));
+        }
+    };
+
+    const handleSelectEnd = (selectedDate: Date) => {
+        if (selectedDate) {
+            setDateRange((prev) => ({ ...prev, end: format(selectedDate, "yyyy-MM-dd") }));
+        }
+    };
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, [dateRange, selectedBranch]);
 
     const dailyGoal = useMemo(() => monthlyExpenses / 30, [monthlyExpenses]);
 
@@ -369,35 +427,67 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div className="w-full flex items-center space-x-4">
-                    <div>
-                        <input
-                            type="date"
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+
+                    <div className="space-y-2">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateRange.start ? formatDate(dateRange.start) : "Desde"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 bg-white">
+                                <Calendar
+                                    mode="single"
+                                    selected={new Date(dateRange.start)}
+                                    onSelect={handleSelectStart}
+                                    locale={es}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
-                    <div>
-                        <input
-                            type="date"
-                            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+
+                    <div className="space-y-2">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {dateRange.end ? formatDate(dateRange.end) : "Desde"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 bg-white">
+                                <Calendar
+                                    mode="single"
+                                    selected={new Date(dateRange.end)}
+                                    onSelect={handleSelectEnd}
+                                    locale={es}
+                                />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 </div>
 
-                <div className="w-full flex items-center justify-end space-x-2">
-                    <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
-                        <Calendar className="h-5 w-5 text-gray-600" />
-                        <select
-                            className="bg-transparent border-none text-gray-700 focus:outline-none"
-                        >
-                        </select>
-                    </div>
-
-                    <button
-                        onClick={() => setShowSettings(!showSettings)}
-                        className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                <div className="flex items-center space-x-2 ">
+                    <select
+                        value={selectedBranch}
+                        onChange={(e) => setSelectedBranch(e.target.value)}
+                        className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                        <Settings className="w-6 h-6 text-gray-700" />
-                    </button>
+                        {
+                            branches.map((branch, index) => (
+                                <option key={index} value={branch.idSucursal}>
+                                    {branch.nombre}
+                                </option>
+                            ))
+                        }
+                    </select>
+
+                    <Button
+                        variant="outline"
+                        className="w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onClick={() => setShowSettings(!showSettings)}>
+                        <Settings className="w-5 h-5 text-gray-700" />
+                    </Button>
                 </div>
             </div>
 

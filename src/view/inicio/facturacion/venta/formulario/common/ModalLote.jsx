@@ -427,7 +427,7 @@ class ModalLote extends Component {
         onClose={onClose}
         contentLabel="Modal Producto - Selección de Lotes"
         titleHeader="Seleccionar Lotes del Producto"
-        className={'modal-custom-lg'}
+        className={'modal-custom-lg h-[80%]'}
         onSubmit={this.handleOnSubmit}
         body={
           <>
