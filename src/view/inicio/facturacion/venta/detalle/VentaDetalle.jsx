@@ -29,23 +29,27 @@ import React from 'react';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
-import Math from '@/model/ts/plugins/math';
 import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
+import ModalPrinter from './component/ModalPrinter';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class VentaDetalle extends CustomComponent {
+
   /**
+   * Crea una nueva instancia del componente Venta.
    *
-   * Constructor
+   * @param {Object} props - Propiedades recibidas del componente padre.
    */
   constructor(props) {
     super(props);
+
     this.state = {
+      // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
 
@@ -64,12 +68,7 @@ class VentaDetalle extends CustomComponent {
       observacion: '',
       nota: '',
 
-      isPrintModalOpen: false,
-      availablePrinters: null,
-      selectedPrinter: null, // { type: 'BLUETOOTH' | 'USB', address: string, name: string }
-      selectedSize: '58mm', // valor por defecto
-      debugModalOpen: false,
-      debugJson: '',
+      isOpenModalPrinter: false,
 
       isOpenSendWhatsapp: false,
 
@@ -239,140 +238,27 @@ class VentaDetalle extends CustomComponent {
   // Eventos para impresión
   //------------------------------------------------------------------------------------------
 
-  // Este método se llama al hacer clic en cualquier botón de impresión
   handlePrintInvoices = async (size) => {
-    if (Capacitor.isNativePlatform()) {
-      this.setState({ selectedSize: size });
-      await this.loadAndOpenPrintModal();
-    } else {
-      const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
-      console.log(url);
+    const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
 
-      await pdfVisualizer.init({
-        url: url,
-        title: 'Venta',
-        titlePageNumber: 'Página',
-        titleLoading: 'Cargando...',
-      });
-    }
+    await pdfVisualizer.init({
+      url: url,
+      title: 'Venta',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
   };
 
-  // Carga impresoras y abre el modal
-  loadAndOpenPrintModal = async (url) => {
-    try {
-      // const permiso = await Math.requestBluetoothPermission();
-      // if (!permiso.granted) {
-      //   alertKit.warning({ title: 'Impresión', message: 'Permiso de Bluetooth requerido para buscar impresoras.' }, () => {
-      //     this.setState({ loading: false });
-      //   });
-      //   return;
-      // }
+  //------------------------------------------------------------------------------------------
+  // Eventos para impresión en mobil
+  //------------------------------------------------------------------------------------------
 
-      alertKit.loading({ title: 'Cargando impresoras...' });
-
-      const result = await Math.listPrinters();
-
-      // Convertir el resultado a JSON legible
-      const debugJson = JSON.stringify(result, null, 2);
-
-      // Mostrar el JSON en un modal de depuración
-      this.setState({
-        debugJson,
-        debugModalOpen: true,
-      });
-
-
-      this.setState({
-        availablePrinters: result,
-        isPrintModalOpen: true,
-      });
-
-      alertKit.close();
-    } catch (error) {
-      alertKit.warning({ title: 'Impresión', message: 'No se pudieron cargar las impresoras. Asegúrese de que estén encendidas y emparejadas.' });
-    }
+  handleOpenModalPrinter = async () => {
+    this.setState({ isOpenModalPrinter: true });
   };
 
-  handleSelectPrinter = async (type, device) => {
-    try {
-      let resultPermission;
-
-      if (type === 'BLUETOOTH') {
-        resultPermission = await Math.requestBluetoothPermission();
-      } else {
-        resultPermission = await Math.requestUsbPermission({
-          vendorId: device.vendorId,
-          productId: device.productId
-        });
-      }
-
-      console.log(resultPermission);
-
-      if (!resultPermission.success) {
-        alertKit.warning({ title: 'Impresión', message: resultPermission.message });
-      }
-
-      if (resultPermission.success) {
-        this.setState({
-          selectedPrinter: {
-            type,
-            address: type === 'BLUETOOTH' ? device.address : '',
-            vendorId: type === 'USB' ? device.vendorId : 0,
-            productId: type === 'USB' ? device.productId : 0,
-            name: device.name,
-          },
-        });
-      }
-    } catch (error) {
-      alertKit.warning({ title: 'Impresión', message: 'No se pudieron cargar las impresoras. Asegúrese de que estén encendidas y emparejadas.' });
-    }
-  };
-
-  handleSelectSize = (size) => {
-    this.setState({ selectedSize: size });
-  };
-
-  handleConfirmPrint = async () => {
-    const { selectedPrinter, selectedSize, idVenta } = this.state;
-
-    if (!selectedPrinter) {
-      alertKit.warning({
-        title: 'Impresión',
-        message: 'Por favor seleccione una impresora.',
-      });
-      return;
-    }
-
-    const url = documentsPdfInvoicesVenta(idVenta, selectedSize, "jpeg");
-
-    // Mapear tamaño a mm
-    const widthMap = { '58mm': 58, '80mm': 80, 'A4': 210 };
-    const widthMm = widthMap[selectedSize] || 58;
-
-    try {
-      alertKit.loading({ message: 'Enviando a la impresora...' });
-
-      await Math.printTicket({
-        type: selectedPrinter.type,
-        address: selectedPrinter.address,
-        vendorId: selectedPrinter.vendorId,
-        productId: selectedPrinter.productId,
-
-        widthMm,
-        message: `Venta ${this.state.comprobante}`,
-        imageUrl: url,
-      });
-
-      alertKit.close(() => {
-        this.setState({ isPrintModalOpen: false });
-      });
-    } catch (error) {
-      alertKit.warning({ title: 'Impresión', message: 'Error al enviar a la impresora. Verifique la conexión.' });
-    }
-  };
-
-  closePrintModal = () => {
-    this.setState({ isPrintModalOpen: false });
+  handleCloseModalPrinter = () => {
+    this.setState({ isOpenModalPrinter: false });
   };
 
   //------------------------------------------------------------------------------------------
@@ -639,28 +525,48 @@ class VentaDetalle extends CustomComponent {
           handleProcess={this.handleProcessSendWhatsapp}
         />
 
+        <ModalPrinter
+          isOpen={this.state.isOpenModalPrinter}
+          handleClose={this.handleCloseModalPrinter}
+          idVenta={this.state.idVenta}
+        />
+
         {/* Acciones */}
         <div className="mb-6 flex flex-wrap gap-3">
+          {
+            Capacitor.isNativePlatform() ? (
+              <button
+                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                onClick={this.handleOpenModalPrinter}
+              >
+                <i className="fa fa-print"></i> Imprimir
+              </button>
+            ) : (
+              <>
+                <button
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  onClick={this.handlePrintInvoices.bind(this, 'A4')}
+                >
+                  <i className="fa fa-print"></i> A4
+                </button>
+                <button
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  onClick={this.handlePrintInvoices.bind(this, '80mm')}
+                >
+                  <i className="fa fa-print"></i> 80MM
+                </button>
+                <button
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  onClick={this.handlePrintInvoices.bind(this, '58mm')}
+                >
+                  <i className="fa fa-print"></i> 58MM
+                </button>
+              </>
+            )
+          }
+
           <button
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-            onClick={this.handlePrintInvoices.bind(this, 'A4')}
-          >
-            <i className="fa fa-print"></i> A4
-          </button>
-          <button
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-            onClick={this.handlePrintInvoices.bind(this, '80mm')}
-          >
-            <i className="fa fa-print"></i> 80MM
-          </button>
-          <button
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-            onClick={this.handlePrintInvoices.bind(this, '58mm')}
-          >
-            <i className="fa fa-print"></i> 58MM
-          </button>
-          <button
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
             <i className="fa fa-whatsapp"></i> WhatsApp
@@ -750,153 +656,6 @@ class VentaDetalle extends CustomComponent {
             </table>
           </div>
         </div>
-
-        {/* Modal de selección de impresora */}
-        {this.state.isPrintModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            {/* Contenedor del modal con altura máxima del 80% de la pantalla */}
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
-              {/* Cabecera */}
-              <div className="p-5 border-b border-gray-200 flex-shrink-0">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-gray-800">Seleccionar impresora</h3>
-                  <button
-                    onClick={this.closePrintModal}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Contenido scrollable */}
-              <div className="p-5 overflow-y-auto flex-grow">
-                {/* Selector de tamaño */}
-                <div className="mb-5">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Tamaño de papel</label>
-                  <div className="flex flex-wrap gap-2">
-                    {['58mm', '80mm', 'A4'].map(size => (
-                      <button
-                        key={size}
-                        type="button"
-                        className={`px-3 py-2 text-sm rounded-lg border ${this.state.selectedSize === size
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
-                        onClick={() => this.handleSelectSize(size)}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Impresoras Bluetooth */}
-                <div className="mb-5">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Bluetooth</h4>
-                  {this.state.availablePrinters.bluetooth.devices.length === 0 ? (
-                    <p className="text-sm text-gray-500">No hay dispositivos emparejados.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {this.state.availablePrinters.bluetooth.devices.map((dev, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          className={`w-full text-left p-3 rounded-lg border ${this.state.selectedPrinter?.address === dev.address
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:bg-gray-50'
-                            }`}
-                          onClick={() => this.handleSelectPrinter('BLUETOOTH', dev)}
-                        >
-                          <div className="font-medium text-gray-800">{dev.name}</div>
-                          <div className="text-xs text-gray-500">{dev.address}</div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Impresoras USB */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">USB</h4>
-                  {this.state.availablePrinters.usb.devices.length === 0 ? (
-                    <p className="text-sm text-gray-500">No se detectaron impresoras USB.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {this.state.availablePrinters.usb.devices.map((dev, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          className={`w-full text-left p-3 rounded-lg border ${this.state.selectedPrinter?.vendorId === dev.vendorId && this.state.selectedPrinter?.productId === dev.productId
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:bg-gray-50'
-                            }`}
-                          onClick={() => this.handleSelectPrinter('USB', dev)}
-                        >
-                          <div className="font-medium text-gray-800">{dev.productName}</div>
-                          <div className="text-xs text-gray-500">VID: {dev.vendorId} / PID: {dev.productId}</div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Pie (botones) */}
-              <div className="p-5 border-t border-gray-200 flex-shrink-0 flex justify-end gap-3">
-                <button
-                  type="button"
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                  onClick={this.closePrintModal}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                  onClick={this.handleConfirmPrint}
-                  disabled={!this.state.selectedPrinter}
-                >
-                  Imprimir
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de depuración JSON */}
-        {this.state.debugModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
-              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-800">Resultado de listPrinters()</h3>
-                <button
-                  onClick={() => this.setState({ debugModalOpen: false })}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-4 overflow-y-auto flex-grow">
-                <pre className="text-xs bg-gray-100 p-3 rounded text-gray-800 whitespace-pre-wrap">
-                  {this.state.debugJson}
-                </pre>
-              </div>
-              <div className="p-4 border-t border-gray-200 flex justify-end">
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  onClick={() => this.setState({ debugModalOpen: false })}
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </ContainerWrapper>
     );
   }

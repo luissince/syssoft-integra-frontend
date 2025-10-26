@@ -15,12 +15,11 @@ const Title = ({
   return (
     <Row>
       <Column className="col-md-3 col-12">
-        <div className="d-flex h-100 justify-content-start align-items-center">
-          <div className="form-group">
+        <div className="flex justify-center items-center">
+          <div className="mb-4">
             <Image
               default={images.icono}
               src={`${rutaImage}`}
-              className="d-block mx-auto mb-2"
               alt={'Logo'}
               width={140}
             />

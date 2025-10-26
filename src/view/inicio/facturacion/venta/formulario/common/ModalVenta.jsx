@@ -287,7 +287,7 @@ class ModalVenta extends CustomComponent {
         onHidden={this.handleOnHidden}
         onClose={handleClose}
         contentLabel="Modal de Venta"
-        className={'modal-custom-lg'}
+        className={'modal-custom-lg h-[80%]'}
       >
         <CustomModalContentScroll>
           <CustomModalContentHeader contentRef={refModal}>

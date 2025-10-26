@@ -27,26 +27,25 @@ import {
   CREDITO_VARIABLE,
 } from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
-import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
+import { SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
 import ModalElegirInterfaz from './component/ModalElejirInterfaz';
-import Button from '../../../../../components/Button';
 import {
   setListaVentaData,
   setListaVentaPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
 import Search from '../../../../../components/Search';
 import { Link } from 'react-router-dom';
 import {
+  ACTIVAR_VISTA_ANTIGUA,
   ANULAR_VENTA,
   FACTURACION,
   REALIZAR_VENTA,
   VENTAS,
-  VISUALIZAR_VENTA,
+  VISUALIZAR_DETALLE,
 } from '../../../../../model/types/menu';
 import { alertKit } from 'alert-kit';
+import { Capacitor } from '@capacitor/core';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -93,17 +92,23 @@ class Ventas extends CustomComponent {
         VENTAS,
         REALIZAR_VENTA,
       ),
-      view: getStatePrivilegio(
+      detail: getStatePrivilegio(
         this.props.token.userToken.menus,
         FACTURACION,
         VENTAS,
-        VISUALIZAR_VENTA,
+        VISUALIZAR_DETALLE,
       ),
       remove: getStatePrivilegio(
         this.props.token.userToken.menus,
         FACTURACION,
         VENTAS,
         ANULAR_VENTA,
+      ),
+      viewAntigua: getStatePrivilegio(
+        this.props.token.userToken.menus,
+        FACTURACION,
+        VENTAS,
+        ACTIVAR_VISTA_ANTIGUA,
       ),
 
       vista: 'tabla',
@@ -234,8 +239,6 @@ class Ventas extends CustomComponent {
   }
 
   loadingInit = async () => {
-    if (!this.state.view) return;
-
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -448,6 +451,16 @@ class Ventas extends CustomComponent {
         title: 'Venta',
         message: 'No tiene privilegios para crear ventas',
       });
+      return;
+    }
+
+    if (Capacitor.isNativePlatform()) {
+      this.props.history.push(`${this.props.location.pathname}/crear`);
+      return;
+    }
+
+    if(!this.state.viewAntigua) {
+      this.props.history.push(`${this.props.location.pathname}/crear`);
       return;
     }
 
@@ -686,10 +699,17 @@ class Ventas extends CustomComponent {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-300"
+                              className={`
+                              p-2 rounded-md text-sm font-medium transition
+                              text-blue-600 bg-white
+                              hover:bg-blue-50 hover:text-blue-700
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                              active:bg-blue-100 active:scale-[0.97]
+                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
+                             `}
                               title="Ver detalle"
                               onClick={() => this.handleDetalle(item.idVenta)}
-                              disabled={!this.state.view}
+                              disabled={!this.state.detail}
                             >
                               <i className="fa fa-eye text-lg"></i>
                             </button>
@@ -702,7 +722,16 @@ class Ventas extends CustomComponent {
                             ) : (
                               <Link
                                 to={getPathNavigation('guia-create', item.idVenta)}
-                                className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                // className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                className={`
+                                  block text-center
+                                  p-2 rounded-md text-sm font-medium transition
+                                  text-gray-600 bg-white
+                                  hover:bg-blue-50 hover:text-blue-700
+                                  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+                                  active:bg-blue-100 active:scale-[0.97]
+                                  disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
+                                `}
                                 title="Generar guía"
                               >
                                 <i className="fa fa-truck text-lg"></i>
@@ -711,7 +740,14 @@ class Ventas extends CustomComponent {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
+                              className={`
+                              p-2 rounded-md text-sm font-medium transition
+                              text-red-600 bg-white
+                              hover:bg-red-50 hover:text-red-700
+                              focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                              active:bg-red-100 active:scale-[0.98]
+                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
+                             `}
                               title="Anular venta"
                               onClick={() => this.handleCancelar(item.idVenta)}
                               disabled={!this.state.remove}
@@ -813,32 +849,55 @@ class Ventas extends CustomComponent {
 
                         <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
                           <button
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-md text-sm font-medium transition"
+                            className={`
+                              p-2 rounded-md text-sm font-medium transition
+                              text-blue-600 bg-white
+                              hover:bg-blue-50 hover:text-blue-700
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                              active:bg-blue-100 active:scale-[0.97]
+                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
+                             `}
                             onClick={() => this.handleDetalle(item.idVenta)}
-                            disabled={!this.state.view}
+                            disabled={!this.state.detail}
                             title="Ver detalle"
                           >
                             <i className="fa fa-eye mr-1"></i> Ver
                           </button>
 
-                          {item.guiaRemision === 0 && (
-                            <Link
-                              to={getPathNavigation('guia-create', item.idVenta)}
-                              className="p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
-                              title="Generar guía"
-                            >
-                              <i className="fa fa-truck mr-1"></i> Guía
-                            </Link>
-                          )}
-
-                          {item.guiaRemision === 1 && (
-                            <span className="p-2 text-green-600 bg-green-50 rounded-md text-sm font-medium" title="Guía generada">
+                          {item.guiaRemision === 1 ? (
+                            <span
+                              className="p-2 text-green-600 bg-green-50 rounded-md text-sm font-medium"
+                              title="Guía generada">
                               <i className="fa fa-check mr-1"></i> Lista
                             </span>
-                          )}
+                          ) :
+                            (
+                              <Link
+                                to={getPathNavigation('guia-create', item.idVenta)}
+                                className={`
+                                  block text-center
+                                  p-2 rounded-md text-sm font-medium transition
+                                  text-gray-600 bg-white
+                                  hover:bg-blue-50 hover:text-blue-700
+                                  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+                                  active:bg-blue-100 active:scale-[0.97]
+                                  disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
+                                `}
+                                title="Generar guía"
+                              >
+                                <i className="fa fa-truck mr-1"></i> Guía
+                              </Link>
+                            )}
 
                           <button
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-md text-sm font-medium transition"
+                            className={`
+                            p-2 rounded-md text-sm font-medium transition
+                            text-red-600 bg-white
+                            hover:bg-red-50 hover:text-red-700
+                            focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                            active:bg-red-100 active:scale-[0.98]
+                            disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
+                          `}
                             onClick={() => this.handleCancelar(item.idVenta)}
                             disabled={!this.state.remove}
                             title="Anular"

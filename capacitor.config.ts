@@ -8,6 +8,13 @@ const config: CapacitorConfig = {
   //   cleartext: true,
   //   url: 'http://172.20.10.10:3000/',
   // }
+  plugins: {
+    StatusBar: {
+      overlaysWebView: false,
+      style: "Light",
+      backgroundColor: "#ffffff",
+    },
+  },
 };
 
 export default config;

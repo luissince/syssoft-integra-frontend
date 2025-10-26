@@ -8,26 +8,18 @@ import { MoveLeft, MoveRight } from 'lucide-react';
 import { useState } from 'react';
 
 const MenuMobile = ({ menus, url }) => {
-  const pageSize = 4;
+  const pageSize = 3;
   const [page, setPage] = useState(0);
 
-  const activeMenus = menus.filter(menu => menu.estado === 1);
-  const totalPages = Math.ceil(activeMenus.length / (pageSize - 1)); // porque a veces hay flecha
+  const activeMenus = menus.filter((menu) => menu.estado === 1);
+  const totalPages = Math.ceil(activeMenus.length / pageSize);
 
-  // Calculamos si habrá flechas
   const hasPrev = page > 0;
   const hasNext = page < totalPages - 1;
 
-  // Cantidad de menús a mostrar (reservando espacio para flechas)
-  let itemsToShow = pageSize;
-  if (hasPrev && hasNext) {
-    itemsToShow = pageSize - 2; // 2 flechas
-  } else if (hasPrev || hasNext) {
-    itemsToShow = pageSize - 1; // 1 flecha
-  }
+  const offset = page * pageSize;
+  const visibleMenus = activeMenus.slice(offset, offset + pageSize);
 
-  const start = page * (pageSize - 1); // avanzamos de a 3 o según tu diseño
-  const visibleMenus = activeMenus.slice(start, start + itemsToShow);
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 bg-[#111827] border-white z-50 lg:hidden">
@@ -95,7 +87,7 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
             <p>{project.nombre}</p>
             <div className="line"></div>
             {menus.map((menu, index) => {
-              if (isEmpty(menu.subMenus) && menu.estado === 1) {
+              if (isEmpty(menu.subMenus) && menu.estado == 1) {
                 return (
                   <li key={index}>
                     <NavLink
@@ -122,7 +114,7 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
               }
 
               if (
-                menu.subMenus.filter((submenu) => submenu.estado === 1)
+                menu.subMenus.filter((submenu) => submenu.estado == 1)
                   .length !== 0
               ) {
                 return (
@@ -149,7 +141,7 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
                         <span className="badge yellow">
                           {
                             menu.subMenus.filter(
-                              (submenu) => submenu.estado === 1,
+                              (submenu) => submenu.estado == 1,
                             ).length
                           }
                         </span>

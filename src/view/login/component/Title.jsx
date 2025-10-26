@@ -1,12 +1,12 @@
 const Title = () => {
   return (
-    <div className="col-lg-6 mb-5 mb-lg-0 d-none d-md-block">
+    <div className="col-lg-6 mb-5 mb-lg-0 d-none d-md-block text-center">
       <h2 className="my-5 display-4 fw-bold">
         La mejor opción
         <br />
         <span className="text-primary">para tu negocio</span>
       </h2>
-      <p className="text-lg" style={{ color: ' hsl(217, 10%, 50.8%)' }}>
+      <p className="text-lg text-center" style={{ color: ' hsl(217, 10%, 50.8%)' }}>
         Entra a un mundo de posibilidades con nuestro software de gestión y
         ventas para restaurantes. Simplifica tus operaciones, aumenta tus ventas
         y supera las expectativas de tus clientes. Descubre una nueva era de

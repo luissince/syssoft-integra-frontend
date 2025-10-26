@@ -75,9 +75,15 @@ export const RESETEAR_USUARIO = 'PR0004'; // SM0002 MN0002 Resetear usuario
 export const GUARDAR_PERFIL = 'PR0001'; // SM0003 MN0002 Guardar perfil
 export const ACTUALIZAR_PERFIL = 'PR0002'; // SM0003 MN0002 Actualizar perfil
 
-export const REALIZAR_VENTA = 'PR0001'; // SM0001 MN0003 Realizar venta
-export const VISUALIZAR_VENTA = 'PR0002'; // SM0001 MN0003 Visualizar venta
-export const ANULAR_VENTA = 'PR0003'; // SM0001 MN0003 Anular venta
+export const REALIZAR_VENTA = 'PR0001'; // Realizar venta
+export const VISUALIZAR_DETALLE = 'PR0002'; // Visualizar venta
+export const ANULAR_VENTA = 'PR0003'; // Anular venta
+export const CAMBIAR_PRECIO = 'PR0004'; // Cambiar precio de producto
+export const USAR_BONIFICACION = 'PR0005'; // Poder usar bonificación
+export const EDITAR_DESCRIPCION = 'PR0006'; // Cambiar descripción de producto
+export const CAMBIAR_DE_ALMACEN = 'PR0007'; // Cambiar de almacen
+export const CAMBIAR_IMPUESTO = 'PR0008'; // Cambiar impuesto
+export const ACTIVAR_VISTA_ANTIGUA = 'PR0009'; // Activar antigua vista
 
 export const REALIZAR_COBRO = 'PR0001'; // SM0002 MN0003 Realizar cobro
 export const VISUALIZAR_COBRO = 'PR0002'; // SM0002 MN0003 Visualizar cobro

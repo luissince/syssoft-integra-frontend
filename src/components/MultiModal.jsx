@@ -18,7 +18,6 @@ import SuccessReponse from '../model/class/response';
 import ErrorResponse from '../model/class/error-response';
 import { CANCELED } from '../model/types/types';
 import {
-  alertDialog,
   convertNullText,
   currentDate,
   isEmpty,
@@ -28,13 +27,12 @@ import {
 import { getDni, getRuc } from '../network/rest/apisperu.network';
 import Row from './Row';
 import Column from './Column';
-import RadioButton from './RadioButton';
 import Select from './Select';
 import Input from './Input';
 import SearchInput from './SearchInput';
-import { RUC } from '../model/types/tipo-documento';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
+import { Capacitor } from '@capacitor/core';
 
 /**
  * Modal para mostrar del impresión.
@@ -52,6 +50,7 @@ const ModalImpresion = ({
   handleClose,
   handleHidden,
 
+  handlePrinterMobile,
   handlePrinterA4,
   handlePrinter80MM,
   handlePrinter58MM,
@@ -99,27 +98,41 @@ const ModalImpresion = ({
           </Button>
         </div>
         <div className="d-flex justify-content-center align-items-center flex-wrap gap-2-5 mt-3">
-          {handlePrinterA4 && (
-            <Button className="btn-outline-secondary" onClick={handlePrinterA4}>
-              <i className="fa fa-print"></i> A4
-            </Button>
-          )}{' '}
-          {handlePrinter80MM && (
-            <Button
-              className="btn-outline-secondary"
-              onClick={handlePrinter80MM}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>
-          )}{' '}
-          {handlePrinter58MM && (
-            <Button
-              className="btn-outline-secondary"
-              onClick={handlePrinter58MM}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>
-          )}
+          {
+            Capacitor.isNativePlatform() ? (
+              <Button
+                className="btn-outline-secondary"
+                onClick={handlePrinterMobile}>
+                <i className="fa fa-print"></i> Imprimir
+              </Button>
+            ) : (
+              <>
+                {handlePrinterA4 && (
+                  <Button
+                    className="btn-outline-secondary"
+                    onClick={handlePrinterA4}>
+                    <i className="fa fa-print"></i> A4
+                  </Button>
+                )}{' '}
+                {handlePrinter80MM && (
+                  <Button
+                    className="btn-outline-secondary"
+                    onClick={handlePrinter80MM}
+                  >
+                    <i className="fa fa-print"></i> 80MM
+                  </Button>
+                )}{' '}
+                {handlePrinter58MM && (
+                  <Button
+                    className="btn-outline-secondary"
+                    onClick={handlePrinter58MM}
+                  >
+                    <i className="fa fa-print"></i> 58MM
+                  </Button>
+                )}
+              </>
+            )
+          }
         </div>
       </CustomModalContentBody>
     </CustomModal>
@@ -139,6 +152,7 @@ ModalImpresion.propTypes = {
   handleClose: PropTypes.func.isRequired,
   handleHidden: PropTypes.func,
 
+  handlePrinterMobile: PropTypes.func,
   handlePrinterA4: PropTypes.func,
   handlePrinter80MM: PropTypes.func,
   handlePrinter58MM: PropTypes.func,

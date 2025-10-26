@@ -764,6 +764,7 @@ class ModalTransaccion extends CustomComponent {
         onHidden={this.onHidden}
         onClose={onClose}
         contentLabel={this.state.title}
+        className={'modal-custom-sm h-[80%]'}
       >
         <CustomModalContentForm onSubmit={this.handleCobrar}>
           <CustomModalContentHeader contentRef={this.refModal}>

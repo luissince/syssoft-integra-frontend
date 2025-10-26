@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import {
   rounded,
-  convertNullText,
   numberFormat,
   isEmpty,
   getNumber,
@@ -21,37 +20,13 @@ import {
 import { CANCELED } from '../../../../model/types/types';
 import { connect } from 'react-redux';
 import Title from '../../../../components/Title';
-import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../components/Table';
-// import CustomModalStock from './component/ModalStock';
-const CustomModalStock = React.lazy(
-  () => import('@/view/inicio/logistica/inventario/component/ModalStock'),
-);
-import Select from '../../../../components/Select';
+import { SpinnerView } from '../../../../components/Spinner';
 import Search from '../../../../components/Search';
 import {
   setListaInventarioData,
   setListaInventarioPaginacion,
 } from '../../../../redux/predeterminadoSlice';
-import Button from '../../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardText,
-  CardTitle,
-} from '../../../../components/Card';
 import {
   AlertCircle,
   AlertTriangle,
@@ -60,21 +35,18 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
-  CircleCheck,
   Clock,
-  MoreHorizontal,
   PackageOpen,
   PackagePlus,
   Plus,
   RefreshCw,
-  SearchIcon,
-  TrendingUp,
-  TriangleAlert,
 } from 'lucide-react';
 import Image from '../../../../components/Image';
 import { images } from '../../../../helper';
-import DropdownActions from '../../../../components/DropdownActions';
-import ProgressBar from '../../../../components/ProgressBar';
+
+const CustomModalStock = React.lazy(
+  () => import('@/view/inicio/logistica/inventario/component/ModalStock'),
+);
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -710,7 +682,7 @@ class Inventario extends CustomComponent {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {this.state.loading ? (
                       <tr>
-                        <td colSpan="6" className="px-6 py-12 text-center">
+                        <td colSpan={6} className="px-6 py-12 text-center">
                           <div className="flex flex-col items-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
                             <p className="text-gray-500">
@@ -721,7 +693,7 @@ class Inventario extends CustomComponent {
                       </tr>
                     ) : isEmpty(this.state.lista) ? (
                       <tr>
-                        <td colSpan="6" className="px-6 py-12 text-center">
+                        <td colSpan={6} className="px-6 py-12 text-center">
                           <div className="text-gray-500">
                             <PackageOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
                             <p className="text-lg font-medium">
@@ -783,7 +755,7 @@ class Inventario extends CustomComponent {
                               <td className="px-6 py-4">
                                 <div>
                                   <div className={`text-sm font-medium ${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
-                                    {item.cantidad} {item.medida}
+                                    {rounded(item.cantidad)} {item.medida}
                                   </div>
                                   <div className="text-xs text-gray-500">
                                     Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
@@ -847,7 +819,7 @@ class Inventario extends CustomComponent {
                             {/* Lotes rows */}
                             {tieneLotes && this.state.lotesVisible[index] && (
                               <tr>
-                                <td colSpan="6" className="px-6 py-0 bg-gray-50">
+                                <td colSpan={6} className="px-6 py-0 bg-gray-50">
                                   <div className="rounded-lg p-4 mb-4">
                                     <h4 className="text-sm font-medium text-gray-900 mb-3">
                                       Lotes del producto
@@ -971,11 +943,8 @@ class Inventario extends CustomComponent {
                       >
                         <div className="p-4">
                           <div className="flex justify-between items-start mb-3">
-                            <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
-                              {item.producto}
-                            </h5>
                             <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoInventario.clase}`}
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoInventario.clase}`}
                             >
                               <estadoInventario.icono className="h-3 w-3 mr-1" />
                               {estadoInventario.estado}
@@ -991,17 +960,21 @@ class Inventario extends CustomComponent {
                             />
                           </div>
 
-                          <div className="text-xs text-gray-600 mb-1">
+                          <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-base">
+                            {item.producto}
+                          </h5>
+
+                          <div className="text-sm text-gray-600 mb-1">
                             <span className="font-medium">Código:</span> {item.codigo}
                           </div>
 
-                          <div className="text-xs text-gray-600 mb-1">
+                          <div className="text-sm text-gray-600 mb-1">
                             <span className="font-medium">Categoría:</span> {item.categoria}
                           </div>
 
-                          <div className="text-xs text-gray-600 mb-1">
-                            <span className="font-medium">Stock:</span> {item.cantidad} {item.medida}
-                            <div className="text-xxs text-gray-500">
+                          <div className="text-sm text-gray-900 mb-1">
+                            <span className="font-medium">Stock:</span> <span className={`${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>{rounded(item.cantidad)} <small>{item.medida}</small></span>
+                            <div className="text-sm text-gray-500">
                               Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
                             </div>
                             <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
@@ -1017,7 +990,7 @@ class Inventario extends CustomComponent {
                             </div>
                           </div>
 
-                          <div className="text-sm font-bold text-gray-900 mb-3">
+                          <div className="text-base font-bold text-gray-900 mb-3">
                             {numberFormat(item.costo, this.state.codIso)}
                           </div>
 

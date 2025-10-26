@@ -12,8 +12,16 @@ import TextArea from '../../../../../../../components/TextArea';
 import Button from '../../../../../../../components/Button';
 import Row from '../../../../../../../components/Row';
 import Column from '../../../../../../../components/Column';
+import { usePrivilegios } from '@/hooks/use-privilegios';
+import { CAMBIAR_PRECIO, EDITAR_DESCRIPCION, FACTURACION, USAR_BONIFICACION, VENTAS } from '@/model/types/menu';
 
 const SidebarProducto = (props) => {
+  
+  const { getPrivilegio } = usePrivilegios(props.menus);
+  const cambiarPrecio = getPrivilegio(FACTURACION, VENTAS, CAMBIAR_PRECIO);
+  const usarBonificacion = getPrivilegio(FACTURACION, VENTAS, USAR_BONIFICACION);
+  const editarDescripcion = getPrivilegio(FACTURACION, VENTAS, EDITAR_DESCRIPCION);
+
   const { idSidebar, loading, producto } = props;
 
   const { refPrecio, refBonificacion, refDescripcion } = props;
@@ -21,6 +29,7 @@ const SidebarProducto = (props) => {
   const { listPrecio } = props;
 
   const { handleSave, handleClose } = props;
+
 
   const handleSeleccionar = (precio) => {
     refPrecio.current.value = precio.valor;
@@ -63,6 +72,7 @@ const SidebarProducto = (props) => {
                   }
                   placeholder="0.00"
                   ref={refPrecio}
+                  disabled={!cambiarPrecio}
                   onKeyDown={keyNumberFloat}
                   onPaste={handlePasteFloat}
                 />
@@ -75,6 +85,7 @@ const SidebarProducto = (props) => {
                   label={'Bonificación:'}
                   placeholder="0"
                   ref={refBonificacion}
+                  disabled={!usarBonificacion}
                   onKeyDown={keyNumberFloat}
                   onPaste={handlePasteFloat}
                 />
@@ -92,6 +103,7 @@ const SidebarProducto = (props) => {
                   }
                   placeholder="Ingrese los datos del producto"
                   ref={refDescripcion}
+                  disabled={!editarDescripcion}
                 />
               </Column>
             </Row>
@@ -105,6 +117,7 @@ const SidebarProducto = (props) => {
                       key={index}
                       contentClassName="list-group-item list-group-item-action"
                       onClick={() => handleSeleccionar(item)}
+                      disabled={!cambiarPrecio}
                     >
                       <i className="fa fa-hand-pointer-o"></i> {item.nombre} -{' '}
                       {item.valor}
@@ -113,6 +126,7 @@ const SidebarProducto = (props) => {
                 </ul>
               </Column>
             </Row>
+
             {producto && producto.idTipoTratamientoProducto === UNIDADES && (
               <Row>
                 <Column formGroup={true}>
@@ -204,6 +218,7 @@ const SidebarProducto = (props) => {
 };
 
 SidebarProducto.propTypes = {
+  menus: PropTypes.array.isRequired,
   idSidebar: PropTypes.string.isRequired,
   loading: PropTypes.bool.isRequired,
   producto: PropTypes.object,
