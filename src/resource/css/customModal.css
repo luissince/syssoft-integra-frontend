@@ -1,12 +1,10 @@
 .modal-custom {
   position: absolute;
   background: rgb(255, 255, 255);
-  /* overflow: auto; */
   border-radius: 0.5rem;
-  padding: 0px;
-  width: 90%;
-  height: 80%;
-  max-width: 640px;
+  padding: 0;
+  width: 80%;
+  max-width: 480px;
   animation: showCustomModal 0.3s;
   -webkit-animation: showCustomModal 0.3s;
 }
@@ -81,7 +79,7 @@
   border-top: 1px solid #dee2e6;
 }
 
-.modal-custom .footer-cm > * {
+.modal-custom .footer-cm>* {
   margin: 0.25rem;
 }
 
@@ -154,11 +152,5 @@
     -webkit-transform: scale(0.5);
     transform: scale(0.5);
     opacity: 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  .modal-custom.modal-custom-lg {
-    width: 100%;
   }
 }

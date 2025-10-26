@@ -4,7 +4,7 @@ import { Calendar } from "lucide-react";
 const DashboardSkeleton = () => {
   // Skeleton component for stat cards
   const StatCardSkeleton = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center justify-between">
         <div>
           <div className="h-4 bg-gray-200 rounded animate-pulse mb-1 w-24"></div>
@@ -134,7 +134,7 @@ const DashboardSkeleton = () => {
       </div>
 
       {/* Charts and Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <BranchPerformanceChartSkeleton />
         <BankBalanceCardSkeleton />
       </div>
@@ -151,7 +151,7 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
+      className={cn("animate-pulse rounded-lg bg-muted", className)}
       {...props}
     />
   )

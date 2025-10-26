@@ -24,7 +24,7 @@ const Form = (props) => {
   } = props;
 
   return (
-    <div className="col-lg-6 mb-5 mb-lg-0">
+    <div className="col-lg-6 mb-lg-0">
       <div className="card">
         <div className="card-body py-5 px-md-5">
           <form
@@ -124,7 +124,7 @@ Form.propTypes = {
 
   password: PropTypes.string,
   passwordRef: PropTypes.object,
-
+  handleChangeUsername: PropTypes.func,
   handleChangeUsuario: PropTypes.func,
   passwordInput: PropTypes.object,
   handleChangePassword: PropTypes.func,

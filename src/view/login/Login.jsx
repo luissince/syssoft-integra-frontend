@@ -193,8 +193,14 @@ class Login extends CustomComponent {
   handleViewPassword = () => {
     this.setState({
       lookPassword: !this.state.lookPassword,
+    }, () => {
+      const input = this.passwordRef.current;
+      if (input) {
+        input.focus();
+        const length = input.value.length;
+        input.setSelectionRange(length, length);
+      }
     });
-    this.passwordRef.current.focus();
   };
 
   /*
@@ -218,15 +224,12 @@ class Login extends CustomComponent {
       return <Redirect to="/principal" />;
     }
 
-    // const { rutaImage } = this.props.token.empresa;
-
     return (
       <div
-        className="vh-100 px-4 py-5 px-md-5 text-center text-lg-start d-flex align-items-center"
-        style={{ backgroundColor: 'hsl(0, 0%, 96%)' }}
+        className="h-full overflow-auto bg-accent"
       >
-        <div className="container">
-          <div className="row gx-lg-5 align-items-center">
+        <div className="container h-full">
+          <div className="row h-full flex justify-center items-center py-4">
             <Title />
 
             <Form

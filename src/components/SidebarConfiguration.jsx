@@ -5,8 +5,15 @@ import Column from './Column';
 import Button from './Button';
 import TextArea from './TextArea';
 import { Printer } from 'lucide-react';
+import { usePrivilegios } from '@/hooks/use-privilegios';
+import { CAMBIAR_DE_ALMACEN, CAMBIAR_IMPUESTO, FACTURACION, VENTAS } from '@/model/types/menu';
 
 const SidebarConfiguration = (props) => {
+
+  const { getPrivilegio } = usePrivilegios(props.menus);
+  const cambiarAlmacen = getPrivilegio(FACTURACION, VENTAS, CAMBIAR_DE_ALMACEN);
+  const cambiarImpuesto = getPrivilegio(FACTURACION, VENTAS, CAMBIAR_IMPUESTO);
+
   const { idSidebarConfiguration } = props;
 
   const { refImpuesto, impuestos, idImpuesto, handleSelectIdImpuesto } = props;
@@ -43,6 +50,7 @@ const SidebarConfiguration = (props) => {
                   ref={refImpuesto}
                   value={idImpuesto}
                   onChange={handleSelectIdImpuesto}
+                  disabled={!cambiarImpuesto}
                 >
                   <option value="">-- Impuesto --</option>
                   {impuestos.map((item, index) => (
@@ -87,6 +95,7 @@ const SidebarConfiguration = (props) => {
                     ref={refAlmacen}
                     value={idAlmacen}
                     onChange={handleSelectIdIdAlmacen}
+                    disabled={!cambiarAlmacen}
                   >
                     <option value="">-- Almacen --</option>
                     {almacenes.map((item, index) => (
@@ -134,7 +143,7 @@ const SidebarConfiguration = (props) => {
                     <label>
                       <div className='flex items-center gap-2'>
                         <span> Instrucciones (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
-                      </div> 
+                      </div>
                     </label>
                     <TextArea
                       placeholder="Ingrese las instrucciones de entrega."
@@ -180,6 +189,7 @@ const SidebarConfiguration = (props) => {
 };
 
 SidebarConfiguration.propTypes = {
+  menus: PropTypes.array.isRequired,
   idSidebarConfiguration: PropTypes.string.isRequired,
 
   impuestos: PropTypes.array.isRequired,

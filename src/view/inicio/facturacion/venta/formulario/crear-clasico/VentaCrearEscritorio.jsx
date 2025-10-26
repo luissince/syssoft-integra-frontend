@@ -62,7 +62,6 @@ import {
   setProductosFavoritos,
   starProduct,
 } from '../../../../../../redux/predeterminadoSlice';
-import RadioButton from '../../../../../../components/RadioButton';
 import SearchInput from '../../../../../../components/SearchInput';
 import ModalVenta from '../common/ModalVenta';
 import ModalCotizacion from '../common/ModalCotizacion';
@@ -90,8 +89,8 @@ import {
 } from '../../../../../../components/Table';
 import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
-import { RUC } from '../../../../../../model/types/tipo-documento';
-import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
+import { JURIDICA } from '@/model/types/tipo-entidad';
+import { usePrivilegios } from '@/hooks/use-privilegios';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -2416,6 +2415,7 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         <SidebarConfiguration
+          menus={this.props.token.userToken.menus}
           idSidebarConfiguration={this.idSidebarConfiguration}
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
