@@ -22,7 +22,7 @@ const MenuMobile = ({ menus, url }) => {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#111827] border-white z-50 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#111827] border-white z-50 lg:hidden ">
         <div className="flex justify-between mx-auto">
           {hasPrev && (
             <button

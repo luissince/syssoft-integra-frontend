@@ -1274,8 +1274,8 @@ class CompraCrear extends CustomComponent {
           handleCloseOptions={this.handleCloseOptions}
         />
 
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100">
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full">
             {/* PANEL IZQUIERDO */}
             <PanelIzquierdo
               loadingProducto={this.state.loadingProducto}
