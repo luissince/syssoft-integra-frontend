@@ -91,14 +91,27 @@ const PanelIzquierdo: React.FC<Props> = ({ loadingProducto, productos, codiso, r
                     )}
 
                 {!isEmpty(productos) && (
+                    // <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    //     {productos.map((item: any, index: number) => (
+                    //         <Button
+                    //             key={index}
+                    //             className="btn-light bg-white border border-solid border-[#e2e8f0] w-60 flex flex-col"
+                    //             onClick={() => handleSelectItemProducto(item)}
+                    //         >
+
+                    //         </Button>
+                    //     ))}
+                    // </div>
+
                     <div className="flex justify-center flex-wrap gap-4">
                         {productos.map((item: any, index: number) => (
                             <Button
                                 key={index}
-                                className="btn-light bg-white border border-solid border-[#e2e8f0] w-60"
+                                className="btn-light bg-white border border-solid border-[#e2e8f0] w-60 flex flex-col"
                                 onClick={() => handleSelectItemProducto(item)}
                             >
-                                <div className="flex flex-col items-center justify-center p-3">
+
+                                <div className="flex-1">
                                     <div className="flex flex-col justify-center items-center">
                                         <Image
                                             default={images.noImage}
@@ -108,28 +121,29 @@ const PanelIzquierdo: React.FC<Props> = ({ loadingProducto, productos, codiso, r
                                             height={150}
                                             className="mb-2 object-contain"
                                         />
-                                        <p
-                                            className={`${item.idTipoProducto === PRODUCTO &&
-                                                item.cantidad <= 0
-                                                ? 'badge badge-danger text-base'
-                                                : 'badge badge-success text-base'
-                                                } `}
-                                        >
+                                        <p className={
+                                            cn(
+                                                "text-base",
+                                                item.idTipoProducto === PRODUCTO && item.cantidad <= 0 ? "text-red-500" : "text-green-500"
+                                            )
+                                        }>
                                             STOCK: {formatDecimal(item.cantidad)}
                                         </p>
                                     </div>
 
                                     <div className="d-flex justify-content-center align-items-center flex-column">
-                                        <p className="m-0 text-lg">{item.nombre}</p>
-                                        <p className="m-0 text-xl font-weight-bold">
+                                        <p className="m-0 text-base">{item.nombre}</p>
+                                        <p className="m-0 text-base font-weight-bold">
                                             {numberFormat(item.costo, codiso)}{' '}
                                             <small>x {item.unidad}</small>
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="w-100 text-left text-sm">
-                                    Almacen: {item.almacen}
+                                <div className="flex-none text-left">
+                                    <span className="w-full text-sm text-gray-500">
+                                        Almacen: {item.almacen}
+                                    </span>
                                 </div>
                             </Button>
                         ))}
