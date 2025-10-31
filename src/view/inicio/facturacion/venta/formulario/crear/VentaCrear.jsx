@@ -726,12 +726,11 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    this.setState(
-      (prevState) => ({
-        productos: [...prevState.productos, data],
-      }), () => {
-        this.updateReduxState();
-      });
+    this.setState((prevState) => ({
+      productos: [...prevState.productos, data],
+    }), () => {
+      this.updateReduxState();
+    });
   };
 
   handleStarProduct = (producto) => {
@@ -1190,6 +1189,7 @@ class VentaCrear extends CustomComponent {
 
   handleSeleccionarCotizacion = async (cotizacion) => {
     this.handleCloseCotizacion();
+
     this.setState({
       loading: true,
       msgLoading: 'Obteniendos datos de la cotización.',
@@ -2109,17 +2109,16 @@ class VentaCrear extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    const accept = await alertKit.question(
-      {
-        title: 'Venta',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Venta',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const data = {
@@ -2157,15 +2156,14 @@ class VentaCrear extends CustomComponent {
 
       if (response instanceof ErrorResponse) {
         if (response.getBody() !== '') {
-          const body = response.getBody().map(
-            (item) =>
-              `<tr>
+          const body = response.getBody().map((item) =>
+            `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                item.cantidadActual - item.cantidadReal,
-              )}</td>
+              item.cantidadActual - item.cantidadReal,
+            )}</td>
                 </tr>`,
           );
 
@@ -2292,7 +2290,6 @@ class VentaCrear extends CustomComponent {
           </button>
         </div>
 
-        {/* Modales de carrito */}
         <ModalTransaccion
           tipo={'Venta'}
           title={'Completar Venta'}

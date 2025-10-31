@@ -1,5 +1,5 @@
 import {
-  numberFormat,
+  formatCurrency,
   formatTime,
   alertDialog,
   isEmpty,
@@ -304,7 +304,7 @@ class Cobros extends CustomComponent {
             )}
           </TableCell>
           <TableCell className="text-center">
-            {numberFormat(item.monto, item.codiso)}
+            {formatCurrency(item.monto, item.codiso)}
           </TableCell>
           <TableCell className="text-center">
             <Button

@@ -14,7 +14,7 @@ import { DashboardSkeleton } from "@/components/ui/skeleton";
 import { comboSucursal, dashboardInit } from "@/network/rest/api-client";
 import { CANCELED } from "@/model/types/types";
 import { alertKit } from "alert-kit";
-import { currentDate, formatDate, isEmpty, numberFormat, rounded } from "@/helper/utils.helper";
+import { currentDate, formatDate, isEmpty, formatCurrency, rounded } from "@/helper/utils.helper";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import BranchInterface from "@/model/ts/interface/branch.interface";
 import DashboardInterface, { StatCardInterface } from "@/model/ts/interface/dashboard.interface";
@@ -306,28 +306,28 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard
                     title="Ventas Totales"
-                    value={numberFormat(dashboardData.totalSales, moneda.codiso)}
+                    value={formatCurrency(dashboardData.totalSales, moneda.codiso)}
                     icon={DollarSign}
                     color="green"
                     trend={12.5}
                 />
                 <StatCard
                     title="Compras Totales"
-                    value={numberFormat(dashboardData.totalPurchases, moneda.codiso)}
+                    value={formatCurrency(dashboardData.totalPurchases, moneda.codiso)}
                     icon={ShoppingCart}
                     color="blue"
                     trend={8.2}
                 />
                 <StatCard
                     title="Por Cobrar (Crédito)"
-                    value={numberFormat(dashboardData.creditSalesToCollect, moneda.codiso)}
+                    value={formatCurrency(dashboardData.creditSalesToCollect, moneda.codiso)}
                     icon={CreditCard}
                     color="yellow"
                     subtitle={`${Math.floor(Math.random() * 15) + 5} clientes`}
                 />
                 <StatCard
                     title="Por Pagar (Crédito)"
-                    value={numberFormat(dashboardData.creditPurchasesToPay, moneda.codiso)}
+                    value={formatCurrency(dashboardData.creditPurchasesToPay, moneda.codiso)}
                     icon={CreditCard}
                     color="red"
                     subtitle={`${Math.floor(Math.random() * 8) + 3} proveedores`}

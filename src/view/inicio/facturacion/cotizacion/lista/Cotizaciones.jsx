@@ -8,7 +8,7 @@ import {
   formatNumberWithZeros,
   formatTime,
   isEmpty,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
@@ -366,7 +366,7 @@ class Cotizaciones extends CustomComponent {
             </span>
           </TableCell>
           <TableCell className="text-center">
-            {numberFormat(item.total, item.codiso)}{' '}
+            {formatCurrency(item.total, item.codiso)}{' '}
           </TableCell>
           <TableCell className="text-center">
             <Button

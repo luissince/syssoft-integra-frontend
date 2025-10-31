@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  numberFormat,
+  formatCurrency,
   formatTime,
   isEmpty,
   formatNumberWithZeros,
@@ -46,6 +46,7 @@ import {
 } from '../../../../../model/types/menu';
 import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -459,7 +460,7 @@ class Ventas extends CustomComponent {
       return;
     }
 
-    if(!this.state.viewAntigua) {
+    if (!this.state.viewAntigua) {
       this.props.history.push(`${this.props.location.pathname}/crear`);
       return;
     }
@@ -661,13 +662,25 @@ class Ventas extends CustomComponent {
                     </tr>
                   ) : (
                     this.state.lista.map((item) => {
-                      const estado = item.estado === 1
-                        ? <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">COBRADO</span>
-                        : item.estado === 2
-                          ? <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">POR COBRAR</span>
-                          : item.estado === 3
-                            ? <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">ANULADO</span>
-                            : <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">POR LLEVAR</span>;
+                      const estado =
+                        <span
+                          className={
+                            cn(
+                              "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                              item.estado === 1 ? "bg-green-100 text-green-800" :
+                                item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
+                                  item.estado === 3 ? "bg-red-100 text-red-800" :
+                                    "bg-blue-100 text-blue-800"
+                            )
+                          }
+                        >
+                          {
+                            item.estado === 1 ? "COBRADO" :
+                              item.estado === 2 ? "POR COBRAR" :
+                                item.estado === 3 ? "ANULADO" :
+                                  "POR LLEVAR"
+                          }
+                        </span>
 
                       const tipo = item.idFormaPago === CONTADO
                         ? 'CONTADO'
@@ -695,7 +708,7 @@ class Ventas extends CustomComponent {
                           <td className="px-6 py-4 text-sm text-gray-900">{tipo}</td>
                           <td className="px-6 py-4 text-center">{estado}</td>
                           <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
-                            {numberFormat(item.total, item.codiso)}
+                            {formatCurrency(item.total, item.codiso)}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button
@@ -844,7 +857,7 @@ class Ventas extends CustomComponent {
                         </div>
 
                         <div className="text-lg font-bold text-gray-900 mb-3">
-                          {numberFormat(item.total, item.codiso)}
+                          {formatCurrency(item.total, item.codiso)}
                         </div>
 
                         <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import {
-  numberFormat,
+  formatCurrency,
   isEmpty,
   getPathNavigation,
   formatNumberWithZeros,
@@ -418,14 +418,14 @@ class Transacciones extends CustomComponent {
             ) : (
               <span className="text-base">
                 <i className="fa fa-plus text-success"></i>{' '}
-                {numberFormat(item.ingreso, item.codiso)}
+                {formatCurrency(item.ingreso, item.codiso)}
               </span>
             )}
             {item.ingreso != 0 &&
               item.detalles.map((detalle, index) => (
                 <div key={index}>
                   <span className="text-xs">
-                    {detalle.nombre}: {numberFormat(detalle.monto, item.codiso)}
+                    {detalle.nombre}: {formatCurrency(detalle.monto, item.codiso)}
                   </span>
                 </div>
               ))}
@@ -436,14 +436,14 @@ class Transacciones extends CustomComponent {
             ) : (
               <span className="text-base">
                 <i className="fa fa-minus text-danger"></i>{' '}
-                {numberFormat(item.egreso, item.codiso)}
+                {formatCurrency(item.egreso, item.codiso)}
               </span>
             )}
             {item.egreso != 0 &&
               item.detalles.map((detalle, index) => (
                 <div key={index}>
                   <span className="text-xs">
-                    {detalle.nombre}: {numberFormat(detalle.monto, item.codiso)}
+                    {detalle.nombre}: {formatCurrency(detalle.monto, item.codiso)}
                   </span>
                 </div>
               ))}

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import {
   rounded,
   formatTime,
-  numberFormat,
+  formatCurrency,
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -212,9 +212,9 @@ class GastoDetalle extends CustomComponent {
           <TableCell>{++index}</TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell>{rounded(item.cantidad)}</TableCell>
-          <TableCell>{numberFormat(item.monto, this.state.codiso)}</TableCell>
+          <TableCell>{formatCurrency(item.monto, this.state.codiso)}</TableCell>
           <TableCell>
-            {numberFormat(item.cantidad * item.monto, this.state.codiso)}
+            {formatCurrency(item.cantidad * item.monto, this.state.codiso)}
           </TableCell>
         </TableRow>
       );
@@ -231,7 +231,7 @@ class GastoDetalle extends CustomComponent {
       <TableRow>
         <TableHead className="text-right h5">Total:</TableHead>
         <TableHead className="text-right h5">
-          {numberFormat(total, this.state.codiso)}
+          {formatCurrency(total, this.state.codiso)}
         </TableHead>
       </TableRow>
     );
@@ -275,7 +275,7 @@ class GastoDetalle extends CustomComponent {
                 <TableCell className="text-center">{index + 1}</TableCell>
                 <TableCell>{detalle.nombre}</TableCell>
                 <TableCell>
-                  {numberFormat(detalle.monto, this.state.codiso)}
+                  {formatCurrency(detalle.monto, this.state.codiso)}
                 </TableCell>
                 <TableCell colSpan={2}>{detalle.observacion}</TableCell>
               </tr>
@@ -401,7 +401,7 @@ class GastoDetalle extends CustomComponent {
                     Total:
                   </TableHead>
                   <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {numberFormat(this.state.total, this.state.codiso)}
+                    {formatCurrency(this.state.total, this.state.codiso)}
                   </TableHead>
                 </TableRow>
               </TableHeader>

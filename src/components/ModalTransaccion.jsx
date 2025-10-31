@@ -1,15 +1,14 @@
-import Column from './Column';
 import CustomModal, {
   CustomModalContentBody,
   CustomModalContentFooter,
   CustomModalContentForm,
   CustomModalContentHeader,
 } from './CustomModal';
-import Row from './Row';
+import { TbHandClick } from "react-icons/tb";
 import { SpinnerView } from './Spinner';
 import {
   keyNumberInteger,
-  numberFormat,
+  formatCurrency,
   isEmpty,
   isNumeric,
   validateNumericInputs,
@@ -23,7 +22,7 @@ import {
   CREDITO_VARIABLE,
 } from '../model/types/forma-pago';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { comboBanco } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 import ErrorResponse from '../model/class/error-response';
@@ -31,9 +30,8 @@ import { CANCELED } from '../model/types/types';
 import Button from './Button';
 import Input from './Input';
 import Select from './Select';
-import TextArea from './TextArea';
 import { alertKit } from 'alert-kit';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -46,7 +44,8 @@ class ModalTransaccion extends CustomComponent {
       loading: true,
       tipo: props.tipo || 'Transacción',
       title: props.title || 'Completar Transacción',
-      formaPago: CONTADO,
+      etapa: '1',
+      formaPago: null,
       bancos: [],
       bancosAgregados: [],
       numeroCuotas: '',
@@ -62,7 +61,6 @@ class ModalTransaccion extends CustomComponent {
     this.refNumeroCuotas = React.createRef();
     this.refFrecuenciaPagoFijo = React.createRef();
     this.refFrecuenciaPagoVariable = React.createRef();
-    this.refMetodoContado = React.createRef();
     this.abortControllerView = new AbortController();
   }
 
@@ -84,24 +82,6 @@ class ModalTransaccion extends CustomComponent {
     this.setState({ loading: true });
     const bancos = await this.fetchComboBanco();
 
-    const metodo = bancos.find((item) => item.preferido === 1);
-
-    this.refMetodoContado.current.value = metodo ? metodo.idBanco : '';
-
-    if (metodo) {
-      const item = {
-        idBanco: metodo.idBanco,
-        nombre: metodo.nombre,
-        monto: '',
-        vuelto: metodo.vuelto,
-        observacion: '',
-      };
-
-      this.setState((prevState) => ({
-        bancosAgregados: [...prevState.bancosAgregados, item],
-      }));
-    }
-
     this.setState({
       importeTotal: Number(rounded(this.props.importeTotal)),
       bancos,
@@ -111,7 +91,8 @@ class ModalTransaccion extends CustomComponent {
 
   onHidden = () => {
     this.setState({
-      formaPago: CONTADO,
+      etapa: '1',
+      formaPago: null,
       numeroCuotas: '',
       frecuenciaPagoFijo: new Date().getDate() > 15 ? '30' : '15',
       frecuenciaPagoVariable: new Date().getDate() > 15 ? '30' : '15',
@@ -153,7 +134,25 @@ class ModalTransaccion extends CustomComponent {
   */
 
   handleSelectTipoPago = (tipo) => {
-    this.setState({ formaPago: tipo });
+    this.setState({ etapa: "2", formaPago: tipo }, () => {
+      if (this.state.formaPago === CONTADO) {
+        const metodo = this.state.bancos.find((item) => item.preferido === 1);
+
+        if (metodo) {
+          const item = {
+            idBanco: metodo.idBanco,
+            nombre: metodo.nombre,
+            monto: '',
+            vuelto: metodo.vuelto,
+            observacion: '',
+          };
+
+          this.setState((prevState) => ({
+            bancosAgregados: [...prevState.bancosAgregados, item],
+          }));
+        }
+      }
+    });
   };
 
   handleSelectNumeroCuotas = (event) => {
@@ -172,9 +171,9 @@ class ModalTransaccion extends CustomComponent {
     this.setState({ nota: event.target.value });
   };
 
-  handleAddBancosAgregados = () => {
+  handleAddBancosAgregados = (idBanco) => {
     const listAdd = this.state.bancosAgregados.find(
-      (item) => item.idBanco === this.refMetodoContado.current.value,
+      (item) => item.idBanco === idBanco,
     );
 
     if (listAdd) {
@@ -182,7 +181,7 @@ class ModalTransaccion extends CustomComponent {
     }
 
     const metodo = this.state.bancos.find(
-      (item) => item.idBanco === this.refMetodoContado.current.value,
+      (item) => item.idBanco === idBanco,
     );
 
     const item = {
@@ -220,6 +219,7 @@ class ModalTransaccion extends CustomComponent {
   };
 
   handleProcessContado = async () => {
+    console.log("handleProcessContado");
     const { formaPago, bancosAgregados, importeTotal, nota } = this.state;
 
     let metodoPagosLista = bancosAgregados.map((item) => ({ ...item }));
@@ -241,63 +241,47 @@ class ModalTransaccion extends CustomComponent {
         },
       }, () => {
         validateNumericInputs(this.refMetodoPagoContenedor);
-
       });
       return;
     }
 
-    const metodoCobroTotal = metodoPagosLista.reduce(
-      (accumulator, item) => (accumulator += Number(item.monto)),
-      0,
-    );
+    const metodoCobroTotal = metodoPagosLista.reduce((accumulator, item) => (accumulator += Number(item.monto)), 0);
 
     if (metodoPagosLista.length > 1) {
       if (metodoCobroTotal !== importeTotal) {
-        alertKit.warning(
-          {
-            title: this.state.tipo,
-            message:
-              'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
-          },
-          () => {
-            validateNumericInputs(this.refMetodoPagoContenedor);
-          },
-        );
+        alertKit.warning({
+          title: this.state.tipo,
+          message: 'Al tener mas de 2 métodos de cobro el monto debe ser igual al total.',
+        }, () => {
+          validateNumericInputs(this.refMetodoPagoContenedor);
+        });
         return;
       }
     } else {
       const metodo = metodoPagosLista[0];
       if (metodo.vuelto === 1) {
         if (metodoCobroTotal < importeTotal) {
-          alertKit.warning(
-            {
-              title: this.state.tipo,
-              message: 'El monto a cobrar es menor que el total.',
-            },
-            () => {
-              validateNumericInputs(this.refMetodoPagoContenedor);
-            },
-          );
+          alertKit.warning({
+            title: this.state.tipo,
+            message: 'El monto a cobrar es menor que el total.',
+          }, () => {
+            validateNumericInputs(this.refMetodoPagoContenedor);
+          });
           return;
         }
 
         metodoPagosLista.forEach((item) => {
-          item.observacion = `Pago con ${rounded(
-            Number(item.monto),
-          )} y su vuelto es ${rounded(Number(item.monto) - importeTotal)}`;
+          item.observacion = `Pago con ${rounded(Number(item.monto))} y su vuelto es ${rounded(Number(item.monto) - importeTotal)}`;
           item.monto = importeTotal;
         });
       } else {
         if (metodoCobroTotal !== importeTotal) {
-          alertKit.warning(
-            {
-              title: this.state.tipo,
-              message: 'El monto a cobrar debe ser igual al total.',
-            },
-            () => {
-              validateNumericInputs(this.refMetodoPagoContenedor);
-            },
-          );
+          alertKit.warning({
+            title: this.state.tipo,
+            message: 'El monto a cobrar debe ser igual al total.',
+          }, () => {
+            validateNumericInputs(this.refMetodoPagoContenedor);
+          });
           return;
         }
       }
@@ -318,41 +302,32 @@ class ModalTransaccion extends CustomComponent {
       this.state;
 
     if (!isNumeric(numeroCuotas)) {
-      alertKit.warning(
-        {
-          title: this.state.tipo,
-          message: 'Ingrese el número de cuotas',
-        },
-        () => {
-          this.refNumeroCuotas.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: this.state.tipo,
+        message: 'Ingrese el número de cuotas',
+      }, () => {
+        this.refNumeroCuotas.current.focus();
+      });
       return;
     }
 
     if (parseFloat(numeroCuotas) < 1) {
-      alertKit.warning(
-        {
-          title: this.state.tipo,
-          message: 'El número de cuotas no puede menor a 0',
-        },
-        () => {
-          this.refNumeroCuotas.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: this.state.tipo,
+        message: 'El número de cuotas no puede menor a 0',
+      }, () => {
+        this.refNumeroCuotas.current.focus();
+      });
       return;
     }
 
     if (isEmpty(frecuenciaPagoFijo)) {
-      alertKit.warning(
-        {
-          title: this.state.tipo,
-          message: 'Selecciona la frecuencia de cobros.',
-        },
-        () => {
-          this.refFrecuenciaPagoFijo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: this.state.tipo,
+        message: 'Selecciona la frecuencia de cobros.',
+      }, () => {
+        this.refFrecuenciaPagoFijo.current.focus();
+      });
       return;
     }
 
@@ -655,7 +630,7 @@ class ModalTransaccion extends CustomComponent {
     const total = parseFloat(importeTotal);
 
     if (isEmpty(bancosAgregados)) {
-      return <h5>Agrega algún método de pago.</h5>;
+      return <h5 className="text-red-500">Agrega algún método de pago.</h5>;
     }
 
     const currentAmount = bancosAgregados.reduce((accumulator, item) => {
@@ -667,10 +642,10 @@ class ModalTransaccion extends CustomComponent {
       if (currentAmount >= total) {
         return (
           <>
-            <h5>
-              RESTANTE:{' '}
-              <span>{numberFormat(currentAmount - total, codiso)}</span>
-            </h5>
+            <div>
+              <p className="text-gray-700">RESTANTE</p>
+              <h4 className="text-green-700">{formatCurrency(currentAmount - total, codiso)}</h4>
+            </div>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
             </h6>
@@ -679,10 +654,10 @@ class ModalTransaccion extends CustomComponent {
       } else {
         return (
           <>
-            <h5>
-              POR COBRAR:{' '}
-              <span>{numberFormat(total - currentAmount, codiso)}</span>
-            </h5>
+            <div>
+              <p className="text-gray-700">POR COBRAR</p>
+              <h4 className="text-red-500">{formatCurrency(total - currentAmount, codiso)}</h4>
+            </div>
             <h6 className="text-danger">
               Más de dos metodos de pago no generan vuelto.
             </h6>
@@ -695,38 +670,38 @@ class ModalTransaccion extends CustomComponent {
     if (metodo.vuelto === 1) {
       if (currentAmount >= total) {
         return (
-          <h5>
-            SU CAMBIO ES:{' '}
-            <span>{numberFormat(currentAmount - total, codiso)}</span>
-          </h5>
+          <div>
+            <p className="text-gray-700"> SU CAMBIO ES</p>
+            <h4 className="text-green-700">{formatCurrency(currentAmount - total, codiso)}</h4>
+          </div>
         );
       } else {
         return (
-          <h5 className="text-danger">
-            POR COBRAR:{' '}
-            <span>{numberFormat(total - currentAmount, codiso)}</span>
-          </h5>
+          <div>
+            <p className="text-gray-700"> POR COBRAR</p>
+            <h4 className="text-red-500">{formatCurrency(total - currentAmount, codiso)}</h4>
+          </div>
         );
       }
     } else {
       if (currentAmount >= total) {
         return (
           <>
-            <h5>
-              RESTANTE:{' '}
-              <span>{numberFormat(currentAmount - total, codiso)}</span>
-            </h5>
-            <h6 className="text-danger">El método de pago no genera vuelto.</h6>
+            <div>
+              <p className="text-gray-700">RESTANTE</p>
+              <h4>{formatCurrency(currentAmount - total, codiso)}</h4>
+            </div>
+            <h6 className="text-red-500">El método de pago no genera vuelto.</h6>
           </>
         );
       } else {
         return (
           <>
-            <h5>
-              POR COBRAR:{' '}
-              <span>{numberFormat(total - currentAmount, codiso)}</span>
-            </h5>
-            <h6 className="text-danger">El método de pago no genera vuelto.</h6>
+            <div>
+              <p className="text-gray-700">POR COBRAR</p>
+              <h4>{formatCurrency(total - currentAmount, codiso)}</h4>
+            </div>
+            <h6 className="text-red-500">El método de pago no genera vuelto.</h6>
           </>
         );
       }
@@ -748,6 +723,7 @@ class ModalTransaccion extends CustomComponent {
     const {
       loading,
       importeTotal,
+      etapa,
       formaPago,
       bancos,
       bancosAgregados,
@@ -764,7 +740,7 @@ class ModalTransaccion extends CustomComponent {
         onHidden={this.onHidden}
         onClose={onClose}
         contentLabel={this.state.title}
-        className={'modal-custom-sm h-[80%]'}
+        className="modal-custom-sm"
       >
         <CustomModalContentForm onSubmit={this.handleCobrar}>
           <CustomModalContentHeader contentRef={this.refModal}>
@@ -772,271 +748,156 @@ class ModalTransaccion extends CustomComponent {
           </CustomModalContentHeader>
 
           <CustomModalContentBody>
-            <SpinnerView loading={loading} message={'Cargando datos...'} />
+            <SpinnerView
+              loading={loading}
+              message={'Cargando datos...'}
+            />
 
             {/* Título del total a cobrar */}
-            <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-700">
-                TOTAL
-              </h3>
-              <p className="text-3xl font-bold">{numberFormat(importeTotal, codiso)}</p>
-            </div>
+            {
+              etapa === '2' && (
+                <div className="text-center mb-3">
+                  <h3 className="text-lg font-medium text-gray-700">
+                    TOTAL
+                  </h3>
+                  <p className="text-3xl font-bold">
+                    {formatCurrency(importeTotal, codiso)}
+                  </p>
+                </div>
+              )
+            }
 
             {/* Sun titulo */}
-            <Row>
-              <Column className="col-md-4 col-sm-4">
-                <hr />
-              </Column>
-              <Column className="col-md-4 col-sm-4 d-flex align-items-center justify-content-center">
-                <h6 className="mb-0">Tipos de cobros</h6>
-              </Column>
-              <Column className="col-md-4 col-sm-4">
-                <hr />
-              </Column>
-            </Row>
+            {
+              etapa === '1' && (
+                <div className="flex flex-wrap">
+                  <div className="w-3/12">
+                    <hr />
+                  </div>
+                  <div className="w-1/2 flex items-center justify-center">
+                    <h6>Tipos de cobros</h6>
+                  </div>
+                  <div className="w-3/12">
+                    <hr />
+                  </div>
+                </div>
+              )
+            }
 
             {/* Tipos de venta */}
-            <Row>
-              {/* Al contado */}
-              <Column className="col-md-6 col-sm-12" formGroup={true}>
-                <Button
-                  className={`${formaPago === CONTADO ? 'btn-primary' : 'btn-light'
-                    } btn-block`}
-                  title="Pago al contado"
-                  disabled={disabledContado}
-                  onClick={() => this.handleSelectTipoPago(CONTADO)}
-                >
-                  <Row>
-                    <Column className="col-md-12">
-                      <i className="bi bi-cash-coin fa-2x"></i>
-                    </Column>
-                  </Row>
-                  <div className="text-center">
-                    <label>Contado</label>
-                  </div>
-                </Button>
-              </Column>
-
-              {/* Crédito fijo*/}
-              <Column className="col-md-6 col-sm-12">
-                <Button
-                  className={`${formaPago === CREDITO_FIJO ? 'btn-primary' : 'btn-light'
-                    } btn-block`}
-                  title="Pago al credito"
-                  disabled={disabledCreditoFijo}
-                  onClick={() => this.handleSelectTipoPago(CREDITO_FIJO)}
-                >
-                  <Row>
-                    <Column className="col-md-12">
-                      <i className="bi bi-boxes fa-2x"></i>
-                    </Column>
-                  </Row>
-                  <div className="text-center">
-                    <label>Crédito fijo</label>
-                  </div>
-                </Button>
-              </Column>
-
-              {/* Crédito variable */}
-              {/* <div className="col-md-3 col-sm-3">
-              <button
-                className={`btn ${formaPago === CREDITO_VARIABLE ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
-                type="button"
-                title="Pago al credito"
-                onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
-              >
-                <div className="row">
-                  <div className="col-md-12">
-                    <i className="bi bi-columns-gap fa-2x"></i>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <label>Crédito variable</label>
-                </div>
-              </button>
-            </div> */}
-
-              {/* Pago adelantado */}
-              {/* <div className="col-md-3 col-sm-3">
-              <button
-                className={`btn ${formaPago === ADELANTADO ? 'btn-primary' : 'btn-light'
-                  } btn-block`}
-                type="button"
-                title="Pago al credito"
-                onClick={() => handleSelectTipoPago(ADELANTADO)}
-              >
-                <div className="row">
-                  <div className="col-md-12">
-                    <i className="bi bi-columns-gap fa-2x"></i>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <label>Pago Adelantado</label>
-                </div>
-              </button>
-            </div> */}
-            </Row>
-
-            {/* contado detalle */}
-            {formaPago === CONTADO && (
-              <Row>
-                <Column ref={this.refMetodoPagoContenedor} formGroup={true}>
-                  <h6>Lista de métodos:</h6>
-                  <div className="flex flex-col gap-2">
-                    {bancosAgregados.map((item, index) => (
-                      <MetodoPago
-                        key={index}
-                        idBanco={item.idBanco}
-                        name={item.nombre}
-                        monto={item.monto}
-                        handleInputMontoBancosAgregados={
-                          this.handleInputMontoBancosAgregados
-                        }
-                        handleRemoveItemBancosAgregados={
-                          this.handleRemoveItemBancosAgregados
-                        }
-                      />
-                    ))}
-                  </div>
-                </Column>
-
-                <Column className="col-12" formGroup={true}>
-                  <Select
-                    group={true}
-                    label={'Agregar método de cobro:'}
-                    iconLeft={<i className="bi bi-tag-fill"></i>}
-                    title="Lista metodo de cobro"
-                    ref={this.refMetodoContado}
-                    buttonRight={
-                      <Button
-                        className="btn-outline-success d-flex"
-                        title="Agregar Pago"
-                        onClick={this.handleAddBancosAgregados}
-                      >
-                        <i className="bi bi-plus-circle-fill"></i>
-                      </Button>
-                    }
+            {
+              etapa === '1' && (
+                <div className="flex  gap-2">
+                  {/* Al contado */}
+                  <ButtonTipoPago
+                    title={"Pago al contado"}
+                    disabled={disabledContado}
+                    onClick={() => this.handleSelectTipoPago(CONTADO)}
                   >
-                    {bancos.map((item, index) => (
-                      <option key={index} value={item.idBanco}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </Column>
+                    <div>
+                      <i className="bi bi-cash-coin fa-2x"></i>
+                      <p>Contado</p>
+                    </div>
+                  </ButtonTipoPago>
 
-                <Column className="col-12">
-                  <br />
-                </Column>
+                  {/* Crédito fijo*/}
+                  <ButtonTipoPago
+                    title="Pago al credito"
+                    disabled={disabledCreditoFijo}
+                    onClick={() => this.handleSelectTipoPago(CREDITO_FIJO)}
+                  >
+                    <div>
+                      <i className="bi bi-boxes fa-2x"></i>
+                      <p>Crédito Fijo</p>
+                    </div>
+                  </ButtonTipoPago>
 
-                <Column className="col-12">
-                  <div className="text-center">{this.generarVuelto()}</div>
-                </Column>
-              </Row>
-            )}
+                  {/* Crédito variable */}
+                  {/* <ButtonTipoPago
+                    title="Pago al credito"
+                    onClick={() => handleSelectTipoPago(CREDITO_VARIABLE)}
+                  >
+                    <div>
+                      <i className="bi bi-columns-gap fa-2x"></i>
+                      <p>Crédito Variable</p>
+                    </div>
+                  </ButtonTipoPago> */}
 
-            {/* crédito fijo */}
-            {formaPago === CREDITO_FIJO && (
-              <Row>
-                <Column>
-                  <div className="form-group">
-                    <span className="text-sm">
-                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                      Los pagos se efectúan en función del número de cuotas, con
-                      una alerta que indica la frecuencia de los pagos.
-                    </span>
-                  </div>
+                  {/* Pago adelantado */}
+                  {/* <ButtonTipoPago
+                    title="Pago al credito"
+                    onClick={() => handleSelectTipoPago(ADELANTADO)}
+                  >
+                    <div>
+                      <i className="bi bi-columns-gap fa-2x"></i>
+                      <p>Pago Adelantado</p>
+                    </div>
+                  </ButtonTipoPago> */}
+                </div>
+              )
+            }
 
-                  <div className="form-group">
-                    <Input
-                      group={true}
-                      iconLeft={<i className="bi bi-hourglass-split"></i>}
-                      role={'float'}
-                      placeholder="Número de cuotas"
-                      ref={this.refNumeroCuotas}
-                      value={numeroCuotas}
-                      onChange={this.handleSelectNumeroCuotas}
-                      onKeyDown={keyNumberInteger}
+            {
+              etapa === '2' && (
+                <>
+                  {/* contado detalle */}
+                  {formaPago === CONTADO && (
+                    <ContadoView
+                      refMetodoPagoContenedor={this.refMetodoPagoContenedor}
+                      bancosAgregados={bancosAgregados}
+                      handleInputMontoBancosAgregados={this.handleInputMontoBancosAgregados}
+                      handleRemoveItemBancosAgregados={this.handleRemoveItemBancosAgregados}
+
+                      handleAddBancosAgregados={this.handleAddBancosAgregados}
+                      bancos={bancos}
+                      generarVuelto={this.generarVuelto}
                     />
-                  </div>
+                  )}
 
-                  <div className="form-group">
-                    <Select
-                      group={true}
-                      iconLeft={<i className="bi bi-credit-card-2-back"></i>}
-                      title="Lista frecuencia de pago"
-                      ref={this.refFrecuenciaPagoFijo}
-                      value={frecuenciaPagoFijo}
-                      onChange={this.handleSelectFrecuenciaPagoFijo}
-                    >
-                      <option value="">-- Frecuencia de pago --</option>
-                      <option value="15">Quinsenal</option>
-                      <option value="30">Mensual</option>
-                    </Select>
-                  </div>
+                  {/* crédito fijo */}
+                  {formaPago === CREDITO_FIJO && (
+                    <CreditoFijoView
+                      refNumeroCuotas={this.refNumeroCuotas}
+                      numeroCuotas={numeroCuotas}
+                      handleSelectNumeroCuotas={this.handleSelectNumeroCuotas}
 
-                  <div className="form-group">
-                    <Input
-                      group={true}
-                      iconLeft={<i className="bi bi-coin"></i>}
-                      placeholder="0.00"
-                      value={this.letraMensual()}
-                      disabled={true}
+                      refFrecuenciaPagoFijo={this.refFrecuenciaPagoFijo}
+                      frecuenciaPagoFijo={frecuenciaPagoFijo}
+                      handleSelectFrecuenciaPagoFijo={this.handleSelectFrecuenciaPagoFijo}
+
+                      letraMensual={this.letraMensual}
                     />
-                  </div>
-                </Column>
-              </Row>
-            )}
+                  )}
 
-            {/* crédito variable */}
-            {formaPago === CREDITO_VARIABLE && (
-              <Row>
-                <Column>
-                  <div className="form-group">
-                    <span className="text-sm">
-                      <i className="bi bi-info-circle text-success text-lg"></i>{' '}
-                      Los pagos se realizan de acuerdo con la frecuencia
-                      establecida, con alertas programadas para recordar las
-                      fechas de pago.
-                    </span>
-                  </div>
-
-                  <div className="form-group">
-                    <Select
-                      group={true}
-                      iconLeft={<i className="bi bi-credit-card-2-back"></i>}
-                      title="Lista frecuencia de pago"
+                  {/* crédito variable */}
+                  {formaPago === CREDITO_VARIABLE && (
+                    <CreditoViableView
                       ref={this.refFrecuenciaPagoVariable}
                       value={frecuenciaPagoVariable}
                       onChange={this.handleSelectFrecuenciaPagoVariable}
-                    >
-                      <option value="">-- Frecuencia de pago --</option>
-                      <option value="15">Quinsenal</option>
-                      <option value="30">Mensual</option>
-                    </Select>
-                  </div>
-                </Column>
-              </Row>
-            )}
+                    />
+                  )}
 
-            <Row>
-              <Column className="col-12">
-                <TextArea
-                  label={'Notas internas:'}
-                  placeholder={'Ingrese alguna nota interna.'}
-                  value={this.state.nota}
-                  onChange={this.handleInputNota}
-                />
-              </Column>
-            </Row>
+                  {/* <Row>
+                    <Column className="col-12">
+                      <TextArea
+                        label={'Notas internas:'}
+                        placeholder={'Ingrese alguna nota interna.'}
+                        value={this.state.nota}
+                        onChange={this.handleInputNota}
+                      />
+                    </Column>
+                  </Row> */}
+                </>
+              )
+            }
 
             {/* pago adelantado */}
             {/* {formaPago === ADELANTADO && (
             <div className="row">
               <div className="col">
 
-                <div className="form-group">
+                <div className="mb-3">
                   <span className="text-md">
                     <i className="bi bi-info-circle text-success text-lg"></i>{' '}
                     Los pagos se efectúan de manera habitual; sin embargo, el inventario no se reduce, ya que se trata de un pago anticipado.
@@ -1048,17 +909,41 @@ class ModalTransaccion extends CustomComponent {
           )} */}
           </CustomModalContentBody>
 
-          <CustomModalContentFooter>
-            <Button type="submit" className="btn-success">
-              <i className="fa fa-save"></i> Registrar
-            </Button>
+          <CustomModalContentFooter
+            className={
+              cn(
+                "flex p-3 border-t border-solid border-[#dee2e6]",
+                etapa === '1' ? "justify-end" : "justify-between",
+              )
+            }
+          >
+            {
+              etapa === '2' && (
+                <Button
+                  className="btn-light"
+                  onClick={this.onHidden}>
+                  <i className="fa fa-arrow-left"></i> Atras
+                </Button>
+              )
+            }
 
-            <Button
-              className="btn-danger"
-              onClick={async () => await this.refModal.current.handleOnClose()}
-            >
-              <i className="fa fa-close"></i> Cancelar
-            </Button>
+            <div className="flex gap-x-3">
+              {
+                etapa === '2' && (
+                  <Button
+                    type="submit"
+                    className="btn-success">
+                    <i className="fa fa-save"></i> Registrar
+                  </Button>
+                )
+              }
+              <Button
+                className="btn-danger"
+                onClick={async () => await this.refModal.current.handleOnClose()}
+              >
+                <i className="fa fa-close"></i> Cancelar
+              </Button>
+            </div>
           </CustomModalContentFooter>
         </CustomModalContentForm>
       </CustomModal>
@@ -1081,6 +966,170 @@ ModalTransaccion.propTypes = {
   handleProcessCredito: PropTypes.func,
 };
 
+const ButtonTipoPago = ({ className, title, disabled, onClick, children }) => {
+  return (
+    <Button
+      className={cn(
+        "btn-block btn-light w-full",
+        className
+      )}
+      title={title}
+      disabled={disabled}
+      onClick={onClick} >
+      {children}
+    </Button>
+  );
+};
+
+const ContadoView = ({
+  refMetodoPagoContenedor,
+  bancosAgregados,
+  handleInputMontoBancosAgregados,
+  handleRemoveItemBancosAgregados,
+
+  handleAddBancosAgregados,
+
+  bancos,
+  generarVuelto,
+}) => {
+
+  return (
+    <div className="flex flex-col gap-6">
+
+      <div className="flex gap-3">
+        {/* Botones para agregar métodos de pago */}
+        <div className="w-full flex flex-col gap-3">
+          <h6>Añadir Método de Pago</h6>
+
+          <div className="flex flex-col gap-3">
+            {bancos
+              .filter(
+                (item) => !bancosAgregados.map(b => b.idBanco).includes(item.idBanco)
+              )
+              .map((item, index) => (
+                <Button
+                  key={index}
+                  className="btn-info !flex items-center justify-center gap-2"
+                  onClick={() => handleAddBancosAgregados(item.idBanco)}
+                >
+                  <TbHandClick className="w-5 h-5" />
+                  {item.nombre}
+                </Button>
+              ))}
+          </div>
+        </div>
+
+        {/* Lista de métodos de pago */}
+        <div className="w-full flex flex-col gap-3" ref={refMetodoPagoContenedor}>
+          <h6>Pagos Aplicados</h6>
+
+          {bancosAgregados.map((item, index) => (
+            <MetodoPago
+              key={index}
+              idBanco={item.idBanco}
+              name={item.nombre}
+              monto={item.monto}
+              handleInputMontoBancosAgregados={handleInputMontoBancosAgregados}
+              handleRemoveItemBancosAgregados={handleRemoveItemBancosAgregados}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="w-full text-center">
+        {generarVuelto()}
+      </div>
+    </div>
+  );
+};
+
+const CreditoFijoView = ({
+  refNumeroCuotas,
+  numeroCuotas,
+  handleSelectNumeroCuotas,
+
+  refFrecuenciaPagoFijo,
+  frecuenciaPagoFijo,
+  handleSelectFrecuenciaPagoFijo,
+
+  letraMensual
+}) => {
+
+  return (
+    <div className="flex flex-col flex-wrap gap-3">
+      <div>
+        <span className="text-sm text-danger text-center">
+          Los pagos se efectúan en función del número de cuotas, con
+          una alerta que indica la frecuencia de los pagos.
+        </span>
+      </div>
+
+      <div className="flex flex-row gap-3">
+        <Input
+          group={true}
+          iconLeft={<i className="bi bi-hourglass-split"></i>}
+          role={'float'}
+          placeholder="Número de cuotas"
+          ref={refNumeroCuotas}
+          value={numeroCuotas}
+          onChange={handleSelectNumeroCuotas}
+          onKeyDown={keyNumberInteger}
+        />
+
+        <Select
+          group={true}
+          iconLeft={<i className="bi bi-credit-card-2-back"></i>}
+          title="Lista frecuencia de pago"
+          ref={refFrecuenciaPagoFijo}
+          value={frecuenciaPagoFijo}
+          onChange={handleSelectFrecuenciaPagoFijo}
+        >
+          <option value="">-- Frecuencia de pago --</option>
+          <option value="15">Quinsenal</option>
+          <option value="30">Mensual</option>
+        </Select>
+      </div>
+
+      <div className="w-full text-center text-xl">
+        {letraMensual()} {frecuenciaPagoFijo === '30'
+          ? <><span className="text-xs text-gray-500">x MES</span></>
+          : <><span className="text-xs text-gray-500">x SEMANA</span></>}
+      </div>
+    </div>
+  );
+};
+
+const CreditoViableView = forwardRef(({ value, onChange }, ref) => {
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="mb-3">
+        <span className="text-sm">
+          <i className="bi bi-info-circle text-success text-lg"></i>{' '}
+          Los pagos se realizan de acuerdo con la frecuencia
+          establecida, con alertas programadas para recordar las
+          fechas de pago.
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <Select
+          group={true}
+          iconLeft={<i className="bi bi-credit-card-2-back"></i>}
+          title="Lista frecuencia de pago"
+          ref={ref}
+          value={value}
+          onChange={onChange}
+        >
+          <option value="">-- Frecuencia de pago --</option>
+          <option value="15">Quinsenal</option>
+          <option value="30">Mensual</option>
+        </Select>
+      </div>
+    </div>
+  );
+});
+
 const MetodoPago = ({
   idBanco,
   name,
@@ -1089,36 +1138,35 @@ const MetodoPago = ({
   handleRemoveItemBancosAgregados,
 }) => {
 
-  const isMobile = useIsMobile();
-
   return (
-    <Input
-      autoFocus={true}
-      group={true}
-      type={isMobile ? 'number' : 'text'}
-      role={'float'}
-      placeholder="Monto"
-      value={monto}
-      onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
-      contentRight={
-        <>
-          <div className="input-group-prepend">
-            <div className="input-group-text">
-              <span>{name}</span>
+    <div className="flex flex-col gap-1">
+      <span className="text-xs">{name}:</span>
+      <Input
+        autoFocus
+        group={true}
+        type="text"
+        inputMode="decimal"
+        // pattern="[0-9]*"
+        enterKeyHint="done"
+        role={'float'}
+        placeholder="Monto"
+        value={monto}
+        onChange={(event) => handleInputMontoBancosAgregados(event, idBanco)}
+        contentRight={
+          <>
+            <div className="input-group-append">
+              <Button
+                className="btn-outline-danger d-flex"
+                title="Agregar Pago"
+                onClick={() => handleRemoveItemBancosAgregados(idBanco)}
+              >
+                <i className="bi bi-trash3-fill"></i>
+              </Button>
             </div>
-          </div>
-          <div className="input-group-append">
-            <Button
-              className="btn-outline-danger d-flex"
-              title="Agregar Pago"
-              onClick={() => handleRemoveItemBancosAgregados(idBanco)}
-            >
-              <i className="bi bi-trash3-fill"></i>
-            </Button>
-          </div>
-        </>
-      }
-    />
+          </>
+        }
+      />
+    </div>
   );
 };
 

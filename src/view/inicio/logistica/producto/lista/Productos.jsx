@@ -1,7 +1,7 @@
 import {
   isEmpty,
   convertNullText,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -526,7 +526,7 @@ class Productos extends CustomComponent {
                             )}
                           </td>
                           <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
-                            {numberFormat(item.precio, this.state.codiso)}
+                            {formatCurrency(item.precio, this.state.codiso)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {item.medida}
@@ -662,7 +662,7 @@ class Productos extends CustomComponent {
                         </div>
 
                         <div className="text-lg font-bold text-gray-900 mb-2">
-                          {numberFormat(item.precio, this.state.codiso)}
+                          {formatCurrency(item.precio, this.state.codiso)}
                         </div>
 
                         <div className="text-sm text-gray-600 mb-1">

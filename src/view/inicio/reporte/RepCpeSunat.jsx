@@ -34,7 +34,7 @@ import {
   getCurrentYear,
   guId,
   months,
-  numberFormat,
+  formatCurrency,
   years,
 } from '../../../helper/utils.helper';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
@@ -361,7 +361,7 @@ class RepCpeSunat extends CustomComponent {
                             {item.nombre}
                           </TableCell>
                           <td className="p-2 border text-right">
-                            {numberFormat(item.total, this.state.codIso)}
+                            {formatCurrency(item.total, this.state.codIso)}
                           </td>
                         </TableRow>
                       ))}
@@ -384,7 +384,7 @@ class RepCpeSunat extends CustomComponent {
                     <YAxis />
                     <Tooltip
                       formatter={(value) => [
-                        numberFormat(value, this.state.codIso),
+                        formatCurrency(value, this.state.codIso),
                         'Monto',
                       ]}
                     />
@@ -420,7 +420,7 @@ class RepCpeSunat extends CustomComponent {
                     <YAxis />
                     <Tooltip
                       formatter={(value) => [
-                        numberFormat(value, this.state.codIso),
+                        formatCurrency(value, this.state.codIso),
                         'Monto',
                       ]}
                     />
@@ -438,7 +438,7 @@ class RepCpeSunat extends CustomComponent {
                                 fontSize={15}
                                 textAnchor="middle"
                               >
-                                {numberFormat(value, this.state.codIso)}
+                                {formatCurrency(value, this.state.codIso)}
                               </text>
                             </g>
                           );

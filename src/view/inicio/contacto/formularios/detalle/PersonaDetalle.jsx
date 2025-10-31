@@ -53,7 +53,7 @@ import {
   getPathNavigation,
   isEmpty,
   isText,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../helper/utils.helper';
 import { detailPersona } from '../../../../../network/rest/principal.network';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -220,7 +220,7 @@ class ClienteDetalle extends CustomComponent {
             ) : (
               <span>
                 <i className="fa fa-plus text-success"></i>{' '}
-                {numberFormat(item.ingreso, item.codiso)}
+                {formatCurrency(item.ingreso, item.codiso)}
               </span>
             )}
           </TableCell>
@@ -230,7 +230,7 @@ class ClienteDetalle extends CustomComponent {
             ) : (
               <span>
                 <i className="fa fa-minus text-danger"></i>{' '}
-                {numberFormat(item.egreso, item.codiso)}
+                {formatCurrency(item.egreso, item.codiso)}
               </span>
             )}
           </TableCell>
@@ -302,7 +302,7 @@ class ClienteDetalle extends CustomComponent {
           </TableCell>
           <TableCell>{item.tipo}</TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell>{numberFormat(item.total, item.codiso)} </TableCell>
+          <TableCell>{formatCurrency(item.total, item.codiso)} </TableCell>
         </TableRow>
       );
     });
@@ -354,7 +354,7 @@ class ClienteDetalle extends CustomComponent {
               </CardHeader>
               <CardBody>
                 <CardText>
-                  {numberFormat(this.state.sumaVentas, this.state.codiso)}
+                  {formatCurrency(this.state.sumaVentas, this.state.codiso)}
                 </CardText>
               </CardBody>
             </Card>
@@ -371,7 +371,7 @@ class ClienteDetalle extends CustomComponent {
               </CardHeader>
               <CardBody>
                 <CardText className={'text-primary'}>
-                  {numberFormat(this.state.sumaCompras, this.state.codiso)}
+                  {formatCurrency(this.state.sumaCompras, this.state.codiso)}
                 </CardText>
               </CardBody>
             </Card>
@@ -388,7 +388,7 @@ class ClienteDetalle extends CustomComponent {
               </CardHeader>
               <CardBody>
                 <CardText className={'text-success'}>
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.sumaCuentasPorCobrar,
                     this.state.codiso,
                   )}
@@ -408,7 +408,7 @@ class ClienteDetalle extends CustomComponent {
               </CardHeader>
               <CardBody>
                 <CardText className={'text-danger'}>
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.sumaCuentasPorPagar,
                     this.state.codiso,
                   )}

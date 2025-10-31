@@ -47,19 +47,17 @@ import {
   getStatePrivilegio,
   guId,
   isEmpty,
-  numberFormat,
+  formatCurrency,
 } from '../../../helper/utils.helper';
 import {
   comboSucursal,
   comboUsuario,
   dashboardTransaccion,
   documentsExcelCompra,
-  documentsPdfReportsCompra,
   documentsPdfReportsTransaccion,
 } from '../../../network/rest/principal.network';
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
-import React from 'react';
 import ErrorResponse from '../../../model/class/error-response';
 import { CANCELED } from '../../../model/types/types';
 import SuccessReponse from '../../../model/class/response';
@@ -384,7 +382,7 @@ class RepFinanciero extends CustomComponent {
             ) : (
               <span>
                 <i className="fa fa-plus text-success"></i>{' '}
-                {numberFormat(item.ingreso, item.codiso)}
+                {formatCurrency(item.ingreso, item.codiso)}
               </span>
             )}
           </TableCell>
@@ -394,7 +392,7 @@ class RepFinanciero extends CustomComponent {
             ) : (
               <span>
                 <i className="fa fa-minus text-danger"></i>{' '}
-                {numberFormat(item.egreso, item.codiso)}
+                {formatCurrency(item.egreso, item.codiso)}
               </span>
             )}
           </TableCell>
@@ -539,7 +537,7 @@ class RepFinanciero extends CustomComponent {
               <CardBody>
                 <CardTitle>Total Restante</CardTitle>
                 <CardText>
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.totalIngreso - this.state.totalEgreso,
                     this.state.codIso,
                   )}
@@ -558,7 +556,7 @@ class RepFinanciero extends CustomComponent {
               <CardBody>
                 <CardTitle>Ingresos</CardTitle>
                 <CardText>
-                  {numberFormat(this.state.totalIngreso, this.state.codIso)}
+                  {formatCurrency(this.state.totalIngreso, this.state.codIso)}
                 </CardText>
                 <p className="text-sm">
                   <ArrowDownIcon className="text-success mr-1" />
@@ -576,7 +574,7 @@ class RepFinanciero extends CustomComponent {
               <CardBody>
                 <CardTitle>Egresos</CardTitle>
                 <CardText>
-                  {numberFormat(this.state.totalEgreso, this.state.codIso)}
+                  {formatCurrency(this.state.totalEgreso, this.state.codIso)}
                 </CardText>
                 <p className="text-sm">
                   <ArrowUpIcon className="text-danger mr-1" />

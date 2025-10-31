@@ -7,7 +7,7 @@ import {
   alertWarning,
   isEmpty,
   formatNumberWithZeros,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
@@ -307,7 +307,7 @@ class Gastos extends CustomComponent {
             )}
           </TableCell>
           <TableCell className="text-right">
-            {numberFormat(item.monto, item.codiso)}
+            {formatCurrency(item.monto, item.codiso)}
           </TableCell>
           <TableCell className="text-center">
             <Button

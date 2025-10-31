@@ -23,7 +23,7 @@ import {
 import {
   currentDate,
   isEmpty,
-  numberFormat,
+  formatCurrency,
   rounded,
 } from '@/helper/utils.helper';
 import { images } from '@/helper';
@@ -556,7 +556,7 @@ class RepProductos extends CustomComponent {
                     Ingresos Totales
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {numberFormat(resumenFinanciero.ingresos_totales, codIso)}
+                    {formatCurrency(resumenFinanciero.ingresos_totales, codIso)}
                   </p>
                 </div>
               </div>
@@ -572,7 +572,7 @@ class RepProductos extends CustomComponent {
                     Ganancia Total
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {numberFormat(resumenFinanciero.ganancia_total, codIso)}
+                    {formatCurrency(resumenFinanciero.ganancia_total, codIso)}
                   </p>
                 </div>
               </div>
@@ -730,26 +730,26 @@ class RepProductos extends CustomComponent {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {numberFormat(producto.precio_promedio, codIso)}
+                          {formatCurrency(producto.precio_promedio, codIso)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {numberFormat(producto.costo, codIso)}
+                          {formatCurrency(producto.costo, codIso)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
-                          {numberFormat(
+                          {formatCurrency(
                             producto.cantidad_vendida *
                             producto.precio_promedio,
                             codIso,
                           )}{' '}
                           -{' '}
-                          {numberFormat(
+                          {formatCurrency(
                             producto.cantidad_vendida * producto.costo,
                             codIso,
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium text-green-600">
-                            {numberFormat(producto.ganancia_total, codIso)}
+                            {formatCurrency(producto.ganancia_total, codIso)}
                           </div>
                           <div className="text-xs text-gray-500">
                             ({rounded(producto.margen_ganancia, 0)}%)
@@ -813,7 +813,7 @@ class RepProductos extends CustomComponent {
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-green-600">
-                        {numberFormat(producto.ingresos_totales, codIso)}
+                        {formatCurrency(producto.ingresos_totales, codIso)}
                       </div>
                     </div>
                   </div>
@@ -942,7 +942,7 @@ class RepProductos extends CustomComponent {
                         </span>
                       </div>
                       <div className="text-sm font-bold text-green-600">
-                        {numberFormat(totalRevenue, codIso)}
+                        {formatCurrency(totalRevenue, codIso)}
                       </div>
                     </div>
                   );

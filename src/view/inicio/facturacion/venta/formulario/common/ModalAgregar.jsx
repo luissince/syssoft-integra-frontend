@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   alertWarning,
@@ -7,8 +7,6 @@ import {
 } from '../../../../../../helper/utils.helper';
 import { VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
 import Input from '../../../../../../components/Input';
 import Button from '../../../../../../components/Button';
 
@@ -38,7 +36,7 @@ class ModalAgregar extends Component {
     });
   };
 
-  handleOpenModal = () => {};
+  handleOpenModal = () => { };
 
   handleOnHiddenModal = async () => {
     this.setState({
@@ -111,26 +109,15 @@ class ModalAgregar extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <Row>
-              <Column>
-                <h5>{titulo}</h5>
-              </Column>
-            </Row>
+            <h5 className='mb-2'>{titulo}</h5>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  autoFocus={true}
-                  label={subTitulo}
-                  placeholder={'0.00'}
-                  role={'float'}
-                  ref={this.refCantidad}
-                  value={cantidad}
-                  onChange={this.handleInputCantidad}
-                  onPaste={handlePasteFloat}
-                />
-              </Column>
-            </Row>
+            <InputCantidad
+              ref={this.refCantidad}
+              label={subTitulo}
+              value={cantidad}
+              onChange={this.handleInputCantidad}
+              onPaste={handlePasteFloat}
+            />
           </>
         }
         footer={
@@ -150,6 +137,26 @@ class ModalAgregar extends Component {
     );
   }
 }
+
+const InputCantidad = forwardRef(({ label ,value, onChange, onPaste }, ref) => {
+  return (
+    <Input
+      autoFocus={true}
+      type="text"
+      inputMode="decimal"
+      // pattern="[0-9]*" 
+      enterKeyHint="done" 
+      label={label}
+      placeholder={'0.00'}
+      role={'float'}
+      ref={ref}
+      value={value}
+      onChange={onChange}
+      onPaste={onPaste}
+    />
+  );
+});
+
 
 ModalAgregar.propTypes = {
   isOpen: PropTypes.bool.isRequired,

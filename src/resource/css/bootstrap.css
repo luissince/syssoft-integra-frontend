@@ -489,12 +489,32 @@
   box-sizing: border-box;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
+  background-color: white;
+}
+
 html {
   font-family: var(--font-family-sans-serif);
   font-size: 15px;
   line-height: 1.25;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  font-family: var(--font-family-sans-serif);
+  font-weight: 400;
+  font-size: 100%;
+  line-height: 1.25;
+  color: var(--dark);
+  text-align: left;
 }
 
 article,
@@ -510,18 +530,6 @@ section {
   display: block;
 }
 
-body {
-  padding-top: env(safe-area-inset-top);
-  margin: 0;
-  font-family: var(--font-family-sans-serif);
-  font-weight: 400;
-  font-size: 100%;
-  line-height: 1.25;
-  color: var(--dark);
-  text-align: left;
-  background-color: var(--white);
-  height: 100vh;
-}
 
 #root {
   height: 100%;
@@ -787,15 +795,6 @@ hr {
   overflow: visible;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
 
 p {
   font-size: 0.9rem;
@@ -1100,9 +1099,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  margin-bottom: 0.5rem;
   font-weight: 500;
-  line-height: 1.2;
 }
 
 h1,
@@ -13038,11 +13035,11 @@ a.text-dark:focus {
 .main-pos .invoice-right {
   /* flex: 0 0 40%; */
   /* display: flex; */
-  flex-direction: column;
+  /* flex-direction: column; */
   /* width: 550px;
   max-width: 550px; */
-  background-color: white;
-  border-left: 1px solid #cbd5e1;
+  /* background-color: white; */
+  /* border-left: 1px solid #cbd5e1; */
   position: relative;
 }
 

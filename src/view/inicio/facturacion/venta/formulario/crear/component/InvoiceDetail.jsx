@@ -1,5 +1,5 @@
 import { images } from '../../../../../../../helper';
-import { numberFormat } from '../../../../../../../helper/utils.helper';
+import { formatCurrency } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import {
   A_GRANEL,
@@ -57,14 +57,14 @@ const InvoiceDetail = (props) => {
                         className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
                         onClick={() => handleEdit(producto)}
                       >
-                        <i className="fa fa-edit text-secondary text-xl"></i>
+                        <i className="fa fa-edit text-warning text-xl"></i>
                       </button>
 
                       <button
                         className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
                         onClick={() => handleRemove(producto)}
                       >
-                        <i className="fa fa-trash text-secondary text-xl"></i>
+                        <i className="fa fa-trash text-danger text-xl"></i>
                       </button>
                     </div>
 
@@ -87,13 +87,13 @@ const InvoiceDetail = (props) => {
                       <div className="invoice-item_add-item-describe-price d-flex align-items-center text-break text-truncate text-nowrap text-base">
                         {producto.idTipoTratamientoProducto ===
                           VALOR_MONETARIO && (
-                          <>{numberFormat(producto.precio, codiso)}</>
+                          <>{formatCurrency(producto.precio, codiso)}</>
                         )}
 
                         {producto.idTipoTratamientoProducto !==
                           VALOR_MONETARIO && (
                           <>
-                            {numberFormat(producto.precio, codiso)}{' '}
+                            {formatCurrency(producto.precio, codiso)}{' '}
                             <span className="text-xs ml-1">
                               x {producto.medida}
                             </span>
@@ -166,7 +166,7 @@ const InvoiceDetail = (props) => {
 
                     <div className="invoice-item_add-item-total">
                       <div className="h-100 d-flex justify-content-end align-items-center text-base">
-                        {numberFormat(producto.precio * cantidad, codiso)}
+                        {formatCurrency(producto.precio * cantidad, codiso)}
                       </div>
                     </div>
                   </div>

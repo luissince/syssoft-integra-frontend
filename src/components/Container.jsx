@@ -127,7 +127,7 @@ export class ContainerMenu extends React.Component {
         <div className="d-flex flex-column align-items-center justify-content-center">
           <h4 className="my-4">{this.props.title}</h4>
 
-          <div className="w-100  border-bottom"></div>
+          <div className="w-100 border-bottom"></div>
 
           <h5 className="my-3">Ingrese la opción a buscar</h5>
 

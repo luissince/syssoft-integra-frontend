@@ -30,7 +30,7 @@ const PanelIzquierdo: React.FC<Props> = ({
         <div className="w-full flex flex-col relative flex-[0_0_60%]" >
 
             {/* Header */}
-            <TitlePos title="Compra" subTitle="Crear" handleGoBack={handleCerrar} />
+            <TitlePos title="Orden de Compra" subTitle="Crear" handleGoBack={handleCerrar} />
 
             {/* Filtros */}
             <div className="px-3 py-3 border-b border-r border-solid border-[#cbd5e1]">

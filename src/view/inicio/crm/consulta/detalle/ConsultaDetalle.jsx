@@ -1,6 +1,6 @@
 import {
   rounded,
-  numberFormat,
+  formatCurrency,
   formatTime,
   isEmpty,
 } from '../../../../../helper/utils.helper';

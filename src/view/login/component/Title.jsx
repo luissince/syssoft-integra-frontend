@@ -1,7 +1,7 @@
 const Title = () => {
   return (
     <div className="col-lg-6 mb-5 mb-lg-0 d-none d-md-block text-center">
-      <h2 className="my-5 display-4 fw-bold">
+      <h2 className="my-5 display-4 font-bold">
         La mejor opción
         <br />
         <span className="text-primary">para tu negocio</span>
