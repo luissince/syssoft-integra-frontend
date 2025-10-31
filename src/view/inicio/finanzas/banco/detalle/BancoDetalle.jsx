@@ -1,5 +1,5 @@
 import {
-  numberFormat,
+  formatCurrency,
   isText,
   isEmpty,
   formatTime,
@@ -20,7 +20,6 @@ import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import Button from '../../../../../components/Button';
 import {
   Table,
   TableBody,
@@ -326,7 +325,7 @@ class BancoDetalle extends CustomComponent {
             ) : (
               <span>
                 <i className="fa fa-plus text-success"></i>{' '}
-                {numberFormat(item.ingreso, item.codiso)}
+                {formatCurrency(item.ingreso, item.codiso)}
               </span>
             )}
           </TableCell>
@@ -336,7 +335,7 @@ class BancoDetalle extends CustomComponent {
             ) : (
               <span>
                 <i className="fa fa-minus text-danger"></i>{' '}
-                {numberFormat(item.egreso, item.codiso)}
+                {formatCurrency(item.egreso, item.codiso)}
               </span>
             )}
           </TableCell>
@@ -433,7 +432,7 @@ class BancoDetalle extends CustomComponent {
                         this.state.saldo <= 0 ? 'text-danger' : 'text-success'
                       }
                     >
-                      {numberFormat(this.state.saldo, this.state.codiso)}
+                      {formatCurrency(this.state.saldo, this.state.codiso)}
                     </strong>
                   </TableHead>
                 </TableRow>

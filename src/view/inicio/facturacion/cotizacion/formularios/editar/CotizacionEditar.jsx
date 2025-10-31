@@ -7,7 +7,7 @@ import {
   formatDecimal,
   isEmpty,
   isText,
-  numberFormat,
+  formatCurrency,
   readDataFile,
   rounded,
 } from '../../../../../../helper/utils.helper';
@@ -901,7 +901,7 @@ class CotizacionEditar extends CustomComponent {
           >
             <p className="m-0 text-secondary">{impuesto.nombre}:</p>
             <p className="m-0 text-secondary">
-              {numberFormat(impuesto.valor, this.state.codiso)}
+              {formatCurrency(impuesto.valor, this.state.codiso)}
             </p>
           </div>
         );
@@ -913,7 +913,7 @@ class CotizacionEditar extends CustomComponent {
         <div className="d-flex justify-content-between align-items-center text-secondary">
           <p className="m-0 text-secondary">Sub Total:</p>
           <p className="m-0 text-secondary">
-            {numberFormat(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, this.state.codiso)}
           </p>
         </div>
         {impuestosGenerado()}
@@ -921,7 +921,7 @@ class CotizacionEditar extends CustomComponent {
           <div className="d-flex justify-content-between align-items-center py-1">
             <p className="m-0 text-xl">Total:</p>
             <p className="m-0 text-xl">
-              {numberFormat(total, this.state.codiso)}
+              {formatCurrency(total, this.state.codiso)}
             </p>
           </div>
         </Button>
@@ -1111,7 +1111,7 @@ class CotizacionEditar extends CustomComponent {
                           <span className="text-sm">{item.codigo}</span>
                           <p className="m-0 text-lg">{item.nombre}</p>
                           <p className="m-0 text-xl font-weight-bold">
-                            {numberFormat(item.precio, this.state.codiso)}{' '}
+                            {formatCurrency(item.precio, this.state.codiso)}{' '}
                             <span className="text-sm">x {item.unidad}</span>
                           </p>
                         </div>
@@ -1242,7 +1242,7 @@ class CotizacionEditar extends CustomComponent {
                           {item.nombre}
                         </p>
                         <p className="m-0">
-                          {numberFormat(item.precio, this.state.codiso)}{' '}
+                          {formatCurrency(item.precio, this.state.codiso)}{' '}
                           <small>x {item.nombreMedida}</small>
                         </p>
                       </div>
@@ -1258,7 +1258,7 @@ class CotizacionEditar extends CustomComponent {
                     {/* Tercera columna (precio total) y opciones */}
                     <div className="d-flex flex-column justify-content-end align-items-center">
                       <div className="h-100 text-lg">
-                        {numberFormat(
+                        {formatCurrency(
                           item.cantidad * item.precio,
                           this.state.codiso,
                         )}

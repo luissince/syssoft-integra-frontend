@@ -2,13 +2,8 @@ import React from 'react';
 import { PosContainerWrapper } from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
-  calculateTax,
-  calculateTaxBruto,
-  formatDecimal,
   isEmpty,
   isText,
-  numberFormat,
-  rounded,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { COMPRA } from '../../../../../model/types/tipo-comprobante';
@@ -26,14 +21,10 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import SearchInput from '../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 import {
-  SpinnerTransparent,
   SpinnerView,
 } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
-import Select from '../../../../../components/Select';
 import ModalProducto from './component/ModalProducto';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import {
@@ -46,15 +37,10 @@ import {
   ModalPersona,
 } from '../../../../../components/MultiModal';
 import printJS from 'print-js';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
-import Search from '../../../../../components/Search';
 import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
-import { PRODUCTO } from '../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import PanelIzquierdo from './component/PanelIzquierdo';
-import { th } from 'date-fns/locale';
 import PanelDerecho from './component/PanelDerecho';
 
 /**
@@ -179,7 +165,7 @@ class CompraCrear extends CustomComponent {
   async componentDidMount() {
     document.addEventListener('keydown', this.handleDocumentKeyDown);
 
-    await this.loadData();
+    await this.loadingData();
   }
 
   componentWillUnmount() {
@@ -203,7 +189,7 @@ class CompraCrear extends CustomComponent {
   |
   */
 
-  loadData = async () => {
+  loadingData = async () => {
     if (
       this.props.compraCrear &&
       this.props.compraCrear.state &&
@@ -213,39 +199,37 @@ class CompraCrear extends CustomComponent {
       if (this.props.compraCrear.state.proveedor !== null) {
         this.handleSelectItemProveedor(this.props.compraCrear.state.proveedor);
       }
-    } else {
-      const [comprobantes, monedas, almacenes, impuestos] = await Promise.all([
-        this.fetchComprobante(COMPRA),
-        this.fetchMoneda(),
-        this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-        this.fetchImpuesto(),
-      ]);
-
-      const comprobante = comprobantes.find((item) => item.preferida === 1);
-      const moneda = monedas.find((item) => item.nacional === 1);
-      const impuesto = impuestos.find((item) => item.preferido === 1);
-      const almacen = almacenes.find((item) => item.predefinido === 1);
-
-      this.setState(
-        {
-          comprobantes,
-          monedas,
-          almacenes,
-          impuestos,
-
-          idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-          idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-          idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-          codiso: isEmpty(moneda) ? '' : moneda.codiso,
-          idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
-
-          loading: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      return;
     }
+
+    const [comprobantes, monedas, almacenes, impuestos] = await Promise.all([
+      this.fetchComprobante(COMPRA),
+      this.fetchMoneda(),
+      this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
+      this.fetchImpuesto(),
+    ]);
+
+    const comprobante = comprobantes.find((item) => item.preferida === 1);
+    const moneda = monedas.find((item) => item.nacional === 1);
+    const impuesto = impuestos.find((item) => item.preferido === 1);
+    const almacen = almacenes.find((item) => item.predefinido === 1);
+
+    this.setState({
+      comprobantes,
+      monedas,
+      almacenes,
+      impuestos,
+
+      idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
+      idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
+      idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
+      codiso: isEmpty(moneda) ? '' : moneda.codiso,
+      idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+
+      loading: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   updateReduxState() {
@@ -258,12 +242,28 @@ class CompraCrear extends CustomComponent {
       await this.refProducto.current.restart();
       await this.refProveedor.current.restart();
       await this.props.clearCrearCompra();
-      await this.loadData();
+      await this.loadingData();
 
       this.refProductoValue.current.focus();
 
       this.updateReduxState();
     });
+  };
+
+  importeTotal = () => {
+    return this.state.detalles.reduce((accumulate, item) => {
+
+      let cantidad = 0;
+      if (item.lote) {
+        cantidad = item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
+      } else {
+        cantidad = item.cantidad;
+      }
+
+      const costo = item.costo;
+
+      return accumulate + cantidad * costo;
+    }, 0);
   };
 
   //------------------------------------------------------------------------------------------
@@ -411,17 +411,7 @@ class CompraCrear extends CustomComponent {
         id: ++index,
       }));
 
-    const total = detalles.reduce((accumulate, item) => {
-      const cantidad = !item.lote
-        ? item.cantidad
-        : item.lotes.reduce(
-          (acumulador, item) => acumulador + Number(item.cantidad.value),
-          0,
-        );
-      const costo = item.costo;
-      return accumulate + cantidad * costo;
-    }, 0);
-    this.setState({ detalles, total }, () => {
+    this.setState({ detalles, total: this.importeTotal() }, () => {
       this.updateReduxState();
     });
   };
@@ -433,15 +423,12 @@ class CompraCrear extends CustomComponent {
     const { idImpuesto } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Seleccione un impuesto para continuar.',
-        },
-        async () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Seleccione un impuesto para continuar.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
@@ -458,19 +445,10 @@ class CompraCrear extends CustomComponent {
   };
 
   handleSaveProducto = async (detalles, callback = async function () { }) => {
-    const total = detalles.reduce((accumulate, item) => {
-      const cantidad = !item.lote
-        ? item.cantidad
-        : item.lotes.reduce(
-          (acumulador, item) => acumulador + Number(item.cantidad.value),
-          0,
-        );
-      const costo = item.costo;
-      return accumulate + cantidad * costo;
-    }, 0);
-    this.setState({ detalles, total }, () => {
+    this.setState({ detalles, total: this.importeTotal() }, () => {
       this.updateReduxState();
     });
+
     await callback();
   };
 
@@ -537,15 +515,12 @@ class CompraCrear extends CustomComponent {
   // Filtrar proveedor
   //------------------------------------------------------------------------------------------
   handleClearInputProveedor = () => {
-    this.setState(
-      {
-        proveedores: [],
-        proveedor: null,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      proveedores: [],
+      proveedor: null,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterProveedor = async (text) => {
@@ -572,45 +547,37 @@ class CompraCrear extends CustomComponent {
     this.refProveedor.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
-    this.setState(
-      {
-        proveedor: value,
-        proveedores: [],
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+
+    this.setState({
+      proveedor: value,
+      proveedores: [],
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
-  // Opciones de compra
+  // Opciones de orden de compra
   //------------------------------------------------------------------------------------------
 
   handleOpenOrdenCompra = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Orden de Compra',
-          message: 'Seleccione un impuesto.',
-        },
-        () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Seleccione un impuesto.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      alertKit.warning(
-        {
-          title: 'Orden de Compra',
-          message: 'Seleccione una moneda.',
-        },
-        () => {
-          this.refMoneda.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Seleccione una moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
@@ -623,6 +590,7 @@ class CompraCrear extends CustomComponent {
 
   handleSeleccionarOrdenCompra = async (ordenCompra) => {
     this.handleCloseOrdenCompra();
+
     this.setState({
       loading: true,
       msgLoading: 'Obteniendos datos de la orden de compra.',
@@ -642,16 +610,13 @@ class CompraCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        alertKit.warning(
-          {
-            title: 'Orden de Compra',
-            message:
-              'La orden de compra no tiene productos, ya que fue utilizado para la compra.',
-          },
-          () => {
-            this.reloadView();
-          },
-        );
+        alertKit.warning({
+          title: 'Orden de Compra',
+          message:
+            'La orden de compra no tiene productos, ya que fue utilizado para la compra.',
+        }, () => {
+          this.clearView();
+        });
         return;
       }
 
@@ -687,6 +652,7 @@ class CompraCrear extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       this.setState({ loading: false });
+
       alertKit.warning({
         title: 'Orden de Compra',
         message: response.getMessage(),
@@ -694,38 +660,6 @@ class CompraCrear extends CustomComponent {
     }
   };
 
-  //------------------------------------------------------------------------------------------
-  // Opciones de configuración
-  //------------------------------------------------------------------------------------------
-
-  handleOpenOptions = () => {
-    const invoice = document.getElementById(this.idSidebarConfiguration);
-    invoice.classList.add('toggled');
-
-    this.setState({
-      cacheConfiguracion: {
-        idImpuesto: this.state.idImpuesto,
-        idMoneda: this.state.idMoneda,
-        observacion: this.state.observacion,
-        nota: this.state.nota,
-      },
-    });
-  };
-
-  handleCloseOptions = () => {
-    const invoice = document.getElementById(this.idSidebarConfiguration);
-
-    if (this.state.cacheConfiguracion) {
-      this.setState({
-        idImpuesto: this.state.cacheConfiguracion.idImpuesto,
-        idMoneda: this.state.cacheConfiguracion.idMoneda,
-        observacion: this.state.cacheConfiguracion.observacion,
-        nota: this.state.cacheConfiguracion.nota,
-      });
-    }
-
-    invoice.classList.remove('toggled');
-  };
 
   handleSelectIdImpuesto = (event) => {
     this.setState({ idImpuesto: event.target.value });
@@ -747,30 +681,42 @@ class CompraCrear extends CustomComponent {
     this.setState({ nota: event.target.value });
   };
 
+  //------------------------------------------------------------------------------------------
+  // Opciones de configuración
+  //------------------------------------------------------------------------------------------
+
+  handleOpenOptions = () => {
+    const invoice = document.getElementById(this.idSidebarConfiguration);
+    invoice.classList.add('toggled');
+
+    this.setState({
+      cacheConfiguracion: {
+        idImpuesto: this.state.idImpuesto,
+        idMoneda: this.state.idMoneda,
+        observacion: this.state.observacion,
+        nota: this.state.nota,
+      },
+    });
+  };
+
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Orden de Compra',
-          message: 'Seleccione un impuesto.',
-        },
-        () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Seleccione un impuesto.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      alertKit.warning(
-        {
-          title: 'Orden de Compra',
-          message: 'Seleccione una moneda.',
-        },
-        () => {
-          this.refMoneda.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Seleccione una moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
@@ -789,24 +735,37 @@ class CompraCrear extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalles,
-      },
-      async () => {
-        this.updateReduxState();
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalles,
+    }, async () => {
+      this.updateReduxState();
 
-        const invoice = document.getElementById(this.idSidebarConfiguration);
-        invoice.classList.remove('toggled');
-      },
-    );
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove('toggled');
+    });
+  };
+
+  handleCloseOptions = () => {
+    const invoice = document.getElementById(this.idSidebarConfiguration);
+
+    if (this.state.cacheConfiguracion) {
+      this.setState({
+        idImpuesto: this.state.cacheConfiguracion.idImpuesto,
+        idMoneda: this.state.cacheConfiguracion.idMoneda,
+        observacion: this.state.cacheConfiguracion.observacion,
+        nota: this.state.cacheConfiguracion.nota,
+      });
+    }
+
+    invoice.classList.remove('toggled');
   };
 
   //------------------------------------------------------------------------------------------
   // Procesos guardar, limpiar y cerrar
   //------------------------------------------------------------------------------------------
+
   handleGuardar = async () => {
     const {
       idComprobante,
@@ -818,79 +777,61 @@ class CompraCrear extends CustomComponent {
     } = this.state;
 
     if (!isText(idComprobante)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Seleccione su comprobante.',
-        },
-        () => {
-          this.refComprobante.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Seleccione su comprobante.',
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(proveedor)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Seleccione un proveedor.',
-        },
-        () => {
-          this.refProveedorValue.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Seleccione un proveedor.',
+      }, () => {
+        this.refProveedorValue.current.focus();
+      });
       return;
     }
 
     if (!isText(idMoneda)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Seleccione su moneda.',
-        },
-        () => {
-          this.refMoneda.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Seleccione su moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
     if (!isText(idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Seleccione el impuesto',
-        },
-        () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Seleccione el impuesto',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (!isText(idAlmacenDestino)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Seleccione su almacen.',
-        },
-        () => {
-          this.refAlmacenDestino.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Seleccione su almacen.',
+      }, () => {
+        this.refAlmacenDestino.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Agregar algún producto a la lista.',
-        },
-        () => {
-          this.refProductoValue.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Agregar algún producto a la lista.',
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
@@ -917,6 +858,7 @@ class CompraCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal terminal
   //------------------------------------------------------------------------------------------
+
   handleOpenModalTerminal = () => {
     this.setState({ isOpenTerminal: true });
   };
@@ -945,11 +887,10 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    const accept = await alertKit.question(
-      {
-        title: 'Compra',
-        message: '¿Está seguro de continuar?',
-      });
+    const accept = await alertKit.question({
+      title: 'Compra',
+      message: '¿Está seguro de continuar?',
+    });
 
     if (accept) {
       const data = {
@@ -1015,11 +956,10 @@ class CompraCrear extends CustomComponent {
       idSucursal,
     } = this.state;
 
-    const accept = await alertKit.question(
-      {
-        title: 'Compra',
-        message: '¿Está seguro de continuar?',
-      });
+    const accept = await alertKit.question({
+      title: 'Compra',
+      message: '¿Está seguro de continuar?',
+    });
 
     if (accept) {
       const data = {
@@ -1105,95 +1045,6 @@ class CompraCrear extends CustomComponent {
   |
   */
 
-  renderTotal() {
-    let subTotal = 0;
-    let total = 0;
-
-    for (const item of this.state.detalles) {
-      const cantidad = !item.lote
-        ? item.cantidad
-        : item.lotes.reduce(
-          (acumulador, item) => acumulador + Number(item.cantidad.value),
-          0,
-        );
-      const valor = item.costo;
-
-      const porcentaje = item.porcentajeImpuesto;
-
-      const valorActual = cantidad * valor;
-      const valorSubNeto = calculateTaxBruto(porcentaje, valorActual);
-      const valorImpuesto = calculateTax(porcentaje, valorSubNeto);
-      const valorNeto = valorSubNeto + valorImpuesto;
-
-      subTotal += valorSubNeto;
-      total += valorNeto;
-    }
-
-    const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
-        const cantidad = !item.lote
-          ? item.cantidad
-          : item.lotes.reduce(
-            (acumulador, item) => acumulador + Number(item.cantidad.value),
-            0,
-          );
-        const total = cantidad * item.costo;
-        const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
-        const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
-
-        const existingImpuesto = acc.find(
-          (imp) => imp.idImpuesto === item.idImpuesto,
-        );
-
-        if (existingImpuesto) {
-          existingImpuesto.valor += impuestoTotal;
-        } else {
-          acc.push({
-            idImpuesto: item.idImpuesto,
-            nombre: item.nombreImpuesto,
-            valor: impuestoTotal,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      return resultado.map((impuesto, index) => {
-        return (
-          <div
-            key={index}
-            className="d-flex justify-content-between align-items-center text-secondary"
-          >
-            <p className="m-0 text-secondary">{impuesto.nombre}:</p>
-            <p className="m-0 text-secondary">
-              {numberFormat(impuesto.valor, this.state.codiso)}
-            </p>
-          </div>
-        );
-      });
-    };
-
-    return (
-      <>
-        <div className="d-flex justify-content-between align-items-center text-secondary">
-          <p className="m-0 text-secondary">Sub Total:</p>
-          <p className="m-0 text-secondary">
-            {numberFormat(subTotal, this.state.codiso)}
-          </p>
-        </div>
-        {impuestosGenerado()}
-        <Button className="btn-success w-100" onClick={this.handleGuardar}>
-          <div className="d-flex justify-content-between align-items-center py-1">
-            <p className="m-0 text-xl">Total:</p>
-            <p className="m-0 text-xl">
-              {numberFormat(total, this.state.codiso)}
-            </p>
-          </div>
-        </Button>
-      </>
-    );
-  }
-
   render() {
     return (
       <PosContainerWrapper>
@@ -1208,7 +1059,7 @@ class CompraCrear extends CustomComponent {
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
           codiso={this.state.codiso}
-          importeTotal={this.state.total}
+          importeTotal={this.importeTotal()}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
           handleProcessCredito={this.handleProcessCredito}
@@ -1251,6 +1102,7 @@ class CompraCrear extends CustomComponent {
         />
 
         <SidebarConfiguration
+          menus={this.props.token.userToken.menus}
           idSidebarConfiguration={this.idSidebarConfiguration}
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
@@ -1326,6 +1178,7 @@ class CompraCrear extends CustomComponent {
 CompraCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
+      menus: PropTypes.array.isRequired,
       idUsuario: PropTypes.string.isRequired,
     }).isRequired,
     project: PropTypes.shape({

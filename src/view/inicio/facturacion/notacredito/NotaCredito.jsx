@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
   spinnerLoading,
-  numberFormat,
+  formatCurrency,
   formatTime,
   alertDialog,
   alertInfo,
@@ -286,7 +286,7 @@ class NotaCredito extends CustomComponent {
                             {<br></br>}
                             {<span>{formatTime(item.hora)}</span>}
                           </td>
-                          <td>{numberFormat(item.total, item.codiso)}</td>
+                          <td>{formatCurrency(item.total, item.codiso)}</td>
                           <td>
                             {item.comprobanteModi}
                             {<br />}

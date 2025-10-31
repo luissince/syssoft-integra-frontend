@@ -5,6 +5,7 @@ import InvoiceFooter from "./InvoiceFooter";
 import InvoiceTicket from "./InvoiceTicket";
 import InvoiceView from "./InvoiceView";
 import InvoiceVoucher from "./InvoiceVoucher";
+import { cn } from "@/lib/utils";
 
 const ContentSale = ({
     activeTab,
@@ -75,7 +76,15 @@ const ContentSale = ({
                 />
             </section>
 
-            <section className={`invoice-right flex w-full md:flex-[0_0_40%] md:max-w-[500px] ${isScreen && activeTab === "productos" && "hidden" }`}>
+            <section
+                className={cn(
+                    "invoice-right bg-white",
+                    "flex flex-col md:flex-[0_0_40%]",
+                    "w-full md:max-w-[500px]",
+                    "border border-solid border-[#cbd5e1]",
+                    isScreen && activeTab === "productos" && "hidden"
+                )}
+            >
                 <div className="hidden md:flex">
                     <InvoiceTicket
                         nombreComporbante={nombreComporbante}

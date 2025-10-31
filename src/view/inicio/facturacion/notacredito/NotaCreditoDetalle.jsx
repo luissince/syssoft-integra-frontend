@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import {
   rounded,
-  numberFormat,
+  formatCurrency,
   calculateTaxBruto,
   calculateTax,
   formatTime,
@@ -123,20 +123,20 @@ class NotaCreditoDetalle extends React.Component {
         <tr>
           <th className="text-right">Sub Total:</th>
           <th className="text-right">
-            {numberFormat(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, this.state.codiso)}
           </th>
         </tr>
         <tr>
           <th className="text-right">Impuesto:</th>
           <th className="text-right">
-            {numberFormat(impuestoTotal, this.state.codiso)}
+            {formatCurrency(impuestoTotal, this.state.codiso)}
           </th>
         </tr>
         <tr className="border-bottom"></tr>
         <tr>
           <th className="text-right h5">Total:</th>
           <th className="text-right h5">
-            {numberFormat(total, this.state.codiso)}
+            {formatCurrency(total, this.state.codiso)}
           </th>
         </tr>
       </>
@@ -261,7 +261,7 @@ class NotaCreditoDetalle extends React.Component {
                         Total
                       </th>
                       <th className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                        {numberFormat(this.state.total, this.state.codiso)}
+                        {formatCurrency(this.state.total, this.state.codiso)}
                       </th>
                     </tr>
                     <tr>
@@ -304,10 +304,10 @@ class NotaCreditoDetalle extends React.Component {
                         <td className="text-right">{rounded(item.cantidad)}</td>
                         <td className="text-right">{item.impuesto}</td>
                         <td className="text-right">
-                          {numberFormat(item.precio, this.state.codiso)}
+                          {formatCurrency(item.precio, this.state.codiso)}
                         </td>
                         <td className="text-right">
-                          {numberFormat(
+                          {formatCurrency(
                             item.cantidad * item.precio,
                             this.state.codiso,
                           )}

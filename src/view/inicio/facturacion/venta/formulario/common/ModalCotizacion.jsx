@@ -25,7 +25,7 @@ import {
   formatTime,
   isEmpty,
   keyUpSearch,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import Button from '../../../../../../components/Button';
@@ -249,7 +249,7 @@ class ModalCotizacion extends CustomComponent {
             </span>
           </TableCell>
           <TableCell className="text-center">
-            {numberFormat(item.total, item.codiso)}{' '}
+            {formatCurrency(item.total, item.codiso)}{' '}
           </TableCell>
           <TableCell className="text-center">
             <Button

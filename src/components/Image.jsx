@@ -4,6 +4,7 @@ import { images } from '../helper';
 import Button from './Button';
 import { alertKit } from 'alert-kit';
 import { imageBase64 } from '../helper/utils.helper';
+import { is, th } from 'date-fns/locale';
 
 const ImageUpload = ({
   label,
@@ -244,6 +245,7 @@ export { MultiImages, ImageUpload };
  *
  * @prop {string} [default] - Fallback image source if no image is provided.
  * @prop {string} [src] - The main image source.
+ * @prop {boolean} [isFullScreen] - If true, the image will take the full width of the container.
  * @prop {string} alt - Alternative text for the image.
  * @prop {string} [className] - Extra classes to append (Bootstrap style).
  * @prop {string|number} [width] - Width of the image.
@@ -258,6 +260,7 @@ class Image extends Component {
    *
    * @param {Object} props - React props.
    * @param {string} [props.default] - Fallback image source.
+   * @param {boolean} [props.isFullScreen] - If true, the image will take the full width of the container.
    * @param {string} [props.src] - Main image source.
    * @param {string} props.alt - Alternative text.
    * @param {string} [props.className] - CSS classes (Bootstrap).
@@ -270,6 +273,7 @@ class Image extends Component {
     super(props);
     this.state = {
       default: props.default || images.noImage,
+      isFullScreen: props.isFullScreen ?? true,
       image: props.src || props.default,
       alt: props.alt,
       className: props.className,
@@ -311,18 +315,19 @@ class Image extends Component {
    */
   toggleFullScreen = (e) => {
     e.stopPropagation();
+
     this.setState((prevState) => ({
       showFullScreen: !prevState.showFullScreen,
     }));
   };
 
-   /**
-   * Renders the image and fullscreen modal.
-   *
-   * @returns {JSX.Element}
-   */
+  /**
+  * Renders the image and fullscreen modal.
+  *
+  * @returns {JSX.Element}
+  */
   render() {
-    const { alt, className, width, height, overrideClass, overrideStyle } = this.props;
+    const { alt, isFullScreen, className, width, height, overrideClass, overrideStyle } = this.props;
     const { image, showFullScreen } = this.state;
     const appliedClass = overrideClass || `${className} img-thumbnail`;
     const appliedStyle = overrideStyle ? {} : { cursor: 'pointer' };
@@ -337,7 +342,7 @@ class Image extends Component {
           width={width}
           height={height}
           onError={this.handleImageError}
-          onClick={this.toggleFullScreen}
+          onClick={isFullScreen ? this.toggleFullScreen : null}
           style={appliedStyle}
         />
 
@@ -366,6 +371,8 @@ class Image extends Component {
 Image.propTypes = {
   /** Fallback image source if no image is provided */
   default: PropTypes.string,
+  /** If true, the image will take the full width of the container */
+  isFullScreen: PropTypes.bool,
   /** The main image source */
   src: PropTypes.string,
   /** Alternative text for the image (required for accessibility) */

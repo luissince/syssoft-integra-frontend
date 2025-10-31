@@ -6,7 +6,7 @@ import {
   formatDate,
   rounded,
   formatTime,
-  numberFormat,
+  formatCurrency,
   imageBase64,
   formatDecimal,
   formatNumberWithZeros,
@@ -113,28 +113,28 @@ describe('formatDate function', () => {
   // });
 });
 
-describe('numberFormat', () => {
+describe('formatCurrency', () => {
   // Prueba 1: Formatear un número en soles peruanos (PEN)
   it('debería formatear un número en soles peruanos (PEN)', () => {
-    const resultado = numberFormat(1000, 'PEN');
+    const resultado = formatCurrency(1000, 'PEN');
     expect(resultado).toBe('S/1,000.00'); // Asegura que el resultado sea el esperado
   });
 
   // Prueba 2: Formatear un número en dólares estadounidenses (USD)
   it('debería formatear un número en dólares estadounidenses (USD)', () => {
-    const resultado = numberFormat(1000, 'USD');
+    const resultado = formatCurrency(1000, 'USD');
     expect(resultado).toBe('$1,000.00'); // Asegura que el resultado sea el esperado
   });
 
   // Prueba 3: Formatear un número en euros (EUR)
   it('debería formatear un número en euros (EUR)', () => {
-    const resultado = numberFormat(1000, 'EUR');
+    const resultado = formatCurrency(1000, 'EUR');
     expect(resultado).toBe('1.000,00€'); // Asegura que el resultado sea el esperado
   });
 
   // Prueba 4: Formatear un número en una moneda no válida (debería devolver "0")
   it('debería devolver "0" para una moneda no válida', () => {
-    const resultado = numberFormat(1000, 'GBP');
+    const resultado = formatCurrency(1000, 'GBP');
     expect(resultado).toBe('0'); // Asegura que el resultado sea "0"
   });
 });

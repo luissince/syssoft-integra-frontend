@@ -12,7 +12,6 @@ interface Props {
   refComprobante: React.RefObject<any>;
   idComprobante: string;
   handleSelectComprobante: () => void;
-  handleOpenOrdenCompra: () => void;
 
   proveedores: Array<any>;
   refProveedor: React.RefObject<any>;
@@ -21,11 +20,6 @@ interface Props {
   handleOpenModalProveedor: () => void;
   handleClearInputProveedor: () => void;
   handleSelectItemProveedor: () => void;
-
-  almacenes: Array<any>;
-  refAlmacenDestino: React.RefObject<any>;
-  idAlmacenDestino: string;
-  handleSelectAlmacenDestino: () => void;
 
   detalles: Array<any>;
   codiso: string;
@@ -42,7 +36,7 @@ const PanelDerecho: React.FC<Props> = ({
   refComprobante,
   idComprobante,
   handleSelectComprobante,
-  handleOpenOrdenCompra,
+
   proveedores,
   refProveedor,
   refProveedorValue,
@@ -50,10 +44,7 @@ const PanelDerecho: React.FC<Props> = ({
   handleOpenModalProveedor,
   handleClearInputProveedor,
   handleSelectItemProveedor,
-  almacenes,
-  refAlmacenDestino,
-  idAlmacenDestino,
-  handleSelectAlmacenDestino,
+
   detalles,
   codiso,
   handleGuardar,
@@ -159,12 +150,7 @@ const PanelDerecho: React.FC<Props> = ({
       {/* Header */}
       <HeaderActions
         title="Resumen"
-        actions={[
-          {
-            icon: <i className="bi bi-file-earmark-text text-xl text-secondary"></i>,
-            onClick: handleOpenOrdenCompra,
-            title: "Orden de compra",
-          },
+        actions={[         
           {
             icon: <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>,
             onClick: handleLimpiar,
@@ -215,19 +201,6 @@ const PanelDerecho: React.FC<Props> = ({
             <>{value.documento + ' - ' + value.informacion}</>
           )}
         />
-
-        <Select
-          ref={refAlmacenDestino}
-          value={idAlmacenDestino}
-          onChange={handleSelectAlmacenDestino}
-        >
-          <option value="">-- Almacen de destino --</option>
-          {almacenes.map((item, index) => (
-            <option key={index} value={item.idAlmacen}>
-              {item.nombre}
-            </option>
-          ))}
-        </Select>
       </div>
 
       {/* Detalles */}

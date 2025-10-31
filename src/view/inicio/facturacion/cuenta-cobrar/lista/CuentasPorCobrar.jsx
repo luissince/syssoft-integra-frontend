@@ -1,7 +1,7 @@
 import {
   formatNumberWithZeros,
   isEmpty,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
@@ -263,12 +263,12 @@ class CuentasPorCobrar extends CustomComponent {
             <br />
             FACTURA DE {item.frecuenciaPago} DÍAS
           </TableCell>
-          <TableCell>{numberFormat(item.total, item.codiso)}</TableCell>
+          <TableCell>{formatCurrency(item.total, item.codiso)}</TableCell>
           <TableCell className="text-success">
-            {numberFormat(item.pagado, item.codiso)}
+            {formatCurrency(item.pagado, item.codiso)}
           </TableCell>
           <TableCell className="text-danger">
-            {numberFormat(item.total - item.pagado, item.codiso)}
+            {formatCurrency(item.total - item.pagado, item.codiso)}
           </TableCell>
           <TableCell className="text-center">
             <Button

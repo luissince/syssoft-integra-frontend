@@ -3,7 +3,7 @@ import {
   calculateTaxBruto,
   formatTime,
   isText,
-  numberFormat,
+  formatCurrency,
   rounded,
 } from '../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../model/class/custom-component';
@@ -450,10 +450,10 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
         <TableCell className="text-right">{item.impuesto}</TableCell>
         <TableCell className="text-right">
-          {numberFormat(item.costo, this.state.codiso)}
+          {formatCurrency(item.costo, this.state.codiso)}
         </TableCell>
         <TableCell className="text-right">
-          {numberFormat(item.cantidad * item.costo, this.state.codiso)}
+          {formatCurrency(item.cantidad * item.costo, this.state.codiso)}
         </TableCell>
       </TableRow>
     ));
@@ -508,7 +508,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
               {impuesto.nombre} :
             </TableHead>
             <TableHead className="text-right mb-2">
-              {numberFormat(impuesto.valor, this.state.codiso)}
+              {formatCurrency(impuesto.valor, this.state.codiso)}
             </TableHead>
           </TableRow>
         );
@@ -520,7 +520,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         <TableRow>
           <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
           <TableHead className="text-right mb-2">
-            {numberFormat(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, this.state.codiso)}
           </TableHead>
         </TableRow>
         {impuestosGenerado()}
@@ -528,7 +528,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         <TableRow>
           <TableHead className="text-right h5">TOTAL :</TableHead>
           <TableHead className="text-right h5">
-            {numberFormat(total, this.state.codiso)}
+            {formatCurrency(total, this.state.codiso)}
           </TableHead>
         </TableRow>
       </>
@@ -553,7 +553,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
               {plazo.estado === 0 ? 'Por Pagar' : 'Págado'}
             </TableCell>
             <TableCell>
-              {numberFormat(plazo.monto, this.state.codiso)}
+              {formatCurrency(plazo.monto, this.state.codiso)}
             </TableCell>
             <TableCell className="text-center">
               <Button
@@ -633,10 +633,10 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                       <TableCell className="text-center">{index + 1}</TableCell>
                       <TableCell>{detalle.nombre}</TableCell>
                       <TableCell>
-                        {numberFormat(detalle.monto, this.state.codiso)}
+                        {formatCurrency(detalle.monto, this.state.codiso)}
                       </TableCell>
                       <TableCell>
-                        {numberFormat(montoActual, this.state.codiso)}
+                        {formatCurrency(montoActual, this.state.codiso)}
                       </TableCell>
                       <TableCell>{detalle.observacion}</TableCell>
                     </TableRow>
@@ -814,7 +814,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                       Total
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {numberFormat(this.state.total, this.state.codiso)}
+                      {formatCurrency(this.state.total, this.state.codiso)}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -822,7 +822,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                       Págado
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
-                      {numberFormat(this.state.cobrado, this.state.codiso)}
+                      {formatCurrency(this.state.cobrado, this.state.codiso)}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -830,7 +830,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                       Por Pagar
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
-                      {numberFormat(
+                      {formatCurrency(
                         this.state.total - this.state.cobrado,
                         this.state.codiso,
                       )}

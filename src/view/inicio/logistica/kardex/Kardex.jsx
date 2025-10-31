@@ -4,7 +4,7 @@ import {
   formatTime,
   rounded,
   convertNullText,
-  numberFormat,
+  formatCurrency,
   getPathNavigation,
 } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
@@ -463,11 +463,11 @@ class Kardex extends CustomComponent {
             {item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}
           </TableCell>
           <TableCell>
-            {item.tipo === 'INGRESO' ? numberFormat(item.costo, codiso) : ''}
+            {item.tipo === 'INGRESO' ? formatCurrency(item.costo, codiso) : ''}
           </TableCell>
           <TableCell>
             {item.tipo === 'INGRESO'
-              ? '+' + numberFormat(item.costo * item.cantidad, codiso)
+              ? '+' + formatCurrency(item.costo * item.cantidad, codiso)
               : ''}
           </TableCell>
 
@@ -476,11 +476,11 @@ class Kardex extends CustomComponent {
             {item.tipo === 'SALIDA' ? '-' + rounded(item.cantidad) : ''}
           </TableCell>
           <TableCell>
-            {item.tipo === 'SALIDA' ? numberFormat(item.costo, codiso) : ''}
+            {item.tipo === 'SALIDA' ? formatCurrency(item.costo, codiso) : ''}
           </TableCell>
           <TableCell>
             {item.tipo === 'SALIDA'
-              ? '-' + numberFormat(item.costo * item.cantidad, codiso)
+              ? '-' + formatCurrency(item.costo * item.cantidad, codiso)
               : ''}
           </TableCell>
 
@@ -489,9 +489,9 @@ class Kardex extends CustomComponent {
             {rounded(cantidad)}
           </TableCell>
           <TableCell>
-            {numberFormat(cantidad > 0 ? costo / cantidad : 0, codiso)}
+            {formatCurrency(cantidad > 0 ? costo / cantidad : 0, codiso)}
           </TableCell>
-          <TableCell>{numberFormat(costo, codiso)}</TableCell>
+          <TableCell>{formatCurrency(costo, codiso)}</TableCell>
 
           {/* <TableCell>{item.almacen}</TableCell>
           <TableCell>
@@ -653,11 +653,11 @@ class Kardex extends CustomComponent {
                     </p>
                     <p>
                       <strong>Costo Promedio:</strong>{' '}
-                      {numberFormat(costo, this.state.codiso)}
+                      {formatCurrency(costo, this.state.codiso)}
                     </p>
                     <p>
                       <strong>Valor Total:</strong>{' '}
-                      {numberFormat(valor, this.state.codiso)}
+                      {formatCurrency(valor, this.state.codiso)}
                     </p>
                   </Column>
                 </Row>

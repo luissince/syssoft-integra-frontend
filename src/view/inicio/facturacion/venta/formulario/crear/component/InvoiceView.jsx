@@ -5,7 +5,7 @@ import { images } from '../../../../../../../helper';
 import {
   formatNumberWithZeros,
   isEmpty,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../../../helper/utils.helper';
 import CustomComponent from '../../../../../../../model/class/custom-component';
 import {
@@ -274,8 +274,8 @@ class InvoiceView extends CustomComponent {
     const { buscar, tipo, loading, totalPaginacion } = this.state;
 
     return (
-      <div className="h-100 d-flex flex-column items position-relative ">
-        <div className="flex md:hidden">
+      <div className="h-full flex flex-col items relative ">
+        <div className="flex md:hidden border-b border-solid border-[#e1e7ee] bg-white">
           <InvoiceTicket
             nombreComporbante={nombreComporbante}
             handleOpenPreImpresion={handleOpenPreImpresion}
@@ -308,10 +308,9 @@ class InvoiceView extends CustomComponent {
         />
 
         <div
-          className="w-100 bottom-0 bg-white"
-          style={{ borderTop: '1px solid #e1e7ee', flex: '1 1 3.5rem' }}
+          className="w-full bg-white border-t border-solid border-[#e1e7ee] flex-[1_1_3.5rem]"
         >
-          <div className="px-3 py-3 d-flex align-items-center">
+          <div className="px-3 py-3 flex items-center">
             {cotizacion && (
               <>
                 <span className="mr-1">
@@ -603,7 +602,7 @@ const ItemView = (props) => {
         {detalleNegativo}
       </span>
       <span className="text-center d-block w-100 ml-1 mr-1 mt-1 mb-3">
-        <span className="text-xl">{numberFormat(precio, codiso)}</span>{' '}
+        <span className="text-xl">{formatCurrency(precio, codiso)}</span>{' '}
         <span className="text-sm">x {medida}</span>
       </span>
       <span className="text-left d-block w-100 ml-1 mr-1 mt-1 text-sm">

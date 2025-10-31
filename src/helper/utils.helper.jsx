@@ -124,7 +124,7 @@ export function formatDecimal(
  * @param {number} amount - La cantidad numérica
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
  * @param {string} [type='string'] - El tipo de retorno (string o number).
- * @returns {string | number} La cantidad formateada como dinero.
+ * @returns {string | number} La cantidad formateada.
  */
 export function rounded(amount, decimalCount = 2, type = 'string') {
   const isNumber = /^-?\d*\.?\d+$/.test(amount);
@@ -151,7 +151,7 @@ export function rounded(amount, decimalCount = 2, type = 'string') {
  * @param {string} [currency="PEN"] - El código de moneda (por ejemplo, "PEN" para soles peruanos).
  * @returns {string} La cantidad formateada como dinero en la moneda especificada.
  */
-export const numberFormat = (value, currency = 'PEN') => {
+export const formatCurrency = (value, currency = 'PEN') => {
   // Definir formatos para diferentes monedas
   const formats = [
     {
@@ -200,6 +200,7 @@ export const numberFormat = (value, currency = 'PEN') => {
     return 'MN ' + formatDecimal(value);
   }
 };
+
 /**
  * Formatea un número agregando ceros delante hasta alcanzar una longitud específica.
  *

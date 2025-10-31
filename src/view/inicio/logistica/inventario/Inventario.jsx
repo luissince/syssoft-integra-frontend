@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import {
   rounded,
-  numberFormat,
+  formatCurrency,
   isEmpty,
   getNumber,
 } from '../../../../helper/utils.helper';
@@ -775,7 +775,7 @@ class Inventario extends CustomComponent {
                               </td>
                               <td className="px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900">
-                                  {numberFormat(item.costo, this.state.codIso)}
+                                  {formatCurrency(item.costo, this.state.codIso)}
                                 </div>
                               </td>
                               <td className="px-6 py-4">
@@ -991,7 +991,7 @@ class Inventario extends CustomComponent {
                           </div>
 
                           <div className="text-base font-bold text-gray-900 mb-3">
-                            {numberFormat(item.costo, this.state.codIso)}
+                            {formatCurrency(item.costo, this.state.codIso)}
                           </div>
 
                           {tieneLotes && (
