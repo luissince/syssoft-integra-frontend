@@ -9,7 +9,7 @@ import {
   alertWarning,
   getNumber,
   isNumeric,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../../helper/utils.helper';
 
 /**
@@ -111,30 +111,30 @@ class ModalProceso extends React.Component {
             <Row>
               <Column formGroup={true}>
                 <p className="text-left m-1">
-                  Pago Total: {numberFormat(this.state.pago, this.props.codiso)}
+                  Pago Total: {formatCurrency(this.state.pago, this.props.codiso)}
                 </p>
                 <p className="text-left text-success  m-1">
                   Monto Pagado:{' '}
-                  {numberFormat(this.state.pagado, this.props.codiso)}
+                  {formatCurrency(this.state.pagado, this.props.codiso)}
                 </p>
               </Column>
 
               <Column formGroup={true}>
                 <p className="text-left text-secondary  m-1">
                   Monto por Pagar:{' '}
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.pago - this.state.pagado,
                     this.props.codiso,
                   )}
                 </p>
                 <p className="text-left text-secondary  m-1">
                   Monto a Pagar:{' '}
-                  {numberFormat(getNumber(this.state.monto), this.props.codiso)}
+                  {formatCurrency(getNumber(this.state.monto), this.props.codiso)}
                 </p>
                 <hr className="m-1" />
                 <p className="text-left text-danger  m-1">
                   Saldo Restante:{' '}
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.pago -
                       this.state.pagado -
                       getNumber(this.state.monto),

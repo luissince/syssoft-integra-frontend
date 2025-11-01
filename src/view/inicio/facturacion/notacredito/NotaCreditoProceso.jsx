@@ -2,7 +2,7 @@ import React from 'react';
 // import axios from 'axios';
 import {
   spinnerLoading,
-  numberFormat,
+  formatCurrency,
   currentDate,
   calculateTaxBruto,
   calculateTax,
@@ -247,20 +247,20 @@ class NotaCreditoProceso extends React.Component {
         <tr>
           <td className="text-right">Sub Total:</td>
           <td className="text-right">
-            {numberFormat(subTotal, this.state.cabecera.codiso)}
+            {formatCurrency(subTotal, this.state.cabecera.codiso)}
           </td>
         </tr>
         <tr>
           <td className="text-right">Impuesto:</td>
           <td className="text-right">
-            {numberFormat(impuestoTotal, this.state.cabecera.codiso)}
+            {formatCurrency(impuestoTotal, this.state.cabecera.codiso)}
           </td>
         </tr>
         <tr className="border-bottom"></tr>
         <tr>
           <td className="text-right h5">Total:</td>
           <td className="text-right h5">
-            {numberFormat(total, this.state.cabecera.codiso)}
+            {formatCurrency(total, this.state.cabecera.codiso)}
           </td>
         </tr>
       </>
@@ -490,13 +490,13 @@ class NotaCreditoProceso extends React.Component {
                         <td>{item.medida}</td>
                         <td>{item.cantidad}</td>
                         <td>
-                          {numberFormat(
+                          {formatCurrency(
                             item.precio,
                             this.state.cabecera.codiso,
                           )}
                         </td>
                         <td>
-                          {numberFormat(
+                          {formatCurrency(
                             item.cantidad * item.precio,
                             this.state.cabecera.codiso,
                           )}

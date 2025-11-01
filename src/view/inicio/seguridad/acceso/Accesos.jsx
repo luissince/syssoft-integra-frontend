@@ -8,8 +8,8 @@ import {
   alertSuccess,
   alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper.jsx';
-import ContainerWrapper from '../../../../components/Container.jsx';
+} from '../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../components/Container';
 import {
   comboPerfil,
   findOneAcceso,
@@ -20,13 +20,13 @@ import SuccessReponse from '../../../../model/class/response.js';
 import ErrorResponse from '../../../../model/class/error-response.js';
 import { CANCELED } from '../../../../model/types/types.js';
 import CustomComponent from '../../../../model/class/custom-component.js';
-import { SpinnerView } from '../../../../components/Spinner.jsx';
-import Row from '../../../../components/Row.jsx';
-import Column from '../../../../components/Column.jsx';
-import Button from '../../../../components/Button.jsx';
-import Select from '../../../../components/Select.jsx';
-import Title from '../../../../components/Title.jsx';
-import CheckBox from '../../../../components/Checks.jsx';
+import { SpinnerView } from '../../../../components/Spinner';
+import Row from '../../../../components/Row';
+import Column from '../../../../components/Column';
+import Button from '../../../../components/Button';
+import Select from '../../../../components/Select';
+import Title from '../../../../components/Title';
+import CheckBox from '../../../../components/Checks';
 
 /**
  * Componente que representa una funcionalidad específica.

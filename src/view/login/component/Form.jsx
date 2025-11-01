@@ -39,7 +39,7 @@ const Form = (props) => {
               width="160"
             />
 
-            <p>Ingrese su usuario y contraseña para iniciar sesión</p>
+            <p className="text-center">Ingrese su usuario y contraseña para iniciar sesión</p>
 
             {message !== '' && (
               <div

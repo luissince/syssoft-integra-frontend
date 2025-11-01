@@ -226,12 +226,12 @@ class Login extends CustomComponent {
 
     return (
       <div
-        className="h-full overflow-auto bg-accent"
+        className="h-full bg-accent"
       >
         <div className="container h-full">
-          <div className="row h-full flex justify-center items-center py-4">
+          <div className="h-full flex justify-center items-center py-4">
             <Title />
-
+           
             <Form
               loading={this.state.loading}
               message={this.state.message}
@@ -244,7 +244,7 @@ class Login extends CustomComponent {
               lookPassword={this.state.lookPassword}
               handleViewPassword={this.handleViewPassword}
               handleSendForm={this.handleSendForm}
-            />
+            /> 
           </div>
         </div>
       </div>

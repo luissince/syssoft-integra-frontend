@@ -5,7 +5,7 @@ import {
   formatTime,
   formatNumberWithZeros,
   isEmpty,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
@@ -369,7 +369,7 @@ class Compras extends CustomComponent {
           <TableCell>{item.tipo}</TableCell>
           <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-right">
-            {numberFormat(item.total, item.codiso)}{' '}
+            {formatCurrency(item.total, item.codiso)}{' '}
           </TableCell>
           <TableCell className="text-center">
             <Button

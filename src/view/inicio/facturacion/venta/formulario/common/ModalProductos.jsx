@@ -3,7 +3,7 @@ import Paginacion from '../../../../../../components/Paginacion';
 import {
   getRowCellIndex,
   isEmpty,
-  numberFormat,
+  formatCurrency,
   rounded,
 } from '../../../../../../helper/utils.helper';
 import Image from '../../../../../../components/Image';
@@ -392,7 +392,7 @@ class ModalProductos extends CustomComponent {
             )}
           </TableCell>
           <TableCell className="text-right">
-            {numberFormat(item.precio, this.props.codiso)}
+            {formatCurrency(item.precio, this.props.codiso)}
           </TableCell>
           <TableCell>{item.medida}</TableCell>
           <TableCell>{item.categoria}</TableCell>

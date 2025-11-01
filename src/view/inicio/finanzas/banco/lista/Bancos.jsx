@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import {
-  numberFormat,
+  formatCurrency,
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -355,7 +355,7 @@ class Bancos extends CustomComponent {
           <TableCell
             className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}
           >
-            {numberFormat(item.saldo, item.codiso)}
+            {formatCurrency(item.saldo, item.codiso)}
           </TableCell>
           <TableCell className="text-center">
             <Button

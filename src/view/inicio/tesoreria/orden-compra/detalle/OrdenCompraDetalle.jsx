@@ -7,7 +7,7 @@ import {
   formatNumberWithZeros,
   formatTime,
   isText,
-  numberFormat,
+  formatCurrency,
   rounded,
 } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
@@ -303,7 +303,7 @@ class OrdenCompraDetalle extends CustomComponent {
               {impuesto.nombre} :
             </TableHead>
             <TableHead className="text-right mb-2">
-              {numberFormat(impuesto.valor, this.state.codiso)}
+              {formatCurrency(impuesto.valor, this.state.codiso)}
             </TableHead>
           </TableRow>
         );
@@ -314,7 +314,7 @@ class OrdenCompraDetalle extends CustomComponent {
         <TableRow>
           <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
           <TableHead className="text-right mb-2">
-            {numberFormat(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, this.state.codiso)}
           </TableHead>
         </TableRow>
         {impuestosGenerado()}
@@ -322,7 +322,7 @@ class OrdenCompraDetalle extends CustomComponent {
         <TableRow>
           <TableHead className="text-right h5">TOTAL :</TableHead>
           <TableHead className="text-right h5">
-            {numberFormat(total, this.state.codiso)}
+            {formatCurrency(total, this.state.codiso)}
           </TableHead>
         </TableRow>
       </>
@@ -485,7 +485,7 @@ class OrdenCompraDetalle extends CustomComponent {
                       Total
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {numberFormat(this.state.total, this.state.codiso)}
+                      {formatCurrency(this.state.total, this.state.codiso)}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -530,7 +530,7 @@ class OrdenCompraDetalle extends CustomComponent {
                         {item.producto}
                       </TableCell>
                       <TableCell className="text-right">
-                        {numberFormat(item.costo, this.state.codiso)}
+                        {formatCurrency(item.costo, this.state.codiso)}
                       </TableCell>
 
                       <TableCell>{item.categoria}</TableCell>
@@ -542,7 +542,7 @@ class OrdenCompraDetalle extends CustomComponent {
                       </TableCell>
                       <TableCell>{item.medida}</TableCell>
                       <TableCell className="text-right">
-                        {numberFormat(
+                        {formatCurrency(
                           item.cantidad * item.costo,
                           this.state.codiso,
                         )}

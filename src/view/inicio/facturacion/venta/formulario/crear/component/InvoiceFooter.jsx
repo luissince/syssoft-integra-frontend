@@ -1,7 +1,7 @@
 import {
   calculateTax,
   calculateTaxBruto,
-  numberFormat,
+  formatCurrency,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { SERVICIO } from '../../../../../../../model/types/tipo-tratamiento-producto';
@@ -73,10 +73,10 @@ const InvoiceFooter = (props) => {
       return (
         <div
           key={index}
-          className="d-flex align-items-center justify-content-between py-2"
+          className="flex items-center justify-between py-2"
         >
           <div>{impuesto.nombre}:</div>
-          <div>{numberFormat(impuesto.valor, codiso)}</div>
+          <div>{formatCurrency(impuesto.valor, codiso)}</div>
         </div>
       );
     });
@@ -93,11 +93,11 @@ const InvoiceFooter = (props) => {
   }, 0);
 
   return (
-    <div className="invoice-detail">
-      <div className="sub-total-content px-3 mb-2">
-        <div className="d-flex align-items-center justify-content-between py-2">
-          <div>Sub Total:</div>
-          <div>{numberFormat(subTotal, codiso)}</div>
+    <div className="border-t border-solid border-[#cbd5e1]">
+      <div className="px-3 mb-2 text-sm text-gray-500">
+        <div className="flex items-center justify-between py-2">
+          <p>Sub Total:</p>
+          <p>{formatCurrency(subTotal, codiso)}</p>
         </div>
         {impuestosTotal()}
       </div>
@@ -105,16 +105,16 @@ const InvoiceFooter = (props) => {
         <div>
           <div>
             <Button
-              className="btn-success btn-lg w-100 d-flex align-items-center justify-content-between"
+              className="btn-success btn-lg w-full !flex items-center justify-between"
               onClick={handleOpenSale}
             >
               <div>Cobrar (F1)</div>
-              <div>{numberFormat(total, codiso)}</div>
+              <div>{formatCurrency(total, codiso)}</div>
             </Button>
           </div>
           <div>
             <Button
-              className="btn-link w-100 d-flex align-items-center justify-content-between px-0"
+              className="btn-link w-full !flex items-center justify-between px-0"
               onClick={handleClearSale}
             >
               <div className="text-dark">{totalQuantity}</div>

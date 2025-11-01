@@ -8,7 +8,7 @@ import {
   getRowCellIndex,
   isEmpty,
   keyNumberPhone,
-  numberFormat,
+  formatCurrency,
   readDataFile,
   rounded,
   text,
@@ -756,7 +756,7 @@ class VentaCrearEscritorio extends CustomComponent {
           >
             <span className="text-sm">{impuesto.nombre}:</span>
             <span className="text-sm text-right">
-              {numberFormat(impuesto.valor, codiso)}
+              {formatCurrency(impuesto.valor, codiso)}
             </span>
           </div>
         );
@@ -785,7 +785,7 @@ class VentaCrearEscritorio extends CustomComponent {
           <div className="d-flex justify-content-between">
             <span className="text-sm">Sub Total:</span>
             <span className="text-sm text-right">
-              {numberFormat(subTotal, codiso)}
+              {formatCurrency(subTotal, codiso)}
             </span>
           </div>
 
@@ -794,7 +794,7 @@ class VentaCrearEscritorio extends CustomComponent {
           <div className="d-flex justify-content-between">
             <span className="text-base">Total:</span>
             <span className="text-base text-right">
-              {numberFormat(total, codiso)}
+              {formatCurrency(total, codiso)}
             </span>
           </div>
         </div>
@@ -2326,11 +2326,11 @@ class VentaCrearEscritorio extends CustomComponent {
             {producto.nombreProducto}
           </TableCell>
           <TableCell className="text-center">
-            {numberFormat(producto.precio, codiso)}
+            {formatCurrency(producto.precio, codiso)}
           </TableCell>
           {/* <td className='text-center'>0%</td> */}
           <TableCell className="text-center">
-            {numberFormat(producto.precio * cantidad, codiso)}
+            {formatCurrency(producto.precio * cantidad, codiso)}
           </TableCell>
         </TableRow>
       );
@@ -2606,7 +2606,7 @@ class VentaCrearEscritorio extends CustomComponent {
                 >
                   <div>Cobrar (F1)</div>
                   <div>
-                    {numberFormat(this.state.importeTotal, this.state.codiso)}
+                    {formatCurrency(this.state.importeTotal, this.state.codiso)}
                   </div>
                 </Button>
               </div>

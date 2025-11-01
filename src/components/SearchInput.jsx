@@ -282,7 +282,7 @@ class SearchInput extends React.Component {
         className={`${
           classNameContainer
             ? classNameContainer
-            : 'form-group position-relative'
+            : 'mb-3 relative'
         }`}
       >
         <Input

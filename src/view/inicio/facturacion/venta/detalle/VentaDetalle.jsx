@@ -1,6 +1,6 @@
 import {
   rounded,
-  numberFormat,
+  formatCurrency,
   calculateTaxBruto,
   calculateTax,
   formatTime,
@@ -363,10 +363,10 @@ class VentaDetalle extends CustomComponent {
         <td className="p-4 text-gray-700 text-right">{rounded(item.cantidad)}</td>
         <td className="p-4 text-gray-700 text-right">{item.impuesto}</td>
         <td className="p-4 text-gray-700 text-right">
-          {numberFormat(item.precio, this.state.codiso)}
+          {formatCurrency(item.precio, this.state.codiso)}
         </td>
         <td className="p-4 text-gray-900 font-medium text-right">
-          {numberFormat(item.cantidad * item.precio, this.state.codiso)}
+          {formatCurrency(item.cantidad * item.precio, this.state.codiso)}
         </td>
       </tr>
     ));
@@ -417,7 +417,7 @@ class VentaDetalle extends CustomComponent {
         <tr key={index}>
           <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
           <td className="p-2 text-gray-900 font-medium text-right">
-            {numberFormat(impuesto.valor, this.state.codiso)}
+            {formatCurrency(impuesto.valor, this.state.codiso)}
           </td>
         </tr>
       ));
@@ -428,7 +428,7 @@ class VentaDetalle extends CustomComponent {
         <tr>
           <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
           <td className="p-2 text-gray-900 font-medium text-right">
-            {numberFormat(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, this.state.codiso)}
           </td>
         </tr>
         {impuestosGenerado()}
@@ -440,7 +440,7 @@ class VentaDetalle extends CustomComponent {
         <tr>
           <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
           <td className="p-2 text-gray-900 font-bold text-right text-lg">
-            {numberFormat(total, this.state.codiso)}
+            {formatCurrency(total, this.state.codiso)}
           </td>
         </tr>
       </>
@@ -485,7 +485,7 @@ class VentaDetalle extends CustomComponent {
             <td className="p-3 text-center text-gray-600">{idx + 1}</td>
             <td className="p-3 text-gray-700">{detalle.nombre}</td>
             <td className="p-3 text-gray-900 font-medium">
-              {numberFormat(detalle.monto, this.state.codiso)}
+              {formatCurrency(detalle.monto, this.state.codiso)}
             </td>
             <td colSpan={2} className="p-3 text-gray-700">
               {detalle.observacion}
@@ -588,7 +588,7 @@ class VentaDetalle extends CustomComponent {
               { label: 'Forma de Pago', value: this.state.formaPago },
               { label: 'Estado', value: this.state.estado },
               { label: 'Usuario', value: this.state.usuario },
-              { label: 'Total', value: numberFormat(this.state.total, this.state.codiso) },
+              { label: 'Total', value: formatCurrency(this.state.total, this.state.codiso) },
             ].map((item, i) => (
               <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
                 <div className="font-medium text-gray-600">{item.label}</div>

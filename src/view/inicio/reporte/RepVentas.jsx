@@ -56,7 +56,7 @@ import {
   getPathNavigation,
   guId,
   isEmpty,
-  numberFormat,
+  formatCurrency,
 } from '../../../helper/utils.helper';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import React from 'react';
@@ -360,7 +360,7 @@ class RepVentas extends CustomComponent {
           </TableCell>
           <TableCell>{item.tipo}</TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell>{numberFormat(item.total, item.codiso)} </TableCell>
+          <TableCell>{formatCurrency(item.total, item.codiso)} </TableCell>
         </TableRow>
       );
     });
@@ -488,7 +488,7 @@ class RepVentas extends CustomComponent {
               <CardBody>
                 <CardTitle>Ventas Totales</CardTitle>
                 <CardText className={'text-success'}>
-                  {numberFormat(this.state.totalVenta, this.state.codIso)}
+                  {formatCurrency(this.state.totalVenta, this.state.codIso)}
                 </CardText>
               </CardBody>
             </Card>
@@ -502,17 +502,17 @@ class RepVentas extends CustomComponent {
               <CardBody>
                 <CardTitle>Al Contado</CardTitle>
                 <CardText className={'text-primary'}>
-                  {numberFormat(this.state.totalContado, this.state.codIso)}
+                  {formatCurrency(this.state.totalContado, this.state.codIso)}
                 </CardText>
                 <p className="text-sm">
                   <Plus className="text-green-500 mr-1" width={16} />
                   Agregado{' '}
-                  {numberFormat(this.state.totalCobrado, this.state.codIso)}
+                  {formatCurrency(this.state.totalCobrado, this.state.codIso)}
                 </p>
                 <p className="text-sm">
                   <EqualIcon className="text-green-500 mr-1" width={16} />
                   Total{' '}
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.totalContado + this.state.totalCobrado,
                     this.state.codIso,
                   )}
@@ -529,17 +529,17 @@ class RepVentas extends CustomComponent {
               <CardBody>
                 <CardTitle>Al Crédito</CardTitle>
                 <CardText className={'text-warning'}>
-                  {numberFormat(this.state.totalCredito, this.state.codIso)}
+                  {formatCurrency(this.state.totalCredito, this.state.codIso)}
                 </CardText>
                 <p className="text-sm">
                   <Minus className="text-green-500 mr-1" width={16} />
                   Cobrado{' '}
-                  {numberFormat(this.state.totalCobrado, this.state.codIso)}
+                  {formatCurrency(this.state.totalCobrado, this.state.codIso)}
                 </p>
                 <p className="text-sm">
                   <EqualIcon className="text-green-500 mr-1" width={16} />
                   Restante{' '}
-                  {numberFormat(
+                  {formatCurrency(
                     this.state.totalCredito - this.state.totalCobrado,
                     this.state.codIso,
                   )}
@@ -556,7 +556,7 @@ class RepVentas extends CustomComponent {
               <CardBody>
                 <CardTitle>Anuladas</CardTitle>
                 <CardText className={'text-danger'}>
-                  {numberFormat(this.state.totalAnulado, this.state.codIso)}
+                  {formatCurrency(this.state.totalAnulado, this.state.codIso)}
                 </CardText>
               </CardBody>
             </Card>

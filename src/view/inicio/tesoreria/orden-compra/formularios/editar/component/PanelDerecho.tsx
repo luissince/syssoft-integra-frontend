@@ -4,7 +4,7 @@ import SearchInput from "@/components/SearchInput";
 import Select from "@/components/Select";
 import { HeaderActions } from "@/components/Title";
 import { images } from "@/helper";
-import { calculateTax, calculateTaxBruto, isEmpty, formatCurrency, rounded } from "@/helper/utils.helper";
+import { calculateTax, calculateTaxBruto, isEmpty, formatCurrency } from "@/helper/utils.helper";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
   refComprobante: React.RefObject<any>;
   idComprobante: string;
   handleSelectComprobante: () => void;
-  handleOpenOrdenCompra: () => void;
 
   proveedores: Array<any>;
   refProveedor: React.RefObject<any>;
@@ -22,16 +21,10 @@ interface Props {
   handleClearInputProveedor: () => void;
   handleSelectItemProveedor: () => void;
 
-  almacenes: Array<any>;
-  refAlmacenDestino: React.RefObject<any>;
-  idAlmacenDestino: string;
-  handleSelectAlmacenDestino: () => void;
-
   detalles: Array<any>;
   codiso: string;
 
   handleGuardar: () => void;
-  handleLimpiar: () => void;
   handleOpenOptions: () => void;
   handleOpenModalProducto: (item: any, tipo: string) => void;
   handleRemoverProducto: (idProducto: string) => void;
@@ -42,7 +35,7 @@ const PanelDerecho: React.FC<Props> = ({
   refComprobante,
   idComprobante,
   handleSelectComprobante,
-  handleOpenOrdenCompra,
+
   proveedores,
   refProveedor,
   refProveedorValue,
@@ -50,14 +43,10 @@ const PanelDerecho: React.FC<Props> = ({
   handleOpenModalProveedor,
   handleClearInputProveedor,
   handleSelectItemProveedor,
-  almacenes,
-  refAlmacenDestino,
-  idAlmacenDestino,
-  handleSelectAlmacenDestino,
+
   detalles,
   codiso,
   handleGuardar,
-  handleLimpiar,
   handleOpenOptions,
   handleOpenModalProducto,
   handleRemoverProducto,
@@ -161,16 +150,6 @@ const PanelDerecho: React.FC<Props> = ({
         title="Resumen"
         actions={[
           {
-            icon: <i className="bi bi-file-earmark-text text-xl text-secondary"></i>,
-            onClick: handleOpenOrdenCompra,
-            title: "Orden de compra",
-          },
-          {
-            icon: <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>,
-            onClick: handleLimpiar,
-            title: "Limpiar",
-          },
-          {
             icon: <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>,
             onClick: handleOpenOptions,
             title: "Opciones",
@@ -215,19 +194,6 @@ const PanelDerecho: React.FC<Props> = ({
             <>{value.documento + ' - ' + value.informacion}</>
           )}
         />
-
-        <Select
-          ref={refAlmacenDestino}
-          value={idAlmacenDestino}
-          onChange={handleSelectAlmacenDestino}
-        >
-          <option value="">-- Almacen de destino --</option>
-          {almacenes.map((item, index) => (
-            <option key={index} value={item.idAlmacen}>
-              {item.nombre}
-            </option>
-          ))}
-        </Select>
       </div>
 
       {/* Detalles */}

@@ -151,7 +151,7 @@ export const CustomModalForm = ({
       shouldCloseOnEsc={isCloseOnEsc}
     >
       <form
-        className="d-flex flex-column h-100"
+        className="!flex flex-col h-full"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
@@ -180,7 +180,7 @@ export const CustomModalForm = ({
           className={`header-cm ${!showClose ? 'py-3' : ''}`}
           onMouseDown={(event) => contentRef.current.handleMouseDown(event)}
         >
-          <p className="m-0 h6">{titleHeader}</p>
+          <p className="h6">{titleHeader}</p>
           {showClose && (
             <Button
               contentClassName="close"
@@ -229,7 +229,7 @@ export const CustomModalContentForm = (props) => {
 
   return (
     <form
-      className={`d-flex flex-column h-100 ${className}`}
+      className={`!flex flex-col h-full ${className}`}
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
@@ -269,7 +269,7 @@ export const CustomModalContentScroll = (props) => {
   const { className = '', children } = props;
 
   return (
-    <div className={`d-flex flex-column h-100 ${className}`}>{children}</div>
+    <div className={`flex flex-col h-full ${className}`}>{children}</div>
   );
 };
 
@@ -359,10 +359,10 @@ export const CustomModalContentOverflow = (props) => {
   const { className = '', children } = props;
 
   return (
-    <div className={`d-flex w-100 h-100 ${className}`}>
-      <div className="d-flex flex-column" style={{ flex: '1 1 0%' }}>
-        <div className="h-100 overflow-auto">
-          <div className="h-100">{children}</div>
+    <div className={`flex w-full h-full ${className}`}>
+      <div className="flex flex-col" style={{ flex: '1 1 0%' }}>
+        <div className="h-full overflow-auto">
+          <div className="h-full">{children}</div>
         </div>
       </div>
     </div>
