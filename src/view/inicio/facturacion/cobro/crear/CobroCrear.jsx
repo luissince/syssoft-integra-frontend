@@ -6,7 +6,7 @@ import {
   isText,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '../../../../../components/ui/container-wrapper';
 import {
   createCobro,
   filtrarPersona,
@@ -31,9 +31,9 @@ import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
-import printJS from 'print-js';
+import { alertKit } from 'alert-kit';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -87,8 +87,6 @@ class CobroCrear extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Filtrar concepto
     this.refConcepto = React.createRef();
@@ -365,37 +363,42 @@ class CobroCrear extends CustomComponent {
     const { concepto, idComprobante, monto, cliente, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Ingreso', 'Seleccione su concepto.', () =>
-        this.refValueConcepto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione su concepto.",
+      }, () => this.refValueConcepto.current.focus());
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Ingreso', 'Ingrese el monto.', () =>
-        this.refMonto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Ingrese el monto.",
+      }, () => this.refMonto.current.focus());
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Ingreso', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione su comprobante.",
+      }, () => this.refComprobante.current.focus());
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Ingreso', 'Seleccione un cliente.', () =>
-        this.refValueCliente.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione un cliente.",
+      }, () => this.refValueCliente.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Ingreso', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione su moneda.",
+      }, () => this.refMoneda.current.focus());
       return;
     }
 
@@ -403,15 +406,20 @@ class CobroCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Ingreso',
-      '¿Está seguro de limpiar el Ingreso?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+    const accept = await alertKit.question({
+      title: "Ingreso",
+      message: "¿Está seguro de limpiar el Ingreso?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   handleCerrar = () => {
@@ -426,11 +434,11 @@ class CobroCrear extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       cliente,
@@ -444,45 +452,55 @@ class CobroCrear extends CustomComponent {
       monto,
     } = this.state;
 
-    this.alert.dialog(
-      'Ingreso',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idPersona: cliente.idPersona,
-            idUsuario: idUsuario,
-            idMoneda: idMoneda,
-            idSucursal: idSucursal,
-            idComprobante: idComprobante,
-            idConcepto: concepto.idConcepto,
-            monto: monto,
-            estado: 1,
-            observacion,
-            nota,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
-
-          await callback();
-          this.alert.information('Ingreso', 'Procesando información...');
-
-          const response = await createCobro(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idCobro);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Ingreso', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: "Ingreso",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idPersona: cliente.idPersona,
+        idUsuario: idUsuario,
+        idMoneda: idMoneda,
+        idSucursal: idSucursal,
+        idComprobante: idComprobante,
+        idConcepto: concepto.idConcepto,
+        monto: monto,
+        estado: 1,
+        observacion,
+        nota,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback();
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await createCobro(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idCobro);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Ingreso',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {
@@ -501,7 +519,7 @@ class CobroCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesCobro(this.state.idCobro, size),
       type: 'pdf',
       showModal: true,
@@ -542,14 +560,14 @@ class CobroCrear extends CustomComponent {
           title={'Completar Ingreso'}
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
-          disabledCreditoFijo={true}
+          disabledCredito={true}
           codiso={this.state.codiso}
           importeTotal={
             isNumeric(this.state.monto) ? Number(this.state.monto) : 0
           }
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={null}
         />
 
         <ModalImpresion

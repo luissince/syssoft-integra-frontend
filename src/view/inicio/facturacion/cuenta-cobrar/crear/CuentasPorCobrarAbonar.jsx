@@ -21,9 +21,8 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import {
   CONTADO,
-  CREDITO_FIJO,
-  CREDITO_VARIABLE,
-} from '../../../../../model/types/forma-pago';
+  CREDITO
+} from '../../../../../model/types/forma-transaccion';
 import React from 'react';
 import ModalProceso from './component/ModalProceso';
 import printJS from 'print-js';
@@ -217,12 +216,8 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
     const tipo =
       idFormaPago === CONTADO
-        ? 'CONTADO'
-        : idFormaPago === CREDITO_FIJO
-          ? 'CREDITO FIJO'
-          : idFormaPago === CREDITO_VARIABLE
-            ? 'CRÉDITO VARIABLE'
-            : 'PAGO ADELTANDO';
+        ? "CONTADO" 
+        : "CREDITO"
 
     this.setState({
       idVenta: id,

@@ -45,7 +45,7 @@ import {
   UNIDADES,
   VALOR_MONETARIO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
-import { CONTADO } from '../../../../../../model/types/forma-pago';
+import { CONTADO } from '../../../../../../model/types/forma-transaccion';
 import ModalProdcutos from '../common/ModalProductos';
 import {
   getDni,
@@ -91,6 +91,7 @@ import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { cn } from '@/lib/utils';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -191,8 +192,6 @@ class VentaCrearEscritorio extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Referencia al modal impresión
     this.refModalImpresion = React.createRef();
@@ -855,7 +854,10 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleAddItem = async (producto) => {
     if (producto.precio <= 0) {
-      this.alert.warning('Venta', '¡El precio no puede tener un valor de 0!');
+      alertKit.warning({
+        title: "Venta",
+        message: "¡El precio no puede tener un valor de 0!",
+      });
       return;
     }
 
@@ -959,28 +961,40 @@ class VentaCrearEscritorio extends CustomComponent {
     );
 
     if (isEmpty(this.state.detalleVenta)) {
-      this.alert.warning('Venta', 'La lista de productos esta vacía.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "La lista de productos esta vacía.",
+      }, () => {
         this.redCodigoBarras.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idComprobante)) {
-      this.alert.warning('Venta', 'Seleccione un comprobante.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione un comprobante.",
+      }, () => {
         this.refComprobante.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      this.alert.warning('Venta', 'Seleccione el tipo de documento.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
+      }, () => {
         this.refIdTipoDocumento.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.numeroDocumento)) {
-      this.alert.warning('Venta', 'Ingrese el número de documento.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Ingrese el número de documento.",
+      }, () => {
         this.refNumeroDocumento.current.focus();
       });
       return;
@@ -991,18 +1005,21 @@ class VentaCrearEscritorio extends CustomComponent {
       tipoDocumento.obligado === 1 &&
       tipoDocumento.longitud !== this.state.numeroDocumento.length
     ) {
-      this.alert.warning(
-        'Venta',
-        `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+
+      alertKit.warning({
+        title: "Venta",
+        message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      this.alert.warning('Venta', 'Ingrese los datos del cliente.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Ingrese los datos del cliente.",
+      }, () => {
         this.refInformacion.current.focus();
       });
       return;
@@ -1023,15 +1040,16 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   handleClearSale = async () => {
-    this.alert.dialog(
-      'Venta',
-      'Los productos serán eliminados de la venta actual ¿Desea continuar?',
-      async (accept) => {
-        if (accept) {
-          this.clearView();
-        }
-      },
-    );
+    const accept = await alertKit.question({
+      title: "Venta",
+      message: "Los productos serán eliminados de la venta actual ¿Desea continuar?",
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    })
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   handleSelectComprobante = (event) => {
@@ -1057,7 +1075,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
@@ -1077,82 +1095,92 @@ class VentaCrearEscritorio extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    this.alert.dialog(
-      'Venta',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idComprobante: idComprobante,
-            idMoneda: idMoneda,
-            idImpuesto: idImpuesto,
-            idCliente: cliente.idPersona,
-            idSucursal: idSucursal,
-            observacion: observacion,
-            nota: nota,
-            idUsuario: idUsuario,
-            estado: 1,
-            nuevoCliente: nuevoCliente,
-            idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
-            detalleVenta: detalleVenta,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
+    const accept = await alertKit.question({
+      title: 'Compra',
+      message: '¿Está seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
-          await callback();
-          this.alert.information('Venta', 'Procesando venta...');
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idComprobante: idComprobante,
+        idMoneda: idMoneda,
+        idImpuesto: idImpuesto,
+        idCliente: cliente.idPersona,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        nota: nota,
+        idUsuario: idUsuario,
+        estado: 1,
+        nuevoCliente: nuevoCliente,
+        idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
+        detalleVenta: detalleVenta,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
 
-          const response = await createVenta(data);
+      await callback();
+      alertKit.loading({
+        message: "Procesando venta...",
+      });
 
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idVenta);
-          }
+      const response = await createVenta(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getBody() !== '') {
-              const body = response.getBody().map(
-                (item) =>
-                  `<tr>
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idVenta);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (!isEmpty(response.getBody())) {
+          const body = response.getBody().map(
+            (item) =>
+              `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+                item.cantidadActual - item.cantidadReal,
+              )}</td>
                 </tr>`,
-              );
+          );
 
-              this.alert.html(
-                'Venta',
-                `<div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`,
-              );
-            } else {
-              this.alert.warning('Venta', response.getMessage());
-            }
-          }
+          const html = `
+            <div class="flex flex-col items-center">
+                <h5>Productos con cantidades faltantes</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad a Vender</th>
+                            <th>Cantidad de Inventario</th>
+                            <th>Cantidad Faltante</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    ${body}
+                    </tbody>
+                </table>
+            </div>
+              `;
+
+          alertKit.html({
+            title: "Venta",
+            bodyInnerHTML: html,
+          });
+        } else {
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          })
         }
-      },
-    );
+      }
+    }
   };
 
-  handleProcessCredito = (
+  handleProcessCredito = async (
     idFormaPago,
     numeroCuotas,
     frecuenciaPago,
@@ -1174,58 +1202,62 @@ class VentaCrearEscritorio extends CustomComponent {
       detalleVenta,
     } = this.state;
 
-    this.alert.dialog(
-      'Venta',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idComprobante: idComprobante,
-            idMoneda: idMoneda,
-            idImpuesto: idImpuesto,
-            idCliente: cliente.idPersona,
-            idSucursal: idSucursal,
-            observacion: observacion,
-            nota: nota,
-            idUsuario: idUsuario,
-            estado: 2,
-            nuevoCliente: nuevoCliente,
-            idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
-            detalleVenta: detalleVenta,
-            numeroCuotas: numeroCuotas,
-            frecuenciaPago: frecuenciaPago,
-            notaTransacion,
-            importeTotal: importeTotal,
-          };
+    const accept = await alertKit.question({
+      title: "Venta",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
-          await callback();
-          this.alert.information('Venta', 'Procesando venta...');
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idComprobante: idComprobante,
+        idMoneda: idMoneda,
+        idImpuesto: idImpuesto,
+        idCliente: cliente.idPersona,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        nota: nota,
+        idUsuario: idUsuario,
+        estado: 2,
+        nuevoCliente: nuevoCliente,
+        idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
+        detalleVenta: detalleVenta,
+        numeroCuotas: numeroCuotas,
+        frecuenciaPago: frecuenciaPago,
+        notaTransacion,
+        importeTotal: importeTotal,
+      };
 
-          const response = await createVenta(data);
+      await callback();
 
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idVenta);
-          }
+      alertKit.loading({
+        message: "Procesando venta...",
+      });
 
-          if (response instanceof ErrorResponse) {
-            if (response.getBody() !== '') {
-              const body = response.getBody().map(
-                (item) =>
-                  `<tr>
+      const response = await createVenta(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idVenta);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (!isEmpty(response.getBody())) {
+          const body = response.getBody().map(
+            (item) =>
+              `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+                item.cantidadActual - item.cantidadReal,
+              )}</td>
                 </tr>`,
-              );
+          );
 
-              this.alert.html(
-                'Venta',
-                `<div class="d-flex flex-column align-items-center">
+          const html = `<div class="d-flex flex-column align-items-center">
                     <h5>Productos con cantidades faltantes</h5>
                     <table class="table">
                         <thead>
@@ -1240,15 +1272,21 @@ class VentaCrearEscritorio extends CustomComponent {
                         ${body}
                         </tbody>
                     </table>
-                </div>`,
-              );
-            } else {
-              this.alert.warning('Venta', response.getMessage());
-            }
-          }
+                </div>`;
+
+          alertKit.html({
+            title: "Venta",
+            bodyInnerHTML: html,
+          })
+        } else {
+
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          })
         }
-      },
-    );
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {
@@ -1260,7 +1298,10 @@ class VentaCrearEscritorio extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleOpenProductos = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione un impuesto.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione un impuesto.",
+      }, () => {
         this.handleOpenOptions();
         this.refImpuesto.current.focus();
       });
@@ -1268,7 +1309,10 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      this.alert.warning('Venta', 'Seleccione el almacen.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione el almacen.",
+      }, () => {
         this.handleOpenOptions();
         this.refAlmacen.current.focus();
       });
@@ -1336,10 +1380,10 @@ class VentaCrearEscritorio extends CustomComponent {
       producto.precio !== precio &&
       producto.idTipoTratamientoProducto === VALOR_MONETARIO
     ) {
-      this.alert.warning(
-        'Venta',
-        'Los productos a granel no se puede cambia el precio.',
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Los productos a granel no se puede cambia el precio.",
+      })
       return;
     }
 
@@ -1465,13 +1509,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        this.alert.warning(
-          'Venta',
-          'La cotización no tiene productos, ya que fue utilizado para la venta.',
-          () => {
-            this.clearView();
-          },
-        );
+        alertKit.warning({
+          title: "Venta",
+          message: "La cotización no tiene productos, ya que fue utilizado para la venta.",
+        }, () => {
+          this.clearView();
+        })
         return;
       }
 
@@ -1523,7 +1566,11 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning('Venta', response.getMessage());
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      })
     }
   };
 
@@ -1563,13 +1610,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
-        this.alert.warning(
-          'Venta',
-          'El pedido no tiene productos, ya que fue utilizado para la venta.',
-          () => {
-            this.clearView();
-          },
-        );
+        alertKit.warning({
+          title: "Venta",
+          message: "El pedido no tiene productos, ya que fue utilizado para la venta.",
+        }, () => {
+          this.clearView();
+        });
         return;
       }
 
@@ -1618,7 +1664,11 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning('Venta', response.getMessage());
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   };
 
@@ -1701,7 +1751,11 @@ class VentaCrearEscritorio extends CustomComponent {
       this.setState({ loading: false }, () => {
         this.updateReduxState();
       });
-      this.alert.warning('Venta', response.getMessage());
+
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   };
 
@@ -1739,39 +1793,50 @@ class VentaCrearEscritorio extends CustomComponent {
       this.state;
 
     if (isEmpty(idComprobante)) {
-      this.alert.warning('Venta', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione su comprobante.",
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Venta', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione un cliente.",
+      }, () => {
+        // this.refCliente.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      this.alert.warning('Venta', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione su moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione el impuesto",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalleVenta)) {
-      this.alert.warning(
-        'Venta',
-        'Agregar algún producto a la lista.',
-        () => { },
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Agregar algún producto a la lista.",
+      });
       return;
     }
 
@@ -1823,7 +1888,10 @@ class VentaCrearEscritorio extends CustomComponent {
 
       error();
 
-      this.alert.warning('Venta', response.getMessage());
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      });
     }
   };
 
@@ -1867,13 +1935,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleGetApiReniec = async () => {
     if (this.state.numeroDocumento.length !== 8) {
-      this.alert.warning(
-        'Venta',
-        'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Para iniciar la busqueda en número dni debe tener 8 caracteres."
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1920,28 +1987,27 @@ class VentaCrearEscritorio extends CustomComponent {
         return;
       }
 
-      this.alert.warning('Venta', response.getMessage(), () => {
-        this.setState(
-          {
-            loadingCliente: false,
-          },
-          () => {
-            this.updateReduxState();
-          },
-        );
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
+        });
       });
     }
   };
 
   handleGetApiSunat = async () => {
     if (this.state.numeroDocumento.length !== 11) {
-      this.alert.warning(
-        'Venta',
-        'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1958,36 +2024,31 @@ class VentaCrearEscritorio extends CustomComponent {
     );
 
     if (response instanceof SuccessReponse) {
-      this.setState(
-        {
-          numeroDocumento: convertNullText(response.data.ruc),
-          informacion: convertNullText(response.data.razonSocial),
-          direccion: convertNullText(response.data.direccion),
-          loadingCliente: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        numeroDocumento: convertNullText(response.data.ruc),
+        informacion: convertNullText(response.data.razonSocial),
+        direccion: convertNullText(response.data.direccion),
+        loadingCliente: false,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) {
-        this.setState({
-          loadingCliente: false,
-        });
+        this.setState({ loadingCliente: false });
         return;
       }
 
-      this.alert.warning('Venta', response.getMessage(), () => {
-        this.setState(
-          {
-            loadingCliente: false,
-          },
-          () => {
-            this.updateReduxState();
-          },
-        );
+      alertKit.warning({
+        title: "Venta",
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
+        });
       });
     }
   };
@@ -2125,23 +2186,32 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione un impuesto.",
+      }, () => {
+        this.refImpuesto.current.focus()
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Venta', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione una moneda.",
+      }, () => {
+        this.refMoneda.current.focus()
+      });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      this.alert.warning('Venta', 'Seleccione un almacen.', () =>
-        this.refAlmacen.current.focus(),
-      );
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione un almacen.",
+      }, () => {
+        this.refAlmacen.current.focus()
+      });
       return;
     }
 

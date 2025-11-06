@@ -1,5 +1,5 @@
 import React from 'react';
-import { PosContainerWrapper } from '../../../../../components/Container';
+import { PosContainerWrapper } from '../../../../../components/ui/container-wrapper';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
   isEmpty,
@@ -36,12 +36,12 @@ import {
   ModalImpresion,
   ModalPersona,
 } from '../../../../../components/MultiModal';
-import printJS from 'print-js';
 import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
 import { alertKit } from 'alert-kit';
 import PanelIzquierdo from '../../component/PanelIzquierdo';
 import PanelDerecho from '../../component/PanelDerecho';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -57,17 +57,17 @@ class CompraCrear extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idCompra: '',
-      idComprobante: '',
-      idAlmacenDestino: '',
-      idMoneda: '',
-      idAlmacen: '',
-      idImpuesto: '',
-      observacion: '',
-      nota: '',
+      idCompra: "",
+      idComprobante: "",
+      idAlmacenDestino: "",
+      idMoneda: "",
+      idAlmacen: "",
+      idImpuesto: "",
+      observacion: "",
+      nota: "",
       cacheConfiguracion: null,
 
       // Detalle de la compra
@@ -88,7 +88,7 @@ class CompraCrear extends CustomComponent {
       proveedores: [],
 
       // Atributos libres
-      codiso: '',
+      codiso: "",
       total: 0,
 
       // Atributos del modal sale
@@ -140,7 +140,7 @@ class CompraCrear extends CustomComponent {
     this.abortControllerOrdenCompra = new AbortController();
 
     // Atributos para el modal configuración
-    this.idSidebarConfiguration = 'idSidebarConfiguration';
+    this.idSidebarConfiguration = "idSidebarConfiguration";
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
@@ -163,13 +163,13 @@ class CompraCrear extends CustomComponent {
   */
 
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
 
     await this.loadingData();
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown);
+    document.removeEventListener("keydown", this.handleDocumentKeyDown);
 
     this.abortController.abort();
     this.abortControllerOrdenCompra.abort();
@@ -424,8 +424,8 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(idImpuesto)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Seleccione un impuesto para continuar.',
+        title: "Compra",
+        message: "Seleccione un impuesto para continuar.",
       }, () => {
         this.refImpuesto.current.focus();
       });
@@ -496,7 +496,7 @@ class CompraCrear extends CustomComponent {
     const productos = await this.fetchFiltrarProductos(params);
 
     const filteredProductos = productos.filter(
-      (item) => item.tipoProducto !== 'SERVICIO',
+      (item) => item.tipoProducto !== "SERVICIO",
     );
 
     this.setState({
@@ -508,7 +508,7 @@ class CompraCrear extends CustomComponent {
   handleSelectItemProducto = (value) => {
     this.updateReduxState();
 
-    this.handleOpenModalProducto(value, 'new');
+    this.handleOpenModalProducto(value, "new");
   };
 
   //------------------------------------------------------------------------------------------
@@ -563,8 +563,8 @@ class CompraCrear extends CustomComponent {
   handleOpenOrdenCompra = () => {
     if (isEmpty(this.state.idImpuesto)) {
       alertKit.warning({
-        title: 'Orden de Compra',
-        message: 'Seleccione un impuesto.',
+        title: "Compra",
+        message: "Seleccione un impuesto.",
       }, () => {
         this.refImpuesto.current.focus();
       });
@@ -573,8 +573,8 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(this.state.idMoneda)) {
       alertKit.warning({
-        title: 'Orden de Compra',
-        message: 'Seleccione una moneda.',
+        title: "Compra",
+        message: "Seleccione una moneda.",
       }, () => {
         this.refMoneda.current.focus();
       });
@@ -593,7 +593,7 @@ class CompraCrear extends CustomComponent {
 
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos de la orden de compra.',
+      msgLoading: "Obteniendos datos de la orden de compra.",
       detalles: [],
       ordenCompra: null,
     });
@@ -611,9 +611,9 @@ class CompraCrear extends CustomComponent {
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
         alertKit.warning({
-          title: 'Orden de Compra',
+          title: "Compra",
           message:
-            'La orden de compra no tiene productos, ya que fue utilizado para la compra.',
+            "La orden de compra no tiene productos, ya que fue utilizado para la compra.",
         }, () => {
           this.clearView();
         });
@@ -654,7 +654,7 @@ class CompraCrear extends CustomComponent {
       this.setState({ loading: false });
 
       alertKit.warning({
-        title: 'Orden de Compra',
+        title: "Compra",
         message: response.getMessage(),
       });
     }
@@ -687,7 +687,7 @@ class CompraCrear extends CustomComponent {
 
   handleOpenOptions = () => {
     const invoice = document.getElementById(this.idSidebarConfiguration);
-    invoice.classList.add('toggled');
+    invoice.classList.add("toggled");
 
     this.setState({
       cacheConfiguracion: {
@@ -702,8 +702,8 @@ class CompraCrear extends CustomComponent {
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
       alertKit.warning({
-        title: 'Orden de Compra',
-        message: 'Seleccione un impuesto.',
+        title: "Compra",
+        message: "Seleccione un impuesto.",
       }, () => {
         this.refImpuesto.current.focus();
       });
@@ -712,8 +712,8 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(this.state.idMoneda)) {
       alertKit.warning({
-        title: 'Orden de Compra',
-        message: 'Seleccione una moneda.',
+        title: "Compra",
+        message: "Seleccione una moneda.",
       }, () => {
         this.refMoneda.current.focus();
       });
@@ -778,8 +778,8 @@ class CompraCrear extends CustomComponent {
 
     if (!isText(idComprobante)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Seleccione su comprobante.',
+        title: "Compra",
+        message: "Seleccione su comprobante.",
       }, () => {
         this.refComprobante.current.focus();
       });
@@ -788,8 +788,8 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(proveedor)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Seleccione un proveedor.',
+        title: "Compra",
+        message: "Seleccione un proveedor.",
       }, () => {
         this.refProveedorValue.current.focus();
       });
@@ -798,8 +798,8 @@ class CompraCrear extends CustomComponent {
 
     if (!isText(idMoneda)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Seleccione su moneda.',
+        title: "Compra",
+        message: "Seleccione su moneda.",
       }, () => {
         this.refMoneda.current.focus();
       });
@@ -807,8 +807,8 @@ class CompraCrear extends CustomComponent {
     }
     if (!isText(idImpuesto)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Seleccione el impuesto',
+        title: "Compra",
+        message: "Seleccione el impuest.o",
       }, () => {
         this.refImpuesto.current.focus();
       });
@@ -817,8 +817,8 @@ class CompraCrear extends CustomComponent {
 
     if (!isText(idAlmacenDestino)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Seleccione su almacen.',
+        title: "Compra",
+        message: "Seleccione su almacen.",
       }, () => {
         this.refAlmacenDestino.current.focus();
       });
@@ -827,8 +827,8 @@ class CompraCrear extends CustomComponent {
 
     if (isEmpty(detalles)) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Agregar algún producto a la lista.',
+        title: "Compra",
+        message: "Agregar algún producto a la lista.",
       }, () => {
         this.refProductoValue.current.focus();
       });
@@ -840,8 +840,8 @@ class CompraCrear extends CustomComponent {
 
   handleLimpiar = async () => {
     const accept = await alertKit.question({
-      title: 'Compra',
-      message: '¿Está seguro de limpiar la compra?',
+      title: "Compra",
+      message: "¿Está seguro de limpiar la compra?",
       acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
       cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
     });
@@ -888,8 +888,14 @@ class CompraCrear extends CustomComponent {
     } = this.state;
 
     const accept = await alertKit.question({
-      title: 'Compra',
-      message: '¿Está seguro de continuar?',
+      title: "Compra",
+      message: "¿Está seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
 
     if (accept) {
@@ -912,8 +918,9 @@ class CompraCrear extends CustomComponent {
       };
 
       await callback();
+
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const response = await createCompra(data);
@@ -927,7 +934,7 @@ class CompraCrear extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Compra',
+          title: "Compra",
           message: response.getMessage(),
         });
       }
@@ -936,9 +943,7 @@ class CompraCrear extends CustomComponent {
 
   handleProcessCredito = async (
     idFormaPago,
-    numeroCuotas,
-    frecuenciaPago,
-    total,
+    idPlazo,
     notaTransacion,
     callback = async function () { },
   ) => {
@@ -957,8 +962,14 @@ class CompraCrear extends CustomComponent {
     } = this.state;
 
     const accept = await alertKit.question({
-      title: 'Compra',
-      message: '¿Está seguro de continuar?',
+      title: "Compra",
+      message: "¿Está seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
 
     if (accept) {
@@ -975,14 +986,13 @@ class CompraCrear extends CustomComponent {
         idUsuario: idUsuario,
         idSucursal: idSucursal,
         estado: 2,
-        numeroCuotas: numeroCuotas,
-        frecuenciaPago: frecuenciaPago,
+        idPlazo: idPlazo,
         detalles: detalles,
         notaTransacion,
-        importeTotal: total,
       };
 
       await callback();
+
       alertKit.loading({
         message: 'Procesando información...',
       });
@@ -1017,7 +1027,7 @@ class CompraCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesCompra(this.state.idCompra, size),
       type: 'pdf',
       showModal: true,
@@ -1170,7 +1180,7 @@ class CompraCrear extends CustomComponent {
               handleLimpiar={this.handleLimpiar}
 
               handleOpenOptions={this.handleOpenOptions}
-              
+
               handleOpenModalProducto={this.handleOpenModalProducto}
               handleRemoverProducto={this.handleRemoverProducto}
 

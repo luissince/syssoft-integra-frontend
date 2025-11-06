@@ -38,3 +38,11 @@ export async function comboSucursal(signal: AbortSignal): Promise<SuccessRespons
     }),
   );
 }
+
+export async function comboPlazo(signal: AbortSignal): Promise<SuccessResponse | ErrorResponse> {
+  return await Resolve.create<any>(
+    apiClient.get('/api/plazo/combo', {
+      signal: signal,
+    }),
+  );
+}

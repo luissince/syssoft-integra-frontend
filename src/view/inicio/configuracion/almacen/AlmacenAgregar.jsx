@@ -1,7 +1,6 @@
 import React from 'react';
 import { isEmpty } from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -21,6 +20,7 @@ import TextArea from '../../../../components/TextArea';
 import Button from '../../../../components/Button';
 import { alertKit } from 'alert-kit';
 import Select from '../../../../components/Select';
+import CustomComponent from '@/components/CustomComponent';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -213,8 +213,8 @@ class AlmacenAgregar extends CustomComponent {
   async handleSave() {
     if (isEmpty(this.state.nombre)) {
       alertKit.warning({
-        title: 'Almacén',
-        message: '!Ingrese el nombre del almacén!',
+        title: "Almacén",
+        message: "!Ingrese el nombre del almacén!",
         onClose: () => {
           this.refNombre.current.focus();
         },
@@ -224,8 +224,8 @@ class AlmacenAgregar extends CustomComponent {
 
     if (isEmpty(this.state.idTipoAlmacen)) {
       alertKit.warning({
-        title: 'Almacén',
-        message: '!Selecciona el tipo almacén!',
+        title: "Almacén",
+        message: "!Selecciona el tipo almacén!",
         onClose: () => {
           this.refTipoAlmacen.current.focus();
         },
@@ -235,8 +235,8 @@ class AlmacenAgregar extends CustomComponent {
 
     if (isEmpty(this.state.direccion)) {
       alertKit.warning({
-        title: 'Almacén',
-        message: '!Ingrese la dirección del almacén!',
+        title: "Almacén",
+        message: "!Ingrese la dirección del almacén!",
         onClose: () => {
           this.refDireccion.current.focus();
         },
@@ -246,8 +246,8 @@ class AlmacenAgregar extends CustomComponent {
 
     if (isEmpty(this.state.idUbigeo)) {
       alertKit.warning({
-        title: 'Almacén',
-        message: '!Ingrese su ubigeo!',
+        title: "Almacén",
+        message: "!Ingrese su ubigeo!",
         onClose: () => {
           this.refValueUbigeo.current.focus();
         },
@@ -256,8 +256,8 @@ class AlmacenAgregar extends CustomComponent {
     }
 
     const accept = await alertKit.question({
-      title: 'Almacén',
-      message: '¿Estás seguro de continuar?',
+      title: "Almacén",
+      message: "¿Estás seguro de continuar?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -268,7 +268,7 @@ class AlmacenAgregar extends CustomComponent {
 
     if (accept) {
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const data = {
@@ -287,7 +287,7 @@ class AlmacenAgregar extends CustomComponent {
 
       if (response instanceof SuccessReponse) {
         alertKit.success({
-          title: 'Almacén',
+          title: "Almacén",
           message: response.data,
           onClose: () => {
             this.props.history.goBack();
@@ -299,7 +299,7 @@ class AlmacenAgregar extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Almacén',
+          title: "Almacén",
           message: response.getMessage(),
           onClose: () => {
             this.refNombre.current.focus();
