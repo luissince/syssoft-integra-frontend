@@ -40,8 +40,8 @@ import printJS from 'print-js';
 import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
 import { alertKit } from 'alert-kit';
-import PanelIzquierdo from './component/PanelIzquierdo';
-import PanelDerecho from './component/PanelDerecho';
+import PanelIzquierdo from '../../component/PanelIzquierdo';
+import PanelDerecho from '../../component/PanelDerecho';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -1130,6 +1130,8 @@ class CompraCrear extends CustomComponent {
           <div className="flex w-full h-full">
             {/* PANEL IZQUIERDO */}
             <PanelIzquierdo
+              title="Compra"
+              subTitle="CREAR"
               loadingProducto={this.state.loadingProducto}
               productos={this.state.productos}
               codiso={this.state.codiso}
@@ -1146,6 +1148,7 @@ class CompraCrear extends CustomComponent {
               refComprobante={this.refComprobante}
               idComprobante={this.state.idComprobante}
               handleSelectComprobante={this.handleSelectComprobante}
+
               handleOpenOrdenCompra={this.handleOpenOrdenCompra}
 
               proveedores={this.state.proveedores}
@@ -1160,13 +1163,18 @@ class CompraCrear extends CustomComponent {
               refAlmacenDestino={this.refAlmacenDestino}
               idAlmacenDestino={this.state.idAlmacenDestino}
               handleSelectAlmacenDestino={this.handleSelectAlmacenDestino}
+
               detalles={this.state.detalles}
               codiso={this.state.codiso}
-              handleGuardar={this.handleGuardar}
+
               handleLimpiar={this.handleLimpiar}
+
               handleOpenOptions={this.handleOpenOptions}
+              
               handleOpenModalProducto={this.handleOpenModalProducto}
               handleRemoverProducto={this.handleRemoverProducto}
+
+              handleGuardar={this.handleGuardar}
             />
           </div>
         </div>

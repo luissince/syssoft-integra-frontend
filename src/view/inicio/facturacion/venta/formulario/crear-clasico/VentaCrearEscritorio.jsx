@@ -90,7 +90,7 @@ import {
 import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { JURIDICA } from '@/model/types/tipo-entidad';
-import { usePrivilegios } from '@/hooks/use-privilegios';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -2483,44 +2483,38 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         {/* Cuerpo princiapl */}
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100 p-3">
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full p-3">
             {/* Lado izquierdo */}
             <div
-              className="w-100 d-flex flex-column position-relative mr-1 overflow-auto"
-              style={{
-                flex: '1 1 100%',
-                border: '1px solid #cbd5e1',
-              }}
+              className="w-full flex-[1_1_100%]  flex flex-col relative mr-1 overflow-auto border border-solid border-[#cbd5e1]"
             >
               <div className="mb-3 pl-3 pt-3 pr-3 pb-0">
-                <div className="d-flex w-100">
-                  <div className="d-flex align-items-center mr-1">
-                    <img src={images.barcode} width={22} className="mr-1" />
-                    <label className="m-0"> CTRL+D</label>
+                <div className="flex items-center w-full gap-6">
+                  <div className="flex items-center gap-2">
+                    <img src={images.barcode} width={22} />
+                    <span> CTRL+D</span>
                   </div>
 
-                  <Input
-                    ref={this.redCodigoBarras}
-                    value={this.state.codigoBarras}
-                    onChange={this.handleInputCodigoBarras}
-                    onKeyDown={this.handleOnKeyDownCodigoBarras}
-                    placeholder="Ingrese el código de barras o clave alterna... "
-                  />
+                  <div className="w-full">
+                    <Input
+                      ref={this.redCodigoBarras}
+                      value={this.state.codigoBarras}
+                      onChange={this.handleInputCodigoBarras}
+                      onKeyDown={this.handleOnKeyDownCodigoBarras}
+                      placeholder="Ingrese el código de barras o clave alterna... "
+                    />
+                  </div>
                 </div>
               </div>
 
               {isEmpty(this.state.detalleVenta) && (
-                <div className="h-100 pl-3 pr-3 pb-3">
+                <div className="h-full pl-3 pr-3 pb-3">
                   <div
-                    className="h-100 d-flex flex-column align-items-center justify-content-center text-center"
-                    style={{
-                      border: '1px solid #cbd5e1',
-                    }}
+                    className="h-full flex flex-col items-center justify-center gap-3 border border-solid border-[#cbd5e1]"
                   >
                     <img
                       src={images.basket}
-                      className="mb-1"
                       alt="Icono de basket"
                     />
                     <span className="text-base">
@@ -2532,7 +2526,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
               {!isEmpty(this.state.detalleVenta) && (
                 <div
-                  className="h-100 overflow-auto pt-0 pr-3 pb-3 pl-3"
+                  className="h-full overflow-auto pt-0 pr-3 pb-3 pl-3"
                   onKeyDown={this.handleKeyDownTable}
                 >
                   <Table
@@ -2544,15 +2538,9 @@ class VentaCrearEscritorio extends CustomComponent {
                   >
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-center" width="5%">
-                          #
-                        </TableHead>
-                        <TableHead className="text-center" width="5%">
-                          Quitar
-                        </TableHead>
-                        <TableHead className="text-center" width="5%">
-                          Imagen
-                        </TableHead>
+                        <TableHead className="text-center" width="5%">#</TableHead>
+                        <TableHead className="text-center" width="5%">Quitar</TableHead>
+                        <TableHead className="text-center" width="5%">Imagen</TableHead>
                         <TableHead width="10%">Almacen/Cantidad</TableHead>
                         <TableHead width="20%">Descripción</TableHead>
                         <TableHead width="10%">Precio</TableHead>
@@ -2568,13 +2556,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
             {/* Lado derecho */}
             <div
-              className="d-flex flex-column position-relative ml-1 overflow-auto"
-              style={{
-                flex: '0 0 40%',
-                width: '450px',
-                maxWidth: '450px',
-                border: '1px solid #cbd5e1',
-              }}
+              className={
+                cn(
+                  "flex flex-col relative ml-1 overflow-auto",
+                  "flex-[0_0_40%] w-full max-w-[450px] border border-solid border-[#cbd5e1]"
+                )
+              }
             >
               <SpinnerView
                 loading={this.state.loadingCliente}
@@ -2600,7 +2587,7 @@ class VentaCrearEscritorio extends CustomComponent {
               <div>
                 <Button
                   className={
-                    'btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3 rounded-0'
+                    'btn-primary btn-lg w-full !flex items-center justify-between py-3 !rounded-none'
                   }
                   onClick={this.handleOpenSale}
                 >
@@ -2612,7 +2599,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.recibo} width={22} />
                   </div>
@@ -2633,7 +2620,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.options} width={22} />
                   </div>
@@ -2656,11 +2643,11 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.search_color} width={22} />
                   </div>
-                  <div className="invoice-client w-100">
+                  <div className="invoice-client w-full">
                     <SearchInput
                       ref={this.refPersona}
                       classNameContainer="position-relative"
@@ -2710,7 +2697,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.client} width={22} />
                   </div>
@@ -2728,7 +2715,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.phone} width={22} />
                   </div>
@@ -2743,7 +2730,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.email} width={22} />
                   </div>
@@ -2757,7 +2744,7 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
+                <div className="flex items-center">
                   <div className="mr-1">
                     <img src={images.directory} width={22} />
                   </div>
@@ -2776,30 +2763,23 @@ class VentaCrearEscritorio extends CustomComponent {
 
         {/* Crear mas instancias */}
         <div
-          className="bg-white w-100 d-flex position-relative"
-          style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}
+          className="bg-white w-full flex relative border border-solid border-[#cbd5e1] flex-[1_1_3.5rem]"
         >
-          <div className="px-3 d-flex justify-content-center align-items-center">
+          <div className="px-3 flex justify-center items-center gap-2">
             {this.state.cotizacion && (
               <>
-                <span className="mr-1">
-                  <img src={images.cotizacion} width={22} /> COTIZACIÓN:
-                </span>
-                <h6 className="p-0 m-0">
-                  {this.state.cotizacion.serie}-
-                  {formatNumberWithZeros(this.state.cotizacion.numeracion)}
+                <img src={images.cotizacion} width={22} /> COTIZACIÓN:
+                <h6>
+                  {this.state.cotizacion.serie}-{formatNumberWithZeros(this.state.cotizacion.numeracion)}
                 </h6>
               </>
             )}
 
             {this.state.pedido && (
               <>
-                <span className="mr-1">
-                  <img src={images.invoice} width={22} /> PEDIDO:
-                </span>
-                <h6 className="p-0 m-0">
-                  {this.state.pedido.serie}-
-                  {formatNumberWithZeros(this.state.pedido.numeracion)}
+                <img src={images.invoice} width={22} /> PEDIDO:
+                <h6>
+                  {this.state.pedido.serie}-{formatNumberWithZeros(this.state.pedido.numeracion)}
                 </h6>
               </>
             )}

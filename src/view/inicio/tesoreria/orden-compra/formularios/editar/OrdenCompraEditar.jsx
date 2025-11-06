@@ -35,8 +35,8 @@ import {
   SERVICIO,
 } from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
-import PanelIzquierdo from './component/PanelIzquierdo';
-import PanelDerecho from './component/PanelDerecho';
+import PanelIzquierdo from '../../../component/PanelIzquierdo';
+import PanelDerecho from '../../../component/PanelDerecho';
 import pdfVisualizer from 'pdf-visualizer';
 
 /**
@@ -823,6 +823,8 @@ class OrdenCompraEditar extends CustomComponent {
           <div className="flex w-full h-full">
             {/* PANEL IZQUIERDO */}
             <PanelIzquierdo
+              title="Orden de Compra"
+              subTitle="EDITAR"
               loadingProducto={this.state.loadingProducto}
               productos={this.state.productos}
               codiso={this.state.codiso}
@@ -848,12 +850,17 @@ class OrdenCompraEditar extends CustomComponent {
               handleClearInputProveedor={this.handleClearInputProveedor}
               handleSelectItemProveedor={this.handleSelectItemProveedor}
 
+              almacenes={this.state.almacenes}
+
               detalles={this.state.detalles}
               codiso={this.state.codiso}
-              handleGuardar={this.handleGuardar}
+
               handleOpenOptions={this.handleOpenOptions}
+              
               handleOpenModalProducto={this.handleOpenModalProducto}
               handleRemoverProducto={this.handleRemoverProducto}
+
+              handleGuardar={this.handleGuardar}
             />
           </div>
         </div>

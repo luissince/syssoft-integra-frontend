@@ -5,11 +5,9 @@ import {
   calculateTax,
   calculateTaxBruto,
   currentDate,
-  formatDecimal,
   getRanurasDeTiempo,
   isEmpty,
   formatCurrency,
-  rounded,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { PEDIDO } from '../../../../../../model/types/tipo-comprobante';
@@ -23,21 +21,15 @@ import {
   documentsPdfInvoicesPedido,
   filtrarAlmacenProducto,
   filtrarPersona,
-  filtrarProducto,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
-import SearchInput from '../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
-import ModalProducto from '../component/ModalProducto';
 import {
-  SpinnerTransparent,
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
-import Select from '../../../../../../components/Select';
 import {
   clearCrearPedido,
   setCrearPedidoLocal,
@@ -47,14 +39,13 @@ import {
   ModalImpresion,
   ModalPersona,
 } from '../../../../../../components/MultiModal';
-import Image from '../../../../../../components/Image';
-import { images } from '../../../../../../helper';
-import Search from '../../../../../../components/Search';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
-import Input from '@/components/Input';
 import { alertKit } from 'alert-kit';
-import { DELIVERY_PROGRAMADO, RECOGER_EN_LOCAL, RECOGER_PROGRAMADO } from '@/model/types/tipo-entrega';
+import { RECOGER_EN_LOCAL } from '@/model/types/tipo-entrega';
+import pdfVisualizer from 'pdf-visualizer';
+import PanelIzquierdo from '../../../component/PanelIzquierdo';
+import ModalProducto from '../../../component/ModalProducto';
+import PanelDerecho from '../../../component/PanelDerecho';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -114,7 +105,7 @@ class PedidoCrear extends CustomComponent {
       isOpenProducto: false,
 
       // Atributos del modal cliente
-      isOpenPersona: false,
+      isOpenCliente: false,
 
       // Atributos del modal impresión
       isOpenImpresion: false,
@@ -214,41 +205,39 @@ class PedidoCrear extends CustomComponent {
           this.handleSelectItemCliente(this.props.pedidoCrear.state.cliente);
         }
       });
-    } else {
-      const [comprobantes, monedas, impuestos, almacenes, tiposEntrega] = await Promise.all([
-        this.fetchComprobante(PEDIDO),
-        this.fetchMoneda(),
-        this.fetchImpuesto(),
-        this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
-        this.fetchComboTipoEntrega(),
-      ]);
-
-      const comprobante = comprobantes.find((item) => item.preferida === 1);
-      const moneda = monedas.find((item) => item.nacional === 1);
-      const impuesto = impuestos.find((item) => item.preferido === 1);
-      const almacen = almacenes.find((item) => item.predefinido === 1);
-
-      this.setState(
-        {
-          comprobantes,
-          monedas,
-          impuestos,
-          almacenes,
-          tiposEntrega,
-
-          idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-          idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-          idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-          codiso: isEmpty(moneda) ? '' : moneda.codiso,
-          idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
-
-          loading: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      return;
     }
+
+    const [comprobantes, monedas, impuestos, almacenes, tiposEntrega] = await Promise.all([
+      this.fetchComprobante(PEDIDO),
+      this.fetchMoneda(),
+      this.fetchImpuesto(),
+      this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
+      this.fetchComboTipoEntrega(),
+    ]);
+
+    const comprobante = comprobantes.find((item) => item.preferida === 1);
+    const moneda = monedas.find((item) => item.nacional === 1);
+    const impuesto = impuestos.find((item) => item.preferido === 1);
+    const almacen = almacenes.find((item) => item.predefinido === 1);
+
+    this.setState({
+      comprobantes,
+      monedas,
+      impuestos,
+      almacenes,
+      tiposEntrega,
+
+      idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
+      idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
+      idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
+      codiso: isEmpty(moneda) ? '' : moneda.codiso,
+      idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+
+      loading: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   updateReduxState() {
@@ -433,15 +422,12 @@ class PedidoCrear extends CustomComponent {
     const { idImpuesto } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      alertKit.warning(
-        {
-          title: 'Pedido',
-          message: 'Seleccione un impuesto para continuar.',
-        },
-        () => {
-          this.refImpuesto.current.focus();
-        }
-      );
+      alertKit.warning({
+        title: 'Pedido',
+        message: 'Seleccione un impuesto para continuar.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
@@ -488,28 +474,24 @@ class PedidoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
-
-  handleOpenModalPersona = () => {
-    this.setState({ isOpenPersona: true });
+  handleOpenModalCliente = () => {
+    this.setState({ isOpenCliente: true });
   };
 
-  handleCloseModalPersona = async () => {
-    this.setState({ isOpenPersona: false });
+  handleCloseModalCliente = async () => {
+    this.setState({ isOpenCliente: false });
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar productos
   //------------------------------------------------------------------------------------------
   handleClearInputProducto = () => {
-    this.setState(
-      {
-        productos: [],
-        loadingProducto: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      productos: [],
+      loadingProducto: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterProducto = async (text) => {
@@ -545,15 +527,12 @@ class PedidoCrear extends CustomComponent {
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
   handleClearInputCliente = () => {
-    this.setState(
-      {
-        clientes: [],
-        cliente: null,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      clientes: [],
+      cliente: null,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterCliente = async (text) => {
@@ -581,15 +560,12 @@ class PedidoCrear extends CustomComponent {
       value.documento + ' - ' + value.informacion,
     );
 
-    this.setState(
-      {
-        cliente: value,
-        clientes: [],
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      cliente: value,
+      clientes: [],
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -681,19 +657,16 @@ class PedidoCrear extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalles,
-      },
-      async () => {
-        this.updateReduxState();
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalles,
+    }, () => {
+      this.updateReduxState();
 
-        const invoice = document.getElementById(this.idSidebarConfiguration);
-        invoice.classList.remove('toggled');
-      },
-    );
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove('toggled');
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -807,9 +780,8 @@ class PedidoCrear extends CustomComponent {
       const response = await createPedido(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.close(() => {
-          this.handleOpenImpresion(response.data.idPedido);
-        });
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idPedido);
       }
 
       if (response instanceof ErrorResponse) {
@@ -847,11 +819,12 @@ class PedidoCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
-      printable: documentsPdfInvoicesPedido(this.state.idPedido, size),
+    const url = documentsPdfInvoicesPedido(this.state.idPedido, size);
+
+    pdfVisualizer.printer({
+      printable: url,
       type: 'pdf',
       showModal: true,
-      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
@@ -966,13 +939,14 @@ class PedidoCrear extends CustomComponent {
 
   render() {
     return (
-      <PosContainerWrapper className={'flex-column bg-white'}>
+      <PosContainerWrapper>
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
 
         <ModalProducto
+          title="Pedido"
           ref={this.refModalProducto}
           isOpen={this.state.isOpenProducto}
           onClose={this.handleCloseProducto}
@@ -985,12 +959,13 @@ class PedidoCrear extends CustomComponent {
         <ModalPersona
           contentLabel="Modal Cliente"
           titleHeader="Agregar Cliente"
-          isOpen={this.state.isOpenPersona}
+          isOpen={this.state.isOpenCliente}
           onClose={this.handleCloseModalPersona}
           idUsuario={this.state.idUsuario}
         />
 
         <SidebarConfiguration
+          menus={this.props.token.userToken.menus}
           idSidebarConfiguration={this.idSidebarConfiguration}
 
           impuestos={this.state.impuestos}
@@ -1029,377 +1004,44 @@ class PedidoCrear extends CustomComponent {
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100">
-            {/*  */}
-            <div
-              className="w-100 d-flex flex-column position-relative"
-              style={{
-                flex: '0 0 60%',
-              }}
-            >
-              <div
-                className="d-flex align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="d-flex">
-                  <Button className="btn btn-link" onClick={this.handleCerrar}>
-                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
-                  </Button>
-                </div>
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full">
+             {/* PANEL IZQUIERDO */}
+            <PanelIzquierdo
+              title="Pedido"
+              subTitle="Crear"
+              loadingProducto={this.state.loadingProducto}
+              productos={this.state.productos}
+              codiso={this.state.codiso}
+              refProducto={this.refProducto}
+              refProductoValue={this.refProductoValue}
+              handleCerrar={this.handleCerrar}
+              handleFilterProducto={this.handleFilterProducto}
+              handleSelectItemProducto={this.handleSelectItemProducto}
+            />
+          
+            {/* PANEL DERECHO  */}
+            <PanelDerecho
+              comprobantes={this.state.comprobantes}
+              refComprobante={this.refComprobante}
+              idComprobante={this.state.idComprobante}
+              handleSelectComprobante={this.handleSelectComprobante}
 
-                <div className="py-3 d-flex align-items-center">
-                  <p className="h5 m-0">
-                    Crear Pedido <i className="fa fa-plus text-secondary"></i>{' '}
-                  </p>
-                </div>
-              </div>
+              clientes={this.state.clientes}
+              refCliente={this.refCliente}
+              refClienteValue={this.refClienteValue}
+              handleFilterCliente={this.handleFilterCliente}
+              handleOpenModalCliente={this.handleOpenModalCliente}
+              handleClearInputCliente={this.handleClearInputCliente}
+              handleSelectItemCliente={this.handleSelectItemCliente}
 
-              <div
-                className="px-3 py-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <Search
-                  ref={this.refProducto}
-                  refInput={this.refProductoValue}
-                  group={true}
-                  iconLeft={<i className="bi bi-search"></i>}
-                  onSearch={this.handleFilterProducto}
-                  placeholder="Buscar..."
-                  buttonRight={
-                    <Button
-                      className="btn-outline-secondary"
-                      title="Limpiar"
-                      onClick={() => {
-                        this.refProducto.current.restart();
-                        this.refProductoValue.current.focus();
-                      }}
-                    >
-                      <i className="fa fa-close"></i>
-                    </Button>
-                  }
-                />
-              </div>
-
-              <div
-                className={
-                  !isEmpty(this.state.productos)
-                    ? 'px-3 h-100 overflow-auto p-3'
-                    : 'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {this.state.loadingProducto && (
-                  <div className="position-relative w-100 h-100 text-center">
-                    <SpinnerTransparent
-                      loading={true}
-                      message={'Buscando productos...'}
-                    />
-                  </div>
-                )}
-
-                {!this.state.loadingProducto &&
-                  isEmpty(this.state.productos) && (
-                    <div className="text-center position-relative">
-                      <i className="bi bi-cart4 text-secondary text-2xl"></i>
-                      <p className="text-secondary text-lg mb-0">
-                        Use la barra de busqueda para encontrar su producto.
-                      </p>
-                    </div>
-                  )}
-
-                <div className="d-flex justify-content-center flex-wrap gap-4">
-                  {this.state.productos.map((item, index) => (
-                    <Button
-                      key={index}
-                      className="btn btn-light bg-white"
-                      style={{
-                        border: '1px solid #e2e8f0',
-                        width: '16rem',
-                      }}
-                      onClick={() => this.handleSelectItemProducto(item)}
-                    >
-                      <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                        <div className="d-flex justify-content-center align-items-center flex-column mb-2">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className="mb-2 object-contain"
-                          />
-                          {
-                            item.idTipoProducto === SERVICIO ? (
-                              <p className="badge badge-success text-base">
-                                SERVICIO
-                              </p>
-                            ) : (
-                              <p
-                                className={`${item.idTipoProducto === PRODUCTO &&
-                                  item.cantidad <= 0
-                                  ? 'badge badge-danger text-base'
-                                  : 'badge badge-success text-base'
-                                  } `}
-                              >
-                                STOCK: {formatDecimal(item.cantidad)}
-                              </p>
-                            )
-                          }
-                        </div>
-
-                        <div className="d-flex justify-content-center align-items-center flex-column">
-                          <span className="text-sm">{item.codigo}</span>
-                          <p className="m-0 text-lg">{item.nombre}</p>
-                          <p className="m-0 text-xl font-weight-bold">
-                            {formatCurrency(item.precio, this.state.codiso)}{' '}
-                            <span className="text-sm">x {item.unidad}</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="w-100 text-left text-sm">
-                        Almacen: {item.almacen}
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/*  */}
-            <div
-              className="d-flex flex-column position-relative bg-white"
-              style={{
-                flex: '1 1 100%',
-                borderLeft: '1px solid #cbd5e1',
-              }}
-            >
-              <div
-                className="d-flex justify-content-between align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="py-3">
-                  <p className="h5 m-0">Resumen</p>
-                </div>
-
-                <div className="d-flex justify-content-end">
-                  <Button className="btn btn-link" onClick={this.handleLimpiar}>
-                    <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
-                  </Button>
-                  <Button
-                    className="btn btn-link"
-                    onClick={this.handleOpenOptions}
-                  >
-                    <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className="d-flex flex-column px-3 pt-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="form-group">
-                  <Select
-                    group={false}
-                    ref={this.refComprobante}
-                    value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}
-                  >
-                    <option value="">-- Comprobantes --</option>
-                    {this.state.comprobantes.map((item, index) => (
-                      <option key={index} value={item.idComprobante}>
-                        {item.nombre + ' (' + item.serie + ')'}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <div>
-                  <SearchInput
-                    ref={this.refCliente}
-                    placeholder="Filtrar clientes..."
-                    refValue={this.refClienteValue}
-                    data={this.state.clientes}
-                    handleClearInput={this.handleClearInputCliente}
-                    handleFilter={this.handleFilterCliente}
-                    handleSelectItem={this.handleSelectItemCliente}
-                    renderItem={(value) => (
-                      <>{value.documento + ' - ' + value.informacion}</>
-                    )}
-                    customButton={
-                      <Button
-                        className="btn-outline-primary d-flex align-items-center"
-                        onClick={this.handleOpenModalPersona}
-                      >
-                        <i className="fa fa-plus"></i>
-                        <span className="ml-2">Nuevo</span>
-                      </Button>
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <Select
-                    group={false}
-                    ref={this.refTipoEntrega}
-                    value={this.state.idTipoEntrega}
-                    onChange={this.handleSelectTipoEntrega}
-                  >
-                    <option value="">-- Tipo de entrega --</option>
-                    {
-                      this.state.tiposEntrega.map((item, index) => (
-                        <option key={index} value={item.idTipoEntrega}>
-                          {item.nombre}
-                        </option>
-                      ))
-                    }
-                  </Select>
-                </div>
-
-                {
-                  (this.state.idTipoEntrega === DELIVERY_PROGRAMADO || this.state.idTipoEntrega === RECOGER_PROGRAMADO) &&
-                  <div className="form-group">
-                    <div className='flex flex-row justify-between gap-x-4'>
-                      <div className='w-full'>
-                        <label>Fecha *</label>
-                        <Input
-                          type="date"
-                          value={this.state.fechaEntrega}
-                          ref={this.refFechaEntrega}
-                          onChange={this.handleFechaEntrega}
-                        />
-                      </div>
-
-                      <div className='w-full'>
-                        <label htmlFor="fecha-fin">Hora *</label>
-                        <Select
-                          value={this.state.horaEntrega}
-                          ref={this.refHoraEntrega}
-                          onChange={this.handleSelectHoraEntrega}
-                        >
-                          <option value="">-- Seleccionar Hora --</option>
-                          {
-                            this.state.ranurasDeTiempo.map((time, index) => (
-                              <option key={index} value={time}>
-                                {time}
-                              </option>
-                            ))
-                          }
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-
-              <div
-                className={
-                  isEmpty(this.state.detalles)
-                    ? 'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
-                    : 'd-flex flex-column text-center rounded h-100 overflow-auto'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {isEmpty(this.state.detalles) && (
-                  <div className="text-center">
-                    <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-base mb-0">
-                      Aquí verás los productos que elijas en tu próxima pedido
-                    </p>
-                  </div>
-                )}
-
-                {this.state.detalles.map((item, index) => (
-                  <div
-                    key={index}
-                    className="d-grid px-3 position-relative align-items-center bg-white"
-                    style={{
-                      gridTemplateColumns: '60% 20% 20%',
-                      borderBottom: '1px solid #e2e8f0',
-                    }}
-                  >
-                    {/* Primera columna (imagen y texto) */}
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={item.imagen}
-                        alt={item.nombre}
-                        width={80}
-                        height={80}
-                        className="object-contain"
-                      />
-
-                      <div className="p-3 text-left">
-                        <p className="m-0 text-sm"> {item.codigo}</p>
-                        <p className="m-0 text-base font-weight-bold text-break">
-                          {item.nombre}
-                        </p>
-                        <p className="m-0">
-                          {formatCurrency(item.precio, this.state.codiso)}{' '}
-                          <small>x {item.nombreMedida}</small>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Segundo columna (precio total) y opciones */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="h-100 text-xml">
-                        {rounded(item.cantidad)}
-                      </div>
-                    </div>
-
-                    {/* Tercera columna (precio total) y opciones */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="h-100 text-lg">
-                        {formatCurrency(
-                          item.cantidad * item.precio,
-                          this.state.codiso,
-                        )}
-                      </div>
-
-                      <div className="d-flex align-items-end justify-content-end gap-4">
-                        <Button
-                          className="btn-link"
-                          onClick={() => this.handleOpenModalProducto(item)}
-                        >
-                          <i className="fa fa-edit text-secondary text-xl"></i>
-                        </Button>
-                        <Button
-                          className="btn-link"
-                          onClick={() =>
-                            this.handleRemoverProducto(item.idProducto)
-                          }
-                        >
-                          <i className="fa fa-trash text-secondary text-xl"></i>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div
-                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
-                style={{ borderTop: '1px solid #e2e8f0' }}
-              >
-                {this.renderTotal()}
-
-                <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 font-normal">Cantidad:</p>
-                  <p className="m-0 text-black font-normal">
-                    {this.state.detalles.length === 1
-                      ? this.state.detalles.length + ' Producto'
-                      : this.state.detalles.length + ' Productos'}{' '}
-                  </p>
-                </div>
-              </div>
-            </div>
+              detalles={this.state.detalles}
+              codiso={this.state.codiso}
+              handleGuardar={this.handleGuardar}
+              handleOpenOptions={this.handleOpenOptions}
+              handleOpenModalProducto={this.handleOpenModalProducto}
+              handleRemoverProducto={this.handleRemoverProducto}
+            />
           </div>
         </div>
       </PosContainerWrapper>
@@ -1410,6 +1052,7 @@ class PedidoCrear extends CustomComponent {
 PedidoCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
+      menus: PropTypes.array.isRequired,
       idUsuario: PropTypes.string.isRequired,
     }).isRequired,
     project: PropTypes.shape({

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../components/Button';
 import Column from '../../../../../../components/Column';
-import { CustomModalForm } from '../../../../../../components/CustomModal';
+import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader, CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import { SpinnerView } from '../../../../../../components/Spinner';
@@ -131,28 +131,22 @@ class ModalProducto extends Component {
     const { detalles, idImpuesto, impuestos } = this.props;
 
     if (!lote && !isNumeric(cantidad)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Ingrese la cantidad.',
-        },
-        () => {
-          this.refCantidad.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Ingrese la cantidad.',
+      }, () => {
+        this.refCantidad.current.focus();
+      });
       return;
     }
 
     if (!lote && parseFloat(cantidad) <= 0) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'La cantidad no puede ser menor a cero.',
-        },
-        () => {
-          this.refCantidad.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'La cantidad no puede ser menor a cero.',
+      }, () => {
+        this.refCantidad.current.focus();
+      });
       return;
     }
 
@@ -168,28 +162,22 @@ class ModalProducto extends Component {
       lote &&
       !isEmpty(lotes.filter((item) => isEmpty(item.cantidad.value)))
     ) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Hay lotes sin cantidad.',
-        },
-        () => {
-          validateNumericInputs(this.refLote);
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Hay lotes sin cantidad.',
+      }, () => {
+        validateNumericInputs(this.refLote);
+      });
       return;
     }
 
     if (lote && !isEmpty(lotes.filter((item) => isEmpty(item.serie.value)))) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Hay lotes sin serie.',
-        },
-        () => {
-          validateNumericInputs(this.refLote, 'string');
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Hay lotes sin serie.',
+      }, () => {
+        validateNumericInputs(this.refLote, 'string');
+      });
       return;
     }
 
@@ -197,41 +185,32 @@ class ModalProducto extends Component {
       lote &&
       !isEmpty(lotes.filter((item) => isEmpty(item.fechaVencimiento.value)))
     ) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Hay lotes sin fecha de vencimiento.',
-        },
-        () => {
-          validateNumericInputs(this.refLote, 'string');
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Hay lotes sin fecha de vencimiento.',
+      }, () => {
+        validateNumericInputs(this.refLote, 'string');
+      });
       return;
     }
 
     if (!isNumeric(costo)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Ingrese el costo.',
-        },
-        () => {
-          this.refCosto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Ingrese el costo.',
+      }, () => {
+        this.refCosto.current.focus();
+      });
       return;
     }
 
     if (parseFloat(costo) <= 0) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'El costo no puede ser menor a cero.',
-        },
-        () => {
-          this.refCosto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'El costo no puede ser menor a cero.',
+      }, () => {
+        this.refCosto.current.focus();
+      });
       return;
     }
 
@@ -287,35 +266,36 @@ class ModalProducto extends Component {
     const { isOpen, onClose } = this.props;
 
     return (
-      <CustomModalForm
-        contentRef={this.refModal}
+      <CustomModal
+        ref={this.refModal}
         isOpen={isOpen}
         onOpen={this.handleOnOpen}
         onHidden={this.handleOnHidden}
         onClose={onClose}
         contentLabel="Modal Producto"
-        titleHeader="Agregar Producto"
-        onSubmit={this.handleOnSubmit}
-        body={
-          <>
+      >
+        <CustomModalContentForm onSubmit={this.handleOnSubmit}>
+          <CustomModalContentHeader contentRef={this.refModal}>
+            Producto
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody className="flex flex-col gap-3">
             <SpinnerView loading={loading} message={message} />
 
-            <Row>
-              <Column formGroup={true}>
-                <h6>{nombre}</h6>
+            <div className="flex flex-col gap-3">
+              <h6>{nombre}</h6>
+              <div>
                 <Image
                   default={images.noImage}
                   src={imagen}
                   alt={nombre}
-                  width={100}
-                  height={100}
-                  className="object-contain"
+                  overrideClass="mb-2 h-40 object-contain border border-solid border-[#e2e8f0]"
                 />
-              </Column>
-            </Row>
+              </div>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
+            <div className="flex gap-3">
+              <div className="w-full md:w-1/2">
                 <Input
                   label={'Costo:'}
                   placeholder={'0.00'}
@@ -325,10 +305,10 @@ class ModalProducto extends Component {
                   onChange={this.handleInputCosto}
                   onPaste={handlePasteFloat}
                 />
-              </Column>
+              </div>
 
               {!lote && (
-                <Column formGroup={true}>
+                <div className="w-full md:w-1/2">
                   <Input
                     autoFocus={true}
                     label={'Cantidad:'}
@@ -339,29 +319,29 @@ class ModalProducto extends Component {
                     onChange={this.handleInputCantidad}
                     onPaste={handlePasteFloat}
                   />
-                </Column>
+                </div>
               )}
-            </Row>
+            </div>
 
             {lote ? (
               <>
-                <Row>
-                  <Column formGroup={true}>
-                    <div className="d-flex justify-content-start align-items-center">
-                      <h6 className="mr-2">Agregar mas lotes</h6>
-                      <Button
-                        className={'btn-light'}
-                        onClick={this.handleAddLote}
-                      >
-                        <i className="bi bi-plus-circle"></i>
-                      </Button>
-                    </div>
-                  </Column>
-                </Row>
+                <div className="d-flex justify-content-start align-items-center">
+                  <h6 className="mr-2">Agregar mas lotes</h6>
+                  <Button
+                    className={'btn-light'}
+                    onClick={this.handleAddLote}
+                  >
+                    <i className="bi bi-plus-circle"></i>
+                  </Button>
+                </div>
 
                 {lotes.map((item, index) => (
-                  <Row key={index} ref={this.refLote}>
-                    <Column formGroup={true}>
+                  <div
+                    key={index}
+                    ref={this.refLote}
+                    className="flex gap-3"
+                  >
+                    <div>
                       <Input
                         autoFocus={true}
                         label={'Cantidad:'}
@@ -385,9 +365,9 @@ class ModalProducto extends Component {
                         }}
                         onPaste={handlePasteFloat}
                       />
-                    </Column>
+                    </div>
 
-                    <Column formGroup={true}>
+                    <div>
                       <Input
                         label={'Lote:'}
                         placeholder={'LT-0001'}
@@ -408,9 +388,9 @@ class ModalProducto extends Component {
                           this.setState({ lotes: updatedLotes });
                         }}
                       />
-                    </Column>
+                    </div>
 
-                    <Column formGroup={true}>
+                    <div>
                       <Input
                         type="date"
                         label={'Fecha de Vencimiento:'}
@@ -431,15 +411,14 @@ class ModalProducto extends Component {
                           this.setState({ lotes: updatedLotes });
                         }}
                       />
-                    </Column>
-                  </Row>
+                    </div>
+                  </div>
                 ))}
               </>
             ) : null}
-          </>
-        }
-        footer={
-          <>
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
             <Button type="submit" className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
@@ -449,9 +428,9 @@ class ModalProducto extends Component {
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </>
-        }
-      />
+          </CustomModalContentFooter>
+        </CustomModalContentForm>
+      </CustomModal>
     );
   }
 }

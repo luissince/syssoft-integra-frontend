@@ -1,12 +1,15 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatDecimal, isEmpty, formatCurrency } from "@/helper/utils.helper";
-import { SpinnerTransparent } from "../Spinner";
-import Image from "../Image";
+import { SpinnerTransparent } from "@/components/Spinner";
+import Image from "@/components/Image";
 import { PRODUCTO } from "@/model/types/tipo-producto";
-import Button from "../Button";
+import Button from "@/components/Button";
+
+type Operation = "addition" | "subtraction";
 
 interface ListGridProps {
+  operation: Operation;
   items: any[];
   loading: boolean;
   onSelectItem: (item: any) => void;
@@ -17,6 +20,7 @@ interface ListGridProps {
 }
 
 const ListGrid: React.FC<ListGridProps> = ({
+  operation,
   items,
   loading,
   onSelectItem,
@@ -91,13 +95,13 @@ const ListGrid: React.FC<ListGridProps> = ({
                   </div>
                 </div>
 
-                {/* Precio */}
+                {/* Valores */}
                 <div className="flex items-center justify-between pt-1 border-t border-gray-100">
                   <span className="text-sm font-medium text-gray-600">
-                    Costo:
+                    {operation === "addition" ? "Precio" : "Costo"}:
                   </span>
                   <span className="text-lg font-bold text-blue-600">
-                    {formatCurrency(item.costo, codiso)}{" "}
+                    {operation === "addition" ? formatCurrency(item.precio, codiso) : formatCurrency(item.costo, codiso)}{" "}
                     <small className="text-xs">x {item.unidad}</small>
                   </span>
                 </div>

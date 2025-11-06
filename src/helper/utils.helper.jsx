@@ -13,7 +13,7 @@ export function sleep(time) {
 /**
  * Obtiene el estado de un privilegio específico dentro de un menú, submenú y privilegio dados.
  *
- * @param {Array} menus - Lista de menús, cada uno con sus submenús y privilegios.
+ * @param {Array} list - Lista de menús, cada uno con sus submenús y privilegios.
  * @param {string} idMenu - Id del menú en el que se encuentra el privilegio.
  * @param {string} idSubMenu - Id del submenú dentro del menú especificado.
  * @param {string} idPrivilegio - Id del privilegio dentro del submenú especificado.
@@ -51,7 +51,7 @@ export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
 /**
  * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
  * @param {File} file - Archivo seleccionado
- * @returns {Promise<{ base64String: string, extension: string, width: number, height: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho y altura; o false si no se selecciona ningún archivo.
+ * @returns {Promise<{ base64String: string, extension: string, width: number, height: number, size: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho, altura y tamaño; o false si no se selecciona ningún archivo.
  */
 export async function imageBase64(file) {
   if (!file) {
@@ -81,7 +81,7 @@ export async function convertFileBase64(files) {
 /**
  * Formatea un número como una cantidad de dinero con opciones personalizables.
  *
- * @param {number|string} amount - La cantidad numérica que se va a formatear como dinero.
+ * @param {number | string} amount - La cantidad numérica que se va a formatear como dinero.
  * @param {number} [decimalCount=2] - El número de decimales a mostrar.
  * @param {string} [decimal="."] - El separador decimal.
  * @param {string} [thousands=","] - El separador de miles.
@@ -601,7 +601,12 @@ export function debounce(func, delay) {
  */
 export function formatDate(date) {
   const parts = date.split('-');
-  const today = new Date(parts[0], parts[1] - 1, parts[2]);
+
+  if (parts.length !== 3) {
+    return 'Invalid Date';
+  }
+
+  const today = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
   const day = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
   const month =
     today.getMonth() + 1 > 9
@@ -629,7 +634,7 @@ export function formatTime(time, addSeconds = false) {
 
   const parts = time.split(':');
 
-  const HH = parts[0];
+  const HH = Number(parts[0]);
   const mm = parts[1];
   const ss = parts[2] === undefined ? '00' : parts[2];
 
@@ -761,12 +766,12 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () {}) {
+export function viewModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('shown.bs.modal', callback);
 }
 
-export function clearModal(id, callback = function () {}) {
+export function clearModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('hidden.bs.modal', callback);
 }
@@ -1070,7 +1075,7 @@ export function alertInfo(title, message) {
   });
 }
 
-export function alertHTML(title, html, callback = function () {}) {
+export function alertHTML(title, html, callback = function () { }) {
   Swal({
     html: html,
     showConfirmButton: false,
@@ -1084,7 +1089,7 @@ export function alertHTML(title, html, callback = function () {}) {
   });
 }
 
-export function alertSuccess(title, message, callback = function () {}) {
+export function alertSuccess(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
@@ -1099,7 +1104,7 @@ export function alertSuccess(title, message, callback = function () {}) {
   });
 }
 
-export function alertWarning(title, message, callback = function () {}) {
+export function alertWarning(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,

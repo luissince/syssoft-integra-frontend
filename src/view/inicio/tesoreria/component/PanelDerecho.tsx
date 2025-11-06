@@ -4,7 +4,7 @@ import SearchInput from "@/components/SearchInput";
 import Select from "@/components/Select";
 import { HeaderActions } from "@/components/Title";
 import { images } from "@/helper";
-import { calculateTax, calculateTaxBruto, isEmpty, formatCurrency, rounded } from "@/helper/utils.helper";
+import { calculateTax, calculateTaxBruto, isEmpty, formatCurrency } from "@/helper/utils.helper";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -12,7 +12,8 @@ interface Props {
   refComprobante: React.RefObject<any>;
   idComprobante: string;
   handleSelectComprobante: () => void;
-  handleOpenOrdenCompra: () => void;
+
+  handleOpenOrdenCompra?: () => void;
 
   proveedores: Array<any>;
   refProveedor: React.RefObject<any>;
@@ -23,18 +24,21 @@ interface Props {
   handleSelectItemProveedor: () => void;
 
   almacenes: Array<any>;
-  refAlmacenDestino: React.RefObject<any>;
-  idAlmacenDestino: string;
-  handleSelectAlmacenDestino: () => void;
+  refAlmacenDestino?: React.RefObject<any>;
+  idAlmacenDestino?: string;
+  handleSelectAlmacenDestino?: () => void;
 
   detalles: Array<any>;
   codiso: string;
 
-  handleGuardar: () => void;
-  handleLimpiar: () => void;
+  handleLimpiar?: () => void;
+
   handleOpenOptions: () => void;
+  
   handleOpenModalProducto: (item: any, tipo: string) => void;
   handleRemoverProducto: (idProducto: string) => void;
+
+  handleGuardar: () => void;
 }
 
 const PanelDerecho: React.FC<Props> = ({
@@ -56,11 +60,11 @@ const PanelDerecho: React.FC<Props> = ({
   handleSelectAlmacenDestino,
   detalles,
   codiso,
-  handleGuardar,
   handleLimpiar,
   handleOpenOptions,
   handleOpenModalProducto,
   handleRemoverProducto,
+  handleGuardar,
 }) => {
 
   const renderTotal = () => {
@@ -154,28 +158,37 @@ const PanelDerecho: React.FC<Props> = ({
 
   // border border-solid border-[#cbd5e1]
 
+  const actions = [];
+
+  if (handleOpenOrdenCompra) {
+    actions.push({
+      icon: <i className="bi bi-file-earmark-text text-xl text-secondary"></i>,
+      onClick: handleOpenOrdenCompra,
+      title: "Orden de compra",
+    });
+  }
+
+  if (handleLimpiar) {
+    actions.push({
+      icon: <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>,
+      onClick: handleLimpiar,
+      title: "Limpiar",
+    });
+  }
+
+  actions.push({
+    icon: <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>,
+    onClick: handleOpenOptions,
+    title: "Opciones",
+  });
+
+
   return (
     <div className="flex flex-col relative w-full">
       {/* Header */}
       <HeaderActions
         title="Resumen"
-        actions={[
-          {
-            icon: <i className="bi bi-file-earmark-text text-xl text-secondary"></i>,
-            onClick: handleOpenOrdenCompra,
-            title: "Orden de compra",
-          },
-          {
-            icon: <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>,
-            onClick: handleLimpiar,
-            title: "Limpiar",
-          },
-          {
-            icon: <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>,
-            onClick: handleOpenOptions,
-            title: "Opciones",
-          },
-        ]}
+        actions={actions}
       />
 
       {/* Filtros */}
@@ -216,22 +229,27 @@ const PanelDerecho: React.FC<Props> = ({
           )}
         />
 
-        <Select
-          ref={refAlmacenDestino}
-          value={idAlmacenDestino}
-          onChange={handleSelectAlmacenDestino}
-        >
-          <option value="">-- Almacen de destino --</option>
-          {almacenes.map((item, index) => (
-            <option key={index} value={item.idAlmacen}>
-              {item.nombre}
-            </option>
-          ))}
-        </Select>
+        {
+          refAlmacenDestino && (
+            <Select
+              ref={refAlmacenDestino}
+              value={idAlmacenDestino}
+              onChange={handleSelectAlmacenDestino}
+            >
+              <option value="">-- Almacen de destino --</option>
+              {almacenes.map((item, index) => (
+                <option key={index} value={item.idAlmacen}>
+                  {item.nombre}
+                </option>
+              ))}
+            </Select>
+          )
+        }
       </div>
 
       {/* Detalles */}
       <DetalleGrid
+        operation={"subtraction"}
         detalles={detalles}
         codiso={codiso}
         images={images}

@@ -308,27 +308,22 @@ class InvoiceView extends CustomComponent {
         />
 
         <div
-          className="w-full bg-white border-t border-solid border-[#e1e7ee] flex-[1_1_3.5rem]"
+          className="bg-white w-full flex relative border border-solid border-[#cbd5e1] flex-[1_1_3.5rem]"
         >
-          <div className="px-3 py-3 flex items-center">
+          <div className="px-3 flex justify-center items-center gap-2">
             {cotizacion && (
               <>
-                <span className="mr-1">
-                  <img src={images.cotizacion} width={22} /> COTIZACIÓN:
-                </span>
-                <h6 className="p-0 m-0">
-                  {cotizacion.serie}-
-                  {formatNumberWithZeros(cotizacion.numeracion)}
+                <img src={images.cotizacion} width={22} /> COTIZACIÓN:
+                <h6>
+                  {cotizacion.serie}-{formatNumberWithZeros(cotizacion.numeracion)}
                 </h6>
               </>
             )}
 
             {pedido && (
               <>
-                <span className="mr-1">
-                  <img src={images.invoice} width={22} /> PEDIDO:
-                </span>
-                <h6 className="p-0 m-0">
+                <img src={images.invoice} width={22} /> PEDIDO:
+                <h6>
                   {pedido.serie}-{formatNumberWithZeros(pedido.numeracion)}
                 </h6>
               </>

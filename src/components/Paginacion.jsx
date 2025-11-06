@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Row from './Row';
 import Column from './Column';
 import Button from './Button';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -143,10 +144,16 @@ class Paginacion extends React.Component {
         <button
           onClick={onClick}
           disabled={disabled}
-          className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${disabled
-            ? 'text-gray-300 cursor-not-allowed'
-            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-            }`}
+          className={
+            cn(
+              "relative",
+              "inline-flex items-center",
+              "px-2 py-2",
+              "text-sm font-medium",
+              "rounded-md",
+              disabled ? "text-gray-300 cursor-not-allowed" : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
+            )
+          }
         >
           <svg
             className="w-5 h-5"

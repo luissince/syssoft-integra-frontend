@@ -68,6 +68,7 @@ import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import ContentSale from './component/ContentSale';
 import ModalPrinter from '../../detalle/component/ModalPrinter';
 import pdfVisualizer from 'pdf-visualizer';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -2056,22 +2057,22 @@ class VentaCrear extends CustomComponent {
           );
 
           const html = `
-              <div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`;
+          <div class="flex flex-col items-center">
+              <h5>Productos con cantidades faltantes :D</h5>
+              <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad a Vender</th>
+                        <th>Cantidad de Inventario</th>
+                        <th>Cantidad Faltante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  ${body}
+                </tbody>
+              </table>
+          </div>`;
 
           alertKit.html({
             title: 'Venta',
@@ -2156,36 +2157,40 @@ class VentaCrear extends CustomComponent {
 
       if (response instanceof ErrorResponse) {
         if (response.getBody() !== '') {
-          const body = response.getBody().map((item) =>
-            `<tr>
+          const body = response.getBody().map(
+            (item) =>
+              `<tr>
                   <td>${item.nombre}</td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-              item.cantidadActual - item.cantidadReal,
-            )}</td>
+                item.cantidadActual - item.cantidadReal,
+              )}</td>
                 </tr>`,
           );
 
-          this.alert.html(
-            'Venta',
-            `<div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`,
-          );
+          const html = `
+          <div class="flex flex-col items-center">
+              <h5>Productos con cantidades faltantes</h5>
+              <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad a Vender</th>
+                        <th>Cantidad de Inventario</th>
+                        <th>Cantidad Faltante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  ${body}
+                </tbody>
+              </table>
+          </div>`;
+
+          alertKit.html({
+            title: 'Venta',
+            bodyInnerHTML: html,
+          });
         } else {
           alertKit.warning({
             title: 'Venta',
@@ -2276,14 +2281,28 @@ class VentaCrear extends CustomComponent {
         <div className="fixed bottom-[15%] right-6 z-50 md:hidden">
           <button
             aria-label="Ver carrito de compras"
-            className="relative p-3 rounded-full bg-red-500 shadow-lg hover:bg-red-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className={
+              cn(
+                "relative p-3 rounded-full bg-red-500 shadow-lg",
+                "transform transition-all duration-200 ",
+                "hover:bg-red-800 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              )
+            }
             onClick={() => this.handleTabChange(activeTab === "productos" ? "detalle" : "productos")}
           >
             {
               activeTab === "productos" ? <ShoppingCart className="w-6 h-6 text-white" /> : <ShoppingBag className="w-6 h-6 text-white" />
             }
             {this.state.detalleVenta.length > 0 && (
-              <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md">
+              <div className={
+                cn(
+                  "absolute -top-2 -right-2",
+                  "h-5 w-5",
+                  "flex items-center justify-center",
+                  "bg-red-600 text-white text-xs font-bold",
+                  "rounded-full shadow-md"
+                )
+              }>
                 {this.state.detalleVenta.length}
               </div>
             )}

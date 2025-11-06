@@ -1,21 +1,30 @@
-import PropTypes from 'prop-types';
-import { forwardRef } from 'react';
+import { forwardRef, InputHTMLAttributes, ReactNode } from 'react';
 
 /**
- * 
- * @param {*} param
- * @returns 
- * Example:
-    <Input
-        label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
-        placeholder="Ingrese el nombre"
-        ref={this.refNombre}
-        value={this.state.nombre}
-        onChange={this.handleInputNombre}
-    />
+ * Componente Input con soporte para etiquetas, iconos y tipo color.
+ *
+ * @component
+ * @example
+ * <Input
+ *   label={<>Nombre:<i className="fa fa-asterisk text-danger small"></i></>}
+ *   placeholder="Ingrese el nombre"
+ *   ref={this.refNombre}
+ *   value={this.state.nombre}
+ *   onChange={this.handleInputNombre}
+ * />
  */
 
-const Input = forwardRef(
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: ReactNode; // Puede ser string o un nodo de React (JSX)
+  group?: boolean; // Indica si debe envolver el input en un grupo
+  iconLeft?: ReactNode; // Icono a la izquierda del input
+  buttonRight?: ReactNode; // Botón a la derecha del input
+  contentRight?: ReactNode; // Contenido adicional a la derecha del input
+  type?: string; // Tipo de input (text, color, etc.)
+  className?: string; // Clases CSS adicionales
+}
+
+const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
       label,
@@ -89,15 +98,5 @@ const Input = forwardRef(
 );
 
 Input.displayName = 'Input';
-
-Input.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-  group: PropTypes.bool,
-  iconLeft: PropTypes.element,
-  type: PropTypes.string,
-  className: PropTypes.string,
-  buttonRight: PropTypes.element,
-  contentRight: PropTypes.element,
-};
 
 export default Input;

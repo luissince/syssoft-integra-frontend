@@ -576,7 +576,7 @@ class VentaDetalle extends CustomComponent {
         {/* Resumen de la venta */}
         <div className="mb-8 bg-white overflow-hidden">
           <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 px-2">
             {[
               { label: 'Comprobante', value: this.state.comprobante },
               { label: 'Cliente', value: this.state.cliente },
@@ -590,9 +590,9 @@ class VentaDetalle extends CustomComponent {
               { label: 'Usuario', value: this.state.usuario },
               { label: 'Total', value: formatCurrency(this.state.total, this.state.codiso) },
             ].map((item, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
-                <div className="font-medium text-gray-600">{item.label}</div>
-                <div className="md:col-span-3 text-gray-900">{item.value}</div>
+              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-2">
+                <div className="text-sm font-medium text-gray-600">{item.label}</div>
+                <div className="text-sm md:col-span-3 text-gray-900">{item.value}</div>
               </div>
             ))}
           </div>
@@ -600,7 +600,7 @@ class VentaDetalle extends CustomComponent {
 
         {/* Detalles de productos */}
         <div className="mb-8 bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800">Detalles</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Detalles</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 text-left text-gray-600 text-sm">
@@ -638,7 +638,7 @@ class VentaDetalle extends CustomComponent {
 
         {/* Transacciones */}
         <div className="bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800">Transacciones</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Transacciones</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 text-left text-gray-600 text-sm">

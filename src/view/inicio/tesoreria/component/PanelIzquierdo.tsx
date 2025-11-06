@@ -6,6 +6,8 @@ import { images } from "@/helper";
 import React from "react";
 
 interface Props {
+    title: string;
+    subTitle: string;
     loadingProducto: boolean;
     productos: Array<any>;
     codiso: string;
@@ -17,6 +19,8 @@ interface Props {
 }
 
 const PanelIzquierdo: React.FC<Props> = ({
+    title,
+    subTitle,
     loadingProducto,
     productos,
     codiso,
@@ -30,7 +34,7 @@ const PanelIzquierdo: React.FC<Props> = ({
         <div className="w-full flex flex-col relative flex-[0_0_60%]" >
 
             {/* Header */}
-            <TitlePos title="Orden de Compra" subTitle="Crear" handleGoBack={handleCerrar} />
+            <TitlePos title={title} subTitle={subTitle} handleGoBack={handleCerrar} />
 
             {/* Filtros */}
             <div className="px-3 py-3 border-b border-r border-solid border-[#cbd5e1]">
@@ -58,6 +62,7 @@ const PanelIzquierdo: React.FC<Props> = ({
 
             {/* Productos */}
             <ListGrid
+                operation="subtraction"
                 items={productos}
                 loading={loadingProducto}
                 onSelectItem={handleSelectItemProducto}

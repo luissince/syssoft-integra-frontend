@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import { forwardRef } from 'react';
+import { forwardRef, ReactNode, ButtonHTMLAttributes } from 'react';
 import { NavLink } from 'react-router-dom';
 
 /**
@@ -22,13 +21,18 @@ import { NavLink } from 'react-router-dom';
  * </Button>
  */
 
-const Button = forwardRef(
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  contentClassName?: string;
+  className?: string;
+  children: ReactNode; // Definimos children como ReactNode
+}
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      refButton,
-      contentClassName = '',
-      className = '',
-      type = 'button',
+      contentClassName = "",
+      className = "",
+      type = "button",
       children,
       ...rest // ← Aquí van las demás props como onChange, value, etc.
     },
@@ -48,13 +52,6 @@ const Button = forwardRef(
 );
 
 Button.displayName = 'Button';
-
-Button.propTypes = {
-  contentClassName: PropTypes.string,
-  type: PropTypes.string,
-  className: PropTypes.string,
-  children: PropTypes.node,
-};
 
 export default Button;
 
@@ -80,7 +77,14 @@ export default Button;
  * />
  */
 
-const ButtonMenu = ({ icon, path, title, category }) => {
+interface ButtonMenuProps {
+  icon: string;
+  path: string;
+  title: string;
+  category: string;
+}
+
+const ButtonMenu = ({ icon, path, title, category }: ButtonMenuProps) => {
   return (
     <NavLink
       to={path}
@@ -91,13 +95,6 @@ const ButtonMenu = ({ icon, path, title, category }) => {
       <p className="text-sm text-primary m-0">{category}</p>
     </NavLink>
   );
-};
-
-ButtonMenu.propTypes = {
-  icon: PropTypes.string.isRequired,
-  path: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  category: PropTypes.string.isRequired,
 };
 
 export { ButtonMenu };

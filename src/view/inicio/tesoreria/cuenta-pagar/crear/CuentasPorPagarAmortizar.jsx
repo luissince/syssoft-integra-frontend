@@ -40,11 +40,11 @@ import Button from '../../../../../components/Button';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import ModalProceso from './component/ModalProceso';
 import pdfVisualizer from 'pdf-visualizer';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import printJS from 'print-js';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -95,8 +95,6 @@ class CuentasPorPagarAmbonar extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.alert = new SweetAlert();
 
     // Referencia del modal proceso
     this.refModalProceso = React.createRef();
@@ -163,7 +161,10 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.alert.warning('Cuenta por Pagar', response.getMessage(), () => {
+      alertKit.warning({
+        title: 'Cuenta por Pagar',
+        message: response.getMessage(),
+      }, () => {
         this.close();
       });
       return;
@@ -282,15 +283,12 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   };
 
   handleActionProceso = async (plazo, monto) => {
-    this.setState(
-      {
-        plazo,
-        monto: Number(monto),
-      },
-      () => {
-        this.handleOpenModalTerminal();
-      },
-    );
+    this.setState({
+      plazo,
+      monto: Number(monto),
+    }, () => {
+      this.handleOpenModalTerminal();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -300,49 +298,57 @@ class CuentasPorPagarAmbonar extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     _,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { idCompra, plazo, idUsuario, monto } = this.state;
 
-    this.alert.dialog(
-      'Cuenta por Pagar',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idCompra,
-            idPlazo: plazo.idPlazo,
-            idUsuario,
-            monto,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
-
-          await callback();
-          this.alert.information(
-            'Cuenta por Pagar',
-            'Procesando información...',
-          );
-
-          const response = await createAccountsPayableCompra(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(plazo.idPlazo);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Cuenta por Pagar', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: 'Persona',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const data = {
+        idCompra,
+        idPlazo: plazo.idPlazo,
+        idUsuario,
+        monto,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback();
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+      const response = await createAccountsPayableCompra(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(plazo.idPlazo);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cuenta por Pagar',
+          message: response.getMessage(),
+        });
+      }
+    }
+
   };
 
   handleCloseModalTerminal = async () => {
@@ -352,39 +358,49 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Accion para anular el pago
   //------------------------------------------------------------------------------------------
-  handleCancelPurchase = (idPlazo, idTransaccion) => {
-    this.alert.dialog(
-      'Cuenta por Pagar',
-      '¿Estás seguro de anular?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idPlazo: idPlazo,
-            idTransaccion: idTransaccion,
-            idCompra: this.state.idCompra,
-          };
-
-          this.alert.information(
-            'Cuenta por Pagar',
-            'Procesando información...',
-          );
-
-          const response = await cancelAccountsPayableCompra(params);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.success('Cuenta por Pagar', response.data, () => {
-              this.close();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Cuenta por Pagar', response.getMessage());
-          }
-        }
+  handleCancelPurchase = async (idPlazo, idTransaccion) => {
+    const accept = await alertKit.question({
+      title: 'Cuenta por Pagar',
+      message: '¿Estás seguro de anular?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idPlazo: idPlazo,
+        idTransaccion: idTransaccion,
+        idCompra: this.state.idCompra,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await cancelAccountsPayableCompra(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Cuenta por Pagar',
+          message: response.data,
+        }, () => {
+          this.close();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cuenta por Pagar',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -546,9 +562,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             <TableCell>{plazo.fecha}</TableCell>
             <TableCell>{'PLAZO ' + plazo.plazo}</TableCell>
             <TableCell
-              className={`${
-                plazo.estado === 0 ? 'text-danger' : 'text-success'
-              }`}
+              className={`${plazo.estado === 0 ? 'text-danger' : 'text-success'
+                }`}
             >
               {plazo.estado === 0 ? 'Por Pagar' : 'Págado'}
             </TableCell>
@@ -620,11 +635,11 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                 </TableRow>
 
                 <TableRow>
-                  <TableCell className=" text-center">#</TableCell>
-                  <TableCell className="">Banco</TableCell>
-                  <TableCell className="">Págado</TableCell>
-                  <TableCell className="">Restante</TableCell>
-                  <TableCell className="">Observación</TableCell>
+                  <TableCell className="text-center">#</TableCell>
+                  <TableCell>Banco</TableCell>
+                  <TableCell>Págado</TableCell>
+                  <TableCell>Restante</TableCell>
+                  <TableCell>Observación</TableCell>
                 </TableRow>
                 {item.detalles.map((detalle, index) => {
                   montoActual = montoActual - detalle.monto;
@@ -646,7 +661,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
             );
           })}
           <TableRow>
-            <TableCell colSpan="7">
+            <TableCell colSpan={7}>
               <hr />
             </TableCell>
           </TableRow>
@@ -673,7 +688,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
         />
 
         <ModalTransaccion
-          tipo={'Pago'}
+          tipo={'Amortización'}
           title={'Completar Pago'}
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
@@ -682,7 +697,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
           importeTotal={this.state.monto}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={() => { }}
         />
 
         <ModalImpresion
@@ -886,12 +901,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
                     <TableHead width={'10%'}>Plazo</TableHead>
                     <TableHead width={'10%'}>Estado</TableHead>
                     <TableHead width={'15%'}>Monto</TableHead>
-                    <TableHead width={'5%'} className="text-center">
-                      Pagar
-                    </TableHead>
-                    <TableHead width={'5%'} className="text-center">
-                      Imprimir
-                    </TableHead>
+                    <TableHead width={'5%'} className="text-center">Pagar</TableHead>
+                    <TableHead width={'5%'} className="text-center">Imprimir</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>{this.renderPlazos()}</TableBody>

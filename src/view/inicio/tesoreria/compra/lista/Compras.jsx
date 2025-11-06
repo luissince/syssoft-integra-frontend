@@ -159,7 +159,7 @@ class Compras extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   };
@@ -201,7 +201,7 @@ class Compras extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState(
@@ -258,17 +258,16 @@ class Compras extends CustomComponent {
   };
 
   handleAnular = async (id) => {
-    const accept = await alertKit.question(
-      {
-        title: 'Compra',
-        message: '¿Está seguro de anular la compra?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Compra',
+      message: '¿Está seguro de anular la compra?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      }
+    });
 
     if (accept) {
       const params = {

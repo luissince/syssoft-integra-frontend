@@ -1,5 +1,5 @@
 import React from 'react';
-import { alertDialog, isEmpty } from '../../../../helper/utils.helper';
+import { isEmpty } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '../../../../model/class/custom-component';
 import { connect } from 'react-redux';

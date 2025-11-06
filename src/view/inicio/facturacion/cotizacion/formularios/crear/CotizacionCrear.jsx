@@ -1,17 +1,11 @@
 import React from 'react';
-import { PosContainerWrapper } from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
 import {
-  calculateTax,
-  calculateTaxBruto,
-  formatDecimal,
   isEmpty,
-  formatCurrency,
   readDataFile,
-  rounded,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { COTIZACION } from '../../../../../../model/types/tipo-comprobante';
+import { COTIZACION } from '@/model/types/tipo-comprobante';
 import {
   comboAlmacen,
   comboComprobante,
@@ -22,39 +16,34 @@ import {
   filtrarAlmacenProducto,
   filtrarPersona,
   obtenerPreCotizacionPdf,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import SearchInput from '../../../../../../components/SearchInput';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/model/types/types';
 import PropTypes from 'prop-types';
-import ModalProducto from '../component/ModalProducto';
 import {
-  SpinnerTransparent,
   SpinnerView,
-} from '../../../../../../components/Spinner';
-import printJS from 'print-js';
-import Button from '../../../../../../components/Button';
-import Select from '../../../../../../components/Select';
+} from '@/components/Spinner';
 import {
   clearCrearCotizacion,
   setCrearCotizacionLocal,
   setCrearCotizacionState,
-} from '../../../../../../redux/predeterminadoSlice';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
+} from '@/redux/predeterminadoSlice';
 import {
   ModalImpresion,
   ModalPersona,
-} from '../../../../../../components/MultiModal';
-import Image from '../../../../../../components/Image';
-import { images } from '../../../../../../helper';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import Search from '../../../../../../components/Search';
-import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
+} from '@/components/MultiModal';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
+import { alertKit } from 'alert-kit';
+import CustomComponent from '@/components/CustomComponent';
+import pdfVisualizer from 'pdf-visualizer';
+import PanelIzquierdo from '../../../component/PanelIzquierdo';
+import ModalProducto from '../../../component/ModalProducto';
+import PanelDerecho from '../../../component/PanelDerecho';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CotizacionCrear extends CustomComponent {
   /**
@@ -104,7 +93,7 @@ class CotizacionCrear extends CustomComponent {
       isOpenProducto: false,
 
       // Atributos del modal cliente
-      isOpenPersona: false,
+      isOpenCliente: false,
 
       // Atributos del modal impresión
       isOpenImpresion: false,
@@ -118,8 +107,6 @@ class CotizacionCrear extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Referencia principales
     this.refComprobante = React.createRef();
@@ -178,7 +165,7 @@ class CotizacionCrear extends CustomComponent {
 
     this.abortController.abort();
 
-    this.alert.close();
+    alertKit.close();
   }
 
   /*
@@ -208,39 +195,40 @@ class CotizacionCrear extends CustomComponent {
           );
         }
       });
-    } else {
-      const [comprobantes, monedas, impuestos, almacenes] = await Promise.all([
-        this.fetchComprobante(COTIZACION),
-        this.fetchMoneda(),
-        this.fetchImpuesto(),
-        this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
-      ]);
-
-      const comprobante = comprobantes.find((item) => item.preferida === 1);
-      const moneda = monedas.find((item) => item.nacional === 1);
-      const impuesto = impuestos.find((item) => item.preferido === 1);
-      const almacen = almacenes.find((item) => item.predefinido === 1);
-
-      this.setState(
-        {
-          comprobantes,
-          monedas,
-          impuestos,
-          almacenes,
-
-          idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-          idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-          idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-          codiso: isEmpty(moneda) ? '' : moneda.codiso,
-          idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
-
-          loading: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      return;
     }
+
+    const [comprobantes, monedas, impuestos, almacenes] = await Promise.all([
+      this.fetchComprobante(COTIZACION),
+      this.fetchMoneda(),
+      this.fetchImpuesto(),
+      this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
+    ]);
+
+    const comprobante = comprobantes.find((item) => item.preferida === 1);
+    const moneda = monedas.find((item) => item.nacional === 1);
+    const impuesto = impuestos.find((item) => item.preferido === 1);
+    const almacen = almacenes.find((item) => item.predefinido === 1);
+
+    this.setState(
+      {
+        comprobantes,
+        monedas,
+        impuestos,
+        almacenes,
+
+        idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
+        idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
+        idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
+        codiso: isEmpty(moneda) ? '' : moneda.codiso,
+        idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+
+        loading: false,
+      },
+      () => {
+        this.updateReduxState();
+      },
+    );
   };
 
   updateReduxState() {
@@ -409,13 +397,12 @@ class CotizacionCrear extends CustomComponent {
     const { idImpuesto } = this.state;
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning(
-        'Cotización',
-        'Seleccione un impuesto para continuar.',
-        () => {
-          this.refImpuesto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione un impuesto para continuar.",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
@@ -445,27 +432,24 @@ class CotizacionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Acciones del modal cliente
   //------------------------------------------------------------------------------------------
-  handleOpenModalPersona = () => {
-    this.setState({ isOpenPersona: true });
+  handleOpenModalCliente = () => {
+    this.setState({ isOpenCliente: true });
   };
 
-  handleCloseModalPersona = async () => {
-    this.setState({ isOpenPersona: false });
+  handleCloseModalCliente = async () => {
+    this.setState({ isOpenCliente: false });
   };
 
   //------------------------------------------------------------------------------------------
   // Filtrar productos
   //------------------------------------------------------------------------------------------
   handleClearInputProducto = () => {
-    this.setState(
-      {
-        productos: [],
-        loadingProducto: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      productos: [],
+      loadingProducto: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterProducto = async (text) => {
@@ -499,15 +483,12 @@ class CotizacionCrear extends CustomComponent {
   // Filtrar cliente
   //------------------------------------------------------------------------------------------
   handleClearInputCliente = () => {
-    this.setState(
-      {
-        clientes: [],
-        cliente: null,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      clientes: [],
+      cliente: null,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterCliente = async (text) => {
@@ -535,15 +516,12 @@ class CotizacionCrear extends CustomComponent {
       value.documento + ' - ' + value.informacion,
     );
 
-    this.setState(
-      {
-        cliente: value,
-        clientes: [],
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      cliente: value,
+      clientes: [],
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -601,16 +579,22 @@ class CotizacionCrear extends CustomComponent {
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Cotización', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione un impuesto.",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Cotización', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione una moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
@@ -629,19 +613,16 @@ class CotizacionCrear extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalles,
-      },
-      async () => {
-        this.updateReduxState();
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalles,
+    }, () => {
+      this.updateReduxState();
 
-        const invoice = document.getElementById(this.idSidebarConfiguration);
-        invoice.classList.remove('toggled');
-      },
-    );
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove('toggled');
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -659,91 +640,110 @@ class CotizacionCrear extends CustomComponent {
     } = this.state;
 
     if (isEmpty(idComprobante)) {
-      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione su comprobante.",
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
-        this.refClienteValue.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione un cliente.",
+      }, () => {
+        this.refClienteValue.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione su moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Cotización', 'Seleccione el impuesto', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione el impuesto",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning(
-        'Cotización',
-        'Agregar algún producto a la lista.',
-        () => this.refProductoValue.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Agregar algún producto a la lista.",
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
-    this.alert.dialog(
-      'Cotización',
-      '¿Está seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idComprobante: idComprobante,
-            idCliente: cliente.idPersona,
-            idMoneda: idMoneda,
-            idSucursal: this.state.idSucursal,
-            idUsuario: this.state.idUsuario,
-            estado: 1,
-            observacion: observacion,
-            nota: nota,
-            detalles: detalles,
-          };
+    const accept = await alertKit.question({
+      title: "Cotización",
+      message: "¿Está seguro de continuar?",
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
-          this.alert.information('Cotización', 'Procesando información...');
+    if (accept) {
+      const data = {
+        idComprobante: idComprobante,
+        idCliente: cliente.idPersona,
+        idMoneda: idMoneda,
+        idSucursal: this.state.idSucursal,
+        idUsuario: this.state.idUsuario,
+        estado: 1,
+        observacion: observacion,
+        nota: nota,
+        detalles: detalles,
+      };
 
-          const response = await createCotizacion(data);
+      alertKit.loading({ message: 'Procesando información...' });
 
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idCotizacion);
-          }
+      const response = await createCotizacion(data);
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idCotizacion);
+      }
 
-            this.alert.warning('Cotización', response.getMessage());
-          }
-        }
-      },
-    );
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cotización',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Cotización',
-      '¿Está seguro de limpiar la cotización?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
-      },
-    );
+    const accept = await alertKit.question({
+      title: "Cotización",
+      message: "¿Está seguro de limpiar la cotización?",
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
+
   };
 
   //------------------------------------------------------------------------------------------
@@ -754,8 +754,10 @@ class CotizacionCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
-      printable: documentsPdfInvoicesCotizacion(this.state.idCotizacion, size),
+    const url = documentsPdfInvoicesCotizacion(this.state.idCotizacion, size);
+
+    pdfVisualizer.printer({
+      printable: url,
       type: 'pdf',
       showModal: true,
       modalMessage: 'Recuperando documento...',
@@ -778,39 +780,52 @@ class CotizacionCrear extends CustomComponent {
       this.state;
 
     if (isEmpty(idComprobante)) {
-      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione su comprobante.",
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
-        this.refClienteValue.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione un cliente.",
+      }, () => {
+        this.refClienteValue.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione su moneda.",
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Cotización', 'Seleccione un impuesto', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Seleccione el impuesto",
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning(
-        'Cotización',
-        'Agregar algún producto a la lista.',
-        () => this.refProductoValue.current.focus(),
-      );
+      alertKit.warning({
+        title: "Cotización",
+        message: "Agregar algún producto a la lista.",
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
@@ -828,18 +843,17 @@ class CotizacionCrear extends CustomComponent {
       detalles,
     } = this.state;
 
-    const response = await obtenerPreCotizacionPdf(
-      {
-        idComprobante: idComprobante,
-        idCliente: idPersona,
+    const response = await obtenerPreCotizacionPdf({
+      idComprobante: idComprobante,
+      idCliente: idPersona,
 
-        idMoneda: idMoneda,
-        idUsuario: idUsuario,
-        idSucursal: idSucursal,
-        nota: nota,
+      idMoneda: idMoneda,
+      idUsuario: idUsuario,
+      idSucursal: idSucursal,
+      nota: nota,
 
-        detalle: detalles,
-      },
+      detalle: detalles,
+    },
       type,
       abort.signal,
     );
@@ -849,7 +863,7 @@ class CotizacionCrear extends CustomComponent {
 
       success();
 
-      printJS({
+      pdfVisualizer.printer({
         printable: base64,
         type: 'pdf',
         base64: true,
@@ -862,7 +876,10 @@ class CotizacionCrear extends CustomComponent {
 
       error();
 
-      this.alert.warning('Cotización', response.getMessage());
+      alertKit.warning({
+        title: "Cotización",
+        message: response.getMessage(),
+      });
     }
   };
 
@@ -893,93 +910,16 @@ class CotizacionCrear extends CustomComponent {
   |
   */
 
-  renderTotal() {
-    let subTotal = 0;
-    let total = 0;
-
-    for (const item of this.state.detalles) {
-      const cantidad = item.cantidad;
-      const valor = item.precio;
-
-      const porcentaje = item.porcentajeImpuesto;
-
-      const valorActual = cantidad * valor;
-      const valorSubNeto = calculateTaxBruto(porcentaje, valorActual);
-      const valorImpuesto = calculateTax(porcentaje, valorSubNeto);
-      const valorNeto = valorSubNeto + valorImpuesto;
-
-      subTotal += valorSubNeto;
-      total += valorNeto;
-    }
-
-    const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.precio;
-        const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
-        const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
-
-        const existingImpuesto = acc.find(
-          (imp) => imp.idImpuesto === item.idImpuesto,
-        );
-
-        if (existingImpuesto) {
-          existingImpuesto.valor += impuestoTotal;
-        } else {
-          acc.push({
-            idImpuesto: item.idImpuesto,
-            nombre: item.nombreImpuesto,
-            valor: impuestoTotal,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      return resultado.map((impuesto, index) => {
-        return (
-          <div
-            key={index}
-            className="d-flex justify-content-between align-items-center text-secondary"
-          >
-            <p className="m-0 text-secondary">{impuesto.nombre}:</p>
-            <p className="m-0 text-secondary">
-              {formatCurrency(impuesto.valor, this.state.codiso)}
-            </p>
-          </div>
-        );
-      });
-    };
-
-    return (
-      <>
-        <div className="d-flex justify-content-between align-items-center text-secondary">
-          <p className="m-0 text-secondary">Sub Total:</p>
-          <p className="m-0 text-secondary">
-            {formatCurrency(subTotal, this.state.codiso)}
-          </p>
-        </div>
-        {impuestosGenerado()}
-        <Button className="btn-success w-100" onClick={this.handleGuardar}>
-          <div className="d-flex justify-content-between align-items-center py-1">
-            <p className="m-0 text-xl">Total:</p>
-            <p className="m-0 text-xl">
-              {formatCurrency(total, this.state.codiso)}
-            </p>
-          </div>
-        </Button>
-      </>
-    );
-  }
-
   render() {
     return (
-      <PosContainerWrapper className={'flex-column bg-white'}>
+      <PosContainerWrapper>
         <SpinnerView
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
 
         <ModalProducto
+          title="Cotización"
           ref={this.refModalProducto}
           isOpen={this.state.isOpenProducto}
           onClose={this.handleCloseProducto}
@@ -992,8 +932,8 @@ class CotizacionCrear extends CustomComponent {
         <ModalPersona
           contentLabel="Modal Cliente"
           titleHeader="Agregar Cliente"
-          isOpen={this.state.isOpenPersona}
-          onClose={this.handleCloseModalPersona}
+          isOpen={this.state.isOpenCliente}
+          onClose={this.handleCloseModalCliente}
           idUsuario={this.state.idUsuario}
         />
 
@@ -1008,345 +948,74 @@ class CotizacionCrear extends CustomComponent {
         />
 
         <SidebarConfiguration
+          menus={this.props.token.userToken.menus}
           idSidebarConfiguration={this.idSidebarConfiguration}
+
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
           idImpuesto={this.state.idImpuesto}
           handleSelectIdImpuesto={this.handleSelectIdImpuesto}
+
           monedas={this.state.monedas}
           refMoneda={this.refMoneda}
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
+
           almacenes={this.state.almacenes}
           refAlmacen={this.refAlmacen}
           idAlmacen={this.state.idAlmacen}
           handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
+
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
+
           refNota={this.refNota}
           nota={this.state.nota}
           handleInputNota={this.handleInputNota}
+
           handleSaveOptions={this.handleSaveOptions}
           handleCloseOptions={this.handleCloseOptions}
         />
 
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100">
-            {/*  */}
-            <div
-              className="w-100 d-flex flex-column position-relative"
-              style={{
-                flex: '0 0 60%',
-              }}
-            >
-              <div
-                className="d-flex align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="d-flex">
-                  <Button className="btn-link" onClick={this.handleCerrar}>
-                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
-                  </Button>
-                </div>
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full">
+            {/* PANEL IZQUIERDO */}
+            <PanelIzquierdo
+              title="Cotización"
+              subTitle="Crear"
+              loadingProducto={this.state.loadingProducto}
+              productos={this.state.productos}
+              codiso={this.state.codiso}
+              refProducto={this.refProducto}
+              refProductoValue={this.refProductoValue}
+              handleCerrar={this.handleCerrar}
+              handleFilterProducto={this.handleFilterProducto}
+              handleSelectItemProducto={this.handleSelectItemProducto}
+            />
 
-                <div className="py-3 d-flex align-items-center">
-                  <p className="h5 m-0">
-                    Crear Cótización{' '}
-                    <i className="fa fa-plus text-secondary"></i>{' '}
-                  </p>
-                </div>
-              </div>
+             {/* PANEL DERECHO  */}
+            <PanelDerecho
+              comprobantes={this.state.comprobantes}
+              refComprobante={this.refComprobante}
+              idComprobante={this.state.idComprobante}
+              handleSelectComprobante={this.handleSelectComprobante}
+              
+              clientes={this.state.clientes}
+              refCliente={this.refCliente}
+              refClienteValue={this.refClienteValue}
+              handleFilterCliente={this.handleFilterCliente}
+              handleOpenModalCliente={this.handleOpenModalCliente}
+              handleClearInputCliente={this.handleClearInputCliente}
+              handleSelectItemCliente={this.handleSelectItemCliente}
 
-              <div
-                className="px-3 py-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <Search
-                  ref={this.refProducto}
-                  refInput={this.refProductoValue}
-                  group={true}
-                  iconLeft={<i className="bi bi-search "></i>}
-                  onSearch={this.handleFilterProducto}
-                  placeholder="Buscar..."
-                  buttonRight={
-                    <Button
-                      className="btn-outline-secondary"
-                      title="Limpiar"
-                      onClick={() => {
-                        this.refProducto.current.restart();
-                        this.refProductoValue.current.focus();
-                      }}
-                    >
-                      <i className="fa fa-close"></i>
-                    </Button>
-                  }
-                />
-              </div>
-
-              <div
-                className={
-                  !isEmpty(this.state.productos)
-                    ? 'px-3 h-100 overflow-auto p-3'
-                    : 'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {this.state.loadingProducto && (
-                  <div className="position-relative w-100 h-100 text-center">
-                    <SpinnerTransparent
-                      loading={true}
-                      message={'Buscando productos...'}
-                    />
-                  </div>
-                )}
-
-                {!this.state.loadingProducto &&
-                  isEmpty(this.state.productos) && (
-                    <div className="text-center position-relative">
-                      <i className="bi bi-cart4 text-secondary text-2xl"></i>
-                      <p className="text-secondary text-lg mb-0">
-                        Use la barra de busqueda para encontrar su producto.
-                      </p>
-                    </div>
-                  )}
-
-                <div className="d-flex justify-content-center flex-wrap gap-4">
-                  {this.state.productos.map((item, index) => (
-                    <Button
-                      key={index}
-                      className="btn-light bg-white"
-                      style={{
-                        border: '1px solid #e2e8f0',
-                        width: '16rem',
-                      }}
-                      onClick={() => this.handleSelectItemProducto(item)}
-                    >
-                      <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                        <div className="d-flex justify-content-center align-items-center flex-column mb-2">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className="mb-2 object-contain"
-                          />
-                          {
-                            item.idTipoProducto === SERVICIO ? (
-                              <p className="badge badge-success text-base">
-                                SERVICIO
-                              </p>
-                            ) : (
-                              <p
-                                className={`${item.idTipoProducto === PRODUCTO &&
-                                  item.cantidad <= 0
-                                  ? 'badge badge-danger text-base'
-                                  : 'badge badge-success text-base'
-                                  } `}
-                              >
-                                STOCK: {formatDecimal(item.cantidad)}
-                              </p>
-                            )
-                          }
-                        </div>
-
-                        <div className="d-flex justify-content-center align-items-center flex-column">
-                          <span className="text-sm">{item.codigo}</span>
-                          <p className="m-0 text-lg">{item.nombre}</p>
-                          <p className="m-0 text-xl font-weight-bold">
-                            {formatCurrency(item.precio, this.state.codiso)}{' '}
-                            <span className="text-sm">x {item.unidad}</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="w-100 text-left text-sm">
-                        Almacen: {item.almacen}
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/*  */}
-            <div
-              className="d-flex flex-column position-relative bg-white"
-              style={{
-                flex: '1 1 100%',
-                borderLeft: '1px solid #cbd5e1',
-              }}
-            >
-              <div
-                className="d-flex justify-content-between align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="py-3">
-                  <p className="h5 m-0">Resumen</p>
-                </div>
-
-                <div className="d-flex justify-content-end">
-                  <Button className="btn-link" onClick={this.handleLimpiar}>
-                    <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
-                  </Button>
-                  <Button className="btn-link" onClick={this.handleOpenOptions}>
-                    <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className="d-flex flex-column px-3 pt-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="form-group">
-                  <Select
-                    group={false}
-                    ref={this.refComprobante}
-                    value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}
-                  >
-                    <option value="">-- Comprobantes --</option>
-                    {this.state.comprobantes.map((item, index) => (
-                      <option key={index} value={item.idComprobante}>
-                        {item.nombre + ' (' + item.serie + ')'}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <div>
-                  <SearchInput
-                    ref={this.refCliente}
-                    placeholder="Filtrar clientes..."
-                    refValue={this.refClienteValue}
-                    data={this.state.clientes}
-                    handleClearInput={this.handleClearInputCliente}
-                    handleFilter={this.handleFilterCliente}
-                    handleSelectItem={this.handleSelectItemCliente}
-                    customButton={
-                      <Button
-                        className="btn-outline-primary d-flex align-items-center"
-                        onClick={this.handleOpenModalPersona}
-                      >
-                        <i className="fa fa-user-plus"></i>
-                        <div className="ml-2">Nuevo</div>
-                      </Button>
-                    }
-                    renderItem={(value) => (
-                      <>{value.documento + ' - ' + value.informacion}</>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div
-                className={
-                  isEmpty(this.state.detalles)
-                    ? 'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
-                    : 'd-flex flex-column text-center rounded h-100 overflow-auto'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {isEmpty(this.state.detalles) && (
-                  <div className="text-center">
-                    <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-lg mb-0">
-                      Aquí verás los productos que elijas en tu próxima pedido
-                    </p>
-                  </div>
-                )}
-
-                {this.state.detalles.map((item, index) => (
-                  <div
-                    key={index}
-                    className="d-grid px-3 position-relative align-items-center bg-white"
-                    style={{
-                      gridTemplateColumns: '60% 20% 20%',
-                      borderBottom: '1px solid #e2e8f0',
-                    }}
-                  >
-                    {/* Primera columna (imagen y texto) */}
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={item.imagen}
-                        alt={item.nombre}
-                        width={80}
-                        height={80}
-                        className="object-contain"
-                      />
-
-                      <div className="p-3 text-left">
-                        <p className="m-0 text-sm"> {item.codigo}</p>
-                        <p className="m-0 text-base font-weight-bold text-break">
-                          {item.nombre}
-                        </p>
-                        <p className="m-0">
-                          {formatCurrency(item.precio, this.state.codiso)}{' '}
-                          <small>x {item.nombreMedida}</small>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Segundo columna (precio total) y opciones */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="h-100 text-xml">
-                        {rounded(item.cantidad)}
-                      </div>
-                    </div>
-
-                    {/* Tercera columna (precio total) y opciones */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="h-100 text-lg">
-                        {formatCurrency(
-                          item.cantidad * item.precio,
-                          this.state.codiso,
-                        )}
-                      </div>
-
-                      <div className="d-flex align-items-end justify-content-end gap-4">
-                        <Button
-                          className="btn-link"
-                          onClick={() => this.handleOpenModalProducto(item)}
-                        >
-                          <i className="fa fa-edit text-secondary text-xl"></i>
-                        </Button>
-                        <Button
-                          className="btn-link"
-                          onClick={() =>
-                            this.handleRemoverProducto(item.idProducto)
-                          }
-                        >
-                          <i className="fa fa-trash text-secondary text-xl"></i>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div
-                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
-                style={{ borderTop: '1px solid #e2e8f0' }}
-              >
-                {this.renderTotal()}
-
-                <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 text-secondary">Cantidad:</p>
-                  <p className="m-0 text-secondary">
-                    {this.state.detalles.length === 1
-                      ? this.state.detalles.length + ' Producto'
-                      : this.state.detalles.length + ' Productos'}{' '}
-                  </p>
-                </div>
-              </div>
-            </div>
+              detalles={this.state.detalles}
+              codiso={this.state.codiso}
+              handleGuardar={this.handleGuardar}
+              handleOpenOptions={this.handleOpenOptions}
+              handleOpenModalProducto={this.handleOpenModalProducto}
+              handleRemoverProducto={this.handleRemoverProducto}
+            />
           </div>
         </div>
       </PosContainerWrapper>
@@ -1357,6 +1026,7 @@ class CotizacionCrear extends CustomComponent {
 CotizacionCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
+      menus: PropTypes.array.isRequired,
       idUsuario: PropTypes.string.isRequired,
     }).isRequired,
     project: PropTypes.shape({

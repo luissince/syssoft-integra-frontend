@@ -2,10 +2,7 @@ import React from 'react';
 import { PosContainerWrapper } from '../../../../../../components/Container';
 import CustomComponent from '../../../../../../model/class/custom-component';
 import {
-  calculateTax,
-  calculateTaxBruto,
   isEmpty,
-  formatCurrency,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { ORDEN_DE_COMPRA } from '../../../../../../model/types/tipo-comprobante';
@@ -27,7 +24,6 @@ import ModalProducto from '../component/ModalProducto';
 import {
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import Button from '../../../../../../components/Button';
 import {
   clearCrearOrdenCompra,
   setCrearOrdenCompraLocal,
@@ -42,8 +38,8 @@ import {
   SERVICIO,
 } from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
-import PanelIzquierdo from './component/PanelIzquierdo';
-import PanelDerecho from './component/PanelDerecho';
+import PanelIzquierdo from '../../../component/PanelIzquierdo';
+import PanelDerecho from '../../../component/PanelDerecho';
 import pdfVisualizer from 'pdf-visualizer';
 
 /**
@@ -863,6 +859,8 @@ class OrdenCompraCrear extends CustomComponent {
           <div className="flex w-full h-full">
             {/* PANEL IZQUIERDO */}
             <PanelIzquierdo
+              title="Orden de Compra"
+              subTitle="CREAR"
               loadingProducto={this.state.loadingProducto}
               productos={this.state.productos}
               codiso={this.state.codiso}
@@ -875,6 +873,7 @@ class OrdenCompraCrear extends CustomComponent {
 
             {/* PANEL DERECHO  */}
             <PanelDerecho
+
               comprobantes={this.state.comprobantes}
               refComprobante={this.refComprobante}
               idComprobante={this.state.idComprobante}
@@ -888,13 +887,18 @@ class OrdenCompraCrear extends CustomComponent {
               handleClearInputProveedor={this.handleClearInputProveedor}
               handleSelectItemProveedor={this.handleSelectItemProveedor}
 
+              almacenes={this.state.almacenes}
+
               detalles={this.state.detalles}
               codiso={this.state.codiso}
-              handleGuardar={this.handleGuardar}
+
               handleLimpiar={this.handleLimpiar}
               handleOpenOptions={this.handleOpenOptions}
               handleOpenModalProducto={this.handleOpenModalProducto}
+              
               handleRemoverProducto={this.handleRemoverProducto}
+
+              handleGuardar={this.handleGuardar}
             />
           </div>
         </div>
@@ -906,6 +910,7 @@ class OrdenCompraCrear extends CustomComponent {
 OrdenCompraCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
+      menus: PropTypes.array.isRequired,
       idUsuario: PropTypes.string.isRequired,
     }).isRequired,
     project: PropTypes.shape({

@@ -219,7 +219,6 @@ class ModalTransaccion extends CustomComponent {
   };
 
   handleProcessContado = async () => {
-    console.log("handleProcessContado");
     const { formaPago, bancosAgregados, importeTotal, nota } = this.state;
 
     let metodoPagosLista = bancosAgregados.map((item) => ({ ...item }));

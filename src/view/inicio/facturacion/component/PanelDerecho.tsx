@@ -4,7 +4,7 @@ import SearchInput from "@/components/SearchInput";
 import Select from "@/components/Select";
 import { HeaderActions } from "@/components/Title";
 import { images } from "@/helper";
-import { calculateTax, calculateTaxBruto, isEmpty, formatCurrency, rounded } from "@/helper/utils.helper";
+import { calculateTax, calculateTaxBruto, isEmpty, formatCurrency } from "@/helper/utils.helper";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -13,19 +13,18 @@ interface Props {
   idComprobante: string;
   handleSelectComprobante: () => void;
 
-  proveedores: Array<any>;
-  refProveedor: React.RefObject<any>;
-  refProveedorValue: React.RefObject<any>;
-  handleFilterProveedor: () => void;
-  handleOpenModalProveedor: () => void;
-  handleClearInputProveedor: () => void;
-  handleSelectItemProveedor: () => void;
+  clientes: Array<any>;
+  refCliente: React.RefObject<any>;
+  refClienteValue: React.RefObject<any>;
+  handleFilterCliente: () => void;
+  handleOpenModalCliente: () => void;
+  handleClearInputCliente: () => void;
+  handleSelectItemCliente: () => void;
 
   detalles: Array<any>;
   codiso: string;
 
   handleGuardar: () => void;
-  handleLimpiar: () => void;
   handleOpenOptions: () => void;
   handleOpenModalProducto: (item: any, tipo: string) => void;
   handleRemoverProducto: (idProducto: string) => void;
@@ -37,18 +36,17 @@ const PanelDerecho: React.FC<Props> = ({
   idComprobante,
   handleSelectComprobante,
 
-  proveedores,
-  refProveedor,
-  refProveedorValue,
-  handleFilterProveedor,
-  handleOpenModalProveedor,
-  handleClearInputProveedor,
-  handleSelectItemProveedor,
+  clientes,
+  refCliente,
+  refClienteValue,
+  handleFilterCliente,
+  handleOpenModalCliente,
+  handleClearInputCliente,
+  handleSelectItemCliente,
 
   detalles,
   codiso,
   handleGuardar,
-  handleLimpiar,
   handleOpenOptions,
   handleOpenModalProducto,
   handleRemoverProducto,
@@ -59,13 +57,8 @@ const PanelDerecho: React.FC<Props> = ({
     let total = 0;
 
     for (const item of detalles) {
-      const cantidad = !item.lote
-        ? item.cantidad
-        : item.lotes.reduce(
-          (acumulador: number, item: any) => acumulador + Number(item.cantidad.value),
-          0,
-        );
-      const valor = item.costo;
+      const cantidad = item.cantidad;
+      const valor = item.precio;
 
       const porcentaje = item.porcentajeImpuesto;
 
@@ -80,13 +73,7 @@ const PanelDerecho: React.FC<Props> = ({
 
     const impuestosGenerado = () => {
       const resultado = detalles.reduce((acc, item) => {
-        const cantidad = !item.lote
-          ? item.cantidad
-          : item.lotes.reduce(
-            (acumulador: number, item: any) => acumulador + Number(item.cantidad.value),
-            0,
-          );
-        const total = cantidad * item.costo;
+        const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
 
@@ -150,12 +137,7 @@ const PanelDerecho: React.FC<Props> = ({
       {/* Header */}
       <HeaderActions
         title="Resumen"
-        actions={[         
-          {
-            icon: <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>,
-            onClick: handleLimpiar,
-            title: "Limpiar",
-          },
+        actions={[
           {
             icon: <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>,
             onClick: handleOpenOptions,
@@ -181,17 +163,18 @@ const PanelDerecho: React.FC<Props> = ({
         </Select>
 
         <SearchInput
-          ref={refProveedor}
-          placeholder="Filtrar proveedores..."
-          refValue={refProveedorValue}
-          data={proveedores}
-          handleClearInput={handleClearInputProveedor}
-          handleFilter={handleFilterProveedor}
-          handleSelectItem={handleSelectItemProveedor}
+          ref={refCliente}
+          placeholder="Filtrar clientes..."
+          refValue={refClienteValue}
+          data={clientes}
+          handleClearInput={handleClearInputCliente}
+          handleFilter={handleFilterCliente}
+          handleSelectItem={handleSelectItemCliente}
+          classNameContainer="relative"
           customButton={
             <Button
               className="btn-outline-primary !flex items-center"
-              onClick={handleOpenModalProveedor}
+              onClick={handleOpenModalCliente}
             >
               <i className="fa fa-user-plus"></i>
               <div className="ml-2">Nuevo</div>
@@ -205,6 +188,7 @@ const PanelDerecho: React.FC<Props> = ({
 
       {/* Detalles */}
       <DetalleGrid
+        operation={"addition"}
         detalles={detalles}
         codiso={codiso}
         images={images}

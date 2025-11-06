@@ -6,11 +6,12 @@ import Column from '../../../../../../components/Column';
 import Input from '../../../../../../components/Input';
 import Button from '../../../../../../components/Button';
 import {
-  alertWarning,
   getNumber,
   isNumeric,
   formatCurrency,
+  rounded,
 } from '../../../../../../helper/utils.helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -49,22 +50,25 @@ class ModalProceso extends React.Component {
 
   handleOnSummit = async () => {
     if (!isNumeric(this.state.monto)) {
-      alertWarning('Cuentas por Pagar', 'Ingrese un monto valido.', () => {
+      alertKit.warning({
+        title: 'Cuentas por Pagar',
+        message: 'Ingrese un monto valido.',
+      }, () => {
         this.refMonto.current.focus();
       });
       return;
     }
 
-    const valor =
-      this.state.pago - this.state.pagado - getNumber(this.state.monto);
+    const restante = rounded(this.state.pago - this.state.pagado, 2, "number");
+    const valor = restante - getNumber(this.state.monto);
+
     if (valor < 0) {
-      alertWarning(
-        'Cuentas por Pagar',
-        'El monto a cobrar es mayor que el restante.',
-        () => {
-          this.refMonto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Cuentas por Pagar',
+        message: 'El monto a pagar es mayor que el restante.',
+      }, () => {
+        this.refMonto.current.focus();
+      });
       return;
     }
 
@@ -136,8 +140,8 @@ class ModalProceso extends React.Component {
                   Saldo Restante:{' '}
                   {formatCurrency(
                     this.state.pago -
-                      this.state.pagado -
-                      getNumber(this.state.monto),
+                    this.state.pagado -
+                    getNumber(this.state.monto),
                     this.props.codiso,
                   )}
                 </p>

@@ -44,7 +44,6 @@ import { connect } from 'react-redux';
 import Title from '../../../../../components/Title';
 import Button from '../../../../../components/Button';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import pdfVisualizer from 'pdf-visualizer';
 import {
   ModalImpresion,
@@ -53,6 +52,7 @@ import {
 import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
 import DropdownActions from '../../../../../components/DropdownActions';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -106,8 +106,6 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    this.alert = new SweetAlert();
 
     // Referencia del modal proceso
     this.refModalProceso = React.createRef();
@@ -177,7 +175,10 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      this.alert.warning('Cuenta por Cobrar', response.getMessage(), () => {
+      alertKit.warning({
+        title: 'Cuenta por Cobrar',
+        message: response.getMessage(),
+      }, () => {
         this.close();
       });
       return;
@@ -302,7 +303,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
@@ -380,49 +381,57 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     _,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { idVenta, cuota, idUsuario, monto } = this.state;
 
-    this.alert.dialog(
-      'Cuenta por Cobrar',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idVenta,
-            idCuota: cuota.idCuota,
-            idUsuario,
-            monto,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
-
-          await callback();
-          this.alert.information(
-            'Cuenta por Cobrar',
-            'Procesando información...',
-          );
-
-          const response = await createAccountsReceivableVenta(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(cuota.idCuota);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Cuenta por Cobrar', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: 'Cuenta por Cobrar',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const data = {
+        idVenta,
+        idCuota: cuota.idCuota,
+        idUsuario,
+        monto,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback();
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await createAccountsReceivableVenta(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(cuota.idCuota);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cuenta por Cobrar',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {
@@ -433,38 +442,48 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   // Accion para anular el cobro
   //------------------------------------------------------------------------------------------
   handleCancelSale = async (idCuota, idTransaccion) => {
-    this.alert.dialog(
-      'Cuenta por Cobrar',
-      '¿Estás seguro de anular?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idCuota: idCuota,
-            idTransaccion: idTransaccion,
-            idVenta: this.state.idVenta,
-          };
-
-          this.alert.information(
-            'Cuenta por Cobrar',
-            'Procesando información...',
-          );
-
-          const response = await cancelAccountsReceivableVenta(params);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.success('Cuenta por Cobrar', response.data, () => {
-              this.close();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Cuenta por Cobrar', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: 'Cuenta por Cobrar',
+      message: '¿Estás seguro de anular?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idCuota: idCuota,
+        idTransaccion: idTransaccion,
+        idVenta: this.state.idVenta,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await cancelAccountsReceivableVenta(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Cuenta por Cobrar',
+          message: response.data,
+        }, () => {
+          this.close();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cuenta por Cobrar',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -626,9 +645,8 @@ class CuentasPorCobrarAbonar extends CustomComponent {
             <TableCell>{cuota.fecha}</TableCell>
             <TableCell>{'CUOTA ' + cuota.cuota}</TableCell>
             <TableCell
-              className={`${
-                cuota.estado === 0 ? 'text-danger' : 'text-success'
-              }`}
+              className={`${cuota.estado === 0 ? 'text-danger' : 'text-success'
+                }`}
             >
               {cuota.estado === 0 ? 'Por Cobrar' : 'Cobrado'}
             </TableCell>
@@ -787,7 +805,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           importeTotal={this.state.monto}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={() => { }}
         />
 
         <ModalImpresion

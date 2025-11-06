@@ -36,22 +36,9 @@ import {
   GUIA_DE_REMISION,
   NOTA_DE_CREDITO,
 } from '../../../../model/types/tipo-comprobante';
-import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
+import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../components/Table';
-import Select from '../../../../components/Select';
 import Button from '../../../../components/Button';
-import Input from '../../../../components/Input';
 import Search from '../../../../components/Search';
 import {
   setListaCpeSunatData,
@@ -63,6 +50,7 @@ import { toastKit, ToastStyle } from 'toast-kit';
 import { Link } from 'react-router-dom';
 import DropdownActions from '../../../../components/DropdownActions';
 import { alertKit } from 'alert-kit';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -282,7 +270,7 @@ class CpeElectronicos extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   };
@@ -292,7 +280,7 @@ class CpeElectronicos extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
@@ -344,19 +332,16 @@ class CpeElectronicos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -820,20 +805,30 @@ class CpeElectronicos extends CustomComponent {
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition",
+                  vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+                )
+              }
             >
               <i className="bi bi-list-ul"></i>
               <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
               onClick={() => this.handleChangeView('cuadricula')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "px-4 py-2",
+                  "text-sm font-medium",
+                  "rounded-md transition",
+                  vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+                )
+              }
             >
               <i className="bi bi-grid-3x3"></i>
               <span className="hidden sm:inline">Cuadrícula</span>

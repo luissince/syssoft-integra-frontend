@@ -55,16 +55,13 @@ class SearchInput extends React.Component {
   };
 
   restart = async () => {
-    this.setState(
-      {
-        searchTerm: '',
-        highlightedIndex: -1,
-      },
-      () => {
-        this.selectItem = false;
-        this.props.refValue.current.focus();
-      },
-    );
+    this.setState({
+      searchTerm: '',
+      highlightedIndex: -1,
+    }, () => {
+      this.selectItem = false;
+      this.props.refValue.current.focus();
+    });
   };
 
   handleWindowClick = (event) => {
@@ -147,87 +144,6 @@ class SearchInput extends React.Component {
     }
   };
 
-  // handleKeyUp = (event) => {
-  //   event.stopPropagation();
-
-  //   const dataResult = this.refContentResult.current;
-  //   if (dataResult == null) return;
-
-  //   const data = this.props.data;
-
-  //   if (isEmpty(data)) return;
-
-  //   if (event.key === "ArrowDown" || event.keyCode === 40) {
-
-  //     dataResult.focus();
-
-  //     let children = dataResult.children;
-
-  //     if (children.length > 0) {
-  //       this.index = 0;
-  //       for (const item of children) {
-  //         item.classList.remove('active');
-  //       }
-  //       children[this.index].classList.add('active');
-  //       children[this.index].focus();
-  //     }
-  //   }
-
-  //   if (event.key === "Enter" || event.keyCode === 13) {
-
-  //     dataResult.focus();
-
-  //     let children = dataResult.children;
-
-  //     if (children.length > 0) {
-  //       this.index = 0;
-  //       children[this.index].classList.add('active');
-  //       children[this.index].focus();
-  //     }
-  //   }
-  // }
-
-  // handleKeyDown = (event) => {
-  //   event.stopPropagation();
-
-  //   const dataResult = this.refContentResult.current;
-  //   if (dataResult == null) return;
-
-  //   const children = dataResult.children;
-
-  //   if (event.key === "Escape" || event.keyCode === 27) {
-  //     event.preventDefault();
-  //     this.props.refValue.current.focus();
-  //     this.index = -1;
-  //   }
-
-  //   if (event.key === "ArrowUp" || event.keyCode === 38) {
-  //     event.preventDefault();
-  //     if (this.index !== 0) {
-  //       if (this.index > 0) {
-  //         this.index--;
-  //         for (const item of children) {
-  //           item.classList.remove('active');
-  //         }
-  //         children[this.index].classList.add('active');
-  //         children[this.index].focus();
-  //       }
-  //     }
-  //   }
-
-  //   if (event.key === "ArrowDown" || event.keyCode === 40) {
-  //     event.preventDefault();
-  //     if (this.index < children.length - 1) {
-  //       this.index++;
-  //       for (const item of children) {
-  //         item.classList.remove('active');
-  //       }
-  //       children[this.index].classList.add('active');
-  //       children[this.index].focus();
-  //     }
-  //   }
-  // }
-
   handleInputChange = (event) => {
     const value = this.selectItem ? '' : event.target.value;
     this.setState({ searchTerm: value });
@@ -279,11 +195,10 @@ class SearchInput extends React.Component {
 
     return (
       <div
-        className={`${
-          classNameContainer
-            ? classNameContainer
-            : 'mb-3 relative'
-        }`}
+        className={`${classNameContainer
+          ? classNameContainer
+          : 'mb-3 relative'
+          }`}
       >
         <Input
           autoFocus={autoFocus}
@@ -316,29 +231,41 @@ class SearchInput extends React.Component {
             </>
           }
         />
-        {!isEmpty(data) && (
-          <ul
-            className="dataResult"
-            ref={this.refContentResult}
+
+        {/* {
+          isLoading && (
+            <div className="dataResult" ref={this.refContentResult}>
+              <div className="h-full flex justify-center items-center gap-3">
+                <i className="fa fa-spinner fa-spin"></i> Cargando...
+              </div>
+            </div>
+          )
+        } */}
+
+        {
+          !isEmpty(data) && (
+            <ul
+              className="dataResult"
+              ref={this.refContentResult}
             // tabIndex="-1"
             // onKeyDown={this.handleKeyDown}
-          >
-            {data.map((value, index) => (
-              <Button
-                key={index}
-                contentClassName={`list-group-item list-group-item-action ${
-                  index === highlightedIndex ? 'active' : ''
-                }`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleSelectItem(value);
-                }}
-              >
-                {renderItem(value)}
-              </Button>
-            ))}
-          </ul>
-        )}
+            >
+              {data.map((value, index) => (
+                <Button
+                  key={index}
+                  contentClassName={`list-group-item list-group-item-action ${index === highlightedIndex ? 'active' : ''
+                    }`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleSelectItem(value);
+                  }}
+                >
+                  {renderItem(value)}
+                </Button>
+              ))}
+            </ul>
+          )
+        }
       </div>
     );
   }
@@ -347,6 +274,7 @@ class SearchInput extends React.Component {
 SearchInput.propTypes = {
   classNameContainer: PropTypes.string,
   disabled: PropTypes.bool,
+  isLoading: PropTypes.bool,
   debounceTime: PropTypes.number,
 
   autoFocus: PropTypes.bool,

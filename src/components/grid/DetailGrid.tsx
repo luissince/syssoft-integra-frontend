@@ -1,8 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatCurrency, isEmpty, rounded } from "@/helper/utils.helper";
-import Image from "../Image";
-import Button from "../Button";
+import Image from "@/components/Image";
+import Button from "@/components/Button";
+
+type Operation = "addition" | "subtraction";
 
 interface DetalleItem {
   idProducto: number | string;
@@ -11,11 +13,13 @@ interface DetalleItem {
   imagen: string;
   cantidad: number;
   costo: number;
+  precio: number;
   lote?: boolean;
   lotes?: { cantidad: { value: number } }[];
 }
 
 interface DetalleGridProps {
+  operation: Operation;
   detalles: DetalleItem[];
   codiso?: string;
   images: { noImage: string };
@@ -25,6 +29,7 @@ interface DetalleGridProps {
 }
 
 const DetalleGrid: React.FC<DetalleGridProps> = ({
+  operation,
   detalles,
   codiso = "PEN",
   images,
@@ -49,14 +54,21 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
       )}
 
       {detalles.map((item, index) => {
-        const cantidad = !item.lote
-          ? item.cantidad
-          : item.lotes?.reduce(
-            (acc, l) => acc + Number(l.cantidad.value),
-            0
-          ) ?? 0;
 
-        const total = cantidad * item.costo;
+        let cantidad = 0;
+        if (item.lote) {
+          cantidad = item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
+        } else {
+          cantidad = item.cantidad ?? 0;
+        }
+
+        let total = 0;
+
+        if (operation === "addition") {
+          total = cantidad * item.precio;
+        } else {
+          total = cantidad * item.costo;
+        }
 
         return (
           <div
@@ -86,14 +98,20 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
                   {item.nombre}
                 </p>
                 <p>
-                  {formatCurrency(item.costo, codiso)}
+                  {
+                    operation === "addition"
+                      ? formatCurrency(item.precio, codiso)
+                      : formatCurrency(item.costo, codiso)
+                  }
                 </p>
               </div>
             </div>
 
             {/* Columna 2: cantidad */}
             <div className="flex flex-col justify-end items-center">
-              <div className="h-full text-base">{rounded(cantidad)}</div>
+              <div className="h-full text-base">
+                {rounded(cantidad)}
+              </div>
             </div>
 
             {/* Columna 3: total y acciones */}

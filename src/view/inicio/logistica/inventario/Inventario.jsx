@@ -171,8 +171,7 @@ class Inventario extends CustomComponent {
         await this.loadingSummary();
         await this.loadingInit();
         this.updateReduxState();
-      },
-      );
+      });
     }
   }
 
@@ -209,7 +208,7 @@ class Inventario extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
@@ -236,7 +235,7 @@ class Inventario extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   };
@@ -267,7 +266,7 @@ class Inventario extends CustomComponent {
       const result = response.data.result;
       const total = response.data.total;
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(total) / this.state.filasPorPagina),)
       );
 
       this.setState({

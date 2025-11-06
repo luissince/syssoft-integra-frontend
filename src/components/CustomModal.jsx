@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
 import '../resource/css/customModal.css';
@@ -5,22 +6,21 @@ import {
   keyNumberFloat,
   keyNumberInteger,
   keyNumberPhone,
-} from '../helper/utils.helper';
-import React, { Component } from 'react';
-import Button from './Button';
+} from '@/helper/utils.helper';
+import Button from '@/components/Button';
 
 const customStyles = {
   overlay: {
-    position: 'fixed',
+    position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     zIndex: 1000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 };
 
@@ -177,7 +177,7 @@ export const CustomModalForm = ({
         }}
       >
         <div
-          className={`header-cm ${!showClose ? 'py-3' : ''}`}
+          className={`header-cm ${!showClose ? 'py-3' : ""}`}
           onMouseDown={(event) => contentRef.current.handleMouseDown(event)}
         >
           <p className="h6">{titleHeader}</p>
@@ -225,7 +225,7 @@ CustomModalForm.propTypes = {
 };
 
 export const CustomModalContentForm = (props) => {
-  const { className = '', onSubmit, children } = props;
+  const { className = "", onSubmit, children } = props;
 
   return (
     <form
@@ -266,7 +266,7 @@ CustomModalContentForm.propTypes = {
 };
 
 export const CustomModalContentScroll = (props) => {
-  const { className = '', children } = props;
+  const { className = "", children } = props;
 
   return (
     <div className={`flex flex-col h-full ${className}`}>{children}</div>
@@ -288,14 +288,14 @@ export const CustomModalContentHeader = (props) => {
   const {
     showClose = true,
     isMoveable = true,
-    className = '',
+    className = "",
     contentRef,
     children,
   } = props;
   return (
     <div
-      className={`header-cm ${className} ${!showClose ? 'py-3' : ''} ${
-        isMoveable ? 'cursor-move' : 'cursor-default'
+      className={`header-cm ${className} ${!showClose ? 'py-3' : ""} ${
+        isMoveable ? "cursor-move" : "cursor-default"
       }`}
       onMouseDown={(event) =>
         isMoveable && contentRef.current.handleMouseDown(event)
@@ -329,7 +329,7 @@ CustomModalContentHeader.propTypes = {
  * @returns
  */
 export const CustomModalContentSubHeader = (props) => {
-  const { className = '', children } = props;
+  const { className = "", children } = props;
   return <div className={`sub-header-cm ${className}`}>{children}</div>;
 };
 
@@ -345,7 +345,7 @@ CustomModalContentSubHeader.propTypes = {
  * @returns
  */
 export const CustomModalContentBody = (props) => {
-  const { className = '', children } = props;
+  const { className = "", children } = props;
 
   return <div className={`body-cm ${className}`}>{children}</div>;
 };
@@ -356,7 +356,7 @@ CustomModalContentBody.propTypes = {
 };
 
 export const CustomModalContentOverflow = (props) => {
-  const { className = '', children } = props;
+  const { className = "", children } = props;
 
   return (
     <div className={`flex w-full h-full ${className}`}>
@@ -381,7 +381,7 @@ CustomModalContentOverflow.propTypes = {
  * @returns
  */
 export const CustomModalContentFooter = (props) => {
-  const { className = '', children } = props;
+  const { className = "", children } = props;
 
   return (
     <div className={`${className ? className : 'footer-cm'}`}>{children}</div>
