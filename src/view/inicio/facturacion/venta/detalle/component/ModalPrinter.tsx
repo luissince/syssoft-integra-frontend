@@ -169,7 +169,7 @@ const ModalPrinter: React.FC<Props> = ({ isOpen, handleClose, idVenta }) => {
                             <button
                                 key={size}
                                 type="button"
-                                className={`px-3 py-2 text-sm rounded-lg border ${selectedSize === size
+                                className={`px-3 py-2 text-sm rounded border ${selectedSize === size
                                     ? "border-blue-500 bg-blue-50 text-blue-700"
                                     : "border-gray-300 text-gray-700 hover:bg-gray-50"
                                     }`}
@@ -192,7 +192,7 @@ const ModalPrinter: React.FC<Props> = ({ isOpen, handleClose, idVenta }) => {
                                 <button
                                     key={i}
                                     type="button"
-                                    className={`w-full text-left p-3 rounded-lg border ${selectedPrinter?.address === dev.address
+                                    className={`w-full text-left p-3 rounded border ${selectedPrinter?.address === dev.address
                                         ? "border-blue-500 bg-blue-50"
                                         : "border-gray-200 hover:bg-gray-50"
                                         }`}
@@ -217,7 +217,7 @@ const ModalPrinter: React.FC<Props> = ({ isOpen, handleClose, idVenta }) => {
                                 <button
                                     key={i}
                                     type="button"
-                                    className={`w-full text-left p-3 rounded-lg border ${selectedPrinter?.vendorId === dev.vendorId &&
+                                    className={`w-full text-left p-3 rounded border ${selectedPrinter?.vendorId === dev.vendorId &&
                                         selectedPrinter?.productId === dev.productId
                                         ? "border-blue-500 bg-blue-50"
                                         : "border-gray-200 hover:bg-gray-50"
@@ -240,14 +240,14 @@ const ModalPrinter: React.FC<Props> = ({ isOpen, handleClose, idVenta }) => {
             <CustomModalContentFooter>
                 <button
                     type="button"
-                    className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
                     onClick={handleClose}
                 >
                     Cancelar
                 </button>
                 <button
                     type="button"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                     onClick={handleConfirmPrint}
                     disabled={!selectedPrinter}
                 >

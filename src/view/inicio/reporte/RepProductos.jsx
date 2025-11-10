@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../components/Container';
-import { SpinnerView } from '../../../components/Spinner';
-import Title from '../../../components/Title';
-import CustomComponent from '../../../model/class/custom-component';
-import { downloadFileAsync } from '../../../redux/downloadSlice';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import CustomComponent from '@/components/CustomComponent';
+import { downloadFileAsync } from '@/redux/downloadSlice';
 import {
   ChartNoAxesCombined,
   HandCoins,
@@ -28,6 +28,8 @@ import {
 } from '@/helper/utils.helper';
 import { images } from '@/helper';
 import Image from '@/components/Image';
+import { CANCELED } from '@/model/types/types';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -130,7 +132,7 @@ class RepProductos extends CustomComponent {
   |
   */
 
-  async loadingInit() {
+  loadingInit = async () => {
     const sucursalResponse = await comboSucursal(
       this.abortControllerView.signal,
     );
@@ -200,15 +202,12 @@ class RepProductos extends CustomComponent {
     );
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Reporte Productos',
-          message: response.getMessage(),
-        },
-        () => {
-          this.props.history.goBack();
-        },
-      );
+      alertKit.warning({
+        title: 'Reporte Productos',
+        message: response.getMessage(),
+      }, () => {
+        this.props.history.goBack();
+      });
       return;
     }
 
@@ -305,8 +304,8 @@ class RepProductos extends CustomComponent {
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
               className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === 1
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                 }`}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -332,8 +331,8 @@ class RepProductos extends CustomComponent {
                 key={page}
                 onClick={() => onPageChange(page)}
                 className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${page === currentPage
-                    ? 'z-10 bg-blue-600 border-blue-600 text-white'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  ? 'z-10 bg-blue-600 border-blue-600 text-white'
+                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                   }`}
               >
                 {page}
@@ -358,8 +357,8 @@ class RepProductos extends CustomComponent {
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === totalPages
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                 }`}
             >
               <ChevronRight className="w-5 h-5" />
@@ -476,6 +475,23 @@ class RepProductos extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
+        {/* Acciones principales + Toggle vista */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
+              onClick={this.loadingInit}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+              Recargar Vista
+            </button>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col gap-y-4">
           <div>
@@ -492,7 +508,7 @@ class RepProductos extends CustomComponent {
                   this.loadingData(),
                 );
               }}
-              className="px-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <input
@@ -503,7 +519,7 @@ class RepProductos extends CustomComponent {
                   this.loadingData(),
                 );
               }}
-              className="px-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <select
@@ -513,7 +529,7 @@ class RepProductos extends CustomComponent {
                   this.loadingInit(),
                 );
               }}
-              className="px-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {sucursales.map((item, index) => (
@@ -530,7 +546,7 @@ class RepProductos extends CustomComponent {
                   this.loadingData(),
                 );
               }}
-              className="px-4 py-2 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {almacenes.map((item, index) => (
@@ -546,9 +562,9 @@ class RepProductos extends CustomComponent {
         <div className="max-w-7xl mx-auto py-4">
           {/* Financial Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded p-6 border border-gray-200">
               <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
+                <div className="p-2 bg-green-100 rounded">
                   <HandCoins className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="ml-4">
@@ -562,9 +578,9 @@ class RepProductos extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded p-6 border border-gray-200">
               <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
+                <div className="p-2 bg-blue-100 rounded">
                   <ChartNoAxesCombined className="w-6 h-6 text-blue-60" />
                 </div>
                 <div className="ml-4">
@@ -578,9 +594,9 @@ class RepProductos extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded p-6 border border-gray-200">
               <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded-lg">
+                <div className="p-2 bg-purple-100 rounded">
                   <ShieldCheck className="w-6 h-6 text-purple-600" />
                 </div>
                 <div className="ml-4">
@@ -594,9 +610,9 @@ class RepProductos extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded p-6 border border-gray-200">
               <div className="flex items-center">
-                <div className="p-2 bg-orange-100 rounded-lg">
+                <div className="p-2 bg-orange-100 rounded">
                   <Package className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="ml-4">
@@ -613,7 +629,7 @@ class RepProductos extends CustomComponent {
 
           {/* Main Products Table */}
           <div className="lg:col-span-2 mb-4">
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
@@ -677,7 +693,7 @@ class RepProductos extends CustomComponent {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {isEmpty(paginatedProductosVendidos) && (
                       <tr>
-                        <td colSpan="8" className="text-center">
+                        <td colSpan={8} className="text-center">
                           <div className="d-flex flex-column align-items-center py-4">
                             <img
                               className="mb-1"
@@ -773,7 +789,7 @@ class RepProductos extends CustomComponent {
           {/* Detail Products Table */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Top Selling Products */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded p-6 border border-gray-200">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Productos Más Vendidos
@@ -793,7 +809,7 @@ class RepProductos extends CustomComponent {
                 {paginatedMasVendidos.map((producto, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded"
                   >
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
@@ -843,8 +859,8 @@ class RepProductos extends CustomComponent {
                         }
                         disabled={currentPageMasVendidos === 1}
                         className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === 1
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-100'
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:bg-gray-100'
                           }`}
                       >
                         <ChevronLeft className="w-4 h-4" />
@@ -862,8 +878,8 @@ class RepProductos extends CustomComponent {
                           currentPageMasVendidos === totalPagesMasVendidos
                         }
                         className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === totalPagesMasVendidos
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-600 hover:bg-gray-100'
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-600 hover:bg-gray-100'
                           }`}
                       >
                         <ChevronRight className="w-4 h-4" />
@@ -875,24 +891,24 @@ class RepProductos extends CustomComponent {
             </div>
 
             {/* Inventory Status */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 relative">
+            <div className="bg-white rounded p-6 border border-gray-200 relative">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Estado de Inventario
               </h3>
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-center p-3 bg-green-50 rounded border border-green-200">
                   <div className="text-2xl font-bold text-green-600">
                     {estadoInventario.inventario_normal}
                   </div>
                   <div className="text-sm text-green-800">Normal</div>
                 </div>
-                <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
+                <div className="text-center p-3 bg-red-50 rounded border border-red-200">
                   <div className="text-2xl font-bold text-red-600">
                     {estadoInventario.bajo_inventario}
                   </div>
                   <div className="text-sm text-red-800">Bajo</div>
                 </div>
-                <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-center p-3 bg-blue-50 rounded border border-blue-200">
                   <div className="text-2xl font-bold text-blue-600">
                     {estadoInventario.exceso_inventario}
                   </div>
@@ -907,7 +923,7 @@ class RepProductos extends CustomComponent {
             </div>
 
             {/* Category Performance */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded p-6 border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Rendimiento por Categoría
               </h3>
@@ -932,7 +948,7 @@ class RepProductos extends CustomComponent {
                     0,
                   );
                   return (
-                    <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="p-3 bg-gray-50 rounded">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-sm font-medium text-gray-900">
                           {categoria.categoria}
@@ -975,8 +991,8 @@ class RepProductos extends CustomComponent {
                           }
                           disabled={currentPageRendimientoCategoria === 1}
                           className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria === 1
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                             }`}
                         >
                           <ChevronLeft className="w-4 h-4" />
@@ -996,9 +1012,9 @@ class RepProductos extends CustomComponent {
                             totalPagesRendimientoCategoria
                           }
                           className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria ===
-                              totalPagesRendimientoCategoria
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                            totalPagesRendimientoCategoria
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                             }`}
                         >
                           <ChevronRight className="w-4 h-4" />
@@ -1011,7 +1027,7 @@ class RepProductos extends CustomComponent {
           </div>
 
           {/* Inventory Management Section */}
-          <div className="mt-8 bg-white rounded-xl border border-gray-200">
+          <div className="mt-8 bg-white rounded border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
                 Gestión de Inventario
@@ -1054,7 +1070,7 @@ class RepProductos extends CustomComponent {
                     {paginatedBajoInventario.map((producto, index) => (
                       <div
                         key={index}
-                        className="flex items-center p-3 bg-red-50 rounded-lg border border-red-200 gap-x-4"
+                        className="flex items-center p-3 bg-red-50 rounded border border-red-200 gap-x-4"
                       >
                         <Image
                           default={images.noImage}
@@ -1112,8 +1128,8 @@ class RepProductos extends CustomComponent {
                               }
                               disabled={currentPageBajoInventario === 1}
                               className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario === 1
-                                  ? 'text-gray-300 cursor-not-allowed'
-                                  : 'text-gray-600 hover:bg-gray-100'
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                             >
                               <ChevronLeft className="w-4 h-4" />
@@ -1133,9 +1149,9 @@ class RepProductos extends CustomComponent {
                                 totalPagesBajoInventario
                               }
                               className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario ===
-                                  totalPagesBajoInventario
-                                  ? 'text-gray-300 cursor-not-allowed'
-                                  : 'text-gray-600 hover:bg-gray-100'
+                                totalPagesBajoInventario
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                             >
                               <ChevronRight className="w-4 h-4" />
@@ -1178,7 +1194,7 @@ class RepProductos extends CustomComponent {
                     {paginatedSinVentas.map((producto, index) => (
                       <div
                         key={index}
-                        className="flex items-center p-3 bg-red-50 rounded-lg border border-red-200 gap-x-4"
+                        className="flex items-center p-3 bg-red-50 rounded border border-red-200 gap-x-4"
                       >
                         <Image
                           default={images.noImage}
@@ -1232,8 +1248,8 @@ class RepProductos extends CustomComponent {
                               }
                               disabled={currentPageSinVentas === 1}
                               className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === 1
-                                  ? 'text-gray-300 cursor-not-allowed'
-                                  : 'text-gray-600 hover:bg-gray-100'
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                             >
                               <ChevronLeft className="w-4 h-4" />
@@ -1251,8 +1267,8 @@ class RepProductos extends CustomComponent {
                                 currentPageSinVentas === totalPagesSinVentas
                               }
                               className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === totalPagesSinVentas
-                                  ? 'text-gray-300 cursor-not-allowed'
-                                  : 'text-gray-600 hover:bg-gray-100'
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                             >
                               <ChevronRight className="w-4 h-4" />

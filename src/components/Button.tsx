@@ -88,11 +88,11 @@ const ButtonMenu = ({ icon, path, title, category }: ButtonMenuProps) => {
   return (
     <NavLink
       to={path}
-      className="d-flex flex-column align-items-center btn btn-link text-dark border-0"
+      className="flex flex-col items-center btn btn-link text-dark border-0"
     >
-      <i className={`${icon} text-5xl mb-2`}></i>
-      <p className="text-base m-0">{title}</p>
-      <p className="text-sm text-primary m-0">{category}</p>
+      <i className={`${icon} !text-4xl mb-2`}></i>
+      <p className="text-base">{title}</p>
+      <p className="text-sm text-primary">{category}</p>
     </NavLink>
   );
 };

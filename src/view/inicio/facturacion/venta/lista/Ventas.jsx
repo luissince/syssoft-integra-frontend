@@ -7,11 +7,11 @@ import {
   currentDate,
   getPathNavigation,
   getStatePrivilegio,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../../components/Paginacion';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import {
   cancelVenta,
@@ -62,22 +62,22 @@ class Ventas extends CustomComponent {
 
     this.state = {
       initialLoad: true,
-      initialMessage: 'Cargando datos...',
+      initialMessage: "Cargando datos...",
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
-      idComprobante: '',
-      estado: '0',
+      idComprobante: "",
+      estado: "0",
 
       comprobantes: [],
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
       loading: false,
       lista: [],
@@ -112,7 +112,7 @@ class Ventas extends CustomComponent {
         ACTIVAR_VISTA_ANTIGUA,
       ),
 
-      vista: 'tabla',
+      vista: "tabla",
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -292,7 +292,7 @@ class Ventas extends CustomComponent {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -311,7 +311,7 @@ class Ventas extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -393,15 +393,15 @@ class Ventas extends CustomComponent {
   async handleCancelar(idVenta) {
     if (!this.state.remove) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'No tiene privilegios para anular ventas',
+        title: "Venta",
+        message: "No tiene privilegios para anular ventas",
       });
       return;
     }
 
     const accept = await alertKit.question({
-      title: 'Venta',
-      message: '¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.',
+      title: "Venta",
+      message: "¿Está seguro de que desea anular la venta? Esta operación no se puede deshacer.",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -417,14 +417,14 @@ class Ventas extends CustomComponent {
       };
 
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const response = await cancelVenta(params);
 
       if (response instanceof SuccessReponse) {
         alertKit.success({
-          title: 'Venta',
+          title: "Venta",
           message: response.data,
         }, () => {
           this.loadingInit();
@@ -435,7 +435,7 @@ class Ventas extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Venta',
+          title: "Venta",
           message: response.getMessage(),
         });
       }
@@ -449,8 +449,8 @@ class Ventas extends CustomComponent {
   handleOpenElegirInterfaz = () => {
     if (!this.state.create) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'No tiene privilegios para crear ventas',
+        title: "Venta",
+        message: "No tiene privilegios para crear ventas",
       });
       return;
     }
@@ -518,7 +518,11 @@ class Ventas extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-blue-600 text-white text-sm font-medium rounded",
+                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+              )}
               onClick={this.handleOpenElegirInterfaz}
               disabled={!this.state.create}
               aria-label="Crear nueva venta"
@@ -527,7 +531,11 @@ class Ventas extends CustomComponent {
               Nuevo Registro
             </button>
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -536,23 +544,33 @@ class Ventas extends CustomComponent {
           </div>
 
           {/* Toggle vista */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-gray-100 rounded p-1 gap-1">
             <button
-              onClick={() => this.handleChangeView('tabla')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              onClick={() => this.handleChangeView("tabla")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
             >
               <i className="bi bi-list-ul"></i>
               <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
-              onClick={() => this.handleChangeView('cuadricula')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              onClick={() => this.handleChangeView("cuadricula")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
             >
               <i className="bi bi-grid-3x3"></i>
               <span className="hidden sm:inline">Cuadrícula</span>
@@ -572,20 +590,20 @@ class Ventas extends CustomComponent {
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item) => (
@@ -598,7 +616,7 @@ class Ventas extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
               <option value="1">COBRADO</option>
@@ -623,7 +641,7 @@ class Ventas extends CustomComponent {
         {/* Render condicional: Tabla o Cuadrícula */}
         {vista === 'tabla' ? (
           /* 📊 Vista Tabla */
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-white rounded border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -797,7 +815,7 @@ class Ventas extends CustomComponent {
                 <p className="text-gray-500">Cargando información...</p>
               </div>
             ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded-xl border">
+              <div className="text-center py-16 bg-white rounded border">
                 <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
                 <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron ventas</p>
                 <p className="text-sm text-gray-500">Intenta cambiar los filtros</p>
@@ -806,12 +824,12 @@ class Ventas extends CustomComponent {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {this.state.lista.map((item) => {
                   const estadoClass = item.estado === 1
-                    ? 'bg-green-100 text-green-800'
+                    ? "bg-green-100 text-green-800"
                     : item.estado === 2
-                      ? 'bg-yellow-100 text-yellow-800'
+                      ? "bg-yellow-100 text-yellow-800"
                       : item.estado === 3
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-blue-100 text-blue-800';
+                        ? "bg-red-100 text-red-800"
+                        : "bg-blue-100 text-blue-800";
 
                   const tipo = item.idFormaPago === CONTADO
                     ? 'CONTADO'
@@ -824,7 +842,7 @@ class Ventas extends CustomComponent {
                   return (
                     <div
                       key={item.idVenta}
-                      className="bg-white rounded-xl border transition group overflow-hidden"
+                      className="bg-white rounded border transition group overflow-hidden"
                     >
                       <div className="p-4">
                         <div className="flex justify-between items-start mb-3">
@@ -933,7 +951,7 @@ class Ventas extends CustomComponent {
               paginacion={this.state.paginacion}
               fillTable={this.paginacionContext}
               restart={this.state.restart}
-              className="md:px-6 py-3 bg-white border rounded-xl border-gray-200 overflow-auto"
+              className="md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
               theme="modern"
             />
           </div>

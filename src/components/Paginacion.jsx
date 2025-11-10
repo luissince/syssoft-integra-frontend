@@ -91,8 +91,7 @@ class Paginacion extends React.Component {
     const {
       className = "",
       totalPaginacion,
-      paginacion,
-      theme = 'classic'
+      paginacion
     } = this.props;
 
     const pageNumbers = Array.from({ length: totalPaginacion }, (_, i) => i + 1);
@@ -200,8 +199,7 @@ class Paginacion extends React.Component {
     const {
       className = "",
       totalPaginacion,
-      paginacion,
-      theme = 'classic'
+      paginacion
     } = this.props;
 
     const pageNumbers = [];

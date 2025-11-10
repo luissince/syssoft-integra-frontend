@@ -249,7 +249,7 @@ export { MultiImages, ImageUpload };
  * <Image
  *   src="/path/to/image.jpg"
  *   alt="Example"
- *   overrideClass="rounded-lg shadow-lg cursor-pointer"
+ *   overrideClass="rounded shadow-lg cursor-pointer"
  * />
  *
  * @prop {string} [default] - Fallback image source if no image is provided.

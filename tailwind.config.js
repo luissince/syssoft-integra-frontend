@@ -6,13 +6,13 @@ export default {
   ],
   theme: {
     screens: {
-			'xs': '480px',   // Breakpoint personalizado (opcional)
-			'sm': '640px',   // Sobrescribe el valor predeterminado de sm
-			'md': '768px',   // Sobrescribe el valor predeterminado de md
-			'lg': '1024px',  // Sobrescribe el valor predeterminado de lg
-			'xl': '1280px',  // Sobrescribe el valor predeterminado de xl
-			'2xl': '1536px', // Sobrescribe el valor predeterminado de 2xl
-		},
+      'xs': '480px',   // Breakpoint personalizado (opcional)
+      'sm': '640px',   // Sobrescribe el valor predeterminado de sm
+      'md': '768px',   // Sobrescribe el valor predeterminado de md
+      'lg': '1024px',  // Sobrescribe el valor predeterminado de lg
+      'xl': '1280px',  // Sobrescribe el valor predeterminado de xl
+      '2xl': '1536px', // Sobrescribe el valor predeterminado de 2xl
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -61,7 +61,11 @@ export default {
           700: "#b45309",
           800: "#92400e",
         },
-      }
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

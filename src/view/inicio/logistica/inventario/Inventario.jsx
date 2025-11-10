@@ -6,7 +6,7 @@ import {
   getNumber,
 } from '../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
-import ContainerWrapper from '../../../../components/Container';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import Paginacion from '../../../../components/Paginacion';
 import CustomComponent from '../../../../model/class/custom-component';
 import SuccessReponse from '../../../../model/class/response';
@@ -475,7 +475,7 @@ class Inventario extends CustomComponent {
 
               <div className="flex flex-wrap gap-3 items-center">
                 <button
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                   onClick={this.loadingInit}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
@@ -483,7 +483,7 @@ class Inventario extends CustomComponent {
                 </button>
 
                 {/* Toggle vista */}
-                <div className="flex bg-gray-100 rounded-lg p-1">
+                <div className="flex bg-gray-100 rounded p-1">
                   <button
                     onClick={() => this.handleChangeView('tabla')}
                     className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${this.state.vista === 'tabla'
@@ -519,7 +519,7 @@ class Inventario extends CustomComponent {
                 Almacén
               </label>
               <select
-                className="w-full px-3 py-2 h-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 value={this.state.idAlmacen}
                 onChange={this.handleSelectAlmacen}
               >
@@ -540,7 +540,7 @@ class Inventario extends CustomComponent {
                 Estado del Stock
               </label>
               <select
-                className="w-full px-3 py-2 h-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 value={this.state.estadoFiltro}
                 onChange={this.handleSelectEstado}
               >
@@ -569,7 +569,7 @@ class Inventario extends CustomComponent {
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Box className="h-8 w-8 text-indigo-600" />
@@ -585,7 +585,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Clock className="h-8 w-8 text-orange-500" />
@@ -601,7 +601,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <AlertTriangle className="h-8 w-8 text-red-600" />
@@ -617,7 +617,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <CheckCircle className="h-8 w-8 text-green-500" />
@@ -633,7 +633,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <PackagePlus className="h-8 w-8 text-blue-600" />
@@ -653,7 +653,7 @@ class Inventario extends CustomComponent {
           {/* Render condicional: Tabla o Cuadrícula */}
           {this.state.vista === 'tabla' ? (
             /* 📊 Vista Tabla */
-            <div className="bg-white rounded-xl border overflow-hidden">
+            <div className="bg-white rounded border overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -819,7 +819,7 @@ class Inventario extends CustomComponent {
                             {tieneLotes && this.state.lotesVisible[index] && (
                               <tr>
                                 <td colSpan={6} className="px-6 py-0 bg-gray-50">
-                                  <div className="rounded-lg p-4 mb-4">
+                                  <div className="rounded p-4 mb-4">
                                     <h4 className="text-sm font-medium text-gray-900 mb-3">
                                       Lotes del producto
                                     </h4>
@@ -831,7 +831,7 @@ class Inventario extends CustomComponent {
                                         return (
                                           <div
                                             key={lote.idLote}
-                                            className="bg-white rounded-lg p-4"
+                                            className="bg-white rounded p-4"
                                           >
                                             <div className="flex justify-between items-start mb-2">
                                               <div className="text-sm font-medium text-gray-900">
@@ -919,7 +919,7 @@ class Inventario extends CustomComponent {
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
                 </div>
               ) : isEmpty(this.state.lista) ? (
-                <div className="text-center py-16 bg-white rounded-xl border">
+                <div className="text-center py-16 bg-white rounded border">
                   <PackageOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                   <p className="text-lg font-medium text-gray-900 mb-2">
                     No se encontraron productos
@@ -938,7 +938,7 @@ class Inventario extends CustomComponent {
                     return (
                       <div
                         key={`producto-grid-${item.idInventario}`}
-                        className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden"
+                        className="bg-white rounded border hover:shadow-md transition group overflow-hidden"
                       >
                         <div className="p-4">
                           <div className="flex justify-between items-start mb-3">

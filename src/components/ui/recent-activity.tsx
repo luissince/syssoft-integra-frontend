@@ -63,7 +63,7 @@ export function RecentActivity() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <div>

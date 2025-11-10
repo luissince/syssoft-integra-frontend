@@ -136,7 +136,7 @@ const Bienvenido = (props: RouteComponentProps) => {
                   max="8000"
                 />
               </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="bg-purple-50 p-4 rounded">
                 <p className="font-semibold text-purple-800">Resultado:</p>
                 <p className="text-sm">Categoría: {rusCalc.categoria}</p>
                 <p className="text-sm">Cuota mensual: S/{rusCalc.cuota}</p>
@@ -181,7 +181,7 @@ const Bienvenido = (props: RouteComponentProps) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
+              <div className="bg-green-50 p-4 rounded">
                 <p className="font-semibold text-green-800">Cálculo mensual:</p>
                 <p className="text-sm">Ventas + IGV: S/{rerCalc.ventasConIGV}</p>
                 <p className="text-sm">IGV a pagar: S/{rerCalc.igv}</p>
@@ -236,7 +236,7 @@ const Bienvenido = (props: RouteComponentProps) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
-              <div className="bg-orange-50 p-4 rounded-lg">
+              <div className="bg-orange-50 p-4 rounded">
                 <p className="font-semibold text-orange-800">Pago mensual:</p>
                 <p className="text-sm">IGV: S/{rmtCalc.igv}</p>
                 <p className="text-sm">IR Mensual (1%): S/{rmtCalc.impuestoRentaMensual}</p>
@@ -292,7 +292,7 @@ const Bienvenido = (props: RouteComponentProps) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-blue-50 p-4 rounded">
                 <p className="font-semibold text-blue-800">Pago mensual:</p>
                 <p className="text-sm">IGV: S/{generalCalc.igv}</p>
                 <p className="text-sm">Pago a cuenta (1.5%): S/{generalCalc.pagoACuenta}</p>

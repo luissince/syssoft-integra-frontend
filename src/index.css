@@ -10,85 +10,55 @@
    ================================ */
 @layer base {
   :root {
-    /* Fondo y texto principal */
-    --background: 0 0% 100%;               /* Blanco */
-    --foreground: 20 14.3% 4.1%;           /* Casi negro (texto principal) */
-
-    /* Tarjetas y popovers */
-    --card: 0 0% 100%;                     /* Blanco */
-    --card-foreground: 20 14.3% 4.1%;      /* Texto oscuro */
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
-
-    /* Colores principales del sistema */
-    --primary: 215 100% 30%;               /* Azul oscuro */
-    --primary-foreground: 26 83.3% 14.1%;  /* Texto sobre el primario */
-
-    --info: 210 100% 45%;                  /* Azul brillante */
-    --warning: 39 92% 49%;                 /* Amarillo anaranjado */
-    --error: 355 78% 58%;                  /* Rojo medio */
-    --success: 136 54% 43%;                /* Verde medio */
-
-    /* Colores secundarios y neutros */
-    --secondary: 60 4.8% 95.9%;            /* Gris claro */
-    --secondary-foreground: 24 9.8% 10%;   /* Gris oscuro */
+    --primary: 215 100% 30%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
     --muted: 60 4.8% 95.9%;
     --muted-foreground: 25 5.3% 44.7%;
     --accent: 60 4.8% 95.9%;
     --accent-foreground: 24 9.8% 10%;
-
-    /* Estados destructivos */
-    --destructive: 0 84.2% 60.2%;          /* Rojo vibrante */
-    --destructive-foreground: 60 9.1% 97.8%; /* Blanco cálido */
-
-    /* Bordes y entradas */
-    --border: 20 5.9% 90%;                 /* Gris claro */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
     --input: 20 5.9% 90%;
-    --ring: 38 92% 50%;                    /* Amarillo dorado */
-
-    /* Radio base de los elementos */
-    --radius: 0.5rem;
+    --ring: 215 100% 30%;
+    --info: 210 100% 45%;
+    --warning: 39 92% 49%;
+    --error: 355 78% 58%;
+    --success: 136 54% 43%;
   }
 
-  /* ================================
-     🌚 VARIABLES DE COLOR (Modo Oscuro)
-     ================================ */
   .dark {
-    /* Fondo y texto principal */
-    --background: 20 14.3% 4.1%;           /* Gris casi negro */
-    --foreground: 60 9.1% 97.8%;           /* Casi blanco */
-
-    /* Tarjetas y popovers */
-    --card: 24 10% 10%;                    /* Gris oscuro más suave */
-    --card-foreground: 60 9.1% 97.8%;      /* Texto claro */
-    --popover: 24 10% 10%;
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-
-    /* Colores principales ajustados para contraste en fondo oscuro */
-    --primary: 215 100% 60%;               /* Azul más claro */
-    --primary-foreground: 215 100% 12%;    /* Azul muy oscuro para contraste invertido */
-
-    --info: 210 100% 75%;                  /* Azul claro tipo “cielo” */
-    --warning: 39 92% 60%;                 /* Amarillo más suave, no tan chillón */
-    --error: 355 78% 70%;                  /* Rojo más claro (evita saturación excesiva) */
-    --success: 136 54% 55%;                /* Verde más luminoso */
-
-    /* Colores secundarios y neutros */
-    --secondary: 12 6.5% 15.1%;            /* Gris oscuro cálido */
-    --secondary-foreground: 60 9.1% 97.8%; /* Texto claro */
-    --muted: 12 6.5% 18%;                  /* Gris algo más visible */
-    --muted-foreground: 25 5.4% 63.9%;     /* Gris claro */
-    --accent: 12 6.5% 15.1%;               /* Igual que secundario para coherencia */
+    --primary: 215 100% 30%;
+    --primary-foreground: 26 83.3% 14.1%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 12 6.5% 15.1%;
     --accent-foreground: 60 9.1% 97.8%;
-
-    /* Estado destructivo */
-    --destructive: 0 70% 40%;              /* Rojo oscuro */
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 60 9.1% 97.8%;
-
-    /* Bordes e inputs */
-    --border: 12 6.5% 20%;                 /* Gris oscuro */
-    --input: 12 6.5% 20%;
-    --ring: 38 92% 60%;                    /* Dorado más suave */
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 215 100% 30%;
+    --info: 210 100% 45%;
+    --warning: 39 92% 49%;
+    --error: 355 78% 58%;
+    --success: 136 54% 43%;
   }
 }
 

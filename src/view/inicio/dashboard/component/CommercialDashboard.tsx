@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import DatePickerPopover from "@/components/DatePickerPopover";
 
 interface Props {
     token: {
@@ -42,8 +43,8 @@ const previousYear = currentYear - 1;
 
 const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
     const [dateRange, setDateRange] = useState({
-        start: currentDate(),
-        end: currentDate(),
+        start: new Date(),
+        end: new Date(),
     });
     const [branches, setBranches] = useState<BranchInterface[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
@@ -70,10 +71,10 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
         }
 
         setBranches(branchResponse.data);
-
+        
         const params = {
-            fechaInicio: dateRange.start,
-            fechaFinal: dateRange.end,
+            fechaInicio: format(dateRange.start, "yyyy-MM-dd"),
+            fechaFinal: format(dateRange.end, "yyyy-MM-dd"),
             idSucursal: selectedBranch,
         };
 
@@ -102,26 +103,25 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
 
     const handleSelectStart = (selectedDate: Date) => {
         if (selectedDate) {
-            console.log(selectedDate, format(selectedDate, "yyyy-MM-dd"));
-            setDateRange((prev) => ({ ...prev, start: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, start: selectedDate }));
         }
     };
 
     const handleSelectEnd = (selectedDate: Date) => {
         if (selectedDate) {
-            setDateRange((prev) => ({ ...prev, end: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, end: selectedDate }));
         }
     };
 
     const StatCard: React.FC<StatCardInterface> = ({ title, value, icon: Icon, color, trend, subtitle }) => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
                     <p className="text-2xl font-bold text-gray-900">{value}</p>
                     {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
                 </div>
-                <div className={`p-3 rounded-lg bg-${color}-50`}>
+                <div className={`p-3 rounded bg-${color}-50`}>
                     <Icon className={`h-6 w-6 text-${color}-600`} />
                 </div>
             </div>
@@ -137,7 +137,7 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
     );
 
     const BranchPerformanceChart = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Rendimiento por Sucursal</h3>
             <div className="space-y-4">
                 {!isEmpty(dashboardData.branchPerformance) ? (
@@ -169,12 +169,12 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
     );
 
     const BankBalanceCard = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Saldos Bancarios</h3>
             <div className="space-y-4">
                 {!isEmpty(dashboardData.bankBalances) ? (
                     dashboardData.bankBalances.map((bank) => (
-                        <div key={bank.idBanco} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div key={bank.idBanco} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                             <div>
                                 <p className="font-medium text-gray-900">{bank.nombre}</p>
                                 <p className="text-sm text-gray-600">{bank.sucursal}</p>
@@ -240,43 +240,9 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
             {/* Date Range Filter */}
             <div className="mb-8 bg-white flex items-center justify-between space-x-4">
                 <div className="flex items-center space-x-4">
-                    <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start  focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.start ? formatDate(dateRange.start) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.start)}
-                                    onSelect={handleSelectStart}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
+                    <DatePickerPopover value={dateRange.start} onChange={handleSelectStart} />
 
-                    <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start  focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.end ? formatDate(dateRange.end) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.end)}
-                                    onSelect={handleSelectEnd}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
+                    <DatePickerPopover value={dateRange.end} onChange={handleSelectEnd} />
                 </div>
 
                 <div>
@@ -285,7 +251,7 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
                         onChange={(e) => setSelectedBranch(e.target.value)}
                         className={cn(
                             "w-full px-4 py-2",
-                            "rounded-lg",
+                            "rounded",
                             "border border-gray-300 text-sm",
                             "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
                             "hover:bg-accent hover:text-accent-foreground"
@@ -370,7 +336,7 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
                 <BankBalanceCard />
             </div>
 
-            <div className="w-full max-w-6xl mx-auto p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+            <div className="w-full max-w-6xl mx-auto p-4 bg-white rounded shadow-sm border border-gray-100">
                 <h2 className="text-2xl font-semibold mb-4 text-center">
                     Comparación de Ventas Mensuales: {previousYear} vs {currentYear}
                 </h2>

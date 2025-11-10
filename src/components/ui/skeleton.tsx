@@ -4,14 +4,14 @@ import { Calendar } from "lucide-react";
 const DashboardSkeleton = () => {
   // Skeleton component for stat cards
   const StatCardSkeleton = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center justify-between">
         <div>
           <div className="h-4 bg-gray-200 rounded animate-pulse mb-1 w-24"></div>
           <div className="h-8 bg-gray-200 rounded animate-pulse mb-1 w-20"></div>
           <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
         </div>
-        <div className="p-3 rounded-lg bg-gray-50">
+        <div className="p-3 rounded bg-gray-50">
           <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
         </div>
       </div>
@@ -24,7 +24,7 @@ const DashboardSkeleton = () => {
 
   // Skeleton for branch performance chart
   const BranchPerformanceChartSkeleton = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
       <div className="h-6 bg-gray-200 rounded animate-pulse mb-6 w-48"></div>
       <div className="space-y-4">
         {[...Array(4)].map((_, index) => (
@@ -50,11 +50,11 @@ const DashboardSkeleton = () => {
 
   // Skeleton for bank balance card
   const BankBalanceCardSkeleton = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
       <div className="h-6 bg-gray-200 rounded animate-pulse mb-6 w-32"></div>
       <div className="space-y-4">
         {[...Array(3)].map((_, index) => (
-          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
             <div>
               <div className="h-4 bg-gray-200 rounded animate-pulse w-24 mb-1"></div>
               <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
@@ -70,7 +70,7 @@ const DashboardSkeleton = () => {
   const SalesChartSkeleton = () => (
     <div className="w-full max-w-6xl mx-auto p-4 bg-white rounded-2xl shadow-md">
       <div className="h-7 bg-gray-200 rounded animate-pulse mb-4 mx-auto w-80"></div>
-      <div className="h-96 bg-gray-100 rounded-lg animate-pulse flex items-end justify-around p-4 space-x-2">
+      <div className="h-96 bg-gray-100 rounded animate-pulse flex items-end justify-around p-4 space-x-2">
         {[...Array(12)].map((_, index) => (
           <div key={index} className="flex space-x-1">
             <div 
@@ -102,7 +102,7 @@ const DashboardSkeleton = () => {
           <div className="h-4 bg-gray-200 rounded animate-pulse w-80"></div>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-2">
+          <div className="flex items-center space-x-2 bg-gray-100 rounded p-2">
             <Calendar className="h-5 w-5 text-gray-400" />
             <div className="h-5 bg-gray-200 rounded animate-pulse w-32"></div>
           </div>
@@ -112,8 +112,8 @@ const DashboardSkeleton = () => {
       {/* Date Range Filter */}
       <div className="mb-8 bg-white">
         <div className="flex items-center space-x-4">
-          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-40"></div>
-          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-40"></div>
+          <div className="h-10 bg-gray-200 rounded animate-pulse w-40"></div>
+          <div className="h-10 bg-gray-200 rounded animate-pulse w-40"></div>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-lg bg-muted", className)}
+      className={cn("animate-pulse rounded bg-muted", className)}
       {...props}
     />
   )

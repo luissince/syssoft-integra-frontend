@@ -6,8 +6,8 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '../../../../../components/ui/container-wrapper';
+import CustomComponent from '../../../../../components/CustomComponent';
 import {
   deleteProducto,
   listProducto,
@@ -220,7 +220,7 @@ class Productos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState(
@@ -361,14 +361,14 @@ class Productos extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
               onClick={this.handleAgregar}
             >
               <i className="bi bi-file-plus"></i>
               Nuevo Registro
             </button>
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -377,7 +377,7 @@ class Productos extends CustomComponent {
           </div>
 
           {/* Toggle vista */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-gray-100 rounded p-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
               className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
@@ -425,7 +425,7 @@ class Productos extends CustomComponent {
         {/* Render condicional: Tabla o Cuadrícula */}
         {vista === 'tabla' ? (
           /* 📊 Vista Tabla */
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-white rounded border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -599,7 +599,7 @@ class Productos extends CustomComponent {
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               </div>
             ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded-xl border">
+              <div className="text-center py-16 bg-white rounded border">
                 <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
                 <p className="text-lg font-medium text-gray-900 mb-2">
                   No se encontraron productos
@@ -625,7 +625,7 @@ class Productos extends CustomComponent {
                   return (
                     <div
                       key={item.idProducto}
-                      className="bg-white rounded-xl border transition group overflow-hidden relative"
+                      className="bg-white rounded border transition group overflow-hidden relative"
                     >
                       <div className=" bg-white flex items-center justify-center p-2">
                         <Image

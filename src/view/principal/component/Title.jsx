@@ -1,7 +1,5 @@
 import Button from '../../../components/Button';
-import Column from '../../../components/Column';
 import Image from '../../../components/Image';
-import Row from '../../../components/Row';
 import { images } from '../../../helper';
 import PropTypes from 'prop-types';
 
@@ -13,40 +11,28 @@ const Title = ({
   handleSignOut,
 }) => {
   return (
-    <Row>
-      <Column className="col-md-3 col-12">
-        <div className="flex justify-center items-center">
-          <div className="mb-4">
-            <Image
-              default={images.icono}
-              src={`${rutaImage}`}
-              alt={'Logo'}
-              width={140}
-            />
-          </div>
-        </div>
-      </Column>
+    <div className="flex flex-col justify-center items-center mb-3">
+      <div className="mb-4">
+        <Image
+          default={images.icono}
+          src={`${rutaImage}`}
+          alt={'Logo'}
+          width={140}
+        />
+      </div>
 
-      <Column className="col-md-6 col-12">
-        <div className="d-flex h-100 flex-column justify-content-center align-items-center">
-          <div className="form-group text-center">
-            <h4 className="text-dark">{razonSocial}</h4>
-            <h5 className="text-dark">{nombreEmpresa}</h5>
-            <h5 className="text-secondary">{documento}</h5>
-          </div>
-        </div>
-      </Column>
+      <div className="form-group text-center">
+        <h4 className="text-dark">{razonSocial}</h4>
+        <h5 className="text-dark">{nombreEmpresa}</h5>
+        <h5 className="text-secondary">{documento}</h5>
+      </div>
 
-      <Column className="col-md-3 col-12">
-        <div className="d-flex h-100 justify-content-end align-items-center">
-          <div className="form-group">
-            <Button className="btn-danger" onClick={handleSignOut}>
-              <i className="fa fa-power-off"></i>
-            </Button>
-          </div>
-        </div>
-      </Column>
-    </Row>
+      <div className="flex w-full  justify-end items-center">
+        <Button className="btn-danger" onClick={handleSignOut}>
+          <i className="fa fa-power-off"></i>
+        </Button>
+      </div>
+    </div>
   );
 };
 

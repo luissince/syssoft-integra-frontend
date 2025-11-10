@@ -1,17 +1,15 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, Search, Plus, Trash2, CalendarIcon, Building2 } from 'lucide-react';
-import { currentDate, formatDate } from '@/helper/utils.helper';
+import { TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, Search, Plus, Trash2 } from 'lucide-react';
+import { currentDate } from '@/helper/utils.helper';
 import BranchInterface from '@/model/ts/interface/branch.interface';
 import { comboSucursal } from '@/network/rest/principal.network';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/model/types/types';
 import { alertKit } from 'alert-kit';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
+import DatePickerPopover from '@/components/DatePickerPopover';
 
 // Datos de prueba
 const initialSalesData: {
@@ -150,7 +148,7 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Search className="w-5 h-5" />
                 Analizar Período
@@ -162,7 +160,7 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
                     <select
                         value={rangeType}
                         onChange={(e) => setRangeType(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="day">Un día específico</option>
                         <option value="week">Esta semana (últimos 7 días)</option>
@@ -178,7 +176,7 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                     </div>
                 )}
@@ -191,7 +189,7 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
                         <div>
@@ -200,7 +198,7 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
                                 type="date"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
                     </div>
@@ -208,14 +206,14 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
 
                 <button
                     onClick={analyzeRange}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded font-semibold transition-colors flex items-center justify-center gap-2"
                 >
                     <Search className="w-5 h-5" />
                     Analizar
                 </button>
 
                 {analysis && (
-                    <div className={`mt-4 p-4 rounded-lg border-2 ${analysis.cumple ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                    <div className={`mt-4 p-4 rounded border-2 ${analysis.cumple ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                         <h4 className="text-gray-900 font-bold text-lg mb-3">{analysis.label}</h4>
 
                         <div className="space-y-2">
@@ -264,8 +262,8 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
 
 const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
     const [dateRange, setDateRange] = useState({
-        start: currentDate(),
-        end: currentDate(),
+        start: new Date(),
+        end: new Date(),
     });
     const [branches, setBranches] = useState<BranchInterface[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
@@ -310,14 +308,13 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
 
     const handleSelectStart = (selectedDate: Date) => {
         if (selectedDate) {
-            console.log(selectedDate, format(selectedDate, "yyyy-MM-dd"));
-            setDateRange((prev) => ({ ...prev, start: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, start: selectedDate }));
         }
     };
 
     const handleSelectEnd = (selectedDate: Date) => {
         if (selectedDate) {
-            setDateRange((prev) => ({ ...prev, end: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, end: selectedDate }));
         }
     };
 
@@ -408,14 +405,14 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
     const todayStatus = today.sales >= dailyGoal;
 
     const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color, subtitle }) => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
                     <p className="text-2xl font-bold text-gray-900">{value}</p>
                     {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
                 </div>
-                <div className={`p-3 rounded-lg bg-${color}-50`}>
+                <div className={`p-3 rounded bg-${color}-50`}>
                     <Icon className={`h-6 w-6 text-${color}-600`} />
                 </div>
             </div>
@@ -427,51 +424,16 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div className="w-full flex items-center space-x-4">
+                    <DatePickerPopover value={dateRange.start} onChange={handleSelectStart} />
 
-                    <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.start ? formatDate(dateRange.start) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.start)}
-                                    onSelect={handleSelectStart}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.end ? formatDate(dateRange.end) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.end)}
-                                    onSelect={handleSelectEnd}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
+                    <DatePickerPopover value={dateRange.end} onChange={handleSelectEnd} />
                 </div>
 
                 <div className="flex items-center space-x-2 ">
                     <select
                         value={selectedBranch}
                         onChange={(e) => setSelectedBranch(e.target.value)}
-                        className="px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         {
                             branches.map((branch, index) => (
@@ -493,7 +455,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
 
             {/* Settings Panel */}
             {showSettings && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
+                <div className="bg-white rounded shadow-sm border border-gray-100 p-6 mb-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Configuración de Gastos Fijos</h2>
 
                     {/* Existing Expenses */}
@@ -508,11 +470,11 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
                                         type="number"
                                         value={value}
                                         onChange={(e) => handleExpenseChange(key, e.target.value)}
-                                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="flex-1 border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                     <button
                                         onClick={() => handleDeleteExpense(key)}
-                                        className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                                        className="p-2 bg-red-600 hover:bg-red-700 rounded transition-colors"
                                         title="Eliminar gasto"
                                     >
                                         <Trash2 className="w-5 h-5 text-white" />
@@ -523,7 +485,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
                     </div>
 
                     {/* Add New Expense */}
-                    <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+                    <div className="bg-gray-50 p-4 rounded mb-4 border border-gray-200">
                         <h3 className="text-gray-900 font-semibold mb-3 flex items-center gap-2">
                             <Plus className="w-5 h-5" />
                             Agregar Nuevo Gasto
@@ -534,18 +496,18 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
                                 placeholder="Nombre del gasto"
                                 value={newExpenseName}
                                 onChange={(e) => setNewExpenseName(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                             <input
                                 type="number"
                                 placeholder="Monto mensual"
                                 value={newExpenseAmount}
                                 onChange={(e) => setNewExpenseAmount(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                             <button
                                 onClick={handleAddExpense}
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold transition-colors flex items-center justify-center gap-2"
                             >
                                 <Plus className="w-5 h-5" />
                                 Agregar
@@ -554,7 +516,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
                     </div>
 
                     {/* Total Summary */}
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div className="bg-blue-50 p-4 rounded border border-blue-200">
                         <p className="text-gray-700">Total Gastos Mensuales: <span className="text-gray-900 font-bold text-xl">S/ {monthlyExpenses.toFixed(2)}</span></p>
                         <p className="text-gray-600 text-sm mt-2">Meta diaria: S/ {dailyGoal.toFixed(2)}</p>
                     </div>
@@ -562,7 +524,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
             )}
 
             {/* Today's Status Card */}
-            <div className={`${todayStatus ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-rose-500'} rounded-lg shadow-sm p-6 mb-8`}>
+            <div className={`${todayStatus ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-rose-500'} rounded shadow-sm p-6 mb-8`}>
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-white/80 text-sm uppercase tracking-wide">Venta de Hoy - {today.date}</p>
@@ -626,7 +588,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
                 <CustomRangeAnalysis salesData={salesData} dailyGoal={dailyGoal} />
 
                 {/* Last Week Bar Chart */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <h3 className="text-xl font-semibold text-gray-900 mb-4">Última Semana</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={lastWeekData}>
@@ -647,7 +609,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
             <div className="mb-8">
 
                 {/* Monthly Line Chart */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <h3 className="text-xl font-semibold text-gray-900 mb-4">Tendencia del Mes</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={chartData}>
@@ -665,7 +627,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
             </div>
 
             {/* Daily Details Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded shadow-sm border border-gray-100 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Detalle Diario (Últimos 10 días)</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full">

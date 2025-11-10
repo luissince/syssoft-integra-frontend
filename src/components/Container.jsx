@@ -124,37 +124,26 @@ export class ContainerMenu extends React.Component {
   render() {
     return (
       <ContainerWrapper>
-        <div className="d-flex flex-column align-items-center justify-content-center">
+        <div className="flex flex-col items-center justify-center">
           <h4 className="my-4">{this.props.title}</h4>
 
-          <div className="w-100 border-bottom"></div>
+          <div className="w-full border-b border-solid border-[#cbd5e1]"></div>
 
           <h5 className="my-3">Ingrese la opción a buscar</h5>
 
-          <Input
-            autoFocus={true}
-            placeholder={'Buscar...'}
-            className="d-md-none w-100"
-            value={this.state.search}
-            onChange={(event) => this.handleSearch(event.target.value)}
-            onKeyDown={this.handleFocus}
-          />
-          <Input
-            autoFocus={true}
-            placeholder={'Buscar...'}
-            className="d-none d-md-block w-50"
-            value={this.state.search}
-            onChange={(event) => this.handleSearch(event.target.value)}
-            onKeyDown={this.handleFocus}
-          />
+          <div className="w-full md:w-1/2 mb-3">
+            <Input
+              autoFocus={true}
+              placeholder={'Buscar...'}
+              value={this.state.search}
+              onChange={(event) => this.handleSearch(event.target.value)}
+              onKeyDown={this.handleFocus}
+            />
+          </div>
 
           <div
             ref={this.refContent}
-            className="d-flex justify-content-center align-items-center flex-wrap  w-100 py-3"
-            style={{
-              columnGap: '50px',
-              rowGap: '20px',
-            }}
+            className="flex justify-center items-center flex-wrap w-full gap-x-14 gap-y-5"
           >
             {this.state.subMenus.map((item, index) => {
               if (item.estado === 0) return null;

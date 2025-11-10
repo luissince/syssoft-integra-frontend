@@ -12,7 +12,7 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -793,7 +793,7 @@ class CpeElectronicos extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -802,7 +802,7 @@ class CpeElectronicos extends CustomComponent {
           </div>
 
           {/* Toggle vista */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+           <div className="flex bg-gray-100 rounded p-1 gap-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
               className={
@@ -837,7 +837,7 @@ class CpeElectronicos extends CustomComponent {
         </div>
 
         {/* Leyenda de estados SUNAT */}
-        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded p-4">
           <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
             <img src={images.sunat} alt="SUNAT" className="w-6 h-6" />
             Estados SUNAT
@@ -876,20 +876,20 @@ class CpeElectronicos extends CustomComponent {
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+             className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item, index) => (
@@ -902,7 +902,7 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+             className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
               <option value="1">POR DECLARAR</option>
@@ -942,7 +942,7 @@ class CpeElectronicos extends CustomComponent {
         {/* Render condicional: Tabla o Cuadrícula */}
         {vista === 'tabla' ? (
           /* 📊 Vista Tabla */
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-white rounded border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -1092,13 +1092,13 @@ class CpeElectronicos extends CustomComponent {
           </div>
         ) : (
           /* 🟦 Vista Cuadrícula */
-          <div className="space-y-6">
+          <div className="space-y-6 mb-3">
             {this.state.loading ? (
               <div className="flex justify-center py-16">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
               </div>
             ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded-xl border">
+              <div className="text-center py-16 bg-white rounded border">
                 <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
                 <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron comprobantes</p>
                 <p className="text-sm text-gray-500">Intenta cambiar los filtros</p>
@@ -1117,7 +1117,7 @@ class CpeElectronicos extends CustomComponent {
                   return (
                     <div
                       key={index}
-                      className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden"
+                      className="bg-white rounded border hover:shadow-md transition group overflow-hidden"
                     >
                       <div className="p-4">
                         <div className="flex justify-between items-start mb-3">
@@ -1214,7 +1214,7 @@ class CpeElectronicos extends CustomComponent {
               paginacion={this.state.paginacion}
               fillTable={this.paginacionContext}
               restart={this.state.restart}
-              className="md:px-2 py-3 bg-white border-t border-gray-200 overflow-auto"
+              className="md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
               theme="modern"
             />
           </div>

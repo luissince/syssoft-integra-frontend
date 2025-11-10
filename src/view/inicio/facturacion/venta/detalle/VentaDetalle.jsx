@@ -8,7 +8,7 @@ import {
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '../../../../../components/ui/container-wrapper';
 import {
   detailVenta,
   documentsPdfInvoicesVenta,
@@ -536,7 +536,7 @@ class VentaDetalle extends CustomComponent {
           {
             Capacitor.isNativePlatform() ? (
               <button
-                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 onClick={this.handleOpenModalPrinter}
               >
                 <i className="fa fa-print"></i> Imprimir
@@ -544,19 +544,19 @@ class VentaDetalle extends CustomComponent {
             ) : (
               <>
                 <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   onClick={this.handlePrintInvoices.bind(this, 'A4')}
                 >
                   <i className="fa fa-print"></i> A4
                 </button>
                 <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   onClick={this.handlePrintInvoices.bind(this, '80mm')}
                 >
                   <i className="fa fa-print"></i> 80MM
                 </button>
                 <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   onClick={this.handlePrintInvoices.bind(this, '58mm')}
                 >
                   <i className="fa fa-print"></i> 58MM
@@ -566,7 +566,7 @@ class VentaDetalle extends CustomComponent {
           }
 
           <button
-            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 flex items-center gap-2"
+            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
             <i className="fa fa-whatsapp"></i> WhatsApp

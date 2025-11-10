@@ -76,7 +76,7 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
             <Image
               default={images.icono}
               src={rutaLogo}
-              className="rounded-circle d-block mx-auto mb-2 object-contain"
+              className=" rounded-[50%]  block mx-auto mb-2 object-contain"
               alt={'Logo'}
               width={130}
             />

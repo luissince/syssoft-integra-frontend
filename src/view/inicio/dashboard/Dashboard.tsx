@@ -37,7 +37,7 @@ const Dashboard = ({ token, moneda }: Props) => {
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Selecciona la vista que deseas visualizar</p>
           </div>
-          <TabsList className="bg-gray-100 p-1 rounded-lg">
+          <TabsList className="bg-gray-100 p-1 rounded">
             <TabsTrigger
               value="comercial"
               className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
