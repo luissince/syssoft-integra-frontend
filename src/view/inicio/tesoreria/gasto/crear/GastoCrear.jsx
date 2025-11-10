@@ -6,7 +6,7 @@ import {
   isText,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '../../../../../components/ui/container-wrapper';
 import {
   comboComprobante,
   comboMoneda,
@@ -31,9 +31,9 @@ import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import printJS from 'print-js';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -87,8 +87,6 @@ class GastoCrear extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Filtrar concepto
     this.refConcepto = React.createRef();
@@ -366,37 +364,42 @@ class GastoCrear extends CustomComponent {
     const { concepto, idComprobante, monto, proveedor, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Gasto', 'Seleccione su concepto.', () =>
-        this.refValueConcepto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione su concepto.",
+      }, () => this.refValueConcepto.current.focus());
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Gasto', 'Ingrese el monto.', () =>
-        this.refMonto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Ingrese el monto.",
+      }, () => this.refMonto.current.focus());
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Gasto', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione su comprobante.",
+      }, () => this.refComprobante.current.focus());
       return;
     }
 
     if (isEmpty(proveedor)) {
-      this.alert.warning('Gasto', 'Seleccione un proveedor.', () =>
-        this.refValueProveedor.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione un proveedor.",
+      }, () => this.refValueProveedor.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Gasto', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione su moneda.",
+      }, () => this.refMoneda.current.focus());
       return;
     }
 
@@ -404,15 +407,20 @@ class GastoCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Gasto',
-      '¿Está seguro de limpiar el gasto?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+    const accept = await alertKit.question({
+      title: "Gasto",
+      message: "¿Está seguro de limpiar el gasto?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   handleCerrar = () => {
@@ -427,11 +435,11 @@ class GastoCrear extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
       proveedor,
@@ -445,45 +453,56 @@ class GastoCrear extends CustomComponent {
       monto,
     } = this.state;
 
-    this.alert.dialog(
-      'Gasto',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idPersona: proveedor.idPersona,
-            idUsuario: idUsuario,
-            idMoneda: idMoneda,
-            idSucursal: idSucursal,
-            idComprobante: idComprobante,
-            idConcepto: concepto.idConcepto,
-            monto: monto,
-            estado: 1,
-            observacion,
-            nota,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
-
-          await callback();
-          this.alert.information('Gasto', 'Procesando información...');
-
-          const response = await createGasto(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idGasto);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Gasto', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: "Gasto",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idPersona: proveedor.idPersona,
+        idUsuario: idUsuario,
+        idMoneda: idMoneda,
+        idSucursal: idSucursal,
+        idComprobante: idComprobante,
+        idConcepto: concepto.idConcepto,
+        monto: monto,
+        estado: 1,
+        observacion,
+        nota,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback();
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await createGasto(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idGasto);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Gasto",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {
@@ -543,14 +562,12 @@ class GastoCrear extends CustomComponent {
           title={'Completar Gasto'}
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
-          disabledCreditoFijo={true}
+          disabledCredito={true}
           codiso={this.state.codiso}
-          importeTotal={
-            isNumeric(this.state.monto) ? Number(this.state.monto) : 0
-          }
+          importeTotal={isNumeric(this.state.monto) ? Number(this.state.monto) : 0}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={null}
         />
 
         <ModalImpresion

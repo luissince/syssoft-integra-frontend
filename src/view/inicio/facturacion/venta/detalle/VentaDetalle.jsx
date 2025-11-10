@@ -18,10 +18,7 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '../../../../../model/class/custom-component';
 import {
-  CONTADO,
-  CREDITO_FIJO,
-  CREDITO_VARIABLE,
-} from '../../../../../model/types/forma-pago';
+  CONTADO} from '../../../../../model/types/forma-transaccion';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
@@ -184,12 +181,8 @@ class VentaDetalle extends CustomComponent {
 
     const tipo =
       idFormaPago === CONTADO
-        ? 'CONTADO'
-        : idFormaPago === CREDITO_FIJO
-          ? 'CREDITO FIJO'
-          : idFormaPago === CREDITO_VARIABLE
-            ? 'CRÉDITO VARIABLE'
-            : 'PAGO ADELTANDO';
+        ? "CONTADO"
+        : "CREDITO"
 
     this.setState({
       idVenta: id,

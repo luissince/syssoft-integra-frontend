@@ -23,9 +23,7 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import {
   CONTADO,
-  CREDITO_FIJO,
-  CREDITO_VARIABLE,
-} from '../../../../../model/types/forma-pago';
+} from '../../../../../model/types/forma-transaccion';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import { VENTA } from '../../../../../model/types/tipo-comprobante';
@@ -288,7 +286,7 @@ class Ventas extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
@@ -639,7 +637,7 @@ class Ventas extends CustomComponent {
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        {vista === 'tabla' ? (
+        {vista === "tabla" ? (
           /* 📊 Vista Tabla */
           <div className="bg-white rounded border overflow-hidden">
             <div className="overflow-x-auto">
@@ -680,33 +678,23 @@ class Ventas extends CustomComponent {
                     </tr>
                   ) : (
                     this.state.lista.map((item) => {
-                      const estado =
-                        <span
-                          className={
-                            cn(
-                              "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                              item.estado === 1 ? "bg-green-100 text-green-800" :
-                                item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
-                                  item.estado === 3 ? "bg-red-100 text-red-800" :
-                                    "bg-blue-100 text-blue-800"
-                            )
-                          }
-                        >
-                          {
-                            item.estado === 1 ? "COBRADO" :
-                              item.estado === 2 ? "POR COBRAR" :
-                                item.estado === 3 ? "ANULADO" :
-                                  "POR LLEVAR"
-                          }
-                        </span>
+
+                      const estadoClassName = cn(
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        item.estado === 1 ? "bg-green-100 text-green-800" :
+                          item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
+                            item.estado === 3 ? "bg-red-100 text-red-800" :
+                              "bg-blue-100 text-blue-800"
+                      );
+
+                      const estadoValue = item.estado === 1 ? "COBRADO" :
+                        item.estado === 2 ? "POR COBRAR" :
+                          item.estado === 3 ? "ANULADO" :
+                            "POR LLEVAR";
 
                       const tipo = item.idFormaPago === CONTADO
-                        ? 'CONTADO'
-                        : item.idFormaPago === CREDITO_FIJO
-                          ? 'CRÉDITO FIJO'
-                          : item.idFormaPago === CREDITO_VARIABLE
-                            ? 'CRÉDITO VARIABLE'
-                            : 'PAGO ADELANTADO';
+                        ? "CONTADO"
+                        : "CREDITO"
 
                       return (
                         <tr key={item.idVenta} className="hover:bg-gray-50 transition-colors">
@@ -724,20 +712,28 @@ class Ventas extends CustomComponent {
                             <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">{tipo}</td>
-                          <td className="px-6 py-4 text-center">{estado}</td>
+                          <td className="px-6 py-4 text-center">
+                            <span
+                              className={estadoClassName}
+                            >
+                              {estadoValue}
+                            </span>
+                          </td>
                           <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
                             {formatCurrency(item.total, item.codiso)}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button
-                              className={`
-                              p-2 rounded-md text-sm font-medium transition
-                              text-blue-600 bg-white
-                              hover:bg-blue-50 hover:text-blue-700
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                              active:bg-blue-100 active:scale-[0.97]
-                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                             `}
+                              className={
+                                cn(
+                                  "p-2 rounded-md text-sm font-medium transition",
+                                  "text-blue-600 bg-white",
+                                  "hover:bg-blue-50 hover:text-blue-700",
+                                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                                  "active:bg-blue-100 active:scale-[0.97]",
+                                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                                )
+                              }
                               title="Ver detalle"
                               onClick={() => this.handleDetalle(item.idVenta)}
                               disabled={!this.state.detail}
@@ -753,16 +749,17 @@ class Ventas extends CustomComponent {
                             ) : (
                               <Link
                                 to={getPathNavigation('guia-create', item.idVenta)}
-                                // className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-300"
-                                className={`
-                                  block text-center
-                                  p-2 rounded-md text-sm font-medium transition
-                                  text-gray-600 bg-white
-                                  hover:bg-blue-50 hover:text-blue-700
-                                  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                                  active:bg-blue-100 active:scale-[0.97]
-                                  disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                                `}
+                                className={
+                                  cn(
+                                    "block text-center",
+                                    "p-2 rounded-md text-sm font-medium transition",
+                                    "text-gray-600 bg-white",
+                                    "hover:bg-blue-50 hover:text-blue-700",
+                                    "focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
+                                    "active:bg-blue-100 active:scale-[0.97]",
+                                    "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                                  )
+                                }
                                 title="Generar guía"
                               >
                                 <i className="fa fa-truck text-lg"></i>
@@ -771,14 +768,16 @@ class Ventas extends CustomComponent {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <button
-                              className={`
-                              p-2 rounded-md text-sm font-medium transition
-                              text-red-600 bg-white
-                              hover:bg-red-50 hover:text-red-700
-                              focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                              active:bg-red-100 active:scale-[0.98]
-                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                             `}
+                              className={
+                                cn(
+                                  "p-2 rounded-md text-sm font-medium transition",
+                                  "text-red-600 bg-white",
+                                  "hover:bg-red-50 hover:text-red-700",
+                                  "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                                  "active:bg-red-100 active:scale-[0.98]",
+                                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                                )
+                              }
                               title="Anular venta"
                               onClick={() => this.handleCancelar(item.idVenta)}
                               disabled={!this.state.remove}
@@ -823,21 +822,28 @@ class Ventas extends CustomComponent {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {this.state.lista.map((item) => {
-                  const estadoClass = item.estado === 1
-                    ? "bg-green-100 text-green-800"
-                    : item.estado === 2
-                      ? "bg-yellow-100 text-yellow-800"
-                      : item.estado === 3
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800";
+                  const estadoClassName = cn(
+                    "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                    item.estado === 1
+                      ? "bg-green-100 text-green-800"
+                      : item.estado === 2
+                        ? "bg-yellow-100 text-yellow-800"
+                        : item.estado === 3
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800"
+                  );
+
+                  const estadoValue =
+                    item.estado === 1
+                      ? 'COBRADO' :
+                      item.estado === 2
+                        ? 'POR COBRAR' :
+                        item.estado === 3
+                          ? 'ANULADO' : 'POR LLEVAR';
 
                   const tipo = item.idFormaPago === CONTADO
-                    ? 'CONTADO'
-                    : item.idFormaPago === CREDITO_FIJO
-                      ? 'CRÉDITO FIJO'
-                      : item.idFormaPago === CREDITO_VARIABLE
-                        ? 'CRÉDITO VARIABLE'
-                        : 'PAGO ADELANTADO';
+                    ? "CONTADO"
+                    : "CREDITO"
 
                   return (
                     <div
@@ -849,8 +855,8 @@ class Ventas extends CustomComponent {
                           <h5 className="font-semibold text-gray-900 text-sm">
                             {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
                           </h5>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoClass}`}>
-                            {item.estado === 1 ? 'COBRADO' : item.estado === 2 ? 'POR COBRAR' : item.estado === 3 ? 'ANULADO' : 'POR LLEVAR'}
+                          <span className={estadoClassName}>
+                            {estadoValue}
                           </span>
                         </div>
 
@@ -880,14 +886,16 @@ class Ventas extends CustomComponent {
 
                         <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
                           <button
-                            className={`
-                              p-2 rounded-md text-sm font-medium transition
-                              text-blue-600 bg-white
-                              hover:bg-blue-50 hover:text-blue-700
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                              active:bg-blue-100 active:scale-[0.97]
-                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                             `}
+                            className={
+                              cn(
+                                "p-2 rounded-md text-sm font-medium transition",
+                                "text-blue-600 bg-white",
+                                "hover:bg-blue-50 hover:text-blue-700",
+                                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                                "active:bg-blue-100 active:scale-[0.97]",
+                                "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                              )
+                            }
                             onClick={() => this.handleDetalle(item.idVenta)}
                             disabled={!this.state.detail}
                             title="Ver detalle"
@@ -905,15 +913,17 @@ class Ventas extends CustomComponent {
                             (
                               <Link
                                 to={getPathNavigation('guia-create', item.idVenta)}
-                                className={`
-                                  block text-center
-                                  p-2 rounded-md text-sm font-medium transition
-                                  text-gray-600 bg-white
-                                  hover:bg-blue-50 hover:text-blue-700
-                                  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                                  active:bg-blue-100 active:scale-[0.97]
-                                  disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                                `}
+                                className={
+                                  cn(
+                                    "block text-center",
+                                    "p-2 rounded-md text-sm font-medium transition",
+                                    "text-gray-600 bg-white",
+                                    "hover:bg-blue-50 hover:text-blue-700",
+                                    "focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
+                                    "active:bg-blue-100 active:scale-[0.97]",
+                                    "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                                  )
+                                }
                                 title="Generar guía"
                               >
                                 <i className="fa fa-truck mr-1"></i> Guía
@@ -921,14 +931,16 @@ class Ventas extends CustomComponent {
                             )}
 
                           <button
-                            className={`
-                            p-2 rounded-md text-sm font-medium transition
-                            text-red-600 bg-white
-                            hover:bg-red-50 hover:text-red-700
-                            focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                            active:bg-red-100 active:scale-[0.98]
-                            disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                          `}
+                            className={
+                              cn(
+                                "p-2 rounded-md text-sm font-medium transition",
+                                "text-red-600 bg-white",
+                                "hover:bg-red-50 hover:text-red-700",
+                                "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                                "active:bg-red-100 active:scale-[0.98]",
+                                "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                              )
+                            }
                             onClick={() => this.handleCancelar(item.idVenta)}
                             disabled={!this.state.remove}
                             title="Anular"

@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import PrinterPlugin, { PrinterConfig } from '@/model/ts/plugins/printer-escpos';
 
-
 export const printAsync = createAsyncThunk('printer/print', async (printerConfig: PrinterConfig, { dispatch, rejectWithValue }) => {
   try {
     const result = await PrinterPlugin.printTicket(printerConfig);

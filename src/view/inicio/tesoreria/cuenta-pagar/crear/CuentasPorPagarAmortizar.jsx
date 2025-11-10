@@ -10,7 +10,7 @@ import CustomComponent from '../../../../../model/class/custom-component';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import PropTypes from 'prop-types';
-import { CONTADO, CREDITO_FIJO } from '../../../../../model/types/forma-pago';
+import { CONTADO } from '../../../../../model/types/forma-transaccion';
 import { CANCELED } from '../../../../../model/types/types';
 import {
   cancelAccountsPayableCompra,
@@ -201,10 +201,8 @@ class CuentasPorPagarAmbonar extends CustomComponent {
 
     const tipo =
       idFormaPago === CONTADO
-        ? 'CONTADO'
-        : idFormaPago === CREDITO_FIJO
-          ? 'CREDITO FIJO'
-          : 'CRÉDITO VARIABLE';
+        ? 'CONTADO':
+        "CREDITO"
 
     this.setState({
       idCompra: id,

@@ -2058,7 +2058,7 @@ class VentaCrear extends CustomComponent {
 
           const html = `
           <div class="flex flex-col items-center">
-              <h5>Productos con cantidades faltantes :D</h5>
+              <h5>Productos con cantidades faltantes</h5>
               <table class="table">
                 <thead>
                     <tr>
@@ -2188,12 +2188,12 @@ class VentaCrear extends CustomComponent {
           </div>`;
 
           alertKit.html({
-            title: 'Venta',
+            title: "Venta",
             bodyInnerHTML: html,
           });
         } else {
           alertKit.warning({
-            title: 'Venta',
+            title: "Venta",
             message: response.getMessage(),
           });
         }
