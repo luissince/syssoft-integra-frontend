@@ -1,28 +1,25 @@
 import React from 'react';
 import {
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isText,
   isEmpty,
-  alertDialog,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import ContainerWrapper from '../../../../components/Container';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   getIdMedida,
   updateMedida,
-} from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+} from '@/network/rest/principal.network';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
-import { SpinnerView } from '../../../../components/Spinner';
-import Title from '../../../../components/Title';
-import Button from '../../../../components/Button';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import { alertKit } from 'alert-kit';
 
 class MedidaEditar extends CustomComponent {
   constructor(props) {
@@ -38,9 +35,10 @@ class MedidaEditar extends CustomComponent {
       descripcion: '',
       estado: false,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
+    this.refCodigo = React.createRef();
     this.refNombre = React.createRef();
 
     this.abortController = new AbortController();
@@ -110,45 +108,73 @@ class MedidaEditar extends CustomComponent {
 
   handleEditar = async () => {
     if (isEmpty(this.state.codigo)) {
-      alertWarning('Medida', 'Ingrese el codigo de la medida', () => {
-        this.refCodigo.current.focus();
-      });
+      alertKit.warning({
+        title: "Medida",
+        message: "Ingrese el codigo de la medida",
+        onClose: () => {
+          this.refCodigo.current.focus();
+        },
+      })
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Medida', 'Ingrese el nombre de la medida', () => {
-        this.refNombre.current.focus();
-      });
+      alertKit.warning({
+        title: "Medida",
+        message: "Ingrese el nombre de la medida",
+        onClose: () => {
+          this.refNombre.current.focus();
+        },
+      })
       return;
     }
 
-    alertDialog('Medida', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idMedida: this.state.idMedida,
-          codigo: this.state.codigo,
-          nombre: this.state.nombre,
-          descripcion: this.state.descripcion,
-          estado: this.state.estado,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Medida', 'Procesando información...');
-
-        const response = await updateMedida(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Medida', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Medida', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Medida",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        idMedida: this.state.idMedida,
+        codigo: this.state.codigo,
+        nombre: this.state.nombre,
+        descripcion: this.state.descripcion,
+        estado: this.state.estado,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      })
+
+      const response = await updateMedida(data);
+
+      if (response instanceof SuccessReponse) {
+
+        alertKit.success({
+          title: "Medida",
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          },
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Medida",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   render() {
@@ -261,7 +287,9 @@ class MedidaEditar extends CustomComponent {
 MedidaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

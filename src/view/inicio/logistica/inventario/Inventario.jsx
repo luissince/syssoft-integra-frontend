@@ -4,28 +4,28 @@ import {
   formatCurrency,
   isEmpty,
   getNumber,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
-import ContainerWrapper from '../../../../components/ui/container-wrapper';
-import Paginacion from '../../../../components/Paginacion';
-import CustomComponent from '../../../../model/class/custom-component';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import Paginacion from '@/components/Paginacion';
+import CustomComponent from '@/components/CustomComponent';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
   comboAlmacen,
   documentsPdfCodbarProducto,
   listInventario,
   summaryInventario,
-} from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
-import Title from '../../../../components/Title';
-import { SpinnerView } from '../../../../components/Spinner';
-import Search from '../../../../components/Search';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
+import Search from '@/components/Search';
 import {
   setListaInventarioData,
   setListaInventarioPaginacion,
-} from '../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import pdfVisualizer from 'pdf-visualizer';
 import {
   AlertCircle,
@@ -39,10 +39,11 @@ import {
   PackageOpen,
   PackagePlus,
   Plus,
-  RefreshCw,
 } from 'lucide-react';
-import Image from '../../../../components/Image';
-import { images } from '../../../../helper';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { cn } from '@/lib/utils';
+import { RxEyeNone } from 'react-icons/rx';
 
 const CustomModalStock = React.lazy(
   () => import('@/view/inicio/logistica/inventario/component/ModalStock'),
@@ -63,17 +64,17 @@ class Inventario extends CustomComponent {
     this.state = {
       // Atributos de carga
       initialLoad: true,
-      initialMessage: 'Cargando datos...',
+      initialMessage: "Cargando datos...",
 
       // Atributos de busqueda
-      idTipoAlmacen: '',
+      idTipoAlmacen: "",
       tiposAlmacenes: [],
 
-      idAlmacen: '',
+      idAlmacen: "",
       almacenes: [],
 
       // Nuevo filtro de estado
-      estadoFiltro: '',
+      estadoFiltro: "",
 
       // Atributos principales de la tabla
       loading: false,
@@ -88,25 +89,25 @@ class Inventario extends CustomComponent {
         totalLotesPorVencer: 0,
       },
 
-      lotesVisible: {},
+      inventarioDetallesVisible: {},
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
       // Atributos del modal stock
       isOpenStock: false,
 
-      vista: 'tabla',
+      vista: "tabla",
 
       // Id principales
       codIso: this.props.moneda.codiso ?? '',
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -119,10 +120,11 @@ class Inventario extends CustomComponent {
 
     // Opciones para el filtro de estado
     this.estadosOptions = [
-      { value: '', label: 'Todos los estados' },
-      { value: 'critico', label: 'Stock Crítico' },
-      { value: 'exceso', label: 'Stock Excedente' },
-      { value: 'optimo', label: 'Stock Óptimo' },
+      { value: "", label: "Todos los estados" },
+      { value: "critico", label: "Stock Crítico" },
+      { value: "optimo", label: "Stock Óptimo" },
+      { value: "exceso", label: "Stock Excedente" },
+      { value: "vencer", label: "Lotes por Vencer" },
     ];
   }
 
@@ -170,7 +172,6 @@ class Inventario extends CustomComponent {
       }, async () => {
         await this.loadingSummary();
         await this.loadingInit();
-        this.updateReduxState();
       });
     }
   }
@@ -189,6 +190,8 @@ class Inventario extends CustomComponent {
 
     this.setState({
       resumen: response.data,
+    }, () => {
+      this.updateReduxState()
     });
   };
 
@@ -240,11 +243,11 @@ class Inventario extends CustomComponent {
     await this.setStateAsync({ opcion: 1 });
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -307,9 +310,14 @@ class Inventario extends CustomComponent {
     }
   }
 
-  handleChangeView = (value) => {
+  handleCambiarVista = (value) => {
     this.setState({ vista: value }, () => this.updateReduxState());
   };
+
+  handleRecargar = async () => {
+    await this.loadingSummary();
+    await this.loadingInit();
+  }
 
   //------------------------------------------------------------------------------------------
   // Funciones del modal producto
@@ -329,18 +337,24 @@ class Inventario extends CustomComponent {
   //--------------------------------------------------------------------------------------------
 
   handleSelectAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value }, () => this.loadingInit());
+    this.setState({ idAlmacen: event.target.value }, async () => {
+      await this.loadingSummary();
+      await this.loadingInit();
+    });
   };
 
   // Nuevo handler para el filtro de estado
   handleSelectEstado = (event) => {
-    this.setState({ estadoFiltro: event.target.value }, () => this.loadingInit());
+    this.setState({ estadoFiltro: event.target.value }, async () => {
+      await this.loadingSummary();
+      await this.loadingInit();
+    });
   };
 
   handleOpenPrinterCodBar = async (idProducto) => {
     await pdfVisualizer.init({
       url: documentsPdfCodbarProducto(),
-      title: 'Lista de productos - Código de Barras',
+      title: "Lista de productos - Código de Barras",
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
@@ -348,58 +362,76 @@ class Inventario extends CustomComponent {
 
   toggleLotesVisibility = (index) => {
     this.setState((prevState) => ({
-      lotesVisible: {
-        ...prevState.lotesVisible,
-        [index]: !prevState.lotesVisible?.[index],
+      inventarioDetallesVisible: {
+        ...prevState.inventarioDetallesVisible,
+        [index]: !prevState.inventarioDetallesVisible?.[index],
       },
     }));
   };
 
-  getLotesEnRiesgo = (lotes) => {
-    if (!lotes || lotes.length === 0) return 0;
+  getLotesEnRiesgo = (inventarioDetalles) => {
+    if (!inventarioDetalles || inventarioDetalles.length === 0) return 0;
 
-    return lotes.filter(
-      (lote) => lote.diasRestantes <= 30 || lote.estado === 'Crítico',
+    return inventarioDetalles.filter(
+      (inventarioDetalle) => inventarioDetalle.diasRestantes <= 30 || inventarioDetalle.estado === 'Crítico',
     ).length;
   };
 
-  getProximoVencimiento = (lotes) => {
-    if (!lotes || lotes.length === 0) return 'N/A';
+  getProximoVencimiento = (inventarioDetalles) => {
+    if (!inventarioDetalles || inventarioDetalles.length === 0) return 'N/A';
 
-    const lotesOrdenados = [...lotes].sort(
+    const inventarioDetallesOrdenados = [...inventarioDetalles].sort(
       (a, b) => a.diasRestantes - b.diasRestantes,
     );
-    return lotesOrdenados[0].fechaVencimiento;
+    return inventarioDetallesOrdenados[0].fechaVencimiento;
   };
 
-  determinarEstadoLote = (lote) => {
-    if (lote.diasRestantes <= 0) {
+  determinarEstadoLote = (inventarioDetalle) => {
+    if (inventarioDetalle.porDefecto === 1) {
       return {
-        estado: 'Vencido',
-        clase: 'bg-red-600 text-white',
+        estado: "",
+        clase: "",
+        icono: RxEyeNone,
+        colorBarra: '',
+      };
+    }
+
+    if (isEmpty(inventarioDetalle.fechaVencimiento)) {
+      return {
+        estado: "",
+        clase: "",
+        icono: RxEyeNone,
+        colorBarra: '',
+      };
+    }
+
+    if (inventarioDetalle.diasRestantes <= 0) {
+      return {
+        estado: "Vencido",
+        clase: "bg-red-600 text-white",
         icono: AlertCircle,
-        colorBarra: 'bg-red-600',
+        colorBarra: "bg-red-600",
       };
-    } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
+    } else if (inventarioDetalle.diasRestantes > 0 && inventarioDetalle.diasRestantes <= 30) {
       return {
-        estado: 'Próximo',
-        clase: 'bg-orange-500 text-white',
+        estado: "Próximo",
+        clase: "bg-orange-500 text-white",
         icono: Clock,
-        colorBarra: 'bg-orange-500',
+        colorBarra: "bg-orange-500",
       };
-    } else if (lote.diasRestantes <= 90) {
+    } else if (inventarioDetalle.diasRestantes <= 90) {
       return {
-        estado: 'Vigilar',
-        clase: 'bg-yellow-500 text-white',
+        estado: "Vigilar",
+        clase: "bg-yellow-500 text-white",
         icono: AlertTriangle,
-        colorBarra: 'bg-yellow-500',
+        colorBarra: "bg-yellow-500",
       };
     } else {
       return {
-        estado: 'Óptimo',
-        clase: 'bg-green-500 text-white',
+        estado: "Óptimo",
+        clase: "bg-green-500 text-white",
         icono: CheckCircle,
-        colorBarra: 'bg-green-500',
+        colorBarra: "bg-green-500",
       };
     }
   };
@@ -412,20 +444,20 @@ class Inventario extends CustomComponent {
     const { cantidad, cantidadMinima, cantidadMaxima } = item;
     if (cantidad < cantidadMinima) {
       return {
-        estado: 'Crítico',
-        clase: 'bg-red-600 text-white',
+        estado: "Crítico",
+        clase: "bg-red-600 text-white",
         icono: AlertTriangle,
       };
     } else if (cantidad > cantidadMaxima) {
       return {
-        estado: 'Exceso',
-        clase: 'bg-blue-600 text-white',
+        estado: "Exceso",
+        clase: "bg-blue-600 text-white",
         icono: PackagePlus,
       };
     } else {
       return {
-        estado: 'Óptimo',
-        clase: 'bg-green-500 text-white',
+        estado: "Óptimo",
+        clase: "bg-green-500 text-white",
         icono: CheckCircle,
       };
     }
@@ -441,6 +473,8 @@ class Inventario extends CustomComponent {
   };
 
   render() {
+    const { vista } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
@@ -463,50 +497,62 @@ class Inventario extends CustomComponent {
           />
         </Suspense>
 
-        {/* Header */}
-        <div className="bg-white">
-          <div className="max-w-7xl mx-auto pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <p className="text-gray-600 mt-1">
-                  Gestión de productos y stock
-                </p>
-              </div>
+        {/* Acciones principales + Toggle vista */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
+              onClick={this.handleRecargar}
+            >
+              <i className="bi bi-arrow-clockwise" />
+              Recargar Vista
+            </button>
+          </div>
 
-              <div className="flex flex-wrap gap-3 items-center">
-                <button
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                  onClick={this.loadingInit}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Recargar
-                </button>
+          {/* Toggle vista */}
+          <div className="flex bg-gray-100 rounded p-1 gap-1">
+            <button
+              onClick={() => this.handleCambiarVista("tabla")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-list-ul"></i>
+              <span className="hidden sm:inline">Tabla</span>
+            </button>
+            <button
+              onClick={() => this.handleCambiarVista("cuadricula")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-grid-3x3"></i>
+              <span className="hidden sm:inline">Cuadrícula</span>
+            </button>
+          </div>
+        </div>
 
-                {/* Toggle vista */}
-                <div className="flex bg-gray-100 rounded p-1">
-                  <button
-                    onClick={() => this.handleChangeView('tabla')}
-                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${this.state.vista === 'tabla'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                      }`}
-                  >
-                    <i className="bi bi-list-ul"></i>
-                    <span className="hidden sm:inline">Tabla</span>
-                  </button>
-                  <button
-                    onClick={() => this.handleChangeView('cuadricula')}
-                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${this.state.vista === 'cuadricula'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                      }`}
-                  >
-                    <i className="bi bi-grid-3x3"></i>
-                    <span className="hidden sm:inline">Cuadrícula</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes ver todos los productos con diferentes filtros, por ejemplo: almacen, stock y filtro.
+            </p>
           </div>
         </div>
 
@@ -519,18 +565,20 @@ class Inventario extends CustomComponent {
                 Almacén
               </label>
               <select
-                className="w-full px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 value={this.state.idAlmacen}
                 onChange={this.handleSelectAlmacen}
               >
-                <option value="">Todos los almacenes</option>
-                {this.state.almacenes.map((item, index) => {
-                  return (
-                    <option key={index} value={item.idAlmacen}>
-                      {item.nombre} - {item.tipoAlmacen}
-                    </option>
-                  );
-                })}
+                <option value="">Seleccione un almacén</option>
+                {
+                  this.state.almacenes.map((item, index) => {
+                    return (
+                      <option key={index} value={item.idAlmacen}>
+                        {item.nombre} - {item.tipoAlmacen}
+                      </option>
+                    );
+                  })
+                }
               </select>
             </div>
 
@@ -540,15 +588,17 @@ class Inventario extends CustomComponent {
                 Estado del Stock
               </label>
               <select
-                className="w-full px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 value={this.state.estadoFiltro}
                 onChange={this.handleSelectEstado}
               >
-                {this.estadosOptions.map((option, index) => (
-                  <option key={index} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                {
+                  this.estadosOptions.map((option, index) => (
+                    <option key={index} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))
+                }
               </select>
             </div>
 
@@ -558,7 +608,7 @@ class Inventario extends CustomComponent {
               </label>
               <Search
                 group={true}
-                iconLeft={<i className="bi bi-search"></i>}
+                iconLeft={<i className="bi bi-search" />}
                 ref={this.refSearch}
                 onSearch={this.searchText}
                 placeholder="Buscar por código o nombre..."
@@ -679,222 +729,231 @@ class Inventario extends CustomComponent {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {this.state.loading ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center">
-                          <div className="flex flex-col items-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
-                            <p className="text-gray-500">
-                              Cargando información...
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : isEmpty(this.state.lista) ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center">
-                          <div className="text-gray-500">
-                            <PackageOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                            <p className="text-lg font-medium">
-                              No se encontraron productos con el filtro
-                            </p>
-                            <p className="text-sm">Intenta cambiar el filtro</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      this.state.lista.map((item, index) => {
-                        const estadoInventario = this.determinarEstadoInventario(item);
-                        const tieneLotes = item.lotes && item.lotes.length > 0;
-                        const porcentaje = this.calcularPorcentaje(item);
+                    {
+                      this.state.loading ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center">
+                            <div className="flex flex-col items-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
+                              <p className="text-gray-500">
+                                Cargando información...
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : isEmpty(this.state.lista) ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center">
+                            <div className="text-gray-500">
+                              <PackageOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                              <p className="text-lg font-medium">
+                                No se encontraron productos con el filtro
+                              </p>
+                              <p className="text-sm">Intenta cambiar el filtro</p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        this.state.lista.map((item, index) => {
+                          const estadoInventario = this.determinarEstadoInventario(item);
+                          const tieneInventarioDetalles = item.inventarioDetalles && item.inventarioDetalles.length > 0;
+                          const porcentaje = this.calcularPorcentaje(item);
 
-                        return (
-                          <React.Fragment key={`producto-${item.idInventario}`}>
-                            <tr className="hover:bg-gray-50 transition-colors">
-                              <td className="px-6 py-4">
-                                <div className="flex items-center">
-                                  <Image
-                                    default={images.noImage}
-                                    src={item.imagen}
-                                    alt={item.producto}
-                                    width={70}
-                                  />
-                                  <div className="ml-4">
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {item.producto}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      {item.codigo}
-                                    </div>
-                                    {tieneLotes && (
-                                      <div className="flex items-center mt-1">
-                                        <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                          {item.lotes.length} lote(s)
-                                        </div>
-                                        {this.getLotesEnRiesgo(item.lotes) > 0 && (
-                                          <div className="ml-2 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-                                            {this.getLotesEnRiesgo(item.lotes)} en riesgo
-                                          </div>
-                                        )}
+                          return (
+                            <React.Fragment key={`producto-${item.idInventario}`}>
+                              <tr className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center">
+                                    <Image
+                                      default={images.noImage}
+                                      src={item.imagen}
+                                      alt={item.producto}
+                                      overrideClass="w-20 h-20 object-contain border border-solid border-[#e2e8f0] rounded"
+                                    />
+                                    <div className="ml-4">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {item.producto}
                                       </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-900">
-                                  {item.categoria}
-                                </div>
-                                {tieneLotes && (
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    Próx. venc: {this.getProximoVencimiento(item.lotes)}
-                                  </div>
-                                )}
-                              </td>
-                              <td className="px-6 py-4">
-                                <div>
-                                  <div className={`text-sm font-medium ${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
-                                    {rounded(item.cantidad)} {item.medida}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
-                                  </div>
-                                  <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                                    <div
-                                      className={`h-2 rounded-full transition-all duration-300 ${item.cantidad < item.cantidadMinima
-                                        ? 'bg-red-500'
-                                        : item.cantidad > item.cantidadMaxima
-                                          ? 'bg-blue-500'
-                                          : 'bg-green-500'
-                                        }`}
-                                      style={{ width: `${porcentaje}%` }}
-                                    ></div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {formatCurrency(item.costo, this.state.codIso)}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <span
-                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoInventario.clase}`}
-                                >
-                                  <estadoInventario.icono className="h-3 w-3 mr-1" />
-                                  {estadoInventario.estado}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex items-center space-x-2">
-                                  <button
-                                    className="text-gray-400 hover:text-indigo-600 transition-colors"
-                                    onClick={() => this.handleOpenModalStock(item)}
-                                  >
-                                    <Plus className="h-5 w-5" />
-                                  </button>
-                                  <button
-                                    className="text-gray-400 hover:text-indigo-600 transition-colors"
-                                    onClick={() => this.handleOpenPrinterCodBar(item.idProducto)}
-                                  >
-                                    <Barcode className="h-5 w-5" />
-                                  </button>
-                                  {tieneLotes && (
-                                    <button
-                                      onClick={() => this.toggleLotesVisibility(index)}
-                                      className="text-gray-400 hover:text-indigo-600 transition-colors"
-                                    >
-                                      {this.state.lotesVisible[index] ? (
-                                        <ChevronUp className="h-5 w-5" />
-                                      ) : (
-                                        <ChevronDown className="h-5 w-5" />
-                                      )}
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-
-                            {/* Lotes rows */}
-                            {tieneLotes && this.state.lotesVisible[index] && (
-                              <tr>
-                                <td colSpan={6} className="px-6 py-0 bg-gray-50">
-                                  <div className="rounded p-4 mb-4">
-                                    <h4 className="text-sm font-medium text-gray-900 mb-3">
-                                      Lotes del producto
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                      {item.lotes.map((lote, loteIndex) => {
-                                        const estadoLote = this.determinarEstadoLote(lote);
-                                        const porcentajeLote = (lote.cantidad / item.cantidad) * 100;
-
-                                        return (
-                                          <div
-                                            key={lote.idLote}
-                                            className="bg-white rounded p-4"
-                                          >
-                                            <div className="flex justify-between items-start mb-2">
-                                              <div className="text-sm font-medium text-gray-900">
-                                                Lote {loteIndex + 1}
-                                              </div>
-                                              <span
-                                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoLote.clase}`}
-                                              >
-                                                <estadoLote.icono className="h-3 w-3 mr-1" />
-                                                {estadoLote.estado}
-                                              </span>
-                                            </div>
-                                            <div className="space-y-2">
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Código: </span>
-                                                <span className="font-medium">{lote.codigoLote}</span>
-                                              </div>
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Vencimiento: </span>
-                                                <span className="font-medium">{lote.fechaVencimiento}</span>
-                                              </div>
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Días restantes: </span>
-                                                <span
-                                                  className={`font-medium ${lote.diasRestantes <= 30
-                                                    ? 'text-red-600'
-                                                    : lote.diasRestantes <= 90
-                                                      ? 'text-orange-600'
-                                                      : 'text-gray-900'
-                                                    }`}
-                                                >
-                                                  {lote.diasRestantes} días
-                                                </span>
-                                              </div>
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Cantidad: </span>
-                                                <span className="font-medium">{lote.cantidad} {item.medida}</span>
-                                              </div>
-                                              <div className="mt-2">
-                                                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                                  <span>Participación en stock</span>
-                                                  <span>{rounded(porcentajeLote, 0)}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                  <div
-                                                    className={`h-2 rounded-full ${estadoLote.colorBarra}`}
-                                                    style={{ width: `${porcentajeLote}%` }}
-                                                  ></div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                      <div className="text-sm text-gray-500">
+                                        {item.codigo}
+                                      </div>
+                                      {tieneInventarioDetalles && (
+                                        <div className="flex items-center mt-1">
+                                          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                                            {item.inventarioDetalles.length} lote(s)
                                           </div>
-                                        );
-                                      })}
+                                          {this.getLotesEnRiesgo(item.inventarioDetalles) > 0 && (
+                                            <div className="ml-2 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                                              {this.getLotesEnRiesgo(item.inventarioDetalles)} en riesgo
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-sm text-gray-900">
+                                    {item.categoria}
+                                  </div>
+                                  {tieneInventarioDetalles && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Próx. venc: {this.getProximoVencimiento(item.inventarioDetalles)}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div>
+                                    <div className={`text-sm font-medium ${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
+                                      {rounded(item.cantidad)} {item.medida}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
+                                    </div>
+                                    <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                      <div
+                                        className={cn(
+                                          "h-2 rounded-full transition-all duration-300",
+                                          item.cantidad < item.cantidadMinima ? "bg-red-500" :
+                                            item.cantidad > item.cantidadMaxima ? "bg-blue-500" : "bg-green-500"
+                                        )}
+                                        style={{ width: `${porcentaje}%` }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {formatCurrency(item.costo, this.state.codIso)}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoInventario.clase}`}
+                                  >
+                                    <estadoInventario.icono className="h-3 w-3 mr-1" />
+                                    {estadoInventario.estado}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center space-x-2">
+                                    <button
+                                      className="text-gray-400 hover:text-indigo-600 transition-colors"
+                                      onClick={() => this.handleOpenModalStock(item)}
+                                    >
+                                      <Plus className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                      className="text-gray-400 hover:text-indigo-600 transition-colors"
+                                      onClick={() => this.handleOpenPrinterCodBar(item.idProducto)}
+                                    >
+                                      <Barcode className="h-5 w-5" />
+                                    </button>
+                                    {tieneInventarioDetalles && (
+                                      <button
+                                        onClick={() => this.toggleLotesVisibility(index)}
+                                        className="text-gray-400 hover:text-indigo-600 transition-colors"
+                                      >
+                                        {this.state.inventarioDetallesVisible[index] ? (
+                                          <ChevronUp className="h-5 w-5" />
+                                        ) : (
+                                          <ChevronDown className="h-5 w-5" />
+                                        )}
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
                               </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })
-                    )}
+
+                              {/* Lotes rows */}
+                              {
+                                tieneInventarioDetalles && this.state.inventarioDetallesVisible[index] && (
+                                  <tr>
+                                    <td colSpan={6} className="px-0 py-0 bg-gray-50">
+                                      <div className="rounded p-4">
+                                        <h4 className="text-sm font-medium text-gray-900 mb-3">
+                                          Detalles del producto
+                                        </h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                          {
+                                            item.inventarioDetalles.map((inventarioDetalle, inventarioDetalleIndex) => {
+                                              const estadoLote = this.determinarEstadoLote(inventarioDetalle);
+                                              const porcentajeLote = (inventarioDetalle.cantidad / item.cantidad) * 100;
+
+                                              return (
+                                                <div
+                                                  key={inventarioDetalle.idKardex}
+                                                  className="bg-white rounded p-4 border"
+                                                >
+                                                  <div className="flex justify-between items-start mb-2">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                      {
+                                                        inventarioDetalle.porDefecto === 1 ? "Por Defecto" : `Lote ${inventarioDetalleIndex + 1}`
+                                                      }
+                                                    </div>
+                                                    <span
+                                                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoLote.clase}`}
+                                                    >
+                                                      <estadoLote.icono className="h-3 w-3 mr-1" />
+                                                      {estadoLote.estado}
+                                                    </span>
+                                                  </div>
+                                                  <div className="space-y-2">
+                                                    <div className="text-sm">
+                                                      <span className="text-gray-500">Código: </span>
+                                                      <span className="font-medium">{inventarioDetalle.lote || "N/A"}</span>
+                                                    </div>
+                                                    <div className="text-sm">
+                                                      <span className="text-gray-500">Vencimiento: </span>
+                                                      <span className="font-medium">{inventarioDetalle.fechaVencimiento || "N/A"}</span>
+                                                    </div>
+                                                    <div className="text-sm">
+                                                      <span className="text-gray-500">Días restantes: </span>
+                                                      <span
+                                                        className={cn(
+                                                          "font-medium",
+                                                          inventarioDetalle.diasRestantes <= 30 ? "text-red-600" :
+                                                            inventarioDetalle.diasRestantes <= 90 ? "text-orange-600" : "text-gray-900"
+                                                        )}
+                                                      >
+                                                        {inventarioDetalle.diasRestantes} días
+                                                      </span>
+                                                    </div>
+                                                    <div className="text-sm">
+                                                      <span className="text-gray-500">Cantidad: </span>
+                                                      <span className="font-medium">{inventarioDetalle.cantidad} {item.medida}</span>
+                                                    </div>
+                                                    <div className="text-sm">
+                                                      <span className="text-gray-500">Ubicación: </span>
+                                                      <span className="font-medium">{inventarioDetalle.ubicacion || "N/A"}</span>
+                                                    </div>
+                                                    <div className="mt-2">
+                                                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                        <span>Participación en stock</span>
+                                                        <span>{rounded(porcentajeLote, 0)}%</span>
+                                                      </div>
+                                                      <div className="w-full bg-gray-200 rounded-full h-2">
+                                                        <div
+                                                          className={`h-2 rounded-full ${estadoLote.colorBarra}`}
+                                                          style={{ width: `${porcentajeLote}%` }}
+                                                        ></div>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              );
+                                            })
+                                          }
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )
+                              }
+                            </React.Fragment>
+                          );
+                        })
+                      )}
                   </tbody>
                 </table>
               </div>
@@ -919,170 +978,176 @@ class Inventario extends CustomComponent {
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
                 </div>
               ) : isEmpty(this.state.lista) ? (
-                <div className="text-center py-16 bg-white rounded border">
-                  <PackageOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                  <p className="text-lg font-medium text-gray-900 mb-2">
-                    No se encontraron productos
+                <div className="text-center py-16 bg-white rounded border ">
+                  <PackageOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <p className="text-lg font-medium text-gray-500">
+                    No se encontraron productos con el filtro
                   </p>
-                  <p className="text-sm text-gray-500">
-                    Intenta cambiar los filtros
-                  </p>
+                  <p className="text-sm text-gray-500">Intenta cambiar el filtro</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {this.state.lista.map((item, index) => {
-                    const estadoInventario = this.determinarEstadoInventario(item);
-                    const tieneLotes = item.lotes && item.lotes.length > 0;
-                    const porcentaje = this.calcularPorcentaje(item);
+                  {
+                    this.state.lista.map((item, index) => {
+                      const estadoInventario = this.determinarEstadoInventario(item);
+                      const tieneLotes = item.inventarioDetalles && item.inventarioDetalles.length > 0;
+                      const porcentaje = this.calcularPorcentaje(item);
 
-                    return (
-                      <div
-                        key={`producto-grid-${item.idInventario}`}
-                        className="bg-white rounded border hover:shadow-md transition group overflow-hidden"
-                      >
-                        <div className="p-4">
-                          <div className="flex justify-between items-start mb-3">
-                            <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoInventario.clase}`}
-                            >
-                              <estadoInventario.icono className="h-3 w-3 mr-1" />
-                              {estadoInventario.estado}
-                            </span>
-                          </div>
+                      return (
+                        <div
+                          key={`producto-grid-${item.idInventario}`}
+                          className="bg-white rounded border hover:shadow-md transition group overflow-hidden"
+                        >
+                          <div className="p-4">
+                            <div className="flex justify-between items-start mb-3">
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoInventario.clase}`}
+                              >
+                                <estadoInventario.icono className="h-3 w-3 mr-1" />
+                                {estadoInventario.estado}
+                              </span>
+                            </div>
 
-                          <div className="mb-3">
                             <Image
                               default={images.noImage}
                               src={item.imagen}
                               alt={item.producto}
-                              className="w-full h-32 object-contain mx-auto"
+                              overrideClass="mb-3 w-full h-40 object-contain"
                             />
-                          </div>
 
-                          <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-base">
-                            {item.producto}
-                          </h5>
+                            <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-base">
+                              {item.producto}
+                            </h5>
 
-                          <div className="text-sm text-gray-600 mb-1">
-                            <span className="font-medium">Código:</span> {item.codigo}
-                          </div>
-
-                          <div className="text-sm text-gray-600 mb-1">
-                            <span className="font-medium">Categoría:</span> {item.categoria}
-                          </div>
-
-                          <div className="text-sm text-gray-900 mb-1">
-                            <span className="font-medium">Stock:</span> <span className={`${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>{rounded(item.cantidad)} <small>{item.medida}</small></span>
-                            <div className="text-sm text-gray-500">
-                              Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
+                            <div className="text-sm text-gray-600 mb-1">
+                              <span className="font-medium">Código:</span> {item.codigo}
                             </div>
-                            <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
-                              <div
-                                className={`h-2 rounded-full transition-all duration-300 ${item.cantidad < item.cantidadMinima
-                                  ? 'bg-red-500'
-                                  : item.cantidad > item.cantidadMaxima
-                                    ? 'bg-blue-500'
-                                    : 'bg-green-500'
-                                  }`}
-                                style={{ width: `${porcentaje}%` }}
-                              ></div>
+
+                            <div className="text-sm text-gray-600 mb-1">
+                              <span className="font-medium">Categoría:</span> {item.categoria}
                             </div>
-                          </div>
 
-                          <div className="text-base font-bold text-gray-900 mb-3">
-                            {formatCurrency(item.costo, this.state.codIso)}
-                          </div>
-
-                          {tieneLotes && (
-                            <div className="mb-3">
-                              <div className="flex items-center gap-1 mb-1">
-                                <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                  {item.lotes.length} lote(s)
-                                </div>
-                                {this.getLotesEnRiesgo(item.lotes) > 0 && (
-                                  <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-                                    {this.getLotesEnRiesgo(item.lotes)} en riesgo
-                                  </div>
-                                )}
+                            <div className="text-sm text-gray-900 mb-1">
+                              <span className="font-medium">Stock:</span>
+                              <span className={`${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
+                                {rounded(item.cantidad)} <small>{item.medida}</small>
+                              </span>
+                              <div className="text-sm text-gray-500">
+                                Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
                               </div>
-                              <div className="text-xs text-gray-600">
-                                <span className="font-medium">Próx. venc:</span> {this.getProximoVencimiento(item.lotes)}
+                              <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className={cn(
+                                    "h-2 rounded-full transition-all duration-300",
+                                    item.cantidad < item.cantidadMinima ? "bg-red-500" :
+                                      item.cantidad > item.cantidadMaxima ? "bg-blue-500" :
+                                        "bg-green-500",
+                                  )}
+                                  style={{ width: `${porcentaje}%` }}
+                                ></div>
                               </div>
                             </div>
-                          )}
 
-                          <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
-                            <button
-                              className="flex-1 p-2 text-indigo-600 hover:bg-indigo-50 rounded-md text-sm font-medium transition"
-                              onClick={() => this.handleOpenModalStock(item)}
-                              title="Agregar stock"
-                            >
-                              <Plus className="h-4 w-4 inline mr-1" /> Stock
-                            </button>
-
-                            <button
-                              className="flex-1 p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
-                              onClick={() => this.handleOpenPrinterCodBar(item.idProducto)}
-                              title="Código de barras"
-                            >
-                              <Barcode className="h-4 w-4 inline mr-1" /> Código
-                            </button>
+                            <div className="text-base font-bold text-gray-900 mb-3">
+                              {formatCurrency(item.costo, this.state.codIso)}
+                            </div>
 
                             {tieneLotes && (
-                              <button
-                                className="p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
-                                onClick={() => this.toggleLotesVisibility(index)}
-                                title="Ver lotes"
-                              >
-                                {this.state.lotesVisible[index] ? (
-                                  <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
-                                )}
-                              </button>
+                              <div className="mb-3">
+                                <div className="flex items-center gap-1 mb-1">
+                                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                                    {item.inventarioDetalles.length} lote(s)
+                                  </div>
+                                  {this.getLotesEnRiesgo(item.inventarioDetalles) > 0 && (
+                                    <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
+                                      {this.getLotesEnRiesgo(item.inventarioDetalles)} en riesgo
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  <span className="font-medium">Próx. venc:</span> {this.getProximoVencimiento(item.inventarioDetalles)}
+                                </div>
+                              </div>
                             )}
-                          </div>
 
-                          {/* Lotes expandidos */}
-                          {tieneLotes && this.state.lotesVisible[index] && (
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                              <h6 className="text-xs font-medium text-gray-900 mb-2">Lotes</h6>
-                              <div className="space-y-3">
-                                {item.lotes.map((lote, loteIndex) => {
-                                  const estadoLote = this.determinarEstadoLote(lote);
-                                  const porcentajeLote = (lote.cantidad / item.cantidad) * 100;
+                            <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                              <button
+                                className="flex-1 p-2 text-indigo-600 hover:bg-indigo-50 rounded-md text-sm font-medium transition"
+                                onClick={() => this.handleOpenModalStock(item)}
+                                title="Agregar stock"
+                              >
+                                <Plus className="h-4 w-4 inline mr-1" /> Stock
+                              </button>
 
-                                  return (
-                                    <div key={lote.idLote} className="text-xs bg-gray-50 p-2 rounded">
-                                      <div className="flex justify-between items-center mb-1">
-                                        <span className="font-medium">Lote {loteIndex + 1}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${estadoLote.clase}`}>
-                                          {estadoLote.estado}
-                                        </span>
-                                      </div>
-                                      <div>Cód: {lote.codigoLote}</div>
-                                      <div>Venc: {lote.fechaVencimiento}</div>
-                                      <div className={`${lote.diasRestantes <= 30 ? 'text-red-600' : lote.diasRestantes <= 90 ? 'text-orange-600' : ''}`}>
-                                        {lote.diasRestantes} días restantes
-                                      </div>
-                                      <div className="mt-1">
-                                        <div className="w-full bg-gray-200 rounded h-1.5">
-                                          <div
-                                            className={`h-1.5 rounded ${estadoLote.colorBarra}`}
-                                            style={{ width: `${porcentajeLote}%` }}
-                                          ></div>
+                              <button
+                                className="flex-1 p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
+                                onClick={() => this.handleOpenPrinterCodBar(item.idProducto)}
+                                title="Código de barras"
+                              >
+                                <Barcode className="h-4 w-4 inline mr-1" /> Código
+                              </button>
+
+                              {tieneLotes && (
+                                <button
+                                  className="p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
+                                  onClick={() => this.toggleLotesVisibility(index)}
+                                  title="Ver lotes"
+                                >
+                                  {this.state.inventarioDetallesVisible[index] ? (
+                                    <ChevronUp className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Lotes expandidos */}
+                            {tieneLotes && this.state.inventarioDetallesVisible[index] && (
+                              <div className="mt-4 pt-4 border-t border-gray-100">
+                                <h6 className="text-xs font-medium text-gray-900 mb-2">Lotes</h6>
+                                <div className="space-y-3">
+                                  {item.inventarioDetalles.map((inventarioDetalle, inventarioDetalleIndex) => {
+                                    const estadoLote = this.determinarEstadoLote(inventarioDetalle);
+                                    const porcentajeLote = (inventarioDetalle.cantidad / item.cantidad) * 100;
+
+                                    return (
+                                      <div key={inventarioDetalle.idKardex} className="text-xs bg-gray-50 p-2 rounded">
+                                        <div className="flex justify-between items-center mb-1">
+                                          <span className="font-medium">Lote {inventarioDetalleIndex + 1}</span>
+                                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${estadoLote.clase}`}>
+                                            {estadoLote.estado}
+                                          </span>
+                                        </div>
+                                        <div>Cód: {inventarioDetalle.lote}</div>
+                                        <div>Venc: {inventarioDetalle.fechaVencimiento}</div>
+                                        <div>Ubic.: {inventarioDetalle.ubicacion}</div>
+                                        <div
+                                          className={cn(
+                                            inventarioDetalle.diasRestantes <= 30 ? "text-red-600" :
+                                              inventarioDetalle.diasRestantes <= 90 ? "text-orange-600" : ""
+                                          )}>
+                                          {inventarioDetalle.diasRestantes} días restantes
+                                        </div>
+                                        <div className="mt-1">
+                                          <div className="w-full bg-gray-200 rounded h-1.5">
+                                            <div
+                                              className={`h-1.5 rounded ${estadoLote.colorBarra}`}
+                                              style={{ width: `${porcentajeLote}%` }}
+                                            ></div>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  })}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  }
                 </div>
               )}
 
@@ -1108,7 +1173,9 @@ class Inventario extends CustomComponent {
 Inventario.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

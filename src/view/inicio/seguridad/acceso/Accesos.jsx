@@ -1,32 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Tree from '../../../../resource/js/treeone.js';
+import Tree from '@/resource/js/treeone';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/Container';
+} from '@/helper/utils.helper';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
-  comboPerfil,
   findOneAcceso,
   saveAcceso,
   updateAcceso,
-} from '../../../../network/rest/principal.network.js';
-import SuccessReponse from '../../../../model/class/response.js';
-import ErrorResponse from '../../../../model/class/error-response.js';
-import { CANCELED } from '../../../../model/types/types.js';
-import CustomComponent from '../../../../model/class/custom-component.js';
-import { SpinnerView } from '../../../../components/Spinner';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import Select from '../../../../components/Select';
-import Title from '../../../../components/Title';
-import CheckBox from '../../../../components/Checks';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import { SpinnerView } from '@/components/Spinner';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import Select from '@/components/Select';
+import Title from '@/components/Title';
+import CheckBox from '@/components/Checks';
+import { alertKit } from 'alert-kit';
+import { optionsPerfil } from '@/network/rest/api-client';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -68,27 +65,21 @@ class Accesos extends CustomComponent {
   }
 
   loadData = async () => {
-    const [perfiles] = await Promise.all([this.fetchComboPerfil()]);
+    const { success, data, message } = await optionsPerfil(this.abortControllerView.signal);
+
+    if (!success) {
+      alertKit.warning({
+        title: "Acceso",
+        message: message,
+      });
+      return;
+    }
 
     this.setState({
-      perfiles,
+      perfiles: data,
       loading: false,
     });
   };
-
-  async fetchComboPerfil() {
-    const response = await comboPerfil(this.abortControllerView.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
 
   loadDataAcceso = async (id) => {
     await this.setStateAsync({
@@ -154,7 +145,10 @@ class Accesos extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Acceso', response.getMessage());
+      alertKit.warning({
+        title: "Acceso",
+        message: response.getMessage(),
+      });
     }
   };
 
@@ -223,75 +217,114 @@ class Accesos extends CustomComponent {
 
   async onEventGuardar() {
     if (isEmpty(this.state.idPerfil)) {
-      alertWarning('Acceso', 'Seleccione el perfil.', () => {
+      alertKit.warning({
+        title: "Acceso",
+        message: "Seleccione el perfil.",
+      }, () => {
         this.refIdPerfil.current.focus();
       });
       return;
     }
 
-    alertDialog('Acceso', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idPerfil: this.state.idPerfil,
-          menus: this.state.menus,
-          sucursales: this.state.sucursales,
-        };
-
-        alertInfo('Acceso', 'Procesando información...');
-
-        const response = await saveAcceso(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Acceso', response.data, async () => {
-            await this.setStateAsync({
-              idPerfil: '',
-              menus: [],
-              sucursales: [],
-            });
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Acceso', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Acceso",
+      message: "¿Está seguro de que desea guardar los cambios? Esta operación no se puede deshacer.",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        idPerfil: this.state.idPerfil,
+        menus: this.state.menus,
+        sucursales: this.state.sucursales,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await saveAcceso(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Acceso",
+          message: response.data,
+        }, async () => {
+          await this.setStateAsync({
+            idPerfil: '',
+            menus: [],
+            sucursales: [],
+          });
+        });
+      }
+
+      if (response instanceof ErrorResponse)
+        alertKit.warning({
+          title: "Acceso",
+          message: response.getMessage(),
+        });
+    }
   }
 
   async onEventUpdateData() {
     if (isEmpty(this.state.idPerfil)) {
-      alertWarning('Acceso', 'Seleccione el perfil.', () => {
+      alertKit.warning({
+        title: "Acceso",
+        message: "Seleccione el perfil.",
+      }, () => {
         this.refIdPerfil.current.focus();
       });
       return;
     }
 
-    alertDialog('Acceso', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idPerfil: this.state.idPerfil,
-          menus: this.state.menus,
-        };
-
-        alertInfo('Acceso', 'Procesando información...');
-
-        const response = await updateAcceso(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Acceso', response.data, async () => {
-            await this.setStateAsync({
-              idPerfil: '',
-              menus: [],
-              sucursales: [],
-            });
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Acceso', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Acceso",
+      message: "¿Está seguro de que desea guardar los cambios? Esta operación no se puede deshacer.",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        idPerfil: this.state.idPerfil,
+        menus: this.state.menus,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await updateAcceso(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Acceso",
+          message: response.data,
+        }, async () => {
+          await this.setStateAsync({
+            idPerfil: '',
+            menus: [],
+            sucursales: [],
+          });
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Acceso",
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   render() {
@@ -371,14 +404,14 @@ class Accesos extends CustomComponent {
             <Button
               className="btn-success"
               onClick={() => this.onEventGuardar()}
-              // disabled={!this.state.save}
+            // disabled={!this.state.save}
             >
               <i className="fa fa-save"></i> Guardar
             </Button>{' '}
             <Button
               className="btn-warning"
               onClick={() => this.onEventUpdateData()}
-              // disabled={!this.state.update}
+            // disabled={!this.state.update}
             >
               <i className="fa fa-refresh"></i> Resetear
             </Button>{' '}
@@ -411,9 +444,8 @@ const OptionsList = ({ options, handleCheck, hasParentUl = false }) => {
             )}
 
             <CheckBox
-              className={`form-check-inline ${hasChildren ? 'ml-2' : ''} ${
-                hasParentUl ? 'ml-2' : ''
-              }`} // Agrega clases según el contexto
+              className={`form-check-inline ${hasChildren ? 'ml-2' : ''} ${hasParentUl ? 'ml-2' : ''
+                }`} // Agrega clases según el contexto
               id={`id${option.nombre}`}
               value={value}
               checked={option.estado === 1 ? true : false}

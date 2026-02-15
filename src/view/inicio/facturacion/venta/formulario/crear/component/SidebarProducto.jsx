@@ -1,22 +1,27 @@
 import {
+  formatDate,
   handlePasteFloat,
-  isEmpty,
   keyNumberFloat,
   rounded,
-} from '../../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
-import { UNIDADES } from '../../../../../../../model/types/tipo-tratamiento-producto';
-import { SpinnerView } from '../../../../../../../components/Spinner';
-import Input from '../../../../../../../components/Input';
-import TextArea from '../../../../../../../components/TextArea';
-import Button from '../../../../../../../components/Button';
-import Row from '../../../../../../../components/Row';
-import Column from '../../../../../../../components/Column';
+import { UNIDADES } from '@/model/types/tipo-tratamiento-producto';
+import { SpinnerView } from '@/components/Spinner';
+import Input from '@/components/Input';
+import TextArea from '@/components/TextArea';
+import Button from '@/components/Button';
 import { usePrivilegios } from '@/hooks/use-privilegios';
-import { CAMBIAR_PRECIO, EDITAR_DESCRIPCION, FACTURACION, USAR_BONIFICACION, VENTAS } from '@/model/types/menu';
+import {
+  CAMBIAR_PRECIO,
+  EDITAR_DESCRIPCION,
+  FACTURACION,
+  USAR_BONIFICACION,
+  VENTAS
+} from '@/model/types/menu';
+import { BoxIcon, CalendarIcon } from 'lucide-react';
 
 const SidebarProducto = (props) => {
-  
+
   const { getPrivilegio } = usePrivilegios(props.menus);
   const cambiarPrecio = getPrivilegio(FACTURACION, VENTAS, CAMBIAR_PRECIO);
   const usarBonificacion = getPrivilegio(FACTURACION, VENTAS, USAR_BONIFICACION);
@@ -29,7 +34,6 @@ const SidebarProducto = (props) => {
   const { listPrecio } = props;
 
   const { handleSave, handleClose } = props;
-
 
   const handleSeleccionar = (precio) => {
     refPrecio.current.value = precio.valor;
@@ -50,69 +54,60 @@ const SidebarProducto = (props) => {
 
           <div className="card-body h-100 overflow-y-auto">
             <SpinnerView loading={loading} message={'Cargando datos...'} />
+            <div className="mb-3">
+              <h5>
+                <i className="fa fa-pencil"></i>{' '}
+                {producto && producto.nombreProducto}
+              </h5>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <h5>
-                  <i className="fa fa-pencil"></i>{' '}
-                  {producto && producto.nombreProducto}
-                </h5>
-              </Column>
-            </Row>
+            <div className="mb-3">
+              <Input
+                autoFocus={true}
+                label={
+                  <>
+                    Precio:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                placeholder="0.00"
+                ref={refPrecio}
+                disabled={!cambiarPrecio}
+                onKeyDown={keyNumberFloat}
+                onPaste={handlePasteFloat}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  autoFocus={true}
-                  label={
-                    <>
-                      Precio:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  placeholder="0.00"
-                  ref={refPrecio}
-                  disabled={!cambiarPrecio}
-                  onKeyDown={keyNumberFloat}
-                  onPaste={handlePasteFloat}
-                />
-              </Column>
-            </Row>
+            <div className="mb-3">
+              <Input
+                label={'Bonificación:'}
+                placeholder="0"
+                ref={refBonificacion}
+                disabled={!usarBonificacion}
+                onKeyDown={keyNumberFloat}
+                onPaste={handlePasteFloat}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={'Bonificación:'}
-                  placeholder="0"
-                  ref={refBonificacion}
-                  disabled={!usarBonificacion}
-                  onKeyDown={keyNumberFloat}
-                  onPaste={handlePasteFloat}
-                />
-              </Column>
-            </Row>
+            <div className="mb-3">
+              <TextArea
+                label={
+                  <>
+                    Descripción:{' '}
+                    <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                placeholder="Ingrese los datos del producto"
+                ref={refDescripcion}
+                disabled={!editarDescripcion}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <TextArea
-                  label={
-                    <>
-                      Descripción:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  placeholder="Ingrese los datos del producto"
-                  ref={refDescripcion}
-                  disabled={!editarDescripcion}
-                />
-              </Column>
-            </Row>
-
-            <Row>
-              <Column formGroup={true}>
-                <label>Lista de Precios:</label>
-                <ul className="list-group">
-                  {listPrecio.map((item, index) => (
+            <div>
+              <label>Lista de Precios:</label>
+              <ul className="flex flex-col rounded">
+                {
+                  listPrecio.map((item, index) => (
                     <Button
                       key={index}
                       contentClassName="list-group-item list-group-item-action"
@@ -122,69 +117,78 @@ const SidebarProducto = (props) => {
                       <i className="fa fa-hand-pointer-o"></i> {item.nombre} -{' '}
                       {item.valor}
                     </Button>
-                  ))}
-                </ul>
-              </Column>
-            </Row>
+                  ))
+                }
+              </ul>
+            </div>
 
             {producto && producto.idTipoTratamientoProducto === UNIDADES && (
-              <Row>
-                <Column formGroup={true}>
-                  <label>Cantidad por Almacen:</label>
-                  <ul className="list-group">
-                    {producto.inventarios.map((item, index) => (
-                      <li key={index} className="list-group-item">
-                        <div className="d-flex justify-content-between flex-row">
-                          <div className="d-flex align-items-center gap-2">
-                            <i className="bi bi-house text-muted"></i>
-                            <span className="text-sm">{item.almacen}</span>
-                          </div>
-                          <div>
-                            <span className="text-sm">
-                              cantidad: {rounded(item.cantidad)}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+              <div>
+                <label>Cantidad por Almacen:</label>
+                <ul className="flex flex-col rounded">
+                  {
+                    producto.inventarios.map((item, index) => {
+                      const cantidad = producto.inventarios.reduce((accInventario, inventario) => {
+                        const sumaInventario = inventario.inventarioDetalles.reduce((accInventarioDetalle, inventarioDetalle) => {
+                          return accInventarioDetalle + inventarioDetalle.cantidad;
+                        }, 0);
+                        return accInventario + sumaInventario;
+                      }, 0);
 
-                  {!isEmpty(producto.inventarios) &&
-                    !isEmpty(
-                      producto.inventarios.filter(
-                        (item) => !isEmpty(item.lotes),
-                      ),
-                    ) && (
-                      <>
-                        <label className="mt-3">Lotes:</label>
-                        <ul className="list-group">
-                          {producto.inventarios.map((inv, index) => {
-                            const lotes = inv.lotes;
-
-                            return lotes.map((lote, index) => (
-                              <li key={index} className="list-group-item">
-                                <div className="d-flex justify-content-between flex-row">
-                                  <div className="d-flex align-items-center gap-2">
-                                    <i className="bi bi-box text-muted"></i>
-                                    <span className="text-sm">
-                                      {lote.codigoLote}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-sm">
-                                      cantidad:{' '}
-                                      {rounded(lote.cantidadSeleccionada)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </li>
-                            ));
-                          })}
-                        </ul>
-                      </>
-                    )}
-                </Column>
-              </Row>
+                      return (
+                        <li key={index} className="relative block px-4 py-2 border rounded mb-2">
+                          <div className="flex justify-between flex-row">
+                            <div className="flex items-center gap-2">
+                              <i className="bi bi-house text-muted"></i>
+                              <span className="text-sm">{item.almacen}</span>
+                            </div>
+                            <div>
+                              <span className="text-sm">
+                                cantidad: {rounded(cantidad)}
+                              </span>
+                            </div>
+                          </div>
+                          <label className="mt-3">Inventario Detalles:</label>
+                          <ul className="flex flex-col rounded">
+                            {
+                              item.inventarioDetalles.map((detalle, index) => {
+                                return (
+                                  <li key={index} className="flex w-full px-4 py-2 border rounded mb-2">
+                                    <div className="flex w-full items-center justify-between flex-row">
+                                      <div className="flex flex-col gap-2">
+                                        <div className="flex gap-2">
+                                          {/* <i className="bi bi-box text-muted"></i> */}
+                                          <BoxIcon className="h-4 w-4" />
+                                          <span className="text-sm">
+                                            {detalle.lote || 'SIN LOTE'}
+                                          </span>
+                                        </div>
+                                        {
+                                          detalle.fechaVencimiento && (
+                                            <div className="flex gap-2">
+                                              <CalendarIcon className="h-4 w-4" />
+                                              <span className="text-sm">
+                                                {formatDate(detalle.fechaVencimiento)}
+                                              </span>
+                                            </div>
+                                          )
+                                        }
+                                      </div>
+                                      <div className="text-sm">
+                                         <span>{rounded(detalle.cantidad)}</span> <span className="uppercase">{producto.medida}(S)</span>
+                                      </div>
+                                    </div>
+                                  </li>
+                                )
+                              })
+                            }
+                          </ul>
+                        </li>
+                      );
+                    })
+                  }
+                </ul>
+              </div>
             )}
           </div>
 

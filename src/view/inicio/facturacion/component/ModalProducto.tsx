@@ -6,7 +6,7 @@ import { SpinnerView } from '@/components/Spinner';
 import { handlePasteFloat, isEmpty, isNumeric } from '@/helper/utils.helper';
 import ErrorResponse from '@/model/class/error-response';
 import SuccessResponse from '@/model/class/response';
-import { CANCELED } from '@/model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { comboMedida } from '@/network/rest/principal.network';
 import { alertKit } from 'alert-kit';
 import React, { Component } from 'react';

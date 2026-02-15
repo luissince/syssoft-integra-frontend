@@ -29,7 +29,7 @@ class MarcaAgregar extends React.Component {
       estado: false,
       publicar: false,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -262,6 +262,7 @@ class MarcaAgregar extends React.Component {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
               alt="Icono de la categoría"
@@ -298,7 +299,9 @@ class MarcaAgregar extends React.Component {
 MarcaAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

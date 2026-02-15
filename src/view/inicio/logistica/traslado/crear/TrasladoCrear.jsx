@@ -1,55 +1,46 @@
 import React from 'react';
 import {
+  formatDate,
   getNumber,
   isEmpty,
   keyNumberFloat,
   rounded,
   validateNumericInputs,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
   comboAlmacen,
   comboMotivoTraslado,
   comboSucursal,
   createTraslado,
   filtrarAlmacenProducto,
-} from '../../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
-import SearchInput from '../../../../../components/SearchInput';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Button from '../../../../../components/Button';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Title from '../../../../../components/Title';
-import RadioButton from '../../../../../components/RadioButton';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
-import { SERVICIO } from '../../../../../model/types/tipo-producto';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
+import SearchInput from '@/components/SearchInput';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import RadioButton from '@/components/RadioButton';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
-import ModalLote from './ModalLote';
+import { cn } from '@/lib/utils';
+import { ENTRE_ALMACENES, ENTRE_SUCURSALES } from '@/model/types/tipo-traslado';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class TrasladorCrear extends CustomComponent {
+
   /**
    * Inicializa un nuevo componente.
    * @param {Object} props - Las propiedades pasadas al componente.
@@ -60,7 +51,7 @@ class TrasladorCrear extends CustomComponent {
     this.state = {
       // Atributos de carga
       initialLoad: true,
-      initialMessage: 'Cargando datos...',
+      initialMessage: "Cargando datos...",
 
       // Atributos principales
       paso: 1,
@@ -71,42 +62,39 @@ class TrasladorCrear extends CustomComponent {
 
       productos: [],
 
-      idTipoTraslado: '',
+      idTipoTraslado: "",
 
-      idMotivoTraslado: '',
+      idMotivoTraslado: "",
       motivoTraslado: [],
 
-      idAlmacenOrigenInterno: '',
-      idAlmacenDestinoInterno: '',
+      idAlmacenOrigenInterno: "",
+      idAlmacenDestinoInterno: "",
 
       almacenes: [],
       almacenesExterno: [],
       almacenesOrigenInterno: [],
       almacenesDestinoInterno: [],
 
-      idAlmacenOrigenExterno: '',
-      idSucursalExterno: '',
-      idAlmacenDestinoExterno: '',
+      idAlmacenOrigenExterno: "",
+      idSucursalExterno: "",
+      idAlmacenDestinoExterno: "",
 
-      observacion: 'S/N',
+      observacion: "S/N",
 
       sucursales: [],
 
       detalles: [],
 
-      nombreMotivoAjuste: '',
-      nombreAlmacenOrigenInterno: '',
-      nombreAlmacenDestinoInterno: '',
-      nombreAlmacenOriginExterno: '',
-      nombreSucursalExterno: '',
-      nombreAlmacenDestinoExterno: '',
-
-      // Atributos del modal lote
-      isOpenLote: false,
+      nombreMotivoTraslado: "",
+      nombreAlmacenOrigenInterno: "",
+      nombreAlmacenDestinoInterno: "",
+      nombreAlmacenOriginExterno: "",
+      nombreSucursalExterno: "",
+      nombreAlmacenDestinoExterno: "",
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -130,25 +118,22 @@ class TrasladorCrear extends CustomComponent {
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
 
-    // Referencia al modal lote
-    this.refModalLote = React.createRef();
-
     this.abortController = new AbortController();
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de cliclo de vida
-    |--------------------------------------------------------------------------
-    |
-    | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
-    | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
-    | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
-    | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
-    | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
-    | de la aplicación y optimizar el rendimiento del componente.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   async componentDidMount() {
     await this.loadingData();
@@ -245,15 +230,22 @@ class TrasladorCrear extends CustomComponent {
     }
   }
 
-  addProducto(producto, lotes = null) {
+  clearView() {
+    this.setState(this.initial, async () => {
+      await this.loadingData();
+      this.refIdTipoTraslado.current.focus();
+    });
+  }
+
+  addProducto(producto) {
     const exists = this.state.detalles.find(
       (item) => item.idProducto === producto.idProducto,
     );
 
     if (exists) {
       alertKit.warning({
-        title: 'Ajuste',
-        message: 'El producto ya existe en la lista.',
+        title: "Traslado",
+        message: "El producto ya existe en la lista.",
       });
       return;
     }
@@ -263,10 +255,11 @@ class TrasladorCrear extends CustomComponent {
       codigo: producto.codigo,
       nombre: producto.nombre,
       imagen: producto.imagen,
-      cantidad: '',
-      actual: producto.cantidad,
       unidad: producto.unidad,
-      lotes: lotes ? lotes : null,
+      inventarioDetalles: producto.inventarioDetalles.map((item) => ({
+        ...item,
+        cantidadTrasladar: "",
+      })),
     };
 
     this.setState((prevState) => ({
@@ -275,20 +268,95 @@ class TrasladorCrear extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+  //------------------------------------------------------------------------------------------
+  // Eventos para el traslado
+  //------------------------------------------------------------------------------------------
+
+  handleOptionTipoTraslado = (event) => {
+    this.setState({
+      idTipoTraslado: event.target.value,
+      almacenesOrigenInterno: this.state.almacenes,
+    });
+  };
+
+  handleSelectMotivojuste = (event) => {
+    this.setState({ idMotivoTraslado: event.target.value });
+  };
+
+  handleSelectAlmacenOrigenInterno = (event) => {
+    const almacenesDestinoInterno = this.state.almacenesOrigenInterno.filter(
+      (item) => item.idAlmacen !== event.target.value,
+    );
+
+    const idAlmacenDestinoInterno =
+      almacenesDestinoInterno.length === 1
+        ? almacenesDestinoInterno[0].idAlmacen
+        : "";
+
+    this.setState({
+      idAlmacenOrigenInterno: event.target.value,
+      idAlmacenDestinoInterno,
+      almacenesDestinoInterno,
+    });
+
+    if (event.target.value === "") {
+      this.refIdAlmacenDesitnoInterno.current.disabled = true;
+    } else {
+      this.refIdAlmacenDesitnoInterno.current.disabled = false;
+    }
+  };
+
+  handleSelectAlmacenDestinoInterno = (event) => {
+    this.setState({ idAlmacenDestinoInterno: event.target.value });
+  };
+
+  handleSelectAlmacenOrigenExterno = (event) => {
+    this.setState({ idAlmacenOrigenExterno: event.target.value });
+  };
+
+  handleSelectSucursalExterno = async (event) => {
+    this.setState({
+      initialLoad: true,
+      idSucursalExterno: event.target.value,
+      idAlmacenDestinoExterno: "",
+    });
+
+    const params = {
+      idSucursal: event.target.value,
+    };
+
+    const almacenes = await this.fetchComboAlmacen(params);
+
+    this.setState({
+      almacenesExterno: almacenes,
+      initialLoad: false,
+    });
+
+    if (event.target.value === "") {
+      this.refIdAlmacenDestinoExterno.current.disabled = true;
+    } else {
+      this.refIdAlmacenDestinoExterno.current.disabled = false;
+    }
+  };
+
+  handleSelectAlmacenDestinoExterno = (event) => {
+    this.setState({ idAlmacenDestinoExterno: event.target.value });
+  };
 
   //------------------------------------------------------------------------------------------
   // Filtrar producto
@@ -312,7 +380,7 @@ class TrasladorCrear extends CustomComponent {
 
     const params = {
       idAlmacen:
-        this.state.idTipoTraslado === 'TT0001'
+        this.state.idTipoTraslado === ENTRE_ALMACENES
           ? this.state.idAlmacenOrigenInterno
           : this.state.idAlmacenOrigenExterno,
       filtrar: searchWord,
@@ -333,205 +401,103 @@ class TrasladorCrear extends CustomComponent {
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
 
-    if (value.lote === 1) {
-      this.handleOpenLote(value);
-    } else {
-      this.setState(
-        {
-          producto: value,
-          productos: [],
-        },
-        () => {
-          this.addProducto(value);
-        },
-      );
-    }
-  };
-
-  handleOptionTipoTraslado = (event) => {
     this.setState({
-      idTipoTraslado: event.target.value,
-      almacenesOrigenInterno: this.state.almacenes,
+      producto: value,
+      productos: [],
+    }, () => {
+      this.addProducto(value);
     });
-  };
-
-  handleSelectMotivojuste = (event) => {
-    this.setState({ idMotivoTraslado: event.target.value });
-  };
-
-  handleSelectAlmacenOrigenInterno = (event) => {
-    const almacenesDestinoInterno = this.state.almacenesOrigenInterno.filter(
-      (item) => item.idAlmacen !== event.target.value,
-    );
-
-    const idAlmacenDestinoInterno =
-      almacenesDestinoInterno.length === 1
-        ? almacenesDestinoInterno[0].idAlmacen
-        : '';
-
-    this.setState({
-      idAlmacenOrigenInterno: event.target.value,
-      idAlmacenDestinoInterno,
-      almacenesDestinoInterno,
-    });
-
-    if (event.target.value === '') {
-      this.refIdAlmacenDesitnoInterno.current.disabled = true;
-    } else {
-      this.refIdAlmacenDesitnoInterno.current.disabled = false;
-    }
-  };
-
-  handleSelectAlmacenDestinoInterno = (event) => {
-    this.setState({ idAlmacenDestinoInterno: event.target.value });
-  };
-
-  handleSelectAlmacenOrigenExterno = (event) => {
-    this.setState({ idAlmacenOrigenExterno: event.target.value });
-  };
-
-  handleSelectSucursalExterno = async (event) => {
-    this.setState({
-      initialLoad: true,
-      idSucursalExterno: event.target.value,
-      idAlmacenDestinoExterno: '',
-    });
-
-    const params = {
-      idSucursal: event.target.value,
-    };
-
-    const almacenes = await this.fetchComboAlmacen(
-      params,
-      this.abortController.signal,
-    );
-
-    this.setState({
-      almacenesExterno: almacenes,
-      initialLoad: false,
-    });
-
-    if (event.target.value === '') {
-      this.refIdAlmacenDestinoExterno.current.disabled = true;
-    } else {
-      this.refIdAlmacenDestinoExterno.current.disabled = false;
-    }
-  };
-
-  handleSelectAlmacenDestinoExterno = (event) => {
-    this.setState({ idAlmacenDestinoExterno: event.target.value });
   };
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoTraslado)) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione el tipo de traslado.',
-        },
-        () => {
-          this.refIdTipoTraslado.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione el tipo de traslado.",
+      }, () => {
+        this.refIdTipoTraslado.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMotivoTraslado)) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione el motivo traslado.',
-        },
-        () => {
-          this.refIdMotivoTraslado.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione el motivo traslado.",
+      }, () => {
+        this.refIdMotivoTraslado.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0001' &&
+      this.state.idTipoTraslado === ENTRE_ALMACENES &&
       isEmpty(this.state.idAlmacenOrigenInterno)
     ) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione el almacen origin.',
-        },
-        () => {
-          this.refIdAlmacenOriginInterno.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione el almacen origin.",
+      }, () => {
+        this.refIdAlmacenOriginInterno.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0001' &&
+      this.state.idTipoTraslado === ENTRE_ALMACENES &&
       isEmpty(this.state.idAlmacenDestinoInterno)
     ) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione el almacen destino.',
-        },
-        () => {
-          this.refIdAlmacenDesitnoInterno.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione el almacen destino.",
+      }, () => {
+        this.refIdAlmacenDesitnoInterno.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0002' &&
+      this.state.idTipoTraslado === ENTRE_SUCURSALES &&
       isEmpty(this.state.idAlmacenOrigenExterno)
     ) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione el almacen origin.',
-        },
-        () => {
-          this.refIdAlmacenOrigenExterno.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione el almacen origin.",
+      }, () => {
+        this.refIdAlmacenOrigenExterno.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0002' &&
+      this.state.idTipoTraslado === ENTRE_SUCURSALES &&
       isEmpty(this.state.idSucursalExterno)
     ) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione la sucursal.',
-        },
-        () => {
-          this.refIdSucursalExterno.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione la sucursal.",
+      }, () => {
+        this.refIdSucursalExterno.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0002' &&
+      this.state.idTipoTraslado === ENTRE_SUCURSALES &&
       isEmpty(this.state.idAlmacenDestinoExterno)
     ) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Seleccione el almacen destino.',
-        },
-        () => {
-          this.refIdAlmacenDestinoExterno.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Traslado",
+        message: "Seleccione el almacen destino.",
+      }, () => {
+        this.refIdAlmacenDestinoExterno.current.focus();
+      });
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0001') {
+    if (this.state.idTipoTraslado === ENTRE_ALMACENES) {
       this.setState({
-        nombreMotivoAjuste:
+        nombreMotivoTraslado:
           this.refIdMotivoTraslado.current.options[
             this.refIdMotivoTraslado.current.selectedIndex
           ].innerText,
@@ -547,7 +513,7 @@ class TrasladorCrear extends CustomComponent {
       });
     } else {
       this.setState({
-        nombreMotivoAjuste:
+        nombreMotivoTraslado:
           this.refIdMotivoTraslado.current.options[
             this.refIdMotivoTraslado.current.selectedIndex
           ].innerText,
@@ -581,150 +547,161 @@ class TrasladorCrear extends CustomComponent {
     this.setState({ detalles });
   };
 
-  handleInputDetalle = (event, idProducto) => {
+  handleInputDetalle = (event, idKardex) => {
     const { value } = event.target;
+
     this.setState((prevState) => ({
-      detalles: prevState.detalles.map((item) =>
-        item.idProducto === idProducto ? { ...item, cantidad: value } : item,
-      ),
+      detalles: prevState.detalles.map((item) => ({
+        ...item,
+        inventarioDetalles: item.inventarioDetalles.map((invd) => {
+          if (invd.idKardex === idKardex) {
+            return {
+              ...invd,
+              cantidadTrasladar: value,
+            };
+          }
+          return invd;
+        }),
+      })),
     }));
   };
 
   handleFocusInputTable = (event, isLastRow) => {
-    if (event.key === 'Enter' && !isLastRow) {
+    if (event.key === "Enter" && !isLastRow) {
       const nextInput =
         event.target.parentElement.parentElement.nextElementSibling.querySelector(
-          'input',
+          "input",
         );
       nextInput.focus();
     }
-    if (event.key === 'Enter' && isLastRow) {
+
+    if (event.key === "Enter" && isLastRow) {
       const firstInput =
         event.target.parentElement.parentElement.parentElement.querySelector(
-          'input',
+          "input",
         );
       firstInput.focus();
     }
   };
 
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal lote
-  //------------------------------------------------------------------------------------------
-  handleOpenLote = async (producto) => {
-    this.setState({ isOpenLote: true });
-    await this.refModalLote.current.loadDatos(producto);
-  };
-
-  handleCloseLote = () => {
-    this.setState({ isOpenLote: false });
-  };
-
-  handleSaveLote = async (producto, lotes) => {
-    this.setState(
-      {
-        producto: producto,
-        productos: [],
-      },
-      () => {
-        this.addProducto(producto, lotes);
-      },
-    );
-  };
 
   //------------------------------------------------------------------------------------------
   // Acciones de proceso de registro
   //------------------------------------------------------------------------------------------
   handleSave = async () => {
-    if (isEmpty(this.state.detalles)) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Agregue productos en la lista para continuar.',
-        },
-        () => {
-          this.refValueProducto.current.focus();
-        },
-      );
-      return;
-    }
+    const {
+      idTipoTraslado,
+      idMotivoTraslado,
+      idAlmacenOrigenInterno,
+      idAlmacenOrigenExterno,
+      idAlmacenDestinoInterno,
+      idAlmacenDestinoExterno,
+      idSucursalExterno,
+      idSucursal,
+      observacion,
+      idUsuario,
+      detalles
+    } = this.state
 
-    if (
-      !isEmpty(
-        this.state.detalles.filter(
-          (item) => !item.lotes && getNumber(item.cantidad) <= 0,
-        ),
-      )
-    ) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
-        },
-        () => {
-          validateNumericInputs(this.refTableBody);
-        },
-      );
-      return;
-    }
-
-    const accept = await alertKit.question(
-      {
-        title: 'Traslado',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
+    if (isEmpty(detalles)) {
+      alertKit.warning({
+        title: "Traslado",
+        message: "Agregue productos en la lista para continuar.",
+      }, () => {
+        this.refValueProducto.current.focus();
       });
+      return;
+    }
+    if (!detalles.some((item) =>
+      item.inventarioDetalles.some(
+        (invd) => getNumber(invd.cantidadTrasladar) > 0
+      )
+    )) {
+      alertKit.warning({
+        title: "Traslado",
+        message: "Hay cantidades en lista de productos con valor 0 o vacío.",
+      }, () => {
+        validateNumericInputs(this.refTableBody);
+      });
+      return;
+    }
+
+    const detallesFiltrados = detalles
+      .map(item => {
+        const detallesValidos = item.inventarioDetalles
+          .filter(invd => getNumber(invd.cantidadTrasladar) > 0)
+          .map(invd => ({
+            ...invd,
+            cantidadTrasladar: getNumber(invd.cantidadTrasladar)
+          }));
+
+        return {
+          ...item,
+          inventarioDetalles: detallesValidos
+        };
+      })
+      .filter(item => item.inventarioDetalles.length > 0);
+
+    if (isEmpty(detallesFiltrados)) {
+      alertKit.warning({
+        title: "Traslado",
+        message: "No hay cantidades válidas para trasladar.",
+      });
+      return;
+    }
+
+    const accept = await alertKit.question({
+      title: "Traslado",
+      message: "¿Está seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const data = {
-        idTipoTraslado: this.state.idTipoTraslado,
-        idMotivoTraslado: this.state.idMotivoTraslado,
+        idTipoTraslado: idTipoTraslado,
+        idMotivoTraslado: idMotivoTraslado,
         idAlmacenOrigen:
-          this.state.idTipoTraslado === 'TT0001'
-            ? this.state.idAlmacenOrigenInterno
-            : this.state.idAlmacenOrigenExterno,
+          idTipoTraslado === ENTRE_ALMACENES
+            ? idAlmacenOrigenInterno
+            : idAlmacenOrigenExterno,
         idAlmacenDestino:
-          this.state.idTipoTraslado === 'TT0001'
-            ? this.state.idAlmacenDestinoInterno
-            : this.state.idAlmacenDestinoExterno,
-        idSucursalDestino: this.state.idSucursalExterno,
-        idSucursal: this.state.idSucursal,
-        observacion: this.state.observacion,
-        idUsuario: this.state.idUsuario,
+          idTipoTraslado === ENTRE_ALMACENES
+            ? idAlmacenDestinoInterno
+            : idAlmacenDestinoExterno,
+        idSucursalDestino: idSucursalExterno,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        idUsuario: idUsuario,
 
-        detalles: this.state.detalles,
+        detalles: detallesFiltrados,
       };
 
       alertKit.loading({
-        message: 'Procesando petición...',
+        message: "Procesando petición...",
       });
 
       const response = await createTraslado(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Traslado',
-            message: response.data,
+        alertKit.success({
+          title: "Traslado",
+          message: response.data,
+          onClose: () => {
+            this.clearView();
           },
-          () => {
-            this.setState(this.initial, async () => {
-              await this.loadingData();
-              this.refIdTipoTraslado.current.focus();
-            });
-          },
-        );
+        });
       }
 
       if (response instanceof ErrorResponse) {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Traslado',
+          title: "Traslado",
           message: response.getMessage(),
         });
       }
@@ -739,120 +716,166 @@ class TrasladorCrear extends CustomComponent {
   };
 
   handleClear = async () => {
-    const accept = await alertKit.question(
-      {
-        title: 'Traslado',
-        message:
-          '¿Está seguro de continuar, se va limpiar toda la información?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: "Traslado",
+      message:
+        "¿Está seguro de continuar, se va limpiar toda la información?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
-      this.setState(this.initial, async () => {
-        await this.loadingData();
-        this.refIdTipoTraslado.current.focus();
-      });
+      this.clearView();
     }
   };
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de renderizado
-    |--------------------------------------------------------------------------
-    |
-    | El método render() es esencial en los componentes de React y se encarga de determinar
-    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-    | actuales del componente para determinar lo que se mostrará.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de renderizado
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   generateBody() {
-    if (isEmpty(this.state.detalles)) {
+    const { detalles } = this.state;
+
+    if (isEmpty(detalles)) {
       return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="7">
+        <tr>
+          <td className="text-center p-3" colSpan={7}>
             ¡No hay datos para mostrar!
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
       );
     }
 
-    return this.state.detalles.map((item, index) => {
-      const isLastRow = index === this.state.detalles.length - 1;
-
-      const cantidad = item.lotes
-        ? item.lotes.reduce(
-          (acum, lote) => acum + getNumber(lote.cantidadAjustar),
-          0,
-        )
-        : Number(item.cantidad);
-
-      const diferencia = item.actual - cantidad;
-
+    return detalles.map((item, index) => {
       return (
-        <TableRow key={index}>
-          <TableCell>
-            <Button
-              className="btn-outline-danger btn-sm"
-              title="Anular"
-              onClick={() => this.handleRemoveDetalle(item.idProducto)}
-            >
-              <i className="bi bi-trash"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Image
-              default={images.noImage}
-              src={item.imagen}
-              alt={item.nombre}
-              width={70}
-            />
-          </TableCell>
-          <TableCell>
-            {item.codigo}
-            <br />
-            {item.nombre}
-          </TableCell>
-          <TableCell>
-            {item.lotes && (
-              <small className="text-info">
-                <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
-              </small>
-            )}
+        <React.Fragment key={`producto-${item.idProducto}`}>
+          {/* FILA PRINCIPAL (igual que antes) */}
+          <tr>
+            <td className="text-center">
+              <Button
+                className="btn-outline-danger btn-sm"
+                title="Anular"
+                onClick={() => this.handleRemoveDetalle(item.idProducto)}
+              >
+                <i className="bi bi-trash"></i>
+              </Button>
+            </td>
 
-            {!item.lotes && (
-              <Input
-                value={item.cantidad}
-                placeholder="0"
-                onChange={(event) =>
-                  this.handleInputDetalle(event, item.idProducto)
-                }
-                onKeyDown={keyNumberFloat}
-                onKeyUp={(event) =>
-                  this.handleFocusInputTable(event, isLastRow)
-                }
-              />
-            )}
-          </TableCell>
-          <TableCell className={`${diferencia <= 0 ? 'text-danger' : ''}`}>
-            {rounded(diferencia)}
-          </TableCell>
-          <TableCell>
-            {item.lotes && rounded(cantidad)}
-            {!item.lotes && rounded(cantidad)}
-          </TableCell>
-          <TableCell>{item.unidad}</TableCell>
-        </TableRow>
+            <td className="text-center">
+              <div className="flex justify-center py-3">
+                <Image
+                  default={images.noImage}
+                  src={item.imagen}
+                  alt={item.nombre}
+                  overrideClass="w-24 h-24 object-contain"
+                />
+              </div>
+            </td>
+
+            <td colSpan={5}>
+              <span className="font-mono text-sm text-gray-500"> {item.codigo}</span>
+              <br />
+              <span className="font-medium">{item.nombre}</span>
+            </td>
+          </tr>
+
+          {/* CARDS POR ALMACÉN (en lugar de subtabla) */}
+          {
+            item.inventarioDetalles?.map((invd, index1) => {
+              const isLastRow = index1 === item.inventarioDetalles.length - 1;
+
+              const stockOriginal = getNumber(invd.cantidad);
+              const trasladar = getNumber(invd.cantidadTrasladar);
+
+              // Stock que queda
+              const stockRestante =
+                trasladar > 0 ? stockOriginal - trasladar : stockOriginal;
+
+              // Cantidad a trasladar (destino)
+              const destino =
+                trasladar > 0 ? trasladar : 0;
+
+              const isStockInsuficiente = stockRestante < 0;
+
+              return (
+                <tr key={`detalle-${invd.idKardex}`}>
+                  <td colSpan={2} className="py-3"></td>
+                  <td className="py-3">
+                    {
+                      <div className="text-sm space-y-1">
+                        {invd.lote && (
+                          <div className="font-mono text-gray-500">
+                            <strong>Lote:</strong> {invd.lote}
+                          </div>
+                        )}
+
+                        {invd.fechaVencimiento && (
+                          <div className="font-mono text-gray-500">
+                            <strong>Vence:</strong> {formatDate(invd.fechaVencimiento)}
+                          </div>
+                        )}
+
+                        {invd.ubicacion && (
+                          <div className="font-mono text-gray-500">
+                            <strong>Ubicación:</strong> {invd.ubicacion}
+                          </div>
+                        )}
+                      </div>
+                    }
+                  </td>
+                  <td className="text-center py-3">
+                    <Input
+                      value={invd.cantidadTrasladar}
+                      placeholder="0"
+                      onChange={(event) =>
+                        this.handleInputDetalle(event, invd.idKardex)
+                      }
+                      onKeyDown={keyNumberFloat}
+                      onKeyUp={(event) =>
+                        this.handleFocusInputTable(event, isLastRow)
+                      }
+                    />
+                  </td>
+                  {/* Cantidad restante */}
+                  <td className={cn(
+                    "text-center py-3",
+                    stockRestante <= 0 && "text-red-700"
+                  )}>
+                    {rounded(stockRestante)}
+                  </td>
+
+                  {/* Almacén destino */}
+                  <td
+                    className={cn(
+                      "text-center py-3",
+                      isStockInsuficiente && "text-red-600"
+                    )}
+                  >
+                    {rounded(destino)}
+                  </td>
+
+                  <td className="text-center py-3">{item.unidad}</td>
+                </tr>
+              );
+            })
+          }
+        </React.Fragment>
       );
     });
   }
@@ -871,171 +894,148 @@ class TrasladorCrear extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <ModalLote
-          ref={this.refModalLote}
-          isOpen={this.state.isOpenLote}
-          onClose={this.handleCloseLote}
-          handleAdd={this.handleSaveLote}
-        />
 
         {/* Condición para renderizar contenido específico según el estado 'paso' */}
         {this.state.paso === 1 && (
           <>
             {/* Mensaje y opciones para el primer paso */}
-            <Row>
-              <Column formGroup={true}>
-                <p>
-                  <i className="bi bi-card-list"></i> Defína alguna opciones
-                  antes de continuar.
-                </p>
-              </Column>
-            </Row>
+            <div className="felx mb-3">
+              <p>
+                <i className="bi bi-card-list"></i> Defína alguna opciones antes de continuar.
+              </p>
+            </div>
 
             {/* Selección del tipo de traslado */}
-            <Row>
-              <Column formGroup={true}>
-                <label>Seleccione el tipo de traslado:</label>
+            <div className="flex flex-col gap-1 mb-3">
+              <label>Seleccione el tipo de traslado:</label>
 
-                <RadioButton
-                  ref={this.refIdTipoTraslado}
-                  id={'TT0001'}
-                  value={'TT0001'}
-                  name="ckTipoTraslado"
-                  checked={this.state.idTipoTraslado === 'TT0001'}
-                  onChange={this.handleOptionTipoTraslado}
-                >
-                  Entre almacenes
-                </RadioButton>
+              <RadioButton
+                ref={this.refIdTipoTraslado}
+                id={ENTRE_ALMACENES}
+                value={ENTRE_ALMACENES}
+                name="ckTipoTraslado"
+                checked={this.state.idTipoTraslado === ENTRE_ALMACENES}
+                onChange={this.handleOptionTipoTraslado}
+              >
+                Entre almacenes
+              </RadioButton>
 
-                <RadioButton
-                  id={'TT0002'}
-                  value={'TT0002'}
-                  name="ckTipoTraslado"
-                  checked={this.state.idTipoTraslado === 'TT0002'}
-                  onChange={this.handleOptionTipoTraslado}
-                >
-                  Entre sucursales
-                </RadioButton>
-              </Column>
-            </Row>
+              <RadioButton
+                id={ENTRE_SUCURSALES}
+                value={ENTRE_SUCURSALES}
+                name="ckTipoTraslado"
+                checked={this.state.idTipoTraslado === ENTRE_SUCURSALES}
+                onChange={this.handleOptionTipoTraslado}
+              >
+                Entre sucursales
+              </RadioButton>
+            </div>
 
             {/* Selección el motivo de traslado */}
-            <Row>
-              <Column formGroup={true}>
-                <Select
-                  label={'Seleccione el motivo del traslado:'}
-                  ref={this.refIdMotivoTraslado}
-                  value={this.state.idMotivoTraslado}
-                  onChange={this.handleSelectMotivojuste}
-                >
-                  <option value="">-- Motivo traslado --</option>
-                  {this.state.motivoTraslado.map((item, index) => (
-                    <option key={index} value={item.idMotivoTraslado}>
-                      {item.nombre}
-                    </option>
-                  ))}
-                </Select>
-              </Column>
-            </Row>
+            <div className="flex flex-col mb-3">
+              <Select
+                label={'Seleccione el motivo del traslado:'}
+                ref={this.refIdMotivoTraslado}
+                value={this.state.idMotivoTraslado}
+                onChange={this.handleSelectMotivojuste}
+              >
+                <option value="">-- Motivo traslado --</option>
+                {this.state.motivoTraslado.map((item, index) => (
+                  <option key={index} value={item.idMotivoTraslado}>
+                    {item.nombre}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
             {
-              // Verificar si el tipo de ajuste es 'TT0001'
-              this.state.idTipoTraslado === 'TT0001' && (
+              // Verificar si el tipo de traslado es 'TT0001'
+              this.state.idTipoTraslado === ENTRE_ALMACENES && (
                 <>
                   {/* Selección el almacen de origen */}
-                  <Row>
-                    <Column formGroup={true}>
-                      <Select
-                        label={'Seleccione el almacen de origen:'}
-                        ref={this.refIdAlmacenOriginInterno}
-                        value={this.state.idAlmacenOrigenInterno}
-                        onChange={this.handleSelectAlmacenOrigenInterno}
-                      >
-                        <option value="">-- Almacen --</option>
-                        {this.state.almacenesOrigenInterno.map(
-                          (item, index) => {
-                            return (
-                              <option key={index} value={item.idAlmacen}>
-                                {item.nombre}
-                              </option>
-                            );
-                          },
-                        )}
-                      </Select>
-                    </Column>
-                  </Row>
+                  <div className="mb-3">
+                    <Select
+                      label={'Seleccione el almacen de origen:'}
+                      ref={this.refIdAlmacenOriginInterno}
+                      value={this.state.idAlmacenOrigenInterno}
+                      onChange={this.handleSelectAlmacenOrigenInterno}
+                    >
+                      <option value="">-- Almacen --</option>
+                      {this.state.almacenesOrigenInterno.map(
+                        (item, index) => {
+                          return (
+                            <option key={index} value={item.idAlmacen}>
+                              {item.nombre}
+                            </option>
+                          );
+                        },
+                      )}
+                    </Select>
+                  </div>
 
                   {/* Selección el almacen de destino */}
-                  <Row>
-                    <Column formGroup={true}>
-                      <Select
-                        label={'Seleccione el almacen de destino:'}
-                        ref={this.refIdAlmacenDesitnoInterno}
-                        value={this.state.idAlmacenDestinoInterno}
-                        onChange={this.handleSelectAlmacenDestinoInterno}
-                        disabled
-                      >
-                        <option value="">-- Almacen --</option>
-                        {this.state.almacenesDestinoInterno.map(
-                          (item, index) => {
-                            return (
-                              <option key={index} value={item.idAlmacen}>
-                                {item.nombre}
-                              </option>
-                            );
-                          },
-                        )}
-                      </Select>
-                    </Column>
-                  </Row>
+                  <div className="mb-3">
+                    <Select
+                      label={'Seleccione el almacen de destino:'}
+                      ref={this.refIdAlmacenDesitnoInterno}
+                      value={this.state.idAlmacenDestinoInterno}
+                      onChange={this.handleSelectAlmacenDestinoInterno}
+                      disabled
+                    >
+                      <option value="">-- Almacen --</option>
+                      {this.state.almacenesDestinoInterno.map(
+                        (item, index) => {
+                          return (
+                            <option key={index} value={item.idAlmacen}>
+                              {item.nombre}
+                            </option>
+                          );
+                        },
+                      )}
+                    </Select>
+                  </div>
                 </>
               )
             }
 
             {
-              // Verificar si el tipo de ajuste es 'TT0002'
-              this.state.idTipoTraslado === 'TT0002' && (
+              // Verificar si el tipo de traslado es 'TT0002'
+              this.state.idTipoTraslado === ENTRE_SUCURSALES && (
                 <>
-                  <Row>
-                    <Column formGroup={true}>
-                      <p>
-                        <i className="bi bi-arrow-bar-down"></i> Almacen de
-                        origin
-                      </p>
-                    </Column>
-                  </Row>
+                  <div className="mb-3">
+                    <p>
+                      <i className="bi bi-arrow-bar-down"></i> Almacen de
+                      origin
+                    </p>
+                  </div>
 
                   {/* Selección el almacen de origen */}
-                  <Row>
-                    <Column formGroup={true}>
-                      <Select
-                        label={'Seleccione el almacen:'}
-                        ref={this.refIdAlmacenOrigenExterno}
-                        value={this.state.idAlmacenOrigenExterno}
-                        onChange={this.handleSelectAlmacenOrigenExterno}
-                      >
-                        <option value="">-- Almacen --</option>
-                        {this.state.almacenes.map((item, index) => (
-                          <option key={index} value={item.idAlmacen}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </Select>
-                    </Column>
-                  </Row>
+                  <div className="mb-3">
+                    <Select
+                      label={'Seleccione el almacen:'}
+                      ref={this.refIdAlmacenOrigenExterno}
+                      value={this.state.idAlmacenOrigenExterno}
+                      onChange={this.handleSelectAlmacenOrigenExterno}
+                    >
+                      <option value="">-- Almacen --</option>
+                      {this.state.almacenes.map((item, index) => (
+                        <option key={index} value={item.idAlmacen}>
+                          {item.nombre}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
 
-                  <Row>
-                    <Column formGroup={true}>
-                      <p>
-                        <i className="bi bi-arrow-bar-right"></i> Sucural y
-                        almacen de destino
-                      </p>
-                    </Column>
-                  </Row>
+                  <div className="mb-3">
+                    <p>
+                      <i className="bi bi-arrow-bar-right"></i> Sucural y
+                      almacen de destino
+                    </p>
+                  </div>
 
                   {/* Selección la sucursal */}
-                  <Row>
-                    <Column className="col-md-6 col-12" formGroup={true}>
+                  <div className="flex flex-col md:flex-row gap-3 mb-3">
+                    <div className="w-full">
                       <Select
                         label={'Seleccione la sucursal:'}
                         ref={this.refIdSucursalExterno}
@@ -1049,9 +1049,9 @@ class TrasladorCrear extends CustomComponent {
                           </option>
                         ))}
                       </Select>
-                    </Column>
+                    </div>
 
-                    <Column className="col-md-6 col-12" formGroup={true}>
+                    <div className="w-full">
                       <Select
                         label={'Seleccione el almacen:'}
                         ref={this.refIdAlmacenDestinoExterno}
@@ -1066,213 +1066,177 @@ class TrasladorCrear extends CustomComponent {
                           </option>
                         ))}
                       </Select>
-                    </Column>
-                  </Row>
+                    </div>
+                  </div>
                 </>
               )
             }
 
             {/* Botones de navegación */}
-            <Row>
-              <Column formGroup={true}>
-                <Button className="btn-info" onClick={this.handleSiguiente}>
-                  <i className="fa fa-arrow-right"></i> Siguiente
-                </Button>{' '}
-                <Button
-                  className="btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}
-                >
-                  <i className="fa fa-close"></i> Cancelar
-                </Button>
-              </Column>
-            </Row>
+            <div className="flex gap-3">
+              <Button className="btn-info" onClick={this.handleSiguiente}>
+                <i className="fa fa-arrow-right"></i> Siguiente
+              </Button>
+              <Button
+                className="btn-outline-danger"
+                onClick={() => this.props.history.goBack()}
+              >
+                <i className="fa fa-close"></i> Cancelar
+              </Button>
+            </div>
           </>
         )}
 
         {/* Condición para renderizar contenido específico según el estado 'paso' */}
         {this.state.paso === 2 && (
           <>
-            <Row>
-              <Column formGroup={true}>
-                <TableResponsive>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                          Tipo de Traslado:
-                        </TableHead>
-                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                          {this.state.idTipoTraslado === 'TT0001' ? (
-                            <span>Entre almacenes</span>
-                          ) : (
-                            <span>Entre sucursales</span>
-                          )}
-                        </TableHead>
-                      </TableRow>
-                      {this.state.idTipoTraslado === 'TT0001' && (
-                        <>
-                          <TableRow>
-                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                              Motivo ajuste:
-                            </TableHead>
-                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.nombreMotivoAjuste}
-                            </TableHead>
-                          </TableRow>
+            <div className="flex flex-col gap-1 mb-3">
+              <p>Tipo de Traslado:</p>
+              <div>
+                {this.state.idTipoTraslado === ENTRE_ALMACENES ? (
+                  <p className="font-bold">ENTRE ALMACENES</p>
+                ) : (
+                  <p className="font-bold">ENTRE SUCURSALES</p>
+                )}
+              </div>
+            </div>
 
-                          <TableRow>
-                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                              Almacen de Origen:
-                            </TableHead>
-                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.nombreAlmacenOrigenInterno}
-                            </TableHead>
-                          </TableRow>
+            {this.state.idTipoTraslado === ENTRE_ALMACENES && (
+              <>
+                <div className="flex flex-col gap-1 mb-3">
+                  <p>Motivo de Traslado:</p>
+                  <div>
+                    <p className="font-bold"> {this.state.nombreMotivoTraslado}</p>
+                  </div>
+                </div>
 
-                          <TableRow>
-                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                              Almacen de Destino:
-                            </TableHead>
-                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.nombreAlmacenDestinoInterno}
-                            </TableHead>
-                          </TableRow>
-                        </>
-                      )}
-                      {this.state.idTipoTraslado === 'TT0002' && (
-                        <>
-                          <TableRow>
-                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                              Almacen de Origen:
-                            </TableHead>
-                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.nombreAlmacenOriginExterno}
-                            </TableHead>
-                          </TableRow>
+                <div className="flex flex-col gap-1 mb-3">
+                  <p>Almacen de Origen:</p>
+                  <div>
+                    <p className="font-bold">{this.state.nombreAlmacenOrigenInterno}</p>
+                  </div>
+                </div>
 
-                          <TableRow>
-                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                              Sucursal de Destino:
-                            </TableHead>
-                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.nombreSucursalExterno}
-                            </TableHead>
-                          </TableRow>
+                <div className="flex flex-col gap-1 mb-3">
+                  <p>Almacen de Destino:</p>
+                  <div>
+                    <p className="font-bold"> {this.state.nombreAlmacenDestinoInterno}</p>
+                  </div>
+                </div>
+              </>
+            )}
 
-                          <TableRow>
-                            <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                              Almacen de Destino:
-                            </TableHead>
-                            <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                              {this.state.nombreAlmacenDestinoExterno}
-                            </TableHead>
-                          </TableRow>
-                        </>
-                      )}
-                    </TableHeader>
-                  </Table>
-                </TableResponsive>
-              </Column>
-            </Row>
+            {this.state.idTipoTraslado === ENTRE_SUCURSALES && (
+              <>
+                <div className="flex flex-col gap-1 mb-3">
+                  <p>Almacen de Origen:</p>
+                  <div>
+                    <p className="font-bold">  {this.state.nombreAlmacenOriginExterno}</p>
+                  </div>
+                </div>
 
-            <Row>
-              <Column>
-                <SearchInput
-                  ref={this.refProducto}
-                  autoFocus={true}
-                  label={'Filtrar por el código o nombre del producto:'}
-                  placeholder="Filtrar productos..."
-                  refValue={this.refValueProducto}
-                  data={this.state.productos}
-                  handleClearInput={this.handleClearInputProducto}
-                  handleFilter={this.handleFilterProducto}
-                  handleSelectItem={this.handleSelectItemProducto}
-                  // renderItem={(value) => (
-                  //   <>
-                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                  //   </>
-                  // )}
+                <div className="flex flex-col gap-1 mb-3">
+                  <p> Sucursal de Destino:</p>
+                  <div>
+                    <p className="font-bold">  {this.state.nombreSucursalExterno}</p>
+                  </div>
+                </div>
 
-                  renderItem={(value) => (
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={value.imagen}
-                        alt={value.nombre}
-                        width={60}
-                      />
+                <div className="flex flex-col gap-1 mb-3">
+                  <p> Almacen de Destino:</p>
+                  <div>
+                    <p className="font-bold">{this.state.nombreAlmacenDestinoExterno}</p>
+                  </div>
+                </div>
+              </>
+            )}
 
-                      <div className="ml-2">
-                        {value.codigo}
-                        <br />
-                        {value.nombre} <small>({value.categoria})</small>
-                      </div>
+            <div className="mb-3">
+              <SearchInput
+                ref={this.refProducto}
+                autoFocus={true}
+                label="Filtrar por el código o nombre del producto:"
+                placeholder="Filtrar productos..."
+                refValue={this.refValueProducto}
+                data={this.state.productos}
+                handleClearInput={this.handleClearInputProducto}
+                handleFilter={this.handleFilterProducto}
+                handleSelectItem={this.handleSelectItemProducto}
+                renderItem={(value) => (
+                  <div className="flex items-center">
+                    <Image
+                      default={images.noImage}
+                      src={value.imagen}
+                      alt={value.nombre}
+                      overrideClass="w-20 h-20 object-contain"
+                    />
+
+                    <div className="ml-2">
+                      {value.codigo}
+                      <br />
+                      {value.nombre} <small>({value.categoria})</small>
                     </div>
-                  )}
-                />
-              </Column>
-            </Row>
+                  </div>
+                )}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={
-                    'Ingrese alguna descripción para saber el motivo del ajuste:'
-                  }
-                  placeholder="Ingrese una observación"
-                  value={this.state.observacion}
-                  onChange={this.handleInputObservacion}
-                />
-              </Column>
-            </Row>
+            <div className="mb-3">
+              <Input
+                label={
+                  'Ingrese alguna descripción para saber el motivo del traslado:'
+                }
+                placeholder="Ingrese una observación"
+                value={this.state.observacion}
+                onChange={this.handleInputObservacion}
+              />
+            </div>
 
-            <Row>
-              <Column>
-                <TableResponsive>
-                  <TableTitle>Lista de productos:</TableTitle>
-                  <Table className="table-striped table-bordered rounded">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead width="5%">Quitar</TableHead>
-                        <TableHead width="10%">Imagen</TableHead>
-                        <TableHead width="30%">Clave/Nombre</TableHead>
-                        <TableHead width="15%">Cantidad</TableHead>
-                        <TableHead width="15%">Almacen Origen</TableHead>
-                        <TableHead width="15%">Almacen Destino</TableHead>
-                        <TableHead width="15%">Medida</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody ref={this.refTableBody}>
+            <div className="mb-3">
+              <div className="overflow-x-auto">
+                <p className="mb-2">Lista de productos:</p>
+                <div className="bg-white rounded border overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Quitar</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Imagen</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[25%]">Clave/Nombre</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Cantidad</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Almacen Origen</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Almacen Destino</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Medida</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200" ref={this.refTableBody}>
                       {this.generateBody()}
-                    </TableBody>
-                  </Table>
-                </TableResponsive>
-              </Column>
-            </Row>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
 
             {/* Sección de botones de acción */}
-            <Row>
-              <Column>
-                <Button className="btn-success" onClick={this.handleSave}>
-                  <i className="fa fa-save"></i> Guardar
-                </Button>{' '}
-                <Button className="btn-outline-light" onClick={this.handleBack}>
-                  <i className="fa fa-arrow-left"></i> Atras
-                </Button>{' '}
-                <Button
-                  className="btn-outline-light"
-                  onClick={this.handleClear}
-                >
-                  <i className="fa fa-refresh"></i> Limpiar
-                </Button>{' '}
-                <Button
-                  className="btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}
-                >
-                  <i className="fa fa-close"></i> Cancelar
-                </Button>
-              </Column>
-            </Row>
+            <div className="flex gap-3">
+              <Button className="btn-success" onClick={this.handleSave}>
+                <i className="fa fa-save"></i> Guardar
+              </Button>
+              <Button className="btn-outline-light" onClick={this.handleBack}>
+                <i className="fa fa-arrow-left"></i> Atras
+              </Button>
+              <Button
+                className="btn-outline-light"
+                onClick={this.handleClear}
+              >
+                <i className="fa fa-refresh"></i> Limpiar
+              </Button>
+              <Button
+                className="btn-outline-danger"
+                onClick={() => this.props.history.goBack()}
+              >
+                <i className="fa fa-close"></i> Cancelar
+              </Button>
+            </div>
           </>
         )}
       </ContainerWrapper>
@@ -1296,7 +1260,9 @@ TrasladorCrear.propTypes = {
       idSucursal: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({
@@ -1309,6 +1275,6 @@ TrasladorCrear.propTypes = {
  * Método encargado de conectar con redux y exportar la clase
  */
 
-const ConnectedAjusteCrear = connect(mapStateToProps, null)(TrasladorCrear);
+const ConnectedTrasladorCrear = connect(mapStateToProps, null)(TrasladorCrear);
 
-export default ConnectedAjusteCrear;
+export default ConnectedTrasladorCrear;

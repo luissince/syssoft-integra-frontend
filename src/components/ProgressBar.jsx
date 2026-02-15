@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import PropTypes from 'prop-types';
 
 /**
@@ -17,13 +18,16 @@ import PropTypes from 'prop-types';
  * <ProgressBar value={25} />
  * <ProgressBar value={60} className="bg-success" label="Completado" />
  */
-const ProgressBar = ({ value, label, className = '' }) => {
+const ProgressBar = ({ value, label, className }) => {
   const progress = Math.min(Math.max(value, 0), 100);
 
   return (
-    <div className="progress position-relative" style={{ height: '1.5rem' }}>
+    <div className="progress position-relative h-6">
       <div
-        className={`progress-bar ${className}`}
+        className={cn(
+          "progress-bar",
+          className
+        )}
         role="progressbar"
         style={{ width: `${progress}%` }}
         aria-valuenow={progress}
@@ -31,8 +35,7 @@ const ProgressBar = ({ value, label, className = '' }) => {
         aria-valuemax={100}
       ></div>
       <span
-        className="position-absolute w-100 text-center"
-        style={{ top: 0, left: 0, lineHeight: '1.5rem', fontWeight: 500 }}
+        className="position-absolute w-100 text-center top-0 left-0 font-medium leading-5"
       >
         {label !== undefined ? label : `${progress}%`}
       </span>

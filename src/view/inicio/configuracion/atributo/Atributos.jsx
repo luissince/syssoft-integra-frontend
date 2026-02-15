@@ -4,10 +4,10 @@ import Paginacion from '../../../../components/Paginacion';
 import { listAtributo } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import ContainerWrapper from '../../../../components/Container';
+import { CANCELED } from '@/constants/requestStatus';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import { removeAtributo } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
@@ -34,20 +34,7 @@ class Atributos extends CustomComponent {
     super(props);
 
     this.state = {
-      // add: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
-      // ),
-      // edit: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
-      // ),
-      // remove: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
-      // ),
-      // move: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
-      // ),
-
-      buscar: '',
+      buscar: "",
 
       loading: false,
       lista: [],
@@ -57,7 +44,7 @@ class Atributos extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     };
 
     this.abortControllerTable = new AbortController();
@@ -84,7 +71,7 @@ class Atributos extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   };
@@ -142,7 +129,7 @@ class Atributos extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -181,17 +168,16 @@ class Atributos extends CustomComponent {
   };
 
   handleDelete = async (id) => {
-    const accept = await alertKit.question(
-      {
-        title: 'Color',
-        message: '¿Estás seguro de eliminar la Color?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Atributo',
+      message: '¿Estás seguro de eliminar el Atributo?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const params = {
@@ -205,20 +191,17 @@ class Atributos extends CustomComponent {
       const response = await removeAtributo(params);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Color',
-            message: response.data,
-          },
-          () => {
-            this.loadInit();
-          },
-        );
+        alertKit.success({
+          title: 'Atributo',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
       }
 
       if (response instanceof ErrorResponse) {
         alertKit.warning({
-          title: 'Color',
+          title: 'Atributo',
           message: response.getMessage(),
         });
       }
@@ -229,7 +212,7 @@ class Atributos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );
@@ -277,7 +260,6 @@ class Atributos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idAtributo)}
-            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -286,7 +268,6 @@ class Atributos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idAtributo)}
-            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

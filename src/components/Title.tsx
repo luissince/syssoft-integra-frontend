@@ -90,7 +90,7 @@ interface Props {
 const Title = ({ title, subTitle, icon, handleGoBack }: Props) => {
   return (
     <div className="mb-4">
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2 flex-wrap'>
         {/* Renderiza un botón de retroceso si se proporciona la función handleGoBack */}
         {handleGoBack !== undefined && (
           <button className="mr-2" role="button" onClick={handleGoBack}>

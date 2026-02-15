@@ -6,22 +6,22 @@ import {
   formatNumberWithZeros,
   currentDate,
   formatTime,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../../components/Paginacion';
+import Paginacion from '@/components/Paginacion';
 import {
   comboSucursal,
-  comboUsuario,
+  optionsUsuario,
   listTransaccion,
-} from '../../../../../network/rest/principal.network';
-import ErrorResponse from '../../../../../model/class/error-response';
-import SuccessReponse from '../../../../../model/class/response';
-import { CANCELED } from '../../../../../model/types/types';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+} from '@/network/rest/principal.network';
+import ErrorResponse from '@/model/class/error-response';
+import SuccessReponse from '@/model/class/response';
+import { CANCELED } from '@/constants/requestStatus';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -30,57 +30,62 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
-import Search from '../../../../../components/Search';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
+} from '@/components/Table';
+import { SpinnerTable, SpinnerView } from '@/components/Spinner';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
 import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import {
   TIPO_CONCEPTO_EGRESO,
   TIPO_CONCEPTO_INGRESO,
-} from '../../../../../model/types/tipo-concepto';
+} from '@/model/types/tipo-concepto';
 import {
   setListaFinanzasData,
   setListaFinanzasPaginacion,
-} from '../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Transacciones extends CustomComponent {
   /**
    *
    * Constructor
+   * @param {Object} props - Props del componente
    */
   constructor(props) {
     super(props);
     this.state = {
+      initialLoad: true,
+      initialMessage: "Cargando datos...",
+
+      fechaInicio: currentDate(),
+      fechaFinal: currentDate(),
+      idTipoConcepto: "",
+
+      usuarios: [],
+      sucursales: [],
+
+      buscar: "",
+
       loading: false,
       lista: [],
       restart: false,
-
-      buscar: '',
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
-      idTipoConcepto: '',
-
-      idUsuario: '',
-      usuarios: [],
-
-      idSucursal: '',
-      sucursales: [],
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
+
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -129,29 +134,29 @@ class Transacciones extends CustomComponent {
  */
 
   loadingData = async () => {
+    const finanzasLista = this.props.finanzasLista;
     if (
-      this.props.finanzasLista &&
-      this.props.finanzasLista.data &&
-      this.props.finanzasLista.paginacion
+      finanzasLista &&
+      finanzasLista.data &&
+      finanzasLista.paginacion
     ) {
-      this.setState(this.props.finanzasLista.data);
+      this.setState(finanzasLista.data);
       this.refPaginacion.current.upperPageBound =
-        this.props.finanzasLista.paginacion.upperPageBound;
+        finanzasLista.paginacion.upperPageBound;
       this.refPaginacion.current.lowerPageBound =
-        this.props.finanzasLista.paginacion.lowerPageBound;
+        finanzasLista.paginacion.lowerPageBound;
       this.refPaginacion.current.isPrevBtnActive =
-        this.props.finanzasLista.paginacion.isPrevBtnActive;
+        finanzasLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive =
-        this.props.finanzasLista.paginacion.isNextBtnActive;
+        finanzasLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
-        this.props.finanzasLista.paginacion.pageBound;
+        finanzasLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion =
-        this.props.finanzasLista.paginacion.messagePaginacion;
+        finanzasLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.finanzasLista.data.buscar);
+      this.refSearch.current.initialize(finanzasLista.data.buscar);
     } else {
-      await this.loadingInit();
-      this.updateReduxState();
+      await this.loadingInitData();
     }
   };
 
@@ -167,40 +172,31 @@ class Transacciones extends CustomComponent {
     });
   }
 
-  loadingInit = async () => {
-    await this.setStateAsync({
-      buscar: '',
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
-      idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
-    });
-
-    const sucursalResponse = await comboSucursal(
-      this.abortControllerView.signal,
-    );
+  loadingInitData = async () => {
+    const sucursalResponse = await comboSucursal(this.abortControllerView.signal);
 
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
       alertKit.warning({
-        title: 'Transacciones',
+        title: "Transacciones",
         message: sucursalResponse.getMessage(),
       }, async () => {
-        await this.loadingInit();
+        await this.loadingInitData();
       });
       return;
     }
 
-    const usuarioResponse = await comboUsuario(this.abortControllerView.signal);
+    const usuarioResponse = await optionsUsuario(this.abortControllerView.signal);
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
+
       alertKit.warning({
-        title: 'Transacciones',
+        title: "Transacciones",
         message: usuarioResponse.getMessage(),
       }, async () => {
-        await this.loadingInit();
+        await this.loadingInitData();
       });
       return;
     }
@@ -208,11 +204,12 @@ class Transacciones extends CustomComponent {
     await this.setStateAsync({
       sucursales: sucursalResponse.data,
       usuarios: usuarioResponse.data,
-      idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      initialLoad: false,
     });
 
     await this.searchOpciones();
+
+    this.updateReduxState();
   };
 
   searchText = async (text) => {
@@ -255,11 +252,11 @@ class Transacciones extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const data = {
@@ -281,7 +278,7 @@ class Transacciones extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -371,7 +368,7 @@ class Transacciones extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message={'Cargando información de la tabla...'}
         />
       );
@@ -456,6 +453,11 @@ class Transacciones extends CustomComponent {
   render() {
     return (
       <ContainerWrapper>
+        <SpinnerView
+          loading={this.state.initialLoad}
+          message={this.state.initialMessage}
+        />
+
         <Title
           title="Transacciones"
           subTitle="LISTA"
@@ -525,7 +527,7 @@ class Transacciones extends CustomComponent {
               <option value="">TODOS</option>
               {this.state.usuarios.map((item, index) => (
                 <option key={index} value={item.idUsuario}>
-                  {item.nombres + ' ' + item.apellidos}
+                  {item.informacion}
                 </option>
               ))}
             </Select>
@@ -587,7 +589,9 @@ Transacciones.propTypes = {
       idSucursal: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   finanzasLista: PropTypes.shape({

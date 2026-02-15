@@ -14,8 +14,7 @@ interface DetalleItem {
   cantidad: number;
   costo: number;
   precio: number;
-  lote?: boolean;
-  lotes?: { cantidad: { value: number } }[];
+  inventarioDetalles?: { cantidad: { value: number } }[];
 }
 
 interface DetalleGridProps {
@@ -54,13 +53,7 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
       )}
 
       {detalles.map((item, index) => {
-
-        let cantidad = 0;
-        if (item.lote) {
-          cantidad = item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
-        } else {
-          cantidad = item.cantidad ?? 0;
-        }
+        let cantidad = item.inventarioDetalles.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
 
         let total = 0;
 
@@ -84,14 +77,15 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
           >
             {/* Columna 1: imagen y descripción */}
             <div className="flex items-center">
-              <Image
-                default={images.noImage}
-                src={item.imagen}
-                alt={item.nombre}
-                width={80}
-                height={80}
-                className="object-contain"
-              />
+              <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+                <Image
+                  default={images.noImage}
+                  src={item.imagen}
+                  alt={item.nombre}
+                  overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                />
+              </div>
+
               <div className="p-3 text-left">
                 <p className="text-sm text-gray-500">{item.codigo}</p>
                 <p className="text-base font-semibold break-words">
@@ -125,14 +119,14 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
                   onClick={() => onEdit(item)}
                   title="Editar producto"
                 >
-                  <i className="fa fa-edit text-warning text-xl"></i>
+                  <i className="fa fa-edit text-warning !text-xl"></i>
                 </Button>
                 <Button
                   className="btn-link"
                   onClick={() => onRemove(item.idProducto)}
                   title="Eliminar producto"
                 >
-                  <i className="fa fa-trash text-danger text-xl"></i>
+                  <i className="fa fa-trash text-danger !text-xl"></i>
                 </Button>
               </div>
             </div>

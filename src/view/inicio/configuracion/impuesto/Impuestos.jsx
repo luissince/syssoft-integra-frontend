@@ -1,27 +1,23 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   deleteImpuesto,
   listImpuesto,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
 import {
   Table,
   TableBody,
@@ -30,10 +26,12 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import { SpinnerTable } from '../../../../components/Spinner';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import { alertKit } from 'alert-kit';
 
 class Impuestos extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -59,7 +57,7 @@ class Impuestos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refSearch = React.createRef();
@@ -167,38 +165,55 @@ class Impuestos extends CustomComponent {
     });
   };
 
-  handleBorrar(idImpuesto) {
-    alertDialog(
-      'Impuesto',
-      '¿Estás seguro de eliminar la moneda?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Impuesto', 'Procesando información...');
-
-          const params = {
-            idImpuesto: idImpuesto,
-          };
-
-          const response = await deleteImpuesto(params);
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Impuesto', response.data, () => {
-              this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Impuesto', response.getMessage());
-          }
-        }
+  async handleBorrar(idImpuesto) {
+    const accept = await alertKit.question({
+      title: "Impuesto",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información..."
+      })
+
+      const params = {
+        idImpuesto: idImpuesto,
+      };
+
+      const response = await deleteImpuesto(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Impuesto",
+          message: response.data,
+          onClose: () => {
+            this.loadingInit();
+          }
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Impuesto",
+          message: response.getMessage(),
+        })
+      }
+    }
   }
 
   generarBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -221,18 +236,16 @@ class Impuestos extends CustomComponent {
           <TableCell>{item.codigo}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.preferido === 1 ? 'badge-info' : 'badge-secondary'
-              }`}
+              className={`badge ${item.preferido === 1 ? 'badge-info' : 'badge-secondary'
+                }`}
             >
               {item.preferido ? 'SI' : 'NO'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -241,7 +254,7 @@ class Impuestos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idImpuesto)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -250,7 +263,7 @@ class Impuestos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idImpuesto)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

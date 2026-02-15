@@ -7,22 +7,22 @@ import ProductoAgregar from './producto/formularios/agregar/ProductoAgregar';
 import ProductoEditar from './producto/formularios/editar/ProductoEditar';
 import ProductoDetalle from './producto/detalle/ProductoDetalle';
 
-import LogisticaAjuste from './ajuste/lista/LogisticaAjuste.jsx';
-import LogisticaAjusteCrear from './ajuste/crear/LogisticaAjusteCrear.jsx';
-import LogisticaAjusteDetalle from './ajuste/detalle/LogisticaAjusteDetalle.jsx';
+import LogisticaAjuste from './ajuste/lista/LogisticaAjuste';
+import LogisticaAjusteCrear from './ajuste/crear/LogisticaAjusteCrear';
+import LogisticaAjusteDetalle from './ajuste/detalle/LogisticaAjusteDetalle';
 
-import Traslado from './traslado/listar/Traslado.jsx';
-import TrasladoCrear from './traslado/crear/TrasladoCrear.jsx';
-import TrasladoDetalle from './traslado/detalle/TrasladoDetalle.jsx';
+import Traslado from './traslado/listar/Traslado';
+import TrasladoCrear from './traslado/crear/TrasladoCrear';
+import TrasladoDetalle from './traslado/detalle/TrasladoDetalle';
 
-import Inventario from './inventario/Inventario.jsx';
+import Inventario from './inventario/Inventario';
 
-import Kardex from './kardex/Kardex.jsx';
+import Kardex from './kardex/Kardex';
 
-import Catalogos from './catalogo/lista/Catalogos.jsx';
-import CatalogoCrear from './catalogo/formularios/crear/CatalogoCrear.jsx';
-import CatalogoEditar from './catalogo/formularios/editar/CatalogoEditar.jsx';
-import CatalogoDetalle from './catalogo/detalle/CatalogoDetalle.jsx';
+import Catalogos from './catalogo/lista/Catalogos';
+import CatalogoCrear from './catalogo/formularios/crear/CatalogoCrear';
+import CatalogoEditar from './catalogo/formularios/editar/CatalogoEditar';
+import CatalogoDetalle from './catalogo/detalle/CatalogoDetalle';
 
 export {
   Productos,

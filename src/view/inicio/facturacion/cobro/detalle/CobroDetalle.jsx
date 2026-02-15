@@ -12,8 +12,8 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';

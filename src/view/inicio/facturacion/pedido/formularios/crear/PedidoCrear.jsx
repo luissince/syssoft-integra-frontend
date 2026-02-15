@@ -1,6 +1,6 @@
 import React from 'react';
-import { PosContainerWrapper } from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,
@@ -8,9 +8,9 @@ import {
   getRanurasDeTiempo,
   isEmpty,
   formatCurrency,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { PEDIDO } from '../../../../../../model/types/tipo-comprobante';
+import { PEDIDO } from '@/model/types/tipo-comprobante';
 import {
   comboAlmacen,
   comboComprobante,
@@ -21,25 +21,25 @@ import {
   documentsPdfInvoicesPedido,
   filtrarAlmacenProducto,
   filtrarPersona,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
 import {
   SpinnerView,
-} from '../../../../../../components/Spinner';
-import Button from '../../../../../../components/Button';
+} from '@/components/Spinner';
+import Button from '@/components/Button';
 import {
   clearCrearPedido,
   setCrearPedidoLocal,
   setCrearPedidoState,
-} from '../../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import {
   ModalImpresion,
   ModalPersona,
-} from '../../../../../../components/MultiModal';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+} from '@/components/MultiModal';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
 import { alertKit } from 'alert-kit';
 import { RECOGER_EN_LOCAL } from '@/model/types/tipo-entrega';
 import pdfVisualizer from 'pdf-visualizer';
@@ -49,7 +49,7 @@ import PanelDerecho from '../../../component/PanelDerecho';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PedidoCrear extends CustomComponent {
   /**
@@ -111,8 +111,8 @@ class PedidoCrear extends CustomComponent {
       isOpenImpresion: false,
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -140,7 +140,7 @@ class PedidoCrear extends CustomComponent {
     this.refModalImpresion = React.createRef();
 
     // Atributos para el modal configuración
-    this.idSidebarConfiguration = 'idSidebarConfiguration';
+    this.idSidebarConfiguration = "idSidebarConfiguration";
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
@@ -167,13 +167,13 @@ class PedidoCrear extends CustomComponent {
   */
 
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
 
     await this.loadingData();
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown);
+    document.removeEventListener("keydown", this.handleDocumentKeyDown);
 
     this.abortController.abort();
 
@@ -423,8 +423,8 @@ class PedidoCrear extends CustomComponent {
 
     if (isEmpty(idImpuesto)) {
       alertKit.warning({
-        title: 'Pedido',
-        message: 'Seleccione un impuesto para continuar.',
+        title: "Pedido",
+        message: "Seleccione un impuesto para continuar.",
       }, () => {
         this.refImpuesto.current.focus();
       });
@@ -607,6 +607,10 @@ class PedidoCrear extends CustomComponent {
 
   handleSelectIdMoneda = (event) => {
     this.setState({ idMoneda: event.target.value });
+  };
+
+  handleSelectIdIdAlmacen = (event) => {
+    this.setState({ idAlmacen: event.target.value });
   };
 
   handleInputObservacion = (event) => {
@@ -960,7 +964,7 @@ class PedidoCrear extends CustomComponent {
           contentLabel="Modal Cliente"
           titleHeader="Agregar Cliente"
           isOpen={this.state.isOpenCliente}
-          onClose={this.handleCloseModalPersona}
+          onClose={this.handleCloseModalCliente}
           idUsuario={this.state.idUsuario}
         />
 
@@ -977,6 +981,11 @@ class PedidoCrear extends CustomComponent {
           refMoneda={this.refMoneda}
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
+
+          almacenes={this.state.almacenes}
+          refAlmacen={this.refAlmacen}
+          idAlmacen={this.state.idAlmacen}
+          handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
 
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
@@ -1006,7 +1015,7 @@ class PedidoCrear extends CustomComponent {
 
         <div className="bg-white w-full h-full flex flex-col overflow-auto">
           <div className="flex w-full h-full">
-             {/* PANEL IZQUIERDO */}
+            {/* PANEL IZQUIERDO */}
             <PanelIzquierdo
               title="Pedido"
               subTitle="Crear"
@@ -1019,7 +1028,7 @@ class PedidoCrear extends CustomComponent {
               handleFilterProducto={this.handleFilterProducto}
               handleSelectItemProducto={this.handleSelectItemProducto}
             />
-          
+
             {/* PANEL DERECHO  */}
             <PanelDerecho
               comprobantes={this.state.comprobantes}
@@ -1053,7 +1062,9 @@ PedidoCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       menus: PropTypes.array.isRequired,
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

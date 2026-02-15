@@ -2,16 +2,16 @@ import { ContainerMenu } from '../../../components/Container';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Perfiles from './perfil/Perfiles.jsx';
-import PerfilAgregar from './perfil/PerfilAgregar.jsx';
-import PerfilEditar from './perfil/PerfilEditar.jsx';
+import Perfiles from './perfil/Perfiles';
+import PerfilAgregar from './perfil/PerfilAgregar';
+import PerfilEditar from './perfil/PerfilEditar';
 
-import Usuarios from './usuario/Usuarios.jsx';
-import UsuarioAgregar from './usuario/UsuarioAgregar.jsx';
-import UsuarioEditar from './usuario/UsuarioEditar.jsx';
-import UsuarioResetear from './usuario/UsuarioResetear.jsx';
+import Usuarios from './usuario/Usuarios';
+import UsuarioAgregar from './usuario/UsuarioAgregar';
+import UsuarioEditar from './usuario/UsuarioEditar';
+import UsuarioResetear from './usuario/UsuarioResetear';
 
-import Accesos from './acceso/Accesos.jsx';
+import Accesos from './acceso/Accesos';
 
 export {
   Perfiles,

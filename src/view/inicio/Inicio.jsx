@@ -6,13 +6,13 @@ import { connect } from 'react-redux';
 import {
   addNotification,
   clearNoticacion,
-} from '../../redux/noticacionSlice.js';
-import { projectClose, signOut } from '../../redux/principalSlice.js';
+} from '../../redux/noticacionSlice';
+import { projectClose, signOut } from '../../redux/principalSlice';
 import {
   clearSucursal,
   setEmpresa,
   setMonedaNacional,
-} from '../../redux/predeterminadoSlice.js';
+} from '../../redux/predeterminadoSlice';
 
 import Bienvenido from './bienvenido/Bienvenido';
 import NotFoundMain from '../../components/errors/NotFoundMain';
@@ -105,6 +105,7 @@ import Contacto, {
   Clientes,
   Proveedores,
   Conductores,
+  Personales,
 } from './contacto/index.jsx';
 
 import Configuracion, {
@@ -143,6 +144,9 @@ import Configuracion, {
   Atributos,
   AtributosAgregar,
   AtributosEditar,
+  Ubicaciones,
+  UbicacionAgregar,
+  UbicacionEditar,
 } from './configuracion/index.jsx';
 
 import Reporte, {
@@ -150,9 +154,8 @@ import Reporte, {
   RepCompras,
   RepFinanciero,
   RepProductos,
-  RepClientes,
-  RepProveedores,
   RepCpeSunat,
+  RepInventario,
 } from './reporte/index.jsx';
 
 import CpeSunat, { CpeElectronicos, CpeConsultar } from './cpesunat/index.jsx';
@@ -167,8 +170,7 @@ import Finanzas, {
 
 import Crm, {
   Consultas,
-  ConsultaDetalle,
-  ConsultaEditar,
+  Web,
 } from './crm/index.jsx';
 
 import {
@@ -176,9 +178,9 @@ import {
   listNotificacion,
   nacionalMoneda,
 } from '../../network/rest/principal.network.js';
-import SuccessReponse from '../../model/class/response.js';
-import ErrorResponse from '../../model/class/error-response.js';
-import { CANCELED } from '../../model/types/types.js';
+import SuccessReponse from '../../model/class/response';
+import ErrorResponse from '../../model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import FileDownloader from '../../components/FileDownloader';
 import { images } from '../../helper/index';
 import { SpinnerView } from '../../components/Spinner';
@@ -353,7 +355,8 @@ class Inicio extends React.Component {
   // Evento de foco en la ventana
   // ------------------------------------------------------------------------
   onWindowFocused = () => {
-    const userToken = window.localStorage.getItem('login');
+    const localStorage = window.localStorage;
+    const userToken = localStorage.getItem('login');
     if (userToken === null) {
       this.props.signOut();
       return;
@@ -362,17 +365,17 @@ class Inicio extends React.Component {
     const tokenCurrent = JSON.parse(userToken);
     const tokenOld = this.props.token.userToken;
     if (tokenCurrent.token !== tokenOld.token) {
-      window.location.href = '/';
+      location.href = '/';
       return;
     }
 
-    const projectToken = window.localStorage.getItem('project');
+    const projectToken = localStorage.getItem('project');
 
     const projectCurrent = JSON.parse(projectToken);
     const projectOld = this.props.token.project;
 
     if (JSON.stringify(projectCurrent) !== JSON.stringify(projectOld)) {
-      window.location.href = '/';
+      location.href = '/';
       return;
     }
 
@@ -453,15 +456,11 @@ class Inicio extends React.Component {
 
     const { path, url } = this.props.match;
 
-    const pathname = this.props.location.pathname;
-
     return (
       <div className="app">
         <Menu
           refSideBar={this.refSideBar}
           url={url}
-          project={this.props.token.project}
-          userToken={this.props.token.userToken}
           rutaLogo={this.state.rutaLogo}
         />
 
@@ -920,6 +919,13 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <Conductores {...props} />}
           />
+
+          <Route
+            path={`${path}/contactos/personales`}
+            exact={true}
+            render={(props) => <Personales {...props} />}
+          />
+
           <Route
             path={`${path}/contactos/conductores/editar`}
             exact={true}
@@ -1123,6 +1129,21 @@ class Inicio extends React.Component {
             render={(props) => <AtributosEditar {...props} />}
           />
 
+          <Route
+            path={`${path}/configuracion/ubicaciones`}
+            exact={true}
+            render={(props) => <Ubicaciones {...props} />}
+          />
+          <Route
+            path={`${path}/configuracion/ubicaciones/agregar`}
+            exact={true}
+            render={(props) => <UbicacionAgregar {...props} />}
+          />
+          <Route
+            path={`${path}/configuracion/ubicaciones/editar`}
+            exact={true}
+            render={(props) => <UbicacionEditar {...props} />}
+          />
           {/* 
           --------------------------------------------------------
           | REPORTE
@@ -1155,19 +1176,13 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/reportes/repclientes`}
-            render={(props) => <RepClientes {...props} />}
-          />
-
-          <Route
-            path={`${path}/reportes/repproveedores`}
-            render={(props) => <RepProveedores {...props} />}
-          />
-
-          <Route
             path={`${path}/reportes/repcepsunat`}
             render={(props) => <RepCpeSunat {...props} />}
           />
+
+          <Route path={`${path}/reportes/repinventario`}>
+            <RepInventario />
+          </Route>
 
           {/* 
           --------------------------------------------------------
@@ -1246,17 +1261,9 @@ class Inicio extends React.Component {
             render={(props) => <Consultas {...props} />}
           />
 
-          <Route
-            path={`${path}/crm/consulta/detalle`}
-            exact={true}
-            render={(props) => <ConsultaDetalle {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta/editar`}
-            exact={true}
-            render={(props) => <ConsultaEditar {...props} />}
-          />
+          <Route path={`${path}/crm/web`}>
+            <Web />
+          </Route>
 
           <Route component={NotFoundMain} />
         </Switch>

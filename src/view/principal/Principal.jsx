@@ -2,15 +2,14 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { isEmpty } from '../../helper/utils.helper';
-import CustomComponent from '../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   configEmpresa,
   initSucursales,
 } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
-import { CANCELED } from '../../model/types/types';
-import Row from '../../components/Row';
+import { CANCELED } from '@/constants/requestStatus';
 import ItemCard from './component/ItemCard';
 import Title from './component/Title';
 import { SpinnerView } from '../../components/Spinner';
@@ -18,7 +17,6 @@ import { projectActive, signOut } from '../../redux/principalSlice';
 import PropTypes from 'prop-types';
 import { clearNoticacion } from '../../redux/noticacionSlice';
 import { clearPredeterminado } from '../../redux/predeterminadoSlice';
-import Column from '../../components/Column';
 import Input from '../../components/Input';
 import { images } from '../../helper';
 
@@ -135,20 +133,24 @@ class Principal extends CustomComponent {
   */
 
   handleFocused = () => {
-    const userToken = window.localStorage.getItem('login');
+    const localStorage = window.localStorage;
+
+    const userToken = localStorage.getItem('login');
     if (userToken === null) {
       this.props.signOut();
-    } else {
-      const projectToken = window.localStorage.getItem('project');
-      if (projectToken !== null) {
-        this.props.projectActive({
-          project: JSON.parse(projectToken),
-        });
-      }
+      return;
+    }
+
+    const projectToken = localStorage.getItem('project');
+    if (projectToken !== null) {
+      this.props.projectActive({
+        project: JSON.parse(projectToken),
+      });
     }
   };
 
-  handleSearch = (value) => {
+  handleSearch = (event) => {
+    const value = event.target.value;
     if (isEmpty(value)) {
       this.setState({ sucursales: this.state.cache });
       return;
@@ -160,18 +162,20 @@ class Principal extends CustomComponent {
     this.setState({ sucursales });
   };
 
-  handleSignOut = async () => {
-    window.localStorage.removeItem('login');
-    window.localStorage.removeItem('project');
+  handleSignOut = () => {
+    const localStorage = window.localStorage;
+    localStorage.removeItem('login');
+    localStorage.removeItem('project');
     window.location.href = '/';
   };
 
   handleIngresar = (item) => {
+    const localStorage = window.localStorage;
     const proyect = item;
 
-    window.localStorage.setItem('project', JSON.stringify(proyect));
+    localStorage.setItem('project', JSON.stringify(proyect));
     this.props.projectActive({
-      project: JSON.parse(window.localStorage.getItem('project')),
+      project: JSON.parse(localStorage.getItem('project')),
     });
   };
 
@@ -237,25 +241,29 @@ class Principal extends CustomComponent {
               type="search"
               placeholder="Filtar por nombre de sucursal"
               ref={this.refTxtSearch}
-              onKeyUp={(event) => this.handleSearch(event.target.value)}
+              onKeyUp={this.handleSearch}
             />
 
             <div className="flex">
 
-              {isEmpty(this.state.sucursales) && (
-                <div className="w-full flex justify-center">
-                  <p className="text-center">No hay datos para mostrar.</p>
-                </div>
-              )}
+              {
+                isEmpty(this.state.sucursales) && (
+                  <div className="w-full flex justify-center">
+                    <p className="text-center">No hay datos para mostrar.</p>
+                  </div>
+                )
+              }
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {this.state.sucursales.map((item, index) => (
-                  <ItemCard
-                    key={index}
-                    item={item}
-                    handleIngresar={this.handleIngresar}
-                  />
-                ))}
+                {
+                  this.state.sucursales.map((item, index) => (
+                    <ItemCard
+                      key={index}
+                      item={item}
+                      handleIngresar={this.handleIngresar}
+                    />
+                  ))
+                }
               </div>
             </div>
           </div>

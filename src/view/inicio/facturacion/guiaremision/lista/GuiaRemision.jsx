@@ -1,31 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   currentDate,
   formatNumberWithZeros,
   formatTime,
   isEmpty,
-} from '../../../../../helper/utils.helper';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import SuccessReponse from '../../../../../model/class/response';
+} from '@/helper/utils.helper';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import SuccessReponse from '@/model/class/response';
 import {
   cancelGuiaRemision,
   listGuiaRemision,
-} from '../../../../../network/rest/principal.network';
+} from '@/network/rest/principal.network';
 import { connect } from 'react-redux';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Search from '../../../../../components/Search';
-import Button from '../../../../../components/Button';
+import { SpinnerTable } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Search from '@/components/Search';
+import Button from '@/components/Button';
 import {
   Table,
   TableBody,
@@ -34,50 +30,58 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
-import Paginacion from '../../../../../components/Paginacion';
+} from '@/components/Table';
+import Paginacion from '@/components/Paginacion';
 import {
   setListaGuiaRemisionData,
   setListaGuiaRemisionPaginacion,
-} from '../../../../../redux/predeterminadoSlice';
-import Select from '../../../../../components/Select';
-import Input from '../../../../../components/Input';
+} from '@/redux/predeterminadoSlice';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import { alertKit } from 'alert-kit';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class GuiaRemision extends CustomComponent {
+
   /**
    *
    * Constructor
+   * @param {Object} props - Propiedades recibidas del componente padre.
    */
   constructor(props) {
     super(props);
 
     this.state = {
-      loading: false,
-      lista: [],
-      restart: false,
+      initialLoad: true,
+      initialMessage: "Cargando datos...",
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
       estado: '-1',
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
+
+      loading: false,
+      lista: [],
+      restart: false,
+
+      vista: "tabla",
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
-
     this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
@@ -97,10 +101,16 @@ class GuiaRemision extends CustomComponent {
   |
   */
 
+  /**
+   * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
+   */
   async componentDidMount() {
     await this.loadingData();
   }
 
+  /**
+   * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
+   */
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
@@ -209,11 +219,11 @@ class GuiaRemision extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -234,18 +244,16 @@ class GuiaRemision extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      },
       );
     }
 
@@ -277,6 +285,10 @@ class GuiaRemision extends CustomComponent {
   |
   */
 
+  handleCambiarVista = (value) => {
+    this.setState({ vista: value }, () => this.updateReduxState());
+  };
+
   handleCrear = () => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/crear`,
@@ -297,35 +309,48 @@ class GuiaRemision extends CustomComponent {
     });
   };
 
-  handleAnular = (idGuiaRemision) => {
-    alertDialog(
-      'Guia Remisión',
-      '¿Estás seguro de anular la guía de remisión?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idGuiaRemision: idGuiaRemision,
-          };
-
-          alertInfo('Guia Remisión', 'Procesando petición...');
-
-          const response = await cancelGuiaRemision(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Guia Remisión', response.data, async () => {
-              await this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Guia Remisión', response.getMessage());
-          }
-        }
+  handleAnular = async (idGuiaRemision) => {
+    const accept = await alertKit.question({
+      title: "Guia Remisión",
+      message: "¿Estás seguro de anular la guía de remisión?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idGuiaRemision: idGuiaRemision,
+      };
+
+      alertKit.loading({
+        message: "Procesando petición...",
+      });
+
+      const response = await cancelGuiaRemision(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Guia Remisión",
+          message: response.data,
+        }, async () => {
+          await this.loadingInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Guia Remisión",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
-  handleInputFechaInico = (event) => {
+  handleInputFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
     });
@@ -359,27 +384,35 @@ class GuiaRemision extends CustomComponent {
   |
   */
 
-  generateBody() {
+  renderTable() {
     if (this.state.loading) {
       return (
-        <SpinnerTable
-          colSpan="9"
-          message="Cargando información de la tabla..."
-        />
+        <tr>
+          <td colSpan={9} className="px-6 py-12 text-center">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+              <p className="text-gray-500">Cargando información...</p>
+            </div>
+          </td>
+        </tr>
       );
     }
 
     if (isEmpty(this.state.lista)) {
       return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="9">
-            ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
+        <tr>
+          <td colSpan={9} className="px-6 py-12 text-center">
+            <div className="text-gray-500">
+              <i className="bi bi-box text-4xl mb-3 block"></i>
+              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-sm">Intenta cambiar los filtros</p>
+            </div>
+          </td>
+        </tr>
       );
     }
 
-    return this.state.lista.map((item, index) => {
+    return this.state.lista.map((item) => {
       const estado =
         item.estado === 1 ? (
           <span className="text-success">ACTIVO</span>
@@ -388,59 +421,207 @@ class GuiaRemision extends CustomComponent {
         );
 
       return (
-        <TableRow key={index}>
-          <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
-          </TableCell>
-          <TableCell>
-            {item.tipoDocumento} - {item.documento}
-            <br />
-            {item.informacion}
-          </TableCell>
-          <TableCell>
-            {item.comprobante}
-            <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
-          </TableCell>
-          <TableCell>
-            {item.comprobanteRef}
-            <br />
-            {item.serieRef}-{formatNumberWithZeros(item.numeracionRef)}
-          </TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-info btn-sm"
+        <tr key={item.idGuiaRemision} className="hover:bg-gray-50 transition-colors">
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            {item.fecha}<br />
+            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            <div>{item.tipoDocumento} - {item.documento}</div>
+            <div className="text-xs text-gray-500">{item.informacion}</div>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            {item.comprobante}<br />
+            <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">{estado}</td>
+
+          <td className="px-6 py-4 text-center">
+            <button
+              className={
+                cn(
+                  "p-2 rounded-md text-sm font-medium transition",
+                  "text-blue-600 bg-white",
+                  "hover:bg-blue-50 hover:text-blue-700",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                  "active:bg-blue-100 active:scale-[0.97]",
+                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                )
+              }
+              title="Ver detalle"
               onClick={() => this.handleDetalle(item.idGuiaRemision)}
             >
-              <i className="fa fa-eye"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-warning btn-sm"
+              <i className="bi bi-eye text-lg" />
+            </button>
+          </td>
+
+          <td className="px-6 py-4 text-center">
+            <button
+              className={
+                cn(
+                  "p-2 rounded-md text-sm font-medium transition",
+                  "text-yellow-600 bg-white",
+                  "hover:bg-yellow-50 hover:text-yellow-700",
+                  "focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
+                  "active:bg-yellow-100 active:scale-[0.97]",
+                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                )
+              }
+              title="Ver detalle"
               onClick={() => this.handleEditar(item.idGuiaRemision)}
             >
-              <i className="fa fa-pencil"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
+              <i className="bi bi-pencil text-lg" />
+            </button>
+          </td>
+
+          <td className="px-6 py-4 text-center">
+            <button
+              className={
+                cn(
+                  "p-2 rounded-md text-sm font-medium transition",
+                  "text-red-600 bg-white",
+                  "hover:bg-red-50 hover:text-red-700",
+                  "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                  "active:bg-red-100 active:scale-[0.98]",
+                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                )
+              }
+              title="Anular venta"
               onClick={() => this.handleAnular(item.idGuiaRemision)}
             >
-              <i className="fa fa-remove"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
+              <i className="bi bi-trash text-lg" />
+            </button>
+          </td>
+        </tr>
       );
     });
   }
 
+  renderCuadricula() {
+    if (this.state.loading) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <div className="text-center py-16 rounded border text-gray-500">
+          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+          <p className="text-lg font-medium">No se encontraron ventas</p>
+          <p className="text-sm">Intenta cambiar los filtros</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {
+          this.state.lista.map((item) => {
+            const estado =
+              item.estado === 1 ? (
+                <span className="text-success">ACTIVO</span>
+              ) : (
+                <span className="text-danger">ANULADO</span>
+              );
+
+            return (
+              <div
+                key={item.idGuiaRemision}
+                className="bg-white rounded border transition group overflow-hidden"
+              >
+                <div className="flex flex-col gap-2 p-4">
+                  <div className="flex justify-between items-start">
+                    <h5 className="font-semibold text-gray-900 text-sm">
+                      {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
+                    </h5>
+                    {estado}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">N° Documento:</span> {item.documento}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Información:</span> {item.informacion}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-blue-600 bg-white",
+                          "hover:bg-blue-50 hover:text-blue-700",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                          "active:bg-blue-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleDetalle(item.idGuiaRemision)}
+                      title="Ver detalle"
+                    >
+                      <i className="bi bi-eye text-lg" /> Ver
+                    </button>
+
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-yellow-600 bg-white",
+                          "hover:bg-yellow-50 hover:text-yellow-700",
+                          "focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
+                          "active:bg-yellow-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      title="Ver detalle"
+                      onClick={() => this.handleEditar(item.idGuiaRemision)}
+                    >
+                      <i className="bi bi-pencil text-lg"></i>
+                    </button>
+
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-red-600 bg-white",
+                          "hover:bg-red-50 hover:text-red-700",
+                          "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                          "active:bg-red-100 active:scale-[0.98]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleAnular(item.idVenta)}
+                      title="Anular"
+                    >
+                      <i className="bi bi-trash text-lg" /> Anular
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }
+
   render() {
+    const { vista } = this.state;
+
     return (
       <ContainerWrapper>
         <Title
@@ -449,115 +630,173 @@ class GuiaRemision extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-outline-info" onClick={this.handleCrear}>
-              <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
+        {/* Acciones principales + Toggle vista */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Acciones principales */}
+          <div className="flex flex-wrap gap-3">
+            <button
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-blue-600 text-white text-sm font-medium rounded",
+                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+              )}
+              onClick={this.handleCrear}
+              aria-label="Crear nueva venta"
+            >
+              <i className="bi bi-file-plus"></i>
+              Nuevo Registro
+            </button>
+            <button
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
               onClick={this.loadingInit}
             >
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
+              <i className="bi bi-arrow-clockwise"></i>
+              Recargar Vista
+            </button>
+          </div>
 
-        <Row>
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Input
-              label={'Fecha de Inicio:'}
+          {/* Toggle vista */}
+          <div className="flex bg-gray-100 rounded p-1 gap-1">
+            <button
+              onClick={() => this.handleCambiarVista("tabla")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-list-ul"></i>
+              <span className="hidden sm:inline">Tabla</span>
+            </button>
+            <button
+              onClick={() => this.handleCambiarVista("cuadricula")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-grid-3x3"></i>
+              <span className="hidden sm:inline">Cuadrícula</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes ver las ventas echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <input
               type="date"
               value={this.state.fechaInicio}
-              onChange={this.handleInputFechaInico}
+              onChange={this.handleInputFechaInicio}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </Column>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Input
-              label={'Fecha de Final:'}
+            <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </Column>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Select
-              label={'Estados:'}
+            <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="-1">TODOS</option>
               <option value="1">ACTIVO</option>
               <option value="3">ANULADO</option>
-            </Select>
-          </Column>
-        </Row>
+            </select>
+          </div>
+        </div>
+        {/* Barra de búsqueda */}
+        <div className="w-full mb-4">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Buscar por comprobante o cliente..."
+            theme="modern"
+          />
+        </div>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar por comprobante o cliente..."
-            />
-          </Column>
-        </Row>
+        {/* Render condicional: Tabla o Cuadrícula */}
+        <div
+          className={
+            vista === "tabla"
+              ? "bg-white rounded border overflow-hidden"
+              : "space-y-6"
+          }
+        >
+          {/* 📊 Vista Tabla  */}
+          {
+            vista === "tabla" && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-left">#</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-left">Fecha</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%] text-left">Cliente</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%] text-left">Comprobante</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%] text-left">Referencia</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Mostrar</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Editar</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Anular</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {this.renderTable()}
+                  </tbody>
+                </table>
+              </div>
+            )
+          }
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className={'table-bordered'}>
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
-                    <TableHead width="10%">Fecha</TableHead>
-                    <TableHead width="15%">Cliente</TableHead>
-                    <TableHead width="20%">Comprobante</TableHead>
-                    <TableHead width="15%">referencia</TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Estado
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Mostrar
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Editar
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Anular
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          {/* 🟦 Vista Cuadrícula */}
+          {
+            vista === "cuadricula" && (
+              <>{this.renderCuadricula()}</>
+            )
+          }
 
-        <Paginacion
-          ref={this.refPaginacion}
-          loading={this.state.loading}
-          data={this.state.lista}
-          totalPaginacion={this.state.totalPaginacion}
-          paginacion={this.state.paginacion}
-          fillTable={this.paginacionContext}
-          restart={this.state.restart}
-        />
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              vista === "tabla"
+                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }
@@ -566,7 +805,9 @@ class GuiaRemision extends CustomComponent {
 GuiaRemision.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

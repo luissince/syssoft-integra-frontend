@@ -5,12 +5,12 @@ import {
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '../../../../../components/ui/container-wrapper';
 import { listAccountsPayableCompra } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -45,17 +45,17 @@ class CuentasPorPagar extends CustomComponent {
       lista: [],
       restart: false,
 
-      tipo: 'only',
-      buscar: '',
+      tipo: "only",
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.abortControllerTable = new AbortController();
@@ -156,7 +156,7 @@ class CuentasPorPagar extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -227,7 +227,7 @@ class CuentasPorPagar extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -257,11 +257,9 @@ class CuentasPorPagar extends CustomComponent {
             {item.informacion}
           </TableCell>
           <TableCell>
-            {item.numeroCuota === 1
-              ? item.numeroCuota + ' PLAZO'
-              : item.numeroCuota + ' PLAZOS'}
+            {item.plazo}
             <br />
-            FACTURA DE {item.frecuenciaPago} DÍAS
+            F.V - {item.fechaVencimiento}
           </TableCell>
           <TableCell>{formatCurrency(item.total, item.codiso)}</TableCell>
           <TableCell className="text-success">
@@ -334,18 +332,14 @@ class CuentasPorPagar extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
-                    <TableHead width="10%">Comprobante</TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="15%">Comprobante</TableHead>
                     <TableHead width="18%">Proveedor</TableHead>
-                    <TableHead width="17%">N° Plazos / Frecuencia</TableHead>
+                    <TableHead width="12%">Plazo</TableHead>
                     <TableHead width="10%">Total</TableHead>
                     <TableHead width="10%">Pagado</TableHead>
                     <TableHead width="10%">Por Pagar</TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Pagar
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">Pagar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>{this.generateBody()}</TableBody>
@@ -370,7 +364,9 @@ class CuentasPorPagar extends CustomComponent {
 CuentasPorPagar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

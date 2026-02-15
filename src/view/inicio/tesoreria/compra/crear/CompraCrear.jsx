@@ -1,12 +1,12 @@
 import React from 'react';
-import { PosContainerWrapper } from '../../../../../components/ui/container-wrapper';
-import CustomComponent from '../../../../../model/class/custom-component';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   isEmpty,
   isText,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { COMPRA } from '../../../../../model/types/tipo-comprobante';
+import { COMPRA } from '@/model/types/tipo-comprobante';
 import {
   comboAlmacen,
   comboComprobante,
@@ -17,26 +17,26 @@ import {
   filtrarAlmacenProducto,
   filtrarPersona,
   forPurchaseOrdenCompra,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
 import {
   SpinnerView,
-} from '../../../../../components/Spinner';
+} from '@/components/Spinner';
 import ModalProducto from './component/ModalProducto';
-import ModalTransaccion from '../../../../../components/ModalTransaccion';
+import ModalTransaccion from '@/components/ModalTransaccion';
 import {
   clearCrearCompra,
   setCrearCompraLocal,
   setCrearCompraState,
-} from '../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import {
   ModalImpresion,
   ModalPersona,
-} from '../../../../../components/MultiModal';
-import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
+} from '@/components/MultiModal';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
 import { alertKit } from 'alert-kit';
 import PanelIzquierdo from '../../component/PanelIzquierdo';
@@ -109,7 +109,7 @@ class CompraCrear extends CustomComponent {
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -253,12 +253,7 @@ class CompraCrear extends CustomComponent {
   importeTotal = () => {
     return this.state.detalles.reduce((accumulate, item) => {
 
-      let cantidad = 0;
-      if (item.lote) {
-        cantidad = item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
-      } else {
-        cantidad = item.cantidad;
-      }
+      let cantidad = item.inventarioDetalles.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
 
       const costo = item.costo;
 
@@ -467,15 +462,12 @@ class CompraCrear extends CustomComponent {
   // Filtrar productos
   //------------------------------------------------------------------------------------------
   handleClearInputProducto = () => {
-    this.setState(
-      {
-        productos: [],
-        loadingProducto: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      productos: [],
+      loadingProducto: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterProducto = async (text) => {
@@ -912,6 +904,7 @@ class CompraCrear extends CustomComponent {
         idUsuario: idUsuario,
         idSucursal: idSucursal,
         estado: 1,
+        idPlazo: null,
         detalles: detalles,
         notaTransacion,
         bancosAgregados: metodoPagosLista,
@@ -1018,6 +1011,7 @@ class CompraCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos impresión
   //------------------------------------------------------------------------------------------
+
   handleOpenImpresion = (idCompra) => {
     this.setState({ isOpenImpresion: true, idCompra: idCompra });
   };
@@ -1197,7 +1191,9 @@ CompraCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       menus: PropTypes.array.isRequired,
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

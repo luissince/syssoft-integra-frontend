@@ -13,7 +13,7 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -62,7 +62,7 @@ class Cobros extends CustomComponent {
       messageTable: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.abortControllerTable = new AbortController();
@@ -273,7 +273,7 @@ class Cobros extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -416,7 +416,9 @@ class Cobros extends CustomComponent {
 Cobros.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

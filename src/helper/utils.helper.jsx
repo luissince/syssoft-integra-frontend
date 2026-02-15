@@ -1,6 +1,3 @@
-import bootstrap from '../resource/js/bootstrap';
-import Swal from '../resource/js/sweetalert';
-
 /**
  *
  * @param {Number} time Tiempo de espera del time out
@@ -68,14 +65,14 @@ export async function imageBase64(file) {
 }
 
 export async function convertFileBase64(files) {
-  if (files.length !== 0) {
-    const file = files[0];
-    const data = await readDataFile(file);
-    const extension = getExtension(file.name);
-    return { data, extension };
+  if (files.length === 0) {
+    return false
   }
 
-  return false;
+  const file = files[0];
+  const data = await readDataFile(file);
+  const extension = getExtension(file.name);
+  return { data, extension };
 }
 
 /**
@@ -93,7 +90,7 @@ export function formatDecimal(
   decimal = '.',
   thousands = ',',
 ) {
-  const isNumber = /^-?\d*\.?\d+$/.test(amount);
+  const isNumber = /^-?\d*\.?\d+$/.test(String(amount));
   if (!isNumber) return '0.00';
 
   decimalCount = Number.isInteger(decimalCount) ? Math.abs(decimalCount) : 2;
@@ -102,7 +99,7 @@ export function formatDecimal(
 
   const negativeSign = number < 0 ? '-' : '';
 
-  const roundedAmount = Math.abs(rounded(number, decimalCount)).toFixed(
+  const roundedAmount = Math.abs(Number(rounded(number, decimalCount))).toFixed(
     decimalCount,
   );
   const [integerPart, decimalPart] = roundedAmount.split('.');
@@ -127,7 +124,7 @@ export function formatDecimal(
  * @returns {string | number} La cantidad formateada.
  */
 export function rounded(amount, decimalCount = 2, type = 'string') {
-  const isNumber = /^-?\d*\.?\d+$/.test(amount);
+  const isNumber = /^-?\d*\.?\d+$/.test(String(amount));
   if (!isNumber) return type === 'number' ? 0 : '0.00';
 
   const number = Number(amount);
@@ -594,7 +591,7 @@ export function debounce(func, delay) {
 }
 
 /**
- * Formatea una cadena de fecha en un formato de "DD/MM/YYYY"
+ * Formatea una cadena de fecha en un formato de "dd/MM/yyyy"
  *
  * @param {string} date
  * @returns {string} La cadena de fecha formateada.
@@ -666,16 +663,23 @@ export function reorder(list, startIndex, endIndex) {
 export const formatBytes = (bytes) =>
   `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
+/**
+ * 
+ * @param {*} event 
+ * @returns {{rowIndex: number, cellIndex: number, tBody: HTMLElement, children: HTMLElement[]} | null}
+ */
 export function getRowCellIndex(event) {
   const target = event.target;
   const cell = target.closest('td, th');
   if (!cell) {
-    return -1;
+    return null;
   }
 
   const row = cell.parentElement;
   const tBody = row.closest('tbody');
-  if (!tBody) return -1;
+  if (!tBody) {
+    return null
+  };
 
   const rowIndex = Array.prototype.indexOf.call(tBody.children, row);
   const cellIndex = Array.prototype.indexOf.call(row.children, cell);
@@ -753,31 +757,6 @@ export function calculateTaxBruto(impuesto, monto) {
 export function calculateTax(porcentaje, valor) {
   const igv = parseFloat(porcentaje) / 100.0;
   return valor * igv;
-}
-
-export function showModal(id) {
-  const myModalEl = document.getElementById(id);
-  const myModal = new bootstrap.Modal(myModalEl);
-  myModal.show();
-}
-
-export function hideModal(id) {
-  const myModal = bootstrap.Modal.getInstance(document.getElementById(id));
-  myModal.hide();
-}
-
-export function viewModal(id, callback = function () { }) {
-  const myModalEl = document.getElementById(id);
-  myModalEl.addEventListener('shown.bs.modal', callback);
-}
-
-export function clearModal(id, callback = function () { }) {
-  const myModalEl = document.getElementById(id);
-  myModalEl.addEventListener('hidden.bs.modal', callback);
-}
-
-export function getInstanceModal(id) {
-  return bootstrap.Modal.getInstance(document.getElementById(id));
 }
 
 export function spinnerLoading(message = 'Cargando datos...', table = false) {
@@ -926,9 +905,10 @@ export function imageSizeData(data) {
     const image = new Image();
     image.src = data;
     image.onload = function () {
-      const height = this.height;
-      const width = this.width;
-      resolve({ width, height });
+      resolve({
+        width: image.width,
+        height: image.height,
+      });
     };
     image.onerror = reject;
   });
@@ -1060,125 +1040,6 @@ export function getPathNavigation(opcion, idNavegacion) {
   if (opcion == 'guia') {
     return `/inicio/facturacion/guiaremision/detalle?idGuiaRemision=${idNavegacion}`;
   }
-}
 
-export function alertInfo(title, message) {
-  Swal({
-    title: title,
-    text: message,
-    type: 'info',
-    confirmButtonText: 'Aceptar',
-    cancelButtonText: 'Cancelar',
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-  });
-}
-
-export function alertHTML(title, html, callback = function () { }) {
-  Swal({
-    html: html,
-    showConfirmButton: false,
-    showCancelButton: true,
-    cancelButtonText: 'Cerrar',
-    cancelButtonColor: '#dc3545',
-    allowOutsideClick: false,
-    showCloseButton: true,
-  }).then((event) => {
-    callback(event);
-  });
-}
-
-export function alertSuccess(title, message, callback = function () { }) {
-  Swal({
-    title: title,
-    text: message,
-    type: 'success',
-    confirmButtonText: 'Aceptar',
-    cancelButtonText: 'Cancelar',
-    showConfirmButton: true,
-    allowOutsideClick: false,
-    showCloseButton: true,
-  }).then(() => {
-    callback();
-  });
-}
-
-export function alertWarning(title, message, callback = function () { }) {
-  Swal({
-    title: title,
-    text: message,
-    type: 'warning',
-    focusConfirm: true,
-    confirmButtonText: 'Aceptar',
-    cancelButtonText: 'Cancelar',
-    showConfirmButton: true,
-    allowOutsideClick: false,
-    showCloseButton: true,
-  }).then(() => {
-    callback();
-  });
-}
-
-export function alertError(title, message) {
-  Swal({
-    title: title,
-    text: message,
-    type: 'error',
-    confirmButtonText: 'Aceptar',
-    cancelButtonText: 'Cancelar',
-    showConfirmButton: true,
-    allowOutsideClick: false,
-    showCloseButton: true,
-  });
-}
-
-export function alertDialog(title, mensaje, callback) {
-  Swal({
-    title: title,
-    text: mensaje,
-    type: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Si',
-    confirmButtonColor: '#007bff',
-    cancelButtonText: 'No',
-    cancelButtonColor: '#dc3545',
-    allowOutsideClick: false,
-    showCloseButton: true,
-  }).then((isConfirm) => {
-    if (isConfirm.value === undefined) {
-      return false;
-    }
-    if (isConfirm.value) {
-      callback(true);
-    } else {
-      callback(false);
-    }
-  });
-}
-
-export function alertInput(title, mensaje, callback) {
-  Swal({
-    title: title,
-    text: mensaje,
-    type: 'info',
-    input: 'text',
-    onKeyDown: keyNumberFloat,
-    inputPlaceholder: '0.00',
-    inputAttributes: {
-      autocapitalize: 'off',
-    },
-    showCancelButton: true,
-    allowOutsideClick: false,
-    confirmButtonText: 'Aceptar',
-    confirmButtonColor: '#007bff',
-    cancelButtonText: 'Cancelar',
-    cancelButtonColor: '#dc3545',
-    showCloseButton: true,
-  }).then((result) => {
-    if (result.value) {
-      callback(true, result.value);
-    }
-    callback(false);
-  });
+  return "#";
 }

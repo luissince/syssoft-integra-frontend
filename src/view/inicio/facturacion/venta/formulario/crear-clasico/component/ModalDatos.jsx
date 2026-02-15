@@ -3,12 +3,12 @@ import { CustomModalForm } from '../../../../../../../components/CustomModal';
 import Input from '../../../../../../../components/Input';
 import Row from '../../../../../../../components/Row';
 import {
-  alertWarning,
   isEmpty,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../../components/Button';
 import Column from '../../../../../../../components/Column';
+import { alertKit } from 'alert-kit';
 
 class ModalDatos extends Component {
   constructor(props) {
@@ -46,13 +46,13 @@ class ModalDatos extends Component {
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.informacion)) {
-      alertWarning(
-        'Venta',
-        'Ingrese la nueva descripción del producto.',
-        () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Ingrese la nueva descripción del producto.",
+        onClose: () => {
           this.refInformacion.current.focus();
         },
-      );
+      });
       return;
     }
 

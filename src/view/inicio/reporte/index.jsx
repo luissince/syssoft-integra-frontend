@@ -1,23 +1,24 @@
 import { ContainerMenu } from '../../../components/Container';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-
-import RepVentas from './RepVentas.jsx';
-import RepCompras from './RepCompras.jsx';
-import RepFinanciero from './RepFinanciero.jsx';
-import RepProductos from './RepProductos.jsx';
-import RepClientes from './RepClientes.jsx';
-import RepProveedores from './RepProveedores.jsx';
-import RepCpeSunat from './RepCpeSunat.jsx';
+import RepVentas from './RepVentas';
+import RepCompras from './RepCompras';
+import RepFinanciero from './RepFinanciero';
+import RepProductos from './RepProductos';
+// import RepClientes from './RepClientes';
+// import RepProveedores from './RepProveedores';
+import RepCpeSunat from './RepCpeSunat';
+import RepInventario from './RepInventario';
 
 export {
   RepFinanciero,
   RepVentas,
   RepCompras,
   RepProductos,
-  RepClientes,
-  RepProveedores,
+  // RepClientes,
+  // RepProveedores,
   RepCpeSunat,
+  RepInventario,
 };
 
 /**

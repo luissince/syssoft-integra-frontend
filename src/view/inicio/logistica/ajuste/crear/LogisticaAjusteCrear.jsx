@@ -1,53 +1,36 @@
 import React from 'react';
 import {
-  alertDialog,
   getNumber,
   isEmpty,
-  keyNumberFloat,
-  rounded,
   validateNumericInputs,
-} from '../../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
+} from '@/helper/utils.helper';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
   comboAlmacen,
   comboMotivoAjuste,
   createAjuste,
   filtrarAlmacenProducto,
-} from '../../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
-import SearchInput from '../../../../../components/SearchInput';
+import SearchInput from '@/components/SearchInput';
 import PropTypes from 'prop-types';
 import {
   DECREMENTO,
   INCREMENTO,
-} from '../../../../../model/types/forma-ajuste';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Select from '../../../../../components/Select';
-import Button from '../../../../../components/Button';
-import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
-import { SERVICIO } from '../../../../../model/types/tipo-producto';
-import { imagen } from '../../../../../helper/images.helper';
-import ModalLote from './component/ModalLote';
+} from '@/model/types/forma-ajuste';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Select from '@/components/Select';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import RadioButton from '@/components/RadioButton';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import GenerarTabla from './component/GenerarTabla';
 
@@ -66,7 +49,7 @@ class LogisticaAjusteCrear extends CustomComponent {
     this.state = {
       // Atributos de carga
       initialLoad: true,
-      initialMessage: 'Cargando datos...',
+      initialMessage: "Cargando datos...",
 
       // Atributos principales
       paso: 1,
@@ -77,26 +60,23 @@ class LogisticaAjusteCrear extends CustomComponent {
 
       productos: [],
 
-      idTipoAjuste: '',
-      observacion: 'S/N',
+      idTipoAjuste: "",
+      observacion: "S/N",
 
-      idMotivoAjuste: '',
+      idMotivoAjuste: "",
       motivoAjuste: [],
 
-      idAlmacen: '',
+      idAlmacen: "",
       almacenes: [],
 
       detalles: [],
 
-      nombreMotivoAjuste: '',
-      nombreAlmacen: '',
-
-      // Atributos del modal lote
-      isOpenLote: false,
+      nombreMotivoAjuste: "",
+      nombreAlmacen: "",
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -110,9 +90,6 @@ class LogisticaAjusteCrear extends CustomComponent {
     this.refIdAlmacen = React.createRef();
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
-
-    // Referencia al modal lote
-    this.refModalLote = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -213,15 +190,15 @@ class LogisticaAjusteCrear extends CustomComponent {
     });
   }
 
-  addProducto(producto, lotes = null) {
+  addProducto(producto) {
     const exists = this.state.detalles.find(
       (item) => item.idProducto === producto.idProducto,
     );
 
     if (exists) {
       alertKit.warning({
-        title: 'Ajuste',
-        message: 'El producto ya existe en la lista.',
+        title: "Ajuste",
+        message: "El producto ya existe en la lista.",
       });
       return;
     }
@@ -231,10 +208,11 @@ class LogisticaAjusteCrear extends CustomComponent {
       codigo: producto.codigo,
       nombre: producto.nombre,
       imagen: producto.imagen,
-      cantidad: '',
-      actual: producto.cantidad,
       unidad: producto.unidad,
-      lotes: lotes ? lotes : null,
+      inventarioDetalles: producto.inventarioDetalles.map((item) => ({
+        ...item,
+        cantidadAjustar: "",
+      })),
     };
 
     this.setState((prevState) => ({
@@ -257,6 +235,115 @@ class LogisticaAjusteCrear extends CustomComponent {
     | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
     |
     */
+
+  handleSelectMetodoAjuste = (event) => {
+    this.setState({ idMotivoAjuste: event.target.value });
+  };
+
+  handleOptionTipoAjuste = (event) => {
+    this.setState({ idTipoAjuste: event.target.value });
+  };
+
+  handleSelectAlmacen = (event) => {
+    this.setState({ idAlmacen: event.target.value });
+  };
+
+  handleSiguiente = () => {
+    if (isEmpty(this.state.idTipoAjuste)) {
+      alertKit.warning({
+        title: "Ajuste",
+        message: "Seleccione el tipo de ajuste.",
+      },
+        () => {
+          this.refIdTipoAjuste.current.focus();
+        },
+      );
+      return;
+    }
+
+    if (isEmpty(this.state.idMotivoAjuste)) {
+      alertKit.warning({
+        title: "Ajuste",
+        message: "Seleccione el motivo del ajuste.",
+      }, () => {
+        this.refIdMotivoAjuste.current.focus();
+      });
+      return;
+    }
+
+    if (isEmpty(this.state.idAlmacen)) {
+      alertKit.warning({
+        title: "Ajuste",
+        message: "Seleccione el almacen.",
+      }, () => {
+        this.refIdAlmacen.current.focus();
+      });
+      return;
+    }
+
+    this.setState({
+      nombreMotivoAjuste:
+        this.refIdMotivoAjuste.current.options[
+          this.refIdMotivoAjuste.current.selectedIndex
+        ].innerText,
+      nombreAlmacen:
+        this.refIdAlmacen.current.options[
+          this.refIdAlmacen.current.selectedIndex
+        ].innerText,
+      paso: 2,
+    });
+  };
+
+  handleInputObservacion = (event) => {
+    this.setState({
+      observacion: event.target.value,
+    });
+  };
+
+  handleRemoveDetalle = (idProducto) => {
+    const detalles = this.state.detalles.filter(
+      (item) => item.idProducto !== idProducto,
+    );
+    this.setState({ detalles });
+  };
+
+  handleInputDetalle = (event, idKardex) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      detalles: prevState.detalles.map((item) => ({
+        ...item,
+        inventarioDetalles: item.inventarioDetalles.map((invd) => {
+          if (invd.idKardex === idKardex) {
+            return {
+              ...invd,
+              cantidadAjustar: value,
+            };
+          }
+          return invd;
+        }),
+      })),
+    }));
+  };
+
+  handleFocusInputTable = (event, isLastRow) => {
+    if (event.key === 'Enter' && !isLastRow) {
+      const nextInput =
+        event.target.parentElement.parentElement.nextElementSibling.querySelector(
+          'input',
+        );
+      nextInput.focus();
+      nextInput.select();
+    }
+
+    if (event.key === 'Enter' && isLastRow) {
+      const firstInput =
+        event.target.parentElement.parentElement.parentElement.querySelector(
+          'input',
+        );
+      firstInput.focus();
+      firstInput.select();
+    }
+  };
 
   //------------------------------------------------------------------------------------------
   // Filtrar producto
@@ -298,190 +385,75 @@ class LogisticaAjusteCrear extends CustomComponent {
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
 
-    if (value.lote === 1) {
-      this.handleOpenLote(value);
-    } else {
-      this.setState(
-        {
-          producto: value,
-          productos: [],
-        },
-        () => {
-          this.addProducto(value);
-        },
-      );
-    }
-  };
-
-  handleSelectMetodoAjuste = (event) => {
-    this.setState({ idMotivoAjuste: event.target.value });
-  };
-
-  handleOptionTipoAjuste = (event) => {
-    this.setState({ idTipoAjuste: event.target.value });
-  };
-
-  handleSelectAlmacen = (event) => {
-    this.setState({ idAlmacen: event.target.value });
-  };
-
-  handleSiguiente = () => {
-    if (isEmpty(this.state.idTipoAjuste)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Seleccione el tipo de ajuste.',
-        },
-        () => {
-          this.refIdTipoAjuste.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idMotivoAjuste)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Seleccione el motivo del ajuste.',
-        },
-        () => {
-          this.refIdMotivoAjuste.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idAlmacen)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Seleccione el almacen.',
-        },
-        () => {
-          this.refIdAlmacen.current.focus();
-        },
-      );
-      return;
-    }
-
     this.setState({
-      nombreMotivoAjuste:
-        this.refIdMotivoAjuste.current.options[
-          this.refIdMotivoAjuste.current.selectedIndex
-        ].innerText,
-      nombreAlmacen:
-        this.refIdAlmacen.current.options[
-          this.refIdAlmacen.current.selectedIndex
-        ].innerText,
-      paso: 2,
+      producto: value,
+      productos: [],
+    }, () => {
+      this.addProducto(value);
     });
-  };
-
-  handleInputObservacion = (event) => {
-    this.setState({
-      observacion: event.target.value,
-    });
-  };
-
-  handleRemoveDetalle = (idProducto) => {
-    const detalles = this.state.detalles.filter(
-      (item) => item.idProducto !== idProducto,
-    );
-    this.setState({ detalles });
-  };
-
-  handleInputDetalle = (event, idProducto) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detalles: prevState.detalles.map((item) =>
-        item.idProducto === idProducto ? { ...item, cantidad: value } : item,
-      ),
-    }));
-  };
-
-  handleFocusInputTable = (event, isLastRow) => {
-    if (event.key === 'Enter' && !isLastRow) {
-      const nextInput =
-        event.target.parentElement.parentElement.nextElementSibling.querySelector(
-          'input',
-        );
-      nextInput.focus();
-      nextInput.select();
-    }
-    if (event.key === 'Enter' && isLastRow) {
-      const firstInput =
-        event.target.parentElement.parentElement.parentElement.querySelector(
-          'input',
-        );
-      firstInput.focus();
-      firstInput.select();
-    }
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal lote
-  //------------------------------------------------------------------------------------------
-  handleOpenLote = async (producto) => {
-    this.setState({ isOpenLote: true });
-    await this.refModalLote.current.loadDatos(producto);
-  };
-
-  handleCloseLote = () => {
-    this.setState({ isOpenLote: false });
-  };
-
-  handleSaveLote = async (producto, lotes) => {
-    this.setState(
-      {
-        producto: producto,
-        productos: [],
-      },
-      () => {
-        this.addProducto(producto, lotes);
-      },
-    );
   };
 
   //------------------------------------------------------------------------------------------
   // Acciones de proceso de registro
   //------------------------------------------------------------------------------------------
   handleSave = async () => {
-    if (isEmpty(this.state.detalles)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Agregue productos en la lista para continuar.',
-        },
-        () => {
-          this.refValueProducto.current.focus();
-        },
-      );
+    const {
+      idTipoAjuste,
+      idMotivoAjuste,
+      idAlmacen,
+      idSucursal,
+      observacion,
+      idUsuario,
+      detalles
+    } = this.state;
+
+    if (isEmpty(detalles)) {
+      alertKit.warning({
+        title: "Ajuste",
+        message: "Agregue productos en la lista para continuar.",
+      }, () => {
+        this.refValueProducto.current.focus();
+      });
       return;
     }
 
-    if (
-      !isEmpty(
-        this.state.detalles.filter(
-          (item) => !item.lotes && getNumber(item.cantidad) <= 0,
-        ),
-      )
-    ) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
-        },
-        () => {
-          validateNumericInputs(this.refTableBody);
-        },
-      );
+    if (!isEmpty(detalles.filter((item) => !item.inventarioDetalles && getNumber(item.cantidad) <= 0))) {
+      alertKit.warning({
+        title: "Ajuste",
+        message: "Hay cantidades en lista de productos con valor 0 o vacío.",
+      }, () => {
+        validateNumericInputs(this.refTableBody);
+      });
+      return;
+    }
+
+    const detallesFiltrados = detalles
+      .map(item => {
+        const detallesValidos = item.inventarioDetalles
+          .filter(invd => getNumber(invd.cantidadAjustar) > 0)
+          .map(invd => ({
+            ...invd,
+            cantidadAjustar: getNumber(invd.cantidadAjustar)
+          }));
+
+        return {
+          ...item,
+          inventarioDetalles: detallesValidos
+        };
+      })
+      .filter(item => item.inventarioDetalles.length > 0);
+
+    if (isEmpty(detallesFiltrados)) {
+      alertKit.warning({
+        title: "Ajuste",
+        message: "No hay cantidades válidas para el ajuste.",
+      });
       return;
     }
 
     const accept = await alertKit.question({
-      title: 'Ajuste',
-      message: '¿Está seguro de continuar?',
+      title: "Ajuste",
+      message: "¿Está seguro de continuar?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -492,38 +464,36 @@ class LogisticaAjusteCrear extends CustomComponent {
 
     if (accept) {
       const data = {
-        idTipoAjuste: this.state.idTipoAjuste,
-        idMotivoAjuste: this.state.idMotivoAjuste,
-        idAlmacen: this.state.idAlmacen,
-        idSucursal: this.state.idSucursal,
-        observacion: this.state.observacion,
-        idUsuario: this.state.idUsuario,
-        detalles: this.state.detalles,
+        idTipoAjuste: idTipoAjuste,
+        idMotivoAjuste: idMotivoAjuste,
+        idAlmacen: idAlmacen,
+        idSucursal: idSucursal,
+        observacion: observacion,
+        idUsuario: idUsuario,
+        detalles: detallesFiltrados,
       };
 
       alertKit.loading({
-        message: 'Procesando petición...',
+        message: "Procesando petición...",
       });
 
       const response = await createAjuste(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Ajuste',
-            message: response.data,
-          },
-          () => {
+        alertKit.success({
+          title: "Ajuste",
+          message: response.data,
+          onClose: () => {
             this.clearView();
           },
-        );
+        });
       }
 
       if (response instanceof ErrorResponse) {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Ajuste',
+          title: "Ajuste",
           message: response.getMessage(),
         });
       }
@@ -537,16 +507,21 @@ class LogisticaAjusteCrear extends CustomComponent {
     });
   };
 
-  handleClear = () => {
-    alertDialog(
-      'Ajuste',
-      '¿Está seguro de continuar, se va limpiar toda la información?',
-      async (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+  handleClear = async () => {
+    const accept = await alertKit.question({
+      title: "Ajuste",
+      message: "¿Está seguro de continuar, se va limpiar toda la información?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   /*
@@ -565,7 +540,6 @@ class LogisticaAjusteCrear extends CustomComponent {
     |
     */
 
-
   render() {
     return (
       <ContainerWrapper>
@@ -580,213 +554,165 @@ class LogisticaAjusteCrear extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <ModalLote
-          ref={this.refModalLote}
-          isOpen={this.state.isOpenLote}
-          idTipoAjuste={this.state.idTipoAjuste}
-          onClose={this.handleCloseLote}
-          handleAdd={this.handleSaveLote}
-        />
-
         {/* Primero paso */}
         {this.state.paso === 1 && (
           <>
-            <Row>
-              <Column>
-                <div className="form-group">
-                  <p>
-                    <i className="bi bi-card-list"></i> Defína alguna opciones
-                    antes de continuar.
-                  </p>
-                </div>
-              </Column>
-            </Row>
+            <div className="felx mb-3">
+              <p>
+                <i className="bi bi-card-list"></i> Defína alguna opciones antes de continuar.
+              </p>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <label>Seleccione el tipo de ajuste:</label>
+            <div className="flex flex-col gap-1 mb-3">
+              <label>Seleccione el tipo de ajuste:</label>
 
-                <RadioButton
-                  ref={this.refIdTipoAjuste}
-                  name="ckTipoAjuste"
-                  id={INCREMENTO}
-                  value={INCREMENTO}
-                  checked={this.state.idTipoAjuste === INCREMENTO}
-                  onChange={this.handleOptionTipoAjuste}
-                >
-                  <i className="bi bi-plus-circle-fill text-success"></i>{' '}
-                  Incremento
-                </RadioButton>
+              <RadioButton
+                ref={this.refIdTipoAjuste}
+                name="ckTipoAjuste"
+                id={INCREMENTO}
+                value={INCREMENTO}
+                checked={this.state.idTipoAjuste === INCREMENTO}
+                onChange={this.handleOptionTipoAjuste}
+              >
+                <i className="bi bi-plus-circle-fill text-success"></i>{' '}
+                Incremento
+              </RadioButton>
 
-                <RadioButton
-                  name="ckTipoAjuste"
-                  id={DECREMENTO}
-                  value={DECREMENTO}
-                  checked={this.state.idTipoAjuste === DECREMENTO}
-                  onChange={this.handleOptionTipoAjuste}
-                >
-                  <i className="bi bi-dash-circle-fill text-danger"></i>{' '}
-                  Decremento
-                </RadioButton>
-              </Column>
-            </Row>
+              <RadioButton
+                name="ckTipoAjuste"
+                id={DECREMENTO}
+                value={DECREMENTO}
+                checked={this.state.idTipoAjuste === DECREMENTO}
+                onChange={this.handleOptionTipoAjuste}
+              >
+                <i className="bi bi-dash-circle-fill text-danger"></i>{' '}
+                Decremento
+              </RadioButton>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Select
-                  label={'Seleccione el motivo del ajuste:'}
-                  ref={this.refIdMotivoAjuste}
-                  value={this.state.idMotivoAjuste}
-                  onChange={this.handleSelectMetodoAjuste}
-                >
-                  <option value="">-- Motivo Ajuste --</option>
-                  {this.state.motivoAjuste.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idMotivoAjuste}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </Select>
-              </Column>
-            </Row>
+            <div className="flex flex-col mb-3">
+              <Select
+                label={'Seleccione el motivo del ajuste:'}
+                ref={this.refIdMotivoAjuste}
+                value={this.state.idMotivoAjuste}
+                onChange={this.handleSelectMetodoAjuste}
+              >
+                <option value="">-- Motivo Ajuste --</option>
+                {this.state.motivoAjuste.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idMotivoAjuste}>
+                      {item.nombre}
+                    </option>
+                  );
+                })}
+              </Select>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Select
-                  label={'Seleccione el almacen:'}
-                  ref={this.refIdAlmacen}
-                  value={this.state.idAlmacen}
-                  onChange={this.handleSelectAlmacen}
-                >
-                  <option value="">-- Almacen --</option>
-                  {this.state.almacenes.map((item, index) => {
-                    return (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre}
-                      </option>
-                    );
-                  })}
-                </Select>
-              </Column>
-            </Row>
+            <div className="flex flex-col mb-3">
+              <Select
+                label={'Seleccione el almacen:'}
+                ref={this.refIdAlmacen}
+                value={this.state.idAlmacen}
+                onChange={this.handleSelectAlmacen}
+              >
+                <option value="">-- Almacen --</option>
+                {this.state.almacenes.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre}
+                    </option>
+                  );
+                })}
+              </Select>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Button className="btn-primary" onClick={this.handleSiguiente}>
-                  <i className="fa fa-arrow-right"></i> Siguiente
-                </Button>{' '}
-                <Button
-                  className="btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}
-                >
-                  <i className="fa fa-close"></i> Cancelar
-                </Button>
-              </Column>
-            </Row>
+            <div className="flex gap-3">
+              <Button className="btn-primary" onClick={this.handleSiguiente}>
+                <i className="fa fa-arrow-right"></i> Siguiente
+              </Button>
+              <Button
+                className="btn-outline-danger"
+                onClick={() => this.props.history.goBack()}
+              >
+                <i className="fa fa-close"></i> Cancelar
+              </Button>
+            </div>
           </>
         )}
 
         {/* Segundo paso */}
         {this.state.paso === 2 && (
           <>
-            <Row>
-              <Column formGroup={true}>
-                <TableResponsive>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                          Tipo de Ajuste:
-                        </TableHead>
-                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                          {this.state.idTipoAjuste === INCREMENTO ? (
-                            <span>
-                              <i className="bi bi-plus-circle-fill text-success"></i>{' '}
-                              Incremento
-                            </span>
-                          ) : (
-                            <span>
-                              {' '}
-                              <i className="bi bi-dash-circle-fill text-danger"></i>{' '}
-                              Decremento
-                            </span>
-                          )}
-                        </TableHead>
-                      </TableRow>
-                      <TableRow>
-                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                          Motivo de Ajuste:
-                        </TableHead>
-                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                          {this.state.nombreMotivoAjuste}
-                        </TableHead>
-                      </TableRow>
-                      <TableRow>
-                        <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
-                          Almacen:
-                        </TableHead>
-                        <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                          {this.state.nombreAlmacen}
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                  </Table>
-                </TableResponsive>
-              </Column>
-            </Row>
+            <div className="flex flex-col gap-1 mb-3">
+              <p>Tipo de Ajuste:</p>
+              <div>
+                {this.state.idTipoAjuste === INCREMENTO ? (
+                  <div className="flex gap-1">
+                    <i className="bi bi-plus-circle-fill text-success"></i>
+                    <p className="font-bold">INCREMENTO</p>
+                  </div>
+                ) : (
+                  <div className="flex gap-1">
+                    <i className="bi bi-dash-circle-fill text-danger"></i>{' '}
+                    <p className="font-bold">DECREMENTO</p>
+                  </div>
+                )}
+              </div>
+            </div>
 
-            <Row>
-              <Column>
-                <SearchInput
-                  ref={this.refProducto}
-                  autoFocus={true}
-                  label={'Filtrar por el código o nombre del producto:'}
-                  placeholder="Filtrar productos..."
-                  refValue={this.refValueProducto}
-                  data={this.state.productos}
-                  handleClearInput={this.handleClearInputProducto}
-                  handleFilter={this.handleFilterProducto}
-                  handleSelectItem={this.handleSelectItemProducto}
-                  // renderItem={(value) => (
-                  //   <>
-                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                  //   </>
-                  // )}
+            <div className="flex flex-col gap-1 mb-3">
+              <p>Motivo de Ajuste:</p>
+              <div>
+                <p className="font-bold">{this.state.nombreMotivoAjuste}</p>
+              </div>
+            </div>
 
-                  renderItem={(value) => (
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={value.imagen}
-                        alt={value.nombre}
-                        width={60}
-                      />
+            <div className="flex flex-col gap-1 mb-3">
+              <p>Almacen:</p>
+              <div>
+                <p className="font-bold">{this.state.nombreAlmacen}</p>
+              </div>
+            </div>
 
-                      <div className="ml-2">
-                        {value.codigo}
-                        <br />
-                        {value.nombre} <small>({value.categoria})</small>
-                      </div>
+            <div>
+              <SearchInput
+                ref={this.refProducto}
+                autoFocus={true}
+                label={'Filtrar por el código o nombre del producto:'}
+                placeholder="Filtrar productos..."
+                refValue={this.refValueProducto}
+                data={this.state.productos}
+                handleClearInput={this.handleClearInputProducto}
+                handleFilter={this.handleFilterProducto}
+                handleSelectItem={this.handleSelectItemProducto}
+                renderItem={(value) => (
+                  <div className="flex items-center">
+                    <Image
+                      default={images.noImage}
+                      src={value.imagen}
+                      alt={value.nombre}
+                      overrideClass="w-20 h-20 object-contain"
+                    />
+
+                    <div className="ml-2">
+                      {value.codigo}
+                      <br />
+                      {value.nombre} <small>({value.categoria})</small>
                     </div>
-                  )}
-                  renderIconLeft={<i className="bi bi-cart4"></i>}
-                />
-              </Column>
-            </Row>
+                  </div>
+                )}
+                renderIconLeft={<i className="bi bi-cart4"></i>}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={
-                    ' Ingrese alguna descripción para saber el motivo del ajuste:'
-                  }
-                  placeholder="Ingrese una observación"
-                  value={this.state.observacion}
-                  onChange={this.handleInputObservacion}
-                />
-              </Column>
-            </Row>
+            <div className="mb-3">
+              <Input
+                label="Ingrese alguna descripción para saber el motivo del ajuste: "
+                placeholder="Ingrese una observación"
+                value={this.state.observacion}
+                onChange={this.handleInputObservacion}
+              />
+            </div>
 
             <GenerarTabla
               refTableBody={this.refTableBody}
@@ -797,28 +723,26 @@ class LogisticaAjusteCrear extends CustomComponent {
               handleFocusInputTable={this.handleFocusInputTable}
             />
 
-            <Row>
-              <Column>
-                <Button className="btn-success" onClick={this.handleSave}>
-                  <i className="fa fa-save"></i> Guardar
-                </Button>{' '}
-                <Button className="btn-outline-light" onClick={this.handleBack}>
-                  <i className="fa fa-arrow-left"></i> Atras
-                </Button>{' '}
-                <Button
-                  className="btn-outline-light"
-                  onClick={this.handleClear}
-                >
-                  <i className="fa fa-trash"></i> Limpiar
-                </Button>{' '}
-                <Button
-                  className="btn-outline-danger"
-                  onClick={() => this.props.history.goBack()}
-                >
-                  <i className="fa fa-close"></i> Cancelar
-                </Button>
-              </Column>
-            </Row>
+            <div className="flex gap-3">
+              <Button className="btn-success" onClick={this.handleSave}>
+                <i className="fa fa-save"></i> Guardar
+              </Button>
+              <Button className="btn-outline-light" onClick={this.handleBack}>
+                <i className="fa fa-arrow-left"></i> Atras
+              </Button>
+              <Button
+                className="btn-outline-light"
+                onClick={this.handleClear}
+              >
+                <i className="fa fa-trash"></i> Limpiar
+              </Button>
+              <Button
+                className="btn-outline-danger"
+                onClick={() => this.props.history.goBack()}
+              >
+                <i className="fa fa-close"></i> Cancelar
+              </Button>
+            </div>
           </>
         )}
       </ContainerWrapper>
@@ -835,7 +759,9 @@ LogisticaAjusteCrear.propTypes = {
       idSucursal: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
 };

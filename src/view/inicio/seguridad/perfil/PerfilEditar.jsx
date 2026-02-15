@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { isEmpty, isText } from '../../../../helper/utils.helper';
 import {
   getIdPerfil,
@@ -9,7 +9,7 @@ import {
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
@@ -23,7 +23,7 @@ import { alertKit } from 'alert-kit';
  * @extends CustomComponent
  */
 class PerfilEditar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -33,7 +33,7 @@ class PerfilEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refDescripcion = React.createRef();

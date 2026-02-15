@@ -1,63 +1,79 @@
 import PropTypes from 'prop-types';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../../components/Table';
-import Paginacion from '../../../../../../components/Paginacion';
+import Paginacion from '@/components/Paginacion';
 import CustomModal, {
   CustomModalContentBody,
   CustomModalContentFooter,
   CustomModalContentHeader,
-  CustomModalContentOverflow,
   CustomModalContentScroll,
-} from '../../../../../../components/CustomModal';
-import { SpinnerTable } from '../../../../../../components/Spinner';
+  CustomModalContentSubHeader,
+} from '@/components/CustomModal';
 import {
   currentDate,
   formatNumberWithZeros,
   formatTime,
   isEmpty,
-  keyUpSearch,
   formatCurrency,
-} from '../../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../../model/class/custom-component';
-import { listVenta } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import Input from '../../../../../../components/Input';
-import Button from '../../../../../../components/Button';
+} from '@/helper/utils.helper';
+import CustomComponent from '@/components/CustomComponent';
+import { listVenta } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Input from '@/components/Input';
+import Button from '@/components/Button';
+import { cn } from '@/lib/utils';
+import React from 'react';
+import Search from '@/components/Search';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class ModalVenta extends CustomComponent {
+
+  /**
+    * Inicializa un nuevo componente.
+    * @param {Object} props - Las propiedades pasadas al componente.
+    */
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      buscar: '',
+
+      buscar: "",
       lista: [],
       restart: false,
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
+
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
     };
 
-    this.abortController = new AbortController();
+    this.initial = { ...this.state };
+
+    this.refModal = React.createRef();
+
+    this.peticion = false;
+    this.abortController = null;
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
 
   loadInit = async () => {
     if (this.state.loading) return;
@@ -67,68 +83,61 @@ class ModalVenta extends CustomComponent {
     await this.setStateAsync({ opcion: 0 });
   };
 
-  handleOnOpen = async () => {
-    await this.loadInit();
-  };
-
-  handleSearchText = async (text) => {
+  searchText = async (text) => {
     if (this.state.loading) return;
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
     this.fillTable(1, text.trim());
     await this.setStateAsync({ opcion: 1 });
   };
 
-  handleSearchFecha = async () => {
+  async searchOpciones() {
     if (this.state.loading) return;
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    await this.setStateAsync({ paginacion: 1, restart: true });
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
-  };
+  }
 
-  handlePaginacion = async (listid) => {
+  paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
-    this.handlPaginacion();
+    this.onEventPaginacion();
   };
 
-  handlPaginacion = () => {
+  onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
         this.fillTable(0);
         break;
       case 1:
-        this.fillTable(1, '');
+        this.fillTable(1);
         break;
       case 2:
-        this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+        this.fillTable(2);
         break;
       default:
         this.fillTable(0);
     }
   };
 
-  fillTable = async (
-    opcion,
-    buscar = '',
-    fechaInicio = '',
-    fechaFinal = '',
-  ) => {
+  fillTable = async (opcion, buscar = '',) => {
+    this.abortController = new AbortController();
+
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
       opcion: opcion,
       buscar: buscar,
-      fechaInicio: fechaInicio,
-      fechaFinal: fechaFinal,
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
       idComprobante: '',
       estado: '0',
       idSucursal: this.props.idSucursal,
@@ -139,8 +148,11 @@ class ModalVenta extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
+
+      this.peticion = true;
+      this.abortController = null;
 
       this.setState({
         loading: false,
@@ -152,6 +164,9 @@ class ModalVenta extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
+      this.peticion = false;
+      this.abortController = null;
+
       this.setState({
         loading: false,
         lista: [],
@@ -161,8 +176,35 @@ class ModalVenta extends CustomComponent {
     }
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+  handleOnOpen = async () => {
+    await this.loadInit();
+  };
+
   handleOnHidden = () => {
-    this.setState({ lista: [] });
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
+    this.setState(this.initial);
+    this.peticion = false;
   };
 
   handleInputBuscar = (event) => {
@@ -170,26 +212,32 @@ class ModalVenta extends CustomComponent {
   };
 
   handleFechaInicio = (event) => {
-    this.setState(
-      {
-        fechaInicio: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({ fechaInicio: event.target.value, }, () => {
+      this.searchOpciones();
+    });
   };
 
   handleFechaFinal = (event) => {
-    this.setState(
-      {
-        fechaFinal: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({ fechaFinal: event.target.value, }, () => {
+      this.searchOpciones();
+    });
   };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   generateBody = () => {
     const { loading, lista } = this.state;
@@ -197,70 +245,87 @@ class ModalVenta extends CustomComponent {
 
     if (loading) {
       return (
-        <SpinnerTable
-          colSpan="8"
-          message="Cargando información de la tabla..."
-        />
+        <tr>
+          <td colSpan={8} className="px-6 py-12 text-center">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+              <p className="text-gray-500">Cargando información...</p>
+            </div>
+          </td>
+        </tr>
       );
     }
 
     if (isEmpty(lista)) {
       return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="8">
-            ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
+        <tr>
+          <td colSpan={8} className="px-6 py-12 text-center">
+            <div className="text-gray-500">
+              <i className="bi bi-box text-4xl mb-3 block"></i>
+              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-sm">Intenta cambiar los filtros</p>
+            </div>
+          </td>
+        </tr>
       );
     }
 
     return lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">COBRADO</span>
-        ) : item.estado === 2 ? (
-          <span className="text-warning">POR COBRAR</span>
-        ) : item.estado === 3 ? (
-          <span className="text-danger">ANULADO</span>
-        ) : (
-          <span className="text-primary">POR LLEVAR</span>
-        );
+      const estado = <span className={cn(
+        item.estado === 1 ? "text-success" :
+          item.estado === 2 ? "text-warning" :
+            item.estado === 3 ? "text-danger" :
+              "text-primary"
+      )}>
+        {
+          item.estado === 1 ? "COBRADO" :
+            item.estado === 2 ? "POR COBRAR" :
+              item.estado === 3 ? "ANULADO" :
+                "POR LLEVAR"
+        }
+      </span>;
 
       return (
-        <TableRow key={index}>
-          <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>
+        <tr key={index} className="hover:bg-gray-50 transition-colors">
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">
             {item.fecha}
             <br />
             {formatTime(item.hora)}
-          </TableCell>
-          <TableCell>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
             {item.documento}
             <br />
             {item.informacion}
-          </TableCell>
-          <TableCell>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
             {item.comprobante}
             <br />
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
-          </TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
-          <TableCell className="text-center">
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">{estado}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
             {formatCurrency(item.total, item.codiso)}{' '}
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-primary btn-sm"
-              title="Seleccionar"
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+            <button
+              className={
+                cn(
+                  "inline-flex items-center gap-2 px-3 py-1",
+                  "bg-blue-600 text-white text-sm font-medium rounded",
+                  "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+                )
+              }
+              title="Agregar Detalle"
               onClick={async () => {
-                await this.props.refModal.current.handleOnClose();
-                handleSeleccionar(item.idVenta);
+                await this.refModal.current.handleOnClose();
+                handleSeleccionar(item.idVenta)
               }}
             >
-              <i className="fa fa-plus"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
+              <i className="fa fa-plus !text-lg"></i>
+            </button>
+          </td>
+        </tr>
       );
     });
   };
@@ -268,7 +333,6 @@ class ModalVenta extends CustomComponent {
   render() {
     const {
       loading,
-      buscar,
       lista,
       totalPaginacion,
       paginacion,
@@ -277,11 +341,11 @@ class ModalVenta extends CustomComponent {
       fechaFinal,
     } = this.state;
 
-    const { refModal, isOpen, handleClose } = this.props;
+    const { isOpen, handleClose } = this.props;
 
     return (
       <CustomModal
-        ref={refModal}
+        ref={this.refModal}
         isOpen={isOpen}
         onOpen={this.handleOnOpen}
         onHidden={this.handleOnHidden}
@@ -290,107 +354,92 @@ class ModalVenta extends CustomComponent {
         className={'modal-custom-lg h-[80%]'}
       >
         <CustomModalContentScroll>
-          <CustomModalContentHeader contentRef={refModal}>
-            Ventas
+          <CustomModalContentHeader contentRef={this.refModal}>
+            Lista de Ventas
           </CustomModalContentHeader>
 
-          <CustomModalContentBody className={'p-0'}>
-            <CustomModalContentOverflow>
-              <div className="p-3">
-                <Row>
-                  <Column className={'col-md-6 col-12'} formGroup={true}>
-                    <Input
-                      group={true}
-                      label={
-                        <>
-                          <i className="fa fa-search"></i> Buscar por N° de
-                          Venta o Cliente:
-                        </>
-                      }
-                      placeholder="Buscar..."
-                      value={buscar}
-                      onChange={this.handleInputBuscar}
-                      onKeyUp={(event) =>
-                        keyUpSearch(event, () => this.handleSearchText(buscar))
-                      }
-                      buttonRight={
-                        <Button
-                          className="btn-outline-secondary"
-                          title="Recargar"
-                          onClick={this.loadInit}
-                        >
-                          <i className="bi bi-arrow-clockwise"></i>
-                        </Button>
-                      }
-                    />
-                  </Column>
-
-                  <Column formGroup={true}>
-                    <Input
-                      label={
-                        <>
-                          <i className="fa fa-calendar"></i> Fecha Inicio:
-                        </>
-                      }
-                      type="date"
-                      value={fechaInicio}
-                      onChange={this.handleFechaInicio}
-                    />
-                  </Column>
-
-                  <Column formGroup={true}>
-                    <Input
-                      label={
-                        <>
-                          <i className="fa fa-calendar"></i> Fecha Final:
-                        </>
-                      }
-                      type="date"
-                      value={fechaFinal}
-                      onChange={this.handleFechaFinal}
-                    />
-                  </Column>
-                </Row>
-
-                <Row>
-                  <Column>
-                    <TableResponsive>
-                      <Table className="table-bordered">
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead width="5%" className="text-center">
-                              #
-                            </TableHead>
-                            <TableHead width="10%">Fecha</TableHead>
-                            <TableHead width="15%">Comprobante</TableHead>
-                            <TableHead width="15%">Cliente</TableHead>
-                            <TableHead width="5%">Estado</TableHead>
-                            <TableHead width="10%" className="text-center">
-                              Total
-                            </TableHead>
-                            <TableHead width="5%" className="text-center">
-                              Seleccionar
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>{this.generateBody()}</TableBody>
-                      </Table>
-                    </TableResponsive>
-                  </Column>
-                </Row>
+          <CustomModalContentSubHeader className="pb-3">
+            <div className="flex flex-col gap-3">
+              <div>
+                <p className="text-gray-600">
+                  Puedes ver las ventas echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
+                </p>
               </div>
-            </CustomModalContentOverflow>
+
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full md:w-6/12">
+                  <Search
+                    group={true}
+                    iconLeft={<i className="bi bi-search text-gray-400"></i>}
+                    onSearch={this.searchText}
+                    placeholder="Buscar por N° de Venta o Cliente..."
+                    theme="modern"
+                    buttonRight={
+                      <Button
+                        className="btn-outline-secondary"
+                        title="Recargar"
+                        onClick={this.loadInit}
+                      >
+                        <i className="bi bi-arrow-clockwise"></i>
+                      </Button>
+                    }
+                  />
+                </div>
+
+                <div className="w-full md:w-3/12">
+                  <input
+                    type="date"
+                    value={fechaInicio}
+                    onChange={this.handleFechaInicio}
+                    className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="w-full md:w-3/12">
+                  <input
+                    type="date"
+                    value={fechaFinal}
+                    onChange={this.handleFechaFinal}
+                    className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </CustomModalContentSubHeader>
+
+          <CustomModalContentBody>
+            <div className="bg-white rounded border overflow-auto h-full">
+              <div className="overflow-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="w-[5%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                      <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                      <th className="w-[15%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
+                      <th className="w-[15%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                      <th className="w-[5%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th className="w-[10%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                      <th className="w-[5%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Seleccionar</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {this.generateBody()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </CustomModalContentBody>
 
-          <CustomModalContentFooter className={'footer-cm-table'}>
+          <CustomModalContentFooter className="footer-cm-table">
             <Paginacion
-              className="w-100"
               loading={loading}
               data={lista}
               totalPaginacion={totalPaginacion}
               paginacion={paginacion}
-              fillTable={this.handlePaginacion}
+              fillTable={this.paginacionContext}
               restart={restart}
+              className="w-full md:px-4 py-2  overflow-auto"
+              theme="modern"
             />
           </CustomModalContentFooter>
         </CustomModalContentScroll>
@@ -400,7 +449,6 @@ class ModalVenta extends CustomComponent {
 }
 
 ModalVenta.propTypes = {
-  refModal: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   idSucursal: PropTypes.string.isRequired,
   handleClose: PropTypes.func.isRequired,

@@ -1,12 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isText,
 } from '../../../../helper/utils.helper';
@@ -16,19 +12,20 @@ import {
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import { SpinnerView } from '../../../../components/Spinner';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class VehiculoEditar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -41,7 +38,7 @@ class VehiculoEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refMarca = React.createRef();
@@ -95,47 +92,69 @@ class VehiculoEditar extends CustomComponent {
     }
   }
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.marca)) {
-      alertWarning('Vehículo', 'Ingrese la marca del vehículo.', () =>
-        this.refMarca.current.focus(),
-      );
+      alertKit.warning({
+        title: "Vehículo",
+        message: "Ingrese la marca del vehículo.",
+        onClose: () => this.refMarca.current.focus(),
+      })
       return;
     }
 
     if (isEmpty(this.state.numeroPlaca)) {
-      alertWarning('Vehículo', 'Ingrese el número de placa.', () =>
-        this.refNumeroPlaca.current.focus(),
-      );
+      alertKit.warning({
+        title: "Vehículo",
+        message: "Ingrese el número de placa.",
+        onClose: () => this.refNumeroPlaca.current.focus(),
+      })
       return;
     }
 
-    alertDialog('Vehículo', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        alertInfo('Vehículo', 'Procesando información...');
-
-        const data = {
-          idVehiculo: this.state.idVehiculo,
-          marca: this.state.marca,
-          numeroPlaca: this.state.numeroPlaca,
-          estado: this.state.estado,
-          preferido: this.state.preferido,
-          idUsuario: this.state.idUsuario,
-        };
-
-        const response = await editVehiculo(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Vehículo', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Vehículo', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Vehículo",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+
+      alertKit.loading({
+        message: "Procesando información...",
+      })
+
+      const data = {
+        idVehiculo: this.state.idVehiculo,
+        marca: this.state.marca,
+        numeroPlaca: this.state.numeroPlaca,
+        estado: this.state.estado,
+        preferido: this.state.preferido,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await editVehiculo(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Vehículo",
+          message: response.data,
+          onClose: () => this.props.history.goBack(),
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Vehículo",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   render() {

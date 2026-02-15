@@ -2,40 +2,39 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   convertNullText,
-  alertDialog,
   keyNumberInteger,
   imageBase64,
   isText,
   isEmpty,
   convertFileBase64,
   guId,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import { images } from '../../../../helper';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { images } from '@/helper';
 import {
   getIdEmpresa,
   updateEmpresa,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import { getRuc } from '../../../../network/rest/apisperu.network';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import { SpinnerView } from '../../../../components/Spinner';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import { ImageUpload, MultiImages } from '../../../../components/Image';
-import Button from '../../../../components/Button';
-import Input from '../../../../components/Input';
-import { downloadFileAsync } from '../../../../redux/downloadSlice';
-import TextArea from '../../../../components/TextArea';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import { getRuc } from '@/network/rest/apisperu.network';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import { ImageUpload, MultiImages } from '@/components/Image';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import { downloadFileAsync } from '@/redux/downloadSlice';
+import TextArea from '@/components/TextArea';
 import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class EmpresaProceso extends CustomComponent {
   /**
@@ -47,25 +46,24 @@ class EmpresaProceso extends CustomComponent {
 
     this.state = {
       loading: true,
-      messageWarning: '',
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idEmpresa: '',
-      documento: '',
-      razonSocial: '',
-      nombreEmpresa: '',
-      email: '',
+      idEmpresa: "",
+      documento: "",
+      razonSocial: "",
+      nombreEmpresa: "",
+      email: "",
 
-      usuarioSolSunat: '',
-      claveSolSunat: '',
+      usuarioSolSunat: "",
+      claveSolSunat: "",
 
-      idApiSunat: '',
-      claveApiSunat: '',
+      idApiSunat: "",
+      claveApiSunat: "",
 
-      certificado: 'Hacer click para seleccionar su archivo.',
-      claveCertificado: '',
+      certificado: "Hacer click para seleccionar su archivo.",
+      claveCertificado: "",
 
-      fireBaseCertificado: 'Hacer click para seleccionar su archivo.',
+      fireBaseCertificado: "Hacer click para seleccionar su archivo.",
 
       logo: {
         src: images.noImage,
@@ -87,27 +85,27 @@ class EmpresaProceso extends CustomComponent {
 
       banners: [],
 
-      numeroWhatsapp: '',
-      tituloWhatsapp: '',
-      mensajeWhatsapp: '',
-      informacion: '',
-      acercaNosotros: '',
-      politicasPrivacidad: '',
-      terminosCondiciones: '',
+      numeroWhatsapp: "",
+      tituloWhatsapp: "",
+      mensajeWhatsapp: "",
+      informacion: "",
+      acercaNosotros: "",
+      politicasPrivacidad: "",
+      terminosCondiciones: "",
 
       lookPasswordEmail: false,
       lookPasswordSol: false,
       lookPasswordClave: false,
       lookPasswordClaveCertificado: false,
 
-      paginaWeb: '',
-      youTubePagina: '',
-      facebookPagina: '',
-      twitterPagina: '',
-      instagramPagina: '',
-      tiktokPagina: '',
+      paginaWeb: "",
+      youTubePagina: "",
+      facebookPagina: "",
+      twitterPagina: "",
+      instagramPagina: "",
+      tiktokPagina: "",
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refDocumento = React.createRef();
@@ -147,7 +145,7 @@ class EmpresaProceso extends CustomComponent {
 
   componentDidMount() {
     const url = this.props.location.search;
-    const idEmpresa = new URLSearchParams(url).get('idEmpresa');
+    const idEmpresa = new URLSearchParams(url).get("idEmpresa");
     if (isText(idEmpresa)) {
       this.loadingData(idEmpresa);
     } else {
@@ -193,20 +191,20 @@ class EmpresaProceso extends CustomComponent {
         nombreEmpresa: empresa.nombreEmpresa,
         email: empresa.email,
 
-        usuarioSolSunat: empresa.usuarioSolSunat ?? '',
-        claveSolSunat: empresa.claveSolSunat ?? '',
+        usuarioSolSunat: empresa.usuarioSolSunat ?? "",
+        claveSolSunat: empresa.claveSolSunat ?? "",
 
-        idApiSunat: empresa.idApiSunat ?? '',
-        claveApiSunat: empresa.claveApiSunat ?? '',
+        idApiSunat: empresa.idApiSunat ?? "",
+        claveApiSunat: empresa.claveApiSunat ?? "",
 
         certificado:
           empresa.certificadoSunat ??
-          'Hacer click para seleccionar su archivo.',
-        claveCertificado: empresa.claveCertificadoSunat ?? '',
+          "Hacer click para seleccionar su archivo.",
+        claveCertificado: empresa.claveCertificadoSunat ?? "",
 
         fireBaseCertificado:
           empresa.certificadoFirebase ??
-          'Hacer click para seleccionar su archivo.',
+          "Hacer click para seleccionar su archivo.",
 
         logo: empresa.rutaLogo ?? { src: images.noImage },
         image: empresa.rutaImage ?? { src: images.noImage },
@@ -215,13 +213,13 @@ class EmpresaProceso extends CustomComponent {
         portada: empresa.rutaPortada ?? { src: images.noImage },
         banners: empresa.banners ?? [],
 
-        numeroWhatsapp: empresa.numeroWhatsapp ?? '',
-        tituloWhatsapp: empresa.tituloWhatsapp ?? '',
-        mensajeWhatsapp: empresa.mensajeWhatsapp ?? '',
-        informacion: empresa.informacion ?? '',
-        acercaNosotros: empresa.acercaNosotros ?? '',
-        politicasPrivacidad: empresa.politicasPrivacidad ?? '',
-        terminosCondiciones: empresa.terminosCondiciones ?? '',
+        numeroWhatsapp: empresa.numeroWhatsapp ?? "",
+        tituloWhatsapp: empresa.tituloWhatsapp ?? "",
+        mensajeWhatsapp: empresa.mensajeWhatsapp ?? "",
+        informacion: empresa.informacion ?? "",
+        acercaNosotros: empresa.acercaNosotros ?? "",
+        politicasPrivacidad: empresa.politicasPrivacidad ?? "",
+        terminosCondiciones: empresa.terminosCondiciones ?? "",
 
         paginaWeb: empresa.paginaWeb,
         youTubePagina: empresa.youTubePagina,
@@ -264,7 +262,7 @@ class EmpresaProceso extends CustomComponent {
       this.setState({ certificado: event.target.files[0].name });
     } else {
       this.setState(
-        { certificado: 'Hacer click para seleccionar su archivo.' },
+        { certificado: "Hacer click para seleccionar su archivo." },
         () => {
           this.refFileCertificado.current.value = '';
         },
@@ -276,8 +274,7 @@ class EmpresaProceso extends CustomComponent {
     if (!isEmpty(event.target.files)) {
       this.setState({ fireBaseCertificado: event.target.files[0].name });
     } else {
-      this.setState(
-        { fireBaseCertificado: 'Hacer click para seleccionar su archivo.' },
+      this.setState({ fireBaseCertificado: "Hacer click para seleccionar su archivo." },
         () => {
           this.refFileFireBase.current.value = '';
         },
@@ -298,7 +295,7 @@ class EmpresaProceso extends CustomComponent {
 
     this.setState({
       loading: true,
-      msgLoading: 'Consultando número de RUC...',
+      msgLoading: "Consultando número de RUC...",
     });
 
     const response = await getRuc(this.state.documento);
@@ -315,8 +312,7 @@ class EmpresaProceso extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        headerTitle: 'SysSoft Integra',
-        title: 'Error',
+        title: "Empresa",
         message: response.getMessage(),
         onClose: () => {
           this.setState({
@@ -346,14 +342,11 @@ class EmpresaProceso extends CustomComponent {
   };
 
   handleLookPasswordCertificado = () => {
-    this.setState(
-      {
-        lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado,
-      },
-      () => {
-        this.refPasswordClaveCertificado.current.focus();
-      },
-    );
+    this.setState({
+      lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado,
+    }, () => {
+      this.refPasswordClaveCertificado.current.focus();
+    });
   };
 
   // ------------------------------------------------------------------------
@@ -363,39 +356,50 @@ class EmpresaProceso extends CustomComponent {
   handleFileLogo = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Logo repote',
-          message:
-            'El logo del reporte ' +
-            file.name +
-            ' no debe superar los 500KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        logo: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         logo: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (size > 500) {
+      alertKit.warning({
+        title: 'Logo repote',
+        message:
+          'El logo del reporte ' +
+          file.name +
+          ' no debe superar los 500KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      logo: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -403,39 +407,51 @@ class EmpresaProceso extends CustomComponent {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Logo pagina web',
-          message:
-            'El logo pagina web ' +
-            file.name +
-            ' no debe superar los 500KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        image: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         image: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (size > 500) {
+      alertKit.warning({
+        title: 'Logo pagina web',
+        message:
+          'El logo pagina web ' +
+          file.name +
+          ' no debe superar los 500KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      image: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
+
 
     event.target.value = null;
   };
@@ -444,36 +460,47 @@ class EmpresaProceso extends CustomComponent {
     const files = event.currentTarget.files;
 
     if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.size > 50) {
-        alertKit.warning({
-          title: 'Icono',
-          message:
-            'El icono ' + file.name + ' no debe superar los 50KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        icon: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
       this.setState({
         icon: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (size > 50) {
+      alertKit.warning({
+        title: 'Icono',
+        message:
+          'El icono ' + file.name + ' no debe superar los 50KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      icon: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -481,50 +508,62 @@ class EmpresaProceso extends CustomComponent {
   handleFileBanner = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.width !== 1200 && logoSend.height !== 1200) {
-        alertKit.warning({
-          title: 'Banner',
-          message:
-            'La imagen del banner ' +
-            file.name +
-            ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
-        });
-        return;
-      }
-
-      if (logoSend.size > 1024) {
-        alertKit.warning({
-          title: 'Banner',
-          message:
-            'La imagen del banner ' +
-            file.name +
-            ' no debe superar los 1024KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        banner: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         banner: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (width !== 1200 && height !== 1200) {
+      alertKit.warning({
+        title: 'Banner',
+        message:
+          'La imagen del banner ' +
+          file.name +
+          ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
+      });
+      return;
+    }
+
+    if (size > 1024) {
+      alertKit.warning({
+        title: 'Banner',
+        message:
+          'La imagen del banner ' +
+          file.name +
+          ' no debe superar los 1024KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      banner: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
+
 
     event.target.value = null;
   };
@@ -533,49 +572,61 @@ class EmpresaProceso extends CustomComponent {
     const files = event.currentTarget.files;
 
     if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.width !== 1200 && logoSend.height !== 1200) {
-        alertKit.warning({
-          title: 'Portada',
-          message:
-            'La imagen de la portada ' +
-            file.name +
-            ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
-        });
-        return;
-      }
-
-      if (logoSend.size > 1024) {
-        alertKit.warning({
-          title: 'Portada',
-          message:
-            'La imagen de la portada ' +
-            file.name +
-            ' no debe superar los 1024KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        portada: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
       this.setState({
         portada: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (width !== 1200 && height !== 1200) {
+      alertKit.warning({
+        title: 'Portada',
+        message:
+          'La imagen de la portada ' +
+          file.name +
+          ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
+      });
+      return;
+    }
+
+    if (size > 1024) {
+      alertKit.warning({
+        title: 'Portada',
+        message:
+          'La imagen de la portada ' +
+          file.name +
+          ' no debe superar los 1024KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      portada: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
+
 
     event.target.value = null;
   };
@@ -707,12 +758,12 @@ class EmpresaProceso extends CustomComponent {
       idApiSunat: this.state.idApiSunat.trim(),
       claveApiSunat: this.state.claveApiSunat.trim(),
 
-      certificado: certificadoSend.data ?? '',
-      extCertificado: certificadoSend.extension ?? '',
+      certificado: certificadoSend ? certificadoSend.data : '',
+      extCertificado: certificadoSend ? certificadoSend.extension : '',
       claveCertificado: this.state.claveCertificado,
 
-      fireBase: fireBaseSend.data ?? '',
-      extFireBase: fireBaseSend.extension ?? '',
+      fireBase: fireBaseSend ? fireBaseSend.data : '',
+      extFireBase: fireBaseSend ? fireBaseSend.extension : '',
 
       logo: this.state.logo,
       image: this.state.image,
@@ -1028,9 +1079,7 @@ class EmpresaProceso extends CustomComponent {
               onChange={(event) =>
                 this.setState({ claveCertificado: event.target.value })
               }
-              type={
-                this.state.lookPasswordClaveCertificado ? 'text' : 'password'
-              }
+              type={this.state.lookPasswordClaveCertificado ? 'text' : 'password'}
               buttonRight={
                 <Button
                   className="btn-outline-secondary"
@@ -1090,6 +1139,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Logo reporte"
               subtitle={
                 <>
@@ -1112,6 +1162,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Logo pagina web"
               subtitle={
                 <>
@@ -1134,6 +1185,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Icono"
               subtitle={
                 <>
@@ -1271,6 +1323,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Banner de portada"
               subtitle={
                 <>
@@ -1294,6 +1347,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Imagen de portada"
               subtitle={
                 <>
@@ -1455,7 +1509,9 @@ class EmpresaProceso extends CustomComponent {
 EmpresaProceso.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

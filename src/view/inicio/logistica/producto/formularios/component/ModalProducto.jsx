@@ -1,26 +1,26 @@
 import React from 'react';
-import { alertWarning, isEmpty } from '../../../../../../helper/utils.helper';
+import { isEmpty } from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import Input from '../../../../../../components/Input';
-import { CustomModalForm } from '../../../../../../components/CustomModal';
-import Button from '../../../../../../components/Button';
-import { filtrarProducto } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import SearchInput from '../../../../../../components/SearchInput';
-import CustomComponent from '../../../../../../model/class/custom-component';
-import Image from '../../../../../../components/Image';
-import { images } from '../../../../../../helper';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Input from '@/components/Input';
+import { CustomModalForm } from '@/components/CustomModal';
+import { filtrarProducto } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import SearchInput from '@/components/SearchInput';
+import CustomComponent from '@/components/CustomComponent';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class ModalProducto extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -41,7 +41,7 @@ class ModalProducto extends CustomComponent {
     this.abortController = null;
   }
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -129,27 +129,35 @@ class ModalProducto extends CustomComponent {
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.producto)) {
-      alertWarning('Producto - Combo', 'Seleccione un producto.', () => {
-        this.refValueProducto.current.focus();
+      alertKit.warning({
+        title: "Producto - Combo",
+        message: "Seleccione un producto.",
+        onClose: () => {
+          this.refValueProducto.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.cantidad)) {
-      alertWarning('Producto - Combo', 'Ingrese su cantidad..', () => {
-        this.refCantidad.current.focus();
+      alertKit.warning({
+        title: "Producto - Combo",
+        message: "Ingrese su cantidad..",
+        onClose: () => {
+          this.refCantidad.current.focus();
+        },
       });
       return;
     }
 
     if (Number(this.state.cantidad) <= 0) {
-      alertWarning(
-        'Producto - Combo',
-        'Su cantidad tiene que se mayor a cero(0).',
-        () => {
+      alertKit.warning({
+        title: "Producto - Combo",
+        message: "Su cantidad tiene que se mayor a cero(0).",
+        onClose: () => {
           this.refCantidad.current.focus();
         },
-      );
+      });
       return;
     }
 
@@ -158,13 +166,13 @@ class ModalProducto extends CustomComponent {
         (item) => item.idProducto === this.state.producto.idProducto,
       )
     ) {
-      alertWarning(
-        'Producto - Combo',
-        'Ya se encuentra agregado el producto a la lista.',
-        () => {
+      alertKit.warning({
+        title: "Producto - Combo",
+        message: "Ya se encuentra agregado el producto a la lista.",
+        onClose: () => {
           this.refValueProducto.current.focus();
         },
-      );
+      });
       return;
     }
 

@@ -1,23 +1,19 @@
 import React from 'react';
 import {
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isText,
   isEmpty,
-  alertDialog,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import ContainerWrapper from '../../../../components/Container';
+import { CANCELED } from '@/constants/requestStatus';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import {
   comboTipoAtributo,
   getIdAtributo,
   updateAtributo,
 } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import PropTypes from 'prop-types';
@@ -31,6 +27,7 @@ import {
   TIPO_ATRIBUTO_COLOR,
   TIPO_ATRIBUTO_TALLA,
 } from '../../../../model/types/tipo-atributo';
+import { alertKit } from 'alert-kit';
 
 class AtributosEditar extends CustomComponent {
   constructor(props) {
@@ -38,18 +35,18 @@ class AtributosEditar extends CustomComponent {
 
     this.state = {
       loading: true,
-      loadingMessage: 'Cargando datos...',
+      loadingMessage: "Cargando datos...",
 
-      idAtributo: '',
-      idTipoAtributo: '',
-      nombre: '',
-      hexadecimal: '#000000',
-      valor: '',
+      idAtributo: "",
+      idTipoAtributo: "",
+      nombre: "",
+      hexadecimal: "#000000",
+      valor: "",
       estado: false,
 
       tipoAtributos: [],
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTipoAtributo = React.createRef();
@@ -62,7 +59,7 @@ class AtributosEditar extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idAtributo = new URLSearchParams(url).get('idAtributo');
+    const idAtributo = new URLSearchParams(url).get("idAtributo");
 
     if (isText(idAtributo)) {
       this.loadingData(idAtributo);
@@ -149,14 +146,20 @@ class AtributosEditar extends CustomComponent {
 
   handleGuardar = async () => {
     if (isEmpty(this.state.idTipoAtributo)) {
-      alertWarning('Atributo', 'Selecciona el tipo de atributo.', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Selecciona el tipo de atributo.",
+      }, () => {
         this.refTipoAtributo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Atributo', 'Ingrese el nombre de la color', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Ingrese el nombre de la color.",
+      }, () => {
         this.refNombre.current.focus();
       });
       return;
@@ -166,7 +169,10 @@ class AtributosEditar extends CustomComponent {
       this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR &&
       isEmpty(this.state.hexadecimal)
     ) {
-      alertWarning('Atributo', 'Ingrese su color', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Ingrese su color.",
+      }, () => {
         this.refHexadecimal.current.focus();
       });
       return;
@@ -176,39 +182,59 @@ class AtributosEditar extends CustomComponent {
       this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA &&
       isEmpty(this.state.valor)
     ) {
-      alertWarning('Atributo', 'Ingrese su valor', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Ingrese su valor.",
+      }, () => {
         this.refValor.current.focus();
       });
       return;
     }
 
-    alertDialog('Atributo', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idAtributo: this.state.idAtributo,
-          idTipoAtributo: this.state.idTipoAtributo,
-          nombre: this.state.nombre,
-          hexadecimal: this.state.hexadecimal,
-          valor: this.state.valor,
-          estado: this.state.estado,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Atributo', 'Procesando información...');
-
-        const response = await updateAtributo(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Atributo', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Atributo', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Atributo",
+      message: "¿Está seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        idAtributo: this.state.idAtributo,
+        idTipoAtributo: this.state.idTipoAtributo,
+        nombre: this.state.nombre,
+        hexadecimal: this.state.hexadecimal,
+        valor: this.state.valor,
+        estado: this.state.estado,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await updateAtributo(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Atributo",
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Atributo",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {
@@ -335,7 +361,9 @@ class AtributosEditar extends CustomComponent {
 AtributosEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

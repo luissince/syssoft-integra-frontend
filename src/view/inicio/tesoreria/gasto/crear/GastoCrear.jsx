@@ -17,9 +17,9 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import SearchInput from '../../../../../components/SearchInput';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
@@ -83,7 +83,7 @@ class GastoCrear extends CustomComponent {
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -739,7 +739,9 @@ class GastoCrear extends CustomComponent {
 GastoCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

@@ -15,6 +15,7 @@ import Button from '../../../../components/Button';
 import { ImageUpload } from '../../../../components/Image';
 import { images } from '../../../../helper';
 import { alertKit } from 'alert-kit';
+import { CANCELED } from '@/constants/requestStatus';
 
 class CategoriaAgregar extends React.Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class CategoriaAgregar extends React.Component {
       estado: false,
       publicar: false,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -183,7 +184,7 @@ class CategoriaAgregar extends React.Component {
           <Column formGroup={true}>
             <Input
               autoFocus
-              label={'Código:'}
+              label="Código:"
               placeholder="Ingrese el código"
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
@@ -257,6 +258,7 @@ class CategoriaAgregar extends React.Component {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
               alt="Icono de la categoría"
@@ -269,22 +271,20 @@ class CategoriaAgregar extends React.Component {
           </Column>
         </Row>
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={() => this.handleGuardar()}
-            >
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex gap-3">
+          <Button
+            className="btn-success"
+            onClick={() => this.handleGuardar()}
+          >
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }
@@ -293,7 +293,9 @@ class CategoriaAgregar extends React.Component {
 CategoriaAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

@@ -14,7 +14,7 @@ import {
 import { ArrowDownIcon, ArrowUpIcon, ExternalLink } from 'lucide-react';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
-import CustomComponent from '../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '../../../components/Spinner';
 import Title from '../../../components/Title';
 import Row from '../../../components/Row';
@@ -51,7 +51,7 @@ import {
 } from '../../../helper/utils.helper';
 import {
   comboSucursal,
-  comboUsuario,
+  optionsUsuario,
   dashboardTransaccion,
   documentsExcelCompra,
   documentsPdfReportsTransaccion,
@@ -59,7 +59,7 @@ import {
 import pdfVisualizer from 'pdf-visualizer';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import ErrorResponse from '../../../model/class/error-response';
-import { CANCELED } from '../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import SuccessReponse from '../../../model/class/response';
 import {
   ELEGIR_SUCURSAL,
@@ -88,7 +88,7 @@ class RepFinanciero extends CustomComponent {
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
       usuarios: [],
 
       idSucursal: this.props.token.project.idSucursal,
@@ -141,7 +141,7 @@ class RepFinanciero extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   /*
   |--------------------------------------------------------------------------
@@ -184,7 +184,7 @@ class RepFinanciero extends CustomComponent {
       return;
     }
 
-    const usuarioResponse = await comboUsuario(this.abortControllerView.signal);
+    const usuarioResponse = await optionsUsuario(this.abortControllerView.signal);
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
@@ -732,6 +732,11 @@ RepFinanciero.propTypes = {
   token: PropTypes.shape({
     project: PropTypes.shape({
       idSucursal: PropTypes.string,
+    }),
+    userToken: PropTypes.shape({
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   moneda: PropTypes.shape({

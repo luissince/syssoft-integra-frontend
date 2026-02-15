@@ -2,12 +2,10 @@ import { ContainerMenu } from '../../../components/Container';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Consultas from './consulta/lista/Consultas.jsx';
-import ConsultaDetalle from './consulta/detalle/ConsultaDetalle.jsx';
-import ConsultaAgregar from './consulta/formulario/crear/ConsultaAgregar.jsx';
-import ConsultaEditar from './consulta/formulario/editar/ConsultaEditar.jsx';
+import Consultas from './consulta/lista/Consultas';
+import Web from './web/index';
 
-export { Consultas, ConsultaDetalle, ConsultaAgregar, ConsultaEditar };
+export { Consultas, Web };
 
 /**
  * Componente que representa una funcionalidad específica.

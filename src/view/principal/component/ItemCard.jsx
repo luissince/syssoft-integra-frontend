@@ -5,29 +5,29 @@ import { images } from '../../../helper';
 
 const ItemCard = ({ item, handleIngresar }) => {
   return (
-    <div className="card">
-      <Image
-        default={images.noImage}
-        src={`${item.imagen}`}
-        alt={'Imagen de la sucursal'}
-        isFullScreen={false}
-        overrideClass="mb-2 w-full h-40 object-contain"
-      />
-      <div className="card-body">
-        <div className="flex flex-col gap-3">
-          <h6 className="text-primary font-weight-bold text-center">
-            {item.nombre}
-          </h6>
+    <div className="border border-solid border-[#e2e8f0] w-60 flex flex-col rounded">
+      <div className="flex-1 px-3 py-4 flex flex-col gap-y-3">
+        <Image
+          default={images.noImage}
+          src={`${item.imagen}`}
+          alt={'Imagen de la sucursal'}
+          isFullScreen={false}
+          overrideClass="mb-2 w-full h-40 object-contain"
+        />
+        <h6 className="text-primary font-weight-bold text-center">
+          {item.nombre}
+        </h6>
 
+        <div className="h-full">
           <p className="text-secondary text-center">{item.direccion}</p>
-
-          <Button
-            className="btn-block btn-outline-primary"
-            onClick={() => handleIngresar(item)}
-          >
-            <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
-          </Button>
         </div>
+
+        <Button
+          className="btn-block btn-outline-primary"
+          onClick={() => handleIngresar(item)}
+        >
+          <i className="bi bi-arrow-right-circle-fill"></i> Ingresar
+        </Button>
       </div>
     </div>
   );

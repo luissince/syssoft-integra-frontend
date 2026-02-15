@@ -1,31 +1,28 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isText,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import {
   getIdBando,
   comboMoneda,
   updateBanco,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import Title from '../../../../../../components/Title';
-import Button from '../../../../../../components/Button';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import { SpinnerView } from '../../../../../../components/Spinner';
-import Select from '../../../../../../components/Select';
-import Input from '../../../../../../components/Input';
-import { Switches } from '../../../../../../components/Checks';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import { SpinnerView } from '@/components/Spinner';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import { Switches } from '@/components/Checks';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -40,23 +37,23 @@ class BancoEditar extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      idBanco: '',
-      nombre: '',
-      tipoCuenta: '',
-      idMoneda: '',
+      loading: true,
+      msgLoading: "Cargando datos...",
+
+      idBanco: "",
+      nombre: "",
+      tipoCuenta: "",
+      idMoneda: "",
       monedas: [],
-      numCuenta: '',
-      cci: '',
+      numCuenta: "",
+      cci: "",
       preferido: false,
       vuelto: false,
       reporte: false,
       compartir: false,
       estado: false,
 
-      loading: true,
-      msgLoading: 'Cargando datos...',
-
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTxtNombre = React.createRef();
@@ -83,7 +80,7 @@ class BancoEditar extends CustomComponent {
     */
   async componentDidMount() {
     const url = this.props.location.search;
-    const idBanco = new URLSearchParams(url).get('idBanco');
+    const idBanco = new URLSearchParams(url).get("idBanco");
 
     if (isText(idBanco)) {
       this.loadingData(idBanco);
@@ -180,62 +177,88 @@ class BancoEditar extends CustomComponent {
     |
     */
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Banco', 'Ingrese el nombre del banco.', () => {
+      alertKit.warning({
+        title: "Banco",
+        message: "Ingrese el nombre del banco.",
+      }, () => {
         this.refTxtNombre.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.tipoCuenta)) {
-      alertWarning('Banco', 'Seleccione el tipo de cuenta.', () => {
-        this.tipoCuenta.current.focus();
+      alertKit.warning({
+        title: "Banco",
+        message: "Seleccione el tipo de cuenta.",
+      }, () => {
+        this.refTipoCuenta.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      alertWarning('Banco', 'Seleccione el tipo de moneda.', () => {
+      alertKit.warning({
+        title: "Banco",
+        message: "Seleccione el tipo de moneda.",
+      }, () => {
         this.refTxtMoneda.current.focus();
       });
       return;
     }
 
-    alertDialog('Banco', '¿Estás seguro de continuar?', async (event) => {
-      if (event) {
-        const data = {
-          nombre: this.state.nombre.trim().toUpperCase(),
-          tipoCuenta: this.state.tipoCuenta,
-          idMoneda: this.state.idMoneda.trim().toUpperCase(),
-          numCuenta: this.state.numCuenta.trim().toUpperCase(),
-          cci: this.state.cci.trim().toUpperCase(),
-          preferido: this.state.preferido,
-          vuelto: this.state.vuelto,
-          reporte: this.state.reporte,
-          compartir: this.state.compartir,
-          estado: this.state.estado,
-
-          idUsuario: this.state.idUsuario,
-          idBanco: this.state.idBanco,
-        };
-
-        alertInfo('Banco', 'Procesando información...');
-
-        const response = await updateBanco(data, this.abortController.signal);
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Banco', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Banco', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Banco",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        nombre: this.state.nombre.trim().toUpperCase(),
+        tipoCuenta: this.state.tipoCuenta,
+        idMoneda: this.state.idMoneda.trim().toUpperCase(),
+        numCuenta: this.state.numCuenta.trim().toUpperCase(),
+        cci: this.state.cci.trim().toUpperCase(),
+        preferido: this.state.preferido,
+        vuelto: this.state.vuelto,
+        reporte: this.state.reporte,
+        compartir: this.state.compartir,
+        estado: this.state.estado,
+
+        idUsuario: this.state.idUsuario,
+        idBanco: this.state.idBanco,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await updateBanco(data, this.abortController.signal);
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Banco",
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Banco",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   /*
@@ -306,6 +329,7 @@ class BancoEditar extends CustomComponent {
               <option value="1">Banco</option>
               <option value="2">Tarjeta</option>
               <option value="3">Efectivo</option>
+              <option value="4">Billetera Digital</option>
             </Select>
           </Column>
         </Row>

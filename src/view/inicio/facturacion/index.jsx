@@ -2,36 +2,36 @@ import { ContainerMenu } from '../../../components/Container';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Ventas from './venta/lista/Ventas.jsx';
-import VentaCrear from './venta/formulario/crear/VentaCrear.jsx';
-import VentaCrearEscritorio from './venta/formulario/crear-clasico/VentaCrearEscritorio.jsx';
-import VentaDetalle from './venta/detalle/VentaDetalle.jsx';
+import Ventas from './venta/lista/Ventas';
+import VentaCrear from './venta/formulario/crear/VentaCrear';
+import VentaCrearEscritorio from './venta/formulario/crear-clasico/VentaCrearEscritorio';
+import VentaDetalle from './venta/detalle/VentaDetalle';
 
 import Cobros from './cobro/lista/Cobros';
 import CobroCrear from './cobro/crear/CobroCrear';
 import CobroDetalle from './cobro/detalle/CobroDetalle';
 
-import Cotizaciones from './cotizacion/lista/Cotizaciones.jsx';
-import CotizacioneCrear from './cotizacion/formularios/crear/CotizacionCrear.jsx';
-import CotizacioneEditar from './cotizacion/formularios/editar/CotizacionEditar.jsx';
-import CotizacionDetalle from './cotizacion/detalle/CotizacionDetalle.jsx';
+import Cotizaciones from './cotizacion/lista/Cotizaciones';
+import CotizacioneCrear from './cotizacion/formularios/crear/CotizacionCrear';
+import CotizacioneEditar from './cotizacion/formularios/editar/CotizacionEditar';
+import CotizacionDetalle from './cotizacion/detalle/CotizacionDetalle';
 
-import GuiaRemision from './guiaremision/lista/GuiaRemision.jsx';
-import GuiaRemisionCrear from './guiaremision/formularios/crear/GuiaRemisionCrear.jsx';
-import GuiaRemisionEditar from './guiaremision/formularios/editar/GuiaRemisionEditar.jsx';
-import GuiaRemisionDetalle from './guiaremision/detalle/GuiaRemisionDetalle.jsx';
+import GuiaRemision from './guiaremision/lista/GuiaRemision';
+import GuiaRemisionCrear from './guiaremision/formularios/crear/GuiaRemisionCrear';
+import GuiaRemisionEditar from './guiaremision/formularios/editar/GuiaRemisionEditar';
+import GuiaRemisionDetalle from './guiaremision/detalle/GuiaRemisionDetalle';
 
-import NotaCredito from './notacredito/NotaCredito';
-import NotaCreditoProceso from './notacredito/NotaCreditoProceso';
-import NotaCreditoDetalle from './notacredito/NotaCreditoDetalle';
+import NotaCredito from './nota-credito/lista/NotaCredito';
+import NotaCreditoProceso from './nota-credito/formulario/NotaCreditoProceso';
+import NotaCreditoDetalle from './nota-credito/detalle/NotaCreditoDetalle';
 
-import CuentasPorCobrar from './cuenta-cobrar/lista/CuentasPorCobrar.jsx';
-import CuentasPorCobrarAbonar from './cuenta-cobrar/crear/CuentasPorCobrarAbonar.jsx';
+import CuentasPorCobrar from './cuenta-cobrar/lista/CuentasPorCobrar';
+import CuentasPorCobrarAbonar from './cuenta-cobrar/crear/CuentasPorCobrarAbonar';
 
-import Pedidos from './pedido/lista/Pedidos.jsx';
-import PedidoCrear from './pedido/formularios/crear/PedidoCrear.jsx';
-import PedidoEditar from './pedido/formularios/editar/PedidoEditar.jsx';
-import PedidoDetalle from './pedido/detalle/PedidoDetalle.jsx';
+import Pedidos from './pedido/lista/Pedidos';
+import PedidoCrear from './pedido/formularios/crear/PedidoCrear';
+import PedidoEditar from './pedido/formularios/editar/PedidoEditar';
+import PedidoDetalle from './pedido/detalle/PedidoDetalle';
 
 export {
   Ventas,

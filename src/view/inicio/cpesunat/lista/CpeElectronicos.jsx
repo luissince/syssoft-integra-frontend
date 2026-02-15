@@ -29,8 +29,8 @@ import {
   listCpeSunat,
   obtenerXmlSunat,
 } from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import {
   VENTA,
   GUIA_DE_REMISION,
@@ -65,48 +65,32 @@ class CpeElectronicos extends CustomComponent {
     super(props);
     this.state = {
       initialLoad: true,
-      initialMessage: 'Cargando datos...',
+      initialMessage: "Cargando datos...",
 
       loading: false,
       lista: [],
       restart: false,
 
-      // viewPdf: statePrivilegio(
-      //   this.props.token.userToken.menus[7].submenu[0].privilegio[0].estado,
-      // ),
-      // viewXml: statePrivilegio(
-      //   this.props.token.userToken.menus[7].submenu[0].privilegio[1].estado,
-      // ),
-      // viewEmail: statePrivilegio(
-      //   this.props.token.userToken.menus[7].submenu[0].privilegio[2].estado,
-      // ),
-      // ViewResumenDiario: statePrivilegio(
-      //   this.props.token.userToken.menus[7].submenu[0].privilegio[3].estado,
-      // ),
-      // viewDeclarar: statePrivilegio(
-      //   this.props.token.userToken.menus[7].submenu[0].privilegio[4].estado,
-      // ),
-
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
-      idComprobante: '',
-      estado: '0',
+      idComprobante: "",
+      estado: "0",
 
       comprobantes: [],
       sucursales: [],
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
-      vista: 'tabla',
+      vista: "tabla",
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -159,26 +143,18 @@ class CpeElectronicos extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (
-      this.props.cpeSunatLista &&
-      this.props.cpeSunatLista.data &&
-      this.props.cpeSunatLista.paginacion
-    ) {
-      this.setState(this.props.cpeSunatLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.cpeSunatLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.cpeSunatLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.cpeSunatLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.cpeSunatLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.cpeSunatLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.cpeSunatLista.paginacion.messagePaginacion;
+    const cpeSunatLista = this.props.cpeSunatLista;
 
-      this.refSearch.current.initialize(this.props.cpeSunatLista.data.buscar);
+    if (cpeSunatLista && cpeSunatLista.data && cpeSunatLista.paginacion) {
+      this.setState(cpeSunatLista.data);
+      this.refPaginacion.current.upperPageBound = cpeSunatLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = cpeSunatLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = cpeSunatLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = cpeSunatLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = cpeSunatLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = cpeSunatLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(cpeSunatLista.data.buscar);
     } else {
       const [facturado, notaCredito, guiaRemision, sucursales] =
         await Promise.all([
@@ -802,7 +778,7 @@ class CpeElectronicos extends CustomComponent {
           </div>
 
           {/* Toggle vista */}
-           <div className="flex bg-gray-100 rounded p-1 gap-1">
+          <div className="flex bg-gray-100 rounded p-1 gap-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
               className={
@@ -883,7 +859,7 @@ class CpeElectronicos extends CustomComponent {
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-             className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <select
@@ -902,7 +878,7 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-             className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
               <option value="1">POR DECLARAR</option>
@@ -928,7 +904,7 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {this.state.sucursales.map((item, index) => (
                 <option key={index} value={item.idSucursal}>
@@ -1227,7 +1203,9 @@ class CpeElectronicos extends CustomComponent {
 CpeElectronicos.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

@@ -1,27 +1,23 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+} from '@/helper/utils.helper';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   listPersonasProveedor,
   preferredPersona,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
 import {
   Table,
   TableBody,
@@ -30,8 +26,9 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import { SpinnerTable } from '../../../../components/Spinner';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -45,22 +42,21 @@ class Proveedores extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      idSucursal: this.props.token.project.idSucursal,
-
       loading: false,
       lista: [],
       restart: false,
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
+
+      idSucursal: this.props.token.project.idSucursal,
     };
 
-    this.idCodigo = '';
     this.abortControllerTable = new AbortController();
   }
 
@@ -79,7 +75,7 @@ class Proveedores extends CustomComponent {
   */
 
   async componentDidMount() {
-    this.loadInit();
+    await this.loadInit();
   }
 
   componentWillUnmount() {
@@ -136,11 +132,11 @@ class Proveedores extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -157,7 +153,7 @@ class Proveedores extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -195,13 +191,6 @@ class Proveedores extends CustomComponent {
   |
   */
 
-  handleDetalleCliente(idPersona) {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idPersona=' + idPersona,
-    });
-  }
-
   handleEditar(idPersona) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
@@ -209,33 +198,46 @@ class Proveedores extends CustomComponent {
     });
   }
 
-  handlePreferred(idPersona) {
-    alertDialog(
-      'Proveedor',
-      '¿Está seguro de que desea hacer el proveedor preferido?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Proveedor', 'Procesando información...');
-
-          const params = {
-            idPersona: idPersona,
-            rol: '2',
-          };
-
-          const response = await preferredPersona(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Proveedor', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Proveedor', response.getMessage());
-          }
-        }
+  async handlePreferred(idPersona) {
+    const accept = await alertKit.question({
+      title: "Proveedor",
+      message: "¿Está seguro de que desea hacer el proveedor preferido?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const params = {
+        idPersona: idPersona,
+        rol: '2',
+      };
+
+      const response = await preferredPersona(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Proveedor",
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Proveedor",
+          message: response.getMessage(),
+        });
+      }
+    }
   }
   /*
  |--------------------------------------------------------------------------
@@ -257,7 +259,7 @@ class Proveedores extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -289,18 +291,16 @@ class Proveedores extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${
-                item.proveedorPreferido === 1 ? 'badge-info' : 'badge-secondary'
-              }`}
+              className={`badge ${item.proveedorPreferido === 1 ? 'badge-info' : 'badge-secondary'
+                }`}
             >
               {item.proveedorPreferido === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </span>
@@ -398,9 +398,6 @@ class Proveedores extends CustomComponent {
 
 Proveedores.propTypes = {
   token: PropTypes.shape({
-    userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
-    }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
     }).isRequired,

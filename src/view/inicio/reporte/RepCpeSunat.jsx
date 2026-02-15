@@ -12,35 +12,34 @@ import {
   Cell,
 } from 'recharts';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../components/Container';
-import CustomComponent from '../../../model/class/custom-component';
-import { SpinnerView } from '../../../components/Spinner';
-import Title from '../../../components/Title';
-import Row from '../../../components/Row';
-import Column from '../../../components/Column';
-import { Card, CardBody, CardTitle } from '../../../components/Card';
-import Select from '../../../components/Select';
-import Button from '../../../components/Button';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import { Card, CardBody, CardTitle } from '@/components/Card';
+import Select from '@/components/Select';
+import Button from '@/components/Button';
 import pdfVisualizer from 'pdf-visualizer';
 import {
   comboSucursal,
   dashboardSunat,
   documentsExcelCompra,
   documentsPdfReportsCompra,
-} from '../../../network/rest/principal.network';
+} from '@/network/rest/principal.network';
 import {
-  alertWarning,
   getCurrentMonth,
   getCurrentYear,
   guId,
   months,
   formatCurrency,
   years,
-} from '../../../helper/utils.helper';
-import { downloadFileAsync } from '../../../redux/downloadSlice';
-import ErrorResponse from '../../../model/class/error-response';
-import { CANCELED } from '../../../model/types/types';
-import SuccessReponse from '../../../model/class/response';
+} from '@/helper/utils.helper';
+import { downloadFileAsync } from '@/redux/downloadSlice';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import SuccessReponse from '@/model/class/response';
 import {
   Table,
   TableBody,
@@ -49,7 +48,8 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../components/Table';
+} from '@/components/Table';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -65,9 +65,9 @@ class RepCpeSunat extends CustomComponent {
 
     this.state = {
       loading: false,
-      msgLoading: 'Cargando información...',
+      msgLoading: "Cargando información...",
 
-      codIso: this.props.moneda.codiso ?? '',
+      codIso: this.props.moneda.codiso ?? "",
 
       month: getCurrentMonth(),
       months: months(),
@@ -103,7 +103,7 @@ class RepCpeSunat extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   /*
   |--------------------------------------------------------------------------
@@ -122,7 +122,7 @@ class RepCpeSunat extends CustomComponent {
   loadingInit = async () => {
     this.setState({
       loading: true,
-      msgLoading: 'Cargando información...',
+      msgLoading: "Cargando información...",
     });
 
     const sucursalResponse = await comboSucursal(
@@ -132,19 +132,17 @@ class RepCpeSunat extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning(
-        'Reporte Financiero',
-        sucursalResponse.getMessage(),
-        async () => {
+      alertKit.warning({
+        title: "Reporte Financiero",
+        message: sucursalResponse.getMessage(),
+        onClose: async () => {
           await this.loadingInit();
         },
-      );
+      });
       return;
     }
 
-    await this.setStateAsync({
-      sucursales: sucursalResponse.data,
-    });
+    await this.setStateAsync({ sucursales: sucursalResponse.data });
     await this.loadingData();
   };
 
@@ -158,7 +156,7 @@ class RepCpeSunat extends CustomComponent {
   loadingData = async (borrarLista = false) => {
     await this.setStateAsync({
       loading: true,
-      msgLoading: 'Cargando información...',
+      msgLoading: "Cargando información...",
       lista: borrarLista ? [] : this.state.lista,
       paginacion: borrarLista ? 1 : this.state.paginacion,
     });
@@ -172,7 +170,15 @@ class RepCpeSunat extends CustomComponent {
     const dashboard = await dashboardSunat(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Financiero', dashboard.getMessage());
+      if (dashboard.getType() === CANCELED) return;
+
+      alertKit.warning({
+        title: "Reporte Financiero",
+        message: dashboard.getMessage(),
+        onClose: async () => {
+          await this.loadingData();
+        },
+      });
       return;
     }
 

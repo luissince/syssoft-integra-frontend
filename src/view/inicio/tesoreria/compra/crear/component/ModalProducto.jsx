@@ -1,115 +1,174 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Button from '../../../../../../components/Button';
-import Column from '../../../../../../components/Column';
-import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader, CustomModalForm } from '../../../../../../components/CustomModal';
-import Input from '../../../../../../components/Input';
-import Row from '../../../../../../components/Row';
-import { SpinnerView } from '../../../../../../components/Spinner';
+import Button from '@/components/Button';
+import CustomModal,
+{
+  CustomModalContentBody,
+  CustomModalContentFooter,
+  CustomModalContentForm,
+  CustomModalContentHeader
+} from '@/components/CustomModal';
+import Input from '@/components/Input';
+import { SpinnerView } from '@/components/Spinner';
 import {
   guId,
   handlePasteFloat,
   isEmpty,
   isNumeric,
   validateNumericInputs,
-} from '../../../../../../helper/utils.helper';
-import { images } from '../../../../../../helper';
-import Image from '../../../../../../components/Image';
+} from '@/helper/utils.helper';
+import { images } from '@/helper';
+import Image from '@/components/Image';
 import { alertKit } from 'alert-kit';
+import { comboUbicacion } from '@/network/rest/principal.network';
+import { CANCELED } from '@/constants/requestStatus';
+import Select from '@/components/Select';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
 class ModalProducto extends Component {
+
+  /**
+   * 
+   * @param {*} props 
+   */
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
-      message: 'Cargando datos...',
+      message: "Cargando datos...",
 
-      idProducto: '',
-      codigo: '',
-      nombre: '',
+      idProducto: "",
+      codigo: "",
+      nombre: "",
       imagen: null,
-      costo: '',
-      cantidad: '',
-      tipoProducto: '',
-      lote: false,
+      costo: "",
+      tipoProducto: "",
 
-      lotes: [],
+      inventarioDetalles: [],
+
+      // colores: [],
+      // tallas: [],
+      // sabores: [],
+
+      ubicaciones: [],
     };
 
     this.initial = { ...this.state };
 
     this.refModal = React.createRef();
-    this.refCantidad = React.createRef();
     this.refCosto = React.createRef();
-    this.refLote = React.createRef();
+    this.refInventarioDetalles = React.createRef();
+
+    this.peticion = false;
+    this.abortController = null;
   }
 
   loadDatos = async (producto, type) => {
-    if (type === 'edit') {
+    this.abortController = new AbortController();
+
+    // const { success: successColores, message: messageColores, type: typeColores, data: dataColores } = await comboAtributo(TIPO_ATRIBUTO_COLOR, this.abortController.signal);
+    // const { success: successTallas, message: messageTallas, type: typeTallas, data: dataTallas } = await comboAtributo(TIPO_ATRIBUTO_TALLA, this.abortController.signal);
+    // const { success: successSabores, message: messageSabores, type: typeSabores, data: dataSabores } = await comboAtributo(TIPO_ATRIBUTO_SABOR, this.abortController.signal);
+    const { success: successUbicacion, message: messageUbicacion, type: typeUbicacion, data: dataUbicacion } = await comboUbicacion(this.abortController.signal);
+
+    if (!successUbicacion) {
+      if (typeUbicacion === CANCELED) return;
+
+      this.setState({
+        message: messageUbicacion
+      })
+
+      this.peticion = false;
+      this.abortController = null;
+      return;
+    }
+
+    const ubicaciones = dataUbicacion;
+
+    if (type === "edit") {
       this.setState({
         idProducto: producto.idProducto,
         codigo: producto.codigo,
-        cantidad: producto.cantidad,
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
         tipoProducto: producto.tipoProducto,
-        lote: producto.lote,
-        lotes: producto.lotes,
+        inventarioDetalles: producto.inventarioDetalles,
+
+        ubicaciones: ubicaciones,
+
         loading: false,
       });
     } else {
       this.setState({
         idProducto: producto.idProducto,
         codigo: producto.codigo,
-        cantidad: 1,
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
         tipoProducto: producto.tipoProducto,
-        lote: producto.lote === 1 ? true : false,
+        inventarioDetalles: [
+          ...this.state.inventarioDetalles,
+          this.loadDetalleInventarioPorDefecto(),
+        ],
+        ubicaciones: ubicaciones,
 
         loading: false,
       });
     }
   };
 
+  loadDetalleInventarioPorDefecto = () => {
+    return {
+      id: guId(),
+      cantidad: { type: "number", value: 1 },
+      idUbicacion: { type: "text", value: null },
+      lote: { type: "text", value: null },
+      fechaVencimiento: { type: "date", value: null },
+      porDefecto: { type: "boolean", value: true }
+    };
+  };
+
+
   handleOnOpen = () => {
-    if (!this.state.lote) {
-      this.refCantidad.current.focus();
-      this.refCantidad.current.select();
-    } else {
-      this.refCosto.current.focus();
-      this.refCosto.current.select();
-    }
+    this.refCosto.current.focus();
+    this.refCosto.current.select();
   };
 
   handleOnHidden = () => {
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
     this.setState(this.initial);
+    this.peticion = false;
   };
 
-  handleInputCantidad = (event) => {
-    this.setState({ cantidad: event.target.value });
-  };
 
   handleInputCosto = (event) => {
     this.setState({ costo: event.target.value });
   };
 
-  handleAddLote = () => {
-    const lote = {
+  handleAgregarInventarioDetalle = () => {
+    const inventarioDetalle = {
       id: guId(),
 
       cantidad: {
         type: 'number',
         value: '',
       },
-      serie: {
+      idUbicacion: {
+        type: 'text',
+        value: '',
+      },
+      lote: {
         type: 'text',
         value: '',
       },
@@ -117,99 +176,64 @@ class ModalProducto extends Component {
         type: 'date',
         value: '',
       },
+      porDefecto: {
+        type: 'boolean',
+        value: false,
+      },
     };
-    const lotes = [...this.state.lotes, lote];
+
+    const inventarioDetalles = [...this.state.inventarioDetalles, inventarioDetalle];
+
     this.setState({
-      lotes,
+      inventarioDetalles,
     });
   };
 
+  handleEliminarInventarioDetalle = (id) => {
+    const { inventarioDetalles } = this.state;
+    const nuevosDetalles = inventarioDetalles.filter(item => item.id !== id);
+    this.setState({ inventarioDetalles: nuevosDetalles });
+  };
+
   handleOnSubmit = async () => {
-    const { idProducto, codigo, nombre, imagen, cantidad, costo, lote, lotes } =
-      this.state;
+    const {
+      idProducto,
+      codigo,
+      nombre,
+      imagen,
+      costo,
+      inventarioDetalles
+    } = this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
-    if (!lote && !isNumeric(cantidad)) {
+    if (!isNumeric(costo) || Number(costo) <= 0) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'Ingrese la cantidad.',
-      }, () => {
-        this.refCantidad.current.focus();
-      });
-      return;
-    }
-
-    if (!lote && parseFloat(cantidad) <= 0) {
-      alertKit.warning({
-        title: 'Compra',
-        message: 'La cantidad no puede ser menor a cero.',
-      }, () => {
-        this.refCantidad.current.focus();
-      });
-      return;
-    }
-
-    if (lote && isEmpty(lotes)) {
-      alertKit.warning({
-        title: 'Compra',
-        message: 'Debes agregar al menos un lote.',
-      });
-      return;
-    }
-
-    if (
-      lote &&
-      !isEmpty(lotes.filter((item) => isEmpty(item.cantidad.value)))
-    ) {
-      alertKit.warning({
-        title: 'Compra',
-        message: 'Hay lotes sin cantidad.',
-      }, () => {
-        validateNumericInputs(this.refLote);
-      });
-      return;
-    }
-
-    if (lote && !isEmpty(lotes.filter((item) => isEmpty(item.serie.value)))) {
-      alertKit.warning({
-        title: 'Compra',
-        message: 'Hay lotes sin serie.',
-      }, () => {
-        validateNumericInputs(this.refLote, 'string');
-      });
-      return;
-    }
-
-    if (
-      lote &&
-      !isEmpty(lotes.filter((item) => isEmpty(item.fechaVencimiento.value)))
-    ) {
-      alertKit.warning({
-        title: 'Compra',
-        message: 'Hay lotes sin fecha de vencimiento.',
-      }, () => {
-        validateNumericInputs(this.refLote, 'string');
-      });
-      return;
-    }
-
-    if (!isNumeric(costo)) {
-      alertKit.warning({
-        title: 'Compra',
-        message: 'Ingrese el costo.',
+        title: "Compra",
+        message: "El costo no puede ser menor a cero.",
       }, () => {
         this.refCosto.current.focus();
       });
       return;
     }
 
-    if (parseFloat(costo) <= 0) {
+    if (!isEmpty(inventarioDetalles.filter((item) => isEmpty(item.cantidad.value)))) {
       alertKit.warning({
-        title: 'Compra',
-        message: 'El costo no puede ser menor a cero.',
+        title: "Compra",
+        message: "Hay detalle(s) sin cantidad.",
       }, () => {
-        this.refCosto.current.focus();
+        validateNumericInputs(this.refInventarioDetalles);
+      });
+      return;
+    }
+
+
+    if (!isEmpty(inventarioDetalles.filter((item) => item.porDefecto.value !== true)) && !isEmpty(inventarioDetalles.filter((item) => isEmpty(item.lote.value)))) {
+      alertKit.warning({
+        title: "Compra",
+        message: "Hay detalle(s) sin lote.",
+      }, () => {
+        validateNumericInputs(this.refInventarioDetalles);
       });
       return;
     }
@@ -223,8 +247,7 @@ class ModalProducto extends Component {
     const impuesto = impuestos.find((item) => item.idImpuesto === idImpuesto);
 
     if (existeDetalle) {
-      existeDetalle.cantidad = Number(cantidad);
-      existeDetalle.lotes = lotes;
+      existeDetalle.inventarioDetalles = inventarioDetalles;
       existeDetalle.costo = Number(costo);
     } else {
       const data = {
@@ -233,13 +256,11 @@ class ModalProducto extends Component {
         codigo: codigo,
         nombre: nombre,
         imagen: imagen,
-        cantidad: lote ? 0 : Number(cantidad),
         costo: Number(costo),
-        lote: lote,
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
-        lotes: lotes,
+        inventarioDetalles: inventarioDetalles,
       };
       nuevoDetalles.push(data);
     }
@@ -257,10 +278,9 @@ class ModalProducto extends Component {
 
       nombre,
       imagen,
-      cantidad,
       costo,
-      lote,
-      lotes,
+      inventarioDetalles,
+      ubicaciones
     } = this.state;
 
     const { isOpen, onClose } = this.props;
@@ -273,6 +293,10 @@ class ModalProducto extends Component {
         onHidden={this.handleOnHidden}
         onClose={onClose}
         contentLabel="Modal Producto"
+        className={cn(
+          "modal-custom-sm ",
+          !isEmpty(inventarioDetalles) && "h-[80%]"
+        )}
       >
         <CustomModalContentForm onSubmit={this.handleOnSubmit}>
           <CustomModalContentHeader contentRef={this.refModal}>
@@ -284,21 +308,19 @@ class ModalProducto extends Component {
 
             <div className="flex flex-col gap-3">
               <h6>{nombre}</h6>
-              <div>
-                <Image
-                  default={images.noImage}
-                  src={imagen}
-                  alt={nombre}
-                  overrideClass="mb-2 h-40 object-contain border border-solid border-[#e2e8f0]"
-                />
-              </div>
+              <Image
+                default={images.noImage}
+                src={imagen}
+                alt={nombre}
+                overrideClass="mb-2 h-40 object-contain rounded border border-solid border-[#e2e8f0]"
+              />
             </div>
 
             <div className="flex gap-3">
               <div className="w-full md:w-1/2">
                 <Input
-                  label={'Costo:'}
-                  placeholder={'0.00'}
+                  label="Costo:"
+                  placeholder="0.00"
                   role={'float'}
                   ref={this.refCosto}
                   value={costo}
@@ -306,116 +328,186 @@ class ModalProducto extends Component {
                   onPaste={handlePasteFloat}
                 />
               </div>
-
-              {!lote && (
-                <div className="w-full md:w-1/2">
-                  <Input
-                    autoFocus={true}
-                    label={'Cantidad:'}
-                    placeholder={'0.00'}
-                    role={'float'}
-                    ref={this.refCantidad}
-                    value={cantidad}
-                    onChange={this.handleInputCantidad}
-                    onPaste={handlePasteFloat}
-                  />
-                </div>
-              )}
             </div>
 
-            {lote ? (
-              <>
-                <div className="d-flex justify-content-start align-items-center">
-                  <h6 className="mr-2">Agregar mas lotes</h6>
+            <div className="d-flex justify-content-start align-items-center">
+              <h6 className="mr-2">Agregar detalles</h6>
+              <div className="flex gap-3">
+                {/* Botón agregar detalle normal */}
+                <Button
+                  className="btn-light"
+                  title="Agregar detalle"
+                  onClick={this.handleAgregarInventarioDetalle}
+                >
+                  <i className="bi bi-plus-circle"></i>
+                </Button>
+
+                {/* Botón agregar detalle por defecto */}
+                <Button
+                  className="btn-warning"
+                  title="Agregar detalle por defecto"
+                  disabled={this.state.inventarioDetalles.some(
+                    (d) => d.porDefecto.value === true
+                  )}
+                  onClick={() => {
+                    const yaExiste = this.state.inventarioDetalles.some(
+                      (d) => d.porDefecto.value === true
+                    );
+
+                    if (yaExiste) {
+                      alertKit.warning({
+                        title: "Detalle",
+                        message: "Ya existe un inventario por defecto."
+                      });
+                      return;
+                    }
+
+                    const nuevo = this.loadDetalleInventarioPorDefecto();
+                    this.setState({
+                      inventarioDetalles: [...this.state.inventarioDetalles, nuevo]
+                    });
+                  }}
+                >
+                  <i className="bi bi-stars"></i>
+                </Button>
+              </div>
+            </div>
+
+            {inventarioDetalles.map((item, index) => (
+              <div
+                key={index}
+                ref={this.refInventarioDetalles}
+                className="flex gap-3 p-3 mb-3 border border-gray-300 rounded"
+              >
+                <div className="w-full flex flex-col gap-3">
+                  <div>
+                    <Input
+                      autoFocus={true}
+                      label="Cantidad:"
+                      placeholder="0.00"
+                      role="float"
+                      tabIndex={1}
+                      value={item.cantidad.value}
+                      onChange={(e) => {
+                        const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
+                          if (inventarioDetalle.id === item.id) {
+                            return {
+                              ...inventarioDetalle,
+                              cantidad: {
+                                ...inventarioDetalle.cantidad,
+                                value: e.target.value,
+                              },
+                            };
+                          }
+                          return inventarioDetalle;
+                        });
+                        this.setState({ inventarioDetalles: updatedInventarioDetalles });
+                      }}
+                      onPaste={handlePasteFloat}
+                    />
+                  </div>
+                  {
+                    item.idUbicacion.value !== null && (
+                      <div>
+                        <Select
+                          label="Ubicación en el inventario:"
+                          tabIndex={3}
+                          value={item.idUbicacion.value}
+                          onChange={(e) => {
+                            const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
+                              if (inventarioDetalle.id === item.id) {
+                                return {
+                                  ...inventarioDetalle,
+                                  idUbicacion: {
+                                    ...inventarioDetalle.idUbicacion,
+                                    value: e.target.value,
+                                  },
+                                };
+                              }
+                              return inventarioDetalle;
+                            });
+                            this.setState({ inventarioDetalles: updatedInventarioDetalles });
+                          }}
+                        >
+                          <option value="">-- Seleccione --</option>
+                          {
+                            ubicaciones.map((ubicacion, idx) => (
+                              <option key={idx} value={ubicacion.idUbicacion}>
+                                {ubicacion.descripcion}
+                              </option>
+                            ))
+                          }
+                        </Select>
+                      </div>
+                    )
+                  }
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  {
+                    item.lote.value !== null && (
+                      <div>
+                        <Input
+                          label="Lote:"
+                          placeholder="LT-0001"
+                          tabIndex={2}
+                          value={item.lote.value}
+                          onChange={(e) => {
+                            const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
+                              if (inventarioDetalle.id === item.id) {
+                                return {
+                                  ...inventarioDetalle,
+                                  lote: {
+                                    ...inventarioDetalle.lote,
+                                    value: e.target.value,
+                                  },
+                                };
+                              }
+                              return inventarioDetalle;
+                            });
+                            this.setState({ inventarioDetalles: updatedInventarioDetalles });
+                          }}
+                        />
+                      </div>
+                    )
+                  }
+                  {
+                    item.fechaVencimiento.value !== null && (
+                      <div>
+                        <Input
+                          type="date"
+                          label="Fecha de Vencimiento:"
+                          tabIndex={4}
+                          value={item.fechaVencimiento.value}
+                          onChange={(e) => {
+                            const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
+                              if (inventarioDetalle.id === item.id) {
+                                return {
+                                  ...inventarioDetalle,
+                                  fechaVencimiento: {
+                                    ...inventarioDetalle.fechaVencimiento,
+                                    value: e.target.value,
+                                  },
+                                };
+                              }
+                              return inventarioDetalle;
+                            });
+                            this.setState({ inventarioDetalles: updatedInventarioDetalles });
+                          }}
+                        />
+                      </div>
+                    )
+                  }
+                </div>
+                <div className="flex items-center">
                   <Button
-                    className={'btn-light'}
-                    onClick={this.handleAddLote}
+                    className="btn-danger"
+                    onClick={() => this.handleEliminarInventarioDetalle(item.id)}
                   >
-                    <i className="bi bi-plus-circle"></i>
+                    <i className="bi bi-trash"></i>
                   </Button>
                 </div>
-
-                {lotes.map((item, index) => (
-                  <div
-                    key={index}
-                    ref={this.refLote}
-                    className="flex gap-3"
-                  >
-                    <div>
-                      <Input
-                        autoFocus={true}
-                        label={'Cantidad:'}
-                        placeholder={'0.00'}
-                        role={'float'}
-                        value={item.cantidad.value}
-                        onChange={(e) => {
-                          const updatedLotes = lotes.map((lote) => {
-                            if (lote.id === item.id) {
-                              return {
-                                ...lote,
-                                cantidad: {
-                                  ...lote.cantidad,
-                                  value: e.target.value,
-                                },
-                              };
-                            }
-                            return lote;
-                          });
-                          this.setState({ lotes: updatedLotes });
-                        }}
-                        onPaste={handlePasteFloat}
-                      />
-                    </div>
-
-                    <div>
-                      <Input
-                        label={'Lote:'}
-                        placeholder={'LT-0001'}
-                        value={item.serie.value}
-                        onChange={(e) => {
-                          const updatedLotes = lotes.map((lote) => {
-                            if (lote.id === item.id) {
-                              return {
-                                ...lote,
-                                serie: {
-                                  ...lote.serie,
-                                  value: e.target.value,
-                                },
-                              };
-                            }
-                            return lote;
-                          });
-                          this.setState({ lotes: updatedLotes });
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <Input
-                        type="date"
-                        label={'Fecha de Vencimiento:'}
-                        value={item.fechaVencimiento.value}
-                        onChange={(e) => {
-                          const updatedLotes = lotes.map((lote) => {
-                            if (lote.id === item.id) {
-                              return {
-                                ...lote,
-                                fechaVencimiento: {
-                                  ...lote.fechaVencimiento,
-                                  value: e.target.value,
-                                },
-                              };
-                            }
-                            return lote;
-                          });
-                          this.setState({ lotes: updatedLotes });
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : null}
+              </div>
+            ))}
           </CustomModalContentBody>
 
           <CustomModalContentFooter>

@@ -9,85 +9,74 @@ import {
   isEmpty,
   keyNumberPhone,
   formatCurrency,
-  readDataFile,
   rounded,
   text,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { PosContainerWrapper } from '../../../../../../components/Container';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
 import {
   getPreferidoPersona,
   comboComprobante,
   comboMoneda,
   filtrarPersona,
-  preferidosProducto,
   obtenerListaPrecioProducto,
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
-  detailOnlyVentaVenta,
+  detailForIdVenta,
   comboImpuesto,
   filtrarProductoVenta,
   createVenta,
-  obtenerPreVentaPdf,
+  // obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
   forSalePedido,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import CustomComponent from '../../../../../../model/class/custom-component';
-import { VENTA } from '../../../../../../model/types/tipo-comprobante';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import { VENTA } from '@/model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
 import {
   A_GRANEL,
-  SERVICIO,
+  NINGUNO,
   UNIDADES,
   VALOR_MONETARIO,
-} from '../../../../../../model/types/tipo-tratamiento-producto';
-import { CONTADO } from '../../../../../../model/types/forma-transaccion';
+} from '@/model/types/tipo-tratamiento-producto';
+import { CONTADO } from '@/model/types/forma-transaccion';
 import ModalProdcutos from '../common/ModalProductos';
 import {
   getDni,
   getRuc,
-} from '../../../../../../network/rest/apisperu.network';
-import { images } from '../../../../../../helper';
-import Input from '../../../../../../components/Input';
-import Select from '../../../../../../components/Select';
-import Button from '../../../../../../components/Button';
+} from '@/network/rest/apisperu.network';
+import { images } from '@/helper';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
+import Button from '@/components/Button';
 import {
   clearCrearVentaClasico,
   setCrearVentaClasicoLocal,
   setCrearVentaClasicoState,
   setProductosFavoritos,
   starProduct,
-} from '../../../../../../redux/predeterminadoSlice';
-import SearchInput from '../../../../../../components/SearchInput';
+} from '@/redux/predeterminadoSlice';
+import SearchInput from '@/components/SearchInput';
 import ModalVenta from '../common/ModalVenta';
 import ModalCotizacion from '../common/ModalCotizacion';
-import { SpinnerView } from '../../../../../../components/Spinner';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+import { SpinnerView } from '@/components/Spinner';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
 import ModalAgregar from '../common/ModalAgregar';
 import printJS from 'print-js';
 import ButtonsOpciones from './component/ButtonsOpciones';
 import ModalPrecios from './component/ModalPrecios';
 import ModalCantidad from './component/ModalCantidad';
 import ModalDatos from './component/ModalDatos';
-import ModalTransaccion from '../../../../../../components/ModalTransaccion';
+import ModalTransaccion from '@/components/ModalTransaccion';
 import {
   ModalImpresion,
   ModalPreImpresion,
-} from '../../../../../../components/MultiModal';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../../../../../components/Table';
-import Image from '../../../../../../components/Image';
+} from '@/components/MultiModal';
+import Image from '@/components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { cn } from '@/lib/utils';
@@ -96,6 +85,7 @@ import { alertKit } from 'alert-kit';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
+ * @deprecated
  */
 class VentaCrearEscritorio extends CustomComponent {
   constructor(props) {
@@ -104,12 +94,12 @@ class VentaCrearEscritorio extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idVenta: '',
-      idComprobante: '',
-      codigoBarras: '',
+      idVenta: "",
+      idComprobante: "",
+      codigoBarras: "",
       detalleVenta: [],
 
       // Lista de datos
@@ -120,8 +110,8 @@ class VentaCrearEscritorio extends CustomComponent {
       tiposDocumentos: [],
 
       // Atributos libres
-      nombreComporbante: '',
-      codiso: '',
+      nombreComporbante: "",
+      codiso: "",
       importeTotal: 0,
 
       // Atributos del modal impresión
@@ -160,11 +150,11 @@ class VentaCrearEscritorio extends CustomComponent {
       isOpenDatos: false,
 
       // Atributos del modal configuración
-      idImpuesto: '',
-      idMoneda: '',
-      idAlmacen: '',
-      observacion: '',
-      nota: '',
+      idImpuesto: "",
+      idMoneda: "",
+      idAlmacen: "",
+      observacion: "",
+      nota: "",
       cacheConfiguracion: null,
 
       // Atributos del modal cobro
@@ -178,17 +168,17 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Atributos del cliente formulario
       loadingCliente: false,
-      msgLoadingCliente: 'Consultado datos...',
-      idTipoDocumento: '',
-      numeroDocumento: '',
-      informacion: '',
-      numeroCelular: '',
-      email: '',
-      direccion: '',
+      msgLoadingCliente: "Consultado datos...",
+      idTipoDocumento: "",
+      numeroDocumento: "",
+      informacion: "",
+      numeroCelular: "",
+      email: "",
+      direccion: "",
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -227,7 +217,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.refModalDatos = React.createRef();
 
     // Atributos para el modal configuración
-    this.idSidebarConfiguration = 'idSidebarConfiguration';
+    this.idSidebarConfiguration = "idSidebarConfiguration";
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
@@ -271,7 +261,7 @@ class VentaCrearEscritorio extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
     await this.loadingData();
   }
 
@@ -279,7 +269,7 @@ class VentaCrearEscritorio extends CustomComponent {
    * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
    */
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown);
+    document.removeEventListener("keydown", this.handleDocumentKeyDown);
 
     this.abortControllerView.abort();
     this.abortControllerCotizacion.abort();
@@ -337,7 +327,7 @@ class VentaCrearEscritorio extends CustomComponent {
         this.fetchComprobante(VENTA),
         this.fetchMoneda(),
         this.fetchImpuesto(),
-        this.fetchPersonaPredeterminado({ cliente: '1' }),
+        this.fetchPersonaPredeterminado({ cliente: "1" }),
         this.fetchTipoDocumento(),
         this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
       ]);
@@ -350,7 +340,7 @@ class VentaCrearEscritorio extends CustomComponent {
       );
       const almacenFilter = almacenes.find((item) => item.predefinido === 1);
 
-      if (typeof predeterminado === 'object') {
+      if (typeof predeterminado === "object") {
         this.handleSelectItemCliente(predeterminado);
       }
 
@@ -360,22 +350,22 @@ class VentaCrearEscritorio extends CustomComponent {
         impuestos,
         almacenes,
 
-        idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
+        idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : "",
         nombreComporbante: !comprobanteFilter
-          ? 'Ninguno'
+          ? "Ninguno"
           : comprobanteFilter.nombre,
 
         idTipoDocumento:
-          typeof predeterminado === 'object'
+          typeof predeterminado === "object"
             ? predeterminado.idTipoDocumento
-            : '',
+            : "",
 
-        idMoneda: monedaFilter ? monedaFilter.idMoneda : '',
-        codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
+        idMoneda: monedaFilter ? monedaFilter.idMoneda : "",
+        codiso: monedaFilter ? monedaFilter.codiso : "PEN",
 
-        idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : '',
+        idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : "",
 
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
 
         tiposDocumentos,
 
@@ -383,8 +373,11 @@ class VentaCrearEscritorio extends CustomComponent {
       });
 
       const productos = await this.fetchProductoPreferidos({
-        idSucursal: this.state.idSucursal,
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        tipo: 2,
+        filtrar: "",
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
+        posicionPagina: 0,
+        filasPorPagina: 100,
       });
       this.props.setProductosFavoritos(productos);
       this.redCodigoBarras.current.focus();
@@ -475,13 +468,13 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   async fetchProductoPreferidos(params) {
-    const response = await preferidosProducto(
+    const response = await filtrarProductoVenta(
       params,
       this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
-      return response.data;
+      return response.data.list;
     }
 
     if (response instanceof ErrorResponse) {
@@ -559,8 +552,11 @@ class VentaCrearEscritorio extends CustomComponent {
 
   async reloadProductoPreferidos(callback = function () { }) {
     const productos = await this.fetchProductoPreferidos({
-      idSucursal: this.state.idSucursal,
+      tipo: 2,
+      filtrar: "",
       idAlmacen: this.state.idAlmacen,
+      posicionPagina: 0,
+      filasPorPagina: 100,
     });
     this.props.setProductosFavoritos(productos);
     await this.setStateAsync({ productos: productos });
@@ -571,7 +567,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState((prevState) => ({
       importeTotal: prevState.detalleVenta.reduce((accumulator, item) => {
         const cantidad =
-          item.idTipoTratamientoProducto === SERVICIO
+          item.idTipoTratamientoProducto === NINGUNO
             ? item.cantidad
             : item.inventarios.reduce(
               (acc, current) => acc + current.cantidad,
@@ -674,7 +670,7 @@ class VentaCrearEscritorio extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === NINGUNO) {
       if (!existingItem) {
         const newItem = createNewItem(
           precio ? Number(precio) : Number(producto.precio),
@@ -693,7 +689,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     const subTotal = detalleVenta.reduce((accumulator, item) => {
       const cantidad =
-        item.idTipoTratamientoProducto === SERVICIO
+        item.idTipoTratamientoProducto === NINGUNO
           ? item.cantidad
           : item.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -718,7 +714,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
         if (impuesto) {
           const cantidad =
-            item.idTipoTratamientoProducto === SERVICIO
+            item.idTipoTratamientoProducto === NINGUNO
               ? item.cantidad
               : item.inventarios.reduce(
                 (acc, current) => acc + current.cantidad,
@@ -764,7 +760,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     const total = detalleVenta.reduce((accumulator, item) => {
       const cantidad =
-        item.idTipoTratamientoProducto === SERVICIO
+        item.idTipoTratamientoProducto === NINGUNO
           ? item.cantidad
           : item.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -776,12 +772,12 @@ class VentaCrearEscritorio extends CustomComponent {
     }, 0);
 
     return (
-      <div className="p-2" style={{ borderTop: '1px solid #cbd5e1' }}>
+      <div className="p-2 border border-solid border-[#cbd5e1]">
         <div
-          className="w-100"
+          className="w-full "
           style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}
         >
-          <div className="d-flex justify-content-between">
+          <div className="flex justify-between">
             <span className="text-sm">Sub Total:</span>
             <span className="text-sm text-right">
               {formatCurrency(subTotal, codiso)}
@@ -790,7 +786,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
           {impuestosTotal()}
 
-          <div className="d-flex justify-content-between">
+          <div className="flex justify-between">
             <span className="text-base">Total:</span>
             <span className="text-base text-right">
               {formatCurrency(total, codiso)}
@@ -863,7 +859,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (
       producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === SERVICIO
+      producto.idTipoTratamientoProducto === NINGUNO
     ) {
       const detalles = this.addItemDetalle(producto, null, null);
 
@@ -918,13 +914,12 @@ class VentaCrearEscritorio extends CustomComponent {
     if (event.key === 'Enter') {
       this.setState({
         loading: true,
-        msgLoading: 'Buscando producto...',
+        msgLoading: "Buscando producto...",
       });
 
       const params = {
         tipo: 1,
         filtrar: this.state.codigoBarras,
-        idSucursal: this.state.idSucursal,
         idAlmacen: this.state.idAlmacen,
         posicionPagina: 0,
         filasPorPagina: 1,
@@ -932,13 +927,13 @@ class VentaCrearEscritorio extends CustomComponent {
 
       const response = await filtrarProductoVenta(params);
       if (response instanceof SuccessReponse) {
-        if (!isEmpty(response.data.lists)) {
-          this.handleAddItem(response.data.lists[0]);
+        if (!isEmpty(response.data.list)) {
+          this.handleAddItem(response.data.list[0]);
         }
 
         this.setState({
           loading: false,
-          codigoBarras: '',
+          codigoBarras: "",
         });
         this.redCodigoBarras.current.focus();
       }
@@ -948,7 +943,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
         this.setState({
           loading: false,
-          codigoBarras: '',
+          codigoBarras: "",
         });
         this.redCodigoBarras.current.focus();
       }
@@ -1057,15 +1052,12 @@ class VentaCrearEscritorio extends CustomComponent {
       (item) => item.idComprobante == event.target.value,
     );
 
-    this.setState(
-      {
-        idComprobante: event.target.value,
-        nombreComporbante: !comprobante ? 'Ninguno' : comprobante.nombre,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      idComprobante: event.target.value,
+      nombreComporbante: !comprobante ? "Ninguno" : comprobante.nombre,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -1096,8 +1088,8 @@ class VentaCrearEscritorio extends CustomComponent {
     } = this.state;
 
     const accept = await alertKit.question({
-      title: 'Compra',
-      message: '¿Está seguro de continuar?',
+      title: "Venta",
+      message: "¿Está seguro de continuar?",
       acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
       cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
     });
@@ -1117,6 +1109,7 @@ class VentaCrearEscritorio extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
+        idPlazo: null,
         notaTransacion,
         bancosAgregados: metodoPagosLista,
       };
@@ -1134,8 +1127,17 @@ class VentaCrearEscritorio extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (!isEmpty(response.getBody())) {
-          const body = response.getBody().map(
+        const data = response.getBody();
+
+        if (typeof data === "string") {
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          });
+        }
+
+        if (data instanceof Array) {
+          const body = data.map(
             (item) =>
               `<tr>
                   <td>${item.nombre}</td>
@@ -1170,11 +1172,6 @@ class VentaCrearEscritorio extends CustomComponent {
             title: "Venta",
             bodyInnerHTML: html,
           });
-        } else {
-          alertKit.warning({
-            title: "Venta",
-            message: response.getMessage(),
-          })
         }
       }
     }
@@ -1182,9 +1179,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleProcessCredito = async (
     idFormaPago,
-    numeroCuotas,
-    frecuenciaPago,
-    importeTotal,
+    idPlazo,
     notaTransacion,
     callback = async function () { },
   ) => {
@@ -1224,10 +1219,8 @@ class VentaCrearEscritorio extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
-        numeroCuotas: numeroCuotas,
-        frecuenciaPago: frecuenciaPago,
+        idPlazo: idPlazo,
         notaTransacion,
-        importeTotal: importeTotal,
       };
 
       await callback();
@@ -1244,8 +1237,17 @@ class VentaCrearEscritorio extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (!isEmpty(response.getBody())) {
-          const body = response.getBody().map(
+        const data = response.getBody();
+
+        if (typeof data === "string") {
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          });
+        }
+
+        if (data instanceof Array) {
+          const body = data.map(
             (item) =>
               `<tr>
                   <td>${item.nombre}</td>
@@ -1280,10 +1282,7 @@ class VentaCrearEscritorio extends CustomComponent {
           })
         } else {
 
-          alertKit.warning({
-            title: "Venta",
-            message: response.getMessage(),
-          })
+
         }
       }
     }
@@ -1383,7 +1382,7 @@ class VentaCrearEscritorio extends CustomComponent {
       alertKit.warning({
         title: "Venta",
         message: "Los productos a granel no se puede cambia el precio.",
-      })
+      });
       return;
     }
 
@@ -1492,7 +1491,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos de la cotización.',
+      msgLoading: "Obteniendos datos de la cotización.",
       detalleVenta: [],
       cotizacion: null,
     });
@@ -1521,7 +1520,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([UNIDADES, NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1551,13 +1550,10 @@ class VentaCrearEscritorio extends CustomComponent {
         return [];
       });
 
-      this.setState(
-        { cotizacion, detalleVenta: detalles, loading: false },
-        () => {
-          this.updateReduxState();
-          this.calculateTotal();
-        },
-      );
+      this.setState({ cotizacion, detalleVenta: detalles, loading: false }, () => {
+        this.updateReduxState();
+        this.calculateTotal();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -1592,7 +1588,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.handleCloseCotizacion();
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos del pedido.',
+      msgLoading: "Obteniendos datos del pedido.",
       detalleVenta: [],
       cotizacion: null,
       pedido: null,
@@ -1622,7 +1618,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([UNIDADES, NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1690,7 +1686,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.handleCloseVenta();
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos de la venta.',
+      msgLoading: "Obteniendos datos de la venta.",
       detalleVenta: [],
       cotizacion: null,
     });
@@ -1700,7 +1696,7 @@ class VentaCrearEscritorio extends CustomComponent {
       idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailOnlyVentaVenta(
+    const response = await detailForIdVenta(
       params,
       this.abortControllerVenta.signal,
     );
@@ -1709,7 +1705,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([UNIDADES, NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1774,9 +1770,9 @@ class VentaCrearEscritorio extends CustomComponent {
   handlePrinterImpresion = (size) => {
     printJS({
       printable: documentsPdfInvoicesVenta(this.state.idVenta, size),
-      type: 'pdf',
+      type: "pdf",
       showModal: true,
-      modalMessage: 'Recuperando documento...',
+      modalMessage: "Recuperando documento...",
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
@@ -1843,57 +1839,56 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({ isOpenPreImpresion: true });
   };
 
-  handleProcessPreImpresion = async (type, abort, success, error) => {
-    const {
-      idComprobante,
-      cliente,
-      idMoneda,
-      idUsuario,
-      idSucursal,
-      observacion,
-      nota,
-      detalleVenta,
-    } = this.state;
+  // handleProcessPreImpresion = async (type, abort, success, error) => {
+  //   const {
+  //     idComprobante,
+  //     cliente,
+  //     idMoneda,
+  //     idUsuario,
+  //     idSucursal,
+  //     observacion,
+  //     nota,
+  //     detalleVenta,
+  //   } = this.state;
 
-    const response = await obtenerPreVentaPdf(
-      {
-        idComprobante: idComprobante,
-        idCliente: cliente.idPersona,
-        idMoneda: idMoneda,
-        idUsuario: idUsuario,
-        idSucursal: idSucursal,
-        observacion: observacion,
-        nota: nota,
-        detalle: detalleVenta,
-      },
-      type,
-      abort.signal,
-    );
+  //   const response = await obtenerPreVentaPdf({
+  //     idComprobante: idComprobante,
+  //     idCliente: cliente.idPersona,
+  //     idMoneda: idMoneda,
+  //     idUsuario: idUsuario,
+  //     idSucursal: idSucursal,
+  //     observacion: observacion,
+  //     nota: nota,
+  //     detalle: detalleVenta,
+  //   },
+  //     type,
+  //     abort.signal,
+  //   );
 
-    if (response instanceof SuccessReponse) {
-      const base64 = await readDataFile(response.data);
+  //   if (response instanceof SuccessReponse) {
+  //     const base64 = await readDataFile(response.data);
 
-      success();
+  //     success();
 
-      printJS({
-        printable: base64,
-        type: 'pdf',
-        base64: true,
-        onPrintDialogClose: this.handleClosePreImpresion,
-      });
-    }
+  //     printJS({
+  //       printable: base64,
+  //       type: "pdf",
+  //       base64: true,
+  //       onPrintDialogClose: this.handleClosePreImpresion,
+  //     });
+  //   }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+  //   if (response instanceof ErrorResponse) {
+  //     if (response.getType() === CANCELED) return;
 
-      error();
+  //     error();
 
-      alertKit.warning({
-        title: "Venta",
-        message: response.getMessage(),
-      });
-    }
-  };
+  //     alertKit.warning({
+  //       title: "Venta",
+  //       message: response.getMessage(),
+  //     });
+  //   }
+  // };
 
   handleClosePreImpresion = () => {
     this.setState({ isOpenPreImpresion: false });
@@ -1948,7 +1943,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     this.setState({
       loadingCliente: true,
-      msgLoadingCliente: 'Consultando número de DNI...',
+      msgLoadingCliente: "Consultando número de DNI...",
     });
 
     const response = await getDni(
@@ -1957,33 +1952,24 @@ class VentaCrearEscritorio extends CustomComponent {
     );
 
     if (response instanceof SuccessReponse) {
-      this.setState(
-        {
-          numeroDocumento: convertNullText(response.data.dni),
-          informacion:
-            convertNullText(response.data.apellidoPaterno) +
-            ' ' +
-            convertNullText(response.data.apellidoMaterno) +
-            ' ' +
-            convertNullText(response.data.nombres),
-          loadingCliente: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+
+      const informacion = `${convertNullText(response.data.apellidoPaterno)} ${convertNullText(response.data.apellidoMaterno)} ${convertNullText(response.data.nombres)}`;
+
+      this.setState({
+        numeroDocumento: convertNullText(response.data.dni),
+        informacion: informacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) {
-        this.setState(
-          {
-            loadingCliente: false,
-          },
-          () => {
-            this.updateReduxState();
-          },
-        );
+        this.setState({
+          loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
+        });
         return;
       }
 
@@ -2061,12 +2047,12 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState({
       clientes: [],
       cliente: null,
-      idTipoDocumento: '',
-      numeroDocumento: '',
-      informacion: '',
-      numeroCelular: '',
-      email: '',
-      direccion: '',
+      idTipoDocumento: "",
+      numeroDocumento: "",
+      informacion: "",
+      numeroCelular: "",
+      email: "",
+      direccion: "",
       nuevoCliente: null,
     }, () => {
       this.updateReduxState();
@@ -2104,21 +2090,18 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleSelectItemCliente = (value) => {
     this.refPersona.current.initialize(value.documento);
-    this.setState(
-      {
-        clientes: [],
-        cliente: value,
-        idTipoDocumento: value.idTipoDocumento,
-        numeroDocumento: value.documento,
-        informacion: value.informacion,
-        numeroCelular: value.celular,
-        email: value.email,
-        direccion: value.direccion,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      clientes: [],
+      cliente: value,
+      idTipoDocumento: value.idTipoDocumento,
+      numeroDocumento: value.documento,
+      informacion: value.informacion,
+      numeroCelular: value.celular,
+      email: value.email,
+      direccion: value.direccion,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -2127,7 +2110,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleOpenOptions = () => {
     const invoice = document.getElementById(this.idSidebarConfiguration);
-    invoice.classList.add('toggled');
+    invoice.classList.add("toggled");
 
     this.setState({
       cacheConfiguracion: {
@@ -2153,7 +2136,7 @@ class VentaCrearEscritorio extends CustomComponent {
       });
     }
 
-    invoice.classList.remove('toggled');
+    invoice.classList.remove("toggled");
   };
 
   handleSelectIdImpuesto = (event) => {
@@ -2224,18 +2207,16 @@ class VentaCrearEscritorio extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalleVenta,
-      },
-      async () => {
-        this.reloadProductoPreferidos();
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalleVenta,
+    }, async () => {
+      this.reloadProductoPreferidos();
 
-        const invoice = document.getElementById(this.idSidebarConfiguration);
-        invoice.classList.remove('toggled');
-      },
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove("toggled");
+    },
     );
   };
 
@@ -2249,19 +2230,19 @@ class VentaCrearEscritorio extends CustomComponent {
     const children = Array.from(table.tBodies[0].children);
     if (children.length === 0) return;
 
-    if (event.key === 'ArrowUp') {
+    if (event.key === "ArrowUp") {
       this.index = (this.index - 1 + children.length) % children.length;
       this.updateSelection(children);
       event.preventDefault();
     }
 
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       this.index = (this.index + 1) % children.length;
       this.updateSelection(children);
       event.preventDefault();
     }
 
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       if (this.index >= 0) {
         this.handleOpenDatos();
         event.preventDefault();
@@ -2271,18 +2252,26 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   handleOnClick = async (event) => {
-    const { rowIndex, children } = getRowCellIndex(event);
+    const result = getRowCellIndex(event);
 
-    if (rowIndex === -1) return;
+    if (!result) {
+      return;
+    }
+
+    const { rowIndex, children } = result;
 
     this.index = rowIndex;
     this.updateSelection(children);
   };
 
   handleOnDbClick = async (event) => {
-    const { rowIndex, cellIndex, children } = getRowCellIndex(event);
+    const result = getRowCellIndex(event);
 
-    if (rowIndex === -1) return;
+    if (!result) {
+      return;
+    }
+
+    const { rowIndex, cellIndex, children } = result;
 
     this.index = rowIndex;
     this.updateSelection(children);
@@ -2301,11 +2290,11 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   updateSelection = (children) => {
-    children.forEach((row) => row.classList.remove('table-active'));
+    children.forEach((row) => row.classList.remove("table-active"));
 
     const selectedChild = children[this.index];
-    selectedChild.classList.add('table-active');
-    selectedChild.scrollIntoView({ block: 'center' });
+    selectedChild.classList.add("table-active");
+    selectedChild.scrollIntoView({ block: "center" });
   };
 
   /*
@@ -2328,7 +2317,7 @@ class VentaCrearEscritorio extends CustomComponent {
     const { detalleVenta, codiso } = this.state;
     return detalleVenta.map((producto, key) => {
       const cantidad =
-        producto.idTipoTratamientoProducto === SERVICIO
+        producto.idTipoTratamientoProducto === NINGUNO
           ? producto.cantidad
           : producto.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -2336,26 +2325,26 @@ class VentaCrearEscritorio extends CustomComponent {
           );
 
       return (
-        <TableRow key={key} className="bg-white">
-          <TableCell className="text-center">{producto.id}</TableCell>
-          <TableCell className="text-center">
+        <tr key={key} className="bg-white">
+          <td className="text-center">{producto.id}</td>
+          <td className="text-center">
             <Button
               className="btn-outline-danger"
               onClick={() => this.handleRemoveItem(producto)}
             >
               <i className="bi bi-trash"></i>
             </Button>
-          </TableCell>
-          <TableCell className="text-center">
+          </td>
+          <td className="text-center">
             <Image
               default={images.noImage}
               src={producto.imagen}
               alt={producto.nombreProducto}
               width={70}
             />
-          </TableCell>
-          <TableCell className="text-center">
-            {producto.idTipoTratamientoProducto === SERVICIO && (
+          </td>
+          <td className="text-center">
+            {producto.idTipoTratamientoProducto === NINGUNO && (
               <p>{rounded(producto.cantidad)}</p>
             )}
 
@@ -2364,10 +2353,9 @@ class VentaCrearEscritorio extends CustomComponent {
               producto.inventarios.map((item, index) => (
                 <div
                   key={index}
-                  className={`${producto.inventarios.length - 1 === index
-                    ? ''
-                    : ' border-bottom  mb-2'
-                    } `}
+                  className={cn(
+                    producto.inventarios.length - 1 !== index ? "border-bottom  mb-2" : ""
+                  )}
                 >
                   <span>{item.almacen}</span>
                   <p className="my-1">{rounded(item.cantidad)}</p>
@@ -2389,20 +2377,20 @@ class VentaCrearEscritorio extends CustomComponent {
                   <span key={key}>{rounded(inventario.cantidad)}</span>
                 ))
             } */}
-          </TableCell>
-          <TableCell className="text-left">
+          </td>
+          <td className="text-left">
             {producto.codigo}
             <br />
             {producto.nombreProducto}
-          </TableCell>
-          <TableCell className="text-center">
+          </td>
+          <td className="text-center">
             {formatCurrency(producto.precio, codiso)}
-          </TableCell>
+          </td>
           {/* <td className='text-center'>0%</td> */}
-          <TableCell className="text-center">
+          <td className="text-center">
             {formatCurrency(producto.precio * cantidad, codiso)}
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
       );
     });
   }
@@ -2440,11 +2428,11 @@ class VentaCrearEscritorio extends CustomComponent {
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
-        <ModalPreImpresion
+        {/* <ModalPreImpresion
           isOpen={this.state.isOpenPreImpresion}
           handleClose={this.handleClosePreImpresion}
           handleProcess={this.handleProcessPreImpresion}
-        />
+        /> */}
 
         <ModalProdcutos
           refModal={this.refModalProductos}
@@ -2599,27 +2587,29 @@ class VentaCrearEscritorio extends CustomComponent {
                   className="h-full overflow-auto pt-0 pr-3 pb-3 pl-3"
                   onKeyDown={this.handleKeyDownTable}
                 >
-                  <Table
+                  <table
                     ref={this.refTable}
-                    tabIndex="0"
+                    tabIndex={0}
                     onClick={this.handleOnClick}
                     onDoubleClick={this.handleOnDbClick}
                     className={'table table-bordered table-hover table-sticky'}
                   >
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-center" width="5%">#</TableHead>
-                        <TableHead className="text-center" width="5%">Quitar</TableHead>
-                        <TableHead className="text-center" width="5%">Imagen</TableHead>
-                        <TableHead width="10%">Almacen/Cantidad</TableHead>
-                        <TableHead width="20%">Descripción</TableHead>
-                        <TableHead width="10%">Precio</TableHead>
+                    <thead>
+                      <tr>
+                        <th className="text-center w-[5%]">#</th>
+                        <th className="text-center w-[5%]">Quitar</th>
+                        <th className="text-center w-[5%]">Imagen</th>
+                        <th className="w-[10%]">Almacen/Cantidad</th>
+                        <th className="w-[20%]">Descripción</th>
+                        <th className="w-[10%]">Precio</th>
                         {/* <th width="10%">Descuento</th> */}
-                        <TableHead width="10%">Importe</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>{this.generateBody()}</TableBody>
-                  </Table>
+                        <th className="w-[10%]">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.generateBody()}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -2636,23 +2626,20 @@ class VentaCrearEscritorio extends CustomComponent {
               <SpinnerView
                 loading={this.state.loadingCliente}
                 message={this.state.msgLoadingCliente}
-                body={
-                  <>
-                    <div className="mt-2">
-                      <Button
-                        className="btn-danger"
-                        onClick={() => {
-                          if (this.abortControllerCliente) {
-                            this.abortControllerCliente.abort();
-                          }
-                        }}
-                      >
-                        Cancelar petición <i className="fa fa-close"></i>
-                      </Button>
-                    </div>
-                  </>
-                }
-              />
+              >
+                <div className="mt-2">
+                  <Button
+                    className="btn-danger"
+                    onClick={() => {
+                      if (this.abortControllerCliente) {
+                        this.abortControllerCliente.abort();
+                      }
+                    }}
+                  >
+                    Cancelar petición <i className="fa fa-close"></i>
+                  </Button>
+                </div>
+              </SpinnerView>
 
               <div>
                 <Button
@@ -2679,7 +2666,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     value={this.state.idComprobante}
                     onChange={this.handleSelectComprobante}
                   >
-                    <option value={''}>Tipos de comprobante</option>
+                    <option value={""}>Tipos de comprobante</option>
                     {this.state.comprobantes.map((item, index) => (
                       <option key={index} value={item.idComprobante}>
                         {item.nombre} ({item.serie})
@@ -2699,7 +2686,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     ref={this.refIdTipoDocumento}
                     onChange={this.handleSelectTipoDocumento}
                   >
-                    <option value={''}>Tipo de documento</option>
+                    <option value={""}>Tipo de documento</option>
                     {
                       this.state.tiposDocumentos
                         .map((item, index) => (
@@ -2903,7 +2890,9 @@ VentaCrearEscritorio.propTypes = {
   starProduct: PropTypes.func.isRequired,
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

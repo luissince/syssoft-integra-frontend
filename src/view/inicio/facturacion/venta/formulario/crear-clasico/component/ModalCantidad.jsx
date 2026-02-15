@@ -1,23 +1,24 @@
 import React, { Component } from 'react';
-import { CustomModalForm } from '../../../../../../../components/CustomModal';
-import Input from '../../../../../../../components/Input';
-import Row from '../../../../../../../components/Row';
+import { CustomModalForm } from '@/components/CustomModal';
+import Input from '@/components/Input';
+import Row from '@/components/Row';
 import {
-  alertWarning,
   focusOnFirstInvalidInput,
   handlePasteFloat,
   isNumeric,
   validateNumericInputs,
-} from '../../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
-import Button from '../../../../../../../components/Button';
-import Column from '../../../../../../../components/Column';
+import Button from '@/components/Button';
+import Column from '@/components/Column';
+import { alertKit } from 'alert-kit';
 
 class ModalCantidad extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
-      idProducto: '',
+      idProducto: "",
       inventarios: [],
     };
 
@@ -63,8 +64,12 @@ class ModalCantidad extends Component {
     const allValid = inventarios.every(isValidInventory);
 
     if (!allValid) {
-      alertWarning('Venta', 'Ingrese la cantidad de cada almacen.', () => {
-        validateNumericInputs(this.refContenedor);
+      alertKit.warning({
+        title: "Venta",
+        message: "Ingrese la cantidad de cada almacen.",
+        onClose: () => {
+          validateNumericInputs(this.refContenedor);
+        },
       });
       return;
     }

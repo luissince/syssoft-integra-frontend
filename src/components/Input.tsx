@@ -15,7 +15,7 @@ import { forwardRef, InputHTMLAttributes, ReactNode } from 'react';
  */
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: ReactNode; // Puede ser string o un nodo de React (JSX)
+  label?: ReactNode | string; // Puede ser string o un nodo de React (JSX)
   group?: boolean; // Indica si debe envolver el input en un grupo
   iconLeft?: ReactNode; // Icono a la izquierda del input
   buttonRight?: ReactNode; // Botón a la derecha del input

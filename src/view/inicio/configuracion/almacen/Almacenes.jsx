@@ -1,14 +1,14 @@
 import { isEmpty } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
 import Paginacion from '../../../../components/Paginacion';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import {
   deleteAlmacen,
   listAlmacen,
 } from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
@@ -32,7 +32,7 @@ import { alertKit } from 'alert-kit';
  * @extends CustomComponent
  */
 class Almacenes extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -49,7 +49,7 @@ class Almacenes extends CustomComponent {
       messageTable: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.abortControllerTable = new AbortController();
@@ -273,7 +273,7 @@ class Almacenes extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );

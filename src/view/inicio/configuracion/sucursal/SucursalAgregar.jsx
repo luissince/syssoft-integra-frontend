@@ -1,48 +1,50 @@
 import React from 'react';
 import {
+  getNumber,
   imageBase64,
   isEmpty,
+  keyNumberFloat,
   keyNumberPhone,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import { images } from '../../../../helper';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { images } from '@/helper';
 import {
   addSucursal,
   getUbigeo,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import CustomComponent from '../../../../model/class/custom-component';
-import SearchInput from '../../../../components/SearchInput';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import Input from '../../../../components/Input';
-import { Switches } from '../../../../components/Checks';
-import Image, { ImageUpload } from '../../../../components/Image';
-import TextArea from '../../../../components/TextArea';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import CustomComponent from '@/components/CustomComponent';
+import SearchInput from '@/components/SearchInput';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import { Switches } from '@/components/Checks';
+import { ImageUpload } from '@/components/Image';
+import TextArea from '@/components/TextArea';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class SucursalAgregar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
-      nombre: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      paginaWeb: '',
-      direcion: '',
-      idUbigeo: '',
-      googleMaps: '',
-      horarioAtencion: '',
+      nombre: "",
+      telefono: "",
+      celular: "",
+      email: "",
+      paginaWeb: "",
+      direcion: "",
+      idUbigeo: "",
+      googleMaps: "",
+      horarioAtencion: "",
       principal: false,
       estado: true,
 
@@ -51,13 +53,15 @@ class SucursalAgregar extends CustomComponent {
       },
 
       ubigeos: [],
+      gastoFijo: "",
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
     this.refTelefono = React.createRef();
     this.refCelular = React.createRef();
+    this.refGastoFijo = React.createRef();
     this.refEmail = React.createRef();
     this.refPaginWeb = React.createRef();
     this.refDireccion = React.createRef();
@@ -83,35 +87,49 @@ class SucursalAgregar extends CustomComponent {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Sucursal',
-          message: 'La imagen a subir tiene que ser menor a 500 KB.',
-        });
-        return;
-      }
-      this.setState({
-        imagen: {
-          // name: file.name,
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         imagen: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+
+    const getImageBase64 = await imageBase64(file);
+
+    if (!getImageBase64) {
+      alertKit.warning({
+        title: "Sucursal",
+        message: `La imagen ${file.name} no es válida.`
+      });
+      return;
+    }
+
+    const { size, base64String, extension, width, height } = getImageBase64;
+
+    if (size > 500) {
+      alertKit.warning({
+        title: "Sucursal",
+        message: "La imagen a subir tiene que ser menor a 500 KB.",
+      });
+      return;
+    }
+
+    this.setState({
+      imagen: {
+        // name: file.name,
+        base64: base64String,
+        extension: extension,
+        width: width,
+        height: height,
+        size: size,
+        url: url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -131,13 +149,13 @@ class SucursalAgregar extends CustomComponent {
   handleClearInputaUbigeo = () => {
     this.setState({
       ubigeos: [],
-      idUbigeo: '',
+      idUbigeo: "",
     });
   };
 
   handleFilterUbigeo = async (text) => {
     const searchWord = text;
-    this.setState({ idUbigeo: '' });
+    this.setState({ idUbigeo: "" });
 
     if (isEmpty(searchWord)) {
       this.setState({ ubigeos: [] });
@@ -156,16 +174,9 @@ class SucursalAgregar extends CustomComponent {
   };
 
   handleSelectItemUbigeo = (value) => {
-    this.refUbigeo.current.initialize(
-      value.departamento +
-      ' - ' +
-      value.provincia +
-      ' - ' +
-      value.distrito +
-      ' (' +
-      value.ubigeo +
-      ')',
-    );
+    const ubigeo = `${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`;
+
+    this.refUbigeo.current.initialize(ubigeo);
 
     this.setState({
       ubigeos: [],
@@ -176,8 +187,8 @@ class SucursalAgregar extends CustomComponent {
   handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
       alertKit.warning({
-        title: 'Sucursal',
-        message: 'Ingrese el nombre del sucursal.',
+        title: "Sucursal",
+        message: "Ingrese el nombre del sucursal.",
         onClose: () => {
           this.refNombre.current.focus();
         },
@@ -187,8 +198,8 @@ class SucursalAgregar extends CustomComponent {
 
     if (isEmpty(this.state.direcion)) {
       alertKit.warning({
-        title: 'Sucursal',
-        message: 'Ingrese la dirección del sucursal.',
+        title: "Sucursal",
+        message: "Ingrese la dirección del sucursal.",
         onClose: () => {
           this.refDireccion.current.focus();
         },
@@ -198,8 +209,8 @@ class SucursalAgregar extends CustomComponent {
 
     if (isEmpty(this.state.idUbigeo)) {
       alertKit.warning({
-        title: 'Sucursal',
-        message: 'Ingrese su ubigeo.',
+        title: "Sucursal",
+        message: "Ingrese su ubigeo.",
         onClose: () => {
           this.refValueUbigeo.current.focus();
         },
@@ -207,21 +218,20 @@ class SucursalAgregar extends CustomComponent {
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Sucursal',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: "Sucursal",
+      message: "¿Está seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const data = {
@@ -235,6 +245,7 @@ class SucursalAgregar extends CustomComponent {
         idUbigeo: this.state.idUbigeo,
         googleMaps: this.state.googleMaps,
         horarioAtencion: this.state.horarioAtencion.trim(),
+        gastoFijo: getNumber(this.state.gastoFijo),
         principal: this.state.principal,
         estado: this.state.estado,
         imagen: this.state.imagen,
@@ -245,7 +256,7 @@ class SucursalAgregar extends CustomComponent {
 
       if (response instanceof SuccessReponse) {
         alertKit.success({
-          title: 'Sucursal',
+          title: "Sucursal",
           message: response.data,
           onClose: () => {
             this.props.history.goBack();
@@ -257,7 +268,7 @@ class SucursalAgregar extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Sucursal',
+          title: "Sucursal",
           message: response.getMessage(),
         });
       }
@@ -273,30 +284,27 @@ class SucursalAgregar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column className="col-lg-8 col-md-6 col-12" formGroup={true}>
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  autoFocus={true}
-                  label={
-                    <>
-                      Nombre:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  ref={this.refNombre}
-                  value={this.state.nombre}
-                  onChange={(event) =>
-                    this.setState({ nombre: event.target.value })
-                  }
-                  placeholder="Ingrese el nombre ..."
-                />
-              </Column>
-            </Row>
+        <div className="flex flex-row gap-3 mb-3">
+          <div className="w-3/5 flex flex-col gap-3">
+            <div>
+              <Input
+                autoFocus={true}
+                label={
+                  <>
+                    Nombre: <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                ref={this.refNombre}
+                value={this.state.nombre}
+                onChange={(event) =>
+                  this.setState({ nombre: event.target.value })
+                }
+                placeholder="Ingrese el nombre ..."
+              />
+            </div>
 
-            <Row>
-              <Column className={'col-md-6'} formGroup={true}>
+            <div className="flex flex-row gap-3">
+              <div className="w-full">
                 <Input
                   label={'N° de Teléfono:'}
                   ref={this.refTelefono}
@@ -307,9 +315,9 @@ class SucursalAgregar extends CustomComponent {
                   onKeyDown={keyNumberPhone}
                   placeholder="Ingrese su n° de teléfono ..."
                 />
-              </Column>
+              </div>
 
-              <Column className={'col-md-6'} formGroup={true}>
+              <div className="w-full">
                 <Input
                   label={'N° de Celular:'}
                   ref={this.refCelular}
@@ -320,11 +328,11 @@ class SucursalAgregar extends CustomComponent {
                   onKeyDown={keyNumberPhone}
                   placeholder="Ingrese su n° de celular ..."
                 />
-              </Column>
-            </Row>
+              </div>
+            </div>
 
-            <Row>
-              <Column className={'col-md-6'} formGroup={true}>
+            <div className="flex flex-row gap-3">
+              <div className="w-full">
                 <Input
                   label={'Correo Electrónico:'}
                   ref={this.refEmail}
@@ -334,9 +342,9 @@ class SucursalAgregar extends CustomComponent {
                   }
                   placeholder="Ingrese su correo electrónico ..."
                 />
-              </Column>
+              </div>
 
-              <Column className={'col-md-6'} formGroup={true}>
+              <div className="w-full">
                 <Input
                   label={'Página Web:'}
                   ref={this.refPaginWeb}
@@ -346,101 +354,103 @@ class SucursalAgregar extends CustomComponent {
                   }
                   placeholder="Ingrese su página web ..."
                 />
-              </Column>
-            </Row>
+              </div>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={
-                    <>
-                      Dirección:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  ref={this.refDireccion}
-                  value={this.state.direcion}
-                  onChange={(event) =>
-                    this.setState({ direcion: event.target.value })
-                  }
-                  placeholder="Ingrese su dirección ..."
-                />
-              </Column>
-            </Row>
+            <div>
+              <Input
+                label={
+                  <>
+                    Dirección: <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                ref={this.refDireccion}
+                value={this.state.direcion}
+                onChange={(event) =>
+                  this.setState({ direcion: event.target.value })
+                }
+                placeholder="Ingrese su dirección ..."
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <SearchInput
-                  ref={this.refUbigeo}
-                  label={
-                    <>
-                      Ubigeo:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  placeholder="Filtrar productos..."
-                  refValue={this.refValueUbigeo}
-                  data={this.state.ubigeos}
-                  handleClearInput={this.handleClearInputaUbigeo}
-                  handleFilter={this.handleFilterUbigeo}
-                  handleSelectItem={this.handleSelectItemUbigeo}
-                  renderItem={(value) => (
-                    <>
-                      {value.departamento} - {value.provincia} -{' '}
-                      {value.distrito} ({value.ubigeo})
-                    </>
-                  )}
-                />
-              </Column>
-            </Row>
+            <div>
+              <SearchInput
+                ref={this.refUbigeo}
+                label={
+                  <>
+                    Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                placeholder="Filtrar productos..."
+                refValue={this.refValueUbigeo}
+                data={this.state.ubigeos}
+                handleClearInput={this.handleClearInputaUbigeo}
+                handleFilter={this.handleFilterUbigeo}
+                handleSelectItem={this.handleSelectItemUbigeo}
+                renderItem={(value) => (
+                  <>
+                    {value.departamento} - {value.provincia} -{' '}
+                    {value.distrito} ({value.ubigeo})
+                  </>
+                )}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <TextArea
-                  label={
-                    <>
-                      Url de Google Maps
-                      <a
-                        href="https://embed-googlemap.com/"
-                        target="blank"
-                        className="btn btn-link"
-                      >
-                        Puedes obtenerla en esta web
-                      </a>
-                      : <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  value={this.state.googleMaps}
-                  onChange={(event) =>
-                    this.setState({ googleMaps: event.target.value })
-                  }
-                  placeholder="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=Alisios 221-197, Lima 15034..."
-                  rows={6}
-                ></TextArea>
-              </Column>
-            </Row>
+            <div>
+              <TextArea
+                label={
+                  <>
+                    Url de Google Maps
+                    <a
+                      href="https://embed-googlemap.com/"
+                      target="blank"
+                      className="btn btn-link !p-0 ml-1"
+                    >
+                      Puedes obtenerla en esta web
+                    </a>
+                    : <i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
+                value={this.state.googleMaps}
+                onChange={(event) =>
+                  this.setState({ googleMaps: event.target.value })
+                }
+                placeholder="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=Alisios 221-197, Lima 15034..."
+                rows={6}
+              />
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
-                <TextArea
-                  label={<>Horario de Atención:</>}
-                  value={this.state.horarioAtencion}
-                  onChange={(event) =>
-                    this.setState({ horarioAtencion: event.target.value })
-                  }
-                  placeholder="Ingrese su horario de atención ..."
-                  rows={4}
-                ></TextArea>
-              </Column>
-            </Row>
+            <div>
+              <TextArea
+                label={"Horario de Atención:"}
+                value={this.state.horarioAtencion}
+                onChange={(event) =>
+                  this.setState({ horarioAtencion: event.target.value })
+                }
+                placeholder="Ingrese su horario de atención ..."
+                rows={4}
+              />
+            </div>
 
-            <Row>
-              <Column className={'col-md-6 col-12'} formGroup={true}>
+            <div>
+              <Input
+                label={<>Gasto Fijo <small>Para calculo de metas diarias:</small> </>}
+                ref={this.refGastoFijo}
+                value={this.state.gastoFijo}
+                onChange={(event) =>
+                  this.setState({ gastoFijo: event.target.value })
+                }
+                onKeyDown={keyNumberFloat}
+                placeholder="Ingrese su gasto fijo para calculo de metas diarias ..."
+              />
+            </div>
+
+            <div className="flex flex-row gap-3">
+              <div className="w-full">
                 <Switches
                   label={
                     <>
-                      Principal:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
+                      Principal: <i className="fa fa-asterisk text-danger small"></i>
                     </>
                   }
                   id={'stPrincipal'}
@@ -451,14 +461,13 @@ class SucursalAgregar extends CustomComponent {
                 >
                   {this.state.principal ? 'Si' : 'No'}
                 </Switches>
-              </Column>
+              </div>
 
-              <Column className={'col-md-6 col-12'} formGroup={true}>
+              <div className="w-full">
                 <Switches
                   label={
                     <>
-                      Estado:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
+                      Estado: <i className="fa fa-asterisk text-danger small"></i>
                     </>
                   }
                   id={'stEstado'}
@@ -467,44 +476,39 @@ class SucursalAgregar extends CustomComponent {
                     this.setState({ estado: value.target.checked })
                   }
                 >
-                  {this.state.estado ? 'Habilitado' : 'Inactivo'}
+                  {this.state.estado ? "Habilitado" : "Inactivo"}
                 </Switches>
-              </Column>
-            </Row>
-          </Column>
+              </div>
+            </div>
+          </div>
 
-          <Column className="col-lg-4 col-md-6 col-12" formGroup={true}>
-            <Row>
-              <Column formGroup={true}>
-                <ImageUpload
-                  label="Imagen de portada"
-                  subtitle="La imagen no debe superar los 1MB(Megabytes) y debe tener un tamaño de 1024 x 629 píxeles"
-                  imageUrl={this.state.imagen.url}
-                  defaultImage={images.noImage}
-                  alt="Icono de la categoría"
-                  inputId="fileImagen"
-                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                  onChange={this.handleFileImage}
-                  onClear={this.handleClearImage}
-                />
-              </Column>
-            </Row>
-          </Column>
-        </Row>
+          <div className="w-2/5">
+            <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
+              label="Imagen de portada"
+              subtitle="La imagen no debe superar los 1MB(Megabytes) y debe tener un tamaño de 1024 x 629 píxeles"
+              imageUrl={this.state.imagen.url}
+              defaultImage={images.noImage}
+              alt="Icono de la categoría"
+              inputId="fileImagen"
+              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+              onChange={this.handleFileImage}
+              onClear={this.handleClearImage}
+            />
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex gap-3">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>{' '}
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }
@@ -513,7 +517,9 @@ class SucursalAgregar extends CustomComponent {
 SucursalAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
   }).isRequired,
   history: PropTypes.shape({

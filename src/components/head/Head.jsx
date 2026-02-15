@@ -17,7 +17,7 @@ const Menu = (props) => {
     REALIZAR_VENTA,
   );
 
-  const handleSignIn = () => {
+  const handleSignOut = () => {
     window.localStorage.removeItem('login');
     window.localStorage.removeItem('project');
     window.location.href = '/';
@@ -49,7 +49,7 @@ const Menu = (props) => {
           (
             <div className="flex items-center justify-center px-4 gap-x-3">
               <img src={images.logo} alt="logo" />
-                <p className="font-bold">SYSSOFT INTEGRA</p>
+              <p className="font-bold">SYSSOFT INTEGRA</p>
             </div>
           )
       }
@@ -150,7 +150,7 @@ const Menu = (props) => {
                 <i className="fa fa-sign-out fa-sm"></i> Cerrar Sucursal
               </Button>
 
-              <Button className="btn-secondary" onClick={handleSignIn}>
+              <Button className="btn-secondary" onClick={handleSignOut}>
                 <i className="fa fa-window-close fa-sm"></i> Cerrar Sesión
               </Button>
             </li>

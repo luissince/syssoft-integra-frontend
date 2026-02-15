@@ -2,21 +2,21 @@ import PropTypes from 'prop-types';
 import {
   formatCurrency,
   isEmpty,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../../components/Paginacion';
+import Paginacion from '@/components/Paginacion';
 import {
   deleteBanco,
   listBancos,
-} from '../../../../../network/rest/principal.network';
-import ErrorResponse from '../../../../../model/class/error-response';
-import SuccessReponse from '../../../../../model/class/response';
-import { CANCELED } from '../../../../../model/types/types';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+} from '@/network/rest/principal.network';
+import ErrorResponse from '@/model/class/error-response';
+import SuccessReponse from '@/model/class/response';
+import { CANCELED } from '@/constants/requestStatus';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -25,14 +25,14 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
-import Search from '../../../../../components/Search';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
 import {
   setListaBancoData,
   setListaBancoPaginacion,
-} from '../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
 
@@ -59,10 +59,10 @@ class Bancos extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -108,26 +108,27 @@ class Bancos extends CustomComponent {
     */
 
   loadingData = async () => {
+    const bancoLista = this.props.bancoLista;
     if (
-      this.props.bancoLista &&
-      this.props.bancoLista.data &&
-      this.props.bancoLista.paginacion
+      bancoLista &&
+      bancoLista.data &&
+      bancoLista.paginacion
     ) {
-      this.setState(this.props.bancoLista.data);
+      this.setState(bancoLista.data);
       this.refPaginacion.current.upperPageBound =
-        this.props.bancoLista.paginacion.upperPageBound;
+        bancoLista.paginacion.upperPageBound;
       this.refPaginacion.current.lowerPageBound =
-        this.props.bancoLista.paginacion.lowerPageBound;
+        bancoLista.paginacion.lowerPageBound;
       this.refPaginacion.current.isPrevBtnActive =
-        this.props.bancoLista.paginacion.isPrevBtnActive;
+        bancoLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive =
-        this.props.bancoLista.paginacion.isNextBtnActive;
+        bancoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
-        this.props.bancoLista.paginacion.pageBound;
+        bancoLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion =
-        this.props.bancoLista.paginacion.messagePaginacion;
+        bancoLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.bancoLista.data.buscar);
+      this.refSearch.current.initialize(bancoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -186,7 +187,7 @@ class Bancos extends CustomComponent {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const data = {
@@ -201,19 +202,16 @@ class Bancos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -266,8 +264,8 @@ class Bancos extends CustomComponent {
 
   handleBorrar = async (idBanco) => {
     const accept = await alertKit.question({
-      title: 'Banco',
-      message: '¿Estás seguro de eliminar el banco?',
+      title: "Banco",
+      message: "¿Estás seguro de eliminar el banco?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -277,21 +275,21 @@ class Bancos extends CustomComponent {
     });
 
     if (accept) {
-      alertKit.loading({ message: 'Procesando información...' });
+      alertKit.loading({ message: "Procesando información..." });
 
       const params = { idBanco: idBanco };
       const response = await deleteBanco(params);
 
       if (response instanceof ErrorResponse) {
         alertKit.warning({
-          title: 'Banco',
+          title: "Banco",
           message: response.getMessage(),
         });
         return;
       }
 
       alertKit.success({
-        title: 'Banco',
+        title: "Banco",
         message: response.data,
       }, () => {
         this.loadingInit();
@@ -319,7 +317,7 @@ class Bancos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="11"
+          colSpan={11}
           message={'Cargando información de la tabla...'}
         />
       );
@@ -477,7 +475,9 @@ Bancos.propTypes = {
       idSucursal: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   bancoLista: PropTypes.shape({

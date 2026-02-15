@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -16,8 +12,8 @@ import {
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
@@ -33,6 +29,7 @@ import {
   TableRow,
 } from '../../../../components/Table';
 import { SpinnerTable } from '../../../../components/Spinner';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -64,7 +61,7 @@ class Monedas extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTxtNombre = React.createRef();
@@ -138,7 +135,7 @@ class Monedas extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -173,39 +170,55 @@ class Monedas extends CustomComponent {
     });
   };
 
-  handleBorrar(idMoneda) {
-    alertDialog(
-      'Moneda',
-      '¿Estás seguro de eliminar la moneda?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idMoneda: idMoneda,
-          };
-
-          alertInfo('Moneda', 'Procesando información...');
-
-          const response = await deleteMoneda(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Moneda', response.data);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Moneda', response.getType());
-          }
-        }
+  async handleBorrar(idMoneda) {
+    const accept = await alertKit.question({
+      title: "Moneda",
+      message: "¿Estás seguro de eliminar la moneda?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idMoneda: idMoneda,
+      };
+
+      alertKit.loading({
+        message: "Procesando información..."
+      })
+
+      const response = await deleteMoneda(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Moneda",
+          message: response.data,
+          onClose: async () => {
+            await this.loadInit();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Moneda",
+          message: response.getType(),
+        });
+      }
+    }
   }
 
   generarBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -233,9 +246,8 @@ class Monedas extends CustomComponent {
         );
 
       const nmEstado = item.estado === 1 ? 'ACTIVO' : 'INACTIVO';
-      const bgEstado = `badge ${
-        item.estado === 1 ? 'badge-success' : 'badge-danger'
-      }`;
+      const bgEstado = `badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+        }`;
 
       return (
         <TableRow key={index}>
@@ -251,7 +263,7 @@ class Monedas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idMoneda)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -260,7 +272,7 @@ class Monedas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idMoneda)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -284,7 +296,7 @@ class Monedas extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-              // disabled={!this.state.add}
+            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}
@@ -353,7 +365,9 @@ Monedas.propTypes = {
   }),
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
 };

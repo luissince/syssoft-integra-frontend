@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ExternalLink } from 'lucide-react';
 import {
-  alertWarning,
   currentDate,
   formatNumberWithZeros,
   formatTime,
@@ -10,24 +9,24 @@ import {
   guId,
   isEmpty,
   formatCurrency,
-} from '../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../components/Container';
-import CustomComponent from '../../../model/class/custom-component';
-import { SpinnerView } from '../../../components/Spinner';
-import Title from '../../../components/Title';
-import Row from '../../../components/Row';
-import Column from '../../../components/Column';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   comboSucursal,
-  comboUsuario,
+  optionsUsuario,
   dashboardCompra,
   documentsExcelCompra,
   documentsPdfReportsCompra,
-} from '../../../network/rest/principal.network';
-import SuccessReponse from '../../../model/class/response';
-import ErrorResponse from '../../../model/class/error-response';
-import { CANCELED } from '../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import { Link } from 'react-router-dom';
 import {
   Table,
@@ -37,19 +36,20 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../components/Table';
+} from '@/components/Table';
 import {
   Card,
   CardBody,
   CardHeader,
   CardText,
   CardTitle,
-} from '../../../components/Card';
-import Input from '../../../components/Input';
-import Select from '../../../components/Select';
-import Button from '../../../components/Button';
+} from '@/components/Card';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
+import Button from '@/components/Button';
 import pdfVisualizer from 'pdf-visualizer';
-import { downloadFileAsync } from '../../../redux/downloadSlice';
+import { downloadFileAsync } from '@/redux/downloadSlice';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -149,23 +149,29 @@ class RepCompras extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning(
-        'Reporte Compra',
-        sucursalResponse.getMessage(),
-        async () => {
+
+      alertKit.warning({
+        title: "Reporte Compra",
+        message: sucursalResponse.getMessage(),
+        onClose: async () => {
           await this.loadingInit();
         },
-      );
+      });
+
       return;
     }
 
-    const usuarioResponse = await comboUsuario(this.abortControllerView.signal);
+    const usuarioResponse = await optionsUsuario(this.abortControllerView.signal);
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
 
-      alertWarning('Reporte Compra', usuarioResponse.getMessage(), async () => {
-        await this.loadingInit();
+      alertKit.warning({
+        title: "Reporte Compra",
+        message: usuarioResponse.getMessage(),
+        onClose: async () => {
+          await this.loadingInit();
+        },
       });
       return;
     }
@@ -204,15 +210,18 @@ class RepCompras extends CustomComponent {
     const dashboard = await dashboardCompra(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Compra', dashboard.getMessage());
+
+      alertKit.warning({
+        title: "Reporte Compra",
+        message: dashboard.getMessage(),
+      });
+
       return;
     }
 
     dashboard instanceof SuccessReponse;
 
-    const totalPaginacion = parseInt(
-      Math.ceil(parseFloat(dashboard.data.total) / this.state.filasPorPagina),
-    );
+    const totalPaginacion = parseInt(String(Math.ceil(Number(dashboard.data.total) / this.state.filasPorPagina)));
 
     this.setState({
       totalCompra: dashboard.data.contado + dashboard.data.credito,

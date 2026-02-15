@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -9,16 +9,16 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../../components/Table';
-import Paginacion from '../../../../../../components/Paginacion';
+} from '@/components/Table';
+import Paginacion from '@/components/Paginacion';
 import CustomModal, {
   CustomModalContentBody,
   CustomModalContentFooter,
   CustomModalContentHeader,
   CustomModalContentOverflow,
   CustomModalContentScroll,
-} from '../../../../../../components/CustomModal';
-import { SpinnerTable } from '../../../../../../components/Spinner';
+} from '@/components/CustomModal';
+import { SpinnerTable } from '@/components/Spinner';
 import {
   currentDate,
   formatNumberWithZeros,
@@ -26,14 +26,14 @@ import {
   isEmpty,
   keyUpSearch,
   formatCurrency,
-} from '../../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../../model/class/custom-component';
-import Button from '../../../../../../components/Button';
-import Input from '../../../../../../components/Input';
-import { listPedido } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+} from '@/helper/utils.helper';
+import CustomComponent from '@/components/CustomComponent';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import { listPedido } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -87,7 +87,7 @@ class ModalPedido extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -112,7 +112,7 @@ class ModalPedido extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
@@ -193,7 +193,7 @@ class ModalPedido extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );

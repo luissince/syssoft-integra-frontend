@@ -1,27 +1,23 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+} from '@/helper/utils.helper';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   listPersonasConductor,
   preferredPersona,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
 import {
   Table,
   TableBody,
@@ -29,8 +25,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../../../../components/Table';
-import { SpinnerTable } from '../../../../components/Spinner';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -44,22 +41,21 @@ class Conductores extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      idSucursal: this.props.token.project.idSucursal,
-
       loading: false,
       lista: [],
       restart: false,
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
+
+      idSucursal: this.props.token.project.idSucursal,
     };
 
-    this.idCodigo = '';
     this.abortControllerTable = new AbortController();
   }
 
@@ -78,7 +74,7 @@ class Conductores extends CustomComponent {
   */
 
   async componentDidMount() {
-    this.loadInit();
+    await this.loadInit();
   }
 
   componentWillUnmount() {
@@ -135,11 +131,11 @@ class Conductores extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -156,7 +152,7 @@ class Conductores extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -194,13 +190,6 @@ class Conductores extends CustomComponent {
   |
   */
 
-  handleDetalleCliente(idPersona) {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idPersona=' + idPersona,
-    });
-  }
-
   handleEditar(idPersona) {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/editar`,
@@ -208,33 +197,46 @@ class Conductores extends CustomComponent {
     });
   }
 
-  handlePreferred(idPersona) {
-    alertDialog(
-      'Conductor',
-      '¿Está seguro de que desea hacer la conductor preferido?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Conductor', 'Procesando información...');
-
-          const params = {
-            idPersona: idPersona,
-            rol: '3',
-          };
-
-          const response = await preferredPersona(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Conductor', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Conductor', response.getMessage());
-          }
-        }
+  async handlePreferred(idPersona) {
+    const accept = await alertKit.question({
+      title: "Conductor",
+      message: "¿Está seguro de que desea hacer el conductor preferido?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const params = {
+        idPersona: idPersona,
+        rol: '3',
+      };
+
+      const response = await preferredPersona(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Conductor",
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Conductor",
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   /*
@@ -257,7 +259,7 @@ class Conductores extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -289,18 +291,16 @@ class Conductores extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${
-                item.conductorPreferido === 1 ? 'badge-info' : 'badge-secondary'
-              }`}
+              className={`badge ${item.conductorPreferido === 1 ? 'badge-info' : 'badge-secondary'
+                }`}
             >
               {item.conductorPreferido === 1 ? 'SI' : 'NO'}
             </span>
           </TableCell>
           <TableCell className="text-center">
             <span
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </span>
@@ -396,9 +396,6 @@ class Conductores extends CustomComponent {
 
 Conductores.propTypes = {
   token: PropTypes.shape({
-    userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
-    }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
     }).isRequired,

@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
-import { CustomModalForm } from '../../../../../components/CustomModal';
-import { SpinnerView } from '../../../../../components/Spinner';
+import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader, CustomModalContentScroll, CustomModalForm } from '@/components/CustomModal';
+import { SpinnerView } from '@/components/Spinner';
 import PropTypes from 'prop-types';
 import { alertKit } from 'alert-kit';
-import { isNumeric } from '../../../../../helper/utils.helper';
+import { isNumeric } from '@/helper/utils.helper';
 import {
   getStockInventario,
   updateStockInventario,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import { images } from '../../../../../helper';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import { images } from '@/helper';
 import Image from '@/components/Image';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -28,13 +29,13 @@ class CustomModalStock extends Component {
 
     this.state = {
       loading: true,
-      message: 'Cargando datos...',
+      message: "Cargando datos...",
 
-      nombre: '',
+      nombre: "",
       imagen: null,
-      idInventario: '',
-      stockMinimo: '',
-      stockMaximo: '',
+      idInventario: "",
+      stockMinimo: "",
+      stockMaximo: "",
     };
 
     this.initial = { ...this.state };
@@ -78,19 +79,16 @@ class CustomModalStock extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState(
-        {
-          nombre: producto.producto,
-          imagen: producto.imagen,
-          stockMinimo: response.data.cantidadMinima,
-          stockMaximo: response.data.cantidadMaxima,
-          idInventario: producto.idInventario,
-          loading: false,
-        },
-        () => {
-          this.refStockMinimo.current.focus();
-        },
-      );
+      this.setState({
+        nombre: producto.producto,
+        imagen: producto.imagen,
+        stockMinimo: response.data.cantidadMinima,
+        stockMaximo: response.data.cantidadMaxima,
+        idInventario: producto.idInventario,
+        loading: false,
+      }, () => {
+        this.refStockMinimo.current.focus();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -140,38 +138,31 @@ class CustomModalStock extends Component {
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.stockMinimo)) {
-      alertKit.warning(
-        {
-          title: 'Inventario',
-          message: 'Ingrese el stock mínimo.',
-        },
-        () => {
-          this.refStockMinimo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Inventario",
+        message: "Ingrese el stock mínimo.",
+      }, () => {
+        this.refStockMinimo.current.focus();
+      });
       return;
     }
 
     if (!isNumeric(this.state.stockMaximo)) {
-      alertKit.warning(
-        {
-          title: 'Inventario',
-          message: 'Ingrese el stock máximo.',
-        },
-        () => {
-          this.refStockMaximo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "Inventario",
+        message: "Ingrese el stock máximo.",
+      }, () => {
+        this.refStockMaximo.current.focus();
+      });
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Inventario',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
-        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
-      });
+    const accept = await alertKit.question({
+      title: "Inventario",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
     if (accept) {
       const data = {
@@ -189,22 +180,19 @@ class CustomModalStock extends Component {
       const response = await updateStockInventario(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Inventario',
-            message: response.data,
-          },
-          () => {
-            this.props.handleSave();
-          },
-        );
+        alertKit.success({
+          title: "Inventario",
+          message: response.data,
+        }, () => {
+          this.props.handleSave();
+        });
       }
 
       if (response instanceof ErrorResponse) {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Inventario',
+          title: "Inventario",
           message: response.getMessage(),
         });
       }
@@ -241,31 +229,36 @@ class CustomModalStock extends Component {
     const { isOpen, onClose } = this.props;
 
     return (
-      <CustomModalForm
-        contentRef={this.refModal}
+      <CustomModal
+        ref={this.refModal}
         isOpen={isOpen}
         onOpen={this.handleOnOpen}
         onHidden={this.handleOnHidden}
         onClose={onClose}
         contentLabel="Modal Stock"
         titleHeader="Actualizar Stock"
-        onSubmit={this.handleOnSubmit}
-        body={
-          <>
+      >
+        <CustomModalContentForm onSubmit={this.handleOnSubmit}>
+          <CustomModalContentHeader contentRef={this.refModal}>
+            Actualizar Stock
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody className="flex flex-col gap-3">
             <SpinnerView loading={loading} message={message} />
 
             {/* Producto + Imagen */}
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">
               {nombre}
             </h2>
-            <Image
-              default={images.noImage}
-              src={imagen}
-              alt={nombre}
-              width={100}
-              height={100}
-              className="object-contain rounded-md border mb-2"
-            />
+
+            <div className="w-24 h-24">
+              <Image
+                default={images.noImage}
+                src={imagen}
+                alt={nombre}
+                overrideClass="w-full h-full object-contain rounded border"
+              />
+            </div>
 
             {/* Formulario Stock */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -280,7 +273,7 @@ class CustomModalStock extends Component {
                   ref={this.refStockMinimo}
                   value={stockMinimo}
                   onChange={this.handleInputStockMinimo}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-5 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -295,30 +288,38 @@ class CustomModalStock extends Component {
                   ref={this.refStockMaximo}
                   value={stockMaximo}
                   onChange={this.handleInputStockMaximo}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-5 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
-          </>
-        }
-        footer={
-          <>
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-green-600 text-white text-sm font-medium rounded",
+                "hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition",
+              )}
             >
-              <i className="fa fa-save mr-2"></i> Guardar
+              <i className="fa fa-save"></i> Guardar
             </button>
             <button
               type="button"
               onClick={async () => await this.refModal.current.handleOnClose()}
-              className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-red-600 text-white text-sm font-medium rounded",
+                "hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition",
+              )}
             >
-              <i className="fa fa-close mr-2"></i> Cerrar
+              <i className="fa fa-close"></i> Cerrar
             </button>
-          </>
-        }
-      />
+          </CustomModalContentFooter>
+        </CustomModalContentForm>
+
+      </CustomModal>
     );
   }
 }

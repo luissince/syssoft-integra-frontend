@@ -2,12 +2,12 @@ import { ContainerMenu } from '../../../components/Container';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Bancos from './banco/lista/Bancos.jsx';
-import BancoDetalle from './banco/detalle/BancoDetalle.jsx';
-import BancoAgregar from './banco/formulario/crear/BancoAgregar.jsx';
-import BancoEditar from './banco/formulario/editar/BancoEditar.jsx';
+import Bancos from './banco/lista/Bancos';
+import BancoDetalle from './banco/detalle/BancoDetalle';
+import BancoAgregar from './banco/formulario/crear/BancoAgregar';
+import BancoEditar from './banco/formulario/editar/BancoEditar';
 
-import Transacciones from './transaccion/lista/Transacciones.jsx';
+import Transacciones from './transaccion/lista/Transacciones';
 
 export { Bancos, BancoDetalle, BancoAgregar, BancoEditar, Transacciones };
 

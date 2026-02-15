@@ -1,24 +1,20 @@
 import {
-  alertSuccess,
-  alertWarning,
-  alertDialog,
-  alertInfo,
   isEmpty,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/Container';
 import {
   deleteSucursal,
   listSucursales,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import CustomComponent from '../../../../model/class/custom-component';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import CustomComponent from '@/components/CustomComponent';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -27,40 +23,29 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
-import { SpinnerTable } from '../../../../components/Spinner';
-import Image from '../../../../components/Image';
-import { images } from '../../../../helper';
+} from '@/components/Table';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import { SpinnerTable } from '@/components/Spinner';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { alertKit } from 'alert-kit';
 
 class Sucursales extends CustomComponent {
   constructor(props) {
     super(props);
     this.state = {
-      idSucursal: '',
-
-      // add: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[4].privilegio[0].estado,
-      // ),
-      // edit: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[4].privilegio[1].estado,
-      // ),
-      // remove: statePrivilegio(
-      //   this.props.token.userToken.menus[5].submenu[4].privilegio[2].estado,
-      // ),
-
       loading: false,
       lista: [],
       restart: false,
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     };
 
     this.abortControllerTable = new AbortController();
@@ -110,11 +95,11 @@ class Sucursales extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -131,7 +116,7 @@ class Sucursales extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -167,35 +152,51 @@ class Sucursales extends CustomComponent {
     });
   };
 
-  handleBorrar = (idSucursal) => {
-    alertDialog(
-      'Sucursal',
-      '¿Estás seguro de eliminar el sucursal?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Sucursal', 'Procesando información...');
-
-          const response = await deleteSucursal(idSucursal);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Sucursal', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Sucursal', response.getMessage());
-          }
-        }
+  handleBorrar = async (idSucursal) => {
+    const accept = await alertKit.question({
+      title: "Sucursal",
+      message: "¿Estás seguro de eliminar la sucursal?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información..."
+      });
+
+      const response = await deleteSucursal(idSucursal);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Sucursal",
+          message: response.data,
+          onClose: async () => {
+            await this.loadInit();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.error({
+          title: "Sucursal",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message={'Cargando información de la tabla...'}
         />
       );
@@ -245,7 +246,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idSucursal)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -254,7 +255,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idSucursal)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -278,7 +279,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-              // disabled={!this.state.add}
+            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}

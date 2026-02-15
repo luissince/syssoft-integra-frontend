@@ -1,25 +1,25 @@
 import React from 'react';
-import Button from '../../../../../../../components/Button';
-import Input from '../../../../../../../components/Input';
-import { images } from '../../../../../../../helper';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import { images } from '@/helper';
 import {
   formatNumberWithZeros,
   isEmpty,
   formatCurrency,
-} from '../../../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../../../model/class/custom-component';
+} from '@/helper/utils.helper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   A_GRANEL,
   UNIDADES,
   VALOR_MONETARIO,
-} from '../../../../../../../model/types/tipo-tratamiento-producto';
+} from '@/model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
-import { filtrarProductoVenta } from '../../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../../model/types/types';
-import Search from '../../../../../../../components/Search';
-import InvoiceTicket from './InvoiceTicket';
+import { filtrarProductoVenta } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Search from '@/components/Search';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -79,7 +79,7 @@ class InvoiceView extends CustomComponent {
   };
 
   handleSearchCodBar = async (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       this.setState({
         loading: true,
       });
@@ -87,7 +87,6 @@ class InvoiceView extends CustomComponent {
       const params = {
         tipo: 1,
         filtrar: this.state.buscar,
-        idSucursal: this.props.idSucursal,
         idAlmacen: this.props.idAlmacen,
         posicionPagina: 0,
         filasPorPagina: 1,
@@ -95,8 +94,8 @@ class InvoiceView extends CustomComponent {
 
       const response = await filtrarProductoVenta(params);
       if (response instanceof SuccessReponse) {
-        if (!isEmpty(response.data.lists)) {
-          this.props.handleAddItem(response.data.lists[0]);
+        if (!isEmpty(response.data.list)) {
+          this.props.handleAddItem(response.data.list[0]);
         }
 
         this.setState({
@@ -215,7 +214,6 @@ class InvoiceView extends CustomComponent {
     const params = {
       tipo: tipo,
       filtrar: buscar,
-      idSucursal: this.props.idSucursal,
       idAlmacen: this.props.idAlmacen,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -224,7 +222,7 @@ class InvoiceView extends CustomComponent {
     const response = await filtrarProductoVenta(params);
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       // this.setState(prevState => ({
@@ -233,7 +231,7 @@ class InvoiceView extends CustomComponent {
       //   totalPaginacion: totalPaginacion,
       // }));
 
-      for (const item of response.data.lists) {
+      for (const item of response.data.list) {
         this.props.handleUpdateProductos(item);
       }
 
@@ -262,30 +260,10 @@ class InvoiceView extends CustomComponent {
       pedido,
     } = this.props;
 
-    const {
-      nombreComporbante,
-      handleOpenPreImpresion,
-      handleOpenVenta,
-      handleOpenCotizacion,
-      handleOpenPedido,
-      handleOpenOptions
-    } = this.props;
-
     const { buscar, tipo, loading, totalPaginacion } = this.state;
 
     return (
-      <div className="h-full flex flex-col items relative ">
-        <div className="flex md:hidden border-b border-solid border-[#e1e7ee] bg-white">
-          <InvoiceTicket
-            nombreComporbante={nombreComporbante}
-            handleOpenPreImpresion={handleOpenPreImpresion}
-            handleOpenVenta={handleOpenVenta}
-            handleOpenCotizacion={handleOpenCotizacion}
-            handleOpenPedido={handleOpenPedido}
-            handleOpenOptions={handleOpenOptions}
-          />
-        </div>
-
+      <>
         <ItemSearch
           refProducto={this.refProducto}
           refSearch={this.refSearch}
@@ -296,6 +274,7 @@ class InvoiceView extends CustomComponent {
           handleSearchCodBar={this.handleSearchCodBar}
           handleSearchText={this.handleSearchText}
         />
+
         <ListSearchItems
           refProducto={this.refProducto}
           codiso={codiso}
@@ -330,7 +309,7 @@ class InvoiceView extends CustomComponent {
             )}
           </div>
         </div>
-      </div>
+      </>
     );
   }
 }
@@ -348,21 +327,24 @@ const ItemSearch = (props) => {
   } = props;
 
   return (
-    <div className="d-flex align-items-center justify-content-between p-4">
-      <div className="w-100 mr-2">
+    <div className="flex items-center justify-between p-4">
+      <div className="w-full mr-2">
         <div className="input-group">
           <div className="input-group-prepend">
             <Button
-              className={`${tipo === 1 ? 'btn-primary ' : 'btn-outline-primary'
-                } px-3`}
+              className={cn(
+                "px-3",
+                tipo === 1 ? "btn-primary" : "btn-outline-primary"
+              )}
               onClick={() => handleSelectTipo(1)}
             >
               <i className="fa fa-barcode"></i>
             </Button>
 
             <Button
-              className={`${tipo === 0 ? 'btn-primary' : 'btn-outline-primary'
-                }`}
+              className={cn(
+                tipo === 0 ? "btn-primary" : "btn-outline-primary"
+              )}
               onClick={() => handleSelectTipo(0)}
             >
               <i className="fa fa-search px-1"></i>
@@ -448,7 +430,7 @@ class ListSearchItems extends React.Component {
 
     if (loading && isEmpty(productos)) {
       return (
-        <div className="p-2 w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+        <div className="p-2 w-full h-full flex flex-col items-center justify-center">
           <span className="loader-one"></span>
           <p className="text-secondary mt-5 text-base">Buscando ...</p>
         </div>
@@ -457,7 +439,7 @@ class ListSearchItems extends React.Component {
 
     if (isEmpty(productos)) {
       return (
-        <div className="p-2 w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+        <div className="p-2 w-full h-full flex flex-col items-center justify-center">
           <img className="mb-1" src={images.basket} alt="Canasta" />
           <p className="text-secondary text-base">
             Use la barra de busqueda para encontrar su productos.
@@ -467,11 +449,11 @@ class ListSearchItems extends React.Component {
     }
 
     return (
-      <div className="overflow-hidden h-100">
+      <div className="overflow-hidden h-full">
         <div
           ref={this.refScroll}
           onScroll={this.handleScroll}
-          className="d-flex h-100 align-items-start justify-content-around flex-wrap mh-100 overflow-hidden overflow-y-auto"
+          className="flex h-full items-start justify-around flex-wrap mh-100 overflow-hidden overflow-y-auto"
         >
           {productos.map((item, index) => (
             <ItemView
@@ -487,7 +469,7 @@ class ListSearchItems extends React.Component {
           ))}
 
           {loading && (
-            <div className="p-2 w-100 d-flex flex-column align-items-center justify-content-center">
+            <div className="p-2 w-full flex flex-col items-center justify-center">
               <span className="loader-one"></span>
               <p className="text-secondary mt-5 text-base">Buscando ...</p>
             </div>
@@ -542,15 +524,17 @@ const ItemView = (props) => {
 
   return (
     <Button
-      contentClassName={`item-view ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''
-        }`}
+      contentClassName={cn(
+        "item-view",
+        tipo === 'PRODUCTO' && cantidad <= 0 ? "border border-danger" : ""
+      )}
       onClick={handleAddItem}
     >
-      <div className="position-absolute ml-1 mt-1 badge badge-danger">
+      <div className="absolute z-10 ml-1 mt-1 badge badge-danger">
         {tipoTratamiento}
       </div>
       <div
-        className="item-view_favorite btn px-1 py-1 position-absolute"
+        className="item-view_favorite btn z-10 px-1 py-1 absolute"
         onClick={(e) => {
           e.stopPropagation();
           const data = {
@@ -560,47 +544,43 @@ const ItemView = (props) => {
           handleStarProduct(data);
         }}
       >
-        {preferido === 1 && (
-          <i className="fa fa-star text-white" style={{ fontSize: '25px' }}></i>
-        )}
-        {preferido === 0 && (
-          <i
-            className="fa fa-star-o text-white"
-            style={{ fontSize: '25px' }}
-          ></i>
-        )}
+        <i className={cn(
+          "text-white !text-2xl",
+          preferido === 1 ? "fa fa-star" : "fa fa-star-o"
+        )} />
       </div>
       <div className="item-view_describe">
         <p
-          className={`item-view_describe-title ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
-            } position-absolute`}
+          className={cn(
+            "item-view_describe-title absolute",
+            tipo === "PRODUCTO" && cantidad <= 0 ? "text-danger" : "",
+          )}
         >
-          {tipo === 'PRODUCTO' ? `STOCK: ${cantidad}` : `SERVICIO`}
+          {tipo === "PRODUCTO" ? `STOCK: ${cantidad}` : `SERVICIO`}
         </p>
-        <div className="item-view_describe-image">
+        <div className="flex items-center justify-center">
           <img
             src={imagen ? imagen : images.sale}
             alt="Venta"
-            width={96}
-            height={96}
+            className="w-full h-36 object-contain"
           />
         </div>
       </div>
-      <span className="text-center d-block w-100 my-1">
+      <span className="text-center block w-full my-1">
         <strong>{codigo}</strong>
       </span>
-      <span className="text-center d-block w-100 my-1">
+      <span className="text-center block w-full my-1">
         <strong>{nombreProducto}</strong>
       </span>
 
-      <span className={`text-center d-block w-100 my-1 text-xs ${cssNegativo}`}>
+      <span className={`text-center block w-full my-1 text-xs ${cssNegativo}`}>
         {detalleNegativo}
       </span>
-      <span className="text-center d-block w-100 ml-1 mr-1 mt-1 mb-3">
+      <span className="text-center block w-full mb-3">
         <span className="text-xl">{formatCurrency(precio, codiso)}</span>{' '}
         <span className="text-sm">x {medida}</span>
       </span>
-      <span className="text-left d-block w-100 ml-1 mr-1 mt-1 text-sm">
+      <span className="text-gray-500 block w-full text-left px-3 py-1 text-sm">
         Almacen: {almacen}
       </span>
     </Button>
@@ -617,13 +597,6 @@ InvoiceView.propTypes = {
   handleUpdateProductos: PropTypes.func.isRequired,
   handleAddItem: PropTypes.func.isRequired,
   handleStarProduct: PropTypes.func.isRequired,
-
-  nombreComporbante: PropTypes.string,
-  handleOpenPreImpresion: PropTypes.func,
-  handleOpenVenta: PropTypes.func,
-  handleOpenCotizacion: PropTypes.func,
-  handleOpenPedido: PropTypes.func,
-  handleOpenOptions: PropTypes.func.isRequired,
 };
 
 ItemSearch.propTypes = {

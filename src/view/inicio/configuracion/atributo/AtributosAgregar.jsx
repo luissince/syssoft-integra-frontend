@@ -1,15 +1,11 @@
 import React from 'react';
 import {
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-  alertDialog,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import ContainerWrapper from '../../../../components/Container';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import {
   addAtributo,
   comboTipoAtributo,
@@ -22,26 +18,27 @@ import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
 import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   TIPO_ATRIBUTO_COLOR,
   TIPO_ATRIBUTO_TALLA,
 } from '../../../../model/types/tipo-atributo';
+import { alertKit } from 'alert-kit';
 
 class AtributosAgregar extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      idTipoAtributo: '',
-      nombre: '',
+      idTipoAtributo: "",
+      nombre: "",
       hexadecimal: '#000000',
-      valor: '',
+      valor: "",
       estado: true,
 
       tipoAtributos: [],
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTipoAtributo = React.createRef();
@@ -105,52 +102,78 @@ class AtributosAgregar extends React.Component {
 
   handleGuardar = async () => {
     if (isEmpty(this.state.idTipoAtributo)) {
-      alertWarning('Atributo', 'Selecciona el tipo de atributo.', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Selecciona el tipo de atributo.",
+      }, () => {
         this.refTipoAtributo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Atributo', 'Ingrese el nombre de la marca.', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Ingrese el nombre de la marca.",
+      }, () => {
         this.refNombre.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.hexadecimal)) {
-      alertWarning('Atributo', 'Ingrese su color.', () => {
+      alertKit.warning({
+        title: "Atributo",
+        message: "Ingrese su color.",
+      }, () => {
         this.refHexadecimal.current.focus();
       });
       return;
     }
 
-    alertDialog('Atributo', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idTipoAtributo: this.state.idTipoAtributo,
-          nombre: this.state.nombre,
-          hexadecimal: this.state.hexadecimal,
-          valor: this.state.valor,
-          estado: this.state.estado,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Atributo', 'Procesando información...');
-
-        const response = await addAtributo(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Atributo', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Atributo', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Atributo",
+      message: "¿Está seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        idTipoAtributo: this.state.idTipoAtributo,
+        nombre: this.state.nombre,
+        hexadecimal: this.state.hexadecimal,
+        valor: this.state.valor,
+        estado: this.state.estado,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await addAtributo(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Atributo",
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Atributo",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {
@@ -271,7 +294,9 @@ class AtributosAgregar extends React.Component {
 AtributosAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

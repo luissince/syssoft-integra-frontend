@@ -1,14 +1,14 @@
 import React, { Component, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import {
-  alertWarning,
   handlePasteFloat,
   isNumeric,
-} from '../../../../../../helper/utils.helper';
-import { VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
-import { CustomModalForm } from '../../../../../../components/CustomModal';
-import Input from '../../../../../../components/Input';
-import Button from '../../../../../../components/Button';
+} from '@/helper/utils.helper';
+import { VALOR_MONETARIO } from '@/model/types/tipo-tratamiento-producto';
+import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader, CustomModalForm } from '@/components/CustomModal';
+import Input from '@/components/Input';
+import Button from '@/components/Button';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -18,9 +18,9 @@ class ModalAgregar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      titulo: '',
-      subTitulo: '',
-      cantidad: '',
+      titulo: "",
+      subTitulo: "",
+      cantidad: "",
       producto: null,
     };
 
@@ -40,9 +40,9 @@ class ModalAgregar extends Component {
 
   handleOnHiddenModal = async () => {
     this.setState({
-      titulo: '',
-      subTitulo: '',
-      cantidad: '',
+      titulo: "",
+      subTitulo: "",
+      cantidad: "",
       producto: null,
     });
   };
@@ -53,20 +53,22 @@ class ModalAgregar extends Component {
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.cantidad)) {
-      alertWarning('Venta', 'Ingrese el valor solicitado.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "El valor debe ser numérico.",
+      }, () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
-    if (this.state.cantidad <= 0) {
-      alertWarning(
-        'Venta',
-        'La cantidad no puede ser menor a 0 o igual a 0.',
-        () => {
-          this.refCantidad.current.focus();
-        },
-      );
+    if (Number(this.state.cantidad) <= 0) {
+      alertKit.warning({
+        title: "Venta",
+        message: "La cantidad no debe ser menor o igual a 0.",
+      }, () => {
+        this.refCantidad.current.focus();
+      });
       return;
     }
 
@@ -79,10 +81,10 @@ class ModalAgregar extends Component {
           (item) => item.idInventario === this.state.producto.idInventario,
         );
         if (!existingInventario) {
-          alertWarning(
-            'Venta',
-            'Los productos con valor monetario se trabajan con un solo almacen y sin unidades.',
-          );
+          alertKit.warning({
+            title: "Venta",
+            message: "Los productos con valor monetario se trabajan con un solo almacen y sin unidades.",
+          });
           return;
         }
       }
@@ -98,30 +100,40 @@ class ModalAgregar extends Component {
     const { isOpen, onClose } = this.props;
 
     return (
-      <CustomModalForm
-        contentRef={this.refModal}
+      <CustomModal
+        ref={this.refModal}
         isOpen={isOpen}
         onOpen={this.handleOpenModal}
         onHidden={this.handleOnHiddenModal}
         onClose={onClose}
         contentLabel="Modal Producto"
         titleHeader="Agregar Producto"
-        onSubmit={this.handleOnSubmit}
-        body={
-          <>
+      >
+        <CustomModalContentForm onSubmit={this.handleOnSubmit}>
+          <CustomModalContentHeader contentRef={this.refModal}>
+            Producto
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody>
             <h5 className='mb-2'>{titulo}</h5>
 
-            <InputCantidad
-              ref={this.refCantidad}
+            <Input
+              autoFocus={true}
+              type="text"
+              inputMode="decimal"
+              // pattern="[0-9]*" 
+              enterKeyHint="done"
               label={subTitulo}
+              placeholder={'0.00'}
+              role={'float'}
+              ref={this.refCantidad}
               value={cantidad}
               onChange={this.handleInputCantidad}
               onPaste={handlePasteFloat}
             />
-          </>
-        }
-        footer={
-          <>
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
             <Button type="submit" className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
@@ -131,32 +143,12 @@ class ModalAgregar extends Component {
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </>
-        }
-      />
+          </CustomModalContentFooter>
+        </CustomModalContentForm>
+      </CustomModal>
     );
   }
 }
-
-const InputCantidad = forwardRef(({ label ,value, onChange, onPaste }, ref) => {
-  return (
-    <Input
-      autoFocus={true}
-      type="text"
-      inputMode="decimal"
-      // pattern="[0-9]*" 
-      enterKeyHint="done" 
-      label={label}
-      placeholder={'0.00'}
-      role={'float'}
-      ref={ref}
-      value={value}
-      onChange={onChange}
-      onPaste={onPaste}
-    />
-  );
-});
-
 
 ModalAgregar.propTypes = {
   isOpen: PropTypes.bool.isRequired,

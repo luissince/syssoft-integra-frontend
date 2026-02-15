@@ -1,9 +1,9 @@
 import React from 'react';
-import '../resource/css/searchbar.css';
 import { isEmpty } from '../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Input from './Input';
 import Button from './Button';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -21,6 +21,7 @@ class SearchInput extends React.Component {
     this.state = {
       searchTerm: '',
       highlightedIndex: -1,
+      isDropdownActive: false,
     };
 
     this.refContentResult = React.createRef();
@@ -85,25 +86,29 @@ class SearchInput extends React.Component {
       return;
     }
 
+    if (event.key === "Tab") {
+      this.props.handleClearInput();
+      this.setState({ isDropdownActive: false, highlightedIndex: -1 });
+      return;
+    }
+
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      this.setState(
-        (prevState) => ({
-          highlightedIndex: Math.min(
-            prevState.highlightedIndex + 1,
-            data.length - 1,
-          ),
-        }),
-        () => this.scrollToHighlighted(),
+      this.setState((prevState) => ({
+        isDropdownActive: true,
+        highlightedIndex: Math.min(
+          prevState.highlightedIndex + 1,
+          data.length - 1,
+        ),
+      }), () => this.scrollToHighlighted(),
       );
     }
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      this.setState(
-        (prevState) => ({
-          highlightedIndex: Math.max(prevState.highlightedIndex - 1, -1),
-        }),
+      this.setState((prevState) => ({
+        highlightedIndex: Math.max(prevState.highlightedIndex - 1, -1),
+      }),
         () => this.scrollToHighlighted(),
       );
     }
@@ -121,6 +126,24 @@ class SearchInput extends React.Component {
       this.props.handleClearInput();
       this.setState({ highlightedIndex: -1 });
     }
+  };
+
+  handleBlur = (event) => {
+    const dropdown = this.refContentResult.current;
+
+    // nuevo elemento enfocado
+    const nextFocus = event.relatedTarget;
+
+    // si el foco se fue hacia dentro del dropdown, no cerrar
+    if (dropdown && dropdown.contains(nextFocus)) {
+      return;
+    }
+
+    // cerrar normalmente
+    this.setState({
+      isDropdownActive: false,
+      highlightedIndex: -1,
+    });
   };
 
   scrollToHighlighted = () => {
@@ -154,18 +177,6 @@ class SearchInput extends React.Component {
     this.debouncedSearch(value);
   };
 
-  handleFocus = () => {
-    if (!this.props.refValue) {
-      return;
-    }
-
-    const input = this.props.refValue.current;
-    if (input) {
-      const length = input.value.length;
-      input.setSelectionRange(length, length);
-    }
-  };
-
   handleMouseDown = () => {
     if (!this.props.refValue) {
       return;
@@ -195,10 +206,9 @@ class SearchInput extends React.Component {
 
     return (
       <div
-        className={`${classNameContainer
-          ? classNameContainer
-          : 'mb-3 relative'
-          }`}
+        className={cn(
+          classNameContainer ? classNameContainer : 'mb-3 relative group',
+        )}
       >
         <Input
           autoFocus={autoFocus}
@@ -209,10 +219,8 @@ class SearchInput extends React.Component {
           ref={refValue}
           value={searchTerm}
           onChange={this.handleInputChange}
-          // onKeyUp={this.handleKeyUp}
           onKeyDown={this.handleKeyDown}
-          // onFocus={this.handleFocus}
-          // onMouseDown={this.handleMouseDown}
+          onBlur={this.handleBlur}
           disabled={disabled}
           buttonRight={
             <>
@@ -245,24 +253,50 @@ class SearchInput extends React.Component {
         {
           !isEmpty(data) && (
             <ul
-              className="dataResult"
               ref={this.refContentResult}
-            // tabIndex="-1"
-            // onKeyDown={this.handleKeyDown}
+              className={cn(
+                "w-full h-[200px]",
+                "flex flex-col",
+                "pl-0 mb-0 mt-2",
+                "bg-white",
+                "overflow-hidden overflow-y-auto",
+                "absolute z-[100]",
+                "rounded border border-primary",
+                "shadow-[rgba(0,0,0,0.1)_0px_0px_0px_1px,rgba(0,0,0,0.1)_0px_4px_11px]",
+
+                "group-focus-within:border-[#80bdff]",
+                "group-focus-within:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]"
+              )}
+              onMouseDown={(e) => {
+                // ✅ evita que el input pierda foco
+                e.preventDefault();
+
+                // ✅ mantiene el cursor al final
+                this.handleMouseDown();
+              }}
             >
-              {data.map((value, index) => (
-                <Button
-                  key={index}
-                  contentClassName={`list-group-item list-group-item-action ${index === highlightedIndex ? 'active' : ''
-                    }`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleSelectItem(value);
-                  }}
-                >
-                  {renderItem(value)}
-                </Button>
-              ))}
+              {
+                data.map((value, index) => (
+                  <button
+                    key={index}
+                    tabIndex={-1}
+                    className={cn(
+                      "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200",
+                      index === highlightedIndex && 'text-white bg-primary',
+                    )}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // ✅ no roba foco
+                      this.handleMouseDown(); // mantiene caret
+                    }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleSelectItem(value);
+                    }}
+                  >
+                    {renderItem(value)}
+                  </button>
+                ))
+              }
             </ul>
           )
         }

@@ -13,12 +13,12 @@ import {
 } from 'recharts';
 import { EqualIcon, ExternalLink, Minus, Plus } from 'lucide-react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../components/Container';
-import CustomComponent from '../../../model/class/custom-component';
-import { SpinnerView } from '../../../components/Spinner';
-import Title from '../../../components/Title';
-import Row from '../../../components/Row';
-import Column from '../../../components/Column';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import { Link } from 'react-router-dom';
 import {
   Table,
@@ -28,27 +28,26 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../components/Table';
+} from '@/components/Table';
 import {
   Card,
   CardBody,
   CardHeader,
   CardText,
   CardTitle,
-} from '../../../components/Card';
-import Select from '../../../components/Select';
-import Input from '../../../components/Input';
-import Button from '../../../components/Button';
+} from '@/components/Card';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import Button from '@/components/Button';
 import pdfVisualizer from 'pdf-visualizer';
 import {
   comboSucursal,
-  comboUsuario,
+  optionsUsuario,
   dashboardVenta,
   documentsExcelVenta,
   documentsPdfReportsVenta,
-} from '../../../network/rest/principal.network';
+} from '@/network/rest/principal.network';
 import {
-  alertWarning,
   currentDate,
   formatDecimal,
   formatNumberWithZeros,
@@ -57,12 +56,13 @@ import {
   guId,
   isEmpty,
   formatCurrency,
-} from '../../../helper/utils.helper';
-import { downloadFileAsync } from '../../../redux/downloadSlice';
+} from '@/helper/utils.helper';
+import { downloadFileAsync } from '@/redux/downloadSlice';
 import React from 'react';
-import ErrorResponse from '../../../model/class/error-response';
-import { CANCELED } from '../../../model/types/types';
-import SuccessReponse from '../../../model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import SuccessReponse from '@/model/class/response';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -78,18 +78,18 @@ class RepVentas extends CustomComponent {
 
     this.state = {
       loading: false,
-      msgLoading: 'Cargando información...',
+      msgLoading: "Cargando información...",
 
       fechaInicial: currentDate(),
       fechaFinal: currentDate(),
 
-      idUsuario: '',
+      idUsuario: "",
       usuarios: [],
 
       idSucursal: this.props.token.project.idSucursal,
       sucursales: [],
 
-      codIso: this.props.moneda.codiso ?? '',
+      codIso: this.props.moneda.codiso ?? "",
 
       totalVenta: 0,
       totalContado: 0,
@@ -131,7 +131,7 @@ class RepVentas extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   /*
   |--------------------------------------------------------------------------
@@ -165,19 +165,27 @@ class RepVentas extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertWarning('Reporte Venta', sucursalResponse.getMessage(), async () => {
-        await this.loadingInit();
+      alertKit.warning({
+        title: 'Reporte Venta',
+        message: sucursalResponse.getMessage(),
+        onClose: async () => {
+          await this.loadingInit();
+        },
       });
       return;
     }
 
-    const usuarioResponse = await comboUsuario(this.abortControllerView.signal);
+    const usuarioResponse = await optionsUsuario(this.abortControllerView.signal);
 
     if (usuarioResponse instanceof ErrorResponse) {
       if (usuarioResponse.getType() === CANCELED) return;
 
-      alertWarning('Reporte Venta', usuarioResponse.getMessage(), async () => {
-        await this.loadingInit();
+      alertKit.warning({
+        title: 'Reporte Venta',
+        message: usuarioResponse.getMessage(),
+        onClose: async () => {
+          await this.loadingInit();
+        },
       });
       return;
     }
@@ -216,14 +224,18 @@ class RepVentas extends CustomComponent {
     const dashboard = await dashboardVenta(params);
 
     if (dashboard instanceof ErrorResponse) {
-      alertWarning('Reporte Venta', dashboard.getMessage());
+
+      alertKit.warning({
+        title: "Reporte Venta",
+        message: dashboard.getMessage(),
+      });
       return;
     }
 
     dashboard instanceof SuccessReponse;
 
     const totalPaginacion = parseInt(
-      Math.ceil(parseFloat(dashboard.data.total) / this.state.filasPorPagina),
+      String(Math.ceil(Number(dashboard.data.total) / this.state.filasPorPagina)),
     );
 
     this.setState({
@@ -233,7 +245,7 @@ class RepVentas extends CustomComponent {
       totalAnulado: dashboard.data.anulado,
       totalCobrado: dashboard.data.cobrado,
       listaPorMeses: dashboard.data.listaPorMeses,
-      listaPorComprobante: !isEmpty(dashboard.data.listaPorComprobante) ? dashboard.data.listaPorComprobante.map((item)=>({
+      listaPorComprobante: !isEmpty(dashboard.data.listaPorComprobante) ? dashboard.data.listaPorComprobante.map((item) => ({
         ...item,
         total: Number(formatDecimal(item.total))
       })) : [],

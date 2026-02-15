@@ -1,33 +1,31 @@
 import React from 'react';
-import CustomComponent from '../../../../model/class/custom-component';
-import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
+  getNumber,
   isNumeric,
   isText,
   keyNumberInteger,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { CANCELED } from '../../../../model/types/types';
-import ErrorResponse from '../../../../model/class/error-response';
-import SuccessReponse from '../../../../model/class/response';
+import { CANCELED } from '@/constants/requestStatus';
+import ErrorResponse from '@/model/class/error-response';
+import SuccessReponse from '@/model/class/response';
 import {
   comboTipoComprobante,
   editComprobante,
   getIdComprobante,
-} from '../../../../network/rest/principal.network';
-import Title from '../../../../components/Title';
-import Column from '../../../../components/Column';
-import Row from '../../../../components/Row';
-import { SpinnerView } from '../../../../components/Spinner';
-import Select from '../../../../components/Select';
-import Input from '../../../../components/Input';
-import { Switches } from '../../../../components/Checks';
-import RadioButton from '../../../../components/RadioButton';
-import Button from '../../../../components/Button';
+} from '@/network/rest/principal.network';
+import Title from '@/components/Title';
+import Column from '@/components/Column';
+import Row from '@/components/Row';
+import { SpinnerView } from '@/components/Spinner';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import { Switches } from '@/components/Checks';
+import RadioButton from '@/components/RadioButton';
+import Button from '@/components/Button';
+import { alertKit } from 'alert-kit';
 
 class ComporbanteEditar extends CustomComponent {
   constructor(props) {
@@ -53,7 +51,7 @@ class ComporbanteEditar extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTipo = React.createRef();
@@ -137,90 +135,123 @@ class ComporbanteEditar extends CustomComponent {
     }
   }
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (!isText(this.state.idTipoComprobante)) {
-      alertWarning('Comprobante', 'Seleccione el tipo de comprobante.', () =>
-        this.refTipo.current.focus(),
-      );
+      alertKit.warning({
+        title: "Comprobante",
+        message: "Seleccione el tipo de comprobante.",
+        onClose: () => {
+          this.refTipo.current.focus()
+        },
+      });
       return;
     }
 
     if (!isText(this.state.nombre)) {
-      alertWarning('Comprobante', 'Ingrese el nombre de comprobante.', () =>
-        this.refNombre.current.focus(),
-      );
+      alertKit.warning({
+        title: "Comprobante",
+        message: "Ingrese el nombre de comprobante.",
+        onClose: () => {
+          this.refNombre.current.focus()
+        },
+      });
       return;
     }
 
     if (!isText(this.state.serie)) {
-      alertWarning('Comprobante', 'Ingrese la serie del comprobante.', () =>
-        this.refSerie.current.focus(),
-      );
+      alertKit.warning({
+        title: "Comprobante",
+        message: "Ingrese la serie del comprobante.",
+        onClose: () => {
+          this.refSerie.current.focus()
+        },
+      });
       return;
     }
 
     if (!isNumeric(this.state.numeracion)) {
-      alertWarning('Comprobante', 'Ingrese la numeración.', () =>
-        this.refNumeracion.current.focus(),
-      );
+      alertKit.warning({
+        title: "Comprobante",
+        message: "Ingrese la numeración.",
+        onClose: () => {
+          this.refNumeracion.current.focus()
+        },
+      });
       return;
     }
 
-    if (this.state.numeroCampo < 0 || this.state.numeroCampo > 128) {
-      alertWarning(
-        'Comprobante',
-        'El número de campo no puede ser menor que 0.',
-        () => this.refNumeroCampo.current.focus(),
-      );
+    if (getNumber(this.state.numeroCampo) < 0 || getNumber(this.state.numeroCampo) > 128) {
+      alertKit.warning({
+        title: "Comprobante",
+        message: "El número de campo no puede ser menor que 0.",
+        onClose: () => {
+          this.refNumeroCampo.current.focus()
+        },
+      });
       return;
     }
 
-    alertDialog(
-      'Comprobante',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Comprobante', 'Procesando información...');
 
-          const data = {
-            idTipoComprobante: this.state.idTipoComprobante,
-            nombre: this.state.nombre.trim().toUpperCase(),
-            serie: this.state.serie.trim().toUpperCase(),
-            numeracion: this.state.numeracion,
-            codigo: this.state.codigo,
-            impresion: this.state.impresion.trim(),
-            estado: this.state.estado,
-            preferida: this.state.preferida,
-            numeroCampo:
-              this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
-            facturado: this.state.facturado,
-            creditoFiscal: this.state.creditoFiscal,
-            anulacion: this.state.anulacion,
-            idSucursal: this.state.idSucursal,
-            idUsuario: this.state.idUsuario,
-
-            idComprobante: this.state.idComprobante,
-          };
-
-          const response = await editComprobante(
-            data,
-            this.abortController.signal,
-          );
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Comprobante', response.data, () => {
-              this.props.history.goBack();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Comprobante', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: "Comprobante",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+
+    if (accept) {
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const data = {
+        idTipoComprobante: this.state.idTipoComprobante,
+        nombre: this.state.nombre.trim().toUpperCase(),
+        serie: this.state.serie.trim().toUpperCase(),
+        numeracion: this.state.numeracion,
+        codigo: this.state.codigo,
+        impresion: this.state.impresion.trim(),
+        estado: this.state.estado,
+        preferida: this.state.preferida,
+        numeroCampo:
+          this.state.numeroCampo === '' ? 0 : this.state.numeroCampo,
+        facturado: this.state.facturado,
+        creditoFiscal: this.state.creditoFiscal,
+        anulacion: this.state.anulacion,
+        idSucursal: this.state.idSucursal,
+        idUsuario: this.state.idUsuario,
+
+        idComprobante: this.state.idComprobante,
+      };
+
+      const response = await editComprobante(
+        data,
+        this.abortController.signal,
+      );
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.error({
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

@@ -27,12 +27,12 @@ import {
   keyUpSearch,
   formatCurrency,
 } from '../../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { listOrdenCompra } from '../../../../../../network/rest/principal.network';
 
 /**
@@ -87,7 +87,7 @@ class ModalOrdenCompra extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    this.fillTable(2, '');
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -112,11 +112,11 @@ class ModalOrdenCompra extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -134,7 +134,7 @@ class ModalOrdenCompra extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -176,14 +176,11 @@ class ModalOrdenCompra extends CustomComponent {
   };
 
   handleFechaFinal = (event) => {
-    this.setState(
-      {
+    this.setState({
         fechaFinal: event.target.value,
-      },
-      () => {
+      }, () => {
         this.handleSearchFecha();
-      },
-    );
+      });
   };
 
   generateBody = () => {
@@ -193,7 +190,7 @@ class ModalOrdenCompra extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );

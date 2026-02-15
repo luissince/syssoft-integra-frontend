@@ -1,28 +1,28 @@
 import React from 'react';
-import { isEmpty, isText } from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import { isEmpty, isText } from '@/helper/utils.helper';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
 import { connect } from 'react-redux';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
   comboTipoAlmacen,
   getIdAlmacen,
   getUbigeo,
   updateAlmacen,
-} from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
-import SearchInput from '../../../../components/SearchInput';
-import { SpinnerView } from '../../../../components/Spinner';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Input from '../../../../components/Input';
-import { Switches } from '../../../../components/Checks';
-import TextArea from '../../../../components/TextArea';
-import Button from '../../../../components/Button';
+} from '@/network/rest/principal.network';
+import { CANCELED } from '@/constants/requestStatus';
+import SearchInput from '@/components/SearchInput';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Input from '@/components/Input';
+import { Switches } from '@/components/Checks';
+import TextArea from '@/components/TextArea';
+import Button from '@/components/Button';
 import { alertKit } from 'alert-kit';
-import Select from '../../../../components/Select';
+import Select from '@/components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -52,7 +52,7 @@ class AlmacenEditar extends CustomComponent {
       ubigeos: [],
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -234,7 +234,7 @@ class AlmacenEditar extends CustomComponent {
   };
 
   handleSelectPredefinido = (event) => {
-    this.setState({ predefinido: event.target.value });
+    this.setState({ predefinido: event.target.checked });
   };
 
   handleInputObservacion = (event) => {

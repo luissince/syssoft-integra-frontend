@@ -1,26 +1,25 @@
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
 import {
   isText,
   formatTime,
   rounded,
   formatNumberWithZeros,
-  alertWarning,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
 import {
   detailGuiaRemision,
   documentsPdfInvoicesGuiaRemision,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Button from '../../../../../components/Button';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
 import {
   Table,
   TableBody,
@@ -30,16 +29,17 @@ import {
   TableResponsive,
   TableRow,
   TableTitle,
-} from '../../../../../components/Table';
+} from '@/components/Table';
 import pdfVisualizer from 'pdf-visualizer';
 import React from 'react';
-import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import { ModalSendWhatsApp } from '@/components/MultiModal';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class GuiaRemisionDetalle extends CustomComponent {
   /**
@@ -146,8 +146,12 @@ class GuiaRemisionDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Guia de Remision', response.getMessage(), () => {
-        this.close();
+      alertKit.warning({
+        title: 'Guia de Remision',
+        message: response.getMessage(),
+        onClose: () => {
+          this.close();
+        },
       });
       return;
     }
@@ -260,7 +264,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;

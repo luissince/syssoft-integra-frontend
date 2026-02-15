@@ -1,17 +1,17 @@
 import PropTypes from 'prop-types';
-import Paginacion from '../../../../../../components/Paginacion';
+import Paginacion from '@/components/Paginacion';
 import {
   getRowCellIndex,
   isEmpty,
   formatCurrency,
   rounded,
-} from '../../../../../../helper/utils.helper';
-import Image from '../../../../../../components/Image';
-import { images } from '../../../../../../helper';
-import Button from '../../../../../../components/Button';
-import CustomComponent from '../../../../../../model/class/custom-component';
+} from '@/helper/utils.helper';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import Button from '@/components/Button';
+import CustomComponent from '@/components/CustomComponent';
 import React from 'react';
-import { filtrarProductoVenta } from '../../../../../../network/rest/principal.network';
+import { filtrarProductoVenta } from '@/network/rest/principal.network';
 import {
   Table,
   TableBody,
@@ -19,19 +19,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../../../../../../components/Table';
+} from '@/components/Table';
 import {
   A_GRANEL,
   UNIDADES,
   VALOR_MONETARIO,
-} from '../../../../../../model/types/tipo-tratamiento-producto';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import SuccessReponse from '../../../../../../model/class/response';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import Select from '../../../../../../components/Select';
-import Search from '../../../../../../components/Search';
+} from '@/model/types/tipo-tratamiento-producto';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import SuccessReponse from '@/model/class/response';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Select from '@/components/Select';
+import Search from '@/components/Search';
 import CustomModal, {
   CustomModalContentBody,
   CustomModalContentFooter,
@@ -39,8 +39,8 @@ import CustomModal, {
   CustomModalContentOverflow,
   CustomModalContentScroll,
   CustomModalContentSubHeader,
-} from '../../../../../../components/CustomModal';
-import { SpinnerTable } from '../../../../../../components/Spinner';
+} from '@/components/CustomModal';
+import { SpinnerTable } from '@/components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -190,7 +190,6 @@ class ModalProductos extends CustomComponent {
     const params = {
       tipo: opcion,
       filtrar: buscar.trim(),
-      idSucursal: this.props.idSucursal,
       idAlmacen: this.props.idAlmacen,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -203,12 +202,12 @@ class ModalProductos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
         loading: false,
-        lista: response.data.lists,
+        lista: response.data.list,
         totalPaginacion: totalPaginacion,
       });
     }
@@ -314,7 +313,7 @@ class ModalProductos extends CustomComponent {
     if (loading && !show) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -322,11 +321,11 @@ class ModalProductos extends CustomComponent {
 
     if (isEmpty(lista)) {
       return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="8">
+        <tr>
+          <td className="text-center" colSpan={8}>
             ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
       );
     }
 

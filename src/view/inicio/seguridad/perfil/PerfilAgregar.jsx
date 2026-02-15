@@ -1,17 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
-import { isEmpty } from '../../../../helper/utils.helper';
-import { addPerfil } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Input from '../../../../components/Input';
-import Button from '../../../../components/Button';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import { isEmpty } from '@/helper/utils.helper';
+import { addPerfil } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Input from '@/components/Input';
+import Button from '@/components/Button';
 import { alertKit } from 'alert-kit';
 
 /**
@@ -19,13 +19,13 @@ import { alertKit } from 'alert-kit';
  * @extends CustomComponent
  */
 class PerfilAgregar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
-      descripcion: '',
+      descripcion: "",
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refDescripcion = React.createRef();

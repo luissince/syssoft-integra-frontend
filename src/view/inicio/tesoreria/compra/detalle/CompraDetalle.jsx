@@ -1,5 +1,5 @@
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,
@@ -9,34 +9,23 @@ import {
   isText,
   formatCurrency,
   rounded,
-} from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/helper/utils.helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   detailCompra,
   documentsPdfInvoicesCompra,
-} from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
-import Title from '../../../../../components/Title';
-import { SpinnerView } from '../../../../../components/Spinner';
+} from '@/network/rest/principal.network';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
 import PropTypes from 'prop-types';
-import Button from '../../../../../components/Button';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { alertKit } from 'alert-kit';
+import { CONTADO } from '@/model/types/forma-transaccion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,34 +40,41 @@ class CompraDetalle extends CustomComponent {
     super(props);
 
     this.state = {
+      // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idCompra: '',
-      fechaHora: '',
+      // Atributos principales
+      idCompra: "",
+      comprobante: "",
+      serie: "",
+      numeracion: 0,
+      fecha: "",
+      hora: "",
 
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
+      tipoDocumento: "",
+      documento: "",
+      informacion: "",
+      telefono: "",
+      celular: "",
+      email: "",
+      direccion: "",
 
-      almacen: '',
+      almacen: "",
 
-      comprobante: '',
-      serieNumeracion: '',
+      tipo: "",
+      estado: "",
 
-      tipo: '',
-      estado: '',
+      observacion: "",
+      notas: "",
 
-      observacion: '',
-      notas: '',
-
-      codiso: '',
+      codiso: "",
       total: 0,
 
       detalles: [],
       transaccion: [],
+
+      usuario: ""
     };
 
     this.abortControllerView = new AbortController();
@@ -118,79 +114,7 @@ class CompraDetalle extends CustomComponent {
   }
 
   async loadingData(id) {
-    const [compra] = await Promise.all([this.fetchDetailCompra(id)]);
 
-    if (!compra) {
-      this.props.history.goBack();
-      return;
-    }
-
-    const {
-      fecha,
-      hora,
-
-      comprobante,
-      serie,
-      numeracion,
-
-      documento,
-      informacion,
-      telefono,
-      celular,
-      email,
-      direccion,
-
-      almacen,
-
-      tipo,
-      estado,
-      observacion,
-      nota,
-      codiso,
-    } = compra.cabecera;
-
-    const monto = compra.detalles.reduce(
-      (accumlate, item) => accumlate + item.costo * item.cantidad,
-      0,
-    );
-
-    this.setState({
-      idCompra: id,
-      fechaHora: fecha + ' ' + formatTime(hora),
-
-      comprobante: comprobante,
-      serieNumeracion: serie + '-' + formatNumberWithZeros(numeracion),
-
-      proveedor: documento + ' - ' + informacion,
-      telefono: telefono,
-      celular: celular,
-      email: email,
-      direccion: direccion,
-
-      almacen: almacen,
-
-      tipo: tipo,
-      estado:
-        estado === 1 ? (
-          <span className="text-success">PAGADO</span>
-        ) : estado === 2 ? (
-          <span className="text-warning">POR PAGAR</span>
-        ) : (
-          <span className="text-danger">ANULADO</span>
-        ),
-      observacion: observacion,
-      notas: nota,
-      codiso: codiso,
-      total: monto,
-
-      detalles: compra.detalles,
-      transaccion: compra.transaccion,
-
-      loading: false,
-    });
-  }
-
-  async fetchDetailCompra(id) {
     const params = {
       idCompra: id,
     };
@@ -200,16 +124,105 @@ class CompraDetalle extends CustomComponent {
       this.abortControllerView.signal,
     );
 
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      return false;
+      alertKit.warning({
+        title: "Compra",
+        message: response.getMessage(),
+      }, () => {
+        this.close();
+      });
+      return;
     }
+
+    response instanceof SuccessReponse;
+    const compra = response.data;
+
+    const {
+      fecha,
+      hora,
+
+      comprobante,
+      serie,
+      numeracion,
+
+      tipoDocumento,
+      documento,
+      informacion,
+      telefono,
+      celular,
+      email,
+      direccion,
+
+      almacen,
+
+      idFormaPago,
+      estado,
+      observacion,
+      nota,
+      codiso,
+
+      usuario
+    } = compra.cabecera;
+
+    const monto = compra.detalles.reduce(
+      (accumlate, item) => accumlate + item.costo * item.cantidad,
+      0,
+    );
+
+    const nuevoEstado =
+      estado === 1 ? (
+        <span className="text-success">COBRADO</span>
+      ) : estado === 2 ? (
+        <span className="text-warning">POR COBRAR</span>
+      ) : (
+        <span className="text-danger">ANULADO</span>
+      );
+
+    const tipo =
+      idFormaPago === CONTADO
+        ? "CONTADO"
+        : "CREDITO"
+
+    this.setState({
+      idCompra: id,
+      fecha: fecha,
+      hora: hora,
+
+      comprobante: comprobante,
+      serie: serie,
+      numeracion: numeracion,
+
+      tipoDocumento: tipoDocumento,
+      documento: documento,
+      informacion: informacion,
+      telefono: telefono,
+      celular: celular,
+      email: email,
+      direccion: direccion,
+
+      almacen: almacen,
+
+      tipo: tipo,
+      estado: nuevoEstado,
+      observacion: observacion,
+      notas: nota,
+      codiso: codiso,
+      total: monto,
+
+      detalles: compra.detalles,
+      transaccion: compra.transaccion,
+
+      usuario: usuario,
+
+      loading: false,
+    });
   }
+
+  close = () => {
+    this.props.history.goBack();
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -226,6 +239,10 @@ class CompraDetalle extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
+
+  //------------------------------------------------------------------------------------------
+  // Eventos para impresión
+  //------------------------------------------------------------------------------------------
 
   handlePrintInvoices = async (size) => {
     await pdfVisualizer.init({
@@ -255,59 +272,83 @@ class CompraDetalle extends CustomComponent {
   renderDetalles() {
     return this.state.detalles.map((item, index) => (
       <React.Fragment key={index}>
-        <TableRow>
-          <TableCell>{item.id}</TableCell>
-          <TableCell className="text-center">
-            <Image
-              default={images.noImage}
-              src={item.imagen}
-              alt={item.producto}
-              width={100}
-            />
-          </TableCell>
-          <TableCell>{item.producto}</TableCell>
-          <TableCell className="text-right">
+        <tr className="hover:bg-gray-50 border-b border-gray-100">
+          <td className="px-4 py-3 text-gray-700">{item.id}</td>
+          <td className="px-4 py-3 text-center">
+            <div className="w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+              <Image
+                default={images.noImage}
+                src={item.imagen}
+                alt={item.producto}
+                overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+              />
+            </div>
+          </td>
+          <td className="px-4 py-3 text-gray-700">
+            <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+            <p className="font-medium">{item.producto}</p>
+          </td>
+          <td className="px-4 py-3 text-gray-700">{item.categoria}</td>
+          <td className="px-4 py-3 text-gray-700 text-right">{rounded(item.cantidad)}</td>
+          <td className="px-4 py-3 text-gray-700">{item.medida}</td>
+          <td className="px-4 py-3 text-gray-700 text-right">{item.impuesto}</td>
+          <td className="px-4 py-3 text-gray-900 font-medium text-right">
             {formatCurrency(item.costo, this.state.codiso)}
-          </TableCell>
-          <TableCell>{item.categoria}</TableCell>
-          <TableCell className="text-right">{item.impuesto}</TableCell>
-          <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-          <TableCell>{item.medida}</TableCell>
-          <TableCell className="text-right">
+          </td>
+          <td className="px-4 py-3 text-gray-900 font-medium text-right">
             {formatCurrency(item.cantidad * item.costo, this.state.codiso)}
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
 
-        {/* Mostrar lotes si existen */}
-        {item.lotes && Array.isArray(item.lotes) && item.lotes.length > 0 && (
-          <TableRow>
-            <TableCell colSpan="9" className="pl-5 pr-5 pt-2 pb-2">
-              <Table className="table-sm table-bordered w-100">
-                <TableHeader>
-                  <TableRow className="table-light">
-                    <TableHead>Código Lote</TableHead>
-                    <TableHead>Fecha Vencimiento</TableHead>
-                    <TableHead className="text-right">Cantidad</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {item.lotes.map((lote, loteIndex) => (
-                    <TableRow key={loteIndex}>
-                      <TableCell>{lote.codigoLote}</TableCell>
-                      <TableCell>{lote.fechaVencimiento}</TableCell>
-                      <TableCell className="text-right">
-                        {rounded(lote.cantidad)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableCell>
-          </TableRow>
+        {/* Detalles de inventario */}
+        {item.inventarioDetalles && !isEmpty(item.inventarioDetalles) && (
+          <tr>
+            <td colSpan={9} className="py-2 bg-gray-50">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        Código Lote
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        Fecha Vencimiento
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        Ubicación
+                      </th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        Cantidad
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {item.inventarioDetalles.map((inventarioDetalle, loteIndex) => (
+                      <tr key={loteIndex} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                          {inventarioDetalle.lote}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                          {inventarioDetalle.fechaVencimiento || 'N/A'}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                          {inventarioDetalle.ubicacion || 'N/A'}
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
+                          {rounded(inventarioDetalle.cantidad)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
         )}
       </React.Fragment>
     ));
   }
+
 
   renderTotal() {
     let subTotal = 0;
@@ -353,33 +394,36 @@ class CompraDetalle extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">
-              {impuesto.nombre} :
-            </TableHead>
-            <TableHead className="text-right mb-2">
+          <tr key={index}>
+            <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+            <td className="p-2 text-gray-900 font-medium text-right">
               {formatCurrency(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
+            </td>
+          </tr>
         );
       });
     };
+
     return (
       <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
+        <tr>
+          <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
             {formatCurrency(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+          </td>
+        </tr>
         {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
+        <tr>
+          <td colSpan={2} className="py-2">
+            <div className="border-t border-gray-200"></div>
+          </td>
+        </tr>
+        <tr>
+          <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+          <td className="p-2 text-gray-900 font-bold text-right text-lg">
             {formatCurrency(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+          </td>
+        </tr>
       </>
     );
   }
@@ -387,55 +431,44 @@ class CompraDetalle extends CustomComponent {
   renderTransaciones() {
     if (isEmpty(this.state.transaccion)) {
       return (
-        <TableRow>
-          <TableCell colSpan="6" className="text-center">
+        <tr>
+          <td colSpan={5} className="px-6 py-12 text-center">
             No hay transacciones para mostrar.
-          </TableCell>
-        </TableRow>
+          </td>
+        </tr>
       );
     }
 
-    return this.state.transaccion.map((item, index) => {
-      return (
-        <React.Fragment key={index}>
-          <TableRow className="table-success">
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>
-              <span>{item.fecha}</span>
-              <br />
-              <span>{formatTime(item.hora)}</span>
-            </TableCell>
-            <TableCell>{item.concepto}</TableCell>
-            <TableCell>{item.nota}</TableCell>
-            <TableCell>{item.usuario}</TableCell>
-          </TableRow>
+    return this.state.transaccion.map((item, index) => (
+      <React.Fragment key={index}>
+        {/* Transacción principal */}
+        <tr className="hover:bg-gray-50 transition-colors">
+          <td className="p-3 font-medium text-gray-800">{index + 1}</td>
+          <td className="p-3">
+            <div className="font-medium">{item.fecha}</div>
+            <div className="text-sm text-gray-600">{formatTime(item.hora)}</div>
+          </td>
+          <td className="p-3 text-gray-800">{item.concepto}</td>
+          <td className="p-3 text-gray-800">{item.nota}</td>
+          <td className="p-3 text-gray-800">{item.usuario}</td>
+        </tr>
 
-          <TableRow>
-            <TableCell className="text-center">#</TableCell>
-            <TableCell>Banco</TableCell>
-            <TableCell>Monto</TableCell>
-            <TableCell colSpan={2}>Observación</TableCell>
-          </TableRow>
-          {item.detalles.map((detalle, index) => {
-            return (
-              <TableRow key={index}>
-                <TableCell className="text-center">{index + 1}</TableCell>
-                <TableCell>{detalle.nombre}</TableCell>
-                <TableCell>
-                  {formatCurrency(detalle.monto, this.state.codiso)}
-                </TableCell>
-                <TableCell colSpan={2}>{detalle.observacion}</TableCell>
-              </TableRow>
-            );
-          })}
-          <TableRow>
-            <TableCell colSpan="6">
-              <hr />
-            </TableCell>
-          </TableRow>
-        </React.Fragment>
-      );
-    });
+        {/* Detalles de la transacción */}
+        <tr className="px-6 py-0 bg-gray-50">
+          <td colSpan={5}>
+            <div className="flex flex-row items-center gap-3 p-3">
+              {item.detalles.map((detalle, idx) => (
+                <div key={idx} className="w-60 flex flex-col gap-3 rounded p-3 bg-white">
+                  <p className="text-sm text-gray-600">Banco: {detalle.nombre}</p>
+                  <p className="text-sm text-gray-600">Monto: {formatCurrency(detalle.monto, this.state.codiso)}</p>
+                  <p className="text-sm text-gray-600">Nota: {detalle.observacion}</p>
+                </div>
+              ))}
+            </div>
+          </td>
+        </tr>
+      </React.Fragment>
+    ));
   }
 
   render() {
@@ -449,216 +482,125 @@ class CompraDetalle extends CustomComponent {
         <Title
           title="Compra"
           subTitle="DETALLE"
-          handleGoBack={() => this.props.history.goBack()}
+          handleGoBack={() => this.close()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>
-          </Column>
-        </Row>
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> A4
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
+          >
+            <i className="fa fa-print"></i> 80MM
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
+        </div>
 
-        <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12">
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha Compra
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.fechaHora}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Proveedor
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.proveedor}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Telefono
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.telefono}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Celular
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.celular}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Email
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.email}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Dirección
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.direccion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Almacen
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.almacen}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
+        {/* Resumen de la venta */}
+        <div className="mb-8 bg-white overflow-hidden">
+          <h2 className="text-base font-semibold text-gray-800 uppercase">Cabecera</h2>
 
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Comprobante
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.comprobante}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Serie - Numeración
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.serieNumeracion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Tipo
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.tipo}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Estado
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.estado}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Observación
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.observacion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Notas
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.notas}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Total
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {formatCurrency(this.state.total, this.state.codiso)}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {[
+              { label: 'Comprobante:', value: this.state.comprobante },
+              { label: 'Serie - Num.:', value: this.state.serie + '-' + formatNumberWithZeros(this.state.numeracion) },
+              { label: 'Tipo Doc.:', value: this.state.tipoDocumento + " - " + this.state.documento },
+              { label: 'Proveedor:', value: this.state.informacion },
+              { label: 'N° de celular:', value: this.state.celular },
+              { label: 'Correo electr.:', value: this.state.email },
+              { label: 'Fecha:', value: this.state.fecha },
+              { label: 'Hora:', value: formatTime(this.state.hora) },
+              { label: 'Observación:', value: this.state.observacion },
+              { label: 'Nota:', value: this.state.nota },
+              { label: 'Forma de Pago:', value: this.state.tipo },
+              { label: 'Estado:', value: this.state.estado },
+              { label: 'Usuario:', value: this.state.usuario },
+              { label: 'Almacen:', value: this.state.almacen },
+              { label: 'Total:', value: formatCurrency(this.state.total, this.state.codiso) },
+            ].map((item, index) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-4 items-center gap-5 py-2">
+                <p className="text-sm text-gray-600 uppercase">
+                  {item.label}
+                </p>
+                <p className="text-sm md:col-span-3 text-gray-900 font-medium">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className={'table-light'}>
-                <TableHeader className="thead-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Costo</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Impuesto %</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Medida</TableHead>
-                    <TableHead>Importe</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderDetalles()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Detalles de productos */}
+        <div className="mb-8 bg-white overflow-hidden">
+          <h2 className="text-base font-semibold text-gray-800 mb-3 uppercase">Detalles</h2>
 
-        <Row>
-          <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table classNameContent="w-100">
-              <TableHeader>{this.renderTotal()}</TableHeader>
-            </Table>
-          </Column>
-        </Row>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 text-black">
+                <tr>
+                  <th className="p-4 text-sm uppercase">#</th>
+                  <th className="p-4 text-sm uppercase">Imagen</th>
+                  <th className="p-4 text-sm uppercase">Producto</th>
+                  <th className="p-4 text-sm uppercase">Categoría</th>
+                  <th className="p-4 text-right text-sm uppercase">Cantidad</th>
+                  <th className="p-4 text-sm uppercase">Unidad</th>
+                  <th className="p-4 text-right text-sm uppercase">Impuesto</th>
+                  <th className="p-4 text-right text-sm uppercase">Costo</th>
+                  <th className="p-4 text-right text-sm uppercase">Monto</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {this.renderDetalles()}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Transacciones</TableTitle>
-              <Table className={'table-light'}>
-                <TableHeader className="thead-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Fecha y Hora</TableHead>
-                    <TableHead>Concepto</TableHead>
-                    <TableHead>Nota</TableHead>
-                    <TableHead>Usuario</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderTransaciones()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Totales (flotante a la derecha en desktop) */}
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-start-9 lg:col-span-4">
+            <div className="bg-white  overflow-hidden">
+              <table className="w-full text-right">
+                <tbody>
+                  {this.renderTotal()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Transacciones */}
+        <div className="bg-white overflow-hidden">
+          <h2 className="text-base font-semibold text-gray-800 mb-3 uppercase">Transacciones</h2>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full ">
+              <thead className="bg-gray-50 text-black">
+                <tr>
+                  <th className="p-4 text-sm uppercase">#</th>
+                  <th className="p-4 text-sm uppercase">Fecha y Hora</th>
+                  <th className="p-4 text-sm uppercase">Concepto</th>
+                  <th className="p-4 text-sm uppercase">Nota</th>
+                  <th className="p-4 text-sm uppercase">Usuario</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {this.renderTransaciones()}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </ContainerWrapper>
     );
   }

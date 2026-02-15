@@ -1,19 +1,18 @@
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertWarning,
   formatTime,
   isText,
-} from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/helper/utils.helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   detailCatalogo,
   documentsPdfCatalogo,
-} from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+} from '@/network/rest/principal.network';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -23,14 +22,14 @@ import {
   TableResponsive,
   TableRow,
   TableTitle,
-} from '../../../../../components/Table';
-import Title from '../../../../../components/Title';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
+} from '@/components/Table';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
+import Button from '@/components/Button';
 import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import Image from '@/components/Image';
+import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 import axios from 'axios';
 
@@ -44,12 +43,12 @@ class CatalogoDetalle extends CustomComponent {
 
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idCatalogo: '',
-      nombre: '',
-      fechaHora: '',
-      usuario: '',
+      idCatalogo: "",
+      nombre: "",
+      fechaHora: "",
+      usuario: "",
 
       detalles: [],
     };
@@ -106,8 +105,12 @@ class CatalogoDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Catálogo', response.getMessage(), () => {
-        this.close();
+      alertKit.warning({
+        title: "Catálogo",
+        message: response.getMessage(),
+        onClose: () => {
+          this.close();
+        },
       });
       return;
     }
@@ -279,12 +282,8 @@ class CatalogoDetalle extends CustomComponent {
               <Table className="table-light table-striped">
                 <TableHeader className="table-dark">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
-                    <TableHead width="20%" className="text-center">
-                      Imagen
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
+                    <TableHead width="20%" className="text-center">Imagen</TableHead>
                     <TableHead width="50%">Producto</TableHead>
                   </TableRow>
                 </TableHeader>

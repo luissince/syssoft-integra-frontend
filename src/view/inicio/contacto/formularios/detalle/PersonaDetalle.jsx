@@ -1,16 +1,16 @@
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Card,
   CardBody,
   CardHeader,
   CardText,
   CardTitle,
-} from '../../../../../components/Card';
+} from '@/components/Card';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -25,13 +25,13 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
+} from '@/components/Table';
 import {
   TabContent,
   TabHead,
   TabHeader,
   TabPane,
-} from '../../../../../components/Tab';
+} from '@/components/Tab';
 import {
   Legend,
   Line,
@@ -42,9 +42,9 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from 'recharts';
-import ErrorResponse from '../../../../../model/class/error-response';
-import SuccessReponse from '../../../../../model/class/response';
-import { CANCELED } from '../../../../../model/types/types';
+import ErrorResponse from '@/model/class/error-response';
+import SuccessReponse from '@/model/class/response';
+import { CANCELED } from '@/constants/requestStatus';
 import { alertKit } from 'alert-kit';
 import {
   formatDecimal,
@@ -54,11 +54,11 @@ import {
   isEmpty,
   isText,
   formatCurrency,
-} from '../../../../../helper/utils.helper';
-import { detailPersona } from '../../../../../network/rest/principal.network';
-import { SpinnerView } from '../../../../../components/Spinner';
+} from '@/helper/utils.helper';
+import { detailPersona } from '@/network/rest/principal.network';
+import { SpinnerView } from '@/components/Spinner';
 import { Link } from 'react-router-dom';
-import Button from '../../../../../components/Button';
+import Button from '@/components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -70,7 +70,7 @@ class ClienteDetalle extends CustomComponent {
     super(props);
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
       persona: null,
       listaVentas: [],
       sumaVentas: 0,
@@ -121,13 +121,10 @@ class ClienteDetalle extends CustomComponent {
     const body = {
       idPersona: idPersona,
 
-      posicionPaginaTransaccion:
-        (this.state.paginacionTransaccion - 1) *
-        this.state.filasPorPaginaTransaccion,
+      posicionPaginaTransaccion: (this.state.paginacionTransaccion - 1) * this.state.filasPorPaginaTransaccion,
       filasPorPaginaTransaccion: this.state.filasPorPaginaTransaccion,
 
-      posicionPaginaVenta:
-        (this.state.paginacionVenta - 1) * this.state.filasPorPaginaVenta,
+      posicionPaginaVenta: (this.state.paginacionVenta - 1) * this.state.filasPorPaginaVenta,
       filasPorPaginaVenta: this.state.filasPorPaginaVenta,
     };
 
@@ -136,13 +133,11 @@ class ClienteDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertKit.warning(
-        {
+      alertKit.warning({
           headerTitle: 'SysSoft Integra',
           title: 'Persona',
           message: response.getMessage(),
-        },
-        () => {
+        },() => {
           this.props.history.goBack();
         },
       );

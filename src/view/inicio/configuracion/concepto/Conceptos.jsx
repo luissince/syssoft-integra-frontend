@@ -1,28 +1,24 @@
 import {
   formatTime,
-  alertDialog,
-  alertSuccess,
-  alertWarning,
-  alertInfo,
   isEmpty,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   listConceptos,
   removeConcepto,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
-import { SpinnerTable } from '../../../../components/Spinner';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import { SpinnerTable } from '@/components/Spinner';
 import {
   Table,
   TableBody,
@@ -31,8 +27,9 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import { TIPO_CONCEPTO_INGRESO } from '../../../../model/types/tipo-concepto';
+} from '@/components/Table';
+import { TIPO_CONCEPTO_INGRESO } from '@/model/types/tipo-concepto';
+import { alertKit } from 'alert-kit';
 
 class Conceptos extends CustomComponent {
   constructor(props) {
@@ -60,7 +57,7 @@ class Conceptos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.abortControllerTable = new AbortController();
@@ -167,41 +164,55 @@ class Conceptos extends CustomComponent {
     });
   };
 
-  handleBorrar(idConcepto) {
-    alertDialog(
-      'Concepto',
-      '¿Estás seguro de eliminar el concepto?',
-      async (event) => {
-        if (event) {
-          const params = {
-            idConcepto: idConcepto,
-          };
-
-          alertInfo('Concepto', 'Procesando información...');
-
-          const response = await removeConcepto(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Concepto', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Concepto', response.getMessage());
-          }
-        }
+  handleBorrar = async (idConcepto) => {
+    const accept = await alertKit.question({
+      title: "Concepto",
+      message: "¿Estás seguro de eliminar el concepto?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idConcepto: idConcepto,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await removeConcepto(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Concepto",
+          message: response.data,
+          onClose: async () => {
+            await this.loadInit();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Concepto",
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );
@@ -245,7 +256,7 @@ class Conceptos extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idConcepto)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -254,7 +265,7 @@ class Conceptos extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idConcepto)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

@@ -1,31 +1,29 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isNumeric,
   isText,
   keyNumberInteger,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import {
   editImpuesto,
   geIdImpuesto,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import { SpinnerView } from '../../../../components/Spinner';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import { SpinnerView } from '@/components/Spinner';
+import { alertKit } from 'alert-kit';
 
 class ImpuestoEditar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -39,7 +37,7 @@ class ImpuestoEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -51,7 +49,7 @@ class ImpuestoEditar extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idImpuesto = new URLSearchParams(url).get('idImpuesto');
+    const idImpuesto = new URLSearchParams(url).get("idImpuesto");
 
     if (isText(idImpuesto)) {
       this.loadingData(idImpuesto);
@@ -95,47 +93,75 @@ class ImpuestoEditar extends CustomComponent {
     }
   }
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Impuesto', 'Ingrese el nombre.', () =>
-        this.refNombre.current.focus(),
-      );
+      alertKit.warning({
+        title: "Impuesto",
+        message: "Ingrese el nombre.",
+        onClose: () => {
+          this.refNombre.current.focus();
+        }
+      })
       return;
     }
 
     if (!isNumeric(this.state.porcentaje)) {
-      alertWarning('Impuesto', 'Ingrese el porcentaje.', () =>
-        this.refPorcentaje.current.focus(),
-      );
+      alertKit.warning({
+        title: "Impuesto",
+        message: "Ingrese el porcentaje.",
+        onClose: () => {
+          this.refPorcentaje.current.focus();
+        }
+      })
       return;
     }
 
-    alertDialog('Impuesto', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        alertInfo('Impuesto', 'Procesando información...');
-
-        const data = {
-          idImpuesto: this.state.idImpuesto,
-          nombre: this.state.nombre,
-          porcentaje: this.state.porcentaje,
-          codigo: this.state.codigo,
-          estado: this.state.estado,
-          preferido: this.state.preferido,
-          idUsuario: this.state.idUsuario,
-        };
-
-        const response = await editImpuesto(data);
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Impuesto', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Impuesto', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Guía de Remisión",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información..."
+      })
+
+      const data = {
+        idImpuesto: this.state.idImpuesto,
+        nombre: this.state.nombre,
+        porcentaje: this.state.porcentaje,
+        codigo: this.state.codigo,
+        estado: this.state.estado,
+        preferido: this.state.preferido,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await editImpuesto(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Impuesto",
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          }
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Impuesto",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   render() {

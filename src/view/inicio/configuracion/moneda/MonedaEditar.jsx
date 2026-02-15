@@ -1,16 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import ContainerWrapper from '../../../../components/Container';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isText,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import ErrorResponse from '../../../../model/class/error-response';
 import SuccessReponse from '../../../../model/class/response';
 import {
@@ -24,6 +20,7 @@ import Column from '../../../../components/Column';
 import { SpinnerView } from '../../../../components/Spinner';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -42,7 +39,7 @@ class MonedaEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTxtNombre = React.createRef();
@@ -100,49 +97,76 @@ class MonedaEditar extends CustomComponent {
     }
   }
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (!isText(this.state.nombre)) {
-      alertWarning('Moneda', 'Ingres el nombre.', () =>
-        this.refTxtNombre.current.focus(),
-      );
+      alertKit.warning({
+        title: "Moneda",
+        message: "Ingres el nombre.",
+        onClose: () => {
+          this.refTxtNombre.current.focus();
+        }
+      })
       return;
     }
 
     if (!isText(this.state.codIso)) {
-      alertWarning('Moneda', 'Ingres el código.', () =>
-        this.refTxtCodIso.current.focus(),
-      );
+      alertKit.warning({
+        title: "Moneda",
+        message: "Ingres el código.",
+        onClose: () => {
+          this.refTxtCodIso.current.focus();
+        }
+      })
       return;
     }
 
-    alertDialog('Moneda', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          nombre: this.state.nombre,
-          codiso: this.state.codIso,
-          simbolo: this.state.simbolo,
-          estado: this.state.estado,
-          idUsuario: this.state.idUsuario,
-          idMoneda: this.state.idMoneda,
-        };
-
-        alertInfo('Moneda', 'Procesando información...');
-
-        const response = await editMoneda(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Moneda', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Moneda', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Moneda",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+
+    if (accept) {
+      const data = {
+        nombre: this.state.nombre,
+        codiso: this.state.codIso,
+        simbolo: this.state.simbolo,
+        estado: this.state.estado,
+        idUsuario: this.state.idUsuario,
+        idMoneda: this.state.idMoneda,
+      };
+
+      alertKit.loading({
+        message: "Procesando información..."
+      })
+
+      const response = await editMoneda(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Moneda",
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          }
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.error({
+          title: "Moneda",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   render() {
@@ -249,7 +273,9 @@ MonedaEditar.propTypes = {
   }),
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
 };

@@ -3,13 +3,13 @@ import { isText, isEmpty, imageBase64 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import ContainerWrapper from '../../../../components/Container';
 import {
   getIdMarca,
   updateMarca,
 } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import PropTypes from 'prop-types';
@@ -40,7 +40,7 @@ class MarcaEditar extends CustomComponent {
       estado: false,
       publicar: false,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -330,6 +330,7 @@ class MarcaEditar extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
               alt="Icono de la categoría"
@@ -363,7 +364,9 @@ class MarcaEditar extends CustomComponent {
 MarcaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

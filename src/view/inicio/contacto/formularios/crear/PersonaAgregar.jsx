@@ -1,39 +1,36 @@
 import React from 'react';
 import {
-  alertDialog,
   currentDate,
   keyNumberPhone,
   keyNumberInteger,
   convertNullText,
   isEmpty,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../components/Container';
-import { images } from '../../../../../helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { images } from '@/helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import PropTypes from 'prop-types';
 import {
   createPersona,
   getUbigeo,
   comboTipoDocumento,
-} from '../../../../../network/rest/principal.network';
-import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
-import SearchInput from '../../../../../components/SearchInput';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Title from '../../../../../components/Title';
-import Button from '../../../../../components/Button';
-import Select from '../../../../../components/Select';
-import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
-import CheckBox, { Switches } from '../../../../../components/Checks';
-import { RUC } from '../../../../../model/types/tipo-documento';
+} from '@/network/rest/principal.network';
+import { getDni, getRuc } from '@/network/rest/apisperu.network';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import SearchInput from '@/components/SearchInput';
+import { SpinnerView } from '@/components/Spinner';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import CheckBox, { Switches } from '@/components/Checks';
 import { alertKit } from 'alert-kit';
-import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
+import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -44,34 +41,34 @@ class PersonaAgregar extends CustomComponent {
     super(props);
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idTipoDocumento: '',
-      documento: '',
-      informacion: '',
+      idTipoDocumento: "",
+      documento: "",
+      informacion: "",
       cliente: true,
       proveedor: false,
       conductor: false,
-      licenciaConductir: '',
-      telefono: '',
-      celular: '',
+      licenciaConductir: "",
+      personal: false,
+      telefono: "",
+      celular: "",
       fechaNacimiento: currentDate(),
-      email: '',
-      clave: '',
-      genero: '',
-      direccion: '',
-      idUbigeo: '',
+      email: "",
+      clave: "",
+      genero: "",
+      direccion: "",
+      idUbigeo: "",
 
-      estadoCivil: '',
+      estadoCivil: "",
       estado: true,
-      observacion: '',
-
-      // otros datos
-      idUsuario: this.props.token.userToken.idUsuario,
+      observacion: "",
 
       tiposDocumentos: [],
 
       ubigeos: [],
+
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTipoDocumento = React.createRef();
@@ -107,9 +104,8 @@ class PersonaAgregar extends CustomComponent {
       this.setState({
         msgLoading: responseListaTipoDocumento.getMessage(),
       });
+      return;
     }
-
-    console.log(responseListaTipoDocumento.data);
 
     this.setState({
       tiposDocumentos: responseListaTipoDocumento.data,
@@ -157,7 +153,7 @@ class PersonaAgregar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
-  handleInputClave = () => {
+  handleInputClave = (event) => {
     this.setState({ clave: event.target.value });
   };
 
@@ -220,7 +216,7 @@ class PersonaAgregar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
       }, () => {
-        this.refDocumentoPj.current.focus();
+        this.refDocumento.current.focus();
       })
       return;
     }
@@ -381,6 +377,7 @@ class PersonaAgregar extends CustomComponent {
         proveedor: this.state.proveedor,
         conductor: this.state.conductor,
         licenciaConducir: this.state.licenciaConductir,
+        personal: this.state.personal,
         telefono: this.state.telefono.toString().trim().toUpperCase(),
         celular: this.state.celular.toString().trim().toUpperCase(),
         fechaNacimiento: this.state.fechaNacimiento,
@@ -547,7 +544,7 @@ class PersonaAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column formGroup={true}>
+          <Column>
             <label>
               Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
@@ -555,7 +552,7 @@ class PersonaAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column className="col-md-4 col-12" formGroup={true}>
+          <Column className="col-md-3 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnCliente"
               checked={this.state.cliente}
@@ -567,7 +564,7 @@ class PersonaAgregar extends CustomComponent {
             </CheckBox>
           </Column>
 
-          <Column className="col-md-4 col-12" formGroup={true}>
+          <Column className="col-md-3 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnProveedor"
               checked={this.state.proveedor}
@@ -579,7 +576,7 @@ class PersonaAgregar extends CustomComponent {
             </CheckBox>
           </Column>
 
-          <Column className="col-md-4 col-12" formGroup={true}>
+          <Column className="col-md-3 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnConductor"
               checked={this.state.conductor}
@@ -589,20 +586,34 @@ class PersonaAgregar extends CustomComponent {
             >
               Conductor
             </CheckBox>
-            {this.state.conductor && (
-              <Row>
-                <Column>
-                  <Input
-                    placeholder="Número de licencia de conducir"
-                    ref={this.refLicenciaConducir}
-                    value={this.state.licenciaConductir}
-                    onChange={(event) => {
-                      this.setState({ licenciaConductir: event.target.value });
-                    }}
-                  />
-                </Column>
-              </Row>
-            )}
+            {
+              this.state.conductor && (
+                <Row>
+                  <Column>
+                    <Input
+                      placeholder="Número de licencia de conducir"
+                      ref={this.refLicenciaConducir}
+                      value={this.state.licenciaConductir}
+                      onChange={(event) => {
+                        this.setState({ licenciaConductir: event.target.value });
+                      }}
+                    />
+                  </Column>
+                </Row>
+              )
+            }
+          </Column>
+
+          <Column className="col-md-3 col-12" formGroup={true}>
+            <CheckBox
+              id="checkboxPnPersonal"
+              checked={this.state.personal}
+              onChange={(event) => {
+                this.setState({ personal: event.target.checked });
+              }}
+            >
+              Personal
+            </CheckBox>
           </Column>
         </Row>
 
@@ -777,7 +788,9 @@ class PersonaAgregar extends CustomComponent {
 PersonaAgregar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

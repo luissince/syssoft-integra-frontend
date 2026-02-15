@@ -1,25 +1,21 @@
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
-  alertInfo,
-  alertSuccess,
-  alertWarning,
-  alertDialog,
   isEmpty,
-} from '../../../../helper/utils.helper';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+} from '@/helper/utils.helper';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   deletePersona,
   listPersonas,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -28,10 +24,11 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import { SpinnerTable } from '../../../../components/Spinner';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -157,7 +154,7 @@ class Personas extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -215,32 +212,45 @@ class Personas extends CustomComponent {
     });
   }
 
-  handleRemoverCliente(idPersona) {
-    alertDialog(
-      'Cliente',
-      '¿Está seguro de que desea eliminar el contacto? Esta operación no se puede deshacer.',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Cliente', 'Procesando información...');
-
-          const params = {
-            idPersona: idPersona,
-          };
-
-          const response = await deletePersona(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Cliente', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Cliente', response.getMessage());
-          }
-        }
+  async handleRemoverCliente(idPersona) {
+    const accept = await alertKit.question({
+      title: "Persona",
+      message: "¿Está seguro de que desea eliminar la persona? Esta operación no se puede deshacer.",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const params = {
+        idPersona: idPersona,
+      };
+
+      const response = await deletePersona(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Persona",
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Persona",
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   /*
@@ -263,7 +273,7 @@ class Personas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -295,9 +305,8 @@ class Personas extends CustomComponent {
           <TableCell>{item.direccion}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -411,9 +420,6 @@ class Personas extends CustomComponent {
 
 Personas.propTypes = {
   token: PropTypes.shape({
-    userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
-    }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
     }).isRequired,

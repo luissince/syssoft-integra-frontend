@@ -1,8 +1,10 @@
-import Button from '../../../../../../../components/Button';
-import { images } from '../../../../../../../helper';
+import { cn } from '@/lib/utils';
+import Button from '@/components/Button';
+import { images } from '@/helper';
 import PropTypes from 'prop-types';
 
 const InvoiceTicket = (props) => {
+  const { className } = props;
   const { nombreComporbante } = props;
   const {
     handleOpenPreImpresion,
@@ -13,7 +15,10 @@ const InvoiceTicket = (props) => {
   } = props;
 
   return (
-    <div className="invoice-ticket pl-3 py-2 flex flex-row items-center justify-between w-full flex-wrap">
+    <div className={cn(
+      "invoice-ticket pl-3 py-2 flex flex-row items-center justify-between w-full flex-wrap",
+      className
+    )}>
       <div>
         <p className="h5 m-0">{nombreComporbante}</p>
       </div>
@@ -68,6 +73,7 @@ const InvoiceTicket = (props) => {
 };
 
 InvoiceTicket.propTypes = {
+  className: PropTypes.string,
   nombreComporbante: PropTypes.string,
   handleOpenPreImpresion: PropTypes.func,
   handleOpenVenta: PropTypes.func,

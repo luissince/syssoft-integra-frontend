@@ -1,38 +1,36 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import CustomComponent from '../../../../model/class/custom-component';
-import ContainerWrapper from '../../../../components/Container';
+import CustomComponent from '@/components/CustomComponent';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isText,
-} from '../../../../helper/utils.helper';
-import { addConcepto } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Select from '../../../../components/Select';
-import Title from '../../../../components/Title';
-import Input from '../../../../components/Input';
-import Button from '../../../../components/Button';
+} from '@/helper/utils.helper';
+import { addConcepto } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Select from '@/components/Select';
+import Title from '@/components/Title';
+import Input from '@/components/Input';
+import Button from '@/components/Button';
 import {
   TIPO_CONCEPTO_EGRESO,
   TIPO_CONCEPTO_INGRESO,
-} from '../../../../model/types/tipo-concepto';
+} from '@/model/types/tipo-concepto';
+import { alertKit } from 'alert-kit';
 
 class ConceptoAgregar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
-      nombre: '',
-      idTipoConcepto: '',
-      codigo: '',
+      nombre: "",
+      idTipoConcepto: "",
+      codigo: "",
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -41,45 +39,67 @@ class ConceptoAgregar extends CustomComponent {
 
   handleGuardar = async () => {
     if (!isText(this.state.nombre)) {
-      alertWarning('Concepto', 'Ingrese el nombre del concepto.', () =>
-        this.refNombre.current.focus(),
-      );
+      alertKit.warning({
+        title: "Concepto",
+        message: "Ingrese el nombre del concepto.",
+        onClose: () => this.refNombre.current.focus(),
+      })
       return;
     }
 
     if (this.state.tipo === 0) {
-      alertWarning('Concepto', 'Seleccione el tipo de concepto.', () =>
-        this.refIdTipoConcepto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Concepto",
+        message: "Seleccione el tipo de concepto.",
+        onClose: () => this.refIdTipoConcepto.current.focus(),
+      })
       return;
     }
 
-    alertDialog('Concepto', '¿Estás seguro de continuar?', async (event) => {
-      if (event) {
-        const data = {
-          nombre: this.state.nombre,
-          idTipoConcepto: this.state.idTipoConcepto,
-          codigo: this.state.codigo,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Concepto', 'Procesando información...');
-
-        const response = await addConcepto(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Concepto', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Concepto', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Guía de Remisión",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        nombre: this.state.nombre,
+        idTipoConcepto: this.state.idTipoConcepto,
+        codigo: this.state.codigo,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      })
+
+      const response = await addConcepto(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Concepto",
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack()
+          },
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Concepto",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

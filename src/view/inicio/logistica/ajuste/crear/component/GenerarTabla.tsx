@@ -1,22 +1,20 @@
 import React from 'react';
-import { TableRow, TableCell } from '@/components/ui/table';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { INCREMENTO } from '@/model/types/forma-ajuste';
-import { getNumber, isEmpty, keyNumberFloat, rounded } from '@/helper/utils.helper';
+import { formatDate, getNumber, isEmpty, keyNumberFloat, rounded } from '@/helper/utils.helper';
 import Input from '@/components/Input';
 import Image from '@/components/Image';
 import { images } from '@/helper';
 import Button from '@/components/Button';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
-import { Table, TableBody, TableHead, TableHeader, TableResponsive, TableTitle } from '@/components/Table';
+import { cn } from '@/lib/utils';
 
-interface Lote {
-    codigoLote: string;
-    cantidad: number;
-    cantidadAjustar: number;
+interface InventarioDetalle {
+    idKardex: string;
+    lote: string;
     fechaVencimiento: string;
-    diasRestantes: number;
+    ubicacion: string;
+    cantidad: number;
+    cantidadAjustar: string;
 }
 
 interface Props {
@@ -27,10 +25,8 @@ interface Props {
         codigo: string;
         nombre: string;
         imagen: string;
-        actual: number;
-        cantidad: number;
         unidad: string;
-        lotes?: Lote[];
+        inventarioDetalles: InventarioDetalle[];
     }>,
     handleRemoveDetalle: (idProducto: string) => void;
     handleInputDetalle: (event: any, idProducto: string) => void;
@@ -47,114 +43,151 @@ const GenerarTabla: React.FC<Props> = ({
 }) => {
     const isMobile = useIsMobile();
 
-    if (isEmpty(detalles)) {
-        return (
-            <TableRow>
-                <TableCell className="text-center" colSpan={7}>
-                    ¡No hay datos para mostrar!
-                </TableCell>
-            </TableRow>
-        );
-    }
-
-    const detailRows = detalles.map((item, index) => {
-        const isLastRow = index === detalles.length - 1;
-
-        const cantidad = item.lotes
-            ? item.lotes.reduce(
-                (acum, lote) => acum + getNumber(lote.cantidadAjustar),
-                0,
-            )
-            : item.cantidad;
-
-        let diferencia = 0;
-
-        if (idTipoAjuste === INCREMENTO) {
-            diferencia = Number(item.actual) + Number(cantidad);
-        } else {
-            diferencia = Number(item.actual) - Number(cantidad);
+    const renderBody = () => {
+        if (isEmpty(detalles)) {
+            return (
+                <tr>
+                    <td className="text-center p-3" colSpan={7}>
+                        ¡No hay datos para mostrar!
+                    </td>
+                </tr>
+            );
         }
 
-        return (
-            <TableRow key={index}>
-                <TableCell>
-                    <Button
-                        className="btn-outline-danger btn-sm"
-                        title="Anular"
-                        onClick={() => handleRemoveDetalle(item.idProducto)}
-                    >
-                        <i className="bi bi-trash"></i>
-                    </Button>
-                </TableCell>
-                <TableCell className="text-center">
-                    <div className="flex justify-center">
-                        <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={100}
-                        />
-                    </div>
-                </TableCell>
-                <TableCell>
-                    {item.codigo}
-                    <br />
-                    {item.nombre}
-                </TableCell>
-                <TableCell>
-                    {item.lotes && (
-                        <small className="text-info">
-                            <i className="bi bi-box-seam"></i> {item.lotes.length} lote(s)
-                        </small>
-                    )}
+        return detalles.map((item) => {
+            return (
+                <React.Fragment key={`producto-${item.idProducto}`}>
+                    {/* FILA PRINCIPAL (igual que antes) */}
+                    <tr>
+                        <td className="text-center py-3">
+                            <Button
+                                className="btn-outline-danger btn-sm"
+                                title="Anular"
+                                onClick={() => handleRemoveDetalle(item.idProducto)}
+                            >
+                                <i className="bi bi-trash"></i>
+                            </Button>
+                        </td>
+                        <td className="text-center py-3">
+                            <div className="flex justify-center">
+                                <Image
+                                    default={images.noImage}
+                                    src={item.imagen}
+                                    alt={item.nombre}
+                                    overrideClass="w-24 h-24 object-contain"
+                                />
+                            </div>
+                        </td>
+                        <td className="py-3" colSpan={3}>
+                            <span className="font-mono text-sm text-gray-500"> {item.codigo}</span>
+                            <br />
+                            <span className="font-medium">{item.nombre}</span>
+                        </td>
+                    </tr>
 
-                    {!item.lotes && (
-                        <Input
-                            value={cantidad}
-                            type={isMobile ? 'number' : 'text'}
-                            placeholder="0"
-                            onChange={(event) =>
-                                handleInputDetalle(event, item.idProducto)
+                    {/* CARDS POR ALMACÉN (en lugar de subtabla) */}
+                    {
+                        item.inventarioDetalles.map((invd, indexinvd) => {
+                            const isLastRow = indexinvd === item.inventarioDetalles.length - 1;
+
+                            const stockOriginal = getNumber(invd.cantidad);
+                            const ajustar = getNumber(invd.cantidadAjustar);
+
+                            const stockRestante = ajustar > 0 ? stockOriginal - ajustar : stockOriginal;
+
+                            let diferencia = 0;
+
+                            if (idTipoAjuste === INCREMENTO) {
+                                diferencia = stockOriginal + ajustar
+                            } else {
+                                diferencia = stockOriginal - ajustar;
                             }
-                            onKeyDown={keyNumberFloat}
-                            onKeyUp={(event) =>
-                                handleFocusInputTable(event, isLastRow)
-                            }
-                        />
-                    )}
-                </TableCell>
-                <TableCell>
-                    {item.lotes && rounded(cantidad)}
-                    {!item.lotes && rounded(cantidad)}
-                </TableCell>
-                <TableCell className={`${diferencia <= 0 ? 'text-danger' : ''}`}>
-                    {rounded(diferencia)} <small>{item.unidad}</small>
-                </TableCell>
-            </TableRow>
-        );
-    });
+
+                            return (
+                                <tr key={`detalle-${invd.idKardex}`}>
+                                    <td colSpan={2} className="py-3"></td>
+                                    <td className="py-3">
+                                        {
+                                            <div className="text-sm space-y-1">
+                                                {invd.lote && (
+                                                    <div className="font-mono text-gray-500">
+                                                        <strong>Lote:</strong> {invd.lote}
+                                                    </div>
+                                                )}
+
+                                                {invd.fechaVencimiento && (
+                                                    <div className="font-mono text-gray-500">
+                                                        <strong>Vence:</strong> {formatDate(invd.fechaVencimiento)}
+                                                    </div>
+                                                )}
+
+                                                {invd.ubicacion && (
+                                                    <div className="font-mono text-gray-500">
+                                                        <strong>Ubicación:</strong> {invd.ubicacion}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        }
+                                    </td>
+                                    <td className="text-center py-3">
+                                        <Input
+                                            type={isMobile ? 'number' : 'text'}
+                                            value={invd.cantidadAjustar}
+                                            placeholder="0"
+                                            onChange={(event) =>
+                                                handleInputDetalle(event, invd.idKardex)
+                                            }
+                                            onKeyDown={keyNumberFloat}
+                                            onKeyUp={(event) =>
+                                                handleFocusInputTable(event, isLastRow)
+                                            }
+                                        />
+                                    </td>
+                                    <td className={cn(
+                                        "text-center py-3",
+                                        stockRestante <= 0 && "text-error",
+                                    )}>
+                                        {rounded(stockRestante)}
+                                    </td>
+                                    <td
+                                        className={cn(
+                                            "text-center py-3",
+                                            diferencia <= 0 && "text-error",
+                                        )}>
+                                        {rounded(diferencia)}
+                                    </td>
+                                </tr>
+                            );
+                        })
+                    }
+                </React.Fragment>
+            );
+        })
+    };
 
     return (
-        <Row>
-            <Column>
-                <TableResponsive>
-                    <TableTitle>Lista de productos:</TableTitle>
-                    <Table className="table-striped table-bordered rounded">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead width="5%" className="text-center">Quitar</TableHead>
-                                <TableHead width="15%" className="text-center">Imagen</TableHead>
-                                <TableHead width="25%">Clave/Nombre</TableHead>
-                                <TableHead width="15%">Nueva Existencia</TableHead>
-                                <TableHead width="15%">Existencia Actual</TableHead>
-                                <TableHead width="15%">Diferencia</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody ref={refTableBody}>{detailRows}</TableBody>
-                    </Table>
-                </TableResponsive>
-            </Column>
-        </Row>
+        <div className="mb-3">
+            <div className="overflow-x-auto">
+                <p className="mb-2">Lista de productos:</p>
+                <div className="bg-white rounded border overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Quitar</th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Imagen</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">Clave/Nombre</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Nueva Existencia</th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Existencia Actual</th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Diferencia</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200" ref={refTableBody}>
+                            {renderBody()}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     );
 };
 

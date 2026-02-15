@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
+  TriangleAlert,
 } from 'lucide-react';
 import ErrorResponse from '@/model/class/error-response';
 import { alertKit } from 'alert-kit';
@@ -21,15 +22,16 @@ import {
   dashboardProducto,
 } from '@/network/rest/principal.network';
 import {
-  currentDate,
   isEmpty,
   formatCurrency,
   rounded,
 } from '@/helper/utils.helper';
 import { images } from '@/helper';
 import Image from '@/components/Image';
-import { CANCELED } from '@/model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { cn } from '@/lib/utils';
+import DatePickerPopover from '@/components/DatePickerPopover';
+import { format } from 'date-fns';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -48,23 +50,14 @@ class RepProductos extends CustomComponent {
 
       codIso: this.props.moneda.codiso ?? '',
 
-      fechaInicial: currentDate(),
-      fechaFinal: currentDate(),
+      fechaInicial: new Date(),
+      fechaFinal: new Date(),
 
       idSucursal: this.props.token.project.idSucursal,
       sucursales: [],
 
       idAlmacen: '',
       almacenes: [],
-
-      resumenFinanciero: {
-        ganancia_total: 0,
-        ingresos_totales: 0,
-        margen_ganancia: 0,
-        ticket_promedio: 0,
-        total_ventas: 0,
-        unidades_vendidas: 0,
-      },
 
       productosVendidos: [],
       productosMasVendidos: [],
@@ -90,7 +83,7 @@ class RepProductos extends CustomComponent {
       currentPageRendimientoCategoria: 1,
       itemsPerPageRendimientoCategoria: 3,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.abortControllerView = new AbortController();
@@ -140,15 +133,12 @@ class RepProductos extends CustomComponent {
     if (sucursalResponse instanceof ErrorResponse) {
       if (sucursalResponse.getType() === CANCELED) return;
 
-      alertKit.warning(
-        {
-          title: 'Reporte Productos',
-          message: sucursalResponse.getMessage(),
-        },
-        () => {
-          this.props.history.goBack();
-        },
-      );
+      alertKit.warning({
+        title: 'Reporte Productos',
+        message: sucursalResponse.getMessage(),
+      }, () => {
+        this.props.history.goBack();
+      });
       return;
     }
 
@@ -159,15 +149,12 @@ class RepProductos extends CustomComponent {
     if (almacenResponse instanceof ErrorResponse) {
       if (almacenResponse.getType() === CANCELED) return;
 
-      alertKit.warning(
-        {
-          title: 'Reporte Productos',
-          message: almacenResponse.getMessage(),
-        },
-        () => {
-          this.props.history.goBack();
-        },
-      );
+      alertKit.warning({
+        title: 'Reporte Productos',
+        message: almacenResponse.getMessage(),
+      }, () => {
+        this.props.history.goBack();
+      });
       return;
     }
 
@@ -180,6 +167,7 @@ class RepProductos extends CustomComponent {
       almacenes: almacenResponse.data,
       idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
     });
+
     await this.loadingData();
   }
 
@@ -190,8 +178,8 @@ class RepProductos extends CustomComponent {
     });
 
     const body = {
-      fechaInicio: this.state.fechaInicial,
-      fechaFinal: this.state.fechaFinal,
+      fechaInicio: format(this.state.fechaInicial, "yyyy-MM-dd"),
+      fechaFinal: format(this.state.fechaFinal, "yyyy-MM-dd"),
       idSucursal: this.state.idSucursal,
       idAlmacen: this.state.idAlmacen,
     };
@@ -211,14 +199,15 @@ class RepProductos extends CustomComponent {
       return;
     }
 
+    console.log(response.data["productosVendidos"].data);
+
     this.setState({
-      resumenFinanciero: response.data['1'].data,
-      productosVendidos: response.data['2'].data,
-      productosMasVendidos: response.data['3'].data,
-      estadoInventario: response.data['4'].data,
-      rendimientoCategoria: response.data['5'].data,
-      productosConBajoInventario: response.data['6'].data,
-      productosSinVentaConInventario: response.data['7'].data,
+      productosVendidos: response.data["productosVendidos"].data,
+      productosMasVendidos: response.data["productosMasVendidos"].data,
+      estadoInventario: response.data["estadoInventario"].data,
+      rendimientoCategoria: response.data["rendimientoCategoria"].data,
+      productosConBajoInventario: response.data["productosConBajoInventario"].data,
+      productosSinVentaConInventario: response.data["productosSinVentaConInventario"].data,
       loading: false,
       // Resetear páginas cuando se cargan nuevos datos
       currentPageProductos: 1,
@@ -243,6 +232,27 @@ class RepProductos extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
+
+  // Métodos para manejar las acciones
+  handleChangeFechaInicial = (selectedDate) => {
+    this.setState({ fechaInicial: selectedDate }, () => this.loadingData());
+  };
+
+  handleChangeFechaFinal = (selectedDate) => {
+    this.setState({ fechaFinal: selectedDate }, () => this.loadingData());
+  };
+
+  handleSelectIdSistema = (e) => {
+    this.setState({ idSucursal: e.target.value }, () =>
+      this.loadingInit(),
+    );
+  };
+
+  handleSelectIdAlmacen = (e) => {
+    this.setState({ idAlmacen: e.target.value }, () =>
+      this.loadingData(),
+    );
+  }
 
   // Métodos para manejar paginación
   handlePageChangeProductos = (page) => {
@@ -303,10 +313,12 @@ class RepProductos extends CustomComponent {
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === 1
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
+              className={cn(
+                "relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                currentPage === 1 ?
+                  "text-gray-300 cursor-not-allowed" :
+                  "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
+              )}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -330,10 +342,12 @@ class RepProductos extends CustomComponent {
               <button
                 key={page}
                 onClick={() => onPageChange(page)}
-                className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${page === currentPage
-                  ? 'z-10 bg-blue-600 border-blue-600 text-white'
-                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                  }`}
+                className={cn(
+                  "relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                  page === currentPage ?
+                    "z-10 bg-blue-600 border-blue-600 text-white" :
+                    "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                )}
               >
                 {page}
               </button>
@@ -356,10 +370,12 @@ class RepProductos extends CustomComponent {
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md ${currentPage === totalPages
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
+              className={cn(
+                "relative inline-flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                currentPage === totalPages ?
+                  "text-gray-300 cursor-not-allowed" :
+                  "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
+              )}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -385,6 +401,762 @@ class RepProductos extends CustomComponent {
   |
   */
 
+  renderProductosVendidos = () => {
+    const {
+      codIso,
+      productosVendidos,
+      currentPageProductos,
+      itemsPerPageProductos,
+    } = this.state;
+
+    // Datos paginados
+    const paginatedProductosVendidos = this.getPaginatedData(
+      productosVendidos,
+      currentPageProductos,
+      itemsPerPageProductos,
+    );
+
+    // Total de páginas
+    const totalPagesProductos = this.getTotalPages(
+      productosVendidos,
+      itemsPerPageProductos,
+    );
+
+    return (
+      <div className="lg:col-span-2 mb-4">
+        <div className="bg-white rounded border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Productos Vendidos
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Detalles de ventas, costos y ganancias (
+                  {productosVendidos.length} productos)
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <label className="text-sm text-gray-600">Mostrar:</label>
+                <select
+                  value={itemsPerPageProductos}
+                  onChange={(e) =>
+                    this.setState({
+                      itemsPerPageProductos: parseInt(e.target.value),
+                      currentPageProductos: 1,
+                    })
+                  }
+                  className="px-2 py-1 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Producto
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Categoría
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vendidos
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Costo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sumatoria
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ganancia
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {isEmpty(paginatedProductosVendidos) && (
+                  <tr>
+                    <td colSpan={8} className="text-center">
+                      <div className="d-flex flex-column align-items-center py-4">
+                        <img
+                          className="mb-1"
+                          src={images.basket}
+                          alt="Canasta"
+                        />
+                        <div className="w-50">
+                          <span className="text-base">
+                            No hay productos vendidos
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {paginatedProductosVendidos.map((producto, index) => (
+                  <tr
+                    key={index}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center items-center w-20 h-20 rounded border border-solid border-[#e2e8f0]">
+                        <Image
+                          default={images.noImage}
+                          src={producto.imagen}
+                          alt={producto.nombre}
+                          overrideClass="w-full h-full object-contain"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {producto.nombre}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {producto.codigo}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {producto.categoria}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {rounded(producto.cantidad_vendida, 0)}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        última: {producto.ultima_venta}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {formatCurrency(producto.precio_promedio, codIso)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {formatCurrency(producto.costo, codIso)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {formatCurrency(
+                        producto.cantidad_vendida *
+                        producto.precio_promedio,
+                        codIso,
+                      )}{' '}
+                      -{' '}
+                      {formatCurrency(
+                        producto.cantidad_vendida * producto.costo,
+                        codIso,
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-green-600">
+                        {formatCurrency(producto.ganancia_total, codIso)}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        ({rounded(producto.margen_ganancia, 0)}%)
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación para productos vendidos */}
+          {this.renderPagination(
+            currentPageProductos,
+            totalPagesProductos,
+            this.handlePageChangeProductos,
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  renderProductosMasVendidos = () => {
+    const {
+      codIso,
+      productosMasVendidos,
+      currentPageMasVendidos,
+      itemsPerPageMasVendidos,
+    } = this.state;
+
+    // Datos paginados
+    const paginatedMasVendidos = this.getPaginatedData(
+      productosMasVendidos,
+      currentPageMasVendidos,
+      itemsPerPageMasVendidos,
+    );
+
+    // Total de páginas
+    const totalPagesMasVendidos = this.getTotalPages(
+      productosMasVendidos,
+      itemsPerPageMasVendidos,
+    );
+
+    return (
+      <div className="bg-white rounded p-6 border border-gray-200">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Productos Más Vendidos
+          </h3>
+          <span className="text-sm text-gray-500">
+            ({productosMasVendidos.length})
+          </span>
+        </div>
+        <div className="space-y-4">
+          {isEmpty(paginatedMasVendidos) && (
+            <div className="flex items-center justify-center">
+              <div className="text-gray-500 text-sm">
+                No hay productos más vendidos
+              </div>
+            </div>
+          )}
+          {paginatedMasVendidos.map((producto, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded"
+            >
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
+                  {(currentPageMasVendidos - 1) *
+                    itemsPerPageMasVendidos +
+                    index +
+                    1}
+                </div>
+                <div className="ml-3">
+                  <div className="text-sm font-medium text-gray-900">
+                    {producto.nombre}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {rounded(producto.cantidad_vendida, 0)} vendidos
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-bold text-green-600">
+                  {formatCurrency(producto.ingresos_totales, codIso)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Paginación para productos más vendidos */}
+        {productosMasVendidos.length > itemsPerPageMasVendidos && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                {(currentPageMasVendidos - 1) * itemsPerPageMasVendidos +
+                  1}
+                -
+                {Math.min(
+                  currentPageMasVendidos * itemsPerPageMasVendidos,
+                  productosMasVendidos.length,
+                )}{' '}
+                de {productosMasVendidos.length}
+              </div>
+              <div className="flex space-x-1">
+                <button
+                  onClick={() =>
+                    this.handlePageChangeMasVendidos(
+                      currentPageMasVendidos - 1,
+                    )
+                  }
+                  disabled={currentPageMasVendidos === 1}
+                  className={cn(
+                    "px-2 py-1 text-xs rounded",
+                    currentPageMasVendidos === 1 ?
+                      "text-gray-300 cursor-not-allowed" :
+                      "text-gray-600 hover:bg-gray-100"
+                  )}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="px-2 py-1 text-xs text-gray-600">
+                  {currentPageMasVendidos}/{totalPagesMasVendidos}
+                </span>
+                <button
+                  onClick={() =>
+                    this.handlePageChangeMasVendidos(
+                      currentPageMasVendidos + 1,
+                    )
+                  }
+                  disabled={
+                    currentPageMasVendidos === totalPagesMasVendidos
+                  }
+                  className={cn(
+                    "px-2 py-1 text-xs rounded",
+                    currentPageMasVendidos === totalPagesMasVendidos ?
+                      "text-gray-300 cursor-not-allowed" :
+                      "text-gray-600 hover:bg-gray-100"
+                  )}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  renderEstadoInventario = () => {
+    const {
+      estadoInventario,
+    } = this.state;
+
+    return (
+      <div className="bg-white rounded p-6 border border-gray-200 relative">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Estado de Inventario
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center p-3 bg-green-50 rounded border border-green-200">
+            <div className="text-2xl font-bold text-green-600">
+              {estadoInventario.inventario_normal}
+            </div>
+            <div className="text-sm text-green-800">Normal</div>
+          </div>
+          <div className="text-center p-3 bg-red-50 rounded border border-red-200">
+            <div className="text-2xl font-bold text-red-600">
+              {estadoInventario.bajo_inventario}
+            </div>
+            <div className="text-sm text-red-800">Bajo</div>
+          </div>
+          <div className="text-center p-3 bg-blue-50 rounded border border-blue-200">
+            <div className="text-2xl font-bold text-blue-600">
+              {estadoInventario.exceso_inventario}
+            </div>
+            <div className="text-sm text-blue-800">Exceso</div>
+          </div>
+        </div>
+        <div className="mt-3 text-center">
+          <div className="text-sm text-gray-600">
+            Total: {estadoInventario.total_productos} productos
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderRendimientoCategoria = () => {
+    const {
+      codIso,
+      rendimientoCategoria,
+      currentPageRendimientoCategoria,
+      itemsPerPageRendimientoCategoria,
+    } = this.state;
+
+    // Datos paginados
+    const paginatedRendimientoCategoria = this.getPaginatedData(
+      rendimientoCategoria,
+      currentPageRendimientoCategoria,
+      itemsPerPageRendimientoCategoria,
+    );
+
+    // Total de páginas
+    const totalPagesRendimientoCategoria = this.getTotalPages(
+      rendimientoCategoria,
+      itemsPerPageRendimientoCategoria,
+    );
+
+    return (
+      <div className="bg-white rounded p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Rendimiento por Categoría
+        </h3>
+        <div className="space-y-3">
+          {isEmpty(paginatedRendimientoCategoria) && (
+            <div className="flex items-center justify-center">
+              <div className="text-gray-500 text-sm">
+                No hay productos con ventas
+              </div>
+            </div>
+          )}
+          {paginatedRendimientoCategoria.map((categoria, index) => {
+            const categoryProducts = rendimientoCategoria.filter(
+              (p) => p.idCategoria === categoria.idCategoria,
+            );
+            const totalRevenue = categoryProducts.reduce(
+              (sum, p) => sum + p.ingresos_totales,
+              0,
+            );
+            const totalItems = categoryProducts.reduce(
+              (sum, p) => sum + p.unidades_vendidas,
+              0,
+            );
+            return (
+              <div key={index} className="p-3 bg-gray-50 rounded">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-gray-900">
+                    {categoria.categoria}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {totalItems} items
+                  </span>
+                </div>
+                <div className="text-sm font-bold text-green-600">
+                  {formatCurrency(totalRevenue, codIso)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Paginación para rendimiento por categoría */}
+        {rendimientoCategoria.length >
+          itemsPerPageRendimientoCategoria && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {(currentPageRendimientoCategoria - 1) *
+                    itemsPerPageRendimientoCategoria +
+                    1}
+                  -
+                  {Math.min(
+                    currentPageRendimientoCategoria *
+                    itemsPerPageRendimientoCategoria,
+                    rendimientoCategoria.length,
+                  )}{' '}
+                  de {rendimientoCategoria.length}
+                </div>
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() =>
+                      this.handlePageChangeRendimientoCategoria(
+                        currentPageRendimientoCategoria - 1,
+                      )
+                    }
+                    disabled={currentPageRendimientoCategoria === 1}
+                    className={cn(
+                      "px-2 py-1 text-xs rounded",
+                      currentPageRendimientoCategoria === 1 ?
+                        "text-gray-300 cursor-not-allowed" :
+                        "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
+                    )}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="px-2 py-1 text-xs text-gray-600">
+                    {currentPageRendimientoCategoria}/
+                    {totalPagesRendimientoCategoria}
+                  </span>
+                  <button
+                    onClick={() =>
+                      this.handlePageChangeRendimientoCategoria(
+                        currentPageRendimientoCategoria + 1,
+                      )
+                    }
+                    disabled={
+                      currentPageRendimientoCategoria ===
+                      totalPagesRendimientoCategoria
+                    }
+                    className={cn(
+                      "px-2 py-1 text-xs rounded",
+                      currentPageRendimientoCategoria === totalPagesRendimientoCategoria ?
+                        "text-gray-300 cursor-not-allowed" :
+                        "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
+                    )}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+      </div>
+    );
+  }
+
+  renderProductosConBajoInventario = () => {
+    const {
+      productosConBajoInventario,
+      currentPageBajoInventario,
+      itemsPerPageBajoInventario,
+    } = this.state;
+
+    // Datos paginados
+    const paginatedBajoInventario = this.getPaginatedData(
+      productosConBajoInventario,
+      currentPageBajoInventario,
+      itemsPerPageBajoInventario,
+    );
+
+    // Total de páginas
+    const totalPagesBajoInventario = this.getTotalPages(
+      productosConBajoInventario,
+      itemsPerPageBajoInventario,
+    );
+
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <h5 className="font-semibold text-red-700 flex items-center">
+            <TriangleAlert className="w-5 h-5 mr-2" />
+            Productos con Bajo Inventario
+          </h5>
+          <span className="text-sm text-gray-500">
+            ({productosConBajoInventario.length})
+          </span>
+        </div>
+        <div className="space-y-3">
+          {isEmpty(paginatedBajoInventario) && (
+            <div className="flex items-center justify-center p-4">
+              <div className="text-gray-500 text-sm">
+                No hay productos con bajo inventario
+              </div>
+            </div>
+          )}
+          {paginatedBajoInventario.map((producto, index) => (
+            <div
+              key={index}
+              className="flex items-center p-3 bg-red-50 rounded border border-red-200 gap-x-4"
+            >
+              <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 bg-white">
+                <Image
+                  default={images.noImage}
+                  src={producto.imagen}
+                  alt={producto.nombre}
+                  overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                />
+              </div>
+              <div className="flex flex-1 items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-red-800">
+                    {producto.nombre}
+                  </div>
+                  <div className="text-xs text-red-600">
+                    Actual: {producto.inventario_actual}, Mínimo:{' '}
+                    {producto.cantidadMinima}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-red-700">
+                    Reordenar
+                  </div>
+                  <div className="text-xs text-red-600">
+                    {producto.unidades_para_reordenar}{' '}
+                    {producto.medida}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Paginación para bajo inventario */}
+        {productosConBajoInventario.length >
+          itemsPerPageBajoInventario && (
+            <div className="mt-4 pt-4 border-t border-red-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {(currentPageBajoInventario - 1) *
+                    itemsPerPageBajoInventario +
+                    1}
+                  -
+                  {Math.min(
+                    currentPageBajoInventario *
+                    itemsPerPageBajoInventario,
+                    productosConBajoInventario.length,
+                  )}{' '}
+                  de {productosConBajoInventario.length}
+                </div>
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() =>
+                      this.handlePageChangeBajoInventario(
+                        currentPageBajoInventario - 1,
+                      )
+                    }
+                    disabled={currentPageBajoInventario === 1}
+                    className={cn(
+                      "px-2 py-1 text-xs rounded",
+                      currentPageBajoInventario === 1 ?
+                        "text-gray-300 cursor-not-allowed" :
+                        "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="px-2 py-1 text-xs text-gray-600">
+                    {currentPageBajoInventario}/
+                    {totalPagesBajoInventario}
+                  </span>
+                  <button
+                    onClick={() =>
+                      this.handlePageChangeBajoInventario(
+                        currentPageBajoInventario + 1,
+                      )
+                    }
+                    disabled={
+                      currentPageBajoInventario ===
+                      totalPagesBajoInventario
+                    }
+                    className={cn(
+                      "px-2 py-1 text-xs rounded",
+                      currentPageBajoInventario === totalPagesBajoInventario ?
+                        "text-gray-300 cursor-not-allowed" :
+                        "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+      </div>
+    );
+  }
+
+  renderProductosSinVentas = () => {
+    const {
+      productosSinVentaConInventario,
+      currentPageSinVentas,
+      itemsPerPageSinVentas,
+    } = this.state;
+
+    // Datos paginados
+    const paginatedSinVentas = this.getPaginatedData(
+      productosSinVentaConInventario,
+      currentPageSinVentas,
+      itemsPerPageSinVentas,
+    );
+
+    // Total de páginas
+    const totalPagesSinVentas = this.getTotalPages(
+      productosSinVentaConInventario,
+      itemsPerPageSinVentas,
+    );
+
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <h5 className="font-semibold text-orange-700 flex items-center">
+            <TriangleAlert className="w-5 h-5 mr-2" />
+            Productos sin Ventas
+          </h5>
+          <span className="text-sm text-gray-500">
+            ({productosSinVentaConInventario.length})
+          </span>
+        </div>
+        <div className="space-y-3">
+          {isEmpty(paginatedSinVentas) && (
+            <div className="flex items-center justify-center p-4">
+              <div className="text-gray-500 text-sm">
+                No hay productos sin ventas
+              </div>
+            </div>
+          )}
+          {paginatedSinVentas.map((producto, index) => (
+            <div
+              key={index}
+              className="flex items-center p-3 bg-red-50 rounded border border-red-200 gap-x-4"
+            >
+              <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 bg-white">
+                <Image
+                  default={images.noImage}
+                  src={producto.imagen}
+                  alt={producto.nombre}
+                  overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                />
+              </div>
+              <div className="flex flex-1 items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-orange-800">
+                    {producto.nombre}
+                  </div>
+                  <div className="text-xs text-orange-600">
+                    Inventario: {producto.inventario_actual} unidades
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold text-orange-700">
+                    Promoción
+                  </div>
+                  <div className="text-xs text-orange-600">
+                    considerar descuento
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Paginación para sin ventas */}
+        {productosSinVentaConInventario.length >
+          itemsPerPageSinVentas && (
+            <div className="mt-4 pt-4 border-t border-orange-200">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {(currentPageSinVentas - 1) * itemsPerPageSinVentas + 1}
+                  -
+                  {Math.min(
+                    currentPageSinVentas * itemsPerPageSinVentas,
+                    productosSinVentaConInventario.length,
+                  )}{' '}
+                  de {productosSinVentaConInventario.length}
+                </div>
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() =>
+                      this.handlePageChangeSinVentas(
+                        currentPageSinVentas - 1,
+                      )
+                    }
+                    disabled={currentPageSinVentas === 1}
+                    className={cn(
+                      "px-2 py-1 text-xs rounded",
+                      currentPageSinVentas === 1 ?
+                        "text-gray-300 cursor-not-allowed" :
+                        "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="px-2 py-1 text-xs text-gray-600">
+                    {currentPageSinVentas}/{totalPagesSinVentas}
+                  </span>
+                  <button
+                    onClick={() =>
+                      this.handlePageChangeSinVentas(
+                        currentPageSinVentas + 1,
+                      )
+                    }
+                    disabled={
+                      currentPageSinVentas === totalPagesSinVentas
+                    }
+                    className={cn(
+                      "px-2 py-1 text-xs rounded",
+                      currentPageSinVentas === totalPagesSinVentas ?
+                        "text-gray-300 cursor-not-allowed" :
+                        "text-gray-600 hover:bg-gray-100"
+                    )}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+      </div>
+    );
+  }
+
   render() {
     const {
       fechaInicial,
@@ -394,73 +1166,7 @@ class RepProductos extends CustomComponent {
       codIso,
       sucursales,
       almacenes,
-      resumenFinanciero,
-      productosVendidos,
-      productosMasVendidos,
-      estadoInventario,
-      rendimientoCategoria,
-      productosConBajoInventario,
-      productosSinVentaConInventario,
-      currentPageProductos,
-      itemsPerPageProductos,
-      currentPageMasVendidos,
-      itemsPerPageMasVendidos,
-      currentPageBajoInventario,
-      itemsPerPageBajoInventario,
-      currentPageSinVentas,
-      itemsPerPageSinVentas,
-      currentPageRendimientoCategoria,
-      itemsPerPageRendimientoCategoria,
     } = this.state;
-
-    // Datos paginados
-    const paginatedProductosVendidos = this.getPaginatedData(
-      productosVendidos,
-      currentPageProductos,
-      itemsPerPageProductos,
-    );
-    const paginatedMasVendidos = this.getPaginatedData(
-      productosMasVendidos,
-      currentPageMasVendidos,
-      itemsPerPageMasVendidos,
-    );
-    const paginatedBajoInventario = this.getPaginatedData(
-      productosConBajoInventario,
-      currentPageBajoInventario,
-      itemsPerPageBajoInventario,
-    );
-    const paginatedSinVentas = this.getPaginatedData(
-      productosSinVentaConInventario,
-      currentPageSinVentas,
-      itemsPerPageSinVentas,
-    );
-    const paginatedRendimientoCategoria = this.getPaginatedData(
-      rendimientoCategoria,
-      currentPageRendimientoCategoria,
-      itemsPerPageRendimientoCategoria,
-    );
-
-    // Total de páginas
-    const totalPagesProductos = this.getTotalPages(
-      productosVendidos,
-      itemsPerPageProductos,
-    );
-    const totalPagesMasVendidos = this.getTotalPages(
-      productosMasVendidos,
-      itemsPerPageMasVendidos,
-    );
-    const totalPagesBajoInventario = this.getTotalPages(
-      productosConBajoInventario,
-      itemsPerPageBajoInventario,
-    );
-    const totalPagesSinVentas = this.getTotalPages(
-      productosSinVentaConInventario,
-      itemsPerPageSinVentas,
-    );
-    const totalPagesRendimientoCategoria = this.getTotalPages(
-      rendimientoCategoria,
-      itemsPerPageRendimientoCategoria,
-    );
 
     return (
       <ContainerWrapper>
@@ -500,35 +1206,13 @@ class RepProductos extends CustomComponent {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <input
-              type="date"
-              value={fechaInicial}
-              onChange={(e) => {
-                this.setState({ fechaInicial: e.target.value }, () =>
-                  this.loadingData(),
-                );
-              }}
-              className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <DatePickerPopover value={fechaInicial} onChange={this.handleChangeFechaInicial} />
 
-            <input
-              type="date"
-              value={fechaFinal}
-              onChange={(e) => {
-                this.setState({ fechaFinal: e.target.value }, () =>
-                  this.loadingData(),
-                );
-              }}
-              className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <DatePickerPopover value={fechaFinal} onChange={this.handleChangeFechaFinal} />
 
             <select
               value={idSucursal}
-              onChange={(e) => {
-                this.setState({ idSucursal: e.target.value }, () =>
-                  this.loadingInit(),
-                );
-              }}
+              onChange={this.handleSelectIdSistema}
               className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
@@ -541,11 +1225,7 @@ class RepProductos extends CustomComponent {
 
             <select
               value={idAlmacen}
-              onChange={(e) => {
-                this.setState({ idAlmacen: e.target.value }, () =>
-                  this.loadingData(),
-                );
-              }}
+              onChange={this.handleSelectIdAlmacen}
               className="px-4 py-2 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
@@ -560,470 +1240,19 @@ class RepProductos extends CustomComponent {
 
         {/* Body */}
         <div className="max-w-7xl mx-auto py-4">
-          {/* Financial Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded p-6 border border-gray-200">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded">
-                  <HandCoins className="h-6 w-6 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Ingresos Totales
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(resumenFinanciero.ingresos_totales, codIso)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded p-6 border border-gray-200">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded">
-                  <ChartNoAxesCombined className="w-6 h-6 text-blue-60" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Ganancia Total
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(resumenFinanciero.ganancia_total, codIso)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded p-6 border border-gray-200">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 rounded">
-                  <ShieldCheck className="w-6 h-6 text-purple-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Margen de Ganancia
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {rounded(resumenFinanciero.margen_ganancia, 0)}%
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded p-6 border border-gray-200">
-              <div className="flex items-center">
-                <div className="p-2 bg-orange-100 rounded">
-                  <Package className="w-6 h-6 text-orange-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Productos Vendidos
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {resumenFinanciero.unidades_vendidas}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Main Products Table */}
-          <div className="lg:col-span-2 mb-4">
-            <div className="bg-white rounded border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      Productos Vendidos
-                    </h2>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Detalles de ventas, costos y ganancias (
-                      {productosVendidos.length} productos)
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm text-gray-600">Mostrar:</label>
-                    <select
-                      value={itemsPerPageProductos}
-                      onChange={(e) =>
-                        this.setState({
-                          itemsPerPageProductos: parseInt(e.target.value),
-                          currentPageProductos: 1,
-                        })
-                      }
-                      className="px-2 py-1 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Producto
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Categoría
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Vendidos
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Precio
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Costo
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Sumatoria
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ganancia
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {isEmpty(paginatedProductosVendidos) && (
-                      <tr>
-                        <td colSpan={8} className="text-center">
-                          <div className="d-flex flex-column align-items-center py-4">
-                            <img
-                              className="mb-1"
-                              src={images.basket}
-                              alt="Canasta"
-                            />
-                            <div className="w-50">
-                              <span className="text-base">
-                                No hay productos vendidos
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                    {paginatedProductosVendidos.map((producto, index) => (
-                      <tr
-                        key={index}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-6 py-4">
-                          <Image
-                            default={images.noImage}
-                            src={producto.imagen}
-                            alt={producto.nombre}
-                            width={90}
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {producto.nombre}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {producto.codigo}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {producto.categoria}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {rounded(producto.cantidad_vendida, 0)}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            última: {producto.ultima_venta}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {formatCurrency(producto.precio_promedio, codIso)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {formatCurrency(producto.costo, codIso)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {formatCurrency(
-                            producto.cantidad_vendida *
-                            producto.precio_promedio,
-                            codIso,
-                          )}{' '}
-                          -{' '}
-                          {formatCurrency(
-                            producto.cantidad_vendida * producto.costo,
-                            codIso,
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-green-600">
-                            {formatCurrency(producto.ganancia_total, codIso)}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            ({rounded(producto.margen_ganancia, 0)}%)
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Paginación para productos vendidos */}
-              {this.renderPagination(
-                currentPageProductos,
-                totalPagesProductos,
-                this.handlePageChangeProductos,
-              )}
-            </div>
-          </div>
+          {this.renderProductosVendidos()}
 
           {/* Detail Products Table */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Top Selling Products */}
-            <div className="bg-white rounded p-6 border border-gray-200">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Productos Más Vendidos
-                </h3>
-                <span className="text-sm text-gray-500">
-                  ({productosMasVendidos.length})
-                </span>
-              </div>
-              <div className="space-y-4">
-                {isEmpty(paginatedMasVendidos) && (
-                  <div className="flex items-center justify-center">
-                    <div className="text-gray-500 text-sm">
-                      No hay productos más vendidos
-                    </div>
-                  </div>
-                )}
-                {paginatedMasVendidos.map((producto, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
-                        {(currentPageMasVendidos - 1) *
-                          itemsPerPageMasVendidos +
-                          index +
-                          1}
-                      </div>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900">
-                          {producto.nombre}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {rounded(producto.cantidad_vendida, 0)} vendidos
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-green-600">
-                        {formatCurrency(producto.ingresos_totales, codIso)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Paginación para productos más vendidos */}
-              {productosMasVendidos.length > itemsPerPageMasVendidos && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {(currentPageMasVendidos - 1) * itemsPerPageMasVendidos +
-                        1}
-                      -
-                      {Math.min(
-                        currentPageMasVendidos * itemsPerPageMasVendidos,
-                        productosMasVendidos.length,
-                      )}{' '}
-                      de {productosMasVendidos.length}
-                    </div>
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() =>
-                          this.handlePageChangeMasVendidos(
-                            currentPageMasVendidos - 1,
-                          )
-                        }
-                        disabled={currentPageMasVendidos === 1}
-                        className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === 1
-                          ? 'text-gray-300 cursor-not-allowed'
-                          : 'text-gray-600 hover:bg-gray-100'
-                          }`}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <span className="px-2 py-1 text-xs text-gray-600">
-                        {currentPageMasVendidos}/{totalPagesMasVendidos}
-                      </span>
-                      <button
-                        onClick={() =>
-                          this.handlePageChangeMasVendidos(
-                            currentPageMasVendidos + 1,
-                          )
-                        }
-                        disabled={
-                          currentPageMasVendidos === totalPagesMasVendidos
-                        }
-                        className={`px-2 py-1 text-xs rounded ${currentPageMasVendidos === totalPagesMasVendidos
-                          ? 'text-gray-300 cursor-not-allowed'
-                          : 'text-gray-600 hover:bg-gray-100'
-                          }`}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            {this.renderProductosMasVendidos()}
 
             {/* Inventory Status */}
-            <div className="bg-white rounded p-6 border border-gray-200 relative">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Estado de Inventario
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-green-50 rounded border border-green-200">
-                  <div className="text-2xl font-bold text-green-600">
-                    {estadoInventario.inventario_normal}
-                  </div>
-                  <div className="text-sm text-green-800">Normal</div>
-                </div>
-                <div className="text-center p-3 bg-red-50 rounded border border-red-200">
-                  <div className="text-2xl font-bold text-red-600">
-                    {estadoInventario.bajo_inventario}
-                  </div>
-                  <div className="text-sm text-red-800">Bajo</div>
-                </div>
-                <div className="text-center p-3 bg-blue-50 rounded border border-blue-200">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {estadoInventario.exceso_inventario}
-                  </div>
-                  <div className="text-sm text-blue-800">Exceso</div>
-                </div>
-              </div>
-              <div className="mt-3 text-center">
-                <div className="text-sm text-gray-600">
-                  Total: {estadoInventario.total_productos} productos
-                </div>
-              </div>
-            </div>
+            {this.renderEstadoInventario()}
 
             {/* Category Performance */}
-            <div className="bg-white rounded p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Rendimiento por Categoría
-              </h3>
-              <div className="space-y-3">
-                {isEmpty(paginatedRendimientoCategoria) && (
-                  <div className="flex items-center justify-center">
-                    <div className="text-gray-500 text-sm">
-                      No hay productos con ventas
-                    </div>
-                  </div>
-                )}
-                {paginatedRendimientoCategoria.map((categoria, index) => {
-                  const categoryProducts = rendimientoCategoria.filter(
-                    (p) => p.idCategoria === categoria.idCategoria,
-                  );
-                  const totalRevenue = categoryProducts.reduce(
-                    (sum, p) => sum + p.ingresos_totales,
-                    0,
-                  );
-                  const totalItems = categoryProducts.reduce(
-                    (sum, p) => sum + p.unidades_vendidas,
-                    0,
-                  );
-                  return (
-                    <div key={index} className="p-3 bg-gray-50 rounded">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium text-gray-900">
-                          {categoria.categoria}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {totalItems} items
-                        </span>
-                      </div>
-                      <div className="text-sm font-bold text-green-600">
-                        {formatCurrency(totalRevenue, codIso)}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Paginación para rendimiento por categoría */}
-              {rendimientoCategoria.length >
-                itemsPerPageRendimientoCategoria && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
-                        {(currentPageRendimientoCategoria - 1) *
-                          itemsPerPageRendimientoCategoria +
-                          1}
-                        -
-                        {Math.min(
-                          currentPageRendimientoCategoria *
-                          itemsPerPageRendimientoCategoria,
-                          rendimientoCategoria.length,
-                        )}{' '}
-                        de {rendimientoCategoria.length}
-                      </div>
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() =>
-                            this.handlePageChangeRendimientoCategoria(
-                              currentPageRendimientoCategoria - 1,
-                            )
-                          }
-                          disabled={currentPageRendimientoCategoria === 1}
-                          className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria === 1
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                            }`}
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                        </button>
-                        <span className="px-2 py-1 text-xs text-gray-600">
-                          {currentPageRendimientoCategoria}/
-                          {totalPagesRendimientoCategoria}
-                        </span>
-                        <button
-                          onClick={() =>
-                            this.handlePageChangeRendimientoCategoria(
-                              currentPageRendimientoCategoria + 1,
-                            )
-                          }
-                          disabled={
-                            currentPageRendimientoCategoria ===
-                            totalPagesRendimientoCategoria
-                          }
-                          className={`px-2 py-1 text-xs rounded ${currentPageRendimientoCategoria ===
-                            totalPagesRendimientoCategoria
-                            ? 'text-gray-300 cursor-not-allowed'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                            }`}
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-            </div>
+            {this.renderRendimientoCategoria()}
           </div>
 
           {/* Inventory Management Section */}
@@ -1039,245 +1268,10 @@ class RepProductos extends CustomComponent {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Low Inventory Products */}
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="font-semibold text-red-700 flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Productos con Bajo Inventario
-                    </h5>
-                    <span className="text-sm text-gray-500">
-                      ({productosConBajoInventario.length})
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {isEmpty(paginatedBajoInventario) && (
-                      <div className="flex items-center justify-center p-4">
-                        <div className="text-gray-500 text-sm">
-                          No hay productos con bajo inventario
-                        </div>
-                      </div>
-                    )}
-                    {paginatedBajoInventario.map((producto, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center p-3 bg-red-50 rounded border border-red-200 gap-x-4"
-                      >
-                        <Image
-                          default={images.noImage}
-                          src={producto.imagen}
-                          alt={producto.nombre}
-                          width={70}
-                        />
-                        <div className="flex flex-1 items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium text-red-800">
-                              {producto.nombre}
-                            </div>
-                            <div className="text-xs text-red-600">
-                              Actual: {producto.inventario_actual}, Mínimo:{' '}
-                              {producto.cantidadMinima}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold text-red-700">
-                              Reordenar
-                            </div>
-                            <div className="text-xs text-red-600">
-                              {producto.unidades_para_reordenar}{' '}
-                              {producto.medida}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Paginación para bajo inventario */}
-                  {productosConBajoInventario.length >
-                    itemsPerPageBajoInventario && (
-                      <div className="mt-4 pt-4 border-t border-red-200">
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm text-gray-600">
-                            {(currentPageBajoInventario - 1) *
-                              itemsPerPageBajoInventario +
-                              1}
-                            -
-                            {Math.min(
-                              currentPageBajoInventario *
-                              itemsPerPageBajoInventario,
-                              productosConBajoInventario.length,
-                            )}{' '}
-                            de {productosConBajoInventario.length}
-                          </div>
-                          <div className="flex space-x-1">
-                            <button
-                              onClick={() =>
-                                this.handlePageChangeBajoInventario(
-                                  currentPageBajoInventario - 1,
-                                )
-                              }
-                              disabled={currentPageBajoInventario === 1}
-                              className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <span className="px-2 py-1 text-xs text-gray-600">
-                              {currentPageBajoInventario}/
-                              {totalPagesBajoInventario}
-                            </span>
-                            <button
-                              onClick={() =>
-                                this.handlePageChangeBajoInventario(
-                                  currentPageBajoInventario + 1,
-                                )
-                              }
-                              disabled={
-                                currentPageBajoInventario ===
-                                totalPagesBajoInventario
-                              }
-                              className={`px-2 py-1 text-xs rounded ${currentPageBajoInventario ===
-                                totalPagesBajoInventario
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </div>
+                {this.renderProductosConBajoInventario()}
 
                 {/* No Sales Products */}
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="font-semibold text-orange-700 flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Productos sin Ventas
-                    </h5>
-                    <span className="text-sm text-gray-500">
-                      ({productosSinVentaConInventario.length})
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {isEmpty(paginatedSinVentas) && (
-                      <div className="flex items-center justify-center p-4">
-                        <div className="text-gray-500 text-sm">
-                          No hay productos sin ventas
-                        </div>
-                      </div>
-                    )}
-                    {paginatedSinVentas.map((producto, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center p-3 bg-red-50 rounded border border-red-200 gap-x-4"
-                      >
-                        <Image
-                          default={images.noImage}
-                          src={producto.imagen}
-                          alt={producto.nombre}
-                          width={70}
-                        />
-                        <div className="flex flex-1 items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium text-orange-800">
-                              {producto.nombre}
-                            </div>
-                            <div className="text-xs text-orange-600">
-                              Inventario: {producto.inventario_actual} unidades
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold text-orange-700">
-                              Promoción
-                            </div>
-                            <div className="text-xs text-orange-600">
-                              considerar descuento
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Paginación para sin ventas */}
-                  {productosSinVentaConInventario.length >
-                    itemsPerPageSinVentas && (
-                      <div className="mt-4 pt-4 border-t border-orange-200">
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm text-gray-600">
-                            {(currentPageSinVentas - 1) * itemsPerPageSinVentas +
-                              1}
-                            -
-                            {Math.min(
-                              currentPageSinVentas * itemsPerPageSinVentas,
-                              productosSinVentaConInventario.length,
-                            )}{' '}
-                            de {productosSinVentaConInventario.length}
-                          </div>
-                          <div className="flex space-x-1">
-                            <button
-                              onClick={() =>
-                                this.handlePageChangeSinVentas(
-                                  currentPageSinVentas - 1,
-                                )
-                              }
-                              disabled={currentPageSinVentas === 1}
-                              className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <span className="px-2 py-1 text-xs text-gray-600">
-                              {currentPageSinVentas}/{totalPagesSinVentas}
-                            </span>
-                            <button
-                              onClick={() =>
-                                this.handlePageChangeSinVentas(
-                                  currentPageSinVentas + 1,
-                                )
-                              }
-                              disabled={
-                                currentPageSinVentas === totalPagesSinVentas
-                              }
-                              className={`px-2 py-1 text-xs rounded ${currentPageSinVentas === totalPagesSinVentas
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </div>
+                {this.renderProductosSinVentas()}
               </div>
             </div>
           </div>
@@ -1294,7 +1288,9 @@ RepProductos.propTypes = {
       nombre: PropTypes.string,
     }),
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.object,

@@ -6,11 +6,11 @@ import {
 } from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '../../../components/Container';
-import CustomComponent from '../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { detailNotifications } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';
-import { CANCELED } from '../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 import { SpinnerTable } from '../../../components/Spinner';
 
@@ -114,7 +114,7 @@ class Notications extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="4"
+          colSpan={4}
           message={'Cargando información de la tabla...'}
         />
       );

@@ -1,25 +1,25 @@
 import React from 'react';
-import { isEmpty } from '../../../../helper/utils.helper';
-import ContainerWrapper from '../../../../components/ui/container-wrapper';
+import { isEmpty } from '@/helper/utils.helper';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import { connect } from 'react-redux';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
   addAlmacen,
   comboTipoAlmacen,
   getUbigeo,
-} from '../../../../network/rest/principal.network';
-import { CANCELED } from '../../../../model/types/types';
-import SearchInput from '../../../../components/SearchInput';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Input from '../../../../components/Input';
-import { Switches } from '../../../../components/Checks';
-import TextArea from '../../../../components/TextArea';
-import Button from '../../../../components/Button';
+} from '@/network/rest/principal.network';
+import { CANCELED } from '@/constants/requestStatus';
+import SearchInput from '@/components/SearchInput';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Input from '@/components/Input';
+import { Switches } from '@/components/Checks';
+import TextArea from '@/components/TextArea';
+import Button from '@/components/Button';
 import { alertKit } from 'alert-kit';
-import Select from '../../../../components/Select';
+import Select from '@/components/Select';
 import CustomComponent from '@/components/CustomComponent';
 
 /**
@@ -46,7 +46,7 @@ class AlmacenAgregar extends CustomComponent {
       ubigeos: [],
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -203,7 +203,7 @@ class AlmacenAgregar extends CustomComponent {
   };
 
   handleSelectPredefinido = (event) => {
-    this.setState({ predefinido: event.target.value });
+    this.setState({ predefinido: event.target.checked });
   };
 
   handleInputObservacion = (event) => {

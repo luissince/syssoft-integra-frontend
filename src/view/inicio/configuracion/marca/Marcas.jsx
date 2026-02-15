@@ -1,22 +1,18 @@
 import {
-  alertDialog,
-  alertSuccess,
-  alertWarning,
-  alertInfo,
   isEmpty,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import { listMarca } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import ContainerWrapper from '../../../../components/Container';
-import { removeMarca } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
+import Paginacion from '@/components/Paginacion';
+import { listMarca } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { removeMarca } from '@/network/rest/principal.network';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -25,32 +21,20 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
-import { SpinnerTable } from '../../../../components/Spinner';
-import { images } from '../../../../helper';
-import Image from '../../../../components/Image';
+} from '@/components/Table';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import { SpinnerTable } from '@/components/Spinner';
+import { images } from '@/helper';
+import Image from '@/components/Image';
+import { alertKit } from 'alert-kit';
 
 class Marcas extends CustomComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      // add: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[0].estado,
-      // ),
-      // edit: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[1].estado,
-      // ),
-      // remove: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[2].estado,
-      // ),
-      // move: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[0].privilegio[3].estado,
-      // ),
-
-      buscar: '',
+      buscar: "",
 
       loading: false,
       lista: [],
@@ -60,7 +44,7 @@ class Marcas extends CustomComponent {
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     };
 
     this.abortControllerTable = new AbortController();
@@ -78,7 +62,7 @@ class Marcas extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
   };
 
@@ -110,14 +94,14 @@ class Marcas extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     /**
      * Restablecer las variables para la busqueda
      */
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     /**
@@ -142,7 +126,7 @@ class Marcas extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -180,39 +164,54 @@ class Marcas extends CustomComponent {
     });
   };
 
-  handleDelete = (id) => {
-    alertDialog(
-      'Marca',
-      '¿Estás seguro de eliminar la Marca?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idMarca: id,
-          };
-
-          alertInfo('Marca', 'Se esta procesando la petición...');
-
-          const response = await removeMarca(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Marca', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Marca', response.getMessage());
-          }
-        }
+  handleDelete = async (id) => {
+    const accept = await alertKit.question({
+      title: "Marca",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idMarca: id,
+      };
+
+      alertKit.loading({
+        message: "Procesando información..."
+      })
+
+      const response = await removeMarca(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Marca",
+          message: response.data,
+          onClose: async () => {
+            await this.loadInit();
+          },
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Marca",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );
@@ -255,7 +254,7 @@ class Marcas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idMarca)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -264,7 +263,7 @@ class Marcas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idMarca)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

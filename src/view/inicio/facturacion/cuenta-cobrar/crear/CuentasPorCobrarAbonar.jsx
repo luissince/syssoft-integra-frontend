@@ -1,5 +1,3 @@
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
 import {
   calculateTax,
   calculateTaxBruto,
@@ -7,7 +5,11 @@ import {
   isText,
   formatCurrency,
   rounded,
+  isEmpty,
+  formatNumberWithZeros,
 } from '../../../../../helper/utils.helper';
+import ContainerWrapper from '../../../../../components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import {
   cancelAccountsReceivableVenta,
@@ -18,11 +20,7 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import {
-  CONTADO,
-  CREDITO
-} from '../../../../../model/types/forma-transaccion';
+import { CANCELED } from '@/constants/requestStatus';
 import React from 'react';
 import ModalProceso from './component/ModalProceso';
 import printJS from 'print-js';
@@ -55,7 +53,7 @@ import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CuentasPorCobrarAbonar extends CustomComponent {
   constructor(props) {
@@ -64,34 +62,34 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idVenta: '',
-      comprobante: '',
-      cliente: '',
-      fecha: '',
-      notas: '',
-      formaPago: '',
-      numeroCuota: 0,
-      frecuenciaPago: '',
-      estado: '',
-      codiso: '',
-      simbolo: '',
-      usuario: '',
+      idVenta: "",
+      comprobante: "",
+      serie: "",
+      numeracion: 0,
+      tipoDocumento: "",
+      documento: "",
+      informacion: "",
+      plazo: "",
+      fechaVencimiento: "",
+      fecha: "",
+      hora: "",
+      nota: "",
+      observacion: "",
+      estado: "",
+      codiso: "",
+      usuario: "",
 
       total: 0,
       cobrado: 0,
 
       detalles: [],
-      cuotas: [],
-
-      // Atributos del modal enviar WhatsApp
-      isOpenSendWhatsapp: false,
+      transaccion: [],
 
       // Atributos del modal de cobro
       isOpenProceso: false,
-      cuota: null,
       monto: 0,
 
       // Atributos del modal cobrar
@@ -99,11 +97,10 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
       // Atributos del modal impresión
       isOpenImpresion: false,
-      idCuota: '',
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     // Referencia del modal proceso
@@ -111,9 +108,6 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
-
-    // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsApp = React.createRef();
 
     //Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -175,7 +169,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.warning({
-        title: 'Cuenta por Cobrar',
+        title: "Cuenta por Cobrar",
         message: response.getMessage(),
       }, () => {
         this.close();
@@ -190,17 +184,18 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       comprobante,
       serie,
       numeracion,
+      tipoDocumento,
       documento,
       informacion,
+      plazo,
+      fechaVencimiento,
       fecha,
       hora,
-      idFormaPago,
-      numeroCuota,
-      frecuenciaPago,
       estado,
-      simbolo,
       codiso,
       usuario,
+      nota,
+      observacion
     } = venta.cabecera;
 
     const nuevoEstado =
@@ -208,36 +203,33 @@ class CuentasPorCobrarAbonar extends CustomComponent {
         <span className="text-success">COBRADO</span>
       ) : estado === 2 ? (
         <span className="text-warning">POR COBRAR</span>
-      ) : estado === 3 ? (
-        <span className="text-danger">ANULADO</span>
       ) : (
-        <span className="text-primary">POR LLEVAR</span>
+        <span className="text-danger">ANULADO</span>
       );
-
-    const tipo =
-      idFormaPago === CONTADO
-        ? "CONTADO" 
-        : "CREDITO"
 
     this.setState({
       idVenta: id,
-      comprobante: comprobante + '  ' + serie + '-' + numeracion,
-      cliente: documento + ' - ' + informacion,
-      fecha: fecha + ' ' + formatTime(hora),
-      notas: '',
-      formaPago: tipo,
-      numeroCuota: parseInt(numeroCuota),
-      frecuenciaPago: frecuenciaPago,
+      comprobante: comprobante,
+      serie: serie,
+      numeracion: numeracion,
+      tipoDocumento: tipoDocumento,
+      documento: documento,
+      informacion: informacion,
+      plazo: plazo,
+      fechaVencimiento: fechaVencimiento,
+      fecha: fecha,
+      hora: hora,
       estado: nuevoEstado,
-      simbolo: simbolo,
       codiso: codiso,
+      nota: nota,
+      observacion: observacion,
       usuario: usuario,
 
       total: venta.resumen[0].total,
-      cobrado: venta.resumen[0].cobrado,
+      pagado: venta.resumen[0].pagado,
 
       detalles: venta.detalles,
-      cuotas: venta.cuotas,
+      transaccion: venta.transaccion,
 
       loading: false,
     });
@@ -269,9 +261,9 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   handlePrintInvoices = async (size) => {
     await pdfVisualizer.init({
       url: documentsPdfInvoicesVenta(this.state.idVenta, size),
-      title: 'Cuentas Por Cobrar',
-      titlePageNumber: 'Página',
-      titleLoading: 'Cargando...',
+      title: "Cuentas Por Cobrar",
+      titlePageNumber: "Página",
+      titleLoading: "Cargando...",
     });
   };
 
@@ -282,96 +274,35 @@ class CuentasPorCobrarAbonar extends CustomComponent {
         this.state.idVenta,
         size,
       ),
-      title: 'Cuentas Por Cobrar',
-      titlePageNumber: 'Página',
-      titleLoading: 'Cargando...',
+      title: "Cuentas Por Cobrar",
+      titlePageNumber: "Página",
+      titleLoading: "Cargando...",
     });
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Modal de enviar WhatsApp
-  //------------------------------------------------------------------------------------------
-
-  handleOpenSendWhatsapp = () => {
-    this.setState({ isOpenSendWhatsapp: true });
-  };
-
-  handleProcessSendWhatsapp = async (
-    phone,
-    callback = async function () { },
-  ) => {
-    const { razonSocial } = this.props.predeterminado.empresa;
-    const { paginaWeb, email } = this.props.token.project;
-
-    const companyInfo = {
-      name: razonSocial,
-      website: paginaWeb,
-      email: email,
-    };
-
-    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, 'A4');
-
-    // Crear mensaje con formato
-    const message = `
-    Hola! Somos *${companyInfo.name}*
-    
-    Le enviamos su comprobante de venta:
-    ${documentUrl}
-    
-    Para cualquier consulta, puede contactarnos:
-    ${companyInfo.website}
-    ${companyInfo.email}
-
-    o escribiendo a nuestro whatsapp
-    
-    Gracias por su preferencia! :D`.trim();
-
-    // Limpiar y formatear el número de teléfono
-    const cleanPhone = phone.replace(/\D/g, '');
-
-    // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-      message,
-    )}`;
-
-    await callback();
-
-    // Abrir en una nueva ventana
-    window.open(whatsappUrl, '_blank');
-  };
-
-  handleCloseSendWhatsapp = () => {
-    this.setState({ isOpenSendWhatsapp: false });
   };
 
   //------------------------------------------------------------------------------------------
   // Eventos del modal cobro
   //------------------------------------------------------------------------------------------
 
-  handleOpenModalProceso = (cuota) => {
-    this.setState({ isOpenProceso: true, cuota: cuota });
+  handleOpenModalProceso = () => {
+    this.setState({ isOpenProceso: true });
   };
 
   handleCloseModalProceso = () => {
-    this.setState({ isOpenProceso: false, cuota: null });
+    this.setState({ isOpenProceso: false });
   };
 
-  handleActionProceso = async (cuota, monto) => {
-    this.setState(
-      {
-        cuota,
-        monto: Number(monto),
-      },
-      () => {
-        this.handleOpenModalTerminal();
-      },
-    );
+  handleActionModalProceso = async (monto) => {
+    this.setState({
+      monto: Number(monto),
+    }, () => {
+      this.handleOpenModalTerminal();
+    });
   };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal terminal
   //------------------------------------------------------------------------------------------
-
   handleOpenModalTerminal = () => {
     this.setState({ isOpenTerminal: true });
   };
@@ -382,11 +313,11 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     notaTransacion,
     callback = async function () { },
   ) => {
-    const { idVenta, cuota, idUsuario, monto } = this.state;
+    const { idVenta, idSucursal, idUsuario, monto } = this.state;
 
     const accept = await alertKit.question({
-      title: 'Cuenta por Cobrar',
-      message: '¿Estás seguro de continuar?',
+      title: "Cuenta por Pagar",
+      message: "¿Estás seguro de continuar?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -398,7 +329,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     if (accept) {
       const data = {
         idVenta,
-        idCuota: cuota.idCuota,
+        idSucursal,
         idUsuario,
         monto,
         notaTransacion,
@@ -408,21 +339,20 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       await callback();
 
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
-
       const response = await createAccountsReceivableVenta(data);
 
       if (response instanceof SuccessReponse) {
         alertKit.close();
-        this.handleOpenImpresion(cuota.idCuota);
+        this.loadingData(this.state.idCompra);
       }
 
       if (response instanceof ErrorResponse) {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Cuenta por Cobrar',
+          title: "Cuenta por Cobrar",
           message: response.getMessage(),
         });
       }
@@ -436,9 +366,9 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Accion para anular el cobro
   //------------------------------------------------------------------------------------------
-  handleCancelSale = async (idCuota, idTransaccion) => {
+  handleCancelTransaction = async (idTransaccion) => {
     const accept = await alertKit.question({
-      title: 'Cuenta por Cobrar',
+      title: "Cuenta por Cobrar",
       message: '¿Estás seguro de anular?',
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
@@ -450,20 +380,20 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
     if (accept) {
       const params = {
-        idCuota: idCuota,
-        idTransaccion: idTransaccion,
         idVenta: this.state.idVenta,
+        idTransaccion: idTransaccion,
+        idUsuario: this.state.idUsuario,
       };
 
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const response = await cancelAccountsReceivableVenta(params);
 
       if (response instanceof SuccessReponse) {
         alertKit.success({
-          title: 'Cuenta por Cobrar',
+          title: "Cuenta por Cobrar",
           message: response.data,
         }, () => {
           this.close();
@@ -474,7 +404,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Cuenta por Cobrar',
+          title: "Cuenta por Cobrar",
           message: response.getMessage(),
         });
       }
@@ -489,7 +419,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfAccountReceivableVenta(
         this.state.idCuota,
         this.state.idVenta,
@@ -501,13 +431,11 @@ class CuentasPorCobrarAbonar extends CustomComponent {
       onPrintDialogClose: () => {
         this.handleCloseImpresion();
       },
-    });
+    })
   };
 
   handleCloseImpresion = () => {
-    this.setState({ isOpenImpresion: false }, () => {
-      this.close();
-    });
+    this.setState({ isOpenImpresion: false });
   };
 
   /*
@@ -526,30 +454,34 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   |
    */
 
-  renderDetalle() {
+  renderDetalles() {
     return this.state.detalles.map((item, index) => (
-      <TableRow key={index}>
-        <TableCell>{item.id}</TableCell>
-        <TableCell className="text-center">
+      <tr key={index} className="hover:bg-gray-50">
+        <td className="p-4 text-gray-700">{item.id}</td>
+        <td className="p-4 text-center">
           <Image
             default={images.noImage}
             src={item.imagen}
             alt={item.producto}
-            width={70}
+            width={80}
+            className="mx-auto rounded border border-gray-200"
           />
-        </TableCell>
-        <TableCell>{item.producto}</TableCell>
-        <TableCell>{item.medida}</TableCell>
-        <TableCell>{item.categoria}</TableCell>
-        <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-        <TableCell className="text-right">{item.impuesto}</TableCell>
-        <TableCell className="text-right">
+        </td>
+        <td className="p-4 text-gray-700">
+          <div className="font-mono text-sm text-gray-500">{item.codigo}</div>
+          <div>{item.producto}</div>
+        </td>
+        <td className="p-4 text-gray-700">{item.medida}</td>
+        <td className="p-4 text-gray-700">{item.categoria}</td>
+        <td className="p-4 text-gray-700 text-right">{rounded(item.cantidad)}</td>
+        <td className="p-4 text-gray-700 text-right">{item.impuesto}</td>
+        <td className="p-4 text-gray-700 text-right">
           {formatCurrency(item.precio, this.state.codiso)}
-        </TableCell>
-        <TableCell className="text-right">
+        </td>
+        <td className="p-4 text-gray-900 font-medium text-right">
           {formatCurrency(item.cantidad * item.precio, this.state.codiso)}
-        </TableCell>
-      </TableRow>
+        </td>
+      </tr>
     ));
   }
 
@@ -597,179 +529,91 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
       return resultado.map((impuesto, index) => {
         return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">
-              {impuesto.nombre} :
-            </TableHead>
-            <TableHead className="text-right mb-2">
+          <tr key={index}>
+            <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+            <td className="p-2 text-gray-900 font-medium text-right">
               {formatCurrency(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
+            </td>
+          </tr>
         );
       });
     };
 
     return (
       <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
+        <tr>
+          <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
             {formatCurrency(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+          </td>
+        </tr>
         {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
+        <tr>
+          <td colSpan={2} className="py-2">
+            <div className="border-t border-gray-200"></div>
+          </td>
+        </tr>
+        <tr>
+          <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+          <td className="p-2 text-gray-900 font-bold text-right text-lg">
             {formatCurrency(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
+          </td>
+        </tr>
       </>
     );
   }
 
-  renderCuotas() {
-    return this.state.cuotas.map((cuota, index) => {
-      let montoActual = cuota.monto;
-
+  renderTransaciones() {
+    if (isEmpty(this.state.transaccion)) {
       return (
-        <React.Fragment key={index}>
-          <TableRow className="table-success">
-            <TableCell className="text-center">{index + 1}</TableCell>
-            <TableCell>{cuota.fecha}</TableCell>
-            <TableCell>{'CUOTA ' + cuota.cuota}</TableCell>
-            <TableCell
-              className={`${cuota.estado === 0 ? 'text-danger' : 'text-success'
-                }`}
-            >
-              {cuota.estado === 0 ? 'Por Cobrar' : 'Cobrado'}
-            </TableCell>
-            <TableCell>
-              {formatCurrency(cuota.monto, this.state.codiso)}
-            </TableCell>
-            <TableCell className="text-center">
-              <Button
-                className="btn-warning"
-                onClick={() => this.handleOpenModalProceso(cuota)}
-                disabled={cuota.estado === 1 ? true : false}
-              >
-                <i className="fa fa-money"></i>
-              </Button>
-            </TableCell>
-            <TableCell className="text-center">
-              <DropdownActions
-                options={[
-                  {
-                    image: images.pdf,
-                    tooltip: 'Pdf A4',
-                    label: 'Archivo Pdf A4',
-                    onClick: () =>
-                      this.handlePrintAccountsPayable.bind(
-                        this,
-                        cuota.idCuota,
-                        'A4',
-                      ),
-                  },
-                  {
-                    image: images.invoice,
-                    tooltip: 'Pdf Ticket',
-                    label: 'Archivo Pdf 80mm',
-                    onClick: () =>
-                      this.handlePrintAccountsPayable.bind(
-                        this,
-                        cuota.idCuota,
-                        '80mm',
-                      ),
-                  },
-                  {
-                    image: images.invoice,
-                    tooltip: 'Pdf Ticket',
-                    label: 'Archivo Pdf 58mm',
-                    onClick: () =>
-                      this.handlePrintAccountsPayable.bind(
-                        this,
-                        cuota.idCuota,
-                        '54mm',
-                      ),
-                  },
-                ]}
-              />
-            </TableCell>
-          </TableRow>
-
-          <TableRow>
-            <TableCell colSpan="7" className="pb-0">
-              Cobros Asociados
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead>Fecha y Hora</TableHead>
-            <TableHead>Concepto</TableHead>
-            <TableHead colSpan={2}>Nota</TableHead>
-            <TableHead>Usuario</TableHead>
-            <TableHead className="text-center">Anular</TableHead>
-          </TableRow>
-          {cuota.transacciones.map((item, index) => {
-            return (
-              <React.Fragment key={index}>
-                <TableRow className="table-secondary">
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <span>{item.fecha}</span>
-                    <br />
-                    <span>{formatTime(item.hora)}</span>
-                  </TableCell>
-                  <TableCell>{item.concepto}</TableCell>
-                  <TableCell colSpan={2}>{item.nota}</TableCell>
-                  <TableCell>{item.usuario}</TableCell>
-                  <TableCell className="text-center">
-                    <Button
-                      className="btn-danger"
-                      onClick={() =>
-                        this.handleCancelSale(cuota.idCuota, item.idTransaccion)
-                      }
-                    >
-                      <i className="fa fa-close"></i>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell className=" text-center">#</TableCell>
-                  <TableCell className="">Banco</TableCell>
-                  <TableCell className="">Cobrado</TableCell>
-                  <TableCell className="">Restante</TableCell>
-                  <TableCell className="">Observación</TableCell>
-                </TableRow>
-                {item.detalles.map((detalle, index) => {
-                  montoActual = montoActual - detalle.monto;
-                  return (
-                    <TableRow key={index}>
-                      <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell>{detalle.nombre}</TableCell>
-                      <TableCell>
-                        {formatCurrency(detalle.monto, this.state.codiso)}
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(montoActual, this.state.codiso)}
-                      </TableCell>
-                      <TableCell>{detalle.observacion}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </React.Fragment>
-            );
-          })}
-          <TableRow>
-            <TableCell colSpan="7">
-              <hr />
-            </TableCell>
-          </TableRow>
-        </React.Fragment>
+        <tr>
+          <td colSpan={6} className="px-6 py-12 text-center">
+            No hay transacciones para mostrar.
+          </td>
+        </tr>
       );
-    });
+    }
+
+    return this.state.transaccion.map((item, index) => (
+      <React.Fragment key={index}>
+        {/* Transacción principal */}
+        <tr className="hover:bg-gray-50 transition-colors">
+          <td className="p-3 font-medium text-gray-800">{index + 1}</td>
+          <td className="p-3">
+            <div className="font-medium">{item.fecha}</div>
+            <div className="text-sm text-gray-600">{formatTime(item.hora)}</div>
+          </td>
+          <td className="p-3 text-gray-800">{item.concepto}</td>
+          <td className="p-3 text-gray-800">{item.nota}</td>
+          <td className="p-3 text-gray-800">{item.usuario}</td>
+          <td className="p3">
+            <div className="w-full flex justify-center">
+              <button
+                className="px-4 py-2 bg-red-500 border border-red-600 text-sm font-medium rounded text-white hover:bg-red-600 flex items-center gap-2"
+                onClick={() => this.handleCancelTransaction(item.idTransaccion)}
+              >
+                <i className="fa fa-trash"></i> Quitar
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        {/* Detalles de la transacción */}
+        <tr className="px-6 py-0 bg-gray-50">
+          <td colSpan={6}>
+            <div className="flex flex-row items-center gap-3 p-3">
+              {item.detalles.map((detalle, idx) => (
+                <div key={idx} className="w-60 flex flex-col gap-3 rounded p-3 bg-white">
+                  <p className="text-sm text-gray-600">Banco: {detalle.nombre}</p>
+                  <p className="text-sm text-gray-600">Monto: {formatCurrency(detalle.monto, this.state.codiso)}</p>
+                  <p className="text-sm text-gray-600">Nota: {detalle.observacion}</p>
+                </div>
+              ))}
+            </div>
+          </td>
+        </tr>
+      </React.Fragment>
+    ));
   }
 
   render() {
@@ -779,28 +623,30 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           loading={this.state.loading}
           message={this.state.msgLoading}
         />
-
         <ModalProceso
           refModal={this.refModalProceso}
           isOpen={this.state.isOpenProceso}
           onClose={this.handleCloseModalProceso}
+
+          idCompra={this.state.idCompra}
           codiso={this.state.codiso}
-          cuota={this.state.cuota}
-          cuotas={this.state.cuotas}
-          handleAction={this.handleActionProceso}
+          transaccion={this.state.transaccion}
+          restante={Number(this.state.total - this.state.pagado)}
+
+          handleAction={this.handleActionModalProceso}
         />
 
         <ModalTransaccion
-          tipo={'Cobro'}
-          title={'Completar Cobro'}
+          tipo={"Abonar"}
+          title={"Completar Cobro"}
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
-          disabledCreditoFijo={true}
+          disabledCredito={true}
           codiso={this.state.codiso}
           importeTotal={this.state.monto}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => { }}
+          handleProcessCredito={null}
         />
 
         <ModalImpresion
@@ -812,223 +658,132 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
-        <ModalSendWhatsApp
-          refModal={this.refModalSendWhatsApp}
-          isOpen={this.state.isOpenSendWhatsapp}
-          phone={this.state.celular}
-          handleClose={this.handleCloseSendWhatsapp}
-          handleProcess={this.handleProcessSendWhatsapp}
-        />
-
         <Title
           title="Cuentas por Cobrar"
           subTitle="DETALLE"
           handleGoBack={() => this.close()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> A4
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
+          >
+            <i className="fa fa-print"></i> 80MM
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
+        </div>
+
+        {/* Resumen de la compra */}
+        <div className="mb-8 bg-white overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {[
+              { label: 'Comprobante:', value: this.state.comprobante },
+              { label: 'Serie - Num.:', value: this.state.serie + '-' + formatNumberWithZeros(this.state.numeracion) },
+              { label: 'Tipo Doc.:', value: this.state.tipoDocumento + " - " + this.state.documento },
+              { label: 'Información:', value: this.state.informacion },
+              { label: 'Plazo:', value: this.state.plazo },
+              { label: 'Fecha de Venc.:', value: this.state.fechaVencimiento },
+              { label: 'Fecha:', value: this.state.fecha },
+              { label: 'Hora:', value: formatTime(this.state.hora) },
+              { label: 'Nota:', value: this.state.nota },
+              { label: 'Observación:', value: this.state.observacion },
+              { label: 'Estado:', value: this.state.estado },
+              { label: 'Usuario:', value: this.state.usuario },
+              { label: 'Por Cobrar:', value: formatCurrency(this.state.total - this.state.cobrado, this.state.codiso) },
+              { label: 'Total:', value: formatCurrency(this.state.total, this.state.codiso) },
+              { label: 'Cobrado:', value: formatCurrency(this.state.cobrado, this.state.codiso) },
+            ].map((item, i) => (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-4 items-center gap-4 py-2">
+                <div className="text-base font-normal text-gray-600">{item.label}</div>
+                <div className="text-sm md:col-span-3 text-gray-900">{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Detalles de productos */}
+        <div className="mb-8 bg-white overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Detalles</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 text-left text-gray-600 text-sm">
+                <tr>
+                  <th className="p-4">#</th>
+                  <th className="p-4">Imagen</th>
+                  <th className="p-4">Producto</th>
+                  <th className="p-4">Unidad</th>
+                  <th className="p-4">Categoría</th>
+                  <th className="p-4 text-right">Cantidad</th>
+                  <th className="p-4 text-right">Impuesto</th>
+                  <th className="p-4 text-right">Precio</th>
+                  <th className="p-4 text-right">Monto</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {this.renderDetalles()}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Totales (flotante a la derecha en desktop) */}
+        <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-start-9 lg:col-span-4">
+            <div className="bg-white  overflow-hidden">
+              <table className="w-full text-right">
+                <tbody>
+                  {this.renderTotal()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Transacciones */}
+        <div className="bg-white overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold text-gray-800">Transacciones</h2>
+
+            <button
+              className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded"
+              onClick={this.handleOpenModalProceso}
             >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>{' '}
-            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
-              <i className="fa fa-whatsapp"></i> Whatsapp
-            </Button>
-          </Column>
-        </Row>
+              <i className="fa fa-plus"></i> Agregar Cobro
+            </button>
+          </div>
 
-        <Row>
-          <Column className="col-lg-6 col-md-12">
-            <TableResponsive>
-              <Table className="table-light table-striped">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
-                      Comprobante
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.comprobante}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Cliente
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.cliente}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.fecha}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Notas
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.notas}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Forma de venta
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.formaPago}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Estado
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.estado}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Usuario
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.usuario}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-
-          <Column className="col-lg-6 col-md-12" formGroup={true}>
-            <TableResponsive>
-              <Table className="table-light table-striped">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Numero de Cuotas
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.numeroCuota}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Frecuencia
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.frecuenciaPago} DÍAS
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Total
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {formatCurrency(this.state.total, this.state.codiso)}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
-                      Cobrado
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-success">
-                      {formatCurrency(this.state.cobrado, this.state.codiso)}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
-                      Por Cobrar
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-danger">
-                      {formatCurrency(
-                        this.state.total - this.state.cobrado,
-                        this.state.codiso,
-                      )}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Unidad</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Impuesto</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Monto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderDetalle()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className="col-lg-8 col-sm-12"></Column>
-          <Column className="col-lg-4 col-sm-12">
-            <Table classNameContent="w-100">
-              <TableHeader>{this.renderTotal()}</TableHeader>
-            </Table>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Cuotas</TableTitle>
-              <Table className="able-light">
-                <TableHeader className="table-primary">
-                  <TableRow className="table-primary">
-                    <TableHead width={'5%'}>#</TableHead>
-                    <TableHead width={'10%'}>Fecha de Cobro</TableHead>
-                    <TableHead width={'10%'}>Cuota</TableHead>
-                    <TableHead width={'10%'}>Estado</TableHead>
-                    <TableHead width={'15%'}>Monto</TableHead>
-                    <TableHead width={'5%'} className="text-center">
-                      Cobrar
-                    </TableHead>
-                    <TableHead width={'5%'} className="text-center">
-                      Imprimir
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderCuotas()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          <div className="overflow-x-auto">
+            <table className="min-w-full ">
+              <thead className="bg-gray-50 text-left text-gray-600 text-sm">
+                <tr>
+                  <th className="p-4 font-medium">#</th>
+                  <th className="p-4 font-medium">Fecha y Hora</th>
+                  <th className="p-4 font-medium">Concepto</th>
+                  <th className="p-4 font-medium">Nota</th>
+                  <th className="p-4 font-medium">Usuario</th>
+                  <th className="p-4 font-medium text-center">Anular</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {this.renderTransaciones()}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </ContainerWrapper>
     );
   }
@@ -1037,7 +792,9 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 CuentasPorCobrarAbonar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

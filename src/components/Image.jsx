@@ -6,6 +6,7 @@ import { alertKit } from 'alert-kit';
 import { imageBase64 } from '../helper/utils.helper';
 
 const ImageUpload = ({
+  className,
   label,
   subtitle,
   imageUrl,
@@ -18,49 +19,48 @@ const ImageUpload = ({
   onClear,
   onDownload,
 }) => (
-  <div className="text-center">
+  <div className={`${className}`}>
     {label && (
-      <>
-        <span>{label}</span> <br />
-      </>
+      <span>{label}</span>
     )}
     {subtitle && (
-      <>
-        <small>{subtitle}</small> <br />{' '}
-      </>
+      <small>{subtitle}</small>
     )}
-    <div className="text-center mt-2 mb-2">
-      <Image
-        default={defaultImage}
-        src={imageUrl}
-        alt={alt}
-        className="img-fluid border border-primary rounded"
-        width={width}
-      />
-    </div>
-    <input
-      type="file"
-      id={inputId}
-      accept={accept}
-      className="display-none"
-      onChange={onChange}
+
+    <Image
+      default={defaultImage}
+      src={imageUrl}
+      alt={alt}
+      className="img-fluid border border-primary rounded"
+      width={width}
     />
-    <label htmlFor={inputId} className="btn btn-outline-secondary m-0">
-      <div className="content-button">
-        <i className="bi bi-image"></i>
-        <span></span>
-      </div>
-    </label>{' '}
-    {onClear && (
-      <Button className="btn-outline-secondary" onClick={onClear}>
-        <i className="bi bi-trash"></i>
-      </Button>
-    )}
-    {onDownload && (
-      <Button className="btn-outline-secondary" onClick={onDownload}>
-        <i className="bi bi-download"></i>
-      </Button>
-    )}
+
+    <div className="flex gap-3">
+      <input
+        type="file"
+        id={inputId}
+        accept={accept}
+        className="display-none"
+        onChange={onChange}
+      />
+      <label htmlFor={inputId} className="btn btn-outline-secondary m-0">
+        <div className="content-button">
+          <i className="bi bi-image"></i>
+          <span></span>
+        </div>
+      </label>
+
+      {onClear && (
+        <Button className="btn-outline-secondary" onClick={onClear}>
+          <i className="bi bi-trash"></i>
+        </Button>
+      )}
+      {onDownload && (
+        <Button className="btn-outline-secondary" onClick={onDownload}>
+          <i className="bi bi-download"></i>
+        </Button>
+      )}
+    </div>
   </div>
 );
 

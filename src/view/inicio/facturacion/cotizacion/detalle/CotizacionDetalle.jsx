@@ -1,7 +1,6 @@
-import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   formatNumberWithZeros,
@@ -11,17 +10,17 @@ import {
   isText,
   formatCurrency,
   rounded,
-} from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/helper/utils.helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   detailCotizacion,
   documentsPdfInvoicesCotizacion,
   documentsPdfListsCotizacion,
-} from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+} from '@/network/rest/principal.network';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -31,22 +30,23 @@ import {
   TableResponsive,
   TableRow,
   TableTitle,
-} from '../../../../../components/Table';
-import Title from '../../../../../components/Title';
-import { SpinnerView } from '../../../../../components/Spinner';
+} from '@/components/Table';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Button from '../../../../../components/Button';
+import Button from '@/components/Button';
 import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import { connect } from 'react-redux';
-import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import { ModalSendWhatsApp } from '@/components/MultiModal';
+import Image from '@/components/Image';
+import { images } from '@/helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CotizacionDetalle extends CustomComponent {
   constructor(props) {
@@ -146,8 +146,12 @@ class CotizacionDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Cotización', response.getMessage(), () => {
-        this.close();
+      alertKit.warning({
+        title: "Cotización",
+        message: response.getMessage(),
+        onClose: () => {
+          this.close();
+        },
       });
       return;
     }
@@ -247,7 +251,7 @@ class CotizacionDetalle extends CustomComponent {
 
   handlePrintList = async (size) => {
     await pdfVisualizer.init({
-      url: documentsPdfListsCotizacion(this.state.idCotizacion, size),
+      url: documentsPdfListsCotizacion(this.state.idCotizacion),
       title: 'Cotización',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
@@ -264,7 +268,7 @@ class CotizacionDetalle extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial } = this.props.predeterminado.empresa;
     const { paginaWeb, email } = this.props.token.project;
@@ -609,12 +613,14 @@ class CotizacionDetalle extends CustomComponent {
                         <TableRow key={index}>
                           <TableCell>{item.id}</TableCell>
                           <TableCell className="text-center">
-                            <Image
-                              default={images.noImage}
-                              src={item.imagen}
-                              alt={item.producto}
-                              width={100}
-                            />
+                            <div className="max-w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+                              <Image
+                                default={images.noImage}
+                                src={item.imagen}
+                                alt={item.producto}
+                                overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                              />
+                            </div>
                           </TableCell>
                           <TableCell>
                             {item.codigo}

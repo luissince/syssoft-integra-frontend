@@ -1,24 +1,20 @@
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
 import {
   deleteComprobante,
   listComprobante,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -27,10 +23,11 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import { SpinnerTable } from '../../../../components/Spinner';
-import Search from '../../../../components/Search';
-import Button from '../../../../components/Button';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import Search from '@/components/Search';
+import Button from '@/components/Button';
+import { alertKit } from 'alert-kit';
 
 class Comprobantes extends CustomComponent {
   constructor(props) {
@@ -59,7 +56,7 @@ class Comprobantes extends CustomComponent {
       messageTable: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.abortControllerTable = new AbortController();
@@ -131,7 +128,7 @@ class Comprobantes extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -166,41 +163,56 @@ class Comprobantes extends CustomComponent {
     });
   };
 
-  handleBorrar(idComprobante) {
-    alertDialog(
-      'Comprobante',
-      '¿Estás seguro de eliminar el comprobante?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idComprobante: idComprobante,
-          };
-
-          alertInfo('Comprobante', 'Procesando información...');
-
-          const response = await deleteComprobante(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Comprobante', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Comprobante', response.getMessage());
-          }
-        }
+  async handleBorrar(idComprobante) {
+    const accept = await alertKit.question({
+      title: "Comprobante",
+      message: "¿Estás seguro de eliminar el comprobante?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+
+    if (accept) {
+      const params = {
+        idComprobante: idComprobante,
+      };
+
+      alertKit.loading({
+        message: "Procesando información..."
+      })
+
+      const response = await deleteComprobante(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Comprobante",
+          message: response.data,
+          onClose: () => {
+            this.loadInit();
+          }
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Comprobante",
+          message: response.getMessage(),
+        })
+      }
+    }
   }
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="10"
+          colSpan={10}
           message="Cargando información de la tabla..."
         />
       );
@@ -226,18 +238,16 @@ class Comprobantes extends CustomComponent {
           <TableCell>{item.numeracion}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.preferida === 1 ? 'badge-info' : 'badge-danger'
-              }`}
+              className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'
+                }`}
             >
               {item.preferida === 1 ? 'Si' : 'No'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -246,7 +256,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idComprobante)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -255,7 +265,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idComprobante)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -279,7 +289,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-              // disabled={!this.state.add}
+            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}

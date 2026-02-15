@@ -49,6 +49,10 @@ import Atributos from './atributo/Atributos.jsx';
 import AtributosAgregar from './atributo/AtributosAgregar.jsx';
 import AtributosEditar from './atributo/AtributosEditar.jsx';
 
+import Ubicaciones from './ubicacion/Ubicaciones.jsx';
+import UbicacionAgregar from './ubicacion/UbicacionAgregar.jsx';  
+import UbicacionEditar from './ubicacion/UbicacionEditar.jsx';
+
 export {
   Almacenes,
   AlmacenAgregar,
@@ -85,6 +89,9 @@ export {
   Atributos,
   AtributosAgregar,
   AtributosEditar,
+  Ubicaciones,
+  UbicacionAgregar,
+  UbicacionEditar,
 };
 
 /**

@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Button from '../../../../../../components/Button';
-import { images } from '../../../../../../helper';
+import Button from '@/components/Button';
+import { images } from '@/helper';
 import {
-  alertWarning,
   imageBase64,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
+import { alertKit } from 'alert-kit';
 
 class ItemImage extends React.Component {
   constructor(props) {
@@ -38,30 +38,40 @@ class ItemImage extends React.Component {
 
       const logoSend = await imageBase64(file);
 
-      if (logoSend.size > 500) {
-        alertWarning(
-          'Producto',
-          'La imagen ' +
-            file.name +
-            ' a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de ' +
-            logoSend.size +
-            ' KB',
-        );
-        continue;
-      } else {
-        arrayImages.push({
-          index: indexInicial,
-          name: file.name,
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url,
+      if (!logoSend) {
+        alertKit.warning({
+          title: 'Producto',
+          message: 'La imagen ' + file.name + ' no es una imagen valida',
+          onClose: () => {
+            event.target.value = null;
+          },
+        });
+        return;
+      }
+
+      const { size } = logoSend;
+
+      if (size > 500) {
+        alertKit.warning({
+          title: "Producto",
+          message: `La imagen ${file.name} a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de ${logoSend.size} KB`,
         });
 
-        indexInicial++;
+        continue;
       }
+
+      arrayImages.push({
+        index: indexInicial,
+        name: file.name,
+        base64: logoSend.base64String,
+        extension: logoSend.extension,
+        width: logoSend.width,
+        height: logoSend.height,
+        size: logoSend.size,
+        url,
+      });
+
+      indexInicial++;
     }
 
     event.target.value = null;

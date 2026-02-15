@@ -6,7 +6,6 @@ import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import {
-  alertWarning,
   handlePasteFloat,
   isEmpty,
   isNumeric,
@@ -16,7 +15,8 @@ import Button from '../../../../../../components/Button';
 import { comboMedida } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -93,7 +93,7 @@ class ModalProducto extends Component {
     }
   };
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -150,55 +150,67 @@ class ModalProducto extends Component {
     const { detalles, idImpuesto, impuestos } = this.props;
 
     if (!isNumeric(cantidad)) {
-      alertWarning('Orden de Compra', 'Ingrese la cantidad.', () => {
-        this.refCantidad.current.focus();
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese la cantidad.',
+        onClose: () => {
+          this.refCantidad.current.focus();
+        },
       });
       return;
     }
 
     if (parseFloat(cantidad) <= 0) {
-      alertWarning(
-        'Orden de Compra',
-        'La cantidad no puede ser menor a cero.',
-        () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'La cantidad no puede ser menor a cero.',
+        onClose: () => {
           this.refCantidad.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (!isNumeric(costo)) {
-      alertWarning('Orden de Compra', 'Ingrese el costo.', () => {
-        this.refCosto.current.focus();
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese el costo.',
+        onClose: () => {
+          this.refCosto.current.focus();
+        },
       });
       return;
     }
 
     if (parseFloat(costo) <= 0) {
-      alertWarning(
-        'Orden de Compra',
-        'El costo no puede ser menor a cero.',
-        () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'El costo no puede ser menor a cero.',
+        onClose: () => {
           this.refCosto.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(descripcion)) {
-      alertWarning(
-        'Orden de Compra',
-        'Ingrese la descripción del producto.',
-        () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese la descripción del producto.',
+        onClose: () => {
           this.refDescripcion.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(idMedida)) {
-      alertWarning('Orden de Compra', 'Ingrese la unidad de medida', () => {
-        this.refMedida.current.focus();
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese la unidad de medida.',
+        onClose: () => {
+          this.refMedida.current.focus();
+        },
       });
       return;
     }

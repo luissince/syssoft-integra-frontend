@@ -2,25 +2,23 @@ import { createSlice } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   establecerPreferidoProducto,
-  preferidosProducto,
+  filtrarProductoVenta
 } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 
-export const starProduct = createAsyncThunk(
-  'productos/starProduct',
-  async (data) => {
-    await establecerPreferidoProducto({
-      preferido: data.producto.preferido,
-      idProducto: data.producto.idProducto,
-    });
+export const starProduct = createAsyncThunk('productos/starProduct', async (data) => {
+  await establecerPreferidoProducto({
+    preferido: data.producto.preferido,
+    idProducto: data.producto.idProducto,
+  });
 
-    const response = await preferidosProducto(data.params);
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
+  const response = await filtrarProductoVenta(data.params);
+  if (response instanceof SuccessReponse) {
+    return response.data.list;
+  }
 
-    throw new Error('Hubo un error al obtener los productos preferidos');
-  },
+  throw new Error('Hubo un error al obtener los productos preferidos');
+},
 );
 
 const initialState = {
@@ -36,6 +34,14 @@ const initialState = {
     local: null,
   },
   ventaCrearClasico: {
+    state: null,
+    local: null,
+  },
+  notaCreditoLista: {
+    data: null,
+    paginacion: null,
+  },
+  notaCreditoCrear: {
     state: null,
     local: null,
   },
@@ -173,6 +179,33 @@ const predeterminadoSlice = createSlice({
         local: null,
       };
     },
+
+    setListaNotaCreditoData: (state, action) => {
+      state.notaCreditoLista.data = action.payload;
+    },
+    setListaNotaCreditoPaginacion: (state, action) => {
+      state.notaCreditoLista.paginacion = action.payload;
+    },
+    clearListaNotaCredito: (state) => {
+      state.notaCreditoLista = {
+        data: null,
+        paginacion: null,
+      };
+    },
+
+    setCrearNotaCreditoState: (state, action) => {
+      state.notaCreditoCrear.state = action.payload;
+    },
+    setCrearNotaCreditoLocal: (state, action) => {
+      state.notaCreditoCrear.local = action.payload;
+    },
+    clearCrearNotaCredito: (state) => {
+      state.notaCreditoCrear = {
+        state: null,
+        local: null,
+      };
+    },
+
 
     setListaCotizacionData: (state, action) => {
       state.cotizacionLista.data = action.payload;
@@ -447,6 +480,14 @@ const predeterminadoSlice = createSlice({
         state: null,
         local: null,
       };
+      state.notaCreditoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.notaCreditoCrear = {
+        state: null,
+        local: null,
+      };
       state.cotizacionLista = {
         data: null,
         paginacion: null,
@@ -542,6 +583,14 @@ const predeterminadoSlice = createSlice({
         local: null,
       };
       state.ventaCrearClasico = {
+        state: null,
+        local: null,
+      };
+      state.notaCreditoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.notaCreditoCrear = {
         state: null,
         local: null,
       };
@@ -659,6 +708,14 @@ export const {
   setCrearVentaClasicoState,
   setCrearVentaClasicoLocal,
   clearCrearVentaClasico,
+
+  setListaNotaCreditoData,
+  setListaNotaCreditoPaginacion,
+  clearListaNotaCredito,
+
+  setCrearNotaCreditoState,
+  setCrearNotaCreditoLocal,
+  clearCrearNotaCredito,
 
   setListaCotizacionData,
   setListaCotizacionPaginacion,

@@ -2,32 +2,31 @@ import {
   isEmpty,
   convertNullText,
   formatCurrency,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../../components/Paginacion';
-import ContainerWrapper from '../../../../../components/ui/container-wrapper';
-import CustomComponent from '../../../../../components/CustomComponent';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   deleteProducto,
   listProducto,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import { images } from '../../../../../helper';
-import Title from '../../../../../components/Title';
-import Image from '../../../../../components/Image';
-import Search from '../../../../../components/Search';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import { images } from '@/helper';
+import Title from '@/components/Title';
+import Image from '@/components/Image';
+import Search from '@/components/Search';
 import {
   setListaProductoData,
   setListaProductoPaginacion,
-} from '../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
-import { Layers } from 'lucide-react';
 import { FaStar } from 'react-icons/fa';
-import { RxValueNone } from 'react-icons/rx';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -72,7 +71,7 @@ class Productos extends CustomComponent {
       vista: 'tabla',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -379,21 +378,21 @@ class Productos extends CustomComponent {
           {/* Toggle vista */}
           <div className="flex bg-gray-100 rounded p-1">
             <button
-              onClick={() => this.handleChangeView('tabla')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              onClick={() => this.handleChangeView("tabla")}
+              className={cn(
+                "flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1",
+                vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+              )}
             >
               <i className="bi bi-list-ul"></i>
               <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
-              onClick={() => this.handleChangeView('cuadricula')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              onClick={() => this.handleChangeView("cuadricula")}
+              className={cn(
+                "flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1",
+                vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+              )}
             >
               <i className="bi bi-grid-3x3"></i>
               <span className="hidden sm:inline">Cuadrícula</span>
@@ -430,37 +429,34 @@ class Productos extends CustomComponent {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
                       #
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                       Tipo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nombre
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                      Precio
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                      Medida
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                      Categoría
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                      Lote
-                    </th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-center">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-28 text-center">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                       Imagen
                     </th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">
+                      Nombre
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                      Precio
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                      Medida
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                      Categoría
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
                       Editar
                     </th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
                       Eliminar
                     </th>
                   </tr>
@@ -504,14 +500,24 @@ class Productos extends CustomComponent {
 
                       return (
                         <tr key={item.idProducto} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+                          <td className="px-2 py-4 text-sm text-gray-900 text-center">
                             {item.id}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-4 text-sm text-gray-900">
                             {tipo}
                             <div className="text-sm text-gray-500">{item.venta}</div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-2 py-4">
+                            <div className="w-full flex justify-center">
+                              <Image
+                                default={images.noImage}
+                                src={item.imagen}
+                                alt={item.nombre}
+                                overrideClass="w-20 h-20 object-contain border border-solid border-[#e2e8f0] rounded"
+                              />
+                            </div>
+                          </td>
+                          <td className="px-2 py-4">
                             <div className="text-sm text-gray-500">
                               {item.codigo}
                             </div>
@@ -525,50 +531,38 @@ class Productos extends CustomComponent {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
+                          <td className="px-2 py-4 text-sm font-medium text-gray-900 text-right">
                             {formatCurrency(item.precio, this.state.codiso)}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-4 text-sm text-gray-900">
                             {item.medida}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-4 text-sm text-gray-900">
                             {item.categoria}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {item.lote == 1 ? <Layers className="w-5 h-5 text-green-600" /> : <RxValueNone className="w-5 h-5 text-gray-500" />}
-                          </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-2 py-4 text-center">
                             <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${estadoClass}`}
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoClass}`}
                             >
                               {item.estado === 1 ? 'Activo' : 'Inactivo'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-center">
-                            <Image
-                              default={images.noImage}
-                              src={item.imagen}
-                              alt={item.nombre}
-                              width={60}
-                              className="mx-auto rounded border border-gray-200"
-                            />
-                          </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-2 py-4 text-center">
                             <button
                               className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
                               title="Editar"
                               onClick={() => this.handleEditar(item.idProducto)}
                             >
-                              <i className="bi bi-pencil text-lg"></i>
+                              <i className="bi bi-pencil text-base"></i>
                             </button>
                           </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-2 py-4 text-center">
                             <button
                               className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
                               title="Eliminar"
                               onClick={() => this.handleEliminar(item.idProducto)}
                             >
-                              <i className="bi bi-trash text-lg"></i>
+                              <i className="bi bi-trash text-base"></i>
                             </button>
                           </td>
                         </tr>
@@ -640,10 +634,6 @@ class Productos extends CustomComponent {
                         {item.preferido === 1 && (
                           <FaStar className="w-6 h-6 text-yellow-500 m-2" />
                         )}
-                      </div>
-
-                      <div className="absolute left-0 top-0">
-                        {item.lote == 1 ? <Layers className="w-5 h-5 text-green-600 m-2" /> : <RxValueNone className="w-5 h-5 text-gray-500 m-2" />}
                       </div>
 
                       <div className="py-2 px-3">
@@ -726,7 +716,9 @@ class Productos extends CustomComponent {
 Productos.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

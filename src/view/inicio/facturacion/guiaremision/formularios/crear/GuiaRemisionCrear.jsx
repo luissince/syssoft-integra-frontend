@@ -1,11 +1,12 @@
 import React from 'react';
-import ContainerWrapper from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   currentDate,
   keyNumberFloat,
   isEmpty,
-} from '../../../../../../helper/utils.helper';
+  getNumber,
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
@@ -13,7 +14,7 @@ import {
   comboMotivoTraslado,
   comboTipoPeso,
   createGuiaRemision,
-  detailOnlyVenta,
+  detailsVenta,
   documentsPdfInvoicesGuiaRemision,
   filtrarPersona,
   filtrarVehiculo,
@@ -22,16 +23,15 @@ import {
   getPreferidoPersona,
   getUbigeo,
   listFiltrarVenta,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import { GUIA_DE_REMISION } from '../../../../../../model/types/tipo-comprobante';
-import SearchInput from '../../../../../../components/SearchInput';
-import { SpinnerView } from '../../../../../../components/Spinner';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import printJS from 'print-js';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import { GUIA_DE_REMISION } from '@/model/types/tipo-comprobante';
+import SearchInput from '@/components/SearchInput';
+import { SpinnerView } from '@/components/Spinner';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -40,18 +40,19 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../../components/Table';
-import Title from '../../../../../../components/Title';
-import Button from '../../../../../../components/Button';
-import Select from '../../../../../../components/Select';
-import Input from '../../../../../../components/Input';
-import RadioButton from '../../../../../../components/RadioButton';
-import { ModalImpresion } from '../../../../../../components/MultiModal';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
+} from '@/components/Table';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import RadioButton from '@/components/RadioButton';
+import { ModalImpresion } from '@/components/MultiModal';
+import pdfVisualizer from 'pdf-visualizer';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class GuiaRemisionCrear extends CustomComponent {
   /**
@@ -64,22 +65,22 @@ class GuiaRemisionCrear extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idGuiaRemision: '',
-      idComprobante: '',
-      idModalidadTraslado: 'MT0001',
-      idMotivoTraslado: '',
+      idGuiaRemision: "",
+      idComprobante: "",
+      idModalidadTraslado: "MT0001",
+      idMotivoTraslado: "",
       fechaTraslado: currentDate(),
-      idTipoPeso: '',
-      peso: '',
-      direccionPartida: '',
-      idUbigeoPartida: '',
-      direccionLlegada: '',
-      idUbigeoLlegada: '',
+      idTipoPeso: "",
+      peso: "",
+      direccionPartida: "",
+      idUbigeoPartida: "",
+      direccionLlegada: "",
+      idUbigeoLlegada: "",
 
-      cliente: '',
+      cliente: "",
       disabledPublica: true,
       disabledPrivado: false,
 
@@ -117,12 +118,10 @@ class GuiaRemisionCrear extends CustomComponent {
       isOpenImpresion: false,
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Referencia de los atributos principales
     this.refComprobante = React.createRef();
@@ -179,9 +178,7 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   async componentDidMount() {
-    const idVenta = new URLSearchParams(this.props.location.search).get(
-      'idVenta',
-    );
+    const idVenta = new URLSearchParams(this.props.location.search).get("idVenta");
     await this.loadingData();
 
     if (idVenta) {
@@ -232,7 +229,7 @@ class GuiaRemisionCrear extends CustomComponent {
       this.fetchComboTipoPeso(),
       this.fetchObtenerSucursal(),
       this.fetchDefaultVehiculo(),
-      this.fetchPersonaPredeterminado({ conductor: '1' }),
+      this.fetchPersonaPredeterminado({ conductor: "1" }),
     ]);
 
     const ubigeo = {
@@ -312,9 +309,8 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
-  async fetchComboMotivoTraslado(params) {
+  async fetchComboMotivoTraslado() {
     const response = await comboMotivoTraslado(
-      params,
       this.abortController.signal,
     );
 
@@ -329,8 +325,8 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
-  async fetchComboTipoPeso(params) {
-    const response = await comboTipoPeso(params, this.abortController.signal);
+  async fetchComboTipoPeso() {
+    const response = await comboTipoPeso(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -428,7 +424,7 @@ class GuiaRemisionCrear extends CustomComponent {
       idVenta: this.state.venta.idVenta,
     };
 
-    const response = await detailOnlyVenta(params);
+    const response = await detailsVenta(params);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -476,14 +472,13 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesGuiaRemision(
         this.state.idGuiaRemision,
         size,
       ),
-      type: 'pdf',
+      type: "pdf",
       showModal: true,
-      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
@@ -531,12 +526,11 @@ class GuiaRemisionCrear extends CustomComponent {
     this.refVenta.current.initialize(
       `${value.nombreComprobante} ${value.serie}-${value.numeracion}`,
     );
-    this.setState(
-      {
-        venta: value,
-        direccionLlegada: value.direccion,
-        ventas: [],
-      },
+    this.setState({
+      venta: value,
+      direccionLlegada: value.direccion,
+      ventas: [],
+    },
       async () => {
         const ubigeo = {
           idUbigeo: value.idUbigeo,
@@ -717,13 +711,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleSelectItemUbigeoPartido = (value) => {
     this.refUbigeoPartida.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeosPartida: [],
@@ -737,13 +731,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleClearInputaUbigeoLlegada = () => {
     this.setState({
       ubigeosLlegada: [],
-      idUbigeoLlegada: '',
+      idUbigeoLlegada: "",
     });
   };
 
   handleFilterUbigeoLlegada = async (text) => {
     const searchWord = text;
-    this.setState({ idUbigeoLlegada: '' });
+    this.setState({ idUbigeoLlegada: "" });
 
     if (isEmpty(searchWord)) {
       this.setState({ ubigeosLlegada: [] });
@@ -764,13 +758,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleSelectItemUbigeoLlegada = (value) => {
     this.refUbigeoLlegada.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeosLlegada: [],
@@ -807,54 +801,58 @@ class GuiaRemisionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Evento para guardar la guía de remisión
   //------------------------------------------------------------------------------------------
-  handleSave = () => {
+  handleSave = async () => {
     if (!this.state.venta) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Filtre una venta para continuar.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Filtre una venta para continuar.",
+        onClose: () => {
           this.refFiltrarVenta.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.idComprobante)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione un comprobante.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Seleccione un comprobante.",
+        onClose: () => {
           this.refComprobante.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.idMotivoTraslado)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el motivo de traslado.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Seleccione el motivo de traslado.",
+        onClose: () => {
           this.refMotivoTraslado.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.idTipoPeso)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el tipo de peso.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Seleccione el tipo de peso.",
+        onClose: () => {
           this.refTipoPeso.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.peso)) {
-      this.alert.warning('Guía de Remisión', 'Ingrese el peso total.', () => {
-        this.refPeso.current.focus();
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Ingrese el peso total.",
+        onClose: () => {
+          this.refPeso.current.focus();
+        },
       });
       return;
     }
@@ -863,13 +861,13 @@ class GuiaRemisionCrear extends CustomComponent {
       this.state.idModalidadTraslado === 'MT0001' &&
       isEmpty(this.state.conductorPublico)
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el conductor que va trandportar.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Seleccione el conductor que va trandportar.",
+        onClose: () => {
           this.refFiltrarConductorPublico.current.focus();
         },
-      );
+      });
       return;
     }
 
@@ -877,13 +875,13 @@ class GuiaRemisionCrear extends CustomComponent {
       this.state.idModalidadTraslado === 'MT0002' &&
       isEmpty(this.state.vehiculo)
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el vehículo que va transportar.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Seleccione el vehículo que va transportar.",
+        onClose: () => {
           this.refFiltrarVehiculo.current.focus();
         },
-      );
+      });
       return;
     }
 
@@ -891,129 +889,140 @@ class GuiaRemisionCrear extends CustomComponent {
       this.state.idModalidadTraslado === 'MT0002' &&
       isEmpty(this.state.conductor)
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el conductor que va transportar.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Seleccione el conductor que va transportar.",
+        onClose: () => {
           this.refFiltrarConductor.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.direccionPartida)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Ingrese la dirección de partida.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Ingrese la dirección de partida.",
+        onClose: () => {
           this.refDireccionPartida.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (
-      isEmpty(this.state.idUbigeoPartida) ||
-      this.state.idUbigeoPartida <= 0
+      isEmpty(this.state.idUbigeoPartida) || getNumber(this.state.idUbigeoPartida) <= 0
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Selecciona el ubigeo de partida.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Selecciona el ubigeo de partida.",
+        onClose: () => {
           this.refFiltrarUbigeoPartida.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.direccionLlegada)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Ingrese la dirección de llegada.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Ingrese la dirección de llegada.",
+        onClose: () => {
           this.refDireccionLlegada.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (
-      isEmpty(this.state.idUbigeoLlegada) ||
-      this.state.idUbigeoLlegada <= 0
+      isEmpty(this.state.idUbigeoLlegada) || getNumber(this.state.idUbigeoLlegada) <= 0
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Selecciona el ubigeo de llegada.',
-        () => {
+      alertKit.warning({
+        title: "Guía de Remisión",
+        message: "Selecciona el ubigeo de llegada.",
+        onClose: () => {
           this.refFiltrarUbigeoLlegada.current.focus();
         },
-      );
+      });
       return;
     }
 
-    this.alert.dialog(
-      'Guía de Remisión',
-      '¿Está seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idVenta: this.state.venta.idVenta,
-            idSucursal: this.state.idSucursal,
-            idComprobante: this.state.idComprobante,
-            idModalidadTraslado: this.state.idModalidadTraslado,
-            idMotivoTraslado: this.state.idMotivoTraslado,
-            fechaTraslado: this.state.fechaTraslado,
-            idTipoPeso: this.state.idTipoPeso,
-            peso: this.state.peso,
-            idVehiculo: this.state.vehiculo.idVehiculo,
-            idConductor:
-              this.state.idModalidadTraslado === 'MT0001'
-                ? this.state.conductorPublico.idPersona
-                : this.state.conductor.idPersona,
-            direccionPartida: this.state.direccionPartida,
-            idUbigeoPartida: this.state.idUbigeoPartida,
-            direccionLlegada: this.state.direccionLlegada,
-            idUbigeoLlegada: this.state.idUbigeoLlegada,
-            detalle: this.state.detalle,
-            estado: 1,
-            idUsuario: this.state.idUsuario,
-          };
-
-          this.alert.information(
-            'Guía de Remisión',
-            'Procesando información...',
-          );
-
-          const response = await createGuiaRemision(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idGuiaRemision);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Guía de Remisión', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: "Guía de Remisión",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const data = {
+        idVenta: this.state.venta.idVenta,
+        idSucursal: this.state.idSucursal,
+        idComprobante: this.state.idComprobante,
+        idModalidadTraslado: this.state.idModalidadTraslado,
+        idMotivoTraslado: this.state.idMotivoTraslado,
+        fechaTraslado: this.state.fechaTraslado,
+        idTipoPeso: this.state.idTipoPeso,
+        peso: this.state.peso,
+        idVehiculo: this.state.vehiculo.idVehiculo,
+        idConductor:
+          this.state.idModalidadTraslado === 'MT0001'
+            ? this.state.conductorPublico.idPersona
+            : this.state.conductor.idPersona,
+        direccionPartida: this.state.direccionPartida,
+        idUbigeoPartida: this.state.idUbigeoPartida,
+        direccionLlegada: this.state.direccionLlegada,
+        idUbigeoLlegada: this.state.idUbigeoLlegada,
+        detalle: this.state.detalle,
+        estado: 1,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: "Procesando información...",
+      })
+
+      const response = await createGuiaRemision(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idGuiaRemision);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Guía de Remisión",
+          message: response.getMessage(),
+        });
+      }
+    }
+
   };
 
   //------------------------------------------------------------------------------------------
   // Evento para limpiar la guía de remisión
   //------------------------------------------------------------------------------------------
-  handleClear = () => {
-    this.alert.dialog(
-      'Guía de Remisión',
-      '¿Está seguro de limpiar todo el contenido?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+  handleClear = async () => {
+    const accept = await alertKit.question({
+      title: "Guía de Remisión",
+      message: "¿Estás seguro de limpiar todo el contenido?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -1557,7 +1566,9 @@ class GuiaRemisionCrear extends CustomComponent {
 GuiaRemisionCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

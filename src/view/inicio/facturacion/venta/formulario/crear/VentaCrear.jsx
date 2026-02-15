@@ -1,74 +1,76 @@
 import React from 'react';
 import {
+  calculateTax,
+  calculateTaxBruto,
   convertNullText,
+  formatCurrency,
   formatDecimal,
   isEmpty,
   isNumeric,
-  readDataFile,
   text,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { PosContainerWrapper } from '../../../../../../components/Container';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
 import {
   getPreferidoPersona,
   comboComprobante,
   comboImpuesto,
   comboMoneda,
   filtrarPersona,
-  preferidosProducto,
   obtenerListaPrecioProducto,
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
-  detailOnlyVentaVenta,
+  detailForIdVenta,
   createVenta,
-  obtenerPreVentaPdf,
+  // obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
   forSalePedido,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
-import CustomComponent from '../../../../../../model/class/custom-component';
+  filtrarProductoVenta,
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import SidebarCliente from './component/SidebarCliente';
-import { VENTA } from '../../../../../../model/types/tipo-comprobante';
+import { VENTA } from '@/model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
 import {
   A_GRANEL,
-  SERVICIO,
+  NINGUNO,
   UNIDADES,
   VALOR_MONETARIO,
-} from '../../../../../../model/types/tipo-tratamiento-producto';
-import { SpinnerView } from '../../../../../../components/Spinner';
+} from '@/model/types/tipo-tratamiento-producto';
+import { SpinnerView } from '@/components/Spinner';
 import {
   getDni,
   getRuc,
-} from '../../../../../../network/rest/apisperu.network';
+} from '@/network/rest/apisperu.network';
 import {
   clearCrearVenta,
   setCrearVentaLocal,
   setCrearVentaState,
   setProductosFavoritos,
   starProduct,
-} from '../../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import {
   ModalImpresion,
-  ModalPreImpresion,
-} from '../../../../../../components/MultiModal';
+} from '@/components/MultiModal';
 import ModalAgregar from '../common/ModalAgregar';
 import ModalCotizacion from '../common/ModalCotizacion';
 import ModalVenta from '../common/ModalVenta';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import ModalTransaccion from '../../../../../../components/ModalTransaccion';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
+import ModalTransaccion from '@/components/ModalTransaccion';
 import SidebarProducto from './component/SidebarProducto';
 import ModalPedido from '../common/ModalPedido';
 import { alertKit } from 'alert-kit';
-import ModalLote from '../common/ModalLote';
 import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import ContentSale from './component/ContentSale';
 import ModalPrinter from '../../detalle/component/ModalPrinter';
 import pdfVisualizer from 'pdf-visualizer';
 import { cn } from '@/lib/utils';
+import ModalInventarioDetalle from '../common/ModalInventarioDetalle';
+import FloatingCartButton from './component/FloatingCartButton';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -87,11 +89,11 @@ class VentaCrear extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idVenta: '',
-      idComprobante: '',
+      idVenta: "",
+      idComprobante: "",
 
       // Filtrar cliente
       nuevoCliente: null,
@@ -108,8 +110,8 @@ class VentaCrear extends CustomComponent {
       detalleVenta: [],
 
       // Atributos libres
-      nombreComporbante: '',
-      codiso: '',
+      nombreComporbante: "",
+      codiso: "",
 
       // Atributos del modal impresión
       isOpenImpresion: false,
@@ -118,40 +120,40 @@ class VentaCrear extends CustomComponent {
       isOpenPreImpresion: false,
 
       // Atributos del modal cotización
-      isOpenCotizacion: false,
+      isOpenModalCotizacion: false,
       cotizacion: null,
 
       // Atributos del modal pedido
-      isOpenPedido: false,
+      isOpenModalPedido: false,
       pedido: null,
 
       // Atributos del modal venta
-      isOpenVenta: false,
+      isOpenModalVenta: false,
 
       // Atributos del modal cobrar
       isOpenTerminal: false,
 
       // Atributos del modal configuración
-      idImpuesto: '',
-      idMoneda: '',
-      idAlmacen: '',
-      observacion: '',
-      nota: '',
+      idImpuesto: "",
+      idMoneda: "",
+      idAlmacen: "",
+      observacion: "",
+      nota: "",
       cacheConfiguracion: null,
 
       // Atributos del modal agregar
       isOpenAgregar: false,
 
-      // Atributos del modal lote
-      isOpenLote: false,
+      // Atributos del modal inventario detalle
+      isOpenInventarioDetalle: false,
 
       // Atributos del modal cliente
       loadingCliente: false,
-      idTipoDocumento: '',
-      numeroDocumento: '',
-      informacion: '',
-      numeroCelular: '',
-      direccion: '',
+      idTipoDocumento: "",
+      numeroDocumento: "",
+      informacion: "",
+      numeroCelular: "",
+      direccion: "",
       cacheCliente: null,
 
       // Atributos del modal producto
@@ -161,11 +163,11 @@ class VentaCrear extends CustomComponent {
       isOpenModalPrinter: false,
 
       // Opción para cambiar de vista
-      activeTab: 'productos',
+      activeTab: "productos",
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -182,9 +184,6 @@ class VentaCrear extends CustomComponent {
     // Referencia al modal de cotización
     this.refModalPedido = React.createRef();
 
-    // Referencia al modal de cotización
-    this.refModalVenta = React.createRef();
-
     // Referencia al tipo de comprobante
     this.refComprobante = React.createRef();
 
@@ -192,14 +191,14 @@ class VentaCrear extends CustomComponent {
     this.refModalAgregar = React.createRef();
 
     // Referencia al modal lote
-    this.refModalLote = React.createRef();
+    this.refModalInventarioDetalle = React.createRef();
 
     // Referencia al tipo de cliente
     this.refCliente = React.createRef();
     this.refValueCliente = React.createRef();
 
     // Atributos para el modal configuración
-    this.idSidebarConfiguration = 'idSidebarConfiguration';
+    this.idSidebarConfiguration = "idSidebarConfiguration";
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
@@ -207,7 +206,7 @@ class VentaCrear extends CustomComponent {
     this.refNota = React.createRef();
 
     // Atributos para el modal producto
-    this.idSidebarProducto = 'idSidebarProducto';
+    this.idSidebarProducto = "idSidebarProducto";
     this.producto = null;
     this.refPrecioProducto = React.createRef();
     this.refBonificacionProducto = React.createRef();
@@ -215,7 +214,7 @@ class VentaCrear extends CustomComponent {
     this.listPrecioProducto = [];
 
     // Atributos para el modal cliente
-    this.idSidebarCliente = 'idSidebarCliente';
+    this.idSidebarCliente = "idSidebarCliente";
     this.refIdTipoDocumento = React.createRef();
     this.refNumeroDocumento = React.createRef();
     this.refInformacion = React.createRef();
@@ -246,7 +245,7 @@ class VentaCrear extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
 
     await this.loadingData();
   }
@@ -255,7 +254,7 @@ class VentaCrear extends CustomComponent {
    * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
    */
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown);
+    document.removeEventListener("keydown", this.handleDocumentKeyDown);
 
     this.abortControllerView.abort();
     this.abortControllerCotizacion.abort();
@@ -303,7 +302,7 @@ class VentaCrear extends CustomComponent {
         this.fetchComprobante(VENTA),
         this.fetchMoneda(),
         this.fetchImpuesto(),
-        this.fetchPersonaPredeterminado({ cliente: '1' }),
+        this.fetchPersonaPredeterminado({ cliente: "1" }),
         this.fetchTipoDocumento(),
         this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
       ]);
@@ -316,7 +315,7 @@ class VentaCrear extends CustomComponent {
       );
       const almacenFilter = almacenes.find((item) => item.predefinido === 1);
 
-      if (typeof predeterminado === 'object') {
+      if (typeof predeterminado === "object") {
         this.handleSelectItemCliente(predeterminado);
       }
 
@@ -328,22 +327,25 @@ class VentaCrear extends CustomComponent {
 
         idComprobante: comprobanteFilter ? comprobanteFilter.idComprobante : '',
         nombreComporbante: !comprobanteFilter
-          ? 'Ninguno'
+          ? "Ninguno"
           : comprobanteFilter.nombre,
 
-        idMoneda: monedaFilter ? monedaFilter.idMoneda : '',
-        codiso: monedaFilter ? monedaFilter.codiso : 'PEN',
+        idMoneda: monedaFilter ? monedaFilter.idMoneda : "",
+        codiso: monedaFilter ? monedaFilter.codiso : "PEN",
 
-        idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : '',
+        idImpuesto: impuestoFilter ? impuestoFilter.idImpuesto : "",
 
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
 
         tiposDocumentos,
       });
 
       const productos = await this.fetchProductoPreferidos({
-        idSucursal: this.state.idSucursal,
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        tipo: 2,
+        filtrar: "",
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
+        posicionPagina: 0,
+        filasPorPagina: 100,
       });
       this.props.setProductosFavoritos(productos);
       await this.setStateAsync({ productos: productos, loading: false });
@@ -430,13 +432,13 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchProductoPreferidos(params) {
-    const response = await preferidosProducto(
+    const response = await filtrarProductoVenta(
       params,
       this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
-      return response.data;
+      return response.data.list;
     }
 
     if (response instanceof ErrorResponse) {
@@ -514,14 +516,32 @@ class VentaCrear extends CustomComponent {
 
   async reloadProductoPreferidos() {
     const productos = await this.fetchProductoPreferidos({
-      idSucursal: this.state.idSucursal,
+      tipo: 2,
+      filtrar: "",
       idAlmacen: this.state.idAlmacen,
+      posicionPagina: 0,
+      filasPorPagina: 100,
     });
     this.props.setProductosFavoritos(productos);
     await this.setStateAsync({ productos: productos });
   }
 
-  addItemDetalle = (producto, precio, cantidad, lotes = []) => {
+  getCantidadProducto = (item) =>
+    item.inventarios
+      .flatMap(inv => inv.inventarioDetalles)
+      .reduce((sum, d) => sum + (d.cantidad || 0), 0);
+
+  getImpuesto = (idImpuesto) => {
+    const { impuestos } = this.state;
+    return impuestos.find(i => i.idImpuesto === idImpuesto)
+  };
+
+  addItemDetalle = ({
+    producto,
+    precio = null,
+    cantidad = null,
+    inventarioDetalles = [],
+  }) => {
     const { almacenes, idAlmacen, idImpuesto, detalleVenta } = this.state;
 
     // Clonar el estado actual de detalleVenta para evitar mutaciones directas
@@ -536,12 +556,10 @@ class VentaCrear extends CustomComponent {
     );
 
     // Función auxiliar para crear un nuevo inventario
-    const createInventory = (can, lotes) => ({
+    const createInventory = () => ({
       idAlmacen: almacen.idAlmacen,
       almacen: almacen.nombre,
-      idInventario: producto.idInventario,
-      cantidad: can,
-      lotes: lotes,
+      inventarioDetalles: inventarioDetalles,
     });
 
     // Función auxiliar para crear un nuevo item de detalle
@@ -557,112 +575,76 @@ class VentaCrear extends CustomComponent {
       tipo: producto.tipo,
     });
 
-    // Lógica principal basada en el tipo de tratamiento del producto
+    // Agregar producto con tratamiento UNIDADES
     if (producto.idTipoTratamientoProducto === UNIDADES) {
-      if (!existingItem) {
-        const newAmount = !isEmpty(lotes)
-          ? cantidad
-          : cantidad
-            ? Number(producto.cantidad)
-            : 1;
 
+      // Crear un nuevo registro en caso no exista nada.
+      if (!existingItem) {
         const newItem = createNewItem(Number(producto.precio));
-        newItem.inventarios = [createInventory(newAmount, lotes)];
+        newItem.inventarios = [createInventory()];
 
         return [...detalles, newItem];
-      } else {
-        for (const inventario of existingItem.inventarios) {
-          if (inventario.idInventario === producto.idInventario) {
-            if (!isEmpty(lotes)) {
-              inventario.cantidad = Number(cantidad);
-              inventario.lotes = lotes;
+      }
+
+      // Actualizar inventario existente
+      for (const inventario of existingItem.inventarios) {
+        if (inventario.idAlmacen === idAlmacen) {
+          for (const inventarioDetalle of inventario.inventarioDetalles) {
+            if (isNumeric(cantidad)) {
+              inventarioDetalle.cantidad = Number(cantidad);
             } else {
-              inventario.cantidad += 1;
+              inventarioDetalle.cantidad += 1;
             }
           }
         }
       }
     }
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    // Agregar un servicio a un producto
+    if (producto.idTipoTratamientoProducto === NINGUNO) {
+      // Crear un nuevo registro en caso no exista nada.
       if (!existingItem) {
-        const newItem = createNewItem(Number(precio));
-        newItem.inventarios = [createInventory(1)];
+        const newItem = createNewItem(Number(producto.precio));
+        newItem.inventarios = [createInventory()];
 
         return [...detalles, newItem];
-      } else {
-        existingItem.precio = Number(precio);
       }
     }
 
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
+      // Crear un nuevo registro en caso no exista nada.
       if (!existingItem) {
         const newItem = createNewItem(Number(producto.precio));
-        newItem.inventarios = [createInventory(Number(cantidad))];
+        newItem.inventarios = [createInventory()];
 
         return [...detalles, newItem];
-      } else {
-        for (const inventario of existingItem.inventarios) {
-          if (inventario.idInventario === producto.idInventario) {
-            inventario.cantidad = Number(cantidad);
+      }
+
+      // Actualizar inventario existente
+      for (const inventario of existingItem.inventarios) {
+        if (inventario.idAlmacen === idAlmacen) {
+          for (const inventarioDetalle of inventario.inventarioDetalles) {
+            inventarioDetalle.cantidad = Number(cantidad);
           }
         }
       }
     }
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
+    // Agregar un producto con tratamiento VALOR_MONETARIO
+    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
       if (!existingItem) {
-        const newItem = createNewItem(
-          precio ? Number(precio) : Number(producto.precio),
-        );
-        newItem.cantidad = 1;
+        const newItem = createNewItem(Number(precio));
+        newItem.inventarios = [createInventory()];
 
         return [...detalles, newItem];
       }
-      //  else {
-      //   // Para productos a granel con lotes múltiples
-      //   if (lote) {
-      //     const existingLoteIndex = existingItem.inventarios.findIndex(
-      //       (inv) => inv.lote && inv.lote.idLote === lote.idLote,
-      //     );
 
-      //     if (existingLoteIndex >= 0) {
-      //       existingItem.inventarios[existingLoteIndex].cantidad =
-      //         Number(cantidad);
-      //     } else {
-      //       existingItem.inventarios.push(
-      //         createInventory(Number(cantidad), lote),
-      //       );
-      //     }
-      //   } else {
-      //     // Lógica original
-      //     for (const inventario of existingItem.inventarios) {
-      //       if (inventario.idInventario === producto.idInventario) {
-      //         inventario.cantidad = Number(cantidad);
-      //         break;
-      //       }
-      //     }
-      //   }
-      // }
+      existingItem.precio = Number(precio);
     }
 
     return detalles;
   };
 
-  importeTotal = () => {
-    return this.state.detalleVenta.reduce((accumulator, item) => {
-      const cantidad =
-        item.idTipoTratamientoProducto === SERVICIO
-          ? item.cantidad
-          : item.inventarios.reduce(
-            (acc, current) => acc + current.cantidad,
-            0,
-          );
-
-      const totalProductPrice = item.precio * cantidad;
-      return accumulator + totalProductPrice;
-    }, 0);
-  };
 
   /*
   |--------------------------------------------------------------------------
@@ -682,27 +664,27 @@ class VentaCrear extends CustomComponent {
 
   handleDocumentKeyDown = (event) => {
     if (
-      event.key === 'F1' &&
+      event.key === "F1" &&
       !this.state.isOpenImpresion &&
       !this.state.isOpenTerminal &&
       !this.state.isOpenAgregar &&
-      !this.state.isOpenLote &&
-      !this.state.isOpenCotizacion &&
-      !this.state.isOpenPedido &&
-      !this.state.isOpenVenta
+      !this.state.isOpenInventarioDetalle &&
+      !this.state.isOpenModalCotizacion &&
+      !this.state.isOpenModalPedido &&
+      !this.state.isOpenModalVenta
     ) {
       this.handleOpenSale();
     }
 
     if (
-      event.key === 'F2' &&
+      event.key === "F2" &&
       !this.state.isOpenImpresion &&
       !this.state.isOpenTerminal &&
       !this.state.isOpenAgregar &&
-      !this.state.isOpenLote &&
-      !this.state.isOpenCotizacion &&
-      !this.state.isOpenPedido &&
-      !this.state.isOpenVenta
+      !this.state.isOpenInventarioDetalle &&
+      !this.state.isOpenModalCotizacion &&
+      !this.state.isOpenModalPedido &&
+      !this.state.isOpenModalVenta
     ) {
       this.handleClearSale();
     }
@@ -738,8 +720,11 @@ class VentaCrear extends CustomComponent {
     // Despachar la acción para manejar el cambio en Redux
     this.props.starProduct({
       params: {
-        idSucursal: this.state.idSucursal,
+        tipo: 2,
+        filtrar: "",
         idAlmacen: this.state.idAlmacen,
+        posicionPagina: 0,
+        filasPorPagina: 0,
       },
       producto: producto,
     });
@@ -759,10 +744,11 @@ class VentaCrear extends CustomComponent {
   };
 
   handleAddItem = async (producto) => {
+    // Debe seleccionar un impuesto.
     if (isEmpty(this.state.idImpuesto)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione un impuesto.',
+        title: "Venta",
+        message: "Seleccione un impuesto.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -773,10 +759,11 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
+    // Debe seleccionar el almacen.
     if (isEmpty(this.state.idAlmacen)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione el almacen.',
+        title: "Venta",
+        message: "Seleccione el almacen.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -787,40 +774,50 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
+    // Debe ingresar un precio válido.
     if (Number(producto.precio) <= 0) {
       alertKit.warning({
-        title: 'Venta',
-        message: '¡El precio no puede tener un valor de 0!',
+        title: "Venta",
+        message: "¡El precio no puede tener un valor de 0!",
       });
       return;
     }
 
-    if (
-      producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === SERVICIO
-    ) {
-      if (producto.lote === 1) {
-        this.handleOpenLote(producto);
+    // 1. Si el producto es por unidad o ninguno, se agrega el detalle con cantidad nula.
+    if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === NINGUNO) {
+      const tieneLote = producto.inventarioDetalles.some(item => !isEmpty(item.lote));
+
+      if (tieneLote) {
+        this.handleOpenInventarioDetalle(producto);
       } else {
-        const detalles = this.addItemDetalle(producto, null, null);
+        const detalles = this.addItemDetalle({
+          producto: producto,
+          inventarioDetalles: producto.inventarioDetalles.map(item => ({
+            ...item,
+            cantidad: 1,
+          })),
+        });
+
         this.setState({ detalleVenta: detalles }, () => {
           this.updateReduxState();
         });
       }
     }
 
+    // 2. Si el producto es por valor monetario, se agrega el detalle con cantidad nula.
     if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
       this.handleOpenAgregar(
-        'Ingrese el valor monetario (S/, $ u otro) del producto o el total.',
-        'Monto:',
+        "Ingrese el valor monetario (S/, $ u otro) del producto o el total.",
+        "Monto:",
         producto,
       );
     }
 
+    // 3. Si el producto es por peso, se agrega el detalle con cantidad nula.
     if (producto.idTipoTratamientoProducto === A_GRANEL) {
       this.handleOpenAgregar(
-        'Ingrese el peso del producto (KM, GM u otro).',
-        'Peso:',
+        "Ingrese el peso del producto (KM, GM u otro).",
+        "Peso:",
         producto,
       );
     }
@@ -829,6 +826,7 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Componenente
   //------------------------------------------------------------------------------------------
+
   handleSelectComprobante = (event) => {
     const comprobante = this.state.comprobantes.find(
       (item) => item.idComprobante == event.target.value,
@@ -836,13 +834,14 @@ class VentaCrear extends CustomComponent {
 
     this.setState({
       idComprobante: event.target.value,
-      nombreComporbante: !comprobante ? 'Ninguno' : comprobante.nombre,
+      nombreComporbante: !comprobante ? "Ninguno" : comprobante.nombre,
     }, () => this.updateReduxState());
   };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal agregar
   //------------------------------------------------------------------------------------------
+
   handleOpenAgregar = (titulo, subTitulo, producto) => {
     this.setState({ isOpenAgregar: true });
     this.refModalAgregar.current.loadDatos(titulo, subTitulo, producto);
@@ -852,16 +851,15 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenAgregar: false });
   };
 
-  handleSaveAgregar = async (producto, cantidad) => {
-    let detalles = structuredClone(this.state.detalleVenta);
-
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-      detalles = this.addItemDetalle(producto, parseFloat(cantidad), null);
-    }
-
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
-      detalles = this.addItemDetalle(producto, null, parseFloat(cantidad));
-    }
+  handleSaveAgregar = async (producto, valor) => {
+    const detalles = this.addItemDetalle({
+      producto: producto,
+      precio: producto.idTipoTratamientoProducto === VALOR_MONETARIO ? Number(valor) : null,
+      inventarioDetalles: producto.inventarioDetalles.map(item => ({
+        ...item,
+        cantidad: producto.idTipoTratamientoProducto === A_GRANEL ? Number(valor) : 1,
+      })),
+    });
 
     this.setState({ detalleVenta: detalles }, () => {
       this.updateReduxState();
@@ -869,21 +867,23 @@ class VentaCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal lote
+  // Acciones del modal inventario detalle
   //------------------------------------------------------------------------------------------
-  handleOpenLote = async (producto) => {
-    this.setState({ isOpenLote: true });
-    await this.refModalLote.current.loadDatos(producto);
+
+  handleOpenInventarioDetalle = async (producto) => {
+    this.setState({ isOpenInventarioDetalle: true });
+    await this.refModalInventarioDetalle.current.loadDatos(producto);
   };
 
-  handleCloseLote = () => {
-    this.setState({ isOpenLote: false });
+  handleCloseInventarioDetalle = () => {
+    this.setState({ isOpenInventarioDetalle: false });
   };
 
-  handleSaveLote = async (producto, lotes, cantidadTotal) => {
-    let detalles = this.state.detalleVenta;
-
-    detalles = this.addItemDetalle(producto, null, cantidadTotal, lotes);
+  handleSaveInventarioDetalle = async (producto, inventarioDetalles) => {
+    const detalles = this.addItemDetalle({
+      producto: producto,
+      inventarioDetalles: inventarioDetalles,
+    });
 
     this.setState({ detalleVenta: detalles }, () => {
       this.updateReduxState();
@@ -896,7 +896,7 @@ class VentaCrear extends CustomComponent {
 
   handleOpenOptions = () => {
     const invoice = document.getElementById(this.idSidebarConfiguration);
-    invoice.classList.add('toggled');
+    invoice.classList.add("toggled");
 
     this.setState({
       cacheConfiguracion: {
@@ -922,7 +922,7 @@ class VentaCrear extends CustomComponent {
       });
     }
 
-    invoice.classList.remove('toggled');
+    invoice.classList.remove("toggled");
   };
 
   handleSelectIdImpuesto = (event) => {
@@ -948,8 +948,8 @@ class VentaCrear extends CustomComponent {
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione un impuesto.',
+        title: "Venta",
+        message: "Seleccione un impuesto.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -961,8 +961,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.idMoneda)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione una moneda.',
+        title: "Venta",
+        message: "Seleccione una moneda.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -974,8 +974,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.idAlmacen)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione un almacen.',
+        title: "Venta",
+        message: "Seleccione un almacen.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1002,7 +1002,7 @@ class VentaCrear extends CustomComponent {
       this.reloadProductoPreferidos();
 
       const invoice = document.getElementById(this.idSidebarConfiguration);
-      invoice.classList.remove('toggled');
+      invoice.classList.remove("toggled");
 
       this.updateReduxState();
     });
@@ -1025,7 +1025,7 @@ class VentaCrear extends CustomComponent {
 
     pdfVisualizer.printer({
       printable: url,
-      type: 'pdf',
+      type: "pdf",
       showModal: true,
       onPrintDialogClose: () => {
         this.clearView();
@@ -1054,13 +1054,18 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleOpenPreImpresion = () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, detalleVenta } =
-      this.state;
+    const {
+      idComprobante,
+      cliente,
+      idMoneda,
+      idImpuesto,
+      detalleVenta
+    } = this.state;
 
     if (isEmpty(idComprobante)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione su comprobante.',
+        title: "Venta",
+        message: "Seleccione su comprobante.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1072,8 +1077,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(cliente)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione un cliente.',
+        title: "Venta",
+        message: "Seleccione un cliente.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1085,8 +1090,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(idMoneda)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione su moneda.',
+        title: "Venta",
+        message: "Seleccione su moneda.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1098,8 +1103,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(idImpuesto)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione el impuesto',
+        title: "Venta",
+        message: "Seleccione el impuesto",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1111,8 +1116,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(detalleVenta)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Agregar algún producto a la lista.',
+        title: "Venta",
+        message: "Agregar algún producto a la lista.",
       });
       return;
     }
@@ -1120,57 +1125,57 @@ class VentaCrear extends CustomComponent {
     this.setState({ isOpenPreImpresion: true });
   };
 
-  handleProcessPreImpresion = async (type, abort, success, error) => {
-    const {
-      idComprobante,
-      cliente,
-      idMoneda,
-      idUsuario,
-      idSucursal,
-      observacion,
-      nota,
-      detalleVenta,
-    } = this.state;
+  // handleProcessPreImpresion = async (type, abort, success, error) => {
+  //   const {
+  //     idComprobante,
+  //     cliente,
+  //     idMoneda,
+  //     idUsuario,
+  //     idSucursal,
+  //     observacion,
+  //     nota,
+  //     detalleVenta,
+  //   } = this.state;
 
-    const response = await obtenerPreVentaPdf({
-      idComprobante: idComprobante,
-      idCliente: cliente.idPersona,
-      idMoneda: idMoneda,
-      idUsuario: idUsuario,
-      idSucursal: idSucursal,
-      observacion: observacion,
-      nota: nota,
-      detalle: detalleVenta,
-    },
-      type,
-      abort.signal,
-    );
+  //   const response = await obtenerPreVentaPdf({
+  //     idComprobante: idComprobante,
+  //     idCliente: cliente.idPersona,
+  //     idMoneda: idMoneda,
+  //     idUsuario: idUsuario,
+  //     idSucursal: idSucursal,
+  //     observacion: observacion,
+  //     nota: nota,
+  //     detalle: detalleVenta,
+  //   },
+  //     type,
+  //     abort.signal,
+  //   );
 
-    if (response instanceof SuccessReponse) {
-      const base64 = await readDataFile(response.data);
+  //   if (response instanceof SuccessReponse) {
+  //     const base64 = await readDataFile(response.data);
 
-      success();
+  //     success();
 
-      pdfVisualizer.printer({
-        printable: base64,
-        type: 'pdf',
-        base64: true,
-        onPrintDialogClose: () => {
-          this.handleClosePreImpresion();
-        },
-      });
-    }
+  //     pdfVisualizer.printer({
+  //       printable: base64,
+  //       type: "pdf",
+  //       base64: true,
+  //       onPrintDialogClose: () => {
+  //         this.handleClosePreImpresion();
+  //       },
+  //     });
+  //   }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+  //   if (response instanceof ErrorResponse) {
+  //     if (response.getType() === CANCELED) return;
 
-      error();
-      alertKit.warning({
-        title: 'Venta',
-        message: response.getMessage(),
-      });
-    }
-  };
+  //     error();
+  //     alertKit.warning({
+  //       title: "Venta",
+  //       message: response.getMessage(),
+  //     });
+  //   }
+  // };
 
   handleClosePreImpresion = () => {
     this.setState({ isOpenPreImpresion: false });
@@ -1180,20 +1185,20 @@ class VentaCrear extends CustomComponent {
   // Opciones de cotización
   //------------------------------------------------------------------------------------------
 
-  handleOpenCotizacion = () => {
-    this.setState({ isOpenCotizacion: true });
+  handleOpenModalCotizacion = () => {
+    this.setState({ isOpenModalCotizacion: true });
   };
 
-  handleCloseCotizacion = () => {
-    this.setState({ isOpenCotizacion: false });
+  handleCloseModalCotizacion = () => {
+    this.setState({ isOpenModalCotizacion: false });
   };
 
-  handleSeleccionarCotizacion = async (cotizacion) => {
-    this.handleCloseCotizacion();
+  handleSeleccionarModalCotizacion = async (cotizacion) => {
+    this.handleCloseModalCotizacion();
 
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos de la cotización.',
+      msgLoading: "Obteniendos datos de la cotización.",
       detalleVenta: [],
       cotizacion: null,
       pedido: null,
@@ -1212,9 +1217,8 @@ class VentaCrear extends CustomComponent {
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
         alertKit.warning({
-          title: 'Venta',
-          message:
-            'La cotización no tiene productos, ya que fue utilizado para la venta.',
+          title: "Venta",
+          message: "La cotización no tiene productos, ya que fue utilizado para la venta.",
         }, () => {
           this.clearView();
         });
@@ -1223,21 +1227,23 @@ class VentaCrear extends CustomComponent {
 
       this.handleSelectItemCliente(response.data.cliente);
 
-      const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
-          return this.addItemDetalle(producto, null, producto.cantidad);
+      const detalles = response.data.productos.flatMap((producto) => {
+        if ([UNIDADES, NINGUNO, A_GRANEL].includes(producto.idTipoTratamientoProducto)) {
+          return this.addItemDetalle({
+            producto: producto,
+            inventarioDetalles: producto.inventarioDetalles,
+          });
         }
 
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          return this.addItemDetalle(
-            producto,
-            producto.cantidad * producto.precio,
-            null,
-          );
-        }
-
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          return this.addItemDetalle(producto, null, producto.cantidad);
+          return this.addItemDetalle({
+            producto: producto,
+            precio: producto.cantidad * producto.precio,
+            inventarioDetalles: producto.inventarioDetalles.map(item => ({
+              ...item,
+              cantidad: 1,
+            })),
+          });
         }
 
         return [];
@@ -1256,7 +1262,7 @@ class VentaCrear extends CustomComponent {
       });
 
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: response.getMessage(),
       });
     }
@@ -1266,19 +1272,20 @@ class VentaCrear extends CustomComponent {
   // Opciones de pedido
   //------------------------------------------------------------------------------------------
 
-  handleOpenPedido = () => {
-    this.setState({ isOpenPedido: true });
+  handleOpenModalPedido = () => {
+    this.setState({ isOpenModalPedido: true });
   };
 
-  handleClosePedido = () => {
-    this.setState({ isOpenPedido: false });
+  handleCloseModalPedido = () => {
+    this.setState({ isOpenModalPedido: false });
   };
 
-  handleSeleccionarPedido = async (pedido) => {
-    this.handleCloseCotizacion();
+  handleSeleccionarModalPedido = async (pedido) => {
+    this.handleCloseModalPedido();
+
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos del pedido.',
+      msgLoading: "Obteniendos datos del pedido.",
       detalleVenta: [],
       cotizacion: null,
       pedido: null,
@@ -1297,9 +1304,9 @@ class VentaCrear extends CustomComponent {
     if (response instanceof SuccessReponse) {
       if (isEmpty(response.data.productos)) {
         alertKit.warning({
-          title: 'Venta',
+          title: "Venta",
           message:
-            'El pedido no tiene productos, ya que fue utilizado para la venta.',
+            "El pedido no tiene productos, ya que fue utilizado para la venta.",
         }, () => {
           this.clearView();
         });
@@ -1309,20 +1316,22 @@ class VentaCrear extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
-          return this.addItemDetalle(producto, null, producto.cantidad);
+        if ([UNIDADES, NINGUNO, A_GRANEL].includes(producto.idTipoTratamientoProducto)) {
+          return this.addItemDetalle({
+            producto: producto,
+            inventarioDetalles: producto.inventarioDetalles,
+          });
         }
 
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          return this.addItemDetalle(
-            producto,
-            producto.cantidad * producto.precio,
-            null,
-          );
-        }
-
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          return this.addItemDetalle(producto, null, producto.cantidad);
+          return this.addItemDetalle({
+            producto: producto,
+            precio: producto.cantidad * producto.precio,
+            inventarioDetalles: producto.inventarioDetalles.map(item => ({
+              ...item,
+              cantidad: 1,
+            })),
+          });
         }
 
         return [];
@@ -1341,7 +1350,7 @@ class VentaCrear extends CustomComponent {
       });
 
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: response.getMessage(),
       });
     }
@@ -1351,21 +1360,22 @@ class VentaCrear extends CustomComponent {
   // Opciones de venta
   //------------------------------------------------------------------------------------------
 
-  handleOpenVenta = () => {
-    this.setState({ isOpenVenta: true });
+  handleOpenModalVenta = () => {
+    this.setState({ isOpenModalVenta: true });
   };
 
-  handleCloseVenta = () => {
-    this.setState({ isOpenVenta: false });
+  handleCloseModalVenta = () => {
+    this.setState({ isOpenModalVenta: false });
   };
 
-  handleSeleccionarVenta = async (idVenta) => {
-    this.handleCloseVenta();
+  handleSeleccionarModalVenta = async (idVenta) => {
+    console.log(idVenta);
     this.setState({
       loading: true,
-      msgLoading: 'Obteniendos datos de la venta.',
+      msgLoading: "Obteniendos datos de la venta.",
       detalleVenta: [],
       cotizacion: null,
+      pedido: null,
     });
 
     const params = {
@@ -1373,29 +1383,33 @@ class VentaCrear extends CustomComponent {
       idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailOnlyVentaVenta(
+    const response = await detailForIdVenta(
       params,
       this.abortControllerVenta.signal,
     );
 
     if (response instanceof SuccessReponse) {
-      this.handleSelectItemCliente(response.data.cliente);
+      if (response.data.cliente) {
+        this.handleSelectItemCliente(response.data.cliente);
+      }
 
-      const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
-          return this.addItemDetalle(producto, null, producto.cantidad);
+      const detalles = response.data.productos.flatMap((producto) => {
+        if ([UNIDADES, NINGUNO, A_GRANEL].includes(producto.idTipoTratamientoProducto)) {
+          return this.addItemDetalle({
+            producto: producto,
+            inventarioDetalles: producto.inventarioDetalles,
+          });
         }
 
         if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
-          return this.addItemDetalle(
-            producto,
-            producto.cantidad * producto.precio,
-            null,
-          );
-        }
-
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
-          return this.addItemDetalle(producto, null, producto.cantidad);
+          return this.addItemDetalle({
+            producto: producto,
+            precio: producto.cantidad * producto.precio,
+            inventarioDetalles: producto.inventarioDetalles.map(item => ({
+              ...item,
+              cantidad: 1,
+            })),
+          });
         }
 
         return [];
@@ -1414,7 +1428,7 @@ class VentaCrear extends CustomComponent {
       });
 
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: response.getMessage(),
       });
     }
@@ -1426,7 +1440,7 @@ class VentaCrear extends CustomComponent {
 
   handleOpenCliente = () => {
     const invoice = document.getElementById(this.idSidebarCliente);
-    invoice.classList.add('toggled');
+    invoice.classList.add("toggled");
     this.setState({
       cacheCliente: {
         idTipoDocumento: this.state.idTipoDocumento,
@@ -1444,19 +1458,17 @@ class VentaCrear extends CustomComponent {
     if (this.state.loadingCliente) return;
 
     if (this.state.cacheCliente) {
-      this.setState(
-        {
-          idTipoDocumento: this.state.cacheCliente.idTipoDocumento,
-          numeroDocumento: this.state.cacheCliente.numeroDocumento,
-          informacion: this.state.cacheCliente.informacion,
-          numeroCelular: this.state.cacheCliente.numeroCelular,
-          direccion: this.state.cacheCliente.direccion,
-        },
-        () => this.updateReduxState(),
+      this.setState({
+        idTipoDocumento: this.state.cacheCliente.idTipoDocumento,
+        numeroDocumento: this.state.cacheCliente.numeroDocumento,
+        informacion: this.state.cacheCliente.informacion,
+        numeroCelular: this.state.cacheCliente.numeroCelular,
+        direccion: this.state.cacheCliente.direccion,
+      }, () => this.updateReduxState(),
       );
     }
 
-    invoice.classList.remove('toggled');
+    invoice.classList.remove("toggled");
   };
 
   handleSelectIdTipoDocumento = (event) => {
@@ -1482,9 +1494,8 @@ class VentaCrear extends CustomComponent {
   handleGetApiReniec = async () => {
     if (this.state.numeroDocumento.length !== 8) {
       alertKit.warning({
-        title: 'Venta',
-        message:
-          'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+        title: "Venta",
+        message: "Para iniciar la busqueda en número dni debe tener 8 caracteres.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1496,27 +1507,25 @@ class VentaCrear extends CustomComponent {
 
     this.setState({
       loadingCliente: true,
-      msgLoading: 'Consultando número de DNI...',
+      msgLoading: "Consultando número de DNI...",
     });
 
     const response = await getDni(this.state.numeroDocumento);
 
     if (response instanceof SuccessReponse) {
+
+      const informacion = `${convertNullText(response.data.apellidoPaterno)} ${convertNullText(response.data.apellidoMaterno)} ${convertNullText(response.data.nombres)}`;
+
       this.setState({
         numeroDocumento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
+        informacion: informacion,
         loadingCliente: false,
       });
     }
 
     if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: response.getMessage(),
       }, () => {
         this.setState({
@@ -1529,9 +1538,8 @@ class VentaCrear extends CustomComponent {
   handleGetApiSunat = async () => {
     if (this.state.numeroDocumento.length !== 11) {
       alertKit.warning({
-        title: 'Venta',
-        message:
-          'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+        title: "Venta",
+        message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         }
@@ -1543,7 +1551,7 @@ class VentaCrear extends CustomComponent {
 
     this.setState({
       loadingCliente: true,
-      msgLoading: 'Consultando número de RUC...',
+      msgLoading: "Consultando número de RUC...",
     });
 
     const response = await getRuc(this.state.numeroDocumento);
@@ -1559,7 +1567,7 @@ class VentaCrear extends CustomComponent {
 
     if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: response.getMessage(),
       }, () => {
         this.setState({
@@ -1576,8 +1584,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.idTipoDocumento)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione el tipo de documento.',
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1589,8 +1597,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.numeroDocumento)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione el tipo de documento.',
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1606,7 +1614,7 @@ class VentaCrear extends CustomComponent {
       tipoDocumento.longitud !== this.state.numeroDocumento.length
     ) {
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
@@ -1619,8 +1627,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.informacion)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione el tipo de documento.',
+        title: "Venta",
+        message: "Seleccione el tipo de documento.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1656,118 +1664,76 @@ class VentaCrear extends CustomComponent {
   // Opciones del producto y modal
   //------------------------------------------------------------------------------------------
 
-  handleMinusProducto = async (producto, idInventario) => {
-    const detalles = structuredClone(this.state.detalleVenta);
+  handleMinusProducto = async (producto, idKardex) => {
+    const { idAlmacen, detalleVenta } = this.state;
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
-      let remove = false;
+    const detalles = structuredClone(detalleVenta);
 
-      for (const item of detalles) {
-        if (item.idProducto === producto.idProducto) {
-          if (parseFloat(item.cantidad) - 1 <= 0) {
-            remove = true;
-            break;
-          }
-          item.cantidad = Math.max(parseFloat(item.cantidad) - 1, 1);
-        }
-      }
-
-      if (remove) {
-        this.handleRemoveProducto(producto);
-      } else {
-        this.setState({ detalleVenta: detalles }, () =>
-          this.updateReduxState(),
-        );
-      }
+    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+      return;
     }
 
-    if (
-      producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === A_GRANEL
-    ) {
-      let remove = false;
+    let remove = false;
 
-      for (const item of detalles) {
-        if (item.idProducto === producto.idProducto) {
-          if (item.inventarios.length === 1) {
-            const inventario = item.inventarios[0];
-            if (parseFloat(inventario.cantidad) - 1 <= 0) {
-              remove = true;
-              break;
-            }
-            inventario.cantidad = Math.max(
-              parseFloat(inventario.cantidad) - 1,
-              1,
-            );
-          } else {
-            for (const inventario of item.inventarios) {
-              if (inventario.idInventario === idInventario) {
-                if (parseFloat(inventario.cantidad) - 1 <= 0) {
-                  const indice = item.inventarios.findIndex(
-                    (objeto) => objeto.idInventario === idInventario,
-                  );
-                  item.inventarios.splice(indice, 1);
-                  break;
-                }
+    for (const item of detalles) {
+      if (item.idProducto === producto.idProducto) {
+        const cantidad = this.getCantidadProducto(item);
+        if (cantidad - 1 <= 0) {
+          remove = true;
+          break;
+        }
 
-                inventario.cantidad = Math.max(
-                  parseFloat(inventario.cantidad) - 1,
-                  1,
-                );
-                break;
+        for (const inventario of item.inventarios) {
+          if (inventario.idAlmacen === idAlmacen) {
+            for (const inventarioDetalle of inventario.inventarioDetalles) {
+              if (inventarioDetalle.idKardex === idKardex) {
+                inventarioDetalle.cantidad = Math.max(Number(inventarioDetalle.cantidad) - 1, 1);
               }
             }
           }
         }
       }
+    }
 
-      if (remove) {
-        this.handleRemoveProducto(producto);
-      } else {
-        this.setState({ detalleVenta: detalles }, () =>
-          this.updateReduxState(),
-        );
-      }
+    if (remove) {
+      this.handleRemoveProducto(producto);
+    } else {
+      this.setState({ detalleVenta: detalles }, () =>
+        this.updateReduxState(),
+      );
     }
   };
 
-  handlePlusProducto = async (producto, idInventario) => {
-    const detalles = structuredClone(this.state.detalleVenta);
+  handlePlusProducto = async (producto, idKardex) => {
+    const { idAlmacen, detalleVenta } = this.state;
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
-      for (const item of detalles) {
-        if (item.idProducto === producto.idProducto) {
-          item.cantidad = parseFloat(item.cantidad) + 1;
-          break;
-        }
-      }
+    const detalles = structuredClone(detalleVenta);
 
-      this.setState({ detalleVenta: detalles });
+    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+      return;
     }
 
-    if (
-      producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === A_GRANEL
-    ) {
-      for (const item of detalles) {
-        if (item.idProducto === producto.idProducto) {
-          for (const inventario of item.inventarios) {
-            if (inventario.idInventario === idInventario) {
-              inventario.cantidad = parseFloat(inventario.cantidad) + 1;
-              break;
+    for (const item of detalles) {
+      if (item.idProducto === producto.idProducto) {
+        for (const inventario of item.inventarios) {
+          if (inventario.idAlmacen === idAlmacen) {
+            for (const inventarioDetalle of inventario.inventarioDetalles) {
+              if (inventarioDetalle.idKardex === idKardex) {
+                inventarioDetalle.cantidad = Number(inventarioDetalle.cantidad) + 1;
+              }
             }
           }
         }
       }
-
-      this.setState({ detalleVenta: detalles }, () => this.updateReduxState());
     }
+
+    this.setState({ detalleVenta: detalles }, () => this.updateReduxState());
   };
 
   handleEditProducto = async (producto) => {
     const invoice = document.getElementById(this.idSidebarProducto);
 
-    invoice.classList.add('toggled');
+    invoice.classList.add("toggled");
     const lista = await this.fetchObtenerListaPrecio(producto.idProducto);
     this.producto = producto;
     this.refPrecioProducto.current.value = producto.precio;
@@ -1790,7 +1756,7 @@ class VentaCrear extends CustomComponent {
 
     if (this.state.loadingProducto) return;
 
-    invoice.classList.remove('toggled');
+    invoice.classList.remove("toggled");
     this.producto = null;
     this.listPrecioProducto = [];
     this.setState({ loadingProducto: true });
@@ -1805,9 +1771,8 @@ class VentaCrear extends CustomComponent {
 
     if (!isNumeric(precioProducto) || Number(precioProducto) <= 0) {
       alertKit.warning({
-        title: 'Venta',
-        message:
-          'El precio del producto tiene un valor no admitido o es menor o igual a 0.',
+        title: "Venta",
+        message: "El precio del producto tiene un valor no admitido o es menor o igual a 0.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1819,8 +1784,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(descripcionProducto)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'La descripción del producto no puede ser vacía.',
+        title: "Venta",
+        message: "La descripción del producto no puede ser vacía.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1839,8 +1804,8 @@ class VentaCrear extends CustomComponent {
       producto.idTipoTratamientoProducto === VALOR_MONETARIO
     ) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Los productos a granel no se puede cambia el precio.',
+        title: "Venta",
+        message: "Los productos a granel no se puede cambia el precio.",
       });
       return;
     }
@@ -1867,16 +1832,13 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputCliente = () => {
-    this.setState(
-      {
-        clientes: [],
-        cliente: null,
-        nuevoCliente: null,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      clientes: [],
+      cliente: null,
+      nuevoCliente: null,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterCliente = async (text) => {
@@ -1902,18 +1864,14 @@ class VentaCrear extends CustomComponent {
   };
 
   handleSelectItemCliente = (value) => {
-    this.refCliente.current.initialize(
-      value.documento + ' - ' + value.informacion,
-    );
-    this.setState(
-      {
-        clientes: [],
-        cliente: value,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
+
+    this.setState({
+      clientes: [],
+      cliente: value,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -1923,8 +1881,8 @@ class VentaCrear extends CustomComponent {
   handleOpenSale = async () => {
     if (isEmpty(this.state.detalleVenta)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'La lista de productos esta vacía.',
+        title: "Venta",
+        message: "La lista de productos esta vacía.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1934,8 +1892,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.idComprobante)) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione un comprobante.',
+        title: "Venta",
+        message: "Seleccione un comprobante.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1945,8 +1903,8 @@ class VentaCrear extends CustomComponent {
 
     if (isEmpty(this.state.cliente) && this.state.nuevoCliente === null) {
       alertKit.warning({
-        title: 'Venta',
-        message: 'Selecciona un cliente.',
+        title: "Venta",
+        message: "Selecciona un cliente.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -1961,8 +1919,8 @@ class VentaCrear extends CustomComponent {
 
   handleClearSale = async () => {
     const accept = await alertKit.question({
-      title: 'Venta',
-      message: 'Los productos serán eliminados de la venta actual ¿Desea continuar?',
+      title: "Venta",
+      message: "Los productos serán eliminados de la venta actual ¿Desea continuar?",
       acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
       cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
     });;
@@ -2000,8 +1958,8 @@ class VentaCrear extends CustomComponent {
     } = this.state;
 
     const accept = await alertKit.question({
-      title: 'Venta',
-      message: '¿Estás seguro de continuar?',
+      title: "Venta",
+      message: "¿Estás seguro de continuar?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -2025,6 +1983,7 @@ class VentaCrear extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
+        idPlazo: null,
         notaTransacion,
         bancosAgregados: metodoPagosLista,
       };
@@ -2043,8 +2002,17 @@ class VentaCrear extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
-          const body = response.getBody().map(
+        const data = response.getBody();
+
+        if (typeof data === 'string') {
+          alertKit.warning({
+            title: 'Venta',
+            message: response.getMessage(),
+          });
+        }
+
+        if (data instanceof Array) {
+          const body = data.map(
             (item) =>
               `<tr>
                   <td>${item.nombre}</td>
@@ -2078,11 +2046,6 @@ class VentaCrear extends CustomComponent {
             title: 'Venta',
             bodyInnerHTML: html,
           });
-        } else {
-          alertKit.warning({
-            title: 'Venta',
-            message: response.getMessage(),
-          });
         }
       }
     }
@@ -2090,9 +2053,7 @@ class VentaCrear extends CustomComponent {
 
   handleProcessCredito = async (
     idFormaPago,
-    numeroCuotas,
-    frecuenciaPago,
-    importeTotal,
+    idPlazo,
     notaTransacion,
     callback = async function () { },
   ) => {
@@ -2111,8 +2072,8 @@ class VentaCrear extends CustomComponent {
     } = this.state;
 
     const accept = await alertKit.question({
-      title: 'Venta',
-      message: '¿Estás seguro de continuar?',
+      title: "Venta",
+      message: "¿Estás seguro de continuar?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -2136,10 +2097,8 @@ class VentaCrear extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
-        numeroCuotas: numeroCuotas,
-        frecuenciaPago: frecuenciaPago,
+        idPlazo: idPlazo,
         notaTransacion,
-        importeTotal: importeTotal,
       };
 
       await callback();
@@ -2156,8 +2115,17 @@ class VentaCrear extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
-          const body = response.getBody().map(
+        const data = response.getBody();
+
+        if (typeof data === 'string') {
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          });
+        }
+
+        if (data instanceof Array) {
+          const body = data.map(
             (item) =>
               `<tr>
                   <td>${item.nombre}</td>
@@ -2190,11 +2158,6 @@ class VentaCrear extends CustomComponent {
           alertKit.html({
             title: "Venta",
             bodyInnerHTML: html,
-          });
-        } else {
-          alertKit.warning({
-            title: "Venta",
-            message: response.getMessage(),
           });
         }
       }
@@ -2226,7 +2189,63 @@ class VentaCrear extends CustomComponent {
   */
 
   render() {
-    const { activeTab } = this.state;
+    const { activeTab, detalleVenta, impuestos, codiso } = this.state;
+
+    const numeroDeItems = `${detalleVenta.length} ${detalleVenta.length === 1 ? 'Producto' : 'Productos'}`;
+
+    const subTotal = detalleVenta.reduce((accumulator, item) => {
+      const cantidad = this.getCantidadProducto(item);
+      const impuesto = this.getImpuesto(item.idImpuesto);
+
+      const total = cantidad * item.precio;
+      return accumulator + calculateTaxBruto(impuesto.porcentaje, total);
+    }, 0);
+
+
+    const impuestoDetalle = () => {
+      const listaImpuesto = detalleVenta.reduce((acc, item) => {
+        const impuesto = this.getImpuesto(item.idImpuesto);
+        if (!impuesto) {
+          return acc;
+        }
+
+        const cantidad = this.getCantidadProducto(item);
+        const subTotal = calculateTaxBruto(impuesto.porcentaje, cantidad * item.precio);
+        const impuestoTotal = calculateTax(impuesto.porcentaje, subTotal);
+
+        const existingImpuesto = acc.find(
+          (imp) => imp.idImpuesto === impuesto.idImpuesto,
+        );
+
+        if (existingImpuesto) {
+          existingImpuesto.valor += impuestoTotal;
+        } else {
+          acc.push({
+            idImpuesto: impuesto.idImpuesto,
+            nombre: impuesto.nombre,
+            valor: impuestoTotal,
+          });
+        }
+
+        return acc;
+      }, []);
+
+      return listaImpuesto.map((impuesto, index) => {
+        return (
+          <div
+            key={index}
+            className="flex items-center justify-between py-2"
+          >
+            <div>{impuesto.nombre}:</div>
+            <div>{formatCurrency(impuesto.valor, codiso)}</div>
+          </div>
+        );
+      });
+    };
+
+    const total = detalleVenta.reduce((accumulator, item) => {
+      return accumulator + item.precio * this.getCantidadProducto(item);
+    }, 0);
 
     return (
       <PosContainerWrapper>
@@ -2250,9 +2269,9 @@ class VentaCrear extends CustomComponent {
 
           nombreComporbante={this.state.nombreComporbante}
           handleOpenPreImpresion={this.handleOpenPreImpresion}
-          handleOpenVenta={this.handleOpenVenta}
-          handleOpenCotizacion={this.handleOpenCotizacion}
-          handleOpenPedido={this.handleOpenPedido}
+          handleOpenVenta={this.handleOpenModalVenta}
+          handleOpenCotizacion={this.handleOpenModalCotizacion}
+          handleOpenPedido={this.handleOpenModalPedido}
           handleOpenOptions={this.handleOpenOptions}
 
           refComprobante={this.refComprobante}
@@ -2268,8 +2287,12 @@ class VentaCrear extends CustomComponent {
           handleFilterCliente={this.handleFilterCliente}
           handleSelectItemCliente={this.handleSelectItemCliente}
 
-          detalleVenta={this.state.detalleVenta}
-          impuestos={this.state.impuestos}
+          detalleVenta={detalleVenta}
+          numeroDeItems={numeroDeItems}
+          subTotal={subTotal}
+          impuestoDetalle={impuestoDetalle}
+          total={total}
+
           handleMinusProducto={this.handleMinusProducto}
           handlePlusProducto={this.handlePlusProducto}
           handleEditProducto={this.handleEditProducto}
@@ -2278,44 +2301,20 @@ class VentaCrear extends CustomComponent {
           handleOpenSale={this.handleOpenSale}
         />
 
-        <div className="fixed bottom-[15%] right-6 z-50 md:hidden">
-          <button
-            aria-label="Ver carrito de compras"
-            className={
-              cn(
-                "relative p-3 rounded-full bg-red-500 shadow-lg",
-                "transform transition-all duration-200 ",
-                "hover:bg-red-800 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-              )
-            }
-            onClick={() => this.handleTabChange(activeTab === "productos" ? "detalle" : "productos")}
-          >
-            {
-              activeTab === "productos" ? <ShoppingCart className="w-6 h-6 text-white" /> : <ShoppingBag className="w-6 h-6 text-white" />
-            }
-            {this.state.detalleVenta.length > 0 && (
-              <div className={
-                cn(
-                  "absolute -top-2 -right-2",
-                  "h-5 w-5",
-                  "flex items-center justify-center",
-                  "bg-red-600 text-white text-xs font-bold",
-                  "rounded-full shadow-md"
-                )
-              }>
-                {this.state.detalleVenta.length}
-              </div>
-            )}
-          </button>
-        </div>
+        {/* Se activa en modo mobile */}
+        <FloatingCartButton
+          activeTab={activeTab}
+          detalleVenta={detalleVenta}
+          handleTabChange={this.handleTabChange}
+        />
 
         <ModalTransaccion
-          tipo={'Venta'}
-          title={'Completar Venta'}
+          tipo="Venta"
+          title="Completar Venta"
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
           codiso={this.state.codiso}
-          importeTotal={this.importeTotal()}
+          importeTotal={total}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
           handleProcessCredito={this.handleProcessCredito}
@@ -2327,16 +2326,16 @@ class VentaCrear extends CustomComponent {
           clear={this.clearView}
           handleClose={this.handleCloseImpresion}
           handlePrinterMobile={this.handleOpenModalPrinter}
-          handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
-          handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
-          handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
+          handlePrinterA4={this.handlePrinterImpresion.bind(this, "A4")}
+          handlePrinter80MM={this.handlePrinterImpresion.bind(this, "80mm")}
+          handlePrinter58MM={this.handlePrinterImpresion.bind(this, "58mm")}
         />
 
-        <ModalPreImpresion
+        {/* <ModalPreImpresion
           isOpen={this.state.isOpenPreImpresion}
           handleClose={this.handleClosePreImpresion}
           handleProcess={this.handleProcessPreImpresion}
-        />
+        /> */}
 
         <ModalPrinter
           isOpen={this.state.isOpenModalPrinter}
@@ -2345,33 +2344,40 @@ class VentaCrear extends CustomComponent {
         />
 
         <ModalVenta
-          refModal={this.refModalVenta}
-          isOpen={this.state.isOpenVenta}
+          isOpen={this.state.isOpenModalVenta}
           idSucursal={this.state.idSucursal}
-          handleClose={this.handleCloseVenta}
-          handleSeleccionar={this.handleSeleccionarVenta}
+          handleClose={this.handleCloseModalVenta}
+          handleSeleccionar={this.handleSeleccionarModalVenta}
         />
 
         <ModalCotizacion
           refModal={this.refModalCotizacion}
-          isOpen={this.state.isOpenCotizacion}
+          isOpen={this.state.isOpenModalCotizacion}
           idSucursal={this.state.idSucursal}
-          handleClose={this.handleCloseCotizacion}
-          handleSeleccionar={this.handleSeleccionarCotizacion}
+          handleClose={this.handleCloseModalCotizacion}
+          handleSeleccionar={this.handleSeleccionarModalCotizacion}
         />
 
         <ModalPedido
           refModal={this.refModalPedido}
-          isOpen={this.state.isOpenPedido}
+          isOpen={this.state.isOpenModalPedido}
           idSucursal={this.state.idSucursal}
-          handleClose={this.handleClosePedido}
-          handleSeleccionar={this.handleSeleccionarPedido}
+          handleClose={this.handleCloseModalPedido}
+          handleSeleccionar={this.handleSeleccionarModalPedido}
+        />
+
+        <ModalAgregar
+          ref={this.refModalAgregar}
+          isOpen={this.state.isOpenAgregar}
+          detalleVenta={this.state.detalleVenta}
+          onClose={this.handleCloseAgregar}
+          handleAdd={this.handleSaveAgregar}
         />
 
         <SidebarConfiguration
           menus={this.props.token.userToken.menus}
           idSidebarConfiguration={this.idSidebarConfiguration}
-          impuestos={this.state.impuestos}
+          impuestos={impuestos}
           refImpuesto={this.refImpuesto}
           idImpuesto={this.state.idImpuesto}
           handleSelectIdImpuesto={this.handleSelectIdImpuesto}
@@ -2431,19 +2437,11 @@ class VentaCrear extends CustomComponent {
           handleClose={this.handleCloseProducto}
         />
 
-        <ModalAgregar
-          ref={this.refModalAgregar}
-          isOpen={this.state.isOpenAgregar}
-          detalleVenta={this.state.detalleVenta}
-          onClose={this.handleCloseAgregar}
-          handleAdd={this.handleSaveAgregar}
-        />
-
-        <ModalLote
-          ref={this.refModalLote}
-          isOpen={this.state.isOpenLote}
-          onClose={this.handleCloseLote}
-          handleAdd={this.handleSaveLote}
+        <ModalInventarioDetalle
+          ref={this.refModalInventarioDetalle}
+          isOpen={this.state.isOpenInventarioDetalle}
+          onClose={this.handleCloseInventarioDetalle}
+          handleAdd={this.handleSaveInventarioDetalle}
         />
       </PosContainerWrapper>
     );

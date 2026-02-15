@@ -3,13 +3,13 @@ import { isText, isEmpty, imageBase64 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import ContainerWrapper from '../../../../components/Container';
 import {
   getIdCategoria,
   updateCategoria,
 } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import PropTypes from 'prop-types';
@@ -40,7 +40,7 @@ class CategoriaEditar extends CustomComponent {
       estado: false,
       publicar: false,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -262,7 +262,7 @@ class CategoriaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               autoFocus
-              label={'Código:'}
+              label="Código:"
               placeholder="Ingrese el código"
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
@@ -336,6 +336,7 @@ class CategoriaEditar extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               imageUrl={this.state.imagen.url}
               defaultImage={images.noImage}
               alt="Icono de la categoría"
@@ -348,22 +349,20 @@ class CategoriaEditar extends CustomComponent {
           </Column>
         </Row>
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={() => this.handleGuardar()}
-            >
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex gap-3">
+          <Button
+            className="btn-warning"
+            onClick={() => this.handleGuardar()}
+          >
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }
@@ -372,7 +371,9 @@ class CategoriaEditar extends CustomComponent {
 CategoriaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

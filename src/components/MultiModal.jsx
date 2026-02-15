@@ -16,7 +16,7 @@ import {
 } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 import ErrorResponse from '../model/class/error-response';
-import { CANCELED } from '../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   convertNullText,
   currentDate,

@@ -1,5 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,
@@ -11,7 +11,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   detailPedido,
   documentsPdfInvoicesPedido,
@@ -40,7 +40,7 @@ import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PedidoDetalle extends CustomComponent {
   constructor(props) {
@@ -239,7 +239,7 @@ class PedidoDetalle extends CustomComponent {
 
   handlePrintList = async (size) => {
     await pdfVisualizer.init({
-      url: documentsPdfListsPedido(this.state.idPedido, size),
+      url: documentsPdfListsPedido(this.state.idPedido),
       title: 'Pedido',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
@@ -567,12 +567,14 @@ class PedidoDetalle extends CustomComponent {
                     <TableRow key={index}>
                       <TableCell>{item.id}</TableCell>
                       <TableCell className="text-center">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.producto}
-                          width={100}
-                        />
+                        <div className="max-w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>
                         {item.codigo}

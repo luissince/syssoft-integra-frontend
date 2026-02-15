@@ -14,8 +14,8 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -280,7 +280,7 @@ class BancoDetalle extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="6"
+          colSpan={6}
           message={'Cargando información de la tabla...'}
         />
       );

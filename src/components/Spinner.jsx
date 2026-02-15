@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import PropTypes from 'prop-types';
 
 const SpinnerTable = ({ colSpan, message }) => {
@@ -5,12 +6,12 @@ const SpinnerTable = ({ colSpan, message }) => {
     <tr>
       <td className="text-center" colSpan={colSpan}>
         <div
-          className={`d-flex flex-column justify-content-center align-items-center h-100 `}
+          className={`flex flex-col justify-center items-center h-full`}
         >
           <div>
-            <div className="spinner-grow text-danger" role="status"></div>
-            <div className="spinner-grow text-warning" role="status"></div>
-            <div className="spinner-grow text-info" role="status"></div>
+            <div className="spinner-grow text-danger" role="status" />
+            <div className="spinner-grow text-warning" role="status" />
+            <div className="spinner-grow text-info" role="status" />
           </div>
           <div>
             <strong>{message}</strong>
@@ -24,15 +25,16 @@ const SpinnerTable = ({ colSpan, message }) => {
 const SpinnerView = ({ loading, message, children }) => {
   return (
     <div
-      className={`${
-        loading ? 'block' : 'hidden'
-      }  absolute inset-0 bg-white z-10`}
+      className={cn(
+        loading ? "block" : "hidden",
+        "absolute inset-0 bg-white z-20"
+      )}
     >
-      <div className="d-flex flex-column justify-content-center align-items-center h-100">
+      <div className="flex flex-col justify-center items-center h-full">
         <div>
-          <div className="spinner-grow text-danger" role="status"></div>
-          <div className="spinner-grow text-warning" role="status"></div>
-          <div className="spinner-grow text-info" role="status"></div>
+          <div className="spinner-grow text-danger" role="status" />
+          <div className="spinner-grow text-warning" role="status" />
+          <div className="spinner-grow text-info" role="status" />
         </div>
         <div>
           <strong>{message}</strong>
@@ -51,15 +53,16 @@ const SpinnerTransparent = ({
 }) => {
   return (
     <div
-      className={`${loading ? 'd-block ' : 'd-none'} clearfix ${
-        isAbsolute ? 'absolute-all' : ''
-      }`}
+      className={cn(
+          loading ? 'block' : 'hidden',
+          isAbsolute ? 'absolute-all' : ''
+      )}
     >
-      <div className="d-flex flex-column justify-content-center align-items-center h-100">
+      <div className="flex flex-col justify-center items-center h-full">
         <div>
-          <div className="spinner-grow text-danger" role="status"></div>
-          <div className="spinner-grow text-warning" role="status"></div>
-          <div className="spinner-grow text-info" role="status"></div>
+          <div className="spinner-grow text-danger" role="status" />
+          <div className="spinner-grow text-warning" role="status" />
+          <div className="spinner-grow text-info" role="status" />
         </div>
         <div>
           <strong>{message}</strong>
@@ -71,7 +74,7 @@ const SpinnerTransparent = ({
 };
 
 SpinnerTable.propTypes = {
-  colSpan: PropTypes.string.isRequired,
+  colSpan: PropTypes.number.isRequired,
   message: PropTypes.string.isRequired,
 };
 

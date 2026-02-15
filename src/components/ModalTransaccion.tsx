@@ -14,7 +14,7 @@ import {
   validateNumericInputs,
   rounded,
 } from '../helper/utils.helper';
-import CustomComponent from '../components/CustomComponent';
+import CustomComponent from '@/components/CustomComponent';
 import {
   CONTADO,
   CREDITO,
@@ -22,13 +22,14 @@ import {
 import { comboBanco } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 import ErrorResponse from '../model/class/error-response';
-import { CANCELED } from '../model/types/types';
+import { CANCELED } from '../constants/requestStatus';
 import Button from './Button';
 import Input from './Input';
 import Select from './Select';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
 import { comboPlazo } from '@/network/rest/api-client';
+import { FaRegHandPointDown } from 'react-icons/fa';
 
 interface ModalTransaccionProps {
   tipo: string;
@@ -264,7 +265,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
     if (isEmpty(metodoPagosLista)) {
       alertKit.warning({
         title: this.state.tipo,
-        message: "Tiene que agregar método de cobro para continuar.",
+        message: "Tiene que agregar método de transacción para continuar.",
       });
       return;
     }
@@ -272,7 +273,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
     if (metodoPagosLista.some((item) => !isNumeric(item.monto))) {
       alertKit.warning({
         title: this.state.tipo,
-        message: "Hay montos del metodo de cobro que no tiene valor.",
+        message: "Hay montos del metodo de transacción que no tiene valor.",
         primaryButton: {
           html: "<i class='fa fa-check'></i> Aceptar",
         },
@@ -288,7 +289,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
       if (metodoCobroTotal !== importeTotal) {
         alertKit.warning({
           title: this.state.tipo,
-          message: "Al tener mas de 2 métodos de cobro el monto debe ser igual al total.",
+          message: "Al tener mas de 2 métodos de transacción el monto debe ser igual al total.",
         }, () => {
           validateNumericInputs(this.refMetodoPagoContenedor);
         });
@@ -391,7 +392,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
     const total = importeTotal;
 
     if (isEmpty(bancosAgregados)) {
-      return <h5 className="text-red-500">Agrega algún método de pago.</h5>;
+      return <h5 className="text-red-500">Agrega algún método de transacción.</h5>;
     }
 
     const currentAmount = bancosAgregados.reduce((accumulator, item) => {
@@ -408,7 +409,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
               <h4 className="text-green-700">{formatCurrency(currentAmount - total, codiso)}</h4>
             </div>
             <h6 className="text-danger">
-              Más de dos metodos de pago no generan vuelto.
+              Más de dos metodos de transacción no generan vuelto.
             </h6>
           </>
         );
@@ -420,7 +421,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
               <h4 className="text-red-500">{formatCurrency(total - currentAmount, codiso)}</h4>
             </div>
             <h6 className="text-danger">
-              Más de dos metodos de pago no generan vuelto.
+              Más de dos metodos de transacciones no generan vuelto.
             </h6>
           </>
         );
@@ -452,7 +453,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
               <p className="text-gray-700">RESTANTE</p>
               <h4>{formatCurrency(currentAmount - total, codiso)}</h4>
             </div>
-            <h6 className="text-red-500">El método de pago no genera vuelto.</h6>
+            <h6 className="text-red-500">El método de transacción no genera vuelto.</h6>
           </>
         );
       } else {
@@ -462,7 +463,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
               <p className="text-gray-700">POR COBRAR</p>
               <h4>{formatCurrency(total - currentAmount, codiso)}</h4>
             </div>
-            <h6 className="text-red-500">El método de pago no genera vuelto.</h6>
+            <h6 className="text-red-500">El método de transacción no genera vuelto.</h6>
           </>
         );
       }
@@ -492,6 +493,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
         onHidden={this.onHidden}
         onClose={onClose}
         contentLabel={this.state.title}
+        titleHeader={this.state.title}
         className="modal-custom-sm"
       >
         <CustomModalContentForm onSubmit={this.handleCobrar}>
@@ -527,7 +529,7 @@ class ModalTransaccion extends CustomComponent<ModalTransaccionProps, ModalTrans
                     <hr />
                   </div>
                   <div className="w-1/2 flex items-center justify-center">
-                    <h6>Tipos de cobros</h6>
+                    <h6>Tipos de Transacción</h6>
                   </div>
                   <div className="w-3/12">
                     <hr />
@@ -677,9 +679,9 @@ const ContadoView = ({
     <div className="flex flex-col gap-6">
 
       <div className="flex gap-3">
-        {/* Botones para agregar métodos de pago */}
+        {/* Botones para agregar métodos de transacción */}
         <div className="w-full flex flex-col gap-3">
-          <h6>Añadir Método de Pago</h6>
+          <h6>Añadir Método de Transacción</h6>
 
           <div className="flex flex-col gap-3">
             {bancos
@@ -699,9 +701,9 @@ const ContadoView = ({
           </div>
         </div>
 
-        {/* Lista de métodos de pago */}
+        {/* Lista de métodos de transacción */}
         <div className="w-full flex flex-col gap-3" ref={refMetodoPagoContenedor}>
-          <h6>Pagos Aplicados</h6>
+          <h6>Métodos de Transacción Aplicados</h6>
 
           {bancosAgregados.map((item, index) => (
             <MetodoPago
@@ -775,7 +777,10 @@ const MetodoPago = ({
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs">{name}:</span>
+      <div className="flex items-center gap-1">
+        <span className="text-sm font-medium">{name}</span>
+        <FaRegHandPointDown />:
+      </div>
       <Input
         autoFocus
         group={true}

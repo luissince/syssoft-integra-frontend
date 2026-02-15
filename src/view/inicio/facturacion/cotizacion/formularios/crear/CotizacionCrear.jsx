@@ -19,7 +19,7 @@ import {
 } from '@/network/rest/principal.network';
 import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
-import { CANCELED } from '@/model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
 import {
   SpinnerView,
@@ -55,16 +55,16 @@ class CotizacionCrear extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idCotizacion: '',
-      idComprobante: '',
-      idMoneda: '',
-      idAlmacen: '',
-      idImpuesto: '',
-      observacion: '',
-      nota: '',
+      idCotizacion: "",
+      idComprobante: "",
+      idMoneda: "",
+      idAlmacen: "",
+      idImpuesto: "",
+      observacion: "",
+      nota: "",
       cacheConfiguracion: null,
 
       // Detalle del gasto
@@ -86,7 +86,7 @@ class CotizacionCrear extends CustomComponent {
       clientes: [],
 
       // Atributos libres
-      codiso: '',
+      codiso: "",
       total: 0,
 
       // Atributos del modal producto
@@ -102,8 +102,8 @@ class CotizacionCrear extends CustomComponent {
       isOpenPreImpresion: false,
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -994,13 +994,13 @@ class CotizacionCrear extends CustomComponent {
               handleSelectItemProducto={this.handleSelectItemProducto}
             />
 
-             {/* PANEL DERECHO  */}
+            {/* PANEL DERECHO  */}
             <PanelDerecho
               comprobantes={this.state.comprobantes}
               refComprobante={this.refComprobante}
               idComprobante={this.state.idComprobante}
               handleSelectComprobante={this.handleSelectComprobante}
-              
+
               clientes={this.state.clientes}
               refCliente={this.refCliente}
               refClienteValue={this.refClienteValue}
@@ -1027,7 +1027,9 @@ CotizacionCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       menus: PropTypes.array.isRequired,
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

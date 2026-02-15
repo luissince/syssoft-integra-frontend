@@ -8,10 +8,11 @@ import Select from '../../../../../../components/Select';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
 import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import SuccessReponse from '../../../../../../model/class/response';
 import { comboAlmacen } from '../../../../../../network/rest/principal.network';
-import { alertWarning, isEmpty } from '../../../../../../helper/utils.helper';
+import { isEmpty } from '../../../../../../helper/utils.helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -70,7 +71,7 @@ class ModalInventario extends Component {
     }
   };
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -111,40 +112,56 @@ class ModalInventario extends Component {
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.idAlmacen)) {
-      alertWarning('Producto', 'Seleccione el almacen.', () => {
-        this.refIdAlmacen.current.focus();
+      alertKit.warning({
+        title: "Producto",
+        message: "Seleccione el almacen.",
+        onClose: () => {
+          this.refIdAlmacen.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.cantidad)) {
-      alertWarning('Producto', 'Ingrese la cantidad inicial.', () => {
-        this.refCantidad.current.focus();
+      alertKit.warning({
+        title: "Producto",
+        message: "Ingrese la cantidad inicial.",
+        onClose: () => {
+          this.refCantidad.current.focus();
+        },
       });
       return;
     }
 
     if (Number(this.state.cantidad) <= 0) {
-      alertWarning(
-        'Producto',
-        'Su cantidad tiene que se mayor a cero(0).',
-        () => {
+      alertKit.warning({
+        title: "Producto",
+        message: "Su cantidad tiene que se mayor a cero(0).",
+        onClose: () => {
           this.refCantidad.current.focus();
         },
-      );
+      });
       return;
     }
 
     if (isEmpty(this.state.cantidadMaxima)) {
-      alertWarning('Producto', 'Ingrese la cantidad máxima.', () => {
-        this.refCantidadMaxima.current.focus();
+      alertKit.warning({
+        title: "Producto",
+        message: "Ingrese la cantidad máxima.",
+        onClose: () => {
+          this.refCantidadMaxima.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.cantidadMinima)) {
-      alertWarning('Producto', 'Ingrese la cantidad mínima.', () => {
-        this.refCantidadMinima.current.focus();
+      alertKit.warning({
+        title: "Producto",
+        message: "Ingrese la cantidad mínima.",
+        onClose: () => {
+          this.refCantidadMinima.current.focus();
+        },
       });
       return;
     }
@@ -154,8 +171,12 @@ class ModalInventario extends Component {
         (item) => item.idAlmacen === this.state.idAlmacen,
       )
     ) {
-      alertWarning('Producto', 'El almacen ya se encuentra agregado.', () => {
-        this.refIdAlmacenProducto.current.focus();
+      alertKit.warning({
+        title: "Producto",
+        message: "El almacen ya se encuentra agregado.",
+        onClose: () => {
+          this.refIdAlmacen.current.focus();
+        },
       });
       return;
     }

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { CustomModalForm } from '../../../../../../../components/CustomModal';
 import Row from '../../../../../../../components/Row';
 import {
-  alertWarning,
   isNumeric,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
@@ -10,9 +9,10 @@ import Button from '../../../../../../../components/Button';
 import Column from '../../../../../../../components/Column';
 import SuccessReponse from '../../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { obtenerListaPrecioProducto } from '../../../../../../../network/rest/principal.network';
 import { SpinnerView } from '../../../../../../../components/Spinner';
+import { alertKit } from 'alert-kit';
 
 class ModalPrecios extends Component {
   constructor(props) {
@@ -82,7 +82,13 @@ class ModalPrecios extends Component {
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.precio)) {
-      alertWarning('Venta', 'Seleccione un precio.');
+      alertKit.warning({
+        title: "Venta",
+        message: "Seleccione un precio.",
+        onClose: () => {
+          this.refModal.current.focus();
+        },
+      });
       return;
     }
 
@@ -123,9 +129,8 @@ class ModalPrecios extends Component {
                       precios.map((item, index) => (
                         <Button
                           key={index}
-                          contentClassName={`list-group-item list-group-item-action ${
-                            this.index === index ? 'active' : ''
-                          }`}
+                          contentClassName={`list-group-item list-group-item-action ${this.index === index ? 'active' : ''
+                            }`}
                           onClick={() => {
                             this.index = index;
                             this.setState({ precio: parseFloat(item.valor) });

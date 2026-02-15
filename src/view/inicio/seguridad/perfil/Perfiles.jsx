@@ -1,20 +1,20 @@
 import PropTypes from 'prop-types';
-import { formatTime, isEmpty } from '../../../../helper/utils.helper';
+import { formatTime, isEmpty } from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/Container';
 import {
   listPerfil,
   removePerfil,
-} from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
-import Title from '../../../../components/Title';
-import { SpinnerTable } from '../../../../components/Spinner';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import Title from '@/components/Title';
+import { SpinnerTable } from '@/components/Spinner';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -23,9 +23,9 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../components/Table';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '@/components/Table';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
 import { alertKit } from 'alert-kit';
 
 /**
@@ -217,7 +217,7 @@ class Perfiles extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="6"
+          colSpan={6}
           message="Cargando información de la tabla..."
         />
       );

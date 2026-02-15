@@ -2,13 +2,14 @@ import { ContainerMenu } from '../../../components/Container';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Personas from './todo/Personas.jsx';
-import PersonaAgregar from './formularios/crear/PersonaAgregar.jsx';
-import PersonaEditar from './formularios/editar/PersonaEditar.jsx';
-import PersonaDetalle from './formularios/detalle/PersonaDetalle.jsx';
-import Clientes from './cliente/Clientes.jsx';
-import Proveedores from './proveedor/Proveedores.jsx';
-import Conductores from './conductor/Conductores.jsx';
+import Personas from './todo/Personas';
+import PersonaAgregar from './formularios/crear/PersonaAgregar';
+import PersonaEditar from './formularios/editar/PersonaEditar';
+import PersonaDetalle from './formularios/detalle/PersonaDetalle';
+import Clientes from './cliente/Clientes';
+import Proveedores from './proveedor/Proveedores';
+import Conductores from './conductor/Conductores';
+import Personales from './personal/Personales';
 
 export {
   Personas,
@@ -18,6 +19,7 @@ export {
   Clientes,
   Proveedores,
   Conductores,
+  Personales,
 };
 
 /**

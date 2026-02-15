@@ -1,24 +1,21 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isNumeric,
   keyNumberInteger,
-} from '../../../../helper/utils.helper';
-import { addImpuesto } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import { SpinnerView } from '../../../../components/Spinner';
+} from '@/helper/utils.helper';
+import { addImpuesto } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import { SpinnerView } from '@/components/Spinner';
+import { alertKit } from 'alert-kit';
 
 class ImpuestoAgregar extends CustomComponent {
   constructor(props) {
@@ -30,7 +27,7 @@ class ImpuestoAgregar extends CustomComponent {
       preferido: false,
       estado: true,
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refNombre = React.createRef();
@@ -40,46 +37,74 @@ class ImpuestoAgregar extends CustomComponent {
     this.abortController = new AbortController();
   }
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Impuesto', 'Ingrese el nombre.', () =>
-        this.refNombre.current.focus(),
-      );
+      alertKit.warning({
+        title: "Impuesto",
+        message: "Ingrese el nombre.",
+        onClose: () => {
+          this.refNombre.current.focus();
+        }
+      })
       return;
     }
 
     if (!isNumeric(this.state.porcentaje)) {
-      alertWarning('Impuesto', 'Ingrese el porcentaje.', () =>
-        this.refPorcentaje.current.focus(),
-      );
+      alertKit.warning({
+        title: "Impuesto",
+        message: "Ingrese el porcentaje.",
+        onClose: () => {
+          this.refPorcentaje.current.focus();
+        }
+      })
       return;
     }
 
-    alertDialog('Impuesto', '¿Estás seguro de continuar?', async (accept) => {
-      if (accept) {
-        alertInfo('Impuesto', 'Procesando información...');
-
-        const data = {
-          nombre: this.state.nombre,
-          porcentaje: this.state.porcentaje,
-          codigo: this.state.codigo,
-          estado: this.state.estado,
-          preferido: this.state.preferido,
-          idUsuario: this.state.idUsuario,
-        };
-
-        const response = await addImpuesto(data);
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Impuesto', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Impuesto', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: "Impuesto",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      alertKit.loading({
+        title: "Impuesto",
+        message: "Procesando información...",
+      })
+
+      const data = {
+        nombre: this.state.nombre,
+        porcentaje: this.state.porcentaje,
+        codigo: this.state.codigo,
+        estado: this.state.estado,
+        preferido: this.state.preferido,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await addImpuesto(data);
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Impuesto",
+          message: response.data,
+          onClose: () => {
+            this.props.history.goBack();
+          }
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: "Impuesto",
+          message: response.getMessage(),
+        })
+      }
+    }
   };
 
   render() {

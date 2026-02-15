@@ -1,10 +1,6 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertSuccess,
-  alertWarning,
   spinnerLoading,
-  alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -15,21 +11,22 @@ import {
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class Medidas extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
 
@@ -98,24 +95,24 @@ class Medidas extends CustomComponent {
   onEventPaginacion = () => {
     switch (this.state.opcion) {
       case 0:
-        this.fillTable(0, '');
+        this.fillTable(0);
         break;
       case 1:
         this.fillTable(1, this.state.buscar);
         break;
       default:
-        this.fillTable(0, '');
+        this.fillTable(0);
     }
   };
 
-  fillTable = async (opcion, buscar) => {
+  fillTable = async (opcion, buscar = "") => {
     /**
      * Restablecer las variables para la busqueda
      */
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     /**
@@ -143,7 +140,7 @@ class Medidas extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -181,34 +178,48 @@ class Medidas extends CustomComponent {
     });
   };
 
-  handleDelete = (id) => {
-    alertDialog(
-      'Medida',
-      '¿Estás seguro de eliminar la Medida?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idMedida: id,
-          };
-
-          alertInfo('Medida', 'Se esta procesando la petición...');
-
-          const response = await removeMedida(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Medida', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Medida', response.getMessage());
-          }
-        }
+  handleDelete = async (id) => {
+    const accept = await alertKit.question({
+      title: "Medida",
+      message: "¿Estás seguro de eliminar la Medida?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idMedida: id,
+      };
+
+      alertKit.loading({
+        message: "Se esta procesando la petición..."
+      })
+
+      const response = await removeMedida(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Medida",
+          message: response.data,
+          onClose: () => {
+            this.loadInit();
+          }
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Medida",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generarBody() {

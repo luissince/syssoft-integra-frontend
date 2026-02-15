@@ -1,6 +1,6 @@
 import React from 'react';
-import { PosContainerWrapper } from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,
@@ -9,9 +9,9 @@ import {
   isEmpty,
   isText,
   formatCurrency,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { PEDIDO } from '../../../../../../model/types/tipo-comprobante';
+import { PEDIDO } from '@/model/types/tipo-comprobante';
 import {
   comboAlmacen,
   comboComprobante,
@@ -23,20 +23,20 @@ import {
   filtrarPersona,
   getIdPedido,
   updatePedido,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
 import {
   SpinnerView,
-} from '../../../../../../components/Spinner';
-import Button from '../../../../../../components/Button';
+} from '@/components/Spinner';
+import Button from '@/components/Button';
 import {
   ModalImpresion,
   ModalPersona,
-} from '../../../../../../components/MultiModal';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+} from '@/components/MultiModal';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
 import { alertKit } from 'alert-kit';
 import pdfVisualizer from 'pdf-visualizer';
 import PanelIzquierdo from '../../../component/PanelIzquierdo';
@@ -45,7 +45,7 @@ import ModalProducto from '../../../component/ModalProducto';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PedidoEditar extends CustomComponent {
   /**
@@ -57,18 +57,18 @@ class PedidoEditar extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idPedido: '',
-      idComprobante: '',
-      idTipoEntrega: '',
-      idMoneda: '',
-      idAlmacen: '',
-      idImpuesto: '',
-      observacion: '',
-      nota: '',
-      instruccion: '',
+      idPedido: "",
+      idComprobante: "",
+      idTipoEntrega: "",
+      idMoneda: "",
+      idAlmacen: "",
+      idImpuesto: "",
+      observacion: "",
+      nota: "",
+      instruccion: "",
 
       // Detalle del gasto
       detalles: [],
@@ -82,7 +82,7 @@ class PedidoEditar extends CustomComponent {
       tiposPedido: [],
       tiposEntrega: [],
       fechaEntrega: currentDate(),
-      horaEntrega: '',
+      horaEntrega: "",
       ranurasDeTiempo: getRanurasDeTiempo(),
 
       // Filtrar producto
@@ -94,7 +94,7 @@ class PedidoEditar extends CustomComponent {
       clientes: [],
 
       // Atributos libres
-      codiso: '',
+      codiso: "",
       total: 0,
 
       // Atributos del modal producto
@@ -107,8 +107,8 @@ class PedidoEditar extends CustomComponent {
       isOpenImpresion: false,
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -136,7 +136,7 @@ class PedidoEditar extends CustomComponent {
     this.refModalImpresion = React.createRef();
 
     // Atributos para el modal configuración
-    this.idSidebarConfiguration = 'idSidebarConfiguration';
+    this.idSidebarConfiguration = "idSidebarConfiguration";
     this.refImpuesto = React.createRef();
     this.refMoneda = React.createRef();
     this.refAlmacen = React.createRef();
@@ -163,10 +163,10 @@ class PedidoEditar extends CustomComponent {
   */
 
   async componentDidMount() {
-    document.addEventListener('keydown', this.handleDocumentKeyDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
 
     const url = this.props.location.search;
-    const idPedido = new URLSearchParams(url).get('idPedido');
+    const idPedido = new URLSearchParams(url).get("idPedido");
 
     if (isText(idPedido)) {
       this.loadingData(idPedido);
@@ -176,7 +176,7 @@ class PedidoEditar extends CustomComponent {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleDocumentKeyDown);
+    document.removeEventListener("keydown", this.handleDocumentKeyDown);
 
     this.abortController.abort();
 
@@ -596,6 +596,10 @@ class PedidoEditar extends CustomComponent {
     this.setState({ idMoneda: event.target.value });
   };
 
+  handleSelectIdIdAlmacen = (event) => {
+    this.setState({ idAlmacen: event.target.value });
+  };
+
   handleInputObservacion = (event) => {
     this.setState({ observacion: event.target.value });
   };
@@ -948,6 +952,11 @@ class PedidoEditar extends CustomComponent {
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
 
+          almacenes={this.state.almacenes}
+          refAlmacen={this.refAlmacen}
+          idAlmacen={this.state.idAlmacen}
+          handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
+
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
@@ -1026,7 +1035,9 @@ PedidoEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       menus: PropTypes.array.isRequired,
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

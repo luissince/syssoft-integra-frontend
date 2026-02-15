@@ -1,11 +1,11 @@
 import React from 'react';
-import { PosContainerWrapper } from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import { PosContainerWrapper } from '@/components/Container';
+import CustomComponent from '@/components/CustomComponent';
 import {
   isEmpty,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import { ORDEN_DE_COMPRA } from '../../../../../../model/types/tipo-comprobante';
+import { ORDEN_DE_COMPRA } from '@/model/types/tipo-comprobante';
 import {
   comboAlmacen,
   comboComprobante,
@@ -15,28 +15,28 @@ import {
   documentsPdfInvoicesOrdenCompra,
   filtrarAlmacenProducto,
   filtrarPersona,
-} from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
 import ModalProducto from '../component/ModalProducto';
 import {
   SpinnerView,
-} from '../../../../../../components/Spinner';
+} from '@/components/Spinner';
 import {
   clearCrearOrdenCompra,
   setCrearOrdenCompraLocal,
   setCrearOrdenCompraState,
-} from '../../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import {
   ModalImpresion,
   ModalPersona,
-} from '../../../../../../components/MultiModal';
-import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
+} from '@/components/MultiModal';
+import SidebarConfiguration from '@/components/SidebarConfiguration';
 import {
   SERVICIO,
-} from '../../../../../../model/types/tipo-producto';
+} from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import PanelIzquierdo from '../../../component/PanelIzquierdo';
 import PanelDerecho from '../../../component/PanelDerecho';
@@ -99,7 +99,7 @@ class OrdenCompraCrear extends CustomComponent {
       isOpenImpresion: false,
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
     };
 
@@ -895,7 +895,7 @@ class OrdenCompraCrear extends CustomComponent {
               handleLimpiar={this.handleLimpiar}
               handleOpenOptions={this.handleOpenOptions}
               handleOpenModalProducto={this.handleOpenModalProducto}
-              
+
               handleRemoverProducto={this.handleRemoverProducto}
 
               handleGuardar={this.handleGuardar}
@@ -911,7 +911,9 @@ OrdenCompraCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       menus: PropTypes.array.isRequired,
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

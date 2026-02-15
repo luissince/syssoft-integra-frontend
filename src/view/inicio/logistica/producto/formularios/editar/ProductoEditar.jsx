@@ -1,7 +1,7 @@
 import React from 'react';
-import CustomComponent from '../../../../../../model/class/custom-component';
-import ContainerWrapper from '../../../../../../components/Container';
-import { images } from '../../../../../../helper';
+import CustomComponent from '@/components/CustomComponent';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { images } from '@/helper';
 import {
   generateEAN13Code,
   imageBase64,
@@ -9,46 +9,39 @@ import {
   isNumeric,
   isText,
   validateNumericInputs,
-} from '../../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import {
-  comboAlmacen,
   comboMedida,
   comboCategoria,
   getIdProducto,
   updateProducto,
   comboMarca,
-  comboAtributo,
-} from '../../../../../../network/rest/principal.network';
+} from '@/network/rest/principal.network';
 import PropTypes from 'prop-types';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../../model/types/types';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Producto from '../component/Producto';
 import Servicio from '../component/Servicio';
 import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
 import {
-  SERVICIO,
+  NINGUNO,
   UNIDADES,
-} from '../../../../../../model/types/tipo-tratamiento-producto';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import Title from '../../../../../../components/Title';
-import { SpinnerView } from '../../../../../../components/Spinner';
+} from '@/model/types/tipo-tratamiento-producto';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
 import ModalProducto from '../component/ModalProducto';
-import {
-  TIPO_ATRIBUTO_COLOR,
-  TIPO_ATRIBUTO_SABOR,
-  TIPO_ATRIBUTO_TALLA,
-} from '../../../../../../model/types/tipo-atributo';
 import {
   TabContent,
   TabHead,
   TabHeader,
   TabPane,
-} from '../../../../../../components/Tab';
-import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
+} from '@/components/Tab';
+import { COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 
 /**
@@ -65,10 +58,10 @@ class ProductoEditar extends CustomComponent {
 
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       idTipoProducto: PRODUCTO,
-      idProducto: '',
+      idProducto: "",
       imagen: {
         url: images.noImage,
       },
@@ -77,83 +70,71 @@ class ProductoEditar extends CustomComponent {
       activeTabServicio: false,
       activeTabCombo: false,
 
-      lote: false,
       publicar: false,
       negativo: false,
       preferido: false,
       estado: true,
 
       // producto
-      nombreProducto: '',
-      codigoProducto: '',
-      skuProducto: '',
-      codigoBarrasProducto: '',
-      codigoSunatProducto: '0',
+      nombreProducto: "",
+      codigoProducto: "",
+      skuProducto: "",
+      codigoBarrasProducto: "",
 
-      idMedidaProducto: '',
-      idCategoriaProducto: '',
-      idMarcaProducto: '',
+      idMedidaProducto: "",
+      idCategoriaProducto: "",
+      idMarcaProducto: "",
 
       idTipoTratamientoProducto: UNIDADES,
 
-      precioProducto: '',
-      costoProducto: '',
+      precioProducto: "",
+      costoProducto: "",
 
       precios: [],
 
-      descripcionCortaProducto: '',
-      descripcionLargaProducto: '',
+      descripcionCortaProducto: "",
+      descripcionLargaProducto: "",
 
       detallesProducto: [],
       imagenesProducto: [],
-      coloresProducto: [],
-      tallasProducto: [],
-      saboresProducto: [],
 
       // servicio
-      nombreServicio: '',
-      codigoServicio: '',
-      skuServicio: '',
-      codigoBarrasServicio: '',
-      codigoSunatServicio: '0',
+      nombreServicio: "",
+      codigoServicio: "",
+      skuServicio: "",
+      codigoBarrasServicio: "",
 
-      idMedidaServicio: '',
-      idCategoriaServicio: '',
-      idMarcaServicio: '',
+      idMedidaServicio: "",
+      idCategoriaServicio: "",
+      idMarcaServicio: "",
 
-      precioServicio: '',
+      precioServicio: "",
 
-      descripcionCortaServicio: '',
-      descripcionLargaServicio: '',
+      descripcionCortaServicio: "",
+      descripcionLargaServicio: "",
 
       detallesServicio: [],
       imagenesServicio: [],
-      coloresServicio: [],
-      tallasServicio: [],
-      saboresServicio: [],
 
       // combo
-      nombreCombo: '',
-      codigoCombo: '',
-      skuCombo: '',
-      codigoBarrasCombo: '',
-      codigoSunatCombo: '0',
+      nombreCombo: "",
+      codigoCombo: "",
+      skuCombo: "",
+      codigoBarrasCombo: "",
 
-      idMedidaCombo: '',
-      idCategoriaCombo: '',
-      idMarcaCombo: '',
+      idMedidaCombo: "",
+      idCategoriaCombo: "",
+      idMarcaCombo: "",
       combos: [],
 
-      precioCombo: '',
+      precioCombo: "",
 
-      descripcionCortaCombo: '',
-      descripcionLargaCombo: '',
+      descripcionCortaCombo: "",
+      descripcionLargaCombo: "",
 
       detallesCombo: [],
       imagenesCombo: [],
-      coloresCombo: [],
-      tallasCombo: [],
-      saboresCombo: [],
+
 
       // Atributos del modal inventario
       isOpenProducto: false,
@@ -162,12 +143,9 @@ class ProductoEditar extends CustomComponent {
       medidas: [],
       categorias: [],
       marcas: [],
-      colores: [],
-      tallas: [],
-      sabores: [],
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     // producto
@@ -175,7 +153,6 @@ class ProductoEditar extends CustomComponent {
     this.refCodigoProducto = React.createRef();
     this.refSkuProducto = React.createRef();
     this.refCodigoBarrasProducto = React.createRef();
-    this.refCodigoSunatProducto = React.createRef();
 
     this.refIdMedidaProducto = React.createRef();
     this.refIdCategoriaProducto = React.createRef();
@@ -194,7 +171,6 @@ class ProductoEditar extends CustomComponent {
     this.refCodigoServicio = React.createRef();
     this.refSkuServicio = React.createRef();
     this.refCodigoBarrasServicio = React.createRef();
-    this.refCodigoSunatServicio = React.createRef();
 
     this.refIdMedidaServicio = React.createRef();
     this.refIdCategoriaServicio = React.createRef();
@@ -262,14 +238,11 @@ class ProductoEditar extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   loadingData = async (idProducto) => {
-    const [medidas, categorias, marcas, colores, tallas, sabores, producto] =
+    const [medidas, categorias, marcas, producto] =
       await Promise.all([
         this.fetchComboMedida(),
         this.fetchComboCategoria(),
         this.fetchComboMarca(),
-        this.fetchComboColor(TIPO_ATRIBUTO_COLOR),
-        this.fetchComboColor(TIPO_ATRIBUTO_TALLA),
-        this.fetchComboColor(TIPO_ATRIBUTO_SABOR),
         this.fetchProducto(idProducto),
       ]);
 
@@ -284,7 +257,6 @@ class ProductoEditar extends CustomComponent {
         codigoProducto: producto.codigo,
         skuProducto: producto.sku,
         codigoBarrasProducto: producto.codigoBarras,
-        codigoSunatProducto: producto.idCodigoSunat,
         idMedidaProducto: producto.idMedida,
         idCategoriaProducto: producto.idCategoria,
         idMarcaProducto: producto.idMarca,
@@ -293,7 +265,6 @@ class ProductoEditar extends CustomComponent {
         idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
         precioProducto: String(producto.precio),
         costoProducto: String(producto.costo),
-        lote: producto.lote === 1 ? true : false,
         publicar: producto.publicar === 1 ? true : false,
         negativo: producto.negativo === 1 ? true : false,
         preferido: producto.preferido === 1 ? true : false,
@@ -301,9 +272,6 @@ class ProductoEditar extends CustomComponent {
         precios: producto.precios,
         detallesProducto: producto.detalles,
         imagenesProducto: producto.imagenes,
-        coloresProducto: producto.colores,
-        tallasProducto: producto.tallas,
-        saboresProducto: producto.sabores,
       });
     } else if (producto.idTipoProducto === SERVICIO) {
       await this.setStateAsync({
@@ -316,7 +284,6 @@ class ProductoEditar extends CustomComponent {
         codigoServicio: producto.codigo,
         skuServicio: producto.sku,
         codigoBarrasServicio: producto.codigoBarras,
-        codigoSunatServicio: producto.idCodigoSunat,
         idMedidaServicio: producto.idMedida,
         idCategoriaServicio: producto.idCategoria,
         idMarcaServicio: producto.idMarca,
@@ -329,9 +296,6 @@ class ProductoEditar extends CustomComponent {
         estado: producto.estado === 1 ? true : false,
         detallesServicio: producto.detalles,
         imagenesServicio: producto.imagenes,
-        coloresServicio: producto.colores,
-        tallasProducto: producto.tallas,
-        saboresProducto: producto.sabores,
       });
     } else {
       await this.setStateAsync({
@@ -344,7 +308,6 @@ class ProductoEditar extends CustomComponent {
         codigoCombo: producto.codigo,
         skuCombo: producto.sku,
         codigoBarrasCombo: producto.codigoBarras,
-        codigoSunatCombo: producto.idCodigoSunat,
         idMedidaCombo: producto.idMedida,
         idCategoriaCombo: producto.idCategoria,
         idMarcaCombo: producto.idMarca,
@@ -356,9 +319,6 @@ class ProductoEditar extends CustomComponent {
         estado: producto.estado === 1 ? true : false,
         detallesCombo: producto.detalles,
         imagenesCombo: producto.imagenes,
-        coloresCombo: producto.colores,
-        tallasProducto: producto.tallas,
-        saboresProducto: producto.sabores,
       });
     }
 
@@ -366,9 +326,6 @@ class ProductoEditar extends CustomComponent {
       medidas,
       categorias,
       marcas,
-      colores,
-      tallas,
-      sabores,
       imagen: producto.imagen ?? {
         url: images.noImage,
       },
@@ -433,36 +390,6 @@ class ProductoEditar extends CustomComponent {
     }
   }
 
-  async fetchComboAlmacen() {
-    const response = await comboAlmacen(this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchComboColor(id) {
-    const params = {
-      idTipoAtributo: id,
-    };
-    const response = await comboAtributo(params, this.abortController.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
   /*
     |--------------------------------------------------------------------------
     | Método de eventos
@@ -546,12 +473,6 @@ class ProductoEditar extends CustomComponent {
   handleGenerateCodigoBarrasProducto = () => {
     this.setState({
       codigoBarrasProducto: generateEAN13Code(),
-    });
-  };
-
-  handleSelectCodigoSunatProducto = (event) => {
-    this.setState({
-      codigoSunatProducto: event.target.value,
     });
   };
 
@@ -691,63 +612,6 @@ class ProductoEditar extends CustomComponent {
     this.setState({ imagenesProducto: newImgs });
   };
 
-  handleSelectColoresProducto = (color) => {
-    if (
-      this.state.coloresProducto.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      const coloresProducto = this.state.coloresProducto.filter(
-        (item) => item.idAtributo !== color.idAtributo,
-      );
-      this.setState({
-        coloresProducto: coloresProducto,
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresProducto: [...prevState.coloresProducto, color],
-      }));
-    }
-  };
-
-  handleSelectTallasProducto = (talla) => {
-    if (
-      this.state.tallasProducto.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      const tallasProducto = this.state.tallasProducto.filter(
-        (item) => item.idAtributo !== talla.idAtributo,
-      );
-      this.setState({
-        tallasProducto: tallasProducto,
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasProducto: [...prevState.tallasProducto, talla],
-      }));
-    }
-  };
-
-  handleSelectSaboresProducto = (sabor) => {
-    if (
-      this.state.saboresProducto.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      const saboresProducto = this.state.saboresProducto.filter(
-        (item) => item.idAtributo !== sabor.idAtributo,
-      );
-      this.setState({
-        saboresProducto: saboresProducto,
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresProducto: [...prevState.saboresProducto, sabor],
-      }));
-    }
-  };
-
   //------------------------------------------------------------------------------------------
   // Servicio
   //------------------------------------------------------------------------------------------
@@ -779,12 +643,6 @@ class ProductoEditar extends CustomComponent {
   handleGenerateCodigoBarrasServicio = () => {
     this.setState({
       codigoBarrasServicio: generateEAN13Code(),
-    });
-  };
-
-  handleSelectCodigoSunatServicio = (event) => {
-    this.setState({
-      codigoSunatServicio: event.target.value,
     });
   };
 
@@ -872,62 +730,6 @@ class ProductoEditar extends CustomComponent {
     this.setState({ imagenesServicio: newImgs });
   };
 
-  handleSelectColoresServicio = (color) => {
-    if (
-      this.state.coloresServicio.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      const coloresServicio = this.state.coloresServicio.filter(
-        (item) => item.idAtributo !== color.idAtributo,
-      );
-      this.setState({
-        coloresServicio: coloresServicio,
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresServicio: [...prevState.coloresServicio, color],
-      }));
-    }
-  };
-
-  handleSelectTallasServicio = (talla) => {
-    if (
-      this.state.tallasServicio.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      const tallasServicio = this.state.tallasServicio.filter(
-        (item) => item.idAtributo !== talla.idAtributo,
-      );
-      this.setState({
-        tallasServicio: tallasServicio,
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasServicio: [...prevState.tallasServicio, talla],
-      }));
-    }
-  };
-
-  handleSelectSaboresServicio = (sabor) => {
-    if (
-      this.state.saboresServicio.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      const saboresServicio = this.state.saboresServicio.filter(
-        (item) => item.idAtributo !== sabor.idAtributo,
-      );
-      this.setState({
-        saboresServicio: saboresServicio,
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresServicio: [...prevState.saboresServicio, sabor],
-      }));
-    }
-  };
 
   //------------------------------------------------------------------------------------------
   // Combo
@@ -960,12 +762,6 @@ class ProductoEditar extends CustomComponent {
   handleGenerateCodigoBarrasCombo = () => {
     this.setState({
       codigoBarrasCombo: generateEAN13Code(),
-    });
-  };
-
-  handleSelectCodigoSunatCombo = (event) => {
-    this.setState({
-      codigoSunatCombo: event.target.value,
     });
   };
 
@@ -1053,63 +849,6 @@ class ProductoEditar extends CustomComponent {
     this.setState({ imagenesCombo: newImgs });
   };
 
-  handleSelectColoresCombo = (color) => {
-    if (
-      this.state.coloresCombo.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      const coloresCombo = this.state.coloresCombo.filter(
-        (item) => item.idAtributo !== color.idAtributo,
-      );
-      this.setState({
-        coloresCombo: coloresCombo,
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresCombo: [...prevState.coloresCombo, color],
-      }));
-    }
-  };
-
-  handleSelectTallasCombo = (talla) => {
-    if (
-      this.state.tallasCombo.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      const tallasCombo = this.state.tallasCombo.filter(
-        (item) => item.idAtributo !== talla.idAtributo,
-      );
-      this.setState({
-        tallasCombo: tallasCombo,
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasCombo: [...prevState.tallasCombo, talla],
-      }));
-    }
-  };
-
-  handleSelectSaboresCombo = (sabor) => {
-    if (
-      this.state.saboresCombo.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      const saboresCombo = this.state.saboresCombo.filter(
-        (item) => item.idAtributo !== sabor.idAtributo,
-      );
-      this.setState({
-        saboresCombo: saboresCombo,
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresCombo: [...prevState.saboresCombo, sabor],
-      }));
-    }
-  };
-
   //------------------------------------------------------------------------------------------
   // Detalle general
   //------------------------------------------------------------------------------------------
@@ -1121,6 +860,15 @@ class ProductoEditar extends CustomComponent {
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
+
+      if (!logoSend) {
+        alertKit.warning({
+          title: 'Producto',
+          message: 'La imagen a subir no es válida.',
+        });
+        return;
+      }
+
       if (logoSend.size > 500) {
         alertKit.warning({
           title: 'Producto',
@@ -1163,11 +911,6 @@ class ProductoEditar extends CustomComponent {
     });
   };
 
-  handleSelectLote = (event) => {
-    this.setState({
-      lote: event.target.checked,
-    });
-  };
 
   handleSelectEstado = (event) => {
     this.setState({
@@ -1192,80 +935,62 @@ class ProductoEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleSaveProducto = async () => {
     if (isEmpty(this.state.nombreProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el nombre del producto.',
-        },
-        () => {
-          this.refNombreProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el nombre del producto.',
+      }, () => {
+        this.refNombreProducto.current.focus();
+      },);
       return;
     }
 
     if (isEmpty(this.state.codigoProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el código del producto.',
-        },
-        () => {
-          this.refCodigoProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el código del producto.',
+      }, () => {
+        this.refCodigoProducto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMedidaProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Seleccione la medida.',
-        },
-        () => {
-          this.refIdMedidaProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Seleccione la medida.',
+      }, () => {
+        this.refIdMedidaProducto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idCategoriaProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Seleccione la categoría.',
-        },
-        () => {
-          this.refIdCategoriaProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Seleccione la categoría.',
+      }, () => {
+        this.refIdCategoriaProducto.current.focus();
+      });
       return;
     }
 
     if (!isNumeric(this.state.precioProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el precio.',
-        },
-        () => {
-          this.refPrecioProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el precio.',
+      }, () => {
+        this.refPrecioProducto.current.focus();
+      });
       return;
     }
 
     if (!isNumeric(this.state.costoProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el costo.',
-        },
-        () => {
-          this.refCostoProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Ingrese el costo.',
+      }, () => {
+        this.refCostoProducto.current.focus();
+      });
       return;
     }
 
@@ -1273,15 +998,12 @@ class ProductoEditar extends CustomComponent {
       parseFloat(this.state.precioProducto) <=
       parseFloat(this.state.costoProducto)
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'El costo no debe ser mayor o igual al precio.',
-        },
-        () => {
-          this.refCostoProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'El costo no debe ser mayor o igual al precio.',
+      }, () => {
+        this.refCostoProducto.current.focus();
+      });
       return;
     }
 
@@ -1289,15 +1011,12 @@ class ProductoEditar extends CustomComponent {
       this.state.detallesProducto.filter((item) => isEmpty(item.nombre))
         .length !== 0
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Hay detalle sin nombre..',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesProducto, 'string');
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Hay detalle sin nombre..',
+      }, () => {
+        validateNumericInputs(this.refDetallesProducto, 'string');
+      });
       return;
     }
 
@@ -1305,15 +1024,12 @@ class ProductoEditar extends CustomComponent {
       this.state.detallesProducto.filter((item) => isEmpty(item.valor))
         .length !== 0
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Hay detalle sin valor.',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesProducto);
-        },
-      );
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Hay detalle sin valor.',
+      }, () => {
+        validateNumericInputs(this.refDetallesProducto);
+      });
       return;
     }
 
@@ -1335,7 +1051,6 @@ class ProductoEditar extends CustomComponent {
         codigo: this.state.codigoProducto,
         sku: this.state.skuProducto,
         codigoBarras: this.state.codigoBarrasProducto,
-        idCodigoSunat: this.state.codigoSunatProducto,
         idMedida: this.state.idMedidaProducto,
         idCategoria: this.state.idCategoriaProducto,
         idMarca: this.state.idMarcaProducto,
@@ -1345,7 +1060,6 @@ class ProductoEditar extends CustomComponent {
         costo: this.state.costoProducto,
         precio: this.state.precioProducto,
         precios: this.state.precios,
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: this.state.negativo,
         preferido: this.state.preferido,
@@ -1353,9 +1067,6 @@ class ProductoEditar extends CustomComponent {
 
         detalles: this.state.detallesProducto,
         imagenes: this.state.imagenesProducto,
-        colores: this.state.coloresProducto,
-        tallas: this.state.tallasProducto,
-        sabores: this.state.saboresProducto,
 
         imagen: this.state.imagen,
 
@@ -1364,15 +1075,12 @@ class ProductoEditar extends CustomComponent {
 
       const response = await updateProducto(data);
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Producto',
-            message: response.data,
-          },
-          () => {
-            this.props.history.goBack();
-          },
-        );
+        alertKit.success({
+          title: 'Producto',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -1386,67 +1094,52 @@ class ProductoEditar extends CustomComponent {
 
   handleSaveServicio = async () => {
     if (isEmpty(this.state.nombreServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el nombre del servicio.',
-        },
-        () => {
-          this.refNombreServicio.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el nombre del servicio.',
+      }, () => {
+        this.refNombreServicio.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.codigoServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el código del servicio.',
-        },
-        () => {
-          this.refCodigoServicio.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el código del servicio.',
+      }, () => {
+        this.refCodigoServicio.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMedidaServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Seleccione la medida.',
-        },
-        () => {
-          this.refIdMedidaServicio.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Seleccione la medida.',
+      }, () => {
+        this.refIdMedidaServicio.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idCategoriaServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Seleccione la categoría.',
-        },
-        () => {
-          this.refIdCategoriaServicio.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Seleccione la categoría.',
+      }, () => {
+        this.refIdCategoriaServicio.current.focus();
+      });
       return;
     }
 
     if (!isNumeric(this.state.precioServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el precio.',
-        },
-        () => {
-          this.refPrecioServicio.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el precio.',
+      }, () => {
+        this.refPrecioServicio.current.focus();
+      });
       return;
     }
 
@@ -1454,15 +1147,12 @@ class ProductoEditar extends CustomComponent {
       this.state.detallesServicio.filter((item) => isEmpty(item.nombre))
         .length !== 0
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Hay detalle sin nombre..',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesServicio, 'string');
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Hay detalle sin nombre..',
+      }, () => {
+        validateNumericInputs(this.refDetallesServicio, 'string');
+      });
       return;
     }
 
@@ -1470,25 +1160,21 @@ class ProductoEditar extends CustomComponent {
       this.state.detallesServicio.filter((item) => isEmpty(item.valor))
         .length !== 0
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Hay detalle sin valor.',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesServicio);
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Hay detalle sin valor.',
+      }, () => {
+        validateNumericInputs(this.refDetallesServicio);
+      });
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Producto - Servicio',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
-        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
-      });
+    const accept = await alertKit.question({
+      title: 'Producto - Servicio',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
     if (accept) {
       alertKit.loading({
@@ -1501,17 +1187,15 @@ class ProductoEditar extends CustomComponent {
         codigo: this.state.codigoServicio,
         sku: this.state.skuServicio,
         codigoBarras: this.state.codigoBarrasServicio,
-        idCodigoSunat: this.state.codigoSunatServicio,
         idMedida: this.state.idMedidaServicio,
         idCategoria: this.state.idCategoriaServicio,
         idMarca: this.state.idMarcaServicio,
         descripcionCorta: this.state.descripcionCortaServicio,
         descripcionLarga: this.state.descripcionLargaServicio,
-        idTipoTratamientoProducto: SERVICIO,
+        idTipoTratamientoProducto: NINGUNO,
         costo: 0,
         precio: this.state.precioServicio,
         precios: [],
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: false,
         preferido: this.state.preferido,
@@ -1519,9 +1203,6 @@ class ProductoEditar extends CustomComponent {
 
         detalles: this.state.detallesServicio,
         imagenes: this.state.imagenesServicio,
-        colores: this.state.coloresServicio,
-        tallas: this.state.tallasServicio,
-        sabores: this.state.saboresServicio,
 
         imagen: this.state.imagen,
 
@@ -1530,15 +1211,12 @@ class ProductoEditar extends CustomComponent {
 
       const response = await updateProducto(data);
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Producto - Servicio',
-            message: response.getMessage(),
-          },
-          () => {
-            this.props.history.goBack();
-          },
-        );
+        alertKit.success({
+          title: 'Producto - Servicio',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -1552,67 +1230,52 @@ class ProductoEditar extends CustomComponent {
 
   handleSaveCombo = async () => {
     if (isEmpty(this.state.nombreCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Ingrese el nombre del combo.',
-        },
-        () => {
-          this.refNombreCombo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Ingrese el nombre del combo.',
+      }, () => {
+        this.refNombreCombo.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.codigoCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el código del combo.',
-        },
-        () => {
-          this.refCodigoCombo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Servicio',
+        message: 'Ingrese el código del combo.',
+      }, () => {
+        this.refCodigoCombo.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMedidaCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Seleccione la medida.',
-        },
-        () => {
-          this.refIdMedidaCombo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Seleccione la medida.',
+      }, () => {
+        this.refIdMedidaCombo.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idCategoriaCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Seleccione la categoría.',
-        },
-        () => {
-          this.refIdCategoriaCombo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Seleccione la categoría.',
+      }, () => {
+        this.refIdCategoriaCombo.current.focus();
+      });
       return;
     }
 
     if (!isNumeric(this.state.precioCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Ingrese el precio.',
-        },
-        () => {
-          this.refPrecioCombo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Ingrese el precio.',
+      }, () => {
+        this.refPrecioCombo.current.focus();
+      });
       return;
     }
 
@@ -1620,15 +1283,12 @@ class ProductoEditar extends CustomComponent {
       this.state.detallesCombo.filter((item) => isEmpty(item.nombre)).length !==
       0
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Hay detalle sin nombre..',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesCombo, 'string');
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Hay detalle sin nombre..',
+      }, () => {
+        validateNumericInputs(this.refDetallesCombo, 'string');
+      });
       return;
     }
 
@@ -1636,15 +1296,12 @@ class ProductoEditar extends CustomComponent {
       this.state.detallesCombo.filter((item) => isEmpty(item.valor)).length !==
       0
     ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Hay detalle sin valor.',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesCombo);
-        },
-      );
+      alertKit.warning({
+        title: 'Producto - Combo',
+        message: 'Hay detalle sin valor.',
+      }, () => {
+        validateNumericInputs(this.refDetallesCombo);
+      });
       return;
     }
 
@@ -1664,7 +1321,6 @@ class ProductoEditar extends CustomComponent {
         codigo: this.state.codigoCombo,
         sku: this.state.skuCombo,
         codigoBarras: this.state.codigoBarrasCombo,
-        idCodigoSunat: this.state.codigoSunatCombo,
         idMedida: this.state.idMedidaCombo,
         idCategoria: this.state.idCategoriaCombo,
         idMarca: this.state.idMarcaCombo,
@@ -1676,7 +1332,6 @@ class ProductoEditar extends CustomComponent {
         precios: [],
         combos: [],
         inventarios: [],
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: false,
         preferido: this.state.preferido,
@@ -1684,9 +1339,6 @@ class ProductoEditar extends CustomComponent {
 
         detalles: this.state.detallesCombo,
         imagenes: this.state.imagenesCombo,
-        colores: this.state.coloresCombo,
-        tallas: this.state.tallasCombo,
-        sabores: this.state.saboresCombo,
 
         imagen: this.state.imagen,
 
@@ -1696,15 +1348,12 @@ class ProductoEditar extends CustomComponent {
       const response = await updateProducto(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Producto - Combo',
-            message: response.getMessage(),
-          },
-          () => {
-            this.props.history.goBack();
-          },
-        );
+        alertKit.success({
+          title: 'Producto - Combo',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        },);
       }
 
       if (response instanceof ErrorResponse) {
@@ -1763,7 +1412,6 @@ class ProductoEditar extends CustomComponent {
       codigoProducto,
       skuProducto,
       codigoBarrasProducto,
-      codigoSunatProducto,
     } = this.state;
 
     const {
@@ -1783,7 +1431,6 @@ class ProductoEditar extends CustomComponent {
       codigoServicio,
       skuServicio,
       codigoBarrasServicio,
-      codigoSunatServicio,
     } = this.state;
 
     const {
@@ -1801,7 +1448,6 @@ class ProductoEditar extends CustomComponent {
       codigoCombo,
       skuCombo,
       codigoBarrasCombo,
-      codigoSunatCombo,
     } = this.state;
 
     const {
@@ -1818,7 +1464,6 @@ class ProductoEditar extends CustomComponent {
       medidas,
       categorias,
       marcas,
-      lote,
       publicar,
       negativo,
       preferido,
@@ -1830,14 +1475,6 @@ class ProductoEditar extends CustomComponent {
     const { detallesProducto, detallesServicio, detallesCombo } = this.state;
 
     const { imagenesProducto, imagenesServicio, imagenesCombo } = this.state;
-
-    const { colores, coloresProducto, coloresServicio, coloresCombo } =
-      this.state;
-
-    const { tallas, tallasProducto, tallasServicio, tallasCombo } = this.state;
-
-    const { sabores, saboresProducto, saboresServicio, saboresCombo } =
-      this.state;
 
     const nombre =
       idTipoProducto === PRODUCTO
@@ -1928,11 +1565,7 @@ class ProductoEditar extends CustomComponent {
                       handleGenerateCodigoBarras={
                         this.handleGenerateCodigoBarrasProducto
                       }
-                      codigoSunat={codigoSunatProducto}
-                      refCodigoSunat={this.refCodigoSunatProducto}
-                      handleSelectCodigoSunat={
-                        this.handleSelectCodigoSunatProducto
-                      }
+
                       idMedida={idMedidaProducto}
                       refIdMedida={this.refIdMedidaProducto}
                       handleSelectIdMedida={this.handleSelectIdMedidaProducto}
@@ -1994,15 +1627,6 @@ class ProductoEditar extends CustomComponent {
                       imagenes={imagenesProducto}
                       handleSelectImagenes={this.handleSelectImagenesProducto}
                       handleRemoveImagenes={this.handleRemoveImagenesProducto}
-                      colores={colores}
-                      coloresSeleccionados={coloresProducto}
-                      handleSelectColores={this.handleSelectColoresProducto}
-                      tallas={tallas}
-                      tallasSeleccionados={tallasProducto}
-                      handleSelectTallas={this.handleSelectTallasProducto}
-                      sabores={sabores}
-                      saboresSeleccionados={saboresProducto}
-                      handleSelectSabores={this.handleSelectSaboresProducto}
                     />
                   </TabPane>
 
@@ -2028,11 +1652,7 @@ class ProductoEditar extends CustomComponent {
                       handleGenerateCodigoBarras={
                         this.handleGenerateCodigoBarrasServicio
                       }
-                      codigoSunat={codigoSunatServicio}
-                      refCodigoSunat={this.refCodigoSunatServicio}
-                      handleSelectCodigoSunat={
-                        this.handleSelectCodigoSunatServicio
-                      }
+
                       idMedida={idMedidaServicio}
                       refIdMedida={this.refIdMedidaServicio}
                       handleSelectIdMedida={this.handleSelectIdMedidaServicio}
@@ -2073,15 +1693,6 @@ class ProductoEditar extends CustomComponent {
                       imagenes={imagenesServicio}
                       handleSelectImagenes={this.handleSelectImagenesServicio}
                       handleRemoveImagenes={this.handleRemoveImagenesServicio}
-                      colores={colores}
-                      coloresSeleccionados={coloresServicio}
-                      handleSelectColores={this.handleSelectColoresServicio}
-                      tallas={tallas}
-                      tallasSeleccionados={tallasServicio}
-                      handleSelectTallas={this.handleSelectTallasServicio}
-                      sabores={sabores}
-                      saboresSeleccionados={saboresServicio}
-                      handleSelectSabores={this.handleSelectSaboresServicio}
                     />
                   </TabPane>
 
@@ -2104,11 +1715,7 @@ class ProductoEditar extends CustomComponent {
                       handleGenerateCodigoBarras={
                         this.handleGenerateCodigoBarrasCombo
                       }
-                      codigoSunat={codigoSunatCombo}
-                      refCodigoSunat={this.refCodigoSunatCombo}
-                      handleSelectCodigoSunat={
-                        this.handleSelectCodigoSunatCombo
-                      }
+
                       idMedida={idMedidaCombo}
                       refIdMedida={this.refIdMedidaCombo}
                       handleSelectIdMedida={this.handleSelectIdMedidaCombo}
@@ -2157,15 +1764,6 @@ class ProductoEditar extends CustomComponent {
                       imagenes={imagenesCombo}
                       handleSelectImagenes={this.handleSelectImagenesCombo}
                       handleRemoveImagenes={this.handleRemoveImagenesCombo}
-                      colores={colores}
-                      coloresSeleccionados={coloresCombo}
-                      handleSelectColores={this.handleSelectColoresCombo}
-                      tallas={tallas}
-                      tallasSeleccionados={tallasCombo}
-                      handleSelectTallas={this.handleSelectTallasCombo}
-                      sabores={sabores}
-                      saboresSeleccionados={saboresCombo}
-                      handleSelectSabores={this.handleSelectSaboresCombo}
                     />
                   </TabPane>
                 </TabContent>
@@ -2176,21 +1774,26 @@ class ProductoEditar extends CustomComponent {
           <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
             <DetalleImagen
               idTipoProducto={idTipoProducto}
+
               imagen={imagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
+
               nombre={nombre}
               precio={precio}
-              lote={lote}
-              handleSelectLote={this.handleSelectLote}
+
               publicar={publicar}
               handleSelectPublico={this.handleSelectPublico}
+
               negativo={negativo}
               handleSelectNegativo={this.handleSelectNegativo}
+
               preferido={preferido}
               handleSelectPreferido={this.handleSelectPreferido}
+
               estado={estado}
               handleSelectEstado={this.handleSelectEstado}
+
               handleRegistrar={this.handleRegistrar}
               handleCerrar={this.handleCerrar}
             />
@@ -2214,7 +1817,9 @@ const mapStateToProps = (state) => {
 ProductoEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
   }),
   history: PropTypes.shape({

@@ -1,21 +1,17 @@
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   deleteVehiculo,
   listVehiculo,
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import Title from '../../../../components/Title';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
@@ -31,13 +27,14 @@ import {
 } from '../../../../components/Table';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class Vehiculo extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -53,7 +50,7 @@ class Vehiculo extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.idCodigo = '';
@@ -159,38 +156,53 @@ class Vehiculo extends CustomComponent {
     });
   };
 
-  handleBorrar(id) {
-    alertDialog(
-      'Vehículo',
-      '¿Estás seguro de eliminar el vehículo?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Vehículo', 'Procesando información...');
-
-          const params = {
-            idVehiculo: id,
-          };
-
-          const response = await deleteVehiculo(params);
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Vehículo', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Vehículo', response.getMessage());
-          }
-        }
+  async handleAnular(id) {
+    const accept = await alertKit.question({
+      title: "Vehículo",
+      message: "¿Estás seguro de anular el vehículo?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información..."
+      });
+
+      const params = {
+        idVehiculo: id,
+      };
+
+      const response = await deleteVehiculo(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: "Vehículo",
+          message: response.data,
+          onClose: () => {
+            this.loadInit();
+          }
+        })
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: "Vehículo",
+          message: response.getMessage()
+        })
+      }
+    }
   }
 
   generarBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -214,18 +226,16 @@ class Vehiculo extends CustomComponent {
           <TableCell>{item.numeroPlaca}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.preferido == 1 ? 'badge-info' : 'badge-secondary'
-              }`}
+              className={`badge ${item.preferido == 1 ? 'badge-info' : 'badge-secondary'
+                }`}
             >
               {item.preferido === 1 ? 'SI' : 'NO'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -242,7 +252,7 @@ class Vehiculo extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
-              onClick={() => this.handleBorrar(item.idVehiculo)}
+              onClick={() => this.handleAnular(item.idVehiculo)}
             >
               <i className="bi bi-trash"></i>
             </Button>

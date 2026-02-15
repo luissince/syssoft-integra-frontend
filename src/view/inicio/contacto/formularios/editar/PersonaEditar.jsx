@@ -7,74 +7,73 @@ import {
   isText,
   isEmpty,
   text,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import ContainerWrapper from '../../../../../components/Container';
-import { images } from '../../../../../helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { images } from '@/helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
-  editPersona,
-  getIdPersona,
+  updatePersona,
+  getPersona,
   getUbigeo,
   comboTipoDocumento,
-} from '../../../../../network/rest/principal.network';
-import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
-import SearchInput from '../../../../../components/SearchInput';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import Button from '../../../../../components/Button';
-import Select from '../../../../../components/Select';
-import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
-import CheckBox, { Switches } from '../../../../../components/Checks';
-import { RUC } from '../../../../../model/types/tipo-documento';
+} from '@/network/rest/principal.network';
+import { getDni, getRuc } from '@/network/rest/apisperu.network';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
+import SearchInput from '@/components/SearchInput';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import CheckBox, { Switches } from '@/components/Checks';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PersonaEditar extends CustomComponent {
+
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idPersona: '',
-      idTipoDocumento: '',
-      documento: '',
-      informacion: '',
+      idPersona: "",
+      idTipoDocumento: "",
+      documento: "",
+      informacion: "",
       cliente: true,
       proveedor: false,
       conductor: false,
-      licenciaConductir: '',
-      telefono: '',
-      celular: '',
+      licenciaConductir: "",
+      personal: false,
+      telefono: "",
+      celular: "",
       fechaNacimiento: currentDate(),
-      email: '',
-      clave: '',
-      genero: '',
-      direccion: '',
-      idUbigeo: '',
+      email: "",
+      clave: "",
+      genero: "",
+      direccion: "",
+      idUbigeo: "",
 
-      estadoCivil: '',
+      estadoCivil: "",
       estado: true,
-      observacion: '',
-
-      // otros datos
-      idUsuario: this.props.token.userToken.idUsuario,
+      observacion: "",
 
       tiposDocumentos: [],
 
       ubigeos: [],
+
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refTipoDocumento = React.createRef();
@@ -95,7 +94,7 @@ class PersonaEditar extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idPersona = new URLSearchParams(url).get('idPersona');
+    const idPersona = new URLSearchParams(url).get("idPersona");
     if (isText(idPersona)) {
       this.loadingDataId(idPersona);
     } else {
@@ -112,10 +111,7 @@ class PersonaEditar extends CustomComponent {
       idPersona: id,
     };
 
-    const [responseListaTipoDocumento, responsePersona] = await Promise.all([
-      comboTipoDocumento(this.abortController.signal),
-      getIdPersona(params, this.abortController.signal),
-    ]);
+    const responseListaTipoDocumento = await comboTipoDocumento(this.abortController.signal);
 
     if (responseListaTipoDocumento instanceof ErrorResponse) {
       if (responseListaTipoDocumento.getType() === CANCELED) return;
@@ -125,6 +121,8 @@ class PersonaEditar extends CustomComponent {
       });
       return;
     }
+
+    const responsePersona = await getPersona(params, this.abortController.signal);
 
     if (responsePersona instanceof ErrorResponse) {
       if (responsePersona.getType() === CANCELED) return;
@@ -147,6 +145,7 @@ class PersonaEditar extends CustomComponent {
       proveedor: cliente.proveedor === 1 ? true : false,
       conductor: cliente.conductor === 1 ? true : false,
       licenciaConductir: text(cliente.licenciaConducir),
+      personal: cliente.personal === 1 ? true : false,
       telefono: text(cliente.telefono),
       celular: text(cliente.celular),
       fechaNacimiento: text(cliente.fechaNacimiento),
@@ -213,7 +212,7 @@ class PersonaEditar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
-  handleInputClave = () => {
+  handleInputClave = (event) => {
     this.setState({ clave: event.target.value });
   };
 
@@ -231,7 +230,7 @@ class PersonaEditar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número dni debe tener 8 caracteres.",
       }, () => {
-        this.refNumeroDocumento.current.focus();
+        this.refDocumento.current.focus();
       })
       return;
     }
@@ -276,7 +275,7 @@ class PersonaEditar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
       }, () => {
-        this.refNumeroDocumento.current.focus();
+        this.refDocumento.current.focus();
       });
       return;
     }
@@ -438,6 +437,7 @@ class PersonaEditar extends CustomComponent {
         proveedor: this.state.proveedor,
         conductor: this.state.conductor,
         licenciaConducir: this.state.licenciaConductir,
+        personal: this.state.personal,
         telefono: this.state.telefono.toString().trim().toUpperCase(),
         celular: this.state.celular.toString().trim().toUpperCase(),
         fechaNacimiento:
@@ -457,7 +457,7 @@ class PersonaEditar extends CustomComponent {
         message: 'Procesando información...',
       });
 
-      const response = await editPersona(data);
+      const response = await updatePersona(data);
       if (response instanceof SuccessReponse) {
         alertKit.success({
           title: "Persona",
@@ -604,11 +604,15 @@ class PersonaEditar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column formGroup={true}>
+          <Column>
             <label>
               Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
             </label>
+          </Column>
+        </Row>
 
+        <Row>
+          <Column className="col-md-3 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnCliente"
               checked={this.state.cliente}
@@ -618,7 +622,9 @@ class PersonaEditar extends CustomComponent {
             >
               Cliente
             </CheckBox>
+          </Column>
 
+          <Column className="col-md-3 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnProveedor"
               checked={this.state.proveedor}
@@ -628,7 +634,9 @@ class PersonaEditar extends CustomComponent {
             >
               Proveedor
             </CheckBox>
+          </Column>
 
+          <Column className="col-md-3 col-12" formGroup={true}>
             <CheckBox
               id="checkboxPnConductor"
               checked={this.state.conductor}
@@ -638,22 +646,34 @@ class PersonaEditar extends CustomComponent {
             >
               Conductor
             </CheckBox>
-            {this.state.conductor && (
-              <Row>
-                <Column>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Número de licencia de conducir"
-                    ref={this.refLicenciaConducir}
-                    value={this.state.licenciaConductir}
-                    onChange={(event) => {
-                      this.setState({ licenciaConductir: event.target.value });
-                    }}
-                  />
-                </Column>
-              </Row>
-            )}
+            {
+              this.state.conductor && (
+                <Row>
+                  <Column>
+                    <Input
+                      placeholder="Número de licencia de conducir"
+                      ref={this.refLicenciaConducir}
+                      value={this.state.licenciaConductir}
+                      onChange={(event) => {
+                        this.setState({ licenciaConductir: event.target.value });
+                      }}
+                    />
+                  </Column>
+                </Row>
+              )
+            }
+          </Column>
+
+          <Column className="col-md-3 col-12" formGroup={true}>
+            <CheckBox
+              id="checkboxPnPersonal"
+              checked={this.state.personal}
+              onChange={(event) => {
+                this.setState({ personal: event.target.checked });
+              }}
+            >
+              Personal
+            </CheckBox>
           </Column>
         </Row>
 
@@ -829,7 +849,9 @@ class PersonaEditar extends CustomComponent {
 PersonaEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

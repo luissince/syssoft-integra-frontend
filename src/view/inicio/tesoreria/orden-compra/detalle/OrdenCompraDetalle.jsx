@@ -1,7 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   formatNumberWithZeros,
@@ -12,7 +11,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import {
   detailOrdenCompra,
   documentsPdfInvoicesOrdenCompra,
@@ -37,6 +36,7 @@ import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -132,8 +132,12 @@ class OrdenCompraDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Orden de Compra', response.getMessage(), () => {
-        this.close();
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: response.getMessage(),
+        onClose: () => {
+          this.close();
+        },
       });
       return;
     }
@@ -517,12 +521,14 @@ class OrdenCompraDetalle extends CustomComponent {
                     <TableRow key={index}>
                       <TableCell>{item.id}</TableCell>
                       <TableCell className="text-center">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.producto}
-                          width={100}
-                        />
+                        <div className="max-w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>
                         {item.codigo}

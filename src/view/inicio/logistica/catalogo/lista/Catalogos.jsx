@@ -4,11 +4,11 @@ import {
   formatTime,
   isEmpty,
 } from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { listCatalogo } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -63,7 +63,7 @@ class Catalogos extends CustomComponent {
       messageTable: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -318,7 +318,7 @@ class Catalogos extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="5"
+          colSpan={5}
           message="Cargando información de la tabla..."
         />
       );
@@ -470,7 +470,9 @@ class Catalogos extends CustomComponent {
 Catalogos.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

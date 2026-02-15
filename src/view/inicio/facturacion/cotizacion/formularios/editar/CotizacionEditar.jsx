@@ -24,7 +24,7 @@ import {
 } from '@/network/rest/principal.network';
 import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
-import { CANCELED } from '@/model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import PropTypes from 'prop-types';
 import {
   SpinnerView,
@@ -106,8 +106,8 @@ class CotizacionEditar extends CustomComponent {
       messagePreImpresion: '',
 
       // Id principales
-      idUsuario: this.props.token.userToken.idUsuario,
       idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     // Referencia principales
@@ -1071,7 +1071,9 @@ CotizacionEditar.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
       menus: PropTypes.array.isRequired,
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

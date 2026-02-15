@@ -1,20 +1,18 @@
 import PropTypes from 'prop-types';
 import {
-  alertDialog,
   formatTime,
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
 import {
-  deleteConsulta,
   listConsultas,
 } from '../../../../../network/rest/principal.network';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
@@ -35,7 +33,6 @@ import {
   setListaConsultaPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
-import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -58,7 +55,7 @@ class Consultas extends CustomComponent {
       messageTable: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -172,19 +169,16 @@ class Consultas extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -199,62 +193,11 @@ class Consultas extends CustomComponent {
     }
   };
 
-  handleEditar = (idConsulta) => {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/editar`,
-      search: '?idConsulta=' + idConsulta,
-    });
-  };
-
-  handleDetalle = (idConsulta) => {
-    this.props.history.push({
-      pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idConsulta=' + idConsulta,
-    });
-  };
-
-  handleBorrar = async (idConsulta) => {
-    const accept = await alertKit.question(
-      {
-        title: 'Consulta',
-        message: '¿Estás seguro de eliminar la consulta?',
-        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
-        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
-      });
-
-    if (accept) {
-      alertKit.loading({
-        message: 'Procesando información...',
-      });
-
-      const response = await deleteConsulta(idConsulta);
-
-      if (response instanceof SuccessReponse) {
-        alertKit.success({
-          title: 'Consulta',
-          message: response.data,
-          onClose: () => {
-            this.loadingInit();
-          },
-        });
-      }
-
-      if (response instanceof ErrorResponse) {
-        if (response.getType() === CANCELED) return;
-
-        alertKit.warning({
-          title: 'Consulta',
-          message: response.getMessage(),
-        });
-      }
-    }
-  };
-
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={6}
           message={'Cargando información de la tabla...'}
         />
       );
@@ -263,7 +206,7 @@ class Consultas extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan="9">¡No hay datos registrados!</TableCell>
+          <TableCell colSpan={6}>¡No hay datos registrados!</TableCell>
         </TableRow>
       );
     }
@@ -288,35 +231,6 @@ class Consultas extends CustomComponent {
             {item.email.toUpperCase()} <br /> {item.celular}{' '}
           </TableCell>
           <TableCell>{estado}</TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-info btn-sm"
-              onClick={() => this.handleDetalle(item.idConsulta)}
-            // disabled={!this.state.view}
-            >
-              <i className="fa fa-eye"></i>
-            </Button>
-          </TableCell>
-
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-warning btn-sm"
-              onClick={() => this.handleEditar(item.idConsulta)}
-            // disabled={!this.state.edit}
-            >
-              <i className="bi bi-pencil"></i>
-            </Button>
-          </TableCell>
-
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
-              onClick={() => this.handleBorrar(item.idConsulta)}
-            // disabled={!this.state.remove}
-            >
-              <i className="bi bi-trash"></i>
-            </Button>
-          </TableCell>
         </TableRow>
       );
     });
@@ -360,24 +274,12 @@ class Consultas extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Fecha</TableHead>
                     <TableHead width="15%">Persona</TableHead>
                     <TableHead width="20%">Asunto</TableHead>
                     <TableHead width="20%">Contacto</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">
-                      {' '}
-                      Detalle{' '}
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Editar{' '}
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Eliminar
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>{this.generateBody()}</TableBody>
@@ -403,7 +305,9 @@ class Consultas extends CustomComponent {
 Consultas.propTypes = {
   token: PropTypes.shape({
     project: PropTypes.shape({
-      idSucursal: PropTypes.string,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string,
+      }),
     }),
     userToken: PropTypes.shape({
       idUsuario: PropTypes.string,

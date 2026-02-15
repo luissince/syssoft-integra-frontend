@@ -1,9 +1,9 @@
-import Button from '../../../../../../components/Button';
-import Column from '../../../../../../components/Column';
-import Input from '../../../../../../components/Input';
-import RadioButton from '../../../../../../components/RadioButton';
-import Row from '../../../../../../components/Row';
-import Select, { SelectActive } from '../../../../../../components/Select';
+import Button from '@/components/Button';
+import Column from '@/components/Column';
+import Input from '@/components/Input';
+import RadioButton from '@/components/RadioButton';
+import Row from '@/components/Row';
+import Select from '@/components/Select';
 import {
   Table,
   TableBody,
@@ -12,14 +12,14 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../../components/Table';
-import TextArea from '../../../../../../components/TextArea';
-import { keyNumberFloat } from '../../../../../../helper/utils.helper';
+} from '@/components/Table';
+import TextArea from '@/components/TextArea';
+import { keyNumberFloat } from '@/helper/utils.helper';
 import {
   A_GRANEL,
   UNIDADES,
   VALOR_MONETARIO,
-} from '../../../../../../model/types/tipo-tratamiento-producto';
+} from '@/model/types/tipo-tratamiento-producto';
 import ItemAlmacen from './ItemAlmacen';
 import PropTypes from 'prop-types';
 import ItemImage from './ItemImagen';
@@ -37,8 +37,6 @@ const Producto = (props) => {
     handleInputCodigoBarras,
     handleGenerateCodigoBarras,
   } = props;
-
-  const { codigoSunat, refCodigoSunat, handleSelectCodigoSunat } = props;
 
   const { idMedida, refIdMedida, handleSelectIdMedida, medidas } = props;
 
@@ -86,12 +84,6 @@ const Producto = (props) => {
   } = props;
 
   const { imagenes, handleSelectImagenes, handleRemoveImagenes } = props;
-
-  const { colores, coloresSeleccionados, handleSelectColores } = props;
-
-  const { tallas, tallasSeleccionados, handleSelectTallas } = props;
-
-  const { sabores, saboresSeleccionados, handleSelectSabores } = props;
 
   return (
     <>
@@ -236,19 +228,6 @@ const Producto = (props) => {
                 {item.nombre}
               </option>
             ))}
-          </Select>
-        </Column>
-
-        <Column className="col-md-6" formGroup={true}>
-          <Select
-            label={'Código producto SUNAT:'}
-            ref={refCodigoSunat}
-            value={codigoSunat}
-            onChange={handleSelectCodigoSunat}
-          >
-            <option value="0">-- Selecciona --</option>
-            <option value="1">codigo 01</option>
-            <option value="2">código 02</option>
           </Select>
         </Column>
       </Row>
@@ -630,109 +609,6 @@ const Producto = (props) => {
           />
         </Column>
       </Row>
-
-      {/* SECTOR DE COLORES */}
-      <Row>
-        <Column className="col-12" formGroup={true}>
-          <h6>
-            <span className="badge badge-primary">9</span> COLORES{' '}
-          </h6>
-        </Column>
-
-        <div className="dropdown-divider"></div>
-
-        <Column className="col-12" formGroup={true}>
-          <label>Agregar los tipos de colores</label>
-        </Column>
-
-        <Column className="col-12" formGroup={true}>
-          <div className="d-flex flex-wrap gap-3">
-            {colores.map((item, index) => {
-              const active = coloresSeleccionados.some(
-                (select) => select.idAtributo === item.idAtributo,
-              );
-              return (
-                <SelectActive
-                  key={index}
-                  id={item.idAtributo}
-                  name={item.nombre}
-                  active={active}
-                  background={item.hexadecimal}
-                  handleSelect={handleSelectColores}
-                />
-              );
-            })}
-          </div>
-        </Column>
-      </Row>
-
-      {/* SECTOR DE TALLAS */}
-      <Row>
-        <Column className="col-12" formGroup={true}>
-          <h6>
-            <span className="badge badge-primary">10</span> TALLAS{' '}
-          </h6>
-        </Column>
-
-        <div className="dropdown-divider"></div>
-
-        <Column className="col-12" formGroup={true}>
-          <label>Agregar los tipos de talla</label>
-        </Column>
-
-        <Column className="col-12" formGroup={true}>
-          <div className="d-flex flex-wrap gap-3">
-            {tallas.map((item, index) => {
-              const active = tallasSeleccionados.some(
-                (select) => select.idAtributo === item.idAtributo,
-              );
-              return (
-                <SelectActive
-                  key={index}
-                  id={item.idAtributo}
-                  name={item.nombre}
-                  active={active}
-                  handleSelect={handleSelectTallas}
-                />
-              );
-            })}
-          </div>
-        </Column>
-      </Row>
-
-      {/* SECTOR DE SABORES */}
-      <Row>
-        <Column className="col-12" formGroup={true}>
-          <h6>
-            <span className="badge badge-primary">11</span> SABORES{' '}
-          </h6>
-        </Column>
-
-        <div className="dropdown-divider"></div>
-
-        <Column className="col-12" formGroup={true}>
-          <label>Agregar los tipos de sabores</label>
-        </Column>
-
-        <Column className="col-12" formGroup={true}>
-          <div className="d-flex flex-wrap gap-3">
-            {sabores.map((item, index) => {
-              const active = saboresSeleccionados.some(
-                (select) => select.idAtributo === item.idAtributo,
-              );
-              return (
-                <SelectActive
-                  key={index}
-                  id={item.idAtributo}
-                  name={item.nombre}
-                  active={active}
-                  handleSelect={handleSelectSabores}
-                />
-              );
-            })}
-          </div>
-        </Column>
-      </Row>
     </>
   );
 };
@@ -754,10 +630,6 @@ Producto.propTypes = {
   refCodigoBarras: PropTypes.object,
   handleInputCodigoBarras: PropTypes.func,
   handleGenerateCodigoBarras: PropTypes.func,
-
-  codigoSunat: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  refCodigoSunat: PropTypes.object,
-  handleSelectCodigoSunat: PropTypes.func,
 
   idMedida: PropTypes.string,
   refIdMedida: PropTypes.object,
@@ -815,18 +687,6 @@ Producto.propTypes = {
   imagenes: PropTypes.array,
   handleSelectImagenes: PropTypes.func,
   handleRemoveImagenes: PropTypes.func,
-
-  colores: PropTypes.array,
-  coloresSeleccionados: PropTypes.array,
-  handleSelectColores: PropTypes.func,
-
-  tallas: PropTypes.array,
-  tallasSeleccionados: PropTypes.array,
-  handleSelectTallas: PropTypes.func,
-
-  sabores: PropTypes.array,
-  saboresSeleccionados: PropTypes.array,
-  handleSelectSabores: PropTypes.func,
 };
 
 export default Producto;

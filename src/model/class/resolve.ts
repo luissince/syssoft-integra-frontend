@@ -8,14 +8,46 @@ interface HttpResponse<T = any> {
   statusText?: string;
 }
 
+export interface ResolveResponse<T = any> {
+  success: boolean;
+  data?: T;
+  type?: string;
+  message?: string;
+  status?: number;
+}
+
 class Resolve {
-  static async create<T = any>(value: Promise<HttpResponse<T>>): Promise<SuccessResponse<T> | ErrorResponse> {
+
+  private static async resolveRaw<T>(value: Promise<HttpResponse<T>>) {
     try {
       const response = await value;
       return new SuccessResponse<T>(response);
-    } catch (ex) {
-      return new ErrorResponse(ex as any);
+    } catch (err) {
+      return new ErrorResponse(err as any);
     }
+  }
+
+  static async resolve<T = any>(value: Promise<HttpResponse<T>>) {
+    return await this.resolveRaw(value);
+  }
+
+  static async safe<T = any>(value: Promise<HttpResponse<T>>): Promise<ResolveResponse<T>> {
+    const result = await this.resolveRaw(value);
+
+    if (result instanceof SuccessResponse) {
+      return {
+        success: true,
+        data: result.getData(),
+        status: result.getStatus(),
+      };
+    }
+
+    return {
+      success: false,
+      type: result.getType(),
+      message: result.getMessage(),
+      status: result.getStatus(),
+    };
   }
 }
 

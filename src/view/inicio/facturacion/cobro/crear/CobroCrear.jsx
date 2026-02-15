@@ -17,9 +17,9 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../../components/SearchInput';
-import { CANCELED } from '../../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -43,22 +43,23 @@ class CobroCrear extends CustomComponent {
   /**
    *
    * Constructor
+   * @param {Object} props - Propiedades del componente.
    */
   constructor(props) {
     super(props);
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
       // Atributos principales
-      idCobro: '',
-      idComprobante: '',
-      idMoneda: '',
-      idConcepto: '',
-      observacion: '',
-      nota: '',
-      monto: '',
+      idCobro: "",
+      idComprobante: "",
+      idMoneda: "",
+      idConcepto: "",
+      observacion: "",
+      nota: "",
+      monto: "",
 
       // Atributos del modal cobrar
       isOpenTerminal: false,
@@ -83,7 +84,7 @@ class CobroCrear extends CustomComponent {
 
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.initial = { ...this.state };
@@ -739,7 +740,9 @@ class CobroCrear extends CustomComponent {
 CobroCrear.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

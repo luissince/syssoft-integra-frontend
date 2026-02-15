@@ -1,23 +1,23 @@
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '@/components/Container';
 import {
   currentDate,
   formatNumberWithZeros,
   formatTime,
   isEmpty,
   formatCurrency,
-} from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
+} from '@/helper/utils.helper';
+import CustomComponent from '@/components/CustomComponent';
 import {
   listOrdenCompra,
   cancelOrdenCompra,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -26,18 +26,18 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Paginacion from '../../../../../components/Paginacion';
-import Button from '../../../../../components/Button';
-import Search from '../../../../../components/Search';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import Paginacion from '@/components/Paginacion';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
 import PropTypes from 'prop-types';
 import {
   setListaOrdenCompraData,
   setListaOrdenCompraPaginacion,
-} from '../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
 
@@ -71,7 +71,7 @@ class OrdenCompras extends CustomComponent {
       messageTable: 'Cargando información...',
 
       idSucursal: this.props.token.project.idSucursal,
-      idUsuario: this.props.token.userToken.idUsuario,
+      idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
@@ -313,7 +313,7 @@ class OrdenCompras extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="10"
+          colSpan={10}
           message="Cargando información de la tabla..."
         />
       );
@@ -532,7 +532,9 @@ class OrdenCompras extends CustomComponent {
 OrdenCompras.propTypes = {
   token: PropTypes.shape({
     userToken: PropTypes.shape({
-      idUsuario: PropTypes.string.isRequired,
+      usuario: PropTypes.shape({
+        idUsuario: PropTypes.string.isRequired,
+      }),
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,

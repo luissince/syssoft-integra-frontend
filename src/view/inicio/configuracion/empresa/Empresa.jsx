@@ -5,7 +5,7 @@ import ContainerWrapper from '../../../../components/Container';
 import { loadEmpresa } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import { CANCELED } from '../../../../model/types/types';
+import { CANCELED } from '@/constants/requestStatus';
 import Title from '../../../../components/Title';
 import PropTypes from 'prop-types';
 import Row from '../../../../components/Row';
@@ -84,7 +84,7 @@ class Empresa extends React.Component {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );

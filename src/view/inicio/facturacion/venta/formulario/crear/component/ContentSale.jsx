@@ -41,7 +41,11 @@ const ContentSale = ({
     handleSelectItemCliente,
 
     detalleVenta,
-    impuestos,
+    numeroDeItems,
+    subTotal,
+    impuestoDetalle,
+    total,
+
     handleMinusProducto,
     handlePlusProducto,
     handleEditProducto,
@@ -52,28 +56,36 @@ const ContentSale = ({
 
     const isScreen = useScreenSize();
 
+
     return (
         <>
             <section className={`invoice-left ${isScreen && activeTab !== "productos" && "hidden"}`}>
-                <InvoiceView
-                    ref={refInvoiceView}
-                    idSucursal={idSucursal}
-                    idAlmacen={idAlmacen}
-                    codiso={codiso}
-                    productos={productos}
-                    cotizacion={cotizacion}
-                    pedido={pedido}
-                    handleUpdateProductos={handleUpdateProductos}
-                    handleAddItem={handleAddItem}
-                    handleStarProduct={handleStarProduct}
+                <div className="h-full flex flex-col items relative">
+                    {/* Se activa en modo mobile */}
+                    <div className="flex md:hidden border-b border-solid border-[#e1e7ee] bg-white">
+                        <InvoiceTicket
+                            nombreComporbante={nombreComporbante}
+                            handleOpenPreImpresion={handleOpenPreImpresion}
+                            handleOpenVenta={handleOpenVenta}
+                            handleOpenCotizacion={handleOpenCotizacion}
+                            handleOpenPedido={handleOpenPedido}
+                            handleOpenOptions={handleOpenOptions}
+                        />
+                    </div>
 
-                    nombreComporbante={nombreComporbante}
-                    handleOpenPreImpresion={handleOpenPreImpresion}
-                    handleOpenVenta={handleOpenVenta}
-                    handleOpenCotizacion={handleOpenCotizacion}
-                    handleOpenPedido={handleOpenPedido}
-                    handleOpenOptions={handleOpenOptions}
-                />
+                    <InvoiceView
+                        ref={refInvoiceView}
+                        idSucursal={idSucursal}
+                        idAlmacen={idAlmacen}
+                        codiso={codiso}
+                        productos={productos}
+                        cotizacion={cotizacion}
+                        pedido={pedido}
+                        handleUpdateProductos={handleUpdateProductos}
+                        handleAddItem={handleAddItem}
+                        handleStarProduct={handleStarProduct}
+                    />
+                </div>
             </section>
 
             <section
@@ -85,16 +97,15 @@ const ContentSale = ({
                     isScreen && activeTab === "productos" && "hidden"
                 )}
             >
-                <div className="hidden md:flex">
-                    <InvoiceTicket
-                        nombreComporbante={nombreComporbante}
-                        handleOpenPreImpresion={handleOpenPreImpresion}
-                        handleOpenVenta={handleOpenVenta}
-                        handleOpenCotizacion={handleOpenCotizacion}
-                        handleOpenPedido={handleOpenPedido}
-                        handleOpenOptions={handleOpenOptions}
-                    />
-                </div>
+                <InvoiceTicket
+                    className="hidden md:flex"
+                    nombreComporbante={nombreComporbante}
+                    handleOpenPreImpresion={handleOpenPreImpresion}
+                    handleOpenVenta={handleOpenVenta}
+                    handleOpenCotizacion={handleOpenCotizacion}
+                    handleOpenPedido={handleOpenPedido}
+                    handleOpenOptions={handleOpenOptions}
+                />
 
                 <InvoiceVoucher
                     refComprobante={refComprobante}
@@ -124,11 +135,13 @@ const ContentSale = ({
                 />
 
                 <InvoiceFooter
-                    codiso={codiso}
-                    impuestos={impuestos}
-                    detalleVenta={detalleVenta}
-                    handleOpenSale={handleOpenSale}
-                    handleClearSale={handleClearSale}
+                numeroDeItems={numeroDeItems}
+                codiso={codiso}
+                subTotal={subTotal}
+                impuestoDetalle={impuestoDetalle}
+                total={total}
+                handleOpenSale={handleOpenSale}
+                handleClearSale={handleClearSale}
                 />
             </section>
         </>

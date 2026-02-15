@@ -6,26 +6,28 @@ import {
   formatTime,
   isText,
   isEmpty,
-} from '../../../../../helper/utils.helper';
+  formatNumberWithZeros,
+} from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../../components/ui/container-wrapper';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   detailVenta,
   documentsPdfInvoicesVenta,
-} from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+} from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import { CANCELED } from '@/constants/requestStatus';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  CONTADO} from '../../../../../model/types/forma-transaccion';
-import Title from '../../../../../components/Title';
-import { SpinnerView } from '../../../../../components/Spinner';
+  CONTADO
+} from '@/model/types/forma-transaccion';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import { ModalSendWhatsApp } from '@/components/MultiModal';
+import Image from '@/components/Image';
+import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
@@ -48,22 +50,22 @@ class VentaDetalle extends CustomComponent {
     this.state = {
       // Atributos de carga
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idVenta: '',
-      comprobante: '',
-      cliente: '',
-      celular: '',
-      email: '',
-      fecha: '',
-      formaPago: '',
-      estado: '',
-      codiso: '',
-      simbolo: '',
+      idVenta: "",
+      comprobante: "",
+      cliente: "",
+      celular: "",
+      email: "",
+      fecha: "",
+      formaPago: "",
+      estado: "",
+      codiso: "",
+      simbolo: "",
       total: 0,
-      usuario: '',
-      observacion: '',
-      nota: '',
+      usuario: "",
+      observacion: "",
+      nota: "",
 
       isOpenModalPrinter: false,
 
@@ -96,7 +98,7 @@ class VentaDetalle extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idVenta = new URLSearchParams(url).get('idVenta');
+    const idVenta = new URLSearchParams(url).get("idVenta");
     if (isText(idVenta)) {
       await this.loadingData(idVenta);
     } else {
@@ -133,7 +135,7 @@ class VentaDetalle extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.warning({
-        title: 'Venta',
+        title: "Venta",
         message: response.getMessage(),
       }, () => {
         this.close();
@@ -186,11 +188,12 @@ class VentaDetalle extends CustomComponent {
 
     this.setState({
       idVenta: id,
-      comprobante: comprobante + '  ' + serie + '-' + numeracion,
-      cliente: documento + ' - ' + informacion,
+      comprobante: comprobante,
+      serieNumeracion: serie + "-" + formatNumberWithZeros(numeracion),
+      cliente: documento + " - " + informacion,
       celular: celular,
       email: email,
-      fecha: fecha + ' ' + formatTime(hora),
+      fecha: fecha + " " + formatTime(hora),
       formaPago: tipo,
       estado: nuevoEstado,
       simbolo: simbolo,
@@ -236,9 +239,9 @@ class VentaDetalle extends CustomComponent {
 
     await pdfVisualizer.init({
       url: url,
-      title: 'Venta',
-      titlePageNumber: 'Página',
-      titleLoading: 'Cargando...',
+      title: "Venta",
+      titlePageNumber: "Página",
+      titleLoading: "Cargando...",
     });
   };
 
@@ -275,7 +278,7 @@ class VentaDetalle extends CustomComponent {
       email: email,
     };
 
-    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, 'A4');
+    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, "A4");
 
     // Crear mensaje con formato
     const message = `
@@ -303,7 +306,7 @@ class VentaDetalle extends CustomComponent {
     await callback();
 
     // Abrir en una nueva ventana
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   handleCloseSendWhatsapp = () => {
@@ -339,17 +342,18 @@ class VentaDetalle extends CustomComponent {
       <tr key={index} className="hover:bg-gray-50">
         <td className="p-4 text-gray-700">{item.id}</td>
         <td className="p-4 text-center">
-          <Image
-            default={images.noImage}
-            src={item.imagen}
-            alt={item.producto}
-            width={80}
-            className="mx-auto rounded border border-gray-200"
-          />
+          <div className="w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+            <Image
+              default={images.noImage}
+              src={item.imagen}
+              alt={item.producto}
+              overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+            />
+          </div>
         </td>
         <td className="p-4 text-gray-700">
-          <div className="font-mono text-sm text-gray-500">{item.codigo}</div>
-          <div>{item.producto}</div>
+          <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+          <p className="font-medium">{item.producto}</p>
         </td>
         <td className="p-4 text-gray-700">{item.medida}</td>
         <td className="p-4 text-gray-700">{item.categoria}</td>
@@ -443,7 +447,7 @@ class VentaDetalle extends CustomComponent {
     if (isEmpty(this.state.transaccion)) {
       return (
         <tr>
-          <td colSpan={5} className="p-6 text-center text-gray-500">
+          <td colSpan={5} className="px-6 py-12 text-center">
             No hay transacciones para mostrar.
           </td>
         </tr>
@@ -453,7 +457,7 @@ class VentaDetalle extends CustomComponent {
     return this.state.transaccion.map((item, index) => (
       <React.Fragment key={index}>
         {/* Transacción principal */}
-        <tr className="bg-green-50">
+        <tr className="hover:bg-gray-50 transition-colors">
           <td className="p-3 font-medium text-gray-800">{index + 1}</td>
           <td className="p-3">
             <div className="font-medium">{item.fecha}</div>
@@ -464,32 +468,19 @@ class VentaDetalle extends CustomComponent {
           <td className="p-3 text-gray-800">{item.usuario}</td>
         </tr>
 
-        {/* Encabezado de detalles */}
-        <tr className="bg-gray-50 text-sm text-gray-600">
-          <td className="p-2 text-center">#</td>
-          <td className="p-2">Banco</td>
-          <td className="p-2">Monto</td>
-          <td colSpan={2} className="p-2">Observación</td>
-        </tr>
-
         {/* Detalles de la transacción */}
-        {item.detalles.map((detalle, idx) => (
-          <tr key={idx} className="hover:bg-gray-50">
-            <td className="p-3 text-center text-gray-600">{idx + 1}</td>
-            <td className="p-3 text-gray-700">{detalle.nombre}</td>
-            <td className="p-3 text-gray-900 font-medium">
-              {formatCurrency(detalle.monto, this.state.codiso)}
-            </td>
-            <td colSpan={2} className="p-3 text-gray-700">
-              {detalle.observacion}
-            </td>
-          </tr>
-        ))}
+        <tr className="px-6 py-0 bg-gray-50">
+          <td colSpan={5}>
+            <div className="flex flex-row items-center gap-3 p-3">
+              {item.detalles.map((detalle, idx) => (
+                <div key={idx} className="w-60 flex flex-col gap-3 rounded p-3 bg-white">
+                  <p className="text-sm text-gray-600">Banco: <span className="font-bold text-black">{detalle.nombre}</span></p>
+                  <p className="text-sm text-gray-600">Monto: <span className="font-bold text-black">{formatCurrency(detalle.monto, this.state.codiso)}</span></p>
+                  <p className="text-sm text-gray-600">Nota: {<span className="font-bold text-black">{detalle.observacion}</span>}</p>
+                </div>
+              ))}
+            </div>
 
-        {/* Separador visual */}
-        <tr>
-          <td colSpan={5} className="py-3">
-            <div className="border-t border-gray-200"></div>
           </td>
         </tr>
       </React.Fragment>
@@ -568,24 +559,30 @@ class VentaDetalle extends CustomComponent {
 
         {/* Resumen de la venta */}
         <div className="mb-8 bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
-          <div className="divide-y divide-gray-100 px-2">
+          <h2 className="text-base font-semibold text-gray-800 uppercase">Cabecera</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2">
             {[
-              { label: 'Comprobante', value: this.state.comprobante },
-              { label: 'Cliente', value: this.state.cliente },
-              { label: 'N° de celular', value: this.state.celular },
-              { label: 'Correo electrónico', value: this.state.email },
-              { label: 'Fecha', value: this.state.fecha },
-              { label: 'Observación', value: this.state.observacion },
-              { label: 'Nota', value: this.state.nota },
-              { label: 'Forma de Pago', value: this.state.formaPago },
-              { label: 'Estado', value: this.state.estado },
-              { label: 'Usuario', value: this.state.usuario },
-              { label: 'Total', value: formatCurrency(this.state.total, this.state.codiso) },
+              { label: 'Comprobante:', value: this.state.comprobante },
+              { label: 'Serie - Num.:', value: this.state.serieNumeracion },
+              { label: 'Cliente:', value: this.state.cliente },
+              { label: 'N° de celular:', value: this.state.celular },
+              { label: 'Correo electr.:', value: this.state.email },
+              { label: 'Fecha:', value: this.state.fecha },
+              { label: 'Observación:', value: this.state.observacion },
+              { label: 'Nota:', value: this.state.nota },
+              { label: 'Forma de Pago:', value: this.state.formaPago },
+              { label: 'Estado:', value: this.state.estado },
+              { label: 'Usuario:', value: this.state.usuario },
+              { label: 'Total:', value: formatCurrency(this.state.total, this.state.codiso) },
             ].map((item, i) => (
               <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-2">
-                <div className="text-sm font-medium text-gray-600">{item.label}</div>
-                <div className="text-sm md:col-span-3 text-gray-900">{item.value}</div>
+                <p className="text-sm text-gray-600 uppercase">
+                  {item.label}
+                </p>
+                <p className="text-sm md:col-span-3 text-gray-900 font-medium">
+                  {item.value}
+                </p>
               </div>
             ))}
           </div>
@@ -593,20 +590,21 @@ class VentaDetalle extends CustomComponent {
 
         {/* Detalles de productos */}
         <div className="mb-8 bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Detalles</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-3 uppercase">Detalles</h2>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 text-left text-gray-600 text-sm">
                 <tr>
-                  <th className="p-4">#</th>
-                  <th className="p-4">Imagen</th>
-                  <th className="p-4">Producto</th>
-                  <th className="p-4">Unidad</th>
-                  <th className="p-4">Categoría</th>
-                  <th className="p-4 text-right">Cantidad</th>
-                  <th className="p-4 text-right">Impuesto</th>
-                  <th className="p-4 text-right">Precio</th>
-                  <th className="p-4 text-right">Monto</th>
+                  <th className="p-4 text-sm uppercase">#</th>
+                  <th className="p-4 text-sm uppercase">Imagen</th>
+                  <th className="p-4 text-sm uppercase">Producto</th>
+                  <th className="p-4 text-sm uppercase">Unidad</th>
+                  <th className="p-4 text-sm uppercase">Categoría</th>
+                  <th className="p-4 text-right text-sm uppercase">Cantidad</th>
+                  <th className="p-4 text-right text-sm uppercase">Impuesto</th>
+                  <th className="p-4 text-right text-sm uppercase">Precio</th>
+                  <th className="p-4 text-right text-sm uppercase">Monto</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -631,19 +629,20 @@ class VentaDetalle extends CustomComponent {
 
         {/* Transacciones */}
         <div className="bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Transacciones</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-3 uppercase">Transacciones</h2>
+
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="min-w-full ">
               <thead className="bg-gray-50 text-left text-gray-600 text-sm">
                 <tr>
-                  <th className="p-4">#</th>
-                  <th className="p-4">Fecha y Hora</th>
-                  <th className="p-4">Concepto</th>
-                  <th className="p-4">Nota</th>
-                  <th className="p-4">Usuario</th>
+                  <th className="p-4 text-sm uppercase">#</th>
+                  <th className="p-4 text-sm uppercase">Fecha y Hora</th>
+                  <th className="p-4 text-sm uppercase">Concepto</th>
+                  <th className="p-4 text-sm uppercase">Nota</th>
+                  <th className="p-4 text-sm uppercase">Usuario</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="bg-white divide-y divide-gray-200">
                 {this.renderTransaciones()}
               </tbody>
             </table>
