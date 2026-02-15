@@ -40,3 +40,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: desarrollo-frontend
+
+  popular-safi-services:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: popular-safi-frontend

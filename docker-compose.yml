@@ -77,6 +77,11 @@ services:
     image: main-frontend-image
     container_name: main-frontend
 
+  popular-safi-services:
+    <<: *frontend-service
+    image: popular-safi-frontend-image
+    container_name: popular-safi-frontend
+
 networks:
   luis:
     external: true
