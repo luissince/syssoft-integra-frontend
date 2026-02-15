@@ -14,6 +14,7 @@ import CustomComponent from '@/components/CustomComponent';
 import Image from '@/components/Image';
 import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
+import Button from '@/components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
