@@ -1,18 +1,18 @@
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   currentDate,
   formatTime,
   isEmpty,
-} from '../../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import CustomComponent from '@/components/CustomComponent';
-import { listCatalogo } from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
+import { listCatalogo } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
-import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+import Title from '@/components/Title';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -21,17 +21,17 @@ import {
   TableHeader,
   TableResponsive,
   TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Paginacion from '../../../../../components/Paginacion';
-import Button from '../../../../../components/Button';
-import Search from '../../../../../components/Search';
-import Input from '../../../../../components/Input';
+} from '@/components/Table';
+import { SpinnerTable } from '@/components/Spinner';
+import Paginacion from '@/components/Paginacion';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
+import Input from '@/components/Input';
 import PropTypes from 'prop-types';
 import {
   setListaCatalogoData,
   setListaCatalogoPaginacion,
-} from '../../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import React from 'react';
 
 /**
@@ -221,7 +221,7 @@ class Catalogos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState(

@@ -18,26 +18,12 @@ import {
 import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Title from '@/components/Title';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
 import { SpinnerTable, SpinnerView } from '@/components/Spinner';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '@/components/Table';
 import Search from '@/components/Search';
 import {
   setListaAjusteData,
   setListaAjustePaginacion,
 } from '@/redux/predeterminadoSlice';
-import Button from '@/components/Button';
-import Input from '@/components/Input';
-import Select from '@/components/Select';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
 

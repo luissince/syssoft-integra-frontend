@@ -396,16 +396,13 @@ class ModalPersona extends Component {
 
   handleGetApiReniec = async () => {
     if (this.state.documento.length !== 8) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message:
-            'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-        },
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message:
+          'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
@@ -430,30 +427,26 @@ class ModalPersona extends Component {
     }
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: response.getMessage(),
-        },
-        () => {
-          this.setState({
-            loading: false,
-          });
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loading: false,
+        });
+      });
     }
   };
 
   handleGetApiSunat = async () => {
     if (this.state.documento.length !== 11) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message:
-            'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-        },
+      alertKit.warning({
+        title: 'Persona',
+        message:
+          'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+      },
         () => {
-          this.refDocumentoPj.current.focus();
+          this.refDocumento.current.focus();
         },
       );
       return;
@@ -476,17 +469,14 @@ class ModalPersona extends Component {
     }
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: response.getMessage(),
-        },
-        () => {
-          this.setState({
-            loading: false,
-          });
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loading: false,
+        });
+      });
     }
   };
 
@@ -541,28 +531,22 @@ class ModalPersona extends Component {
     );
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      alertKit.warning(
-        {
+      alertKit.warning({
           title: 'Persona',
           message: 'Seleccione el tipo de documento.',
-        },
-        () => {
+        },() => {
           this.refTipoDocumento.current.focus();
-        },
-      );
+        });
       return;
     }
 
     if (isEmpty(this.state.documento)) {
-      alertKit.warning(
-        {
+      alertKit.warning({
           title: 'Persona',
           message: 'Ingrese el número de documento.',
-        },
-        () => {
+        },() => {
           this.refDocumento.current.focus();
-        },
-      );
+        });
       return;
     }
 
@@ -571,28 +555,22 @@ class ModalPersona extends Component {
       tipoDocumento.obligado === 1 &&
       tipoDocumento.longitud !== this.state.documento.length
     ) {
-      alertKit.warning(
-        {
+      alertKit.warning({
           title: 'Persona',
           message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
-        },
-        () => {
+        },() => {
           this.refDocumento.current.focus();
-        },
-      );
+        });
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      alertKit.warning(
-        {
+      alertKit.warning({
           title: 'Persona',
           message: 'Ingrese los apellidos y nombres.',
-        },
-        () => {
+        },() => {
           this.refInformacion.current.focus();
-        },
-      );
+        });
       return;
     }
 
@@ -613,9 +591,10 @@ class ModalPersona extends Component {
         documento: this.state.documento.toString().trim().toUpperCase(),
         informacion: this.state.informacion.trim().toUpperCase(),
         cliente: true,
-        proveedor: false,
+        proveedor: true,
         conductor: false,
         licenciaConducir: '',
+        personal: false,
         telefono: '',
         celular: this.state.celular.toString().trim().toUpperCase(),
         fechaNacimiento: currentDate(),
@@ -637,8 +616,7 @@ class ModalPersona extends Component {
       const response = await createPersona(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
+        alertKit.success({
             title: 'Persona',
             message: response.data,
           },
