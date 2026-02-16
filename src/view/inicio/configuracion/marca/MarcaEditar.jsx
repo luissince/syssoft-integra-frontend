@@ -1,26 +1,26 @@
 import React from 'react';
-import { isText, isEmpty, imageBase64 } from '../../../../helper/utils.helper';
+import { isText, isEmpty, imageBase64 } from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
-import ContainerWrapper from '../../../../components/Container';
+import ContainerWrapper from '@/components/Container';
 import {
   getIdMarca,
   updateMarca,
-} from '../../../../network/rest/principal.network';
+} from '@/network/rest/principal.network';
 import CustomComponent from '@/components/CustomComponent';
-import Title from '../../../../components/Title';
-import { SpinnerView } from '../../../../components/Spinner';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
 import PropTypes from 'prop-types';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Button from '../../../../components/Button';
-import { Switches } from '../../../../components/Checks';
-import Input from '../../../../components/Input';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Button from '@/components/Button';
+import { Switches } from '@/components/Checks';
+import Input from '@/components/Input';
 import { alertKit } from 'alert-kit';
-import { images } from '../../../../helper';
-import { ImageUpload } from '../../../../components/Image';
+import { images } from '@/helper';
+import { ImageUpload } from '@/components/Image';
 
 class MarcaEditar extends CustomComponent {
   constructor(props) {
@@ -123,8 +123,7 @@ class MarcaEditar extends CustomComponent {
     if (!isEmpty(files)) {
       const file = files[0];
       let url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } =
-        await imageBase64(file);
+      const { size, base64String, extension, width, height } =  await imageBase64(file);
 
       if (width !== 300 || height !== 200) {
         alertKit.warning({
@@ -182,7 +181,7 @@ class MarcaEditar extends CustomComponent {
       alertKit.warning({
         title: 'Marca',
         message: 'Ingrese el nombre de la marca',
-        callback: () => {
+        onClose: () => {
           this.refNombre.current.focus();
         },
       });

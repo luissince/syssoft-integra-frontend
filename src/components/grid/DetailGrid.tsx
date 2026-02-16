@@ -36,7 +36,6 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
   onRemove,
   emptyMessage = "Aquí verás los productos que elijas en tu próximo pedido",
 }) => {
-  console.log(detalles);
   return (
     <div
       className={cn(

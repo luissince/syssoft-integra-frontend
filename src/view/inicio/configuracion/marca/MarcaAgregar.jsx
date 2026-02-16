@@ -1,20 +1,20 @@
 import React from 'react';
-import { isEmpty, imageBase64 } from '../../../../helper/utils.helper';
+import { isEmpty, imageBase64 } from '@/helper/utils.helper';
 import { connect } from 'react-redux';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import ContainerWrapper from '../../../../components/Container';
-import { addMarca } from '../../../../network/rest/principal.network';
-import Title from '../../../../components/Title';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import ContainerWrapper from '@/components/Container';
+import { addMarca } from '@/network/rest/principal.network';
+import Title from '@/components/Title';
 import PropTypes from 'prop-types';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import Input from '../../../../components/Input';
-import { Switches } from '../../../../components/Checks';
-import Button from '../../../../components/Button';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import Input from '@/components/Input';
+import { Switches } from '@/components/Checks';
+import Button from '@/components/Button';
 import { alertKit } from 'alert-kit';
-import { images } from '../../../../helper';
-import { ImageUpload } from '../../../../components/Image';
+import { images } from '@/helper';
+import { ImageUpload } from '@/components/Image';
 
 class MarcaAgregar extends React.Component {
   constructor(props) {

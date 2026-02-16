@@ -1,18 +1,20 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '@/components/CustomComponent'; import {
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import CustomComponent from '@/components/CustomComponent';
+import {
   isEmpty,
-} from '../../../../helper/utils.helper';
-import { addVehiculo } from '../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
-import Title from '../../../../components/Title';
-import Button from '../../../../components/Button';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import { SpinnerView } from '../../../../components/Spinner';
+} from '@/helper/utils.helper';
+import { addVehiculo } from '@/network/rest/principal.network';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
+import { SpinnerView } from '@/components/Spinner';
 import { alertKit } from 'alert-kit';
+import Input from '@/components/Input';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -117,14 +119,13 @@ class VehiculoAgregar extends CustomComponent {
         <div className="row">
           <div className="col-md-6 col-12">
             <div className="form-group">
-              <label htmlFor="marca" className="col-form-label">
-                Marca: <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type="text"
+              <Input
+                label={
+                  <>
+                    Marca:<i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
                 placeholder="Digite..."
-                className="form-control"
-                id="marca"
                 ref={this.refMarca}
                 value={this.state.marca}
                 onChange={(event) =>
@@ -136,15 +137,13 @@ class VehiculoAgregar extends CustomComponent {
 
           <div className="col-md-6 col-12">
             <div className="form-group">
-              <label htmlFor="numeroPlaca" className="col-form-label">
-                Número de Placa:{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
-              </label>
-              <input
-                type="text"
+              <Input
+                label={
+                  <>
+                    Número de Placa:<i className="fa fa-asterisk text-danger small"></i>
+                  </>
+                }
                 placeholder="Digite..."
-                className="form-control"
-                id="numeroPlaca"
                 ref={this.refNumeroPlaca}
                 value={this.state.numeroPlaca}
                 onChange={(event) =>
@@ -197,19 +196,17 @@ class VehiculoAgregar extends CustomComponent {
           </div>
         </div>
 
-        <Row>
-          <Column formGroup>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex items-center gap-3">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }
