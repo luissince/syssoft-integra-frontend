@@ -34,7 +34,7 @@ interface Props {
   handleLimpiar?: () => void;
 
   handleOpenOptions: () => void;
-  
+
   handleOpenModalProducto: (item: any, tipo: string) => void;
   handleRemoverProducto: (idProducto: string) => void;
 
@@ -72,11 +72,7 @@ const PanelDerecho: React.FC<Props> = ({
     let total = 0;
 
     for (const item of detalles) {
-      const cantidad = 
-        item.inventarioDetalles.reduce(
-          (acumulador: number, item: any) => acumulador + Number(item.cantidad.value),
-          0,
-        );
+      const cantidad = item.inventarioDetalles ? item.inventarioDetalles.reduce((acumulador: number, item: any) => acumulador + Number(item.cantidad.value), 0,) : item.cantidad;
       const valor = item.costo;
 
       const porcentaje = item.porcentajeImpuesto;
@@ -92,11 +88,7 @@ const PanelDerecho: React.FC<Props> = ({
 
     const impuestosGenerado = () => {
       const resultado = detalles.reduce((acc, item) => {
-        const cantidad = 
-          item.inventarioDetalles.reduce(
-            (acumulador: number, item: any) => acumulador + Number(item.cantidad.value),
-            0,
-          );
+        const cantidad = item.inventarioDetalles ? item.inventarioDetalles.reduce((acumulador: number, item: any) => acumulador + Number(item.cantidad.value),0,) : item.cantidad;
         const total = cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);

@@ -49,31 +49,32 @@ import { alertKit } from 'alert-kit';
  * @extends CustomComponent
  */
 class CotizacionDetalle extends CustomComponent {
+
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idCotizacion: '',
-      fechaHora: '',
+      idCotizacion: "",
+      fechaHora: "",
 
-      cliente: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
+      cliente: "",
+      telefono: "",
+      celular: "",
+      email: "",
+      direccion: "",
 
-      comprobante: '',
-      serieNumeracion: '',
+      comprobante: "",
+      serieNumeracion: "",
 
-      estado: '',
+      estado: "",
 
-      observacion: '',
-      notas: '',
+      observacion: "",
+      notas: 2,
 
-      codiso: '',
+      codiso: "",
       total: 0,
 
       detalles: [],
@@ -106,10 +107,10 @@ class CotizacionDetalle extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idCotizacion = new URLSearchParams(url).get('idCotizacion');
+    const idCotizacion = new URLSearchParams(url).get("idCotizacion");
 
     if (isText(idCotizacion)) {
-      this.loadingData(idCotizacion);
+      this.loadData(idCotizacion);
     } else {
       this.close();
     }
@@ -133,7 +134,7 @@ class CotizacionDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(id) {
+  async loadData(id) {
     const params = {
       idCotizacion: id,
     };
@@ -180,10 +181,7 @@ class CotizacionDetalle extends CustomComponent {
       codiso,
     } = cotizacion.cabecera;
 
-    const monto = cotizacion.detalles.reduce(
-      (accumlate, item) => accumlate + item.precio * item.cantidad,
-      0,
-    );
+    const monto = cotizacion.detalles.reduce((accumlate, item) => accumlate + item.precio * item.cantidad,0,);
 
     this.setState({
       idCotizacion: id,

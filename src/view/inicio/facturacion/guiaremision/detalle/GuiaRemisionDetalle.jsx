@@ -50,34 +50,34 @@ class GuiaRemisionDetalle extends CustomComponent {
     super(props);
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idGuiaRemision: '',
-      fecha: '',
-      hora: '',
-      comprobante: '',
-      serie: '',
-      numeracion: '',
-      modalidadTraslado: '',
-      motivoTraslado: '',
-      fechaTraslado: '',
-      tipoPeso: '',
-      peso: '',
-      marca: '',
-      numeroPlaca: '',
-      documentoConductor: '',
-      informacionConductor: '',
-      licenciaConducir: '',
-      direccionPartida: '',
-      ubigeoPartida: '',
-      direccionLlegada: '',
-      ubigeoLlegada: '',
-      usuario: '',
+      idGuiaRemision: "",
+      fecha: "",
+      hora: "",
+      comprobante: "",
+      serie: "",
+      numeracion: "",
+      modalidadTraslado: "",
+      motivoTraslado: "",
+      fechaTraslado: "",
+      tipoPeso: "",
+      peso: "",
+      marca: "",
+      numeroPlaca: "",
+      documentoCondutor: "",
+      informacionConductor: "",
+      licenciaConducir: "",
+      direccionPartida: "",
+      ubigeoPartida: "",
+      direccionLlegada: "",
+      ubigeoLlegada: "",
+      usuario: "",
       estado: 0,
-      comprobanteRef: '',
-      serieRef: '',
-      numeracionRef: '',
-      cliente: '',
+      comprobanteRef: "",
+      serieRef: "",
+      numeracionRef: "",
+      cliente: "",
 
       detalles: [],
 
@@ -109,7 +109,7 @@ class GuiaRemisionDetalle extends CustomComponent {
     const url = this.props.location.search;
     const idGuiaRemision = new URLSearchParams(url).get('idGuiaRemision');
     if (isText(idGuiaRemision)) {
-      await this.loadingData(idGuiaRemision);
+      await this.loadData(idGuiaRemision);
     } else {
       this.close();
     }
@@ -133,7 +133,7 @@ class GuiaRemisionDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(id) {
+  async loadData(id) {
     const params = {
       idGuiaRemision: id,
     };
@@ -147,7 +147,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.warning({
-        title: 'Guia de Remision',
+        title: "Guia de Remision",
         message: response.getMessage(),
         onClose: () => {
           this.close();

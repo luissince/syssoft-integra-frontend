@@ -1,4 +1,4 @@
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '@/components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
@@ -8,17 +8,17 @@ import {
   isText,
   formatCurrency,
   rounded,
-} from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
+} from '@/helper/utils.helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import {
   detailPedido,
   documentsPdfInvoicesPedido,
   documentsPdfListsPedido,
-} from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
+} from '@/network/rest/principal.network';
+import Row from '@/components/Row';
+import Column from '@/components/Column';
 import {
   Table,
   TableBody,
@@ -28,14 +28,14 @@ import {
   TableResponsive,
   TableRow,
   TableTitle,
-} from '../../../../../components/Table';
-import Title from '../../../../../components/Title';
-import { SpinnerView } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
+} from '@/components/Table';
+import Title from '@/components/Title';
+import { SpinnerView } from '@/components/Spinner';
+import Button from '@/components/Button';
 import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
-import Image from '../../../../../components/Image';
-import { images } from '../../../../../helper';
+import Image from '@/components/Image';
+import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 
 /**
@@ -48,32 +48,32 @@ class PedidoDetalle extends CustomComponent {
 
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idPedido: '',
-      fechaHora: '',
+      idPedido: "",
+      fechaHora: "",
 
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
+      proveedor: "",
+      telefono: "",
+      celular: "",
+      email: "",
+      direccion: "",
 
-      comprobante: '',
-      serieNumeracion: '',
+      comprobante: "",
+      serieNumeracion: "",
 
-      estado: '',
+      estado: "",
 
-      observacion: '',
-      notas: '',
+      observacion: "",
+      notas: "",
 
-      idTipoEntrega: '',
-      tipoEntrega: '',
+      idTipoEntrega: "",
+      tipoEntrega: "",
 
-      fechaEntrega: '',
-      horaEntrega: '',
+      fechaEntrega: "",
+      horaEntrega: "",
 
-      codiso: '',
+      codiso: "",
       total: 0,
 
       detalles: [],
@@ -98,10 +98,10 @@ class PedidoDetalle extends CustomComponent {
 
   async componentDidMount() {
     const url = this.props.location.search;
-    const idPedido = new URLSearchParams(url).get('idPedido');
+    const idPedido = new URLSearchParams(url).get("idPedido");
 
     if (isText(idPedido)) {
-      this.loadingData(idPedido);
+      this.loadData(idPedido);
     } else {
       this.close();
     }
@@ -125,7 +125,7 @@ class PedidoDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(idPedido) {
+  async loadData(idPedido) {
     const response = await detailPedido(
       idPedido,
       this.abortControllerView.signal,
@@ -135,10 +135,11 @@ class PedidoDetalle extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.warning({
-        title: 'Pedido',
+        title: "Pedido",
         message: response.getMessage(),
-      }, () => {
-        this.close();
+        onClose: () => {
+          this.close();
+        },
       });
       return;
     }
@@ -171,10 +172,7 @@ class PedidoDetalle extends CustomComponent {
       codiso,
     } = pedido.cabecera;
 
-    const monto = pedido.detalles.reduce(
-      (accumlate, item) => accumlate + item.precio * item.cantidad,
-      0,
-    );
+    const monto = pedido.detalles.reduce((accumlate, item) => accumlate + item.precio * item.cantidad,0,);
 
     this.setState({
       idPedido: idPedido,
