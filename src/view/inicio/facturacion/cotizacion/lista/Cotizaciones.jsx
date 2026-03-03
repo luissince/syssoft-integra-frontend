@@ -17,23 +17,8 @@ import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Title from '@/components/Title';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '@/components/Table';
-import { SpinnerTable } from '@/components/Spinner';
 import Paginacion from '@/components/Paginacion';
-import Button from '@/components/Button';
 import Search from '@/components/Search';
-import Input from '@/components/Input';
-import Select from '@/components/Select';
 import PropTypes from 'prop-types';
 import {
   setListaCotizacionData,

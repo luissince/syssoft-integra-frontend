@@ -27,120 +27,100 @@ const DetalleImagen = (props) => {
 
   return (
     <>
-      <Row>
-        <Column
-          className="col-12 flex items-center justify-center"
-          formGroup={true}
-        >
-          <ImageUpload
-            className="w-full flex flex-col items-center text-center gap-2"
-            label="Imagen principal del producto"
-            subtitle="Las imagenes no debe superar los 500 KB."
-            imageUrl={imagen.url}
-            defaultImage={images.noImage}
-            alt="Imagen del producto"
-            inputId="fileImagen"
-            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-            onChange={handleInputImagen}
-            onClear={handleRemoveImagen}
-          />
-        </Column>
-      </Row>
+      <div
+        className="flex items-center justify-center"
+      >
+        <ImageUpload
+          className="w-full flex flex-col items-center text-center gap-2"
+          label="Imagen principal del producto"
+          subtitle="Las imagenes no debe superar los 500 KB."
+          imageUrl={imagen.url}
+          defaultImage={images.noImage}
+          alt="Imagen del producto"
+          inputId="fileImagen"
+          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+          onChange={handleInputImagen}
+          onClear={handleRemoveImagen}
+        />
+      </div>
 
-      <Row>
-        <Column className=" col-12" formGroup={true}>
-          <h4 className="text-black-50">
-            {nombre !== '' ? nombre : 'Producto sin nombre'}
-          </h4>
-        </Column>
-      </Row>
+      <div className="flex flex-col items-center justify-center gap-3">
+        <h4 className="text-gray-500">
+          {nombre || 'Producto sin nombre'}
+        </h4>
 
-      <Row>
-        <Column className=" col-12" formGroup={true}>
-          <h2 className="text-black-50">S/ {formatDecimal(precio)} PEN</h2>
-        </Column>
-      </Row>
+        <h4 className="text-gray-500">
+          S/ {formatDecimal(precio)} PEN
+        </h4>
+      </div>
 
       <div className="dropdown-divider"></div>
 
-      <Row>
-        <Column className="col-md-12" formGroup={true}>
+      <div className="flex flex-col gap-3">
+        <Switches
+          id="customSwitchPublicar"
+          checked={publicar}
+          onChange={handleSelectPublico}
+        >
+          <div className="font-weight-bold text-black-50 ">
+            Publicar en la Tienda Virtual
+          </div>
+          <div className="text-black-50">
+            Publica este producto en tu tienda.
+          </div>
+        </Switches>
+
+
+        {idTipoProducto === PRODUCTO && (
           <Switches
-            id="customSwitchPublicar"
-            checked={publicar}
-            onChange={handleSelectPublico}
+            id="customSwitchVentaNegativo"
+            checked={negativo}
+            onChange={handleSelectNegativo}
           >
             <div className="font-weight-bold text-black-50 ">
-              Publicar en la Tienda Virtual
+              Venta en negativo
             </div>
             <div className="text-black-50">
-              Publica este producto en tu tienda.
+              Vende sin unidades disponibles
             </div>
           </Switches>
-        </Column>
-      </Row>
+        )}
 
-      {idTipoProducto === PRODUCTO && (
-        <Row>
-          <Column className="col-md-12" formGroup={true}>
-            <Switches
-              id="customSwitchVentaNegativo"
-              checked={negativo}
-              onChange={handleSelectNegativo}
-            >
-              <div className="font-weight-bold text-black-50 ">
-                Venta en negativo
-              </div>
-              <div className="text-black-50">
-                Vende sin unidades disponibles
-              </div>
-            </Switches>
-          </Column>
-        </Row>
-      )}
+        <Switches
+          id="customSwitchPreferido"
+          checked={preferido}
+          onChange={handleSelectPreferido}
+        >
+          <div className="font-weight-bold text-black-50 ">Preferido</div>
+          <div className="text-black-50">
+            Se muestra como producto estrella al cargar la venta.
+          </div>
+        </Switches>
 
-      <Row>
-        <Column className="col-md-12" formGroup={true}>
-          <Switches
-            id="customSwitchPreferido"
-            checked={preferido}
-            onChange={handleSelectPreferido}
-          >
-            <div className="font-weight-bold text-black-50 ">Preferido</div>
-            <div className="text-black-50">
-              Se muestra como producto estrella al cargar la venta.
-            </div>
-          </Switches>
-        </Column>
-      </Row>
+        <Switches
+          id="customSwitchEstado"
+          checked={estado}
+          onChange={handleSelectEstado}
+        >
+          <div className="font-weight-bold text-black-50 ">Estado</div>
+          <div className="text-black-50">
+            Controla si el producto esta disponible.
+          </div>
+        </Switches>
+      </div>
 
-      <Row>
-        <Column className="col-md-12" formGroup={true}>
-          <Switches
-            id="customSwitchEstado"
-            checked={estado}
-            onChange={handleSelectEstado}
-          >
-            <div className="font-weight-bold text-black-50 ">Estado</div>
-            <div className="text-black-50">
-              Controla si el producto esta disponible.
-            </div>
-          </Switches>
-        </Column>
-      </Row>
-
-      <Row>
-        <Column className="col-md-6" formGroup={true}>
+      <div className="flex justify-center gap-3">
+        <div className="w-full">
           <Button className="btn-success btn-block" onClick={handleRegistrar}>
             <i className="fa fa-save"></i> Guardar
           </Button>
-        </Column>
-        <Column className="col-md-6" formGroup={true}>
+        </div>
+        <div className="w-full">
           <Button className="btn-secondary btn-block" onClick={handleCerrar}>
             <i className="fa fa-close"></i> Cerrar
           </Button>
-        </Column>
-      </Row>
+        </div>
+      </div>
     </>
   );
 };

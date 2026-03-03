@@ -13,31 +13,20 @@ import { connect } from 'react-redux';
 import {
   comboMotivoTraslado,
   comboTipoPeso,
-  detailsVenta,
+  getDetailsByIdVenta,
   detailUpdateGuiaRemision,
   documentsPdfInvoicesGuiaRemision,
   filtrarPersona,
   filtrarVehiculo,
   getUbigeo,
-  listFiltrarVenta,
   updateGuiaRemision,
 } from '@/network/rest/principal.network';
+import { filterAllVenta } from '@/network/rest/api-client';
 import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import SearchInput from '@/components/SearchInput';
 import { SpinnerView } from '@/components/Spinner';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '@/components/Table';
 import Title from '@/components/Title';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
@@ -286,7 +275,7 @@ class GuiaRemisionEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   async fetchFiltrarVentas(params) {
-    const response = await listFiltrarVenta(
+    const response = await filterAllVenta(
       params,
       this.abortController.signal,
     );
@@ -371,11 +360,7 @@ class GuiaRemisionEditar extends CustomComponent {
   }
 
   async fetchObtenerVentaDetalle() {
-    const params = {
-      idVenta: this.state.venta.idVenta,
-    };
-
-    const response = await detailsVenta(params);
+    const response = await getDetailsByIdVenta(this.state.venta.idVenta);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -874,57 +859,50 @@ class GuiaRemisionEditar extends CustomComponent {
       },
     });
 
+    if (accept) {
+      const data = {
+        idGuiaRemision: this.state.idGuiaRemision,
+        idVenta: this.state.venta.idVenta,
+        idSucursal: this.state.idSucursal,
+        idModalidadTraslado: this.state.idModalidadTraslado,
+        idMotivoTraslado: this.state.idMotivoTraslado,
+        fechaTraslado: this.state.fechaTraslado,
+        idTipoPeso: this.state.idTipoPeso,
+        peso: this.state.peso,
+        idVehiculo: this.state.vehiculo.idVehiculo,
+        idConductor:
+          this.state.idModalidadTraslado === 'MT0001'
+            ? this.state.conductorPublico.idPersona
+            : this.state.conductor.idPersona,
+        direccionPartida: this.state.direccionPartida,
+        idUbigeoPartida: this.state.idUbigeoPartida,
+        direccionLlegada: this.state.direccionLlegada,
+        idUbigeoLlegada: this.state.idUbigeoLlegada,
+        detalle: this.state.detalle,
+        estado: 1,
+        idUsuario: this.state.idUsuario,
+      };
 
-    alertKit.dialog(
-      'Guía de Remisión',
-      '¿Está seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idGuiaRemision: this.state.idGuiaRemision,
-            idVenta: this.state.venta.idVenta,
-            idSucursal: this.state.idSucursal,
-            idModalidadTraslado: this.state.idModalidadTraslado,
-            idMotivoTraslado: this.state.idMotivoTraslado,
-            fechaTraslado: this.state.fechaTraslado,
-            idTipoPeso: this.state.idTipoPeso,
-            peso: this.state.peso,
-            idVehiculo: this.state.vehiculo.idVehiculo,
-            idConductor:
-              this.state.idModalidadTraslado === 'MT0001'
-                ? this.state.conductorPublico.idPersona
-                : this.state.conductor.idPersona,
-            direccionPartida: this.state.direccionPartida,
-            idUbigeoPartida: this.state.idUbigeoPartida,
-            direccionLlegada: this.state.direccionLlegada,
-            idUbigeoLlegada: this.state.idUbigeoLlegada,
-            detalle: this.state.detalle,
-            estado: 1,
-            idUsuario: this.state.idUsuario,
-          };
+      alertKit.loading({
+        message: "Procesando información...",
+      });
 
-          alertKit.loading({
-            message: "Procesando información...",
-          });
+      const response = await updateGuiaRemision(data);
 
-          const response = await updateGuiaRemision(data);
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idGuiaRemision);
+      }
 
-          if (response instanceof SuccessReponse) {
-            alertKit.close();
-            this.handleOpenImpresion(response.data.idGuiaRemision);
-          }
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertKit.warning({
-              title: "Guía de Remisión",
-              message: response.getMessage(),
-            });
-          }
-        }
-      },
-    );
+        alertKit.warning({
+          title: "Guía de Remisión",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -975,19 +953,18 @@ class GuiaRemisionEditar extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
-        <Row>
-          <Column
-            className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
+        {/* Opciones del formulario */}
+        <div className="flex gap-3 mb-3">
+          <Button className="btn-success" onClick={() => this.handleSave()}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.handleBack()}
           >
-            <Button className="btn-warning" onClick={this.handleSave}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button className="btn-outline-danger" onClick={this.handleBack}>
-              <i className="fa fa-close"></i> Cancelar
-            </Button>
-          </Column>
-        </Row>
+            <i className="fa fa-close"></i> Cancelar
+          </Button>
+        </div>
 
         {/* Seleccione la venta */}
         <h6>
@@ -996,35 +973,35 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refVenta}
-              autoFocus={true}
-              label={
-                <>
-                  Filtrar Venta:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Ejm: B001, 1, F001..."
-              refValue={this.refFiltrarVenta}
-              data={this.state.ventas}
-              handleClearInput={this.handleClearInputVenta}
-              handleFilter={this.handleFilterVenta}
-              handleSelectItem={this.handleSelectItemVenta}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.nombreComprobante} {value.serie}-{value.numeracion}
-                  </span>
-                  {' / '}
-                  <span>{value.informacion}</span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
+        <div className="flex mb-3">
+          <SearchInput
+            ref={this.refVenta}
+            autoFocus={true}
+            label={
+              <>
+                Filtrar Venta:{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
+            placeholder="Ejm: B001, 1, F001..."
+            refValue={this.refFiltrarVenta}
+            data={this.state.ventas}
+            handleClearInput={this.handleClearInputVenta}
+            handleFilter={this.handleFilterVenta}
+            handleSelectItem={this.handleSelectItemVenta}
+            renderItem={(value) => (
+              <>
+                <span>
+                  {value.nombreComprobante} {value.serie}-{value.numeracion}
+                </span>
+                {' / '}
+                <span>{value.informacion}</span>
+              </>
+            )}
+            classNameContainer="w-full relative group"
+          />
+        </div>
+
 
         {/* Sección de los datos del cliente */}
         <h6>
@@ -1033,24 +1010,21 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column formGroup={true}>
-            <Input
-              label={
-                <>
-                  Selecciona un Cliente:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              value={
-                this.state.venta
-                  ? `${this.state.venta.documento} - ${this.state.venta.informacion}`
-                  : ''
-              }
-              disabled
-            />
-          </Column>
-        </Row>
+        <div className="flex flex-col mb-3">
+          <Input
+            label={
+              <>
+                Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
+            value={
+              this.state.venta
+                ? `${this.state.venta.documento} - ${this.state.venta.informacion}`
+                : ''
+            }
+            disabled
+          />
+        </div>
 
         {/* Sección para modalidad traslado */}
         <h6>
@@ -1059,31 +1033,27 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column formGroup={true}>
-            <RadioButton
-              id={'MT0001'}
-              value={'MT0001'}
-              name={'ckModalidadTraslado'}
-              checked={this.state.idModalidadTraslado === 'MT0001'}
-              onChange={this.handleInputModalidadTraslado}
-            >
-              Público
-            </RadioButton>
-          </Column>
+        <div className="flex gap-3 mb-3">
+          <RadioButton
+            id={'MT0001'}
+            value={'MT0001'}
+            name={'ckModalidadTraslado'}
+            checked={this.state.idModalidadTraslado === 'MT0001'}
+            onChange={this.handleInputModalidadTraslado}
+          >
+            Público
+          </RadioButton>
 
-          <Column formGroup={true}>
-            <RadioButton
-              id={'MT0002'}
-              value={'MT0002'}
-              name={'ckModalidadTraslado'}
-              checked={this.state.idModalidadTraslado === 'MT0002'}
-              onChange={this.handleInputModalidadTraslado}
-            >
-              Privado
-            </RadioButton>
-          </Column>
-        </Row>
+          <RadioButton
+            id={'MT0002'}
+            value={'MT0002'}
+            name={'ckModalidadTraslado'}
+            checked={this.state.idModalidadTraslado === 'MT0002'}
+            onChange={this.handleInputModalidadTraslado}
+          >
+            Privado
+          </RadioButton>
+        </div>
 
         {/* Sección para datos del traslado */}
         <h6>
@@ -1092,8 +1062,8 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column className="col-md-6 col-12" formGroup={true}>
+        <div className="flex flex-col md:flex-row gap-3 mb-3">
+          <div className="w-full flex flex-col">
             <Select
               label={
                 <>
@@ -1114,14 +1084,13 @@ class GuiaRemisionEditar extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
+          </div>
 
-          <Column className="col-md-6 col-12" formGroup={true}>
+          <div className="w-full flex flex-col">
             <Input
               label={
                 <>
-                  Fecha traslado:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Fecha traslado: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               type="date"
@@ -1130,16 +1099,15 @@ class GuiaRemisionEditar extends CustomComponent {
                 this.setState({ fechaTraslado: event.target.value });
               }}
             />
-          </Column>
-        </Row>
+          </div>
+        </div>
 
-        <Row>
-          <Column className="col-md-6 col-12" formGroup={true}>
+        <div className="flex flex-col md:flex-row gap-3 mb-3">
+          <div className="w-full flex flex-col">
             <Select
               label={
                 <>
-                  Tipo Peso de Carga:{' '}
-                  <i className="fa fa-asterisk text-danger small" />
+                  Tipo Peso de Carga: <i className="fa fa-asterisk text-danger small" />
                 </>
               }
               ref={this.refTipoPeso}
@@ -1155,9 +1123,9 @@ class GuiaRemisionEditar extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
+          </div>
 
-          <Column className="col-md-6 col-12" formGroup={true}>
+          <div className="w-full flex flex-col">
             <Input
               label={
                 <>
@@ -1173,8 +1141,8 @@ class GuiaRemisionEditar extends CustomComponent {
               }}
               onKeyDown={keyNumberFloat}
             />
-          </Column>
-        </Row>
+          </div>
+        </div>
 
         {/* Sección de datos del vehículo */}
         <h6>
@@ -1184,33 +1152,31 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refVehiculo}
-              label={
-                <>
-                  Filtrar un vehículo:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              disabled={this.state.disabledPublica}
-              placeholder="Filtrar por marca o número de placa..."
-              refValue={this.refFiltrarVehiculo}
-              data={this.state.vehiculos}
-              handleClearInput={this.handleClearInputVehiculo}
-              handleFilter={this.handleFilterVehiculo}
-              handleSelectItem={this.handleSelectItemVehiculo}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.marca}-{value.numeroPlaca}
-                  </span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
+        <div className="flex mb-3">
+          <SearchInput
+            ref={this.refVehiculo}
+            label={
+              <>
+                Filtrar un vehículo: <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
+            disabled={this.state.disabledPublica}
+            placeholder="Filtrar por marca o número de placa..."
+            refValue={this.refFiltrarVehiculo}
+            data={this.state.vehiculos}
+            handleClearInput={this.handleClearInputVehiculo}
+            handleFilter={this.handleFilterVehiculo}
+            handleSelectItem={this.handleSelectItemVehiculo}
+            renderItem={(value) => (
+              <>
+                <span>
+                  {value.marca}-{value.numeroPlaca}
+                </span>
+              </>
+            )}
+            classNameContainer="w-full relative group"
+          />
+        </div>
 
         {/* Sección de datos del conductor */}
         <h6>
@@ -1220,33 +1186,32 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refConductor}
-              label={
-                <>
-                  Filtrar un Conductor (DNI):{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              disabled={this.state.disabledPublica}
-              placeholder="Por número de documento o apellidos y nombres..."
-              refValue={this.refFiltrarConductor}
-              data={this.state.conductores}
-              handleClearInput={this.handleClearInputConductor}
-              handleFilter={this.handleFilterConductor}
-              handleSelectItem={this.handleSelectItemConductor}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.documento}, {value.informacion}
-                  </span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
+        <div className="flex mb-3">
+          <SearchInput
+            ref={this.refConductor}
+            label={
+              <>
+                Filtrar un Conductor (DNI):{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
+            disabled={this.state.disabledPublica}
+            placeholder="Por número de documento o apellidos y nombres..."
+            refValue={this.refFiltrarConductor}
+            data={this.state.conductores}
+            handleClearInput={this.handleClearInputConductor}
+            handleFilter={this.handleFilterConductor}
+            handleSelectItem={this.handleSelectItemConductor}
+            renderItem={(value) => (
+              <>
+                <span>
+                  {value.documento}, {value.informacion}
+                </span>
+              </>
+            )}
+            classNameContainer="w-full relative group"
+          />
+        </div>
 
         <h6>
           <span className="badge badge-primary">7</span> Datos de la Empresa a
@@ -1255,38 +1220,38 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refConductorPublico}
-              label={
-                <>
-                  Selecciona una Empresa (RUC):{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              disabled={this.state.disabledPrivado}
-              placeholder="Por número de documento o ruc..."
-              refValue={this.refFiltrarConductorPublico}
-              data={this.state.conductoresPublico}
-              handleClearInput={this.handleClearInputConductorPublico}
-              handleFilter={this.handleFilterConductorPublico}
-              handleSelectItem={this.handleSelectItemConductorPublico}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.documento}, {value.informacion}
-                  </span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
+        <div className="flex mb-3">
+          <SearchInput
+            ref={this.refConductorPublico}
+            label={
+              <>
+                Selecciona una Empresa (RUC):{' '}
+                <i className="fa fa-asterisk text-danger small"></i>
+              </>
+            }
+            disabled={this.state.disabledPrivado}
+            placeholder="Por número de documento o ruc..."
+            refValue={this.refFiltrarConductorPublico}
+            data={this.state.conductoresPublico}
+            handleClearInput={this.handleClearInputConductorPublico}
+            handleFilter={this.handleFilterConductorPublico}
+            handleSelectItem={this.handleSelectItemConductorPublico}
+            renderItem={(value) => (
+              <>
+                <span>
+                  {value.documento}, {value.informacion}
+                </span>
+              </>
+            )}
+            classNameContainer="w-full relative group"
+
+          />
+        </div>
 
         <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column className="col-md-6 col-12">
+        <div className="flex flex-col md:flex-row gap-3 mb-3">
+          <div className="w-full">
             <h6>
               <span className="badge badge-primary">8</span> Punto de partida
             </h6>
@@ -1336,9 +1301,9 @@ class GuiaRemisionEditar extends CustomComponent {
                 renderIconLeft={<i className="bi bi-search"></i>}
               />
             </div>
-          </Column>
+          </div>
 
-          <Column className="col-md-6 col-12">
+          <div className="w-full">
             <h6>
               <span className="badge badge-primary">9</span> Punto de llegada
             </h6>
@@ -1388,44 +1353,53 @@ class GuiaRemisionEditar extends CustomComponent {
                 renderIconLeft={<i className="bi bi-search"></i>}
               />
             </div>
-          </Column>
-        </Row>
+          </div>
+        </div>
 
         <h6>
           <span className="badge badge-primary">10</span> Detalle de Guía de
           Remisión
         </h6>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className="table-bordered">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
-                    <TableHead width="10%">Código</TableHead>
-                    <TableHead width="35%">Descripción</TableHead>
-                    <TableHead width="15%">Und/Medida</TableHead>
-                    <TableHead width="15%">Cantidad</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.state.detalle.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="text-center">{++index}</TableCell>
-                      <TableCell>{item.codigo}</TableCell>
-                      <TableCell>{item.producto}</TableCell>
-                      <TableCell>{item.medida}</TableCell>
-                      <TableCell>{item.cantidad}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        <div className="bg-white rounded border overflow-hidden mt-3">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[5%]">#</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Código</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[35%]">Descripción</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Unidad</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Cantidad</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {
+                  this.state.detalle.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center">
+                          <p className="text-gray-500">Agregar datos a la tabla</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                }
+                {
+                  this.state.detalle.map((item, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 text-sm text-gray-900 text-center">{++index}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{item.codigo}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{item.producto}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{item.medida}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{item.cantidad}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
       </ContainerWrapper>
     );
   }

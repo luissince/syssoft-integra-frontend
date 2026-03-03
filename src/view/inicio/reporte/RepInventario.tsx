@@ -130,7 +130,6 @@ const ReporteInventario = () => {
     setProductosParaPedir(data.productosParaPedir);
     setProductosParaRematar(data.productosParaRematar);
     setProductosDisponibles(data.productosDisponibles);
-
   }
 
   const loadAll = async () => {

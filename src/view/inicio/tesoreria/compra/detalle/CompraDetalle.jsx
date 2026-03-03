@@ -130,8 +130,7 @@ class CompraDetalle extends CustomComponent {
       alertKit.warning({
         title: "Compra",
         message: response.getMessage(),
-      }, () => {
-        this.close();
+        onClose: this.handleGoBack,
       });
       return;
     }
@@ -166,10 +165,7 @@ class CompraDetalle extends CustomComponent {
       usuario
     } = compra.cabecera;
 
-    const monto = compra.detalles.reduce(
-      (accumlate, item) => accumlate + item.costo * item.cantidad,
-      0,
-    );
+    const monto = compra.detalles.reduce((accumlate, item) => accumlate + item.costo * item.cantidad,0,);
 
     const nuevoEstado =
       estado === 1 ? (
@@ -219,11 +215,7 @@ class CompraDetalle extends CustomComponent {
       loading: false,
     });
   }
-
-  close = () => {
-    this.props.history.goBack();
-  };
-
+  
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -239,6 +231,10 @@ class CompraDetalle extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
+
+    handleGoBack = () => {
+    this.props.history.goBack();
+  };
 
   //------------------------------------------------------------------------------------------
   // Eventos para impresión
@@ -482,7 +478,7 @@ class CompraDetalle extends CustomComponent {
         <Title
           title="Compra"
           subTitle="DETALLE"
-          handleGoBack={() => this.close()}
+          handleGoBack={this.handleGoBack}
         />
 
         {/* Acciones */}

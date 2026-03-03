@@ -27,6 +27,7 @@ import React from 'react';
 import { alertKit } from 'alert-kit';
 import { FaStar } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
+import { COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -40,42 +41,29 @@ class Productos extends CustomComponent {
    */
   constructor(props) {
     super(props);
-    this.state = {
-      // add: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[1].privilegio[0].estado,
-      // ),
-      // view: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[1].privilegio[1].estado,
-      // ),
-      // edit: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[1].privilegio[2].estado,
-      // ),
-      // remove: statePrivilegio(
-      //   this.props.token.userToken.menus[3].submenu[1].privilegio[3].estado,
-      // ),
 
+    this.state = {
       loading: false,
       lista: [],
       restart: false,
 
-      buscar: '',
+      buscar: "",
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
 
       codiso: convertNullText(this.props.moneda.codiso),
 
-      vista: 'tabla',
+      vista: "tabla",
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
     this.refPaginacion = React.createRef();
-
     this.refSearch = React.createRef();
 
     this.abortControllerTable = new AbortController();
@@ -95,16 +83,10 @@ class Productos extends CustomComponent {
   |
   */
 
-  /**
-   * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
-   */
   async componentDidMount() {
     await this.loadingData();
   }
 
-  /**
-   * @description Método que se ejecuta antes de que el componente se desmonte del DOM.
-   */
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
@@ -124,26 +106,23 @@ class Productos extends CustomComponent {
   */
 
   async loadingData() {
-    if (
-      this.props.productoLista &&
-      this.props.productoLista.data &&
-      this.props.productoLista.paginacion
-    ) {
-      this.setState(this.props.productoLista.data);
+    const productoLista = this.props.productoLista;
+    if (productoLista && productoLista.data && productoLista.paginacion) {
+      this.setState(productoLista.data);
       this.refPaginacion.current.upperPageBound =
-        this.props.productoLista.paginacion.upperPageBound;
+        productoLista.paginacion.upperPageBound;
       this.refPaginacion.current.lowerPageBound =
-        this.props.productoLista.paginacion.lowerPageBound;
+        productoLista.paginacion.lowerPageBound;
       this.refPaginacion.current.isPrevBtnActive =
-        this.props.productoLista.paginacion.isPrevBtnActive;
+        productoLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive =
-        this.props.productoLista.paginacion.isNextBtnActive;
+        productoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
-        this.props.productoLista.paginacion.pageBound;
+        productoLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion =
-        this.props.productoLista.paginacion.messagePaginacion;
+        productoLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.productoLista.data.buscar);
+      this.refSearch.current.initialize(productoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -198,11 +177,11 @@ class Productos extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
-    await this.setStateAsync({
+  fillTable = async (opcion, buscar = "") => {
+    this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -222,16 +201,13 @@ class Productos extends CustomComponent {
         String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -248,20 +224,20 @@ class Productos extends CustomComponent {
   };
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleChangeView = (value) => {
     this.setState({ vista: value }, () => this.updateReduxState());
@@ -329,20 +305,236 @@ class Productos extends CustomComponent {
   };
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de renderizado
-    |--------------------------------------------------------------------------
-    |
-    | El método render() es esencial en los componentes de React y se encarga de determinar
-    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-    | actuales del componente para determinar lo que se mostrará.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de renderizado
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
+  renderTable() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td colSpan={11} className="px-6 py-12 text-center">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+              <p className="text-gray-500">Cargando información...</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr>
+          <td colSpan={11} className="px-6 py-12 text-center">
+            <div className="text-gray-500">
+              <i className="bi bi-box text-4xl mb-3 block"></i>
+              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-sm">Intenta cambiar los filtros</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    return (
+      this.state.lista.map((item) => {
+        const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO" : item.idTipoProducto === SERVICIO ? "SERVICIO" : item.idTipoProducto === COMBO ? "COMBO" : "ACTIVO FIJO";
+
+        const estadoClass = item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+        return (
+          <tr key={item.idProducto} className="hover:bg-gray-50 transition-colors">
+            <td className="px-2 py-4 text-sm text-gray-900 text-center">
+              {item.id}
+            </td>
+            <td className="px-2 py-4 text-sm text-gray-900">
+              {tipo}
+              <div className="text-sm text-gray-500">{item.venta}</div>
+            </td>
+            <td className="px-2 py-4">
+              <div className="w-full flex justify-center">
+                <Image
+                  default={images.noImage}
+                  src={item.imagen}
+                  alt={item.nombre}
+                  overrideClass="w-20 h-20 object-contain border border-solid border-[#e2e8f0] rounded"
+                />
+              </div>
+            </td>
+            <td className="px-2 py-4">
+              <div className="text-sm text-gray-500">
+                {item.codigo}
+              </div>
+              <div className="text-sm font-medium text-gray-900">
+                {item.nombre}
+              </div>
+              {
+                item.preferido === 1 && (
+                  <div className="mt-1 inline-flex items-center text-yellow-500">
+                    <i className="fa fa-star text-base mr-1"></i>
+                    <span className="text-base">Preferido</span>
+                  </div>
+                )
+              }
+            </td>
+            <td className="px-2 py-4 text-sm font-medium text-gray-900 text-right">
+              {formatCurrency(item.precio, this.state.codiso)}
+            </td>
+            <td className="px-2 py-4 text-sm text-gray-900">
+              {item.medida}
+            </td>
+            <td className="px-2 py-4 text-sm text-gray-900">
+              {item.categoria}
+            </td>
+            <td className="px-2 py-4 text-center">
+              <span
+                className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoClass}`}
+              >
+                {item.estado === 1 ? 'Activo' : 'Inactivo'}
+              </span>
+            </td>
+            <td className="px-2 py-4 text-center">
+              <button
+                className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                title="Editar"
+                onClick={() => this.handleEditar(item.idProducto)}
+              >
+                <i className="bi bi-pencil text-base"></i>
+              </button>
+            </td>
+            <td className="px-2 py-4 text-center">
+              <button
+                className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
+                title="Eliminar"
+                onClick={() => this.handleEliminar(item.idProducto)}
+              >
+                <i className="bi bi-trash text-base"></i>
+              </button>
+            </td>
+          </tr>
+        );
+      })
+    )
+  }
+
+  renderCuadricula() {
+    if (this.state.loading) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <div className="text-center py-16 rounded border text-gray-500">
+          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+          <p className="text-lg font-medium">No se encontraron ventas</p>
+          <p className="text-sm">Intenta cambiar los filtros</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {
+          this.state.lista.map((item) => {
+            const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO" : item.idTipoProducto === SERVICIO ? "SERVICIO" : item.idTipoProducto === COMBO ? "COMBO" : "ACTIVO FIJO";
+
+            const estadoClass = item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+            return (
+              <div
+                key={item.idProducto}
+                className="bg-white rounded border transition group overflow-hidden relative"
+              >
+                <div className=" bg-white flex items-center justify-center p-2">
+                  <Image
+                    default={images.noImage}
+                    src={item.imagen}
+                    alt={item.nombre}
+                    overrideClass="w-full h-40 object-contain"
+                  />
+                </div>
+
+                <div className="absolute right-0 top-0">
+                  {item.preferido === 1 && (
+                    <FaStar className="w-6 h-6 text-yellow-500 m-2" />
+                  )}
+                </div>
+
+                <div className="py-2 px-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
+                      {item.nombre}
+                    </h5>
+                  </div>
+
+                  <div className="text-sm text-gray-500 mb-1">
+                    <span className="font-medium">Código:</span> {item.codigo}
+                  </div>
+
+                  <div className="text-sm text-gray-600 mb-1">
+                    <span className="font-medium">Tipo:</span> {tipo}
+                  </div>
+
+                  <div className="text-lg font-bold text-gray-900 mb-2">
+                    {formatCurrency(item.precio, this.state.codiso)}
+                  </div>
+
+                  <div className="text-sm text-gray-600 mb-1">
+                    <span className="font-medium">Medida:</span> {item.medida}
+                  </div>
+
+                  <div className="text-sm text-gray-600 mb-3">
+                    <span className="font-medium">Categoría:</span> {item.categoria}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${estadoClass}`}
+                    >
+                      {item.estado === 1 ? 'Activo' : 'Inactivo'}
+                    </span>
+
+                    <div className="flex gap-1">
+                      <button
+                        className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                        title="Editar"
+                        onClick={() => this.handleEditar(item.idProducto)}
+                      >
+                        <i className="bi bi-pencil text-lg"></i>
+                      </button>
+                      <button
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
+                        title="Eliminar"
+                        onClick={() => this.handleEliminar(item.idProducto)}
+                      >
+                        <i className="bi bi-trash text-lg"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }
 
   render() {
     const { vista } = this.state;
@@ -422,291 +614,65 @@ class Productos extends CustomComponent {
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        {vista === 'tabla' ? (
-          /* 📊 Vista Tabla */
-          <div className="bg-white rounded border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
-                      #
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                      Tipo
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                      Imagen
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">
-                      Nombre
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                      Precio
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                      Medida
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                      Categoría
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
-                      Editar
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
-                      Eliminar
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {this.state.loading ? (
+        <div
+          className={
+            vista === "tabla"
+              ? "bg-white rounded border overflow-hidden"
+              : "space-y-6"
+          }
+        >
+
+          {/* 📊 Vista Tabla  */}
+          {
+            vista === "tabla" && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan={11} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                          <p className="text-gray-500">
-                            Cargando información...
-                          </p>
-                        </div>
-                      </td>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Imagen</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Nombre</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Precio</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Medida</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Categoría</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Editar</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Eliminar</th>
                     </tr>
-                  ) : isEmpty(this.state.lista) ? (
-                    <tr>
-                      <td colSpan={11} className="px-6 py-12 text-center">
-                        <div className="text-gray-500">
-                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                          <p className="text-lg font-medium">
-                            No se encontraron productos
-                          </p>
-                          <p className="text-sm">Intenta cambiar el filtro</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      const tipo = item.tipo === 'PRODUCTO'
-                        ? 'Producto 🛒'
-                        : item.tipo === 'SERVICIO'
-                          ? 'Servicio 👷'
-                          : 'Combo 🎁';
-
-                      const estadoClass =
-                        item.estado === 1
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800';
-
-                      return (
-                        <tr key={item.idProducto} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-2 py-4 text-sm text-gray-900 text-center">
-                            {item.id}
-                          </td>
-                          <td className="px-2 py-4 text-sm text-gray-900">
-                            {tipo}
-                            <div className="text-sm text-gray-500">{item.venta}</div>
-                          </td>
-                          <td className="px-2 py-4">
-                            <div className="w-full flex justify-center">
-                              <Image
-                                default={images.noImage}
-                                src={item.imagen}
-                                alt={item.nombre}
-                                overrideClass="w-20 h-20 object-contain border border-solid border-[#e2e8f0] rounded"
-                              />
-                            </div>
-                          </td>
-                          <td className="px-2 py-4">
-                            <div className="text-sm text-gray-500">
-                              {item.codigo}
-                            </div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {item.nombre}
-                            </div>
-                            {item.preferido === 1 && (
-                              <div className="mt-1 inline-flex items-center text-yellow-500">
-                                <i className="fa fa-star text-base mr-1"></i>
-                                <span className="text-base">Preferido</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-2 py-4 text-sm font-medium text-gray-900 text-right">
-                            {formatCurrency(item.precio, this.state.codiso)}
-                          </td>
-                          <td className="px-2 py-4 text-sm text-gray-900">
-                            {item.medida}
-                          </td>
-                          <td className="px-2 py-4 text-sm text-gray-900">
-                            {item.categoria}
-                          </td>
-                          <td className="px-2 py-4 text-center">
-                            <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoClass}`}
-                            >
-                              {item.estado === 1 ? 'Activo' : 'Inactivo'}
-                            </span>
-                          </td>
-                          <td className="px-2 py-4 text-center">
-                            <button
-                              className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
-                              title="Editar"
-                              onClick={() => this.handleEditar(item.idProducto)}
-                            >
-                              <i className="bi bi-pencil text-base"></i>
-                            </button>
-                          </td>
-                          <td className="px-2 py-4 text-center">
-                            <button
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
-                              title="Eliminar"
-                              onClick={() => this.handleEliminar(item.idProducto)}
-                            >
-                              <i className="bi bi-trash text-base"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        ) : (
-          /* 🟦 Vista Cuadrícula */
-          <div className="space-y-6">
-            {this.state.loading ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {this.renderTable()}
+                  </tbody>
+                </table>
               </div>
-            ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded border">
-                <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
-                <p className="text-lg font-medium text-gray-900 mb-2">
-                  No se encontraron productos
-                </p>
-                <p className="text-sm text-gray-500">
-                  Intenta cambiar el filtro de búsqueda
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {this.state.lista.map((item, index) => {
-                  const tipo = item.tipo === 'PRODUCTO'
-                    ? 'Producto 🛒'
-                    : item.tipo === 'SERVICIO'
-                      ? 'Servicio 👷'
-                      : 'Combo 🎁';
+            )
+          }
 
-                  const estadoClass =
-                    item.estado === 1
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800';
+          {/* 🟦 Vista Cuadrícula */}
+          {
+            vista === "cuadricula" && (
+              <>{this.renderCuadricula()}</>
+            )
+          }
 
-                  return (
-                    <div
-                      key={item.idProducto}
-                      className="bg-white rounded border transition group overflow-hidden relative"
-                    >
-                      <div className=" bg-white flex items-center justify-center p-2">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.nombre}
-                          overrideClass="w-full h-40 object-contain"
-                        />
-                      </div>
-
-                      <div className="absolute right-0 top-0">
-                        {item.preferido === 1 && (
-                          <FaStar className="w-6 h-6 text-yellow-500 m-2" />
-                        )}
-                      </div>
-
-                      <div className="py-2 px-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
-                            {item.nombre}
-                          </h5>
-                        </div>
-
-                        <div className="text-sm text-gray-500 mb-1">
-                          <span className="font-medium">Código:</span> {item.codigo}
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Tipo:</span> {tipo}
-                        </div>
-
-                        <div className="text-lg font-bold text-gray-900 mb-2">
-                          {formatCurrency(item.precio, this.state.codiso)}
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Medida:</span> {item.medida}
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-3">
-                          <span className="font-medium">Categoría:</span> {item.categoria}
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${estadoClass}`}
-                          >
-                            {item.estado === 1 ? 'Activo' : 'Inactivo'}
-                          </span>
-
-                          <div className="flex gap-1">
-                            <button
-                              className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
-                              title="Editar"
-                              onClick={() => this.handleEditar(item.idProducto)}
-                            >
-                              <i className="bi bi-pencil text-lg"></i>
-                            </button>
-                            <button
-                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
-                              title="Eliminar"
-                              onClick={() => this.handleEliminar(item.idProducto)}
-                            >
-                              <i className="bi bi-trash text-lg"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-2 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        )}
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              vista === "tabla"
+                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }

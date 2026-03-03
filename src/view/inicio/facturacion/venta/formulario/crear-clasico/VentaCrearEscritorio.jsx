@@ -23,7 +23,7 @@ import {
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
-  detailForIdVenta,
+  detailsForIdVenta,
   comboImpuesto,
   filtrarProductoVenta,
   createVenta,
@@ -1696,7 +1696,7 @@ class VentaCrearEscritorio extends CustomComponent {
       idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailForIdVenta(
+    const response = await detailsForIdVenta(
       params,
       this.abortControllerVenta.signal,
     );

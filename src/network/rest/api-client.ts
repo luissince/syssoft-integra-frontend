@@ -2,9 +2,12 @@ import ErrorResponse from '@/model/class/error-response';
 import Resolve, { ResolveResponse } from '@/model/class/resolve';
 import SuccessResponse from '@/model/class/response';
 import BranchInterface from '@/model/ts/interface/branch';
+import { CreditNoteGetInterface, CreditNoteResponseInterface } from '@/model/ts/interface/credit-note';
+import { CreditNotesReasonsOptionsInterface } from '@/model/ts/interface/credit-notes-reasons';
 import DashboardInterface from '@/model/ts/interface/dashboard';
 import { InventoryDashboardInterface } from '@/model/ts/interface/inventory';
 import { ProfileOptionsInterface } from '@/model/ts/interface/profile';
+import { SaleFilterAllInterface, SaleGetIdInterface } from '@/model/ts/interface/sale';
 import { StoreOptionsInterface } from '@/model/ts/interface/store';
 import { AuthenticateInterface, UserGetInterface, UserResponseInterface } from '@/model/ts/interface/user';
 import axios from 'axios';
@@ -25,6 +28,13 @@ apiClient.interceptors.request.use((config) => {
   }
 
   return config;
+});
+
+apiClient.interceptors.response.use((response) => {
+
+  console.log(response.status);
+
+  return response;
 });
 
 export async function initDashboard(params: Record<string, any>, signal: AbortSignal): Promise<ResolveResponse<DashboardInterface>> {
@@ -164,4 +174,73 @@ export async function optionsAlmacen(idSucursal: string, signal: AbortSignal): P
       signal: signal,
     }),
   );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE MOTIVO AJUSTE
+|--------------------------------------------------------------------------
+*/
+
+export async function optionsMotivo(signal: AbortSignal): Promise<ResolveResponse<CreditNotesReasonsOptionsInterface[]>> {
+  return await Resolve.safe<CreditNotesReasonsOptionsInterface[]>(
+    apiClient.get(`/api/motivo/options`, {
+      signal: signal,
+    }),
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE VENTA
+|--------------------------------------------------------------------------
+*/
+
+export async function filterAllVenta(params: Record<string, any>, signal: AbortSignal): Promise<SuccessResponse<SaleFilterAllInterface[]> | ErrorResponse> {
+  return await Resolve.resolve<SaleFilterAllInterface[]>(
+    apiClient.get('/api/venta/filter-all', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function getByIdVenta(idVenta, signal): Promise<ResolveResponse<SaleGetIdInterface>> {
+  return await Resolve.safe<SaleGetIdInterface>(
+    apiClient.get(`/api/venta/${idVenta}`, {
+      signal: signal,
+    }),
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE NOTA DE CRÉDITO
+|--------------------------------------------------------------------------
+*/
+export async function listNotaCredito(params: Record<string, any>, signal: AbortSignal): Promise<ResolveResponse<CreditNoteResponseInterface>> {
+  return await Resolve.safe(
+    apiClient.get('/api/notacredito/', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function createNotaCredito(body: Record<string, any>) {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/notacredito/', body),
+  );
+}
+
+export async function getByIdNotaCredito(idNotaCredito: string, signal: AbortSignal): Promise<ResolveResponse<CreditNoteGetInterface>> {
+  return await Resolve.safe<CreditNoteGetInterface>(
+    apiClient.get(`/api/notacredito/${idNotaCredito}`, {
+      signal: signal
+    }),
+  );
+}
+
+export function pdfNotaCredito(idNotaCredito: string, size: string, outputType: string = "pdf"): string {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/notacredito/${idNotaCredito}/pdf/${size}/${outputType}`;
 }

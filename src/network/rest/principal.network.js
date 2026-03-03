@@ -18,6 +18,13 @@ instancePrincipal.interceptors.request.use((config) => {
   return config;
 });
 
+instancePrincipal.interceptors.response.use((response) => {
+
+  console.log(response.status);
+
+  return response;
+});
+
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE DASHBOARD
@@ -539,16 +546,7 @@ export async function comboAlmacen(params, signal) {
 */
 export async function listVenta(params, signal) {
   return await Resolve.resolve(
-    instancePrincipal.get('/api/venta/list', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
-
-export async function listFiltrarVenta(params, signal) {
-  return await Resolve.resolve(
-    instancePrincipal.get('/api/venta/filter', {
+    instancePrincipal.get('/api/venta', {
       signal: signal,
       params: params,
     }),
@@ -569,16 +567,8 @@ export async function cancelVenta(params) {
   );
 }
 
-export async function detailVenta(params, signal) {
-  return await Resolve.resolve(
-    instancePrincipal.get('/api/venta/detail', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
 
-export async function detailForIdVenta(params, signal) {
+export async function detailsForIdVenta(params, signal) {
   return await Resolve.resolve(
     instancePrincipal.get(`/api/venta/for-sale/${params.idVenta}/${params.idAlmacen}`, {
       signal: signal,
@@ -587,11 +577,10 @@ export async function detailForIdVenta(params, signal) {
 }
 
 
-export async function detailsVenta(params, signal) {
+export async function getDetailsByIdVenta(idVenta, signal) {
   return await Resolve.resolve(
-    instancePrincipal.get('/api/venta/details', {
+    instancePrincipal.get(`/api/venta/${idVenta}/details`, {
       signal: signal,
-      params: params,
     }),
   );
 }
@@ -2204,28 +2193,6 @@ export async function comboMedida(signal) {
 | ENDPOINTS DE NOTA DE CRÉDITO
 |--------------------------------------------------------------------------
 */
-export async function listNotaCredito(params, signal) {
-  return await Resolve.resolve(
-    instancePrincipal.get('/api/notacredito/', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
-
-export async function createNotaCredito(body) {
-  return await Resolve.resolve(
-    instancePrincipal.post('/api/notacredito/', body),
-  );
-}
-
-export async function getNotaCredito(idNotaCredito, signal) {
-  return await Resolve.resolve(
-    instancePrincipal.get(`/api/notacredito/${idNotaCredito}`, {
-      signal: signal
-    }),
-  );
-}
 
 export async function cancelNotaCredito(idNotaCredito) {
   return await Resolve.resolve(
@@ -2244,14 +2211,6 @@ export async function detailNotaCredito(idNotaCredito, signal) {
 export async function submitNotaCredito(idNotaCredito, signal) {
   return await Resolve.resolve(
     instancePrincipal.get(`/api/notacredito/${idNotaCredito}/submit`, {
-      signal: signal
-    }),
-  );
-}
-
-export async function pdfNotaCredito(idNotaCredito, signal) {
-  return await Resolve.resolve(
-    instancePrincipal.get(`/api/notacredito/${idNotaCredito}/pdf`, {
       signal: signal
     }),
   );
@@ -2502,7 +2461,7 @@ export async function detailNotifications(params, signal) {
 
 export async function listCpeSunat(params, signal) {
   return await Resolve.resolve(
-    instancePrincipal.get('/api/sunat/list/cpesunat', {
+    instancePrincipal.get('/api/sunat/', {
       signal: signal,
       params: params,
     }),
@@ -2515,21 +2474,40 @@ export async function facturarCpeSunat(idVenta) {
   );
 }
 
-export async function anularBoletaCpeSunat(idVenta) {
+export async function notaCreditoCpeSunat(idNotaCredito) {
   return await Resolve.resolve(
-    instancePrincipal.get(`/api/sunat/anular/boleta/${idVenta}`),
+    instancePrincipal.get(`/api/sunat/nota-credito/${idNotaCredito}`),
   );
 }
 
-export async function anularFacturaCpeSunat(idVenta) {
+export async function notaCreditoResumenDiarioCpeSunat(idNotaCredito) {
   return await Resolve.resolve(
-    instancePrincipal.get(`/api/sunat/anular/factura/${idVenta}`),
+    instancePrincipal.get(`/api/sunat/nota-credito/resumen-diario/${idNotaCredito}`),
+  );
+}
+
+export async function notaCreditoComunicacionDeBajaCpeSunat(idNotaCredito) {
+  return await Resolve.resolve(
+    instancePrincipal.get(`/api/sunat/nota-credito/comunicacion-de-baja/${idNotaCredito}`),
+  );
+}
+
+
+export async function resumenDiarioCpeSunat(idVenta) {
+  return await Resolve.resolve(
+    instancePrincipal.get(`/api/sunat/resumen-diario/${idVenta}`),
+  );
+}
+
+export async function comunicacionDeBajaCpeSunat(idVenta) {
+  return await Resolve.resolve(
+    instancePrincipal.get(`/api/sunat/comunicacion-de-baja/${idVenta}`),
   );
 }
 
 export async function guiaRemisionCpeSunat(idGuiaRemision) {
   return await Resolve.resolve(
-    instancePrincipal.get(`/api/sunat/guia/remision/${idGuiaRemision}`),
+    instancePrincipal.get(`/api/sunat/guia-remision/${idGuiaRemision}`),
   );
 }
 

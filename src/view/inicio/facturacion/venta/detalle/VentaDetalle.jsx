@@ -11,7 +11,6 @@ import {
 import { connect } from 'react-redux';
 import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
-  detailVenta,
   documentsPdfInvoicesVenta,
 } from '@/network/rest/principal.network';
 import SuccessReponse from '@/model/class/response';
@@ -32,6 +31,9 @@ import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
 import ModalPrinter from './component/ModalPrinter';
+import { th } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { getByIdVenta } from '@/network/rest/api-client';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -53,33 +55,19 @@ class VentaDetalle extends CustomComponent {
       msgLoading: "Cargando datos...",
 
       idVenta: "",
-      comprobante: "",
-      cliente: "",
-      celular: "",
-      email: "",
-      fecha: "",
-      formaPago: "",
-      estado: "",
-      codiso: "",
-      simbolo: "",
-      total: 0,
-      usuario: "",
-      observacion: "",
-      nota: "",
-
-      isOpenModalPrinter: false,
-
-      isOpenSendWhatsapp: false,
-
+      cabecera: {},
       detalles: [],
       transaccion: [],
+
+      isOpenModalPrinter: false,
+      isOpenSendWhatsapp: false,
     };
 
     // Referencia para el modal enviar WhatsApp
     this.refModalSendWhatsApp = React.createRef();
 
     // Anular las peticiones
-    this.abortControllerView = new AbortController();
+    this.abortControllerView = null;
   }
 
   /*
@@ -100,14 +88,16 @@ class VentaDetalle extends CustomComponent {
     const url = this.props.location.search;
     const idVenta = new URLSearchParams(url).get("idVenta");
     if (isText(idVenta)) {
-      await this.loadingData(idVenta);
+      await this.loadData(idVenta);
     } else {
-      this.close();
+      this.handleGoBack();
     }
   }
 
   componentWillUnmount() {
-    this.abortControllerView.abort();
+    if (this.abortControllerView) {
+      this.abortControllerView.abort();
+    }
   }
 
   /*
@@ -124,12 +114,10 @@ class VentaDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(id) {
-    const params = {
-      idVenta: id,
-    };
+  async loadData(id) {
+    this.abortControllerView = new AbortController();
 
-    const response = await detailVenta(params, this.abortControllerView.signal);
+    const response = await getByIdVenta(id, this.abortControllerView.signal);
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
@@ -137,8 +125,7 @@ class VentaDetalle extends CustomComponent {
       alertKit.warning({
         title: "Venta",
         message: response.getMessage(),
-      }, () => {
-        this.close();
+        onClose: this.handleGoBack,
       });
       return;
     }
@@ -146,63 +133,9 @@ class VentaDetalle extends CustomComponent {
     response instanceof SuccessReponse;
     const venta = response.data;
 
-    const {
-      comprobante,
-      serie,
-      numeracion,
-      documento,
-      informacion,
-      celular,
-      email,
-      fecha,
-      hora,
-      idFormaPago,
-      estado,
-      simbolo,
-      codiso,
-      usuario,
-      observacion,
-      nota,
-    } = venta.cabecera;
-
-    const monto = venta.detalles.reduce(
-      (accumlate, item) => accumlate + item.precio * item.cantidad,
-      0,
-    );
-
-    const nuevoEstado =
-      estado === 1 ? (
-        <span className="text-success">COBRADO</span>
-      ) : estado === 2 ? (
-        <span className="text-warning">POR COBRAR</span>
-      ) : estado === 3 ? (
-        <span className="text-danger">ANULADO</span>
-      ) : (
-        <span className="text-primary">POR LLEVAR</span>
-      );
-
-    const tipo =
-      idFormaPago === CONTADO
-        ? "CONTADO"
-        : "CREDITO"
-
     this.setState({
       idVenta: id,
-      comprobante: comprobante,
-      serieNumeracion: serie + "-" + formatNumberWithZeros(numeracion),
-      cliente: documento + " - " + informacion,
-      celular: celular,
-      email: email,
-      fecha: fecha + " " + formatTime(hora),
-      formaPago: tipo,
-      estado: nuevoEstado,
-      simbolo: simbolo,
-      codiso: codiso,
-      usuario: usuario,
-      observacion: observacion,
-      nota: nota,
-      total: rounded(monto),
-
+      cabecera: venta.cabecera,
       detalles: venta.detalles,
       transaccion: venta.transaccion,
 
@@ -210,9 +143,6 @@ class VentaDetalle extends CustomComponent {
     });
   }
 
-  close = () => {
-    this.props.history.goBack();
-  };
 
   /*
   |--------------------------------------------------------------------------
@@ -229,6 +159,10 @@ class VentaDetalle extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
+
+  handleGoBack = () => {
+    this.props.history.goBack();
+  };
 
   //------------------------------------------------------------------------------------------
   // Eventos para impresión
@@ -342,7 +276,7 @@ class VentaDetalle extends CustomComponent {
       <tr key={index} className="hover:bg-gray-50">
         <td className="p-4 text-gray-700">{item.id}</td>
         <td className="p-4 text-center">
-          <div className="w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+          <div className="w-24 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
             <Image
               default={images.noImage}
               src={item.imagen}
@@ -355,12 +289,11 @@ class VentaDetalle extends CustomComponent {
           <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
           <p className="font-medium">{item.producto}</p>
         </td>
-        <td className="p-4 text-gray-700">{item.medida}</td>
         <td className="p-4 text-gray-700">{item.categoria}</td>
         <td className="p-4 text-gray-700 text-right">{rounded(item.cantidad)}</td>
         <td className="p-4 text-gray-700 text-right">{item.impuesto}</td>
         <td className="p-4 text-gray-700 text-right">
-          {formatCurrency(item.precio, this.state.codiso)}
+          {formatCurrency(item.precio, this.state.codiso)} <small>x{item.medida}</small>
         </td>
         <td className="p-4 text-gray-900 font-medium text-right">
           {formatCurrency(item.cantidad * item.precio, this.state.codiso)}
@@ -370,79 +303,70 @@ class VentaDetalle extends CustomComponent {
   }
 
   renderTotal() {
-    let subTotal = 0;
-    let total = 0;
+    const { detalles, codiso } = this.state;
 
-    for (const item of this.state.detalles) {
-      const cantidad = item.cantidad;
-      const valor = item.precio;
-      const impuesto = item.porcentaje;
+    const { subTotal, total, impuestos } = detalles.reduce((acc, item) => {
+      const totalItem = item.cantidad * item.precio;
+      const subNeto = calculateTaxBruto(item.porcentaje, totalItem);
+      const impuestoValor = calculateTax(item.porcentaje, subNeto);
 
-      const valorActual = cantidad * valor;
-      const valorSubNeto = calculateTaxBruto(impuesto, valorActual);
-      const valorImpuesto = calculateTax(impuesto, valorSubNeto);
-      const valorNeto = valorSubNeto + valorImpuesto;
+      acc.subTotal += subNeto;
+      acc.total += subNeto + impuestoValor;
 
-      subTotal += valorSubNeto;
-      total += valorNeto;
-    }
+      if (!acc.impuestos[item.idImpuesto]) {
+        acc.impuestos[item.idImpuesto] = {
+          nombre: item.impuesto,
+          valor: 0,
+        };
+      }
 
-    const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.precio;
-        const subTotal = calculateTaxBruto(item.porcentaje, total);
-        const impuestoTotal = calculateTax(item.porcentaje, subTotal);
+      acc.impuestos[item.idImpuesto].valor += impuestoValor;
 
-        const existingImpuesto = acc.find(
-          (imp) => imp.idImpuesto === item.idImpuesto,
-        );
+      return acc;
+    }, { subTotal: 0, total: 0, impuestos: {} });
 
-        if (existingImpuesto) {
-          existingImpuesto.valor += impuestoTotal;
-        } else {
-          acc.push({
-            idImpuesto: item.idImpuesto,
-            nombre: item.impuesto,
-            valor: impuestoTotal,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      return resultado.map((impuesto, index) => (
+    const impuestosGenerado = Object.entries(impuestos).map(
+      ([id, impuesto], index) => (
         <tr key={index}>
-          <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+          <th className="p-2 text-gray-600 text-right">
+            {impuesto.nombre}:
+          </th>
           <td className="p-2 text-gray-900 font-medium text-right">
-            {formatCurrency(impuesto.valor, this.state.codiso)}
+            {formatCurrency(impuesto.valor, codiso)}
           </td>
         </tr>
-      ));
-    };
+      )
+    );
 
     return (
       <>
         <tr>
           <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
           <td className="p-2 text-gray-900 font-medium text-right">
-            {formatCurrency(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, codiso)}
           </td>
         </tr>
-        {impuestosGenerado()}
+
+        {impuestosGenerado}
+
         <tr>
           <td colSpan={2} className="py-2">
             <div className="border-t border-gray-200"></div>
           </td>
         </tr>
+
         <tr>
-          <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+          <th className="p-2 text-gray-800 font-bold text-right text-lg">
+            TOTAL:
+          </th>
           <td className="p-2 text-gray-900 font-bold text-right text-lg">
-            {formatCurrency(total, this.state.codiso)}
+            {formatCurrency(total, codiso)}
           </td>
         </tr>
       </>
     );
   }
+
   renderTransaciones() {
     if (isEmpty(this.state.transaccion)) {
       return (
@@ -488,6 +412,8 @@ class VentaDetalle extends CustomComponent {
   }
 
   render() {
+    const { cabecera, detalles } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
@@ -498,7 +424,7 @@ class VentaDetalle extends CustomComponent {
         <Title
           title="Venta"
           subTitle="DETALLE"
-          handleGoBack={() => this.close()}
+          handleGoBack={this.handleGoBack}
         />
 
         <ModalSendWhatsApp
@@ -553,7 +479,7 @@ class VentaDetalle extends CustomComponent {
             className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
-            <i className="fa fa-whatsapp"></i> WhatsApp
+            <i className="fa fa-whatsapp !text-base"></i> WhatsApp
           </button>
         </div>
 
@@ -563,24 +489,23 @@ class VentaDetalle extends CustomComponent {
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {[
-              { label: 'Comprobante:', value: this.state.comprobante },
-              { label: 'Serie - Num.:', value: this.state.serieNumeracion },
-              { label: 'Cliente:', value: this.state.cliente },
-              { label: 'N° de celular:', value: this.state.celular },
-              { label: 'Correo electr.:', value: this.state.email },
-              { label: 'Fecha:', value: this.state.fecha },
-              { label: 'Observación:', value: this.state.observacion },
-              { label: 'Nota:', value: this.state.nota },
-              { label: 'Forma de Pago:', value: this.state.formaPago },
-              { label: 'Estado:', value: this.state.estado },
-              { label: 'Usuario:', value: this.state.usuario },
-              { label: 'Total:', value: formatCurrency(this.state.total, this.state.codiso) },
+              { label: 'Comprobante.:', value: cabecera.comprobante + ' (' + cabecera.serie + ' - ' + formatNumberWithZeros(cabecera.numeracion) + ')' },
+                 { label: 'Cliente:', value: cabecera.documento + ' - ' + cabecera.informacion },
+               { label: 'Fecha:', value: cabecera.fecha + ' ' + formatTime(cabecera.hora) },
+              { label: 'Forma de Pago:', value: cabecera.idFormaPago === CONTADO ? "CONTADO" : "CREDITO" },
+              { label: 'Estado:', value: cabecera.estado === 1 ? "COBRADO" : cabecera.estado === 2 ? "POR COBRAR" : cabecera.estado === 3 ? "ANULADO" : "POR LLEVAR", valueClass: cabecera.estado === 1 ? "bg-green-100 text-green-800" : cabecera.estado === 2 ? "bg-orange-100 text-orange-800" : cabecera.estado === 3 ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800" },
+              { label: 'Observación:', value: cabecera.observacion },
+              { label: 'Nota:', value: cabecera.nota },
+              { label: 'Usuario:', value: cabecera.usuario },
             ].map((item, i) => (
               <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-2">
-                <p className="text-sm text-gray-600 uppercase">
+                <p className="text-sm text-gray-600 uppercase px-2 py-1">
                   {item.label}
                 </p>
-                <p className="text-sm md:col-span-3 text-gray-900 font-medium">
+                <p className={cn(
+                  "text-sm md:col-span-3 font-medium w-fit px-2 py-1 rounded",
+                  item.valueClass ?? "text-gray-900"
+                )}>
                   {item.value}
                 </p>
               </div>
@@ -599,7 +524,6 @@ class VentaDetalle extends CustomComponent {
                   <th className="p-4 text-sm uppercase">#</th>
                   <th className="p-4 text-sm uppercase">Imagen</th>
                   <th className="p-4 text-sm uppercase">Producto</th>
-                  <th className="p-4 text-sm uppercase">Unidad</th>
                   <th className="p-4 text-sm uppercase">Categoría</th>
                   <th className="p-4 text-right text-sm uppercase">Cantidad</th>
                   <th className="p-4 text-right text-sm uppercase">Impuesto</th>

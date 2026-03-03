@@ -210,25 +210,22 @@ class CotizacionCrear extends CustomComponent {
     const impuesto = impuestos.find((item) => item.preferido === 1);
     const almacen = almacenes.find((item) => item.predefinido === 1);
 
-    this.setState(
-      {
-        comprobantes,
-        monedas,
-        impuestos,
-        almacenes,
+    this.setState({
+      comprobantes,
+      monedas,
+      impuestos,
+      almacenes,
 
-        idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-        idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-        idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-        codiso: isEmpty(moneda) ? '' : moneda.codiso,
-        idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+      idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
+      idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
+      idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
+      codiso: isEmpty(moneda) ? '' : moneda.codiso,
+      idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
 
-        loading: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+      loading: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   updateReduxState() {
@@ -512,9 +509,7 @@ class CotizacionCrear extends CustomComponent {
   };
 
   handleSelectItemCliente = async (value) => {
-    this.refCliente.current.initialize(
-      value.documento + ' - ' + value.informacion,
-    );
+    this.refCliente.current.initialize(value.documento + ' - ' + value.informacion);
 
     this.setState({
       cliente: value,

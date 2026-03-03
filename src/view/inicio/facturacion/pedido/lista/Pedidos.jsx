@@ -17,23 +17,8 @@ import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Title from '@/components/Title';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '@/components/Table';
-import { SpinnerTable } from '@/components/Spinner';
 import Paginacion from '@/components/Paginacion';
-import Button from '@/components/Button';
 import Search from '@/components/Search';
-import Input from '@/components/Input';
-import Select from '@/components/Select';
 import PropTypes from 'prop-types';
 import {
   setListaPedidoData,
@@ -125,26 +110,23 @@ class Pedidos extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (
-      this.props.pedidoLista &&
-      this.props.pedidoLista.data &&
-      this.props.pedidoLista.paginacion
-    ) {
-      this.setState(this.props.pedidoLista.data);
+    const pedidoLista = this.props.pedidoLista;
+    if (pedidoLista && pedidoLista.data && pedidoLista.paginacion) {
+      this.setState(pedidoLista.data);
       this.refPaginacion.current.upperPageBound =
-        this.props.pedidoLista.paginacion.upperPageBound;
+        pedidoLista.paginacion.upperPageBound;
       this.refPaginacion.current.lowerPageBound =
-        this.props.pedidoLista.paginacion.lowerPageBound;
+        pedidoLista.paginacion.lowerPageBound;
       this.refPaginacion.current.isPrevBtnActive =
-        this.props.pedidoLista.paginacion.isPrevBtnActive;
+        pedidoLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive =
-        this.props.pedidoLista.paginacion.isNextBtnActive;
+        pedidoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
-        this.props.pedidoLista.paginacion.pageBound;
+        pedidoLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion =
-        this.props.pedidoLista.paginacion.messagePaginacion;
+        pedidoLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.pedidoLista.data.buscar);
+      this.refSearch.current.initialize(pedidoLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -243,8 +225,7 @@ class Pedidos extends CustomComponent {
         totalPaginacion: totalPaginacion,
       }, () => {
         this.updateReduxState();
-      },
-      );
+      });
     }
 
     if (response instanceof ErrorResponse) {

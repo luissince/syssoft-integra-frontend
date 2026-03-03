@@ -17,7 +17,7 @@ const ImageUpload = ({
   accept,
   onChange,
   onClear,
-  onDownload,
+  onDownload = null,
 }) => (
   <div className={`${className}`}>
     {label && (

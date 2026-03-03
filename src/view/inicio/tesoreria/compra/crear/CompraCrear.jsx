@@ -4,6 +4,7 @@ import CustomComponent from '@/components/CustomComponent';
 import {
   isEmpty,
   isText,
+  validateMany,
 } from '@/helper/utils.helper';
 import { connect } from 'react-redux';
 import { COMPRA } from '@/model/types/tipo-comprobante';
@@ -768,64 +769,40 @@ class CompraCrear extends CustomComponent {
       detalles,
     } = this.state;
 
-    if (!isText(idComprobante)) {
-      alertKit.warning({
-        title: "Compra",
+    const valid = await validateMany([
+      {
+        value: idComprobante,
         message: "Seleccione su comprobante.",
-      }, () => {
-        this.refComprobante.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(proveedor)) {
-      alertKit.warning({
-        title: "Compra",
+        ref: this.refComprobante
+      },
+      {
+        value: proveedor,
         message: "Seleccione un proveedor.",
-      }, () => {
-        this.refProveedorValue.current.focus();
-      });
-      return;
-    }
-
-    if (!isText(idMoneda)) {
-      alertKit.warning({
-        title: "Compra",
+        ref: this.refProveedorValue
+      },
+      {
+        value: idMoneda,
         message: "Seleccione su moneda.",
-      }, () => {
-        this.refMoneda.current.focus();
-      });
-      return;
-    }
-    if (!isText(idImpuesto)) {
-      alertKit.warning({
-        title: "Compra",
-        message: "Seleccione el impuest.o",
-      }, () => {
-        this.refImpuesto.current.focus();
-      });
-      return;
-    }
-
-    if (!isText(idAlmacenDestino)) {
-      alertKit.warning({
-        title: "Compra",
+        ref: this.refMoneda
+      },
+      {
+        value: idImpuesto,
+        message: "Seleccione el impuesto.",
+        ref: this.refImpuesto
+      },
+      {
+        value: idAlmacenDestino,
         message: "Seleccione su almacen.",
-      }, () => {
-        this.refAlmacenDestino.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(detalles)) {
-      alertKit.warning({
-        title: "Compra",
+        ref: this.refAlmacenDestino
+      },
+      {
+        value: isEmpty(detalles),
         message: "Agregar algún producto a la lista.",
-      }, () => {
-        this.refProductoValue.current.focus();
-      });
-      return;
-    }
+        ref: this.refProductoValue,
+      },
+    ], "Compra");
+
+    if (!valid) return;
 
     this.handleOpenModalTerminal();
   };
@@ -987,7 +964,7 @@ class CompraCrear extends CustomComponent {
       await callback();
 
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const response = await createCompra(data);
@@ -1001,7 +978,7 @@ class CompraCrear extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Compra',
+          title: "Compra",
           message: response.getMessage(),
         });
       }

@@ -8,17 +8,17 @@ import {
   isText,
   guId,
   getPathNavigation,
-} from '../../../../helper/utils.helper';
+} from '@/helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/ui/container-wrapper';
-import { images } from '../../../../helper';
-import SuccessReponse from '../../../../model/class/response';
-import ErrorResponse from '../../../../model/class/error-response';
+import Paginacion from '@/components/Paginacion';
+import ContainerWrapper from '@/components/ui/container-wrapper';
+import { images } from '@/helper';
+import SuccessReponse from '@/model/class/response';
+import ErrorResponse from '@/model/class/error-response';
 import {
-  anularBoletaCpeSunat,
-  anularFacturaCpeSunat,
+  resumenDiarioCpeSunat,
+  comunicacionDeBajaCpeSunat,
   comboComprobante,
   comboSucursal,
   documentsPdfInvoicesGuiaRemision,
@@ -27,28 +27,31 @@ import {
   facturarCpeSunat,
   guiaRemisionCpeSunat,
   listCpeSunat,
+  notaCreditoCpeSunat,
   obtenerXmlSunat,
-} from '../../../../network/rest/principal.network';
+  notaCreditoResumenDiarioCpeSunat,
+  notaCreditoComunicacionDeBajaCpeSunat,
+} from '@/network/rest/principal.network';
 import { CANCELED } from '@/constants/requestStatus';
 import CustomComponent from '@/components/CustomComponent';
 import {
   VENTA,
   GUIA_DE_REMISION,
   NOTA_DE_CREDITO,
-} from '../../../../model/types/tipo-comprobante';
-import { SpinnerView } from '../../../../components/Spinner';
-import Title from '../../../../components/Title';
-import Button from '../../../../components/Button';
-import Search from '../../../../components/Search';
+} from '@/model/types/tipo-comprobante';
+import { SpinnerView } from '@/components/Spinner';
+import Title from '@/components/Title';
+import Button from '@/components/Button';
+import Search from '@/components/Search';
 import {
   setListaCpeSunatData,
   setListaCpeSunatPaginacion,
-} from '../../../../redux/predeterminadoSlice';
+} from '@/redux/predeterminadoSlice';
 import pdfVisualizer from 'pdf-visualizer';
-import { downloadFileAsync } from '../../../../redux/downloadSlice';
+import { downloadFileAsync } from '@/redux/downloadSlice';
 import { toastKit, ToastStyle } from 'toast-kit';
 import { Link } from 'react-router-dom';
-import DropdownActions from '../../../../components/DropdownActions';
+import DropdownActions from '@/components/DropdownActions';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
 
@@ -170,17 +173,15 @@ class CpeElectronicos extends CustomComponent {
         (item) => item.idSucursal === this.props.token.project.idSucursal,
       );
 
-      this.setState(
-        {
-          idSucursal: sucursal.idSucursal,
-          comprobantes: comprobantes,
-          sucursales: sucursales,
-          initialLoad: false,
-        },
-        async () => {
-          this.loadingInit();
-          this.updateReduxState();
-        },
+      this.setState({
+        idSucursal: sucursal.idSucursal,
+        comprobantes: comprobantes,
+        sucursales: sucursales,
+        initialLoad: false,
+      }, async () => {
+        this.loadingInit();
+        this.updateReduxState();
+      },
       );
     }
   };
@@ -286,7 +287,7 @@ class CpeElectronicos extends CustomComponent {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -391,8 +392,8 @@ class CpeElectronicos extends CustomComponent {
 
   handleSendFacturar = async (idVenta) => {
     const accept = await alertKit.question({
-      title: 'Cpe Sunat',
-      message: '¿Está seguro de enviar el comprobante electrónico?',
+      title: "Cpe Sunat",
+      message: "¿Está seguro de enviar el comprobante electrónico?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -411,24 +412,18 @@ class CpeElectronicos extends CustomComponent {
       if (response instanceof SuccessReponse) {
         const { state, accept, code, description } = response.data;
 
-        if (state) {
-          if (accept) {
-            alertKit.success({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description
-            }, () => {
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
               this.onEventPaginacion();
-            });
-          } else {
-            alertKit.warning({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            });
-          }
+            }
+          });
         } else {
           alertKit.warning({
-            title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
           });
         }
       }
@@ -437,7 +432,56 @@ class CpeElectronicos extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Cpe Sunat',
+          title: "Cpe Sunat",
+          message: response.getMessage()
+        });
+      }
+    }
+  };
+
+  handleSendNotaCredito = async (idNotaCredito) => {
+    const accept = await alertKit.question({
+      title: "Cpe Sunat",
+      message: "¿Está seguro de enviar el comprobante electrónico?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await notaCreditoCpeSunat(idNotaCredito);
+
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
+              this.onEventPaginacion();
+            }
+          });
+        } else {
+          alertKit.warning({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+          });
+        }
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Cpe Sunat",
           message: response.getMessage()
         });
       }
@@ -446,8 +490,8 @@ class CpeElectronicos extends CustomComponent {
 
   handleSendResumenDiario = async (idVenta, comprobante) => {
     const accept = await alertKit.question({
-      title: 'Cpe Sunat',
-      message: `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer un resumen diario?`,
+      title: "Cpe Sunat - Resumen diario",
+      message: `¿Está seguro de anular la boleta electrónica ${comprobante}, se va hacer un resumen diario?`,
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -461,30 +505,23 @@ class CpeElectronicos extends CustomComponent {
         message: 'Procesando información...',
       });
 
-      const response = await anularBoletaCpeSunat(idVenta);
+      const response = await resumenDiarioCpeSunat(idVenta);
 
       if (response instanceof SuccessReponse) {
         const { state, accept, code, description } = response.data;
 
-        if (state) {
-          if (accept) {
-            alertKit.success({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            }, () => {
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
               this.onEventPaginacion();
-            },
-            );
-          } else {
-            alertKit.warning({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            });
-          }
+            }
+          });
         } else {
           alertKit.warning({
-            title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
           });
         }
       }
@@ -493,7 +530,56 @@ class CpeElectronicos extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.warning({
-          title: 'Cpe Sunat',
+          title: "Cpe Sunat",
+          message: response.getMessage()
+        });
+      }
+    }
+  };
+
+  handleSendResumenDiarioNotaCredito = async (idNotaCredito, comprobante) => {
+    const accept = await alertKit.question({
+      title: "Cpe Sunat - Resumen diario",
+      message: `¿Está seguro de anular la nota de crédito electrónica ${comprobante}, se va hacer un resumen diario?`,
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await notaCreditoResumenDiarioCpeSunat(idNotaCredito);
+
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
+              this.onEventPaginacion();
+            }
+          });
+        } else {
+          alertKit.warning({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+          });
+        }
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Cpe Sunat",
           message: response.getMessage()
         });
       }
@@ -502,8 +588,8 @@ class CpeElectronicos extends CustomComponent {
 
   handleSendComunicacionDeBaja = async (idVenta, comprobante) => {
     const accept = await alertKit.question({
-      title: 'Cpe Sunat',
-      message: `¿Está seguro de anular el comprobante electrónico ${comprobante}, se va hacer una comunicación de baja?`,
+      title: "Cpe Sunat - Comunicación de baja",
+      message: `¿Está seguro de anular la factura electrónica ${comprobante}, se va hacer una comunicación de baja?`,
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -514,33 +600,26 @@ class CpeElectronicos extends CustomComponent {
 
     if (accept) {
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
-      const response = await anularFacturaCpeSunat(idVenta);
+      const response = await comunicacionDeBajaCpeSunat(idVenta);
 
       if (response instanceof SuccessReponse) {
         const { state, accept, code, description } = response.data;
 
-        if (state) {
-          if (accept) {
-            alertKit.success({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            }, () => {
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
               this.onEventPaginacion();
-            },
-            );
-          } else {
-            alertKit.warning({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            });
-          }
+            }
+          });
         } else {
           alertKit.warning({
-            title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
           });
         }
       }
@@ -549,7 +628,56 @@ class CpeElectronicos extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.error({
-          title: 'Cpe Sunat',
+          title: "Cpe Sunat",
+          message: response.getMessage()
+        });
+      }
+    }
+  };
+
+  handleSendComunicacionDeBajaotaCredito = async (idNotaCredito, comprobante) => {
+    const accept = await alertKit.question({
+      title: "Cpe Sunat - Comunicación de baja",
+      message: `¿Está seguro de anular la nota de crédito electrónica ${comprobante}, se va hacer un resumen diario?`,
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await notaCreditoComunicacionDeBajaCpeSunat(idNotaCredito);
+
+      if (response instanceof SuccessReponse) {
+        const { state, accept, code, description } = response.data;
+
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
+              this.onEventPaginacion();
+            }
+          });
+        } else {
+          alertKit.warning({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+          });
+        }
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Cpe Sunat",
           message: response.getMessage()
         });
       }
@@ -558,8 +686,8 @@ class CpeElectronicos extends CustomComponent {
 
   handleSendGuiaRemision = async (idGuiaRemision) => {
     const accept = await alertKit.question({
-      title: 'Cpe Sunat',
-      message: '¿Está seguro de enviar el comprobante electrónico?',
+      title: "Cpe Sunat",
+      message: "¿Está seguro de enviar el comprobante electrónico?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -570,7 +698,7 @@ class CpeElectronicos extends CustomComponent {
 
     if (accept) {
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const response = await guiaRemisionCpeSunat(idGuiaRemision);
@@ -578,25 +706,18 @@ class CpeElectronicos extends CustomComponent {
       if (response instanceof SuccessReponse) {
         const { state, accept, code, description } = response.data;
 
-        if (state) {
-          if (accept) {
-            alertKit.success({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            }, () => {
+        if (state && accept) {
+          alertKit.success({
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
+            onClose: () => {
               this.onEventPaginacion();
-            },
-            );
-          } else {
-            alertKit.warning({
-              title: 'Cpe Sunat',
-              message: 'Código ' + code + ' ' + description,
-            });
-          }
+            }
+          });
         } else {
           alertKit.warning({
-            title: 'Cpe Sunat',
-            message: 'Código ' + code + ' ' + description,
+            title: "Cpe Sunat",
+            message: "Código " + code + " " + description,
           });
         }
       }
@@ -605,7 +726,7 @@ class CpeElectronicos extends CustomComponent {
         if (response.getType() === CANCELED) return;
 
         alertKit.error({
-          title: 'Cpe Sunat',
+          title: "Cpe Sunat",
           message: response.getMessage()
         });
       }
@@ -681,7 +802,7 @@ class CpeElectronicos extends CustomComponent {
   |
   */
 
-  opcionButtonEnvio(image, alt, onClick) {
+  renderOpcionButton(image, alt, onClick) {
     return (
       <Button className="btn-light btn-sm" onClick={onClick}>
         <img src={image} alt={alt} width="22" />
@@ -689,53 +810,143 @@ class CpeElectronicos extends CustomComponent {
     );
   }
 
+  renderDropdownActions(item) {
+    const { idComprobante, tipo, anulacion, serie, numeracion } = item;
+
+    const numeroCompleto = `${serie}-${formatNumberWithZeros(numeracion)}`;
+
+    const baseOptions = [
+      {
+        image: images.pdf,
+        tooltip: 'PDF A4',
+        label: 'PDF A4',
+        onClick: () => this.handleOpenPrinter(idComprobante, tipo, 'A4'),
+      },
+      {
+        image: images.invoice,
+        tooltip: 'PDF 80mm',
+        label: 'Ticket 80mm',
+        onClick: () => this.handleOpenPrinter(idComprobante, tipo, '80mm'),
+      },
+      {
+        image: images.invoice,
+        tooltip: 'PDF 58mm',
+        label: 'Ticket 58mm',
+        onClick: () => this.handleOpenPrinter(idComprobante, tipo, '58mm'),
+      },
+      {
+        image: images.xml,
+        tooltip: 'XML',
+        label: 'XML',
+        onClick: () => this.handleDownloadXml(idComprobante),
+      },
+      {
+        image: images.email,
+        tooltip: 'Enviar Email',
+        label: 'Email',
+        onClick: () => this.handleSendEmail(idComprobante, tipo),
+      },
+    ];
+
+    const showAnulacionOption =
+      (tipo === 'fac' || tipo === 'nota-credito') && anulacion !== 0;
+
+    const anulacionOption = showAnulacionOption && [
+      {
+        image: images.error,
+        tooltip:
+          anulacion === 1
+            ? 'Comunicación de Baja'
+            : 'Resumen Diario',
+        label:
+          anulacion === 1
+            ? 'Comunicación de Baja'
+            : 'Resumen Diario',
+        onClick: () =>
+          anulacion === 1
+            ? tipo === 'nota-credito' ? this.handleSendComunicacionDeBajaotaCredito(idComprobante, numeroCompleto) : this.handleSendComunicacionDeBaja(idComprobante, numeroCompleto)
+            : tipo === 'nota-credito' ? this.handleSendResumenDiarioNotaCredito(idComprobante, numeroCompleto) : this.handleSendResumenDiario(idComprobante, numeroCompleto),
+      }
+    ] || [];
+
+    return (
+      <DropdownActions
+        options={[...baseOptions, ...anulacionOption]}
+      />
+    );
+  }
+
   renderEstado(item) {
     if (item.tipo === 'fac') {
       if (item.estado === 0) {
-        return this.opcionButtonEnvio(images.unable, 'Error', () => {
+        return this.renderOpcionButton(images.unable, 'Error', () => {
           this.handleSendFacturar(item.idComprobante);
         });
       }
 
       if (isEmpty(item.xmlSunat)) {
-        return this.opcionButtonEnvio(images.reuse, 'Reutilizar', () => {
+        return this.renderOpcionButton(images.reuse, 'Reutilizar', () => {
           this.handleSendFacturar(item.idComprobante);
         });
       }
 
       if (item.xmlSunat === '0') {
-        return this.opcionButtonEnvio(images.accept, 'Aceptar');
+        return this.renderOpcionButton(images.accept, 'Aceptar');
       }
 
       if (item.xmlSunat === '2987' || item.xmlSunat === '1032') {
-        return this.opcionButtonEnvio(images.error, 'Anulado');
+        return this.renderOpcionButton(images.error, 'Anulado');
       }
 
-      return this.opcionButtonEnvio(images.unable, 'Incapaz', () => {
+      return this.renderOpcionButton(images.unable, 'Incapaz', () => {
         this.handleSendFacturar(item.idComprobante);
+      });
+    } else if (item.tipo === 'nota-credito') {
+      if (item.estado === 0) {
+        return this.renderOpcionButton(images.unable, 'Error', () => {
+          this.handleSendNotaCredito(item.idComprobante);
+        });
+      }
+
+      if (isEmpty(item.xmlSunat)) {
+        return this.renderOpcionButton(images.reuse, 'Reutilizar', () => {
+          this.handleSendNotaCredito(item.idComprobante);
+        });
+      }
+
+      if (item.xmlSunat === '0') {
+        return this.renderOpcionButton(images.accept, 'Aceptar');
+      }
+
+      if (item.xmlSunat === '2987' || item.xmlSunat === '1032') {
+        return this.renderOpcionButton(images.error, 'Anulado');
+      }
+
+      return this.renderOpcionButton(images.unable, 'Incapaz', () => {
+        this.handleSendNotaCredito(item.idComprobante);
       });
     } else {
       if (item.estado === 0) {
-        return this.opcionButtonEnvio(images.unable, 'Error', () => {
+        return this.renderOpcionButton(images.unable, 'Error', () => {
           this.handleSendGuiaRemision(item.idComprobante);
         });
       }
 
       if (isEmpty(item.xmlSunat)) {
-        return this.opcionButtonEnvio(images.reuse, 'Reutilizar', () => {
+        return this.renderOpcionButton(images.reuse, 'Reutilizar', () => {
           this.handleSendGuiaRemision(item.idComprobante);
         });
       }
 
       if (item.xmlSunat === '2987' || item.xmlSunat === '1032') {
-        return this.opcionButtonEnvio(images.error, 'Anulado');
+        return this.renderOpcionButton(images.error, 'Anulado');
       }
 
       if (item.xmlSunat === '0') {
-        return this.opcionButtonEnvio(images.accept, 'Aceptar');
+        return this.renderOpcionButton(images.accept, 'Aceptar');
       }
 
-      return this.opcionButtonEnvio(images.unable, 'Incapaz', () => {
+      return this.renderOpcionButton(images.unable, 'Incapaz', () => {
         this.handleSendGuiaRemision(item.idComprobante);
       });
     }
@@ -967,56 +1178,7 @@ class CpeElectronicos extends CustomComponent {
                         <tr key={index} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
                           <td className="px-6 py-4 text-center">
-                            <DropdownActions
-                              options={[
-                                {
-                                  image: images.pdf,
-                                  tooltip: 'PDF A4',
-                                  label: 'PDF A4',
-                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
-                                },
-                                {
-                                  image: images.invoice,
-                                  tooltip: 'PDF Ticket 80mm',
-                                  label: 'PDF Ticket 80mm',
-                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
-                                },
-                                {
-                                  image: images.invoice,
-                                  tooltip: 'PDF Ticket 58mm',
-                                  label: 'PDF Ticket 58mm',
-                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
-                                },
-                                {
-                                  image: images.xml,
-                                  tooltip: 'XML',
-                                  label: 'XML',
-                                  onClick: () => this.handleDownloadXml(item.idComprobante),
-                                },
-                                {
-                                  image: images.email,
-                                  tooltip: 'Enviar por Email',
-                                  label: 'Email',
-                                  onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
-                                },
-                                ...(item.tipo === 'fac' && item.anulacion !== 0
-                                  ? [
-                                    {
-                                      image: images.error,
-                                      tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                      label: item.anulacion === 1 ? 'Com. Baja' : 'Resumen',
-                                      onClick: () => {
-                                        const id = item.idComprobante;
-                                        const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
-                                        item.anulacion === 1
-                                          ? this.handleSendComunicacionDeBaja(id, num)
-                                          : this.handleSendResumenDiario(id, num);
-                                      },
-                                    },
-                                  ]
-                                  : []),
-                              ]}
-                            />
+                            {this.renderDropdownActions(item)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {item.fecha}<br />
@@ -1124,56 +1286,7 @@ class CpeElectronicos extends CustomComponent {
                             <div className="mt-1">{this.renderEstado(item)}</div>
                           </div>
 
-                          <DropdownActions
-                            options={[
-                              {
-                                image: images.pdf,
-                                tooltip: 'PDF A4',
-                                label: 'PDF A4',
-                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
-                              },
-                              {
-                                image: images.invoice,
-                                tooltip: 'PDF 80mm',
-                                label: 'Ticket 80mm',
-                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
-                              },
-                              {
-                                image: images.invoice,
-                                tooltip: 'PDF 58mm',
-                                label: 'Ticket 58mm',
-                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
-                              },
-                              {
-                                image: images.xml,
-                                tooltip: 'XML',
-                                label: 'XML',
-                                onClick: () => this.handleDownloadXml(item.idComprobante),
-                              },
-                              {
-                                image: images.email,
-                                tooltip: 'Enviar Email',
-                                label: 'Email',
-                                onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
-                              },
-                              ...(item.tipo === 'fac' && item.anulacion !== 0
-                                ? [
-                                  {
-                                    image: images.error,
-                                    tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                    label: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                    onClick: () => {
-                                      const id = item.idComprobante;
-                                      const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
-                                      item.anulacion === 1
-                                        ? this.handleSendComunicacionDeBaja(id, num)
-                                        : this.handleSendResumenDiario(id, num);
-                                    },
-                                  },
-                                ]
-                                : []),
-                            ]}
-                          />
+                          {this.renderDropdownActions(item)}
                         </div>
                       </div>
                     </div>

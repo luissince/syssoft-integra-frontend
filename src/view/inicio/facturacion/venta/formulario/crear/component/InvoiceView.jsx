@@ -10,6 +10,7 @@ import {
 import CustomComponent from '@/components/CustomComponent';
 import {
   A_GRANEL,
+  NINGUNO,
   UNIDADES,
   VALOR_MONETARIO,
 } from '@/model/types/tipo-tratamiento-producto';
@@ -20,6 +21,7 @@ import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import Search from '@/components/Search';
 import { cn } from '@/lib/utils';
+import { ACTIVO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -490,48 +492,32 @@ const ItemView = (props) => {
     cantidad,
     precio,
     medida,
-    tipo,
     preferido,
     negativo,
     imagen,
     almacen,
+    idTipoProducto,
     idTipoTratamientoProducto,
   } = props.producto;
 
   const { handleAddItem, handleStarProduct } = props;
 
-  const cssNegativo =
-    tipo !== 'PRODUCTO'
-      ? ''
-      : tipo === 'PRODUCTO' && negativo === 1
-        ? 'text-danger'
-        : 'text-success';
-  const detalleNegativo =
-    tipo !== 'PRODUCTO'
-      ? ''
-      : tipo === 'PRODUCTO' && negativo === 1
-        ? 'VENTA SIN CONTROL DE STOCK'
-        : 'VENTA CON CONTROL DE STOCK';
-
-  const tipoTratamiento =
-    idTipoTratamientoProducto === UNIDADES
-      ? 'EN UNIDADES'
-      : idTipoTratamientoProducto === VALOR_MONETARIO
-        ? 'VALOR MONETARIO'
-        : idTipoTratamientoProducto === A_GRANEL
-          ? 'A GRANEL'
-          : 'SERVICIO';
-
   return (
     <Button
       contentClassName={cn(
         "item-view",
-        tipo === 'PRODUCTO' && cantidad <= 0 ? "border border-danger" : ""
+        idTipoProducto === PRODUCTO && cantidad <= 0 && "border border-danger",
+        idTipoProducto === SERVICIO && cantidad <= 0 && "",
+        idTipoProducto === COMBO && cantidad <= 0 && "border border-danger",
+        idTipoProducto === ACTIVO && cantidad <= 0 && "border border-danger",
       )}
       onClick={handleAddItem}
     >
       <div className="absolute z-10 ml-1 mt-1 badge badge-danger">
-        {tipoTratamiento}
+        {idTipoTratamientoProducto === UNIDADES && "EN UNIDADES"}
+        {idTipoTratamientoProducto === VALOR_MONETARIO && "VALOR MONETARIO"}
+        {idTipoTratamientoProducto === A_GRANEL && "A GRANEL"}
+        {idTipoTratamientoProducto === NINGUNO && "NINGUNO"}
       </div>
       <div
         className="item-view_favorite btn z-10 px-1 py-1 absolute"
@@ -553,10 +539,16 @@ const ItemView = (props) => {
         <p
           className={cn(
             "item-view_describe-title absolute",
-            tipo === "PRODUCTO" && cantidad <= 0 ? "text-danger" : "",
+            idTipoProducto === PRODUCTO && cantidad <= 0 && "text-red-500",
+            idTipoProducto === SERVICIO && cantidad <= 0 && "",
+            idTipoProducto === COMBO && cantidad <= 0 && "text-red-500",
+            idTipoProducto === ACTIVO && cantidad <= 0 && "text-red-500",
           )}
         >
-          {tipo === "PRODUCTO" ? `STOCK: ${cantidad}` : `SERVICIO`}
+          {idTipoProducto === PRODUCTO && `STOCK: ${cantidad}`}
+          {idTipoProducto === SERVICIO && "SERVICIO"}
+          {idTipoProducto === COMBO && `STOCK: ${cantidad}`}
+          {idTipoProducto === ACTIVO && `STOCK: ${cantidad}`}
         </p>
         <div className="flex items-center justify-center">
           <img
@@ -573,8 +565,15 @@ const ItemView = (props) => {
         <strong>{nombreProducto}</strong>
       </span>
 
-      <span className={`text-center block w-full my-1 text-xs ${cssNegativo}`}>
-        {detalleNegativo}
+      <span className={cn(
+        "text-center block w-full my-1 text-xs",
+        idTipoProducto !== SERVICIO && negativo === 1 ? "text-green-600" : "text-red-500"
+      )}>
+        {idTipoProducto === SERVICIO
+          ? "SIN CONTROL DE STOCK"
+          : negativo === 1
+            ? "VENTA CON CONTROL DE STOCK"
+            : "VENTA SIN CONTROL DE STOCK"}
       </span>
       <span className="text-center block w-full mb-3">
         <span className="text-xl">{formatCurrency(precio, codiso)}</span>{' '}
@@ -619,11 +618,11 @@ ItemView.propTypes = {
     cantidad: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     precio: PropTypes.number.isRequired,
     medida: PropTypes.string.isRequired,
-    tipo: PropTypes.string.isRequired,
     preferido: PropTypes.number.isRequired,
     negativo: PropTypes.number.isRequired,
     imagen: PropTypes.string,
     almacen: PropTypes.string,
+    idTipoProducto: PropTypes.string,
     idTipoTratamientoProducto: PropTypes.string,
   }),
   handleAddItem: PropTypes.func.isRequired,

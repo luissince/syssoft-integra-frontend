@@ -51,9 +51,8 @@ import { cn } from '@/lib/utils';
 class Ventas extends CustomComponent {
 
   /**
-   *
-   * Constructor
-   * @param {Object} props - Propiedades recibidas del componente padre.
+   * Inicializa un nuevo componente.
+   * @param {Object} props - Las propiedades pasadas al componente.
    */
   constructor(props) {
     super(props);
@@ -163,11 +162,7 @@ class Ventas extends CustomComponent {
 
   loadingData = async () => {
     const ventaLista = this.props.ventaLista;
-    if (
-      ventaLista &&
-      ventaLista.data &&
-      ventaLista.paginacion
-    ) {
+    if (ventaLista && ventaLista.data && ventaLista.paginacion) {
       this.setState(ventaLista.data);
       this.refPaginacion.current.upperPageBound =
         ventaLista.paginacion.upperPageBound;
@@ -904,16 +899,16 @@ class Ventas extends CustomComponent {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Fecha</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Comprobante</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Tipo</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">Estado</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-right">Total</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Detalle</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Guía</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Anular</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[25%]">Cliente</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Tipo</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-right">Total</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Detalle</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Guía</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Anular</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">

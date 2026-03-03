@@ -72,7 +72,7 @@ class CotizacionDetalle extends CustomComponent {
       estado: "",
 
       observacion: "",
-      notas: 2,
+      notas: "",
 
       codiso: "",
       total: 0,

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatDecimal, isEmpty, formatCurrency } from "@/helper/utils.helper";
 import { SpinnerTransparent } from "@/components/Spinner";
 import Image from "@/components/Image";
-import { PRODUCTO } from "@/model/types/tipo-producto";
+import { ACTIVO, COMBO, PRODUCTO, SERVICIO } from "@/model/types/tipo-producto";
 import Button from "@/components/Button";
 
 type Operation = "addition" | "subtraction";
@@ -78,20 +78,25 @@ const ListGrid: React.FC<ListGridProps> = ({
                 <div className="mt-auto space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">
-                      {item.idTipoProducto === PRODUCTO
-                        ? "Stock"
-                        : "Servicio"}
+                      {item.idTipoProducto === PRODUCTO && "Stock"}
+                      {item.idTipoProducto === SERVICIO && "Servicio"}
+                      {item.idTipoProducto === COMBO && "Servicio"}
+                      {item.idTipoProducto === ACTIVO && "Activo Fijo"}
                     </span>
-                    <span
-                      className={cn(
-                        "text-base font-bold",
-                        item.idTipoProducto === PRODUCTO && item.cantidad <= 0
-                          ? "text-red-600"
-                          : "text-green-500"
-                      )}
-                    >
-                      {formatDecimal(item.cantidad)}
-                    </span>
+                    {
+                      item.idTipoProducto !== SERVICIO && (
+                        <span
+                          className={cn(
+                            "text-base font-bold",
+                            item.cantidad <= 0
+                              ? "text-red-600"
+                              : "text-green-500"
+                          )}
+                        >
+                          {formatDecimal(item.cantidad)}
+                        </span>
+                      )
+                    }
                   </div>
                 </div>
 

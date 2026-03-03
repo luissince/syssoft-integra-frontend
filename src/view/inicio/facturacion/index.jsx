@@ -22,7 +22,7 @@ import GuiaRemisionEditar from './guiaremision/formularios/editar/GuiaRemisionEd
 import GuiaRemisionDetalle from './guiaremision/detalle/GuiaRemisionDetalle';
 
 import NotaCredito from './nota-credito/lista/NotaCredito';
-import NotaCreditoProceso from './nota-credito/formulario/NotaCreditoProceso';
+import NotaCreditoCrear from './nota-credito/formulario/NotaCreditoCrear';
 import NotaCreditoDetalle from './nota-credito/detalle/NotaCreditoDetalle';
 
 import CuentasPorCobrar from './cuenta-cobrar/lista/CuentasPorCobrar';
@@ -50,7 +50,7 @@ export {
   GuiaRemisionEditar,
   GuiaRemisionDetalle,
   NotaCredito,
-  NotaCreditoProceso,
+  NotaCreditoCrear,
   NotaCreditoDetalle,
   CuentasPorCobrar,
   CuentasPorCobrarAbonar,

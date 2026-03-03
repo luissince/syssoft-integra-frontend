@@ -8,6 +8,8 @@ import {
   isEmpty,
   isNumeric,
   isText,
+  keyNumberFloat,
+  validateMany,
   validateNumericInputs,
 } from '@/helper/utils.helper';
 import {
@@ -22,27 +24,25 @@ import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
-import Producto from '../component/Producto';
-import Servicio from '../component/Servicio';
-import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
 import {
-  NINGUNO,
+  A_GRANEL,
   UNIDADES,
+  VALOR_MONETARIO,
 } from '@/model/types/tipo-tratamiento-producto';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
 import Title from '@/components/Title';
 import { SpinnerView } from '@/components/Spinner';
 import ModalProducto from '../component/ModalProducto';
-import {
-  TabContent,
-  TabHead,
-  TabHeader,
-  TabPane,
-} from '@/components/Tab';
-import { COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { ACTIVO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
+import ItemImage from '../component/ItemImagen';
+import Button from '@/components/Button';
+import TextArea from '@/components/TextArea';
+import Input from '@/components/Input';
+import ItemProducto from '../component/ItemProducto';
+import RadioButton from '@/components/RadioButton';
+import Select from '@/components/Select';
+import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -60,81 +60,39 @@ class ProductoEditar extends CustomComponent {
       loading: true,
       msgLoading: "Cargando datos...",
 
-      idTipoProducto: PRODUCTO,
       idProducto: "",
+
+      idTipoProducto: PRODUCTO,
+
+      nombre: "",
+      codigo: "",
+      sku: "",
+      codigoBarras: generateEAN13Code(),
+      idMarca: "",
+      idMedida: "",
+      idCategoria: "",
+      idTipoTratamiento: UNIDADES,
+      costo: "",
+      precio: "",
+
+      idMetodoDepreciacion: LINEA_RECTA,
+
+      descripcionCorta: "",
+      descripcionLarga: "",
+
+      precios: [],
+      combos: [],
+      detalles: [],
+      imagenes: [],
+
       imagen: {
         url: images.noImage,
       },
-
-      activeTabProducto: true,
-      activeTabServicio: false,
-      activeTabCombo: false,
 
       publicar: false,
       negativo: false,
       preferido: false,
       estado: true,
-
-      // producto
-      nombreProducto: "",
-      codigoProducto: "",
-      skuProducto: "",
-      codigoBarrasProducto: "",
-
-      idMedidaProducto: "",
-      idCategoriaProducto: "",
-      idMarcaProducto: "",
-
-      idTipoTratamientoProducto: UNIDADES,
-
-      precioProducto: "",
-      costoProducto: "",
-
-      precios: [],
-
-      descripcionCortaProducto: "",
-      descripcionLargaProducto: "",
-
-      detallesProducto: [],
-      imagenesProducto: [],
-
-      // servicio
-      nombreServicio: "",
-      codigoServicio: "",
-      skuServicio: "",
-      codigoBarrasServicio: "",
-
-      idMedidaServicio: "",
-      idCategoriaServicio: "",
-      idMarcaServicio: "",
-
-      precioServicio: "",
-
-      descripcionCortaServicio: "",
-      descripcionLargaServicio: "",
-
-      detallesServicio: [],
-      imagenesServicio: [],
-
-      // combo
-      nombreCombo: "",
-      codigoCombo: "",
-      skuCombo: "",
-      codigoBarrasCombo: "",
-
-      idMedidaCombo: "",
-      idCategoriaCombo: "",
-      idMarcaCombo: "",
-      combos: [],
-
-      precioCombo: "",
-
-      descripcionCortaCombo: "",
-      descripcionLargaCombo: "",
-
-      detallesCombo: [],
-      imagenesCombo: [],
-
 
       // Atributos del modal inventario
       isOpenProducto: false,
@@ -148,56 +106,19 @@ class ProductoEditar extends CustomComponent {
       idUsuario: this.props.token.userToken.usuario.idUsuario,
     };
 
-    // producto
-    this.refNombreProducto = React.createRef();
-    this.refCodigoProducto = React.createRef();
-    this.refSkuProducto = React.createRef();
-    this.refCodigoBarrasProducto = React.createRef();
-
-    this.refIdMedidaProducto = React.createRef();
-    this.refIdCategoriaProducto = React.createRef();
-    this.refIdMarcaProducto = React.createRef();
-    this.refDescripcionCortaProducto = React.createRef();
-    this.refDescripcionLargaProducto = React.createRef();
-
-    this.refCostoProducto = React.createRef();
-    this.refPrecioProducto = React.createRef();
-    this.refPreciosProducto = React.createRef();
-
-    this.refDetallesProducto = React.createRef();
-
-    // servicio
-    this.refNombreServicio = React.createRef();
-    this.refCodigoServicio = React.createRef();
-    this.refSkuServicio = React.createRef();
-    this.refCodigoBarrasServicio = React.createRef();
-
-    this.refIdMedidaServicio = React.createRef();
-    this.refIdCategoriaServicio = React.createRef();
-    this.refIdMarcaServicio = React.createRef();
-    this.refDescripcionCortaServicio = React.createRef();
-    this.refDescripcionLargaServicio = React.createRef();
-
-    this.refPrecioServicio = React.createRef();
-
-    this.refDetallesServicio = React.createRef();
-
-    // Combo
-    this.refNombreCombo = React.createRef();
-    this.refCodigoCombo = React.createRef();
-    this.refSkuCombo = React.createRef();
-    this.refCodigoBarrasCombo = React.createRef();
-    this.refCodigoSunatCombo = React.createRef();
-
-    this.refIdMedidaCombo = React.createRef();
-    this.refIdCategoriaCombo = React.createRef();
-    this.refIdMarcaCombo = React.createRef();
-    this.refDescripcionCortaCombo = React.createRef();
-    this.refDescripcionLargaCombo = React.createRef();
-
-    this.refPrecioCombo = React.createRef();
-
-    this.refDetallesCombo = React.createRef();
+    this.refNombre = React.createRef();
+    this.refCodigo = React.createRef();
+    this.refSku = React.createRef();
+    this.refCodigoBarras = React.createRef();
+    this.refIdMarca = React.createRef();
+    this.refIdMedida = React.createRef();
+    this.refIdCategoria = React.createRef();
+    this.refCosto = React.createRef();
+    this.refPrecio = React.createRef();
+    this.refPrecios = React.createRef();
+    this.refDescripcionCorta = React.createRef();
+    this.refDescripcionLarga = React.createRef();
+    this.refDetalles = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -207,7 +128,7 @@ class ProductoEditar extends CustomComponent {
    */
   componentDidMount() {
     const url = this.props.location.search;
-    const idproducto = new URLSearchParams(url).get('idProducto');
+    const idproducto = new URLSearchParams(url).get("idProducto");
 
     if (isText(idproducto)) {
       this.loadingData(idproducto);
@@ -221,18 +142,18 @@ class ProductoEditar extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Métodos de acción
-    |--------------------------------------------------------------------------
-    |
-    | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
-    | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-    | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
-    | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-    | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
-    | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
   /**
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
@@ -246,90 +167,36 @@ class ProductoEditar extends CustomComponent {
         this.fetchProducto(idProducto),
       ]);
 
-    if (producto.idTipoProducto === PRODUCTO) {
-      await this.setStateAsync({
-        activeTabProducto: true,
-        activeTabServicio: false,
-        activeTabCombo: false,
-
-        idTipoProducto: producto.idTipoProducto,
-        nombreProducto: producto.nombre,
-        codigoProducto: producto.codigo,
-        skuProducto: producto.sku,
-        codigoBarrasProducto: producto.codigoBarras,
-        idMedidaProducto: producto.idMedida,
-        idCategoriaProducto: producto.idCategoria,
-        idMarcaProducto: producto.idMarca,
-        descripcionCortaProducto: producto.descripcionCorta,
-        descripcionLargaProducto: producto.descripcionLarga,
-        idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-        precioProducto: String(producto.precio),
-        costoProducto: String(producto.costo),
-        publicar: producto.publicar === 1 ? true : false,
-        negativo: producto.negativo === 1 ? true : false,
-        preferido: producto.preferido === 1 ? true : false,
-        estado: producto.estado === 1 ? true : false,
-        precios: producto.precios,
-        detallesProducto: producto.detalles,
-        imagenesProducto: producto.imagenes,
-      });
-    } else if (producto.idTipoProducto === SERVICIO) {
-      await this.setStateAsync({
-        activeTabProducto: false,
-        activeTabServicio: true,
-        activeTabCombo: false,
-
-        idTipoProducto: producto.idTipoProducto,
-        nombreServicio: producto.nombre,
-        codigoServicio: producto.codigo,
-        skuServicio: producto.sku,
-        codigoBarrasServicio: producto.codigoBarras,
-        idMedidaServicio: producto.idMedida,
-        idCategoriaServicio: producto.idCategoria,
-        idMarcaServicio: producto.idMarca,
-        descripcionCortaServicio: producto.descripcionCorta,
-        descripcionLargaServicio: producto.descripcionLarga,
-        precioServicio: String(producto.precio),
-        publicar: producto.publicar === 1 ? true : false,
-        negativo: producto.negativo === 1 ? true : false,
-        preferido: producto.preferido === 1 ? true : false,
-        estado: producto.estado === 1 ? true : false,
-        detallesServicio: producto.detalles,
-        imagenesServicio: producto.imagenes,
-      });
-    } else {
-      await this.setStateAsync({
-        activeTabProducto: false,
-        activeTabServicio: false,
-        activeTabCombo: true,
-
-        idTipoProducto: producto.idTipoProducto,
-        nombreCombo: producto.nombre,
-        codigoCombo: producto.codigo,
-        skuCombo: producto.sku,
-        codigoBarrasCombo: producto.codigoBarras,
-        idMedidaCombo: producto.idMedida,
-        idCategoriaCombo: producto.idCategoria,
-        idMarcaCombo: producto.idMarca,
-        descripcionCortaCombo: producto.descripcionCorta,
-        descripcionLargaCombo: producto.descripcionLarga,
-        precioCombo: String(producto.precio),
-        publicar: producto.publicar === 1 ? true : false,
-        preferido: producto.preferido === 1 ? true : false,
-        estado: producto.estado === 1 ? true : false,
-        detallesCombo: producto.detalles,
-        imagenesCombo: producto.imagenes,
-      });
-    }
-
     await this.setStateAsync({
+      idProducto: idProducto,
+      idTipoProducto: producto.idTipoProducto,
+      nombre: producto.nombre,
+      codigo: producto.codigo,
+      sku: producto.sku,
+      codigoBarras: producto.codigoBarras,
+      idMarca: producto.idMarca,
+      idMedida: producto.idMedida,
+      idCategoria: producto.idCategoria,
+      idTipoTratamiento: producto.idTipoTratamiento,
+      idMetodoDepreciacion: producto.idMetodoDepreciacion,
+      costo: String(producto.costo),
+      precio: String(producto.precio),
+      descripcionCorta: producto.descripcionCorta,
+      descripcionLarga: producto.descripcionLarga,
+      publicar: producto.publicar === 1 ? true : false,
+      negativo: producto.negativo === 1 ? true : false,
+      preferido: producto.preferido === 1 ? true : false,
+      estado: producto.estado === 1 ? true : false,
+      precios: producto.precios,
+      detalles: producto.detalles,
+      imagenes: producto.imagenes,
+
+      marcas,
       medidas,
       categorias,
-      marcas,
       imagen: producto.imagen ?? {
         url: images.noImage,
       },
-      idProducto: idProducto,
       loading: false,
     });
   };
@@ -391,24 +258,221 @@ class ProductoEditar extends CustomComponent {
   }
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+  handleOptionTipoProducto = (event) => {
+    this.setState({
+      idTipoProducto: event.target.value,
+    });
+  }
+
+  handleInputNombre = (event) => {
+    this.setState({
+      nombre: event.target.value,
+    });
+  }
+
+  handleInputCodigo = (event) => {
+    this.setState({
+      codigo: event.target.value,
+    });
+  }
+
+  handleInputSku = (event) => {
+    this.setState({
+      sku: event.target.value,
+    });
+  }
+
+  handleInputCodigoBarras = (event) => {
+    this.setState({
+      codigoBarras: event.target.value,
+    });
+  }
+
+  handleChangeCodigoBarras = () => {
+    this.setState({
+      codigoBarras: generateEAN13Code(),
+    });
+  };
+
+  handleSelectIdMarca = (event) => {
+    this.setState({
+      idMarca: event.target.value,
+    });
+  }
+
+  handleSelectIdMedida = (event) => {
+    this.setState({
+      idMedida: event.target.value,
+    });
+  }
+
+  handleSelectIdCategoria = (event) => {
+    this.setState({
+      idCategoria: event.target.value,
+    });
+  }
+
+  handleOptionTipoTratamiento = (event) => {
+    this.setState({
+      idTipoTratamiento: event.target.value,
+    });
+  }
+
+  handleOptionMetodoDepreciacion = (event) => {
+    this.setState({
+      idMetodoDepreciacion: event.target.value,
+    });
+  }
+
+  handleInputCosto = (event) => {
+    this.setState({
+      costo: event.target.value,
+    });
+  }
+
+  handleInputPrecio = (event) => {
+    this.setState({
+      precio: event.target.value,
+    });
+  }
+
+  handleInputNombrePrecios = (event, id) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      precios: prevState.precios.map((item) =>
+        item.id === id ? { ...item, nombre: value } : item,
+      ),
+    }));
+  };
+
+  handleInputPrecioPrecios = (event, id) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      precios: prevState.precios.map((item) =>
+        item.id === id ? { ...item, precio: value } : item,
+      ),
+    }));
+  };
+
+  handleAddPrecios = () => {
+    const data = {
+      id: this.state.precios.length + 1,
+      nombre: '',
+      precio: '',
+    };
+
+    this.setState((prevState) => ({
+      precios: [...prevState.precios, data],
+    }));
+  };
+
+  handleRemovePrecios = (id) => {
+    const precios = this.state.precios
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
+    this.setState({ precios });
+  };
+
+  handleInputDescripcionCorta = (event) => {
+    this.setState({
+      descripcionCorta: event.target.value,
+    });
+  };
+
+  handleInputDescripcionLarga = (event) => {
+    this.setState({
+      descripcionLarga: event.target.value,
+    });
+  };
+
+
+  handleInputNombreDetalles = (event, id) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      detalles: prevState.detalles.map((item) =>
+        item.id === id ? { ...item, nombre: value } : item,
+      ),
+    }));
+  };
+
+  handleInputValorDetalles = (event, id) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      detalles: prevState.detalles.map((item) =>
+        item.id === id ? { ...item, valor: value } : item,
+      ),
+    }));
+  };
+
+  handleRemoveDetalles = (id) => {
+    const detalles = this.state.detalles
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
+    this.setState({ detalles });
+  };
+
+  handleAddDetalles = () => {
+    const data = {
+      id: this.state.detalles.length + 1,
+      nombre: '',
+      valor: '',
+    };
+
+    this.setState((prevState) => ({
+      detalles: [...prevState.detalles, data],
+    }));
+  };
+
+  handleSelectImagenes = (newImgsState) => {
+    this.setState({ imagenes: newImgsState });
+  };
+
+  handleRemoveImagenes = (newImgs) => {
+    this.setState({ imagenes: newImgs });
+  };
+
+  handleRemoveCombo = (idProducto) => {
+    this.setState((prevState) => ({
+      combos: prevState.combos.filter((item) => item.idProducto !== idProducto),
+    }));
+  };
+
+  handleInputCantidadCombo = (event, idProducto) => {
+    const { value } = event.target;
+    this.setState((prevState) => ({
+      combos: prevState.combos.map((item) =>
+        item.idProducto === idProducto
+          ? { ...item, cantidad: value ? parseFloat(value) : '' }
+          : item,
+      ),
+    }));
+  };
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
   //------------------------------------------------------------------------------------------
+
   handleOpenModalProducto = () => {
     this.setState({ isOpenProducto: true });
   };
@@ -443,420 +507,20 @@ class ProductoEditar extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Producto
-  //------------------------------------------------------------------------------------------
-
-  handleInputNombreProducto = (event) => {
-    this.setState({
-      nombreProducto: event.target.value,
-    });
-  };
-
-  handleInputCodigoProducto = (event) => {
-    this.setState({
-      codigoProducto: event.target.value,
-    });
-  };
-
-  handleInputSkuProducto = (event) => {
-    this.setState({
-      skuProducto: event.target.value,
-    });
-  };
-
-  handleInputCodigoBarrasProducto = (event) => {
-    this.setState({
-      codigoBarrasProducto: event.target.value,
-    });
-  };
-
-  handleGenerateCodigoBarrasProducto = () => {
-    this.setState({
-      codigoBarrasProducto: generateEAN13Code(),
-    });
-  };
-
-  handleSelectIdMedidaProducto = (event) => {
-    this.setState({
-      idMedidaProducto: event.target.value,
-    });
-  };
-
-  handleSelectIdCategoriaProducto = (event) => {
-    this.setState({
-      idCategoriaProducto: event.target.value,
-    });
-  };
-
-  handleSelectIdMarcaProducto = (event) => {
-    this.setState({
-      idMarcaProducto: event.target.value,
-    });
-  };
-
-  handleInputDescripcionCortaProducto = (event) => {
-    this.setState({
-      descripcionCortaProducto: event.target.value,
-    });
-  };
-
-  handleInputDescripcionLargaProducto = (event) => {
-    this.setState({
-      descripcionLargaProducto: event.target.value,
-    });
-  };
-
-  handleOptionTipoTratamientoProducto = (event) => {
-    this.setState({
-      idTipoTratamientoProducto: event.target.value,
-    });
-  };
-
-  handleInputCostoProducto = (event) => {
-    this.setState({
-      costoProducto: event.target.value,
-    });
-  };
-
-  handleInputPrecioProducto = (event) => {
-    this.setState({
-      precioProducto: event.target.value,
-    });
-  };
-
-  handleInputNombrePreciosProducto = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      precios: prevState.precios.map((item) =>
-        item.id === id ? { ...item, nombre: value } : item,
-      ),
-    }));
-  };
-
-  handleInputPrecioPreciosProducto = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      precios: prevState.precios.map((item) =>
-        item.id === id ? { ...item, precio: value } : item,
-      ),
-    }));
-  };
-
-  handleAddPreciosProducto = () => {
-    const data = {
-      id: this.state.precios.length + 1,
-      nombre: '',
-      precio: '',
-    };
-
-    this.setState((prevState) => ({
-      precios: [...prevState.precios, data],
-    }));
-  };
-
-  handleRemovePreciosProducto = (id) => {
-    const precios = this.state.precios
-      .filter((item) => item.id !== id)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1,
-      }));
-    this.setState({ precios });
-  };
-
-  handleInputNombreDetallesProducto = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesProducto: prevState.detallesProducto.map((item) =>
-        item.id === id ? { ...item, nombre: value } : item,
-      ),
-    }));
-  };
-
-  handleInputValorDetallesProducto = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesProducto: prevState.detallesProducto.map((item) =>
-        item.id === id ? { ...item, valor: value } : item,
-      ),
-    }));
-  };
-
-  handleAddDetallesProducto = () => {
-    const data = {
-      id: this.state.detallesProducto.length + 1,
-      nombre: '',
-      valor: '',
-    };
-
-    this.setState((prevState) => ({
-      detallesProducto: [...prevState.detallesProducto, data],
-    }));
-  };
-
-  handleRemoveDetallesProducto = (id) => {
-    const detallesProducto = this.state.detallesProducto
-      .filter((item) => item.id !== id)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1,
-      }));
-    this.setState({ detallesProducto });
-  };
-
-  handleSelectImagenesProducto = (newImgsState) => {
-    this.setState({ imagenesProducto: newImgsState });
-  };
-
-  handleRemoveImagenesProducto = (newImgs) => {
-    this.setState({ imagenesProducto: newImgs });
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Servicio
-  //------------------------------------------------------------------------------------------
-
-  handleInputNombreServicio = (event) => {
-    this.setState({
-      nombreServicio: event.target.value,
-    });
-  };
-
-  handleInputCodigoServicio = (event) => {
-    this.setState({
-      codigoServicio: event.target.value,
-    });
-  };
-
-  handleInputSkuServicio = (event) => {
-    this.setState({
-      skuServicio: event.target.value,
-    });
-  };
-
-  handleInputCodigoBarrasServicio = (event) => {
-    this.setState({
-      codigoBarrasServicio: event.target.value,
-    });
-  };
-
-  handleGenerateCodigoBarrasServicio = () => {
-    this.setState({
-      codigoBarrasServicio: generateEAN13Code(),
-    });
-  };
-
-  handleSelectIdMedidaServicio = (event) => {
-    this.setState({
-      idMedidaServicio: event.target.value,
-    });
-  };
-
-  handleSelectIdMarcaServicio = (event) => {
-    this.setState({
-      idMarcaServicio: event.target.value,
-    });
-  };
-
-  handleSelectIdCategoriaServicio = (event) => {
-    this.setState({
-      idCategoriaServicio: event.target.value,
-    });
-  };
-
-  handleInpuDescripcionCortaServicio = (event) => {
-    this.setState({
-      descripcionCortaServicio: event.target.value,
-    });
-  };
-
-  handleInpuDescripcionLargaServicio = (event) => {
-    this.setState({
-      descripcionLargaServicio: event.target.value,
-    });
-  };
-
-  handleInpuPrecioServicio = (event) => {
-    this.setState({
-      precioServicio: event.target.value,
-    });
-  };
-
-  handleInputNombreDetallesServicio = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesServicio: prevState.detallesServicio.map((item) =>
-        item.id === id ? { ...item, nombre: value } : item,
-      ),
-    }));
-  };
-
-  handleInputValorDetallesServicio = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesServicio: prevState.detallesServicio.map((item) =>
-        item.id === id ? { ...item, valor: value } : item,
-      ),
-    }));
-  };
-
-  handleAddDetallesServicio = () => {
-    const data = {
-      id: this.state.detallesServicio.length + 1,
-      nombre: '',
-      valor: '',
-    };
-
-    this.setState((prevState) => ({
-      detallesServicio: [...prevState.detallesServicio, data],
-    }));
-  };
-
-  handleRemoveDetallesServicio = (id) => {
-    const detallesServicio = this.state.detallesServicio
-      .filter((item) => item.id !== id)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1,
-      }));
-    this.setState({ detallesServicio });
-  };
-
-  handleSelectImagenesServicio = (newImgsState) => {
-    this.setState({ imagenesServicio: newImgsState });
-  };
-
-  handleRemoveImagenesServicio = (newImgs) => {
-    this.setState({ imagenesServicio: newImgs });
-  };
-
-
-  //------------------------------------------------------------------------------------------
-  // Combo
-  //------------------------------------------------------------------------------------------
-
-  handleInputNombreCombo = (event) => {
-    this.setState({
-      nombreCombo: event.target.value,
-    });
-  };
-
-  handleInputCodigoCombo = (event) => {
-    this.setState({
-      codigoCombo: event.target.value,
-    });
-  };
-
-  handleInputSkuCombo = (event) => {
-    this.setState({
-      skuCombo: event.target.value,
-    });
-  };
-
-  handleInputCodigoBarrasCombo = (event) => {
-    this.setState({
-      codigoBarrasCombo: event.target.value,
-    });
-  };
-
-  handleGenerateCodigoBarrasCombo = () => {
-    this.setState({
-      codigoBarrasCombo: generateEAN13Code(),
-    });
-  };
-
-  handleSelectIdMedidaCombo = (event) => {
-    this.setState({
-      idMedidaCombo: event.target.value,
-    });
-  };
-
-  handleSelectIdCategoriaCombo = (event) => {
-    this.setState({
-      idCategoriaCombo: event.target.value,
-    });
-  };
-
-  handleSelectIdMarcaCombo = (event) => {
-    this.setState({
-      idMarcaCombo: event.target.value,
-    });
-  };
-
-  handleInputDescripcionCortaCombo = (event) => {
-    this.setState({
-      descripcionCortaCombo: event.target.value,
-    });
-  };
-
-  handleInputDescripcionLargaCombo = (event) => {
-    this.setState({
-      descripcionLargaCombo: event.target.value,
-    });
-  };
-
-  handleInputPrecioCombo = (event) => {
-    this.setState({
-      precioCombo: event.target.value,
-    });
-  };
-
-  handleInputNombreDetallesCombo = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesCombo: prevState.detallesCombo.map((item) =>
-        item.id === id ? { ...item, nombre: value } : item,
-      ),
-    }));
-  };
-
-  handleInputValorDetallesCombo = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesCombo: prevState.detallesCombo.map((item) =>
-        item.id === id ? { ...item, valor: value } : item,
-      ),
-    }));
-  };
-
-  handleAddDetallesCombo = () => {
-    const data = {
-      id: this.state.detallesCombo.length + 1,
-      nombre: '',
-      valor: '',
-    };
-
-    this.setState((prevState) => ({
-      detallesCombo: [...prevState.detallesCombo, data],
-    }));
-  };
-
-  handleRemoveDetallesCombo = (id) => {
-    const detallesCombo = this.state.detallesCombo
-      .filter((item) => item.id !== id)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1,
-      }));
-    this.setState({ detallesCombo });
-  };
-
-  handleSelectImagenesCombo = (newImgsState) => {
-    this.setState({ imagenesCombo: newImgsState });
-  };
-
-  handleRemoveImagenesCombo = (newImgs) => {
-    this.setState({ imagenesCombo: newImgs });
-  };
-
-  //------------------------------------------------------------------------------------------
   // Detalle general
   //------------------------------------------------------------------------------------------
 
   handleInputImagen = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
+    if (isEmpty(files)) {
+      this.setState({
+        imagen: {
+          url: images.noImage,
+        },
+      });
+    } else {
+
       const file = files[0];
       let url = URL.createObjectURL(file);
       const logoSend = await imageBase64(file);
@@ -874,7 +538,6 @@ class ProductoEditar extends CustomComponent {
           title: 'Producto',
           message: 'La imagen a subir tiene que ser menor a 500 KB.',
         });
-        return;
       }
       this.setState({
         imagen: {
@@ -884,12 +547,6 @@ class ProductoEditar extends CustomComponent {
           height: logoSend.height,
           size: logoSend.size,
           url: url,
-        },
-      });
-    } else {
-      this.setState({
-        imagen: {
-          url: images.noImage,
         },
       });
     }
@@ -910,7 +567,6 @@ class ProductoEditar extends CustomComponent {
       preferido: event.target.checked,
     });
   };
-
 
   handleSelectEstado = (event) => {
     this.setState({
@@ -934,104 +590,100 @@ class ProductoEditar extends CustomComponent {
   // Registrar
   //------------------------------------------------------------------------------------------
   handleSaveProducto = async () => {
-    if (isEmpty(this.state.nombreProducto)) {
-      alertKit.warning({
-        title: 'Producto',
+    const {
+      idProducto,
+      idTipoProducto,
+      nombre,
+      codigo,
+      sku,
+      codigoBarras,
+      idMedida,
+      idCategoria,
+      idMarca,
+      idTipoTratamiento,
+      idMetodoDepreciacion,
+      precio,
+      costo,
+      precios,
+      detalles,
+      descripcionCorta,
+      descripcionLarga,
+      imagenes,
+      publicar,
+      negativo,
+      preferido,
+      estado,
+      imagen,
+      idUsuario,
+    } = this.state;
+
+    const valid = await validateMany([
+      {
+        value: nombre,
         message: 'Ingrese el nombre del producto.',
-      }, () => {
-        this.refNombreProducto.current.focus();
-      },);
-      return;
-    }
-
-    if (isEmpty(this.state.codigoProducto)) {
-      alertKit.warning({
-        title: 'Producto',
+        ref: this.refNombre
+      },
+      {
+        value: codigo,
         message: 'Ingrese el código del producto.',
-      }, () => {
-        this.refCodigoProducto.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idMedidaProducto)) {
-      alertKit.warning({
-        title: 'Producto',
+        ref: this.refCodigo
+      },
+      {
+        value: idMedida,
         message: 'Seleccione la medida.',
-      }, () => {
-        this.refIdMedidaProducto.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idCategoriaProducto)) {
-      alertKit.warning({
-        title: 'Producto',
+        ref: this.refIdMedida
+      },
+      {
+        value: idCategoria,
         message: 'Seleccione la categoría.',
-      }, () => {
-        this.refIdCategoriaProducto.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(this.state.precioProducto)) {
-      alertKit.warning({
-        title: 'Producto',
-        message: 'Ingrese el precio.',
-      }, () => {
-        this.refPrecioProducto.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(this.state.costoProducto)) {
-      alertKit.warning({
-        title: 'Producto',
+        ref: this.refIdCategoria
+      },
+      {
+        value: costo,
         message: 'Ingrese el costo.',
-      }, () => {
-        this.refCostoProducto.current.focus();
-      });
-      return;
-    }
-
-    if (
-      parseFloat(this.state.precioProducto) <=
-      parseFloat(this.state.costoProducto)
-    ) {
-      alertKit.warning({
-        title: 'Producto',
+        ref: this.refCosto
+      },
+      {
+        value: precio,
+        message: 'Ingrese el precio.',
+        ref: this.refPrecio
+      },
+      {
+        value: parseFloat(this.state.precio) <= parseFloat(this.state.costo),
         message: 'El costo no debe ser mayor o igual al precio.',
-      }, () => {
-        this.refCostoProducto.current.focus();
-      });
-      return;
-    }
-
-    if (
-      this.state.detallesProducto.filter((item) => isEmpty(item.nombre))
-        .length !== 0
-    ) {
-      alertKit.warning({
-        title: 'Producto',
+        ref: this.refCosto
+      },
+      {
+        value: this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0,
+        message: 'Hay precios sin nombre..',
+        callback: () => {
+          validateNumericInputs(this.refPrecios, 'string');
+        }
+      },
+      {
+        value: this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0,
+        message: 'Hay precios sin valor.',
+        callback: () => {
+          validateNumericInputs(this.refPrecios);
+        }
+      },
+      {
+        value: this.state.detalles.filter((item) => isEmpty(item.nombre)).length !== 0,
         message: 'Hay detalle sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refDetallesProducto, 'string');
-      });
-      return;
-    }
-
-    if (
-      this.state.detallesProducto.filter((item) => isEmpty(item.valor))
-        .length !== 0
-    ) {
-      alertKit.warning({
-        title: 'Producto',
+        callback: () => {
+          validateNumericInputs(this.refDetalles, 'string');
+        }
+      },
+      {
+        value: this.state.detalles.filter((item) => isEmpty(item.valor)).length !== 0,
         message: 'Hay detalle sin valor.',
-      }, () => {
-        validateNumericInputs(this.refDetallesProducto);
-      });
-      return;
-    }
+        callback: () => {
+          validateNumericInputs(this.refDetalles);
+        }
+      }
+    ], "Producto");
+
+    if (!valid) return;
 
     const accept = await alertKit.question({
       title: 'Producto',
@@ -1046,31 +698,32 @@ class ProductoEditar extends CustomComponent {
       });
 
       const data = {
-        idProducto: this.state.idProducto,
-        nombre: this.state.nombreProducto,
-        codigo: this.state.codigoProducto,
-        sku: this.state.skuProducto,
-        codigoBarras: this.state.codigoBarrasProducto,
-        idMedida: this.state.idMedidaProducto,
-        idCategoria: this.state.idCategoriaProducto,
-        idMarca: this.state.idMarcaProducto,
-        descripcionCorta: this.state.descripcionCortaProducto,
-        descripcionLarga: this.state.descripcionLargaProducto,
-        idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
-        costo: this.state.costoProducto,
-        precio: this.state.precioProducto,
-        precios: this.state.precios,
-        publicar: this.state.publicar,
-        negativo: this.state.negativo,
-        preferido: this.state.preferido,
-        estado: this.state.estado,
+        idProducto: idProducto,
+        idTipoProducto: idTipoProducto,
+        nombre: nombre,
+        codigo: codigo,
+        sku: sku,
+        codigoBarras: codigoBarras,
+        idMedida: idMedida,
+        idCategoria: idCategoria,
+        idMarca: idMarca,
+        descripcionCorta: descripcionCorta,
+        descripcionLarga: descripcionLarga,
+        idTipoTratamiento: idTipoTratamiento,
+        idMetodoDepreciacion: idMetodoDepreciacion,
+        costo: costo,
+        precio: precio,
+        precios: precios,
+        publicar: publicar,
+        negativo: negativo,
+        preferido: preferido,
+        estado: estado,
 
-        detalles: this.state.detallesProducto,
-        imagenes: this.state.imagenesProducto,
+        detalles: detalles,
+        imagenes: imagenes,
+        imagen: imagen,
 
-        imagen: this.state.imagen,
-
-        idUsuario: this.state.idUsuario,
+        idUsuario: idUsuario,
       };
 
       const response = await updateProducto(data);
@@ -1078,8 +731,9 @@ class ProductoEditar extends CustomComponent {
         alertKit.success({
           title: 'Producto',
           message: response.data,
-        }, () => {
-          this.props.history.goBack();
+          onClose: () => {
+            this.props.history.goBack();
+          }
         });
       }
 
@@ -1089,296 +743,6 @@ class ProductoEditar extends CustomComponent {
           message: response.getMessage(),
         });
       }
-    }
-  };
-
-  handleSaveServicio = async () => {
-    if (isEmpty(this.state.nombreServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el nombre del servicio.',
-      }, () => {
-        this.refNombreServicio.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.codigoServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el código del servicio.',
-      }, () => {
-        this.refCodigoServicio.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idMedidaServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Seleccione la medida.',
-      }, () => {
-        this.refIdMedidaServicio.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idCategoriaServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Seleccione la categoría.',
-      }, () => {
-        this.refIdCategoriaServicio.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(this.state.precioServicio)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el precio.',
-      }, () => {
-        this.refPrecioServicio.current.focus();
-      });
-      return;
-    }
-
-    if (
-      this.state.detallesServicio.filter((item) => isEmpty(item.nombre))
-        .length !== 0
-    ) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Hay detalle sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refDetallesServicio, 'string');
-      });
-      return;
-    }
-
-    if (
-      this.state.detallesServicio.filter((item) => isEmpty(item.valor))
-        .length !== 0
-    ) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Hay detalle sin valor.',
-      }, () => {
-        validateNumericInputs(this.refDetallesServicio);
-      });
-      return;
-    }
-
-    const accept = await alertKit.question({
-      title: 'Producto - Servicio',
-      message: '¿Estás seguro de continuar?',
-      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
-      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
-    });
-
-    if (accept) {
-      alertKit.loading({
-        message: 'Procesando información...',
-      });
-
-      const data = {
-        idProducto: this.state.idProducto,
-        nombre: this.state.nombreServicio,
-        codigo: this.state.codigoServicio,
-        sku: this.state.skuServicio,
-        codigoBarras: this.state.codigoBarrasServicio,
-        idMedida: this.state.idMedidaServicio,
-        idCategoria: this.state.idCategoriaServicio,
-        idMarca: this.state.idMarcaServicio,
-        descripcionCorta: this.state.descripcionCortaServicio,
-        descripcionLarga: this.state.descripcionLargaServicio,
-        idTipoTratamientoProducto: NINGUNO,
-        costo: 0,
-        precio: this.state.precioServicio,
-        precios: [],
-        publicar: this.state.publicar,
-        negativo: false,
-        preferido: this.state.preferido,
-        estado: this.state.estado,
-
-        detalles: this.state.detallesServicio,
-        imagenes: this.state.imagenesServicio,
-
-        imagen: this.state.imagen,
-
-        idUsuario: this.state.idUsuario,
-      };
-
-      const response = await updateProducto(data);
-      if (response instanceof SuccessReponse) {
-        alertKit.success({
-          title: 'Producto - Servicio',
-          message: response.data,
-        }, () => {
-          this.props.history.goBack();
-        });
-      }
-
-      if (response instanceof ErrorResponse) {
-        alertKit.warning({
-          title: 'Producto - Servicio',
-          message: response.getMessage(),
-        });
-      }
-    }
-  };
-
-  handleSaveCombo = async () => {
-    if (isEmpty(this.state.nombreCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Ingrese el nombre del combo.',
-      }, () => {
-        this.refNombreCombo.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.codigoCombo)) {
-      alertKit.warning({
-        title: 'Producto - Servicio',
-        message: 'Ingrese el código del combo.',
-      }, () => {
-        this.refCodigoCombo.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idMedidaCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Seleccione la medida.',
-      }, () => {
-        this.refIdMedidaCombo.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(this.state.idCategoriaCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Seleccione la categoría.',
-      }, () => {
-        this.refIdCategoriaCombo.current.focus();
-      });
-      return;
-    }
-
-    if (!isNumeric(this.state.precioCombo)) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Ingrese el precio.',
-      }, () => {
-        this.refPrecioCombo.current.focus();
-      });
-      return;
-    }
-
-    if (
-      this.state.detallesCombo.filter((item) => isEmpty(item.nombre)).length !==
-      0
-    ) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Hay detalle sin nombre..',
-      }, () => {
-        validateNumericInputs(this.refDetallesCombo, 'string');
-      });
-      return;
-    }
-
-    if (
-      this.state.detallesCombo.filter((item) => isEmpty(item.valor)).length !==
-      0
-    ) {
-      alertKit.warning({
-        title: 'Producto - Combo',
-        message: 'Hay detalle sin valor.',
-      }, () => {
-        validateNumericInputs(this.refDetallesCombo);
-      });
-      return;
-    }
-
-    const accept = await alertKit.question({
-      title: 'Producto - Combo',
-      message: '¿Estás seguro de continuar?',
-    });
-
-    if (accept) {
-      alertKit.loading({
-        message: 'Procesando información...',
-      });
-
-      const data = {
-        idProducto: this.state.idProducto,
-        nombre: this.state.nombreCombo,
-        codigo: this.state.codigoCombo,
-        sku: this.state.skuCombo,
-        codigoBarras: this.state.codigoBarrasCombo,
-        idMedida: this.state.idMedidaCombo,
-        idCategoria: this.state.idCategoriaCombo,
-        idMarca: this.state.idMarcaCombo,
-        descripcionCorta: this.state.descripcionCortaCombo,
-        descripcionLarga: this.state.descripcionLargaCombo,
-        idTipoTratamientoProducto: UNIDADES,
-        costo: 0,
-        precio: this.state.precioCombo,
-        precios: [],
-        combos: [],
-        inventarios: [],
-        publicar: this.state.publicar,
-        negativo: false,
-        preferido: this.state.preferido,
-        estado: this.state.estado,
-
-        detalles: this.state.detallesCombo,
-        imagenes: this.state.imagenesCombo,
-
-        imagen: this.state.imagen,
-
-        idUsuario: this.state.idUsuario,
-      };
-
-      const response = await updateProducto(data);
-
-      if (response instanceof SuccessReponse) {
-        alertKit.success({
-          title: 'Producto - Combo',
-          message: response.data,
-        }, () => {
-          this.props.history.goBack();
-        },);
-      }
-
-      if (response instanceof ErrorResponse) {
-        alertKit.warning({
-          title: 'Producto - Combo',
-          message: response.getMessage(),
-        });
-      }
-    }
-  };
-
-  handleRegistrar = () => {
-    if (this.state.idTipoProducto === PRODUCTO) {
-      this.handleSaveProducto();
-      return;
-    }
-
-    if (this.state.idTipoProducto === SERVICIO) {
-      this.handleSaveServicio();
-      return;
-    }
-
-    if (this.state.idTipoProducto === COMBO) {
-      this.handleSaveCombo();
-      return;
     }
   };
 
@@ -1387,108 +751,61 @@ class ProductoEditar extends CustomComponent {
   };
 
   /*
-    |--------------------------------------------------------------------------
-    | Método de cliclo de vida
-    |--------------------------------------------------------------------------
-    |
-    | El método render() es esencial en los componentes de React y se encarga de determinar
-    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-    | actuales del componente para determinar lo que se mostrará.
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
 
   render() {
-    const { loading, msgLoading } = this.state;
-
-    const { idTipoProducto } = this.state;
-
     const {
-      nombreProducto,
-      codigoProducto,
-      skuProducto,
-      codigoBarrasProducto,
-    } = this.state;
+      loading,
+      msgLoading,
 
-    const {
-      idMedidaProducto,
-      idCategoriaProducto,
-      idMarcaProducto,
-      descripcionCortaProducto,
-      descripcionLargaProducto,
-    } = this.state;
+      idTipoProducto,
 
-    const { idTipoTratamientoProducto } = this.state;
+      nombre,
+      codigo,
+      sku,
+      codigoBarras,
+      idMarca,
+      idMedida,
+      idCategoria,
 
-    const { precioProducto, costoProducto, precios } = this.state;
+      idTipoTratamiento,
+      idMetodoDepreciacion,
 
-    const {
-      nombreServicio,
-      codigoServicio,
-      skuServicio,
-      codigoBarrasServicio,
-    } = this.state;
+      costo,
+      precio,
 
-    const {
-      idMedidaServicio,
-      idCategoriaServicio,
-      idMarcaServicio,
-      descripcionCortaServicio,
-      descripcionLargaServicio,
-    } = this.state;
+      precios,
 
-    const { precioServicio } = this.state;
+      descripcionCorta,
+      descripcionLarga,
+      detalles,
+      imagenes,
 
-    const {
-      nombreCombo,
-      codigoCombo,
-      skuCombo,
-      codigoBarrasCombo,
-    } = this.state;
-
-    const {
-      idMedidaCombo,
-      idCategoriaCombo,
-      idMarcaCombo,
-      descripcionCortaCombo,
-      descripcionLargaCombo,
-    } = this.state;
-
-    const { precioCombo, combos } = this.state;
-
-    const {
       medidas,
       categorias,
       marcas,
+
+      combos,
+
+      imagen,
       publicar,
       negativo,
       preferido,
-      estado,
+      estado
     } = this.state;
-
-    const { imagen } = this.state;
-
-    const { detallesProducto, detallesServicio, detallesCombo } = this.state;
-
-    const { imagenesProducto, imagenesServicio, imagenesCombo } = this.state;
-
-    const nombre =
-      idTipoProducto === PRODUCTO
-        ? nombreProducto
-        : idTipoProducto === SERVICIO
-          ? nombreServicio
-          : nombreCombo;
-
-    const precio =
-      idTipoProducto === PRODUCTO
-        ? precioProducto
-        : idTipoProducto === SERVICIO
-          ? precioServicio
-          : precioCombo;
 
     return (
       <ContainerWrapper>
@@ -1499,7 +816,10 @@ class ProductoEditar extends CustomComponent {
           handleAddProducto={this.handleAddProducto}
         />
 
-        <SpinnerView loading={loading} message={msgLoading} />
+        <SpinnerView
+          loading={loading}
+          message={msgLoading}
+        />
 
         <Title
           title="Producto"
@@ -1508,270 +828,629 @@ class ProductoEditar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
-            <Row>
-              <Column className="col-lg-12 col-md-12 col-sm-12 col-12">
-                <TabHeader
-                  onTabChange={(activeTab) => {
-                    if (activeTab === 'producto-tab') {
-                      this.setState({ idTipoProducto: PRODUCTO });
-                    } else if (activeTab === 'servicio-tab') {
-                      this.setState({ idTipoProducto: SERVICIO });
-                    } else if (activeTab === 'combo-tab') {
-                      this.setState({ idTipoProducto: COMBO });
+        <div className="flex flex-col md:flex-row gap-3">
+          {/* Parte de los datos */}
+          <div className="w-full md:w-3/5 flex flex-col gap-3">
+
+            {/* Seleccion de tipo de producto */}
+            <div className="flex flex-row flex-wrap gap-3">
+              <h6 className="flex items-center gap-2">
+                <span className="badge badge-primary">1</span> TIPO DE PRODUCTO
+              </h6>
+
+              <p>
+                Selecciona el tipo de producto que deseas crear, esto te ayudará a organizar mejor tu catálogo.
+              </p>
+
+              <RadioButton
+                className="form-check-inline"
+                id={PRODUCTO}
+                value={PRODUCTO}
+                name="ckTipoProducto"
+                checked={idTipoProducto === PRODUCTO}
+                onChange={this.handleOptionTipoProducto}
+              >
+                Producto
+              </RadioButton>
+
+              <RadioButton
+                className="form-check-inline"
+                id={SERVICIO}
+                value={SERVICIO}
+                name="ckTipoProducto"
+                checked={idTipoProducto === SERVICIO}
+                onChange={this.handleOptionTipoProducto}
+              >
+                Servicio
+              </RadioButton>
+
+              <RadioButton
+                className="form-check-inline"
+                id={COMBO}
+                value={COMBO}
+                name="ckTipoProducto"
+                checked={idTipoProducto === COMBO}
+                onChange={this.handleOptionTipoProducto}
+              >
+                Combo
+              </RadioButton>
+
+              <RadioButton
+                className="form-check-inline"
+                id={ACTIVO}
+                value={ACTIVO}
+                name="ckTipoProducto"
+                checked={idTipoProducto === ACTIVO}
+                onChange={this.handleOptionTipoProducto}
+              >
+                Activo
+              </RadioButton>
+            </div>
+
+            {/* Información general */}
+            <div className="flex flex-col gap-3">
+
+              <h6 className="flex items-center gap-2">
+                <span className="badge badge-primary">1</span> INFORMACIÓN GENERAL
+              </h6>
+
+              <p>
+                Información básica del producto, servicio, combo o activo que deseas registrar.
+              </p>
+
+              {/* Nombre del producto */}
+              <div>
+                <Input
+                  label={
+                    <>
+                      Nombre del producto:
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
+                  className={`${nombre ? '' : 'is-invalid'}`}
+                  placeholder="Dijite un nombre..."
+                  ref={this.refNombre}
+                  value={nombre}
+                  onChange={this.handleInputNombre}
+                />
+              </div>
+
+              {/* Código y SKU */}
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={
+                      <>
+                        Código: <i className="fa fa-asterisk text-danger small"></i>
+                      </>
                     }
-                  }}
-                >
-                  <TabHead
-                    id="producto"
-                    isActive={this.state.activeTabProducto}
+                    className={`${codigo ? '' : 'is-invalid'}`}
+                    placeholder="Ejemplo: CAS002 ..."
+                    ref={this.refCodigo}
+                    value={codigo}
+                    onChange={this.handleInputCodigo}
+                  />
+
+                </div>
+
+                <div className="w-full">
+                  <Input
+                    label={<>SKU:</>}
+                    placeholder="Ejemplo: CAM-NIKE-001 ..."
+                    ref={this.refSku}
+                    value={sku}
+                    onChange={this.handleInputSku}
+                  />
+                </div>
+              </div>
+
+              {/* Código de Barras y Marca */}
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    group
+                    label={
+                      <>
+                        Código de Barras: <i className="bi bi-upc-scan"></i>
+                      </>
+                    }
+                    placeholder="Ejemplo: 1234567890123 ..."
+                    ref={this.refCodigoBarras}
+                    value={codigoBarras}
+                    onChange={this.handleInputCodigoBarras}
+                    buttonRight={
+                      <Button
+                        className="btn-outline-secondary"
+                        title="Generar Código de Barras"
+                        onClick={this.handleChangeCodigoBarras}
+                      >
+                        <i className="bi-arrow-clockwise"></i>
+                      </Button>
+                    }
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Select
+                    label={'Marca:'}
+                    ref={this.refIdMarca}
+                    value={idMarca}
+                    onChange={this.handleSelectIdMarca}
                   >
-                    <i className="bi bi-info-circle"></i> Producto
-                  </TabHead>
+                    <option value="">-- Selecciona --</option>
+                    {marcas.map((item, index) => (
+                      <option key={index} value={item.idMarca}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
 
-                  <TabHead
-                    id="servicio"
-                    isActive={this.state.activeTabServicio}
+              {/* Unidad de medida y Categoria */}
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Select
+                    label={
+                      <>
+                        Unidad de medida:
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </>
+                    }
+                    className={`${idMedida ? '' : 'is-invalid'}`}
+                    ref={this.refIdMedida}
+                    value={idMedida}
+                    onChange={this.handleSelectIdMedida}
                   >
-                    <i className="bi bi-card-checklist"></i> Servicio
-                  </TabHead>
+                    <option value="">-- Selecciona --</option>
+                    {medidas.map((item, index) => (
+                      <option key={index} value={item.idMedida}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
 
-                  <TabHead id="combo" isActive={this.state.activeTabCombo}>
-                    <i className="bi bi-border-all"></i> Combo
-                  </TabHead>
-                </TabHeader>
-
-                <TabContent>
-                  <TabPane
-                    id="producto"
-                    isActive={this.state.activeTabProducto}
+                <div className="w-full">
+                  <Select
+                    label={
+                      <>
+                        Categoria: <i className="fa fa-asterisk text-danger small"></i>
+                      </>
+                    }
+                    className={`form-control ${idCategoria ? '' : 'is-invalid'}`}
+                    ref={this.refIdCategoria}
+                    value={idCategoria}
+                    onChange={this.handleSelectIdCategoria}
                   >
-                    <Producto
-                      nombre={nombreProducto}
-                      refNombre={this.refNombreProducto}
-                      handleSelectNombre={this.handleInputNombreProducto}
-                      codigo={codigoProducto}
-                      refCodigo={this.refCodigoProducto}
-                      handleInputCodigo={this.handleInputCodigoProducto}
-                      sku={skuProducto}
-                      refSku={this.refSkuProducto}
-                      handleInputSku={this.handleInputSkuProducto}
-                      codigoBarras={codigoBarrasProducto}
-                      refCodigoBarras={this.refCodigoBarrasProducto}
-                      handleInputCodigoBarras={
-                        this.handleInputCodigoBarrasProducto
-                      }
-                      handleGenerateCodigoBarras={
-                        this.handleGenerateCodigoBarrasProducto
-                      }
+                    <option value="">-- Selecciona --</option>
+                    {categorias.map((item, index) => (
+                      <option key={index} value={item.idCategoria}>
+                        {item.nombre}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+            </div>
 
-                      idMedida={idMedidaProducto}
-                      refIdMedida={this.refIdMedidaProducto}
-                      handleSelectIdMedida={this.handleSelectIdMedidaProducto}
-                      medidas={medidas}
-                      idCategoria={idCategoriaProducto}
-                      refIdCategoria={this.refIdCategoriaProducto}
-                      handleSelectIdCategoria={
-                        this.handleSelectIdCategoriaProducto
+            {/* Forma de venta */}
+            {
+              [PRODUCTO].includes(idTipoProducto) && (
+                <div className="flex flex-col gap-3">
+                  <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">2</span> FORMA DE VENTA
+                  </h6>
+
+                  <p>
+                    Indica si va ser tratado como unidades, valor monetario o
+                    granel(peso).
+                  </p>
+
+                  <div>
+                    <RadioButton
+                      className="form-check-inline"
+                      id={UNIDADES}
+                      value={UNIDADES}
+                      name="ckTipoTratamiento"
+                      checked={idTipoTratamiento === UNIDADES}
+                      onChange={this.handleOptionTipoTratamiento}
+                    >
+                      Unidades
+                    </RadioButton>
+
+                    <RadioButton
+                      className="form-check-inline"
+                      id={VALOR_MONETARIO}
+                      value={VALOR_MONETARIO}
+                      name="ckTipoTratamiento"
+                      checked={idTipoTratamiento === VALOR_MONETARIO}
+                      onChange={this.handleOptionTipoTratamiento}
+                    >
+                      Valor monetario
+                    </RadioButton>
+
+                    <RadioButton
+                      className="form-check-inline"
+                      id={A_GRANEL}
+                      value={A_GRANEL}
+                      name="ckTipoTratamiento"
+                      checked={idTipoTratamiento === A_GRANEL}
+                      onChange={this.handleOptionTipoTratamiento}
+                    >
+                      A Granel
+                    </RadioButton>
+                  </div>
+                </div>
+              )
+            }
+
+            {/* Metodo de depreciación */}
+            {
+              [ACTIVO].includes(idTipoProducto) && (
+                <div className="flex flex-col gap-3">
+                  <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">2</span> Método de depreciación
+                  </h6>
+
+                  <p>
+                    Indica el método de depreciación que se va a utilizar para el activo.
+                  </p>
+
+                  <div>
+                    <RadioButton
+                      className="form-check-inline"
+                      id={LINEA_RECTA}
+                      value={LINEA_RECTA}
+                      name="rbMetodoDepreciacion"
+                      checked={idMetodoDepreciacion === LINEA_RECTA}
+                      onChange={this.handleOptionMetodoDepreciacion}
+                    >
+                      📉  Línea recta
+                    </RadioButton>
+
+                    <RadioButton
+                      className="form-check-inline"
+                      id={DIGITOS_DECRECIENTES}
+                      value={DIGITOS_DECRECIENTES}
+                      name="rbMetodoDepreciacion"
+                      checked={idMetodoDepreciacion === DIGITOS_DECRECIENTES}
+                      onChange={this.handleOptionMetodoDepreciacion}
+                    >
+                      📊 Dígitos decimales
+                    </RadioButton>
+
+                    <RadioButton
+                      className="form-check-inline"
+                      id={SUMA_DE_DIGITOS}
+                      value={SUMA_DE_DIGITOS}
+                      name="rbMetodoDepreciacion"
+                      checked={idMetodoDepreciacion === SUMA_DE_DIGITOS}
+                      onChange={this.handleOptionMetodoDepreciacion}
+                    >
+                      ⚡  Suma de dígitos
+                    </RadioButton>
+                  </div>
+
+                  <div>
+                    {idMetodoDepreciacion === LINEA_RECTA && (
+                      <div className="flex flex-col gap-3">
+                        <p className="text-gray-500">
+                          Cuota fija anual igual durante toda la vida útil
+                        </p>
+                        <p className="text-orange-400">
+                          Método seleccionado: Línea Recta (SL) — Depreciación = (Costo - Valor Residual) / Vida Útil
+                        </p>
+                      </div>
+                    )}
+
+                    {idMetodoDepreciacion === DIGITOS_DECRECIENTES && (
+                      <div className="flex flex-col gap-3">
+                        <p className="text-gray-500">
+                          Mayor depreciación en primeros años
+                        </p>
+                        <p className="text-orange-400">
+                          Método seleccionado: Doble Saldo Decreciente (DA) — Depreciación = Valor en Libros × (2 / Vida Útil)
+                        </p>
+                      </div>
+                    )}
+
+                    {idMetodoDepreciacion === SUMA_DE_DIGITOS && (
+                      <div className="flex flex-col gap-3">
+                        <p className="text-gray-500">
+                          Depreciación acelerada basada en fracción de años
+                        </p>
+                        <p className="text-orange-400">
+                          Método seleccionado: Suma de Dígitos de Años (SY) — Fracción decreciente sobre base depreciable
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            }
+
+            {/* Costo */}
+            {
+              ![SERVICIO, COMBO].includes(idTipoProducto) && (
+                <div className="flex flex-col gap-3">
+                  <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">3</span> COSTO
+                  </h6>
+
+                  <p>Indica el valor de costo de compra de tu producto.</p>
+
+                  <div>
+                    <Input
+                      label={
+                        <>
+                          Costo inicial:
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
                       }
-                      categorias={categorias}
-                      idMarca={idMarcaProducto}
-                      refIdMarca={this.refIdMarcaProducto}
-                      handleSelectIdMarca={this.handleSelectIdMarcaProducto}
-                      marcas={marcas}
-                      descripcionCorta={descripcionCortaProducto}
-                      refDescripcionCorta={this.refDescripcionCortaProducto}
-                      handleInputDescripcionCorta={
-                        this.handleInputDescripcionCortaProducto
-                      }
-                      descripcionLarga={descripcionLargaProducto}
-                      refDescripcionLarga={this.refDescripcionLargaProducto}
-                      handleInputDescripcionLarga={
-                        this.handleInputDescripcionLargaProducto
-                      }
-                      idTipoTratamientoProducto={idTipoTratamientoProducto}
-                      handleOptionTipoTratamientoProducto={
-                        this.handleOptionTipoTratamientoProducto
-                      }
-                      costo={costoProducto}
-                      refCosto={this.refCostoProducto}
-                      handleInputCosto={this.handleInputCostoProducto}
-                      precio={precioProducto}
-                      refPrecio={this.refPrecioProducto}
-                      handleInputPrecio={this.handleInputPrecioProducto}
-                      precios={precios}
-                      refPrecios={this.refPreciosProducto}
-                      handleInputNombrePrecios={
-                        this.handleInputNombrePreciosProducto
-                      }
-                      handleInputPrecioPrecios={
-                        this.handleInputPrecioPreciosProducto
-                      }
-                      handleAddPrecios={this.handleAddPreciosProducto}
-                      handleRemovePrecios={this.handleRemovePreciosProducto}
-                      activarInventario={false}
-                      inventarios={[]}
-                      handleOpenModalInventario={() => { }}
-                      handleRemoveItemInventario={() => { }}
-                      detalles={detallesProducto}
-                      refDetalles={this.refDetallesProducto}
-                      handleInputNombreDetalles={
-                        this.handleInputNombreDetallesProducto
-                      }
-                      handleInputValorDetalles={
-                        this.handleInputValorDetallesProducto
-                      }
-                      handleAddDetalles={this.handleAddDetallesProducto}
-                      handleRemoveDetalles={this.handleRemoveDetallesProducto}
-                      imagenes={imagenesProducto}
-                      handleSelectImagenes={this.handleSelectImagenesProducto}
-                      handleRemoveImagenes={this.handleRemoveImagenesProducto}
+                      className={`${costo ? '' : 'is-invalid'}`}
+                      placeholder="S/ 0.00"
+                      ref={this.refCosto}
+                      value={costo}
+                      onChange={this.handleInputCosto}
+                      onKeyDown={keyNumberFloat}
                     />
-                  </TabPane>
+                  </div>
+                </div>
+              )
+            }
 
-                  <TabPane
-                    id="servicio"
-                    isActive={this.state.activeTabServicio}
-                  >
-                    <Servicio
-                      nombre={nombreServicio}
-                      refNombre={this.refNombreServicio}
-                      handleSelectNombre={this.handleInputNombreServicio}
-                      codigo={codigoServicio}
-                      refCodigo={this.refCodigoServicio}
-                      handleInputCodigo={this.handleInputCodigoServicio}
-                      sku={skuServicio}
-                      refSku={this.refSkuServicio}
-                      handleInputSku={this.handleInputSkuServicio}
-                      codigoBarras={codigoBarrasServicio}
-                      refCodigoBarras={this.refCodigoBarrasServicio}
-                      handleInputCodigoBarras={
-                        this.handleInputCodigoBarrasServicio
-                      }
-                      handleGenerateCodigoBarras={
-                        this.handleGenerateCodigoBarrasServicio
-                      }
+            {/* Precio */}
+            <div className="flex flex-col gap-3">
+              <h6 className="flex items-center gap-2">
+                <span className="badge badge-primary">4</span> PRECIO
+              </h6>
 
-                      idMedida={idMedidaServicio}
-                      refIdMedida={this.refIdMedidaServicio}
-                      handleSelectIdMedida={this.handleSelectIdMedidaServicio}
-                      medidas={medidas}
-                      idCategoria={idCategoriaServicio}
-                      refIdCategoria={this.refIdCategoriaServicio}
-                      handleSelectIdCategoria={
-                        this.handleSelectIdCategoriaServicio
-                      }
-                      categorias={categorias}
-                      idMarca={idMarcaServicio}
-                      refIdMarca={this.refIdMarcaServicio}
-                      handleSelectIdMarca={this.handleSelectIdMarcaServicio}
-                      marcas={marcas}
-                      descripcionCorta={descripcionCortaServicio}
-                      refDescripcionCorta={this.refDescripcionCortaServicio}
-                      handleInputDescripcionCorta={
-                        this.handleInpuDescripcionCortaServicio
-                      }
-                      descripcionLarga={descripcionLargaServicio}
-                      refDescripcionLarga={this.refDescripcionLargaServicio}
-                      handleInputDescripcionLarga={
-                        this.handleInpuDescripcionLargaServicio
-                      }
-                      precio={precioServicio}
-                      refPrecio={this.refPrecioServicio}
-                      handleInputPrecio={this.handleInpuPrecioServicio}
-                      detalles={detallesServicio}
-                      refDetalles={this.refDetallesServicio}
-                      handleInputNombreDetalles={
-                        this.handleInputNombreDetallesServicio
-                      }
-                      handleInputValorDetalles={
-                        this.handleInputValorDetallesServicio
-                      }
-                      handleAddDetalles={this.handleAddDetallesServicio}
-                      handleRemoveDetalles={this.handleRemoveDetallesServicio}
-                      imagenes={imagenesServicio}
-                      handleSelectImagenes={this.handleSelectImagenesServicio}
-                      handleRemoveImagenes={this.handleRemoveImagenesServicio}
-                    />
-                  </TabPane>
+              <p>Indica el valor de venta de tu producto.</p>
 
-                  <TabPane id="combo" isActive={this.state.activeTabCombo}>
-                    <Combo
-                      nombre={nombreCombo}
-                      refNombre={this.refNombreCombo}
-                      handleSelectNombre={this.handleInputNombreCombo}
-                      codigo={codigoCombo}
-                      refCodigo={this.refCodigoCombo}
-                      handleInputCodigo={this.handleInputCodigoCombo}
-                      sku={skuCombo}
-                      refSku={this.refSkuCombo}
-                      handleInputSku={this.handleInputSkuCombo}
-                      codigoBarras={codigoBarrasCombo}
-                      refCodigoBarras={this.refCodigoBarrasCombo}
-                      handleInputCodigoBarras={
-                        this.handleInputCodigoBarrasCombo
-                      }
-                      handleGenerateCodigoBarras={
-                        this.handleGenerateCodigoBarrasCombo
-                      }
+              <div>
+                <Input
+                  label={
+                    <>
+                      Precio base:
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
+                  className={`${precio ? '' : 'is-invalid'}`}
+                  placeholder=" S/ 0.00"
+                  ref={this.refPrecio}
+                  value={precio}
+                  onChange={this.handleInputPrecio}
+                  onKeyDown={keyNumberFloat}
+                />
+              </div>
 
-                      idMedida={idMedidaCombo}
-                      refIdMedida={this.refIdMedidaCombo}
-                      handleSelectIdMedida={this.handleSelectIdMedidaCombo}
-                      medidas={medidas}
-                      idCategoria={idCategoriaCombo}
-                      refIdCategoria={this.refIdCategoriaCombo}
-                      handleSelectIdCategoria={
-                        this.handleSelectIdCategoriaCombo
-                      }
-                      categorias={categorias}
-                      idMarca={idMarcaCombo}
-                      refIdMarca={this.refIdMarcaCombo}
-                      handleSelectIdMarca={this.handleSelectIdMarcaCombo}
-                      marcas={marcas}
-                      descripcionCorta={descripcionCortaCombo}
-                      refDescripcionCorta={this.refDescripcionCortaCombo}
-                      handleInputDescripcionCorta={
-                        this.handleInputDescripcionCortaCombo
-                      }
-                      descripcionLarga={descripcionLargaCombo}
-                      refDescripcionLarga={this.refDescripcionLargaCombo}
-                      handleInputDescripcionLarga={
-                        this.handleInputDescripcionLargaCombo
-                      }
-                      precio={precioCombo}
-                      refPrecio={this.refPrecioCombo}
-                      handleInputPrecio={this.handleInputPrecioCombo}
-                      combos={combos}
-                      handleOpenModalProducto={this.handleOpenModalProducto}
-                      handleInputCantidadCombos={this.handleInputCantidadCombos}
-                      handleRemoveItemCombo={this.handleRemoveProducto}
-                      activarInventario={false}
-                      inventarios={[]}
-                      handleAddItemInventario={() => { }}
-                      handleRemoveItemInventario={() => { }}
-                      detalles={detallesCombo}
-                      refDetalles={this.refDetallesCombo}
-                      handleInputNombreDetalles={
-                        this.handleInputNombreDetallesCombo
-                      }
-                      handleInputValorDetalles={
-                        this.handleInputValorDetallesCombo
-                      }
-                      handleAddDetalles={this.handleAddDetallesCombo}
-                      handleRemoveDetalles={this.handleRemoveDetallesCombo}
-                      imagenes={imagenesCombo}
-                      handleSelectImagenes={this.handleSelectImagenesCombo}
-                      handleRemoveImagenes={this.handleRemoveImagenesCombo}
-                    />
-                  </TabPane>
-                </TabContent>
-              </Column>
-            </Row>
-          </Column>
+              <div>
+                {
+                  precios.length !== 0 && (
+                    <div className="bg-white rounded border overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table ref={this.refPrecios} className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {
+                              precios.map((item, index) => {
+                                return (
+                                  <tr key={index}>
+                                    <td className="px-6 py-12 text-center">{item.id}</td>
+                                    <td className="px-6 py-12 text-center">
+                                      <Input
+                                        placeholder="Ingrese el nombre del precio..."
+                                        value={item.nombre}
+                                        onChange={(event) =>
+                                          this.handleInputNombrePrecios(event, item.id)
+                                        }
+                                      />
+                                    </td>
+                                    <td className="px-6 py-12 text-center">
+                                      <Input
+                                        placeholder="0.00"
+                                        value={item.precio}
+                                        onChange={(event) =>
+                                          this.handleInputPrecioPrecios(event, item.id)
+                                        }
+                                        onKeyDown={keyNumberFloat}
+                                      />
+                                    </td>
+                                    <td className="px-6 py-12 text-center">
+                                      <Button
+                                        className="btn-danger"
+                                        onClick={() => this.handleRemovePrecios(item.id)}
+                                      >
+                                        <i className="fa fa-remove"></i>
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
 
-          <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
+              <div>
+                <Button className="text-success" onClick={this.handleAddPrecios}>
+                  <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
+                </Button>
+              </div>
+            </div>
+
+            {/* Lista combo */}
+            {
+              [COMBO].includes(idTipoProducto) && (
+                <div className="flex flex-col gap-3">
+                  <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">3</span> COMBO
+                  </h6>
+
+                  <p>
+                    Selecciona los productos y sus cantidades para armar un combo
+                  </p>
+
+                  {
+                    combos.map((item, index) => {
+                      return (
+                        <ItemProducto
+                          key={index}
+                          item={item}
+                          handleInputCantidadCombos={this.handleInputCantidadCombo}
+                          handleRemoveItemCombo={this.handleRemoveCombo}
+                        />
+                      );
+                    })
+                  }
+                </div>
+              )
+            }
+
+            {/* Descripción */}
+            <div className="flex flex-col gap-3">
+              <h6 className="flex items-center gap-2">
+                <span className="badge badge-primary">6</span> DESCRIPCIÓN
+              </h6>
+
+              <p>Agregar un resumen del producto</p>
+
+              <div>
+                <TextArea
+                  label={'Descripción Corta:'}
+                  rows={3}
+                  ref={this.refDescripcionCorta}
+                  value={descripcionCorta}
+                  onChange={this.handleInputDescripcionCorta}
+                />
+              </div>
+
+              <div>
+                <TextArea
+                  label={'Descripción Larga:'}
+                  rows={6}
+                  ref={this.refDescripcionLarga}
+                  value={descripcionLarga}
+                  onChange={this.handleInputDescripcionLarga}
+                />
+              </div>
+            </div>
+
+            {/* Detalles */}
+            <div className="flex flex-col gap-3">
+              <h6 className="flex items-center gap-2">
+                <span className="badge badge-primary">7</span> DETALLES O
+                CARACTERISTICAS
+              </h6>
+
+              <p>Agregar la lista de caracteristicas</p>
+
+              <div>
+                {
+                  detalles.length !== 0 && (
+                    <div className="bg-white rounded border overflow-hidden mt-3">
+                      <div className="overflow-x-auto">
+                        <table ref={this.refDetalles} className="min-w-full divide-y divide-gray-200">
+                          <thead>
+                            <tr>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Nombre</th>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Valor</th>
+                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {detalles.map((item, index) => {
+                              return (
+                                <tr key={index}>
+                                  <tr className="px-6 py-12 text-center">{item.id}</tr>
+                                  <tr className="px-6 py-12 text-center">
+                                    <Input
+                                      placeholder="Ejemplo (Medida)"
+                                      value={item.nombre}
+                                      onChange={(event) =>
+                                        this.handleInputNombreDetalles(event, item.id)
+                                      }
+                                    />
+                                  </tr>
+                                  <tr className="px-6 py-12 text-center">
+                                    <TextArea
+                                      rows={6}
+                                      placeholder="Ejemplo (100m x 200m)"
+                                      value={item.valor}
+                                      onChange={(event) =>
+                                        this.handleInputValorDetalles(event, item.id)
+                                      }
+                                    />
+                                  </tr>
+                                  <tr className="px-6 py-12 text-center">
+                                    <Button
+                                      className="btn-danger"
+                                      onClick={() => this.handleRemoveDetalles(item.id)}
+                                    >
+                                      <i className="fa fa-remove"></i>
+                                    </Button>
+                                  </tr>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+
+              <div>
+                <Button className="text-success" onClick={this.handleAddDetalles}>
+                  <i className="fa fa-plus-circle"></i> Agregar Detalles
+                </Button>
+              </div>
+            </div>
+
+            {/* Imagenes */}
+            <div className="flex flex-col gap-3">
+              <h6 className="flex items-center gap-2">
+                <span className="badge badge-primary">8</span> IMAGENES
+              </h6>
+
+              <p>
+                Agregar las imagenes que sean mas atractivas para el usuario.
+                <b className="text-danger">
+                  Las imagenes no debe superar los 500 KB.
+                </b>
+              </p>
+              <p>
+                Las imágenes deben tener un tamaño de <b>800 x 800 píxeles</b> para
+                que se visualicen correctamente en la página web (formato
+                recomendado *.webp).
+              </p>
+
+              <div>
+                <ItemImage
+                  imagenes={imagenes}
+                  handleSelectImagenes={this.handleSelectImagenes}
+                  handleRemoveImagenes={this.handleRemoveImagenes}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Parte de la imagen */}
+          <div className="w-full md:w-2/5 flex flex-col gap-3">
             <DetalleImagen
               idTipoProducto={idTipoProducto}
 
@@ -1794,11 +1473,10 @@ class ProductoEditar extends CustomComponent {
               estado={estado}
               handleSelectEstado={this.handleSelectEstado}
 
-              handleRegistrar={this.handleRegistrar}
-              handleCerrar={this.handleCerrar}
+              handleRegistrar={this.handleSaveProducto}
             />
-          </Column>
-        </Row>
+          </div>
+        </div>
       </ContainerWrapper>
     );
   }

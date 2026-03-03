@@ -15,8 +15,8 @@ import PropTypes from 'prop-types';
 import {
   cancelNotaCredito,
   comboComprobante,
-  listVenta,
 } from '@/network/rest/principal.network';
+
 import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
@@ -34,6 +34,7 @@ import Search from '@/components/Search';
 import { Link } from 'react-router-dom';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
+import { listNotaCredito } from '@/network/rest/api-client';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -149,15 +150,7 @@ class NotaCredito extends CustomComponent {
 
       this.refSearch.current.initialize(notaCreditoLista.data.buscar);
     } else {
-      const [comprobantes] = await Promise.all([this.fetchComprobante(NOTA_DE_CREDITO)]);
-
-      this.setState({
-        comprobantes,
-        initialLoad: false,
-      }, async () => {
-        await this.loadingInit();
-        this.updateReduxState();
-      });
+      await this.loadingInitData();
     }
   };
 
@@ -173,26 +166,34 @@ class NotaCredito extends CustomComponent {
     });
   }
 
-  async fetchComprobante(tipo) {
+  async loadingInitData() {
     const params = {
-      tipo: tipo,
+      tipo: NOTA_DE_CREDITO,
       idSucursal: this.state.idSucursal,
     };
 
-    const response = await comboComprobante(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const comprobantesResponse = await comboComprobante(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      return response.data;
+    if (comprobantesResponse instanceof ErrorResponse) {
+      if (comprobantesResponse.getType() === CANCELED) return;
+
+      alertKit.warning({
+        title: "Notas de Crédito",
+        message: comprobantesResponse.getMessage(),
+        onClose: async () => {
+          await this.loadingInitData();
+        },
+      });
+      return;
     }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
+    this.setState({
+      comprobantes: comprobantesResponse.data,
+      initialLoad: false,
+    }, async () => {
+      await this.loadingInit();
+      this.updateReduxState();
+    });
   }
 
   loadingInit = async () => {
@@ -263,30 +264,30 @@ class NotaCredito extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listVenta(params, this.abortControllerTable.signal);
+    const {success, data, message, type} = await listNotaCredito(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
+    if (success) {
       const totalPaginacion = parseInt(
-        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
+        String(Math.ceil(Number(data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
         loading: false,
-        lista: response.data.result,
+        lista: data.result,
         totalPaginacion: totalPaginacion,
       }, () => {
         this.updateReduxState();
       });
     }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
     }
   };
@@ -445,20 +446,14 @@ class NotaCredito extends CustomComponent {
     return this.state.lista.map((item) => {
       const estadoClassName = cn(
         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-        item.estado === 1 ? "bg-green-100 text-green-800" :
-          item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
-            item.estado === 3 ? "bg-red-100 text-red-800" :
-              "bg-blue-100 text-blue-800"
+        item.estado === 1 ? "bg-green-100 text-green-800"
+          : "bg-red-100 text-red-800"
       );
 
       const estadoValue =
-        item.estado === 1 ? "COBRADO" :
-          item.estado === 2 ? "POR COBRAR" :
-            item.estado === 3 ? "ANULADO" : "POR LLEVAR";
-
-      const tipo = item.idFormaPago === CONTADO
-        ? "CONTADO"
-        : "CREDITO"
+        item.estado === 1
+          ? 'ACTIVO' :
+          'ANULADO';
 
       return (
         <tr key={item.idNotaCredito} className="hover:bg-gray-50 transition-colors">
@@ -472,10 +467,20 @@ class NotaCredito extends CustomComponent {
             <div className="text-xs text-gray-500">{item.informacion}</div>
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
-            {item.comprobante}<br />
+            {item.comprobante}
+            <br />
             <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
           </td>
-          <td className="px-6 py-4 text-sm text-gray-900">{tipo}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">{item.motivo}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">         
+            <Link
+              to={getPathNavigation("venta", item.idVenta)}
+              className="text-blue-600 hover:underline font-medium"
+            >
+              {item.comprobanteVenta}<br />
+              <span className="font-mono">{item.serieVenta}-{formatNumberWithZeros(item.numeracionVenta)}</span>
+            </Link>
+          </td>
           <td className="px-6 py-4 text-center">
             <span
               className={estadoClassName}
@@ -503,31 +508,6 @@ class NotaCredito extends CustomComponent {
             >
               <i className="bi bi-eye text-lg"></i>
             </button>
-          </td>
-          <td className="px-6 py-4 text-center">
-            {item.guiaRemision === 1 ? (
-              <span className="p-1.5 text-green-600 bg-green-50 rounded-md" title="Guía generada">
-                <i className="fa fa-check !text-lg"></i>
-              </span>
-            ) : (
-              <Link
-                to={getPathNavigation('guia-create', item.idNotaCredito)}
-                className={
-                  cn(
-                    "block text-center",
-                    "p-2 rounded-md text-sm font-medium transition",
-                    "text-gray-600 bg-white",
-                    "hover:bg-blue-50 hover:text-blue-700",
-                    "focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
-                    "active:bg-blue-100 active:scale-[0.97]",
-                    "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                  )
-                }
-                title="Generar guía"
-              >
-                <i className="fa fa-truck !text-lg"></i>
-              </Link>
-            )}
           </td>
           <td className="px-6 py-4 text-center">
             <button
@@ -575,12 +555,16 @@ class NotaCredito extends CustomComponent {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {this.state.lista.map((item) => {
-          const estado =
-            item.estado === 1 ? (
-              <span className="bg-green-100 text-green-800 px-2 py-2 rounded">Activo</span>
-            ) : (
-              <span className="bg-red-100 text-red-800 px-2 py-2 rounded">Anulado</span>
-            );
+          const styleEstado = cn(
+            item.estado === 1
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          );
+
+          const estadoValue =
+            item.estado === 1
+              ? 'ACTIVO' :
+              'ANULADO';
 
           return (
             <div
@@ -590,36 +574,41 @@ class NotaCredito extends CustomComponent {
               <div className="flex flex-col gap-2 p-4">
                 <div className="flex justify-between items-start">
                   <h5 className="font-semibold text-gray-900 text-sm">
-                    Traslado
+                    <span>{item.comprobante}</span>
+                    <br />
+                    <span>{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
                   </h5>
+                  <span className={cn("inline-flex items-center px-2 py-1 rounded-full text-xs font-medium", styleEstado)}>
+                    {estadoValue}
+                  </span>
                 </div>
 
                 <div className="text-sm text-gray-600 mb-1">
                   <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
                 </div>
 
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Tipo:</span> {item.tipo}
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
                 </div>
 
-                <div className="text-sm text-gray-600 mb-1">
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">N° Documento:</span> {item.documento}
+                </div>
+
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Información:</span> {item.informacion}
+                </div>
+
+                <div className="text-sm text-gray-600">
                   <span className="font-medium">Motivo:</span> {item.motivo}
                 </div>
 
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Almacen de Origen:</span> {item.almacenOrigen}
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Referencia:</span> {item.comprobanteVenta} - ({item.serieVenta}-{formatNumberWithZeros(item.numeracionVenta)})
                 </div>
 
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Almacen de Destino:</span> {item.almacenDestino}
-                </div>
-
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Observación:</span> {item.observacion}
-                </div>
-
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Estado:</span>  {estado}
+                <div className="text-lg font-bold text-gray-900 mb-3">
+                  {formatCurrency(item.total, item.codiso)}
                 </div>
 
                 <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
@@ -634,7 +623,7 @@ class NotaCredito extends CustomComponent {
                         "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                       )
                     }
-                    onClick={() => this.handleDetalle(item.idTraslado)}
+                    onClick={() => this.handleDetalle(item.idNotaCredito)}
                     title="Ver detalle"
                   >
                     <i className="bi bi-eye text-lg" /> Ver
@@ -651,7 +640,7 @@ class NotaCredito extends CustomComponent {
                         "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                       )
                     }
-                    onClick={() => this.handleAnular(item.idTraslado)}
+                    onClick={() => this.handleAnular(item.idNotaCredito)}
                     title="Anular"
                   >
                     <i className="bi bi-trash text-lg" /> Anular
@@ -692,7 +681,6 @@ class NotaCredito extends CustomComponent {
                 "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
               )}
               onClick={this.handleCrear}
-              disabled={!this.state.create}
               aria-label="Crear nueva nota de crédito"
             >
               <i className="bi bi-file-plus"></i>
@@ -774,11 +762,13 @@ class NotaCredito extends CustomComponent {
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
-              {this.state.comprobantes.map((item) => (
-                <option key={item.idComprobante} value={item.idComprobante}>
-                  {item.nombre} - {item.serie}
-                </option>
-              ))}
+              {
+                this.state.comprobantes.map((item) => (
+                  <option key={item.idComprobante} value={item.idComprobante}>
+                    {item.nombre} - {item.serie}
+                  </option>
+                ))
+              }
             </select>
 
             <select
@@ -787,9 +777,8 @@ class NotaCredito extends CustomComponent {
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
-              <option value="1">COBRADO</option>
-              <option value="2">POR COBRAR</option>
-              <option value="3">ANULADO</option>
+              <option value="1">ACTIVO</option>
+              <option value="0">ANULADO</option>
             </select>
           </div>
         </div>
@@ -822,16 +811,16 @@ class NotaCredito extends CustomComponent {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Fecha</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Comprobante</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Tipo</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">Estado</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-right">Total</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Detalle</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Guía</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Anular</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[25%]">Cliente</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Motivo</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Referencia</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-right">Total</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Detalle</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Anular</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">

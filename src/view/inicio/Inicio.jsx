@@ -53,7 +53,7 @@ import Facturacion, {
   GuiaRemisionEditar,
   GuiaRemisionDetalle,
   NotaCredito,
-  NotaCreditoProceso,
+  NotaCreditoCrear,
   NotaCreditoDetalle,
   CuentasPorCobrar,
   CuentasPorCobrarAbonar,
@@ -485,12 +485,12 @@ class Inicio extends React.Component {
           />
           <Route
             path={`${path}/dashboard`}
-            render={(props) => (
-              <Suspense fallback={<ContainerWrapper><DashboardSkeleton /></ContainerWrapper>}>
-                <Dashboard {...props} />
-              </Suspense>
-            )}
-          />
+          >
+            <Suspense fallback={<ContainerWrapper><DashboardSkeleton /></ContainerWrapper>}>
+              <Dashboard />
+            </Suspense>
+          </Route>
+
           <Route
             path={`${path}/notifications`}
             render={(props) => <Notifications {...props} />}
@@ -526,23 +526,30 @@ class Inicio extends React.Component {
           <Route
             path={`${path}/seguridad/usuarios`}
             exact={true}
-            render={(props) => <Usuarios {...props} />}
-          />
+          >
+            <Usuarios />
+          </Route>
+
           <Route
             path={`${path}/seguridad/usuarios/agregar`}
             exact={true}
-            render={(props) => <UsuarioAgregar {...props} />}
-          />
+          >
+            <UsuarioAgregar />
+          </Route>
+
           <Route
             path={`${path}/seguridad/usuarios/editar`}
             exact={true}
-            render={(props) => <UsuarioEditar {...props} />}
-          />
+          >
+            <UsuarioEditar />
+          </Route>
+
           <Route
             path={`${path}/seguridad/usuarios/resetear`}
             exact={true}
-            render={(props) => <UsuarioResetear {...props} />}
-          />
+          >
+            <UsuarioResetear />
+          </Route>
 
           <Route
             path={`${path}/seguridad/accesos`}
@@ -604,10 +611,11 @@ class Inicio extends React.Component {
             render={(props) => <NotaCredito {...props} />}
           />
           <Route
-            path={`${path}/facturacion/notacredito/proceso`}
+            path={`${path}/facturacion/notacredito/crear`}
             exact={true}
-            render={(props) => <NotaCreditoProceso {...props} />}
-          />
+          >
+            <NotaCreditoCrear />
+          </Route>
           <Route
             path={`${path}/facturacion/notacredito/detalle`}
             exact={true}

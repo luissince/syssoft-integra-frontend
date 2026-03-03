@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
  * @returns {JSX.Element} The rendered search input component.
  */
 class SearchInput extends React.Component {
+  
   constructor(props) {
     super(props);
 
@@ -281,7 +282,7 @@ class SearchInput extends React.Component {
                     key={index}
                     tabIndex={-1}
                     className={cn(
-                      "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200",
+                      "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200 hover:bg-gray-50",
                       index === highlightedIndex && 'text-white bg-primary',
                     )}
                     onMouseDown={(e) => {

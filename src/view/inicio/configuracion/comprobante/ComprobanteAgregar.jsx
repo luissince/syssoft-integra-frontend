@@ -351,7 +351,7 @@ class ComporbanteAgregar extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
-        <h6>Opciones de Facturación</h6>
+        <h6 className="mb-3">Opciones de Facturación</h6>
 
         <Row>
           <Column className="col-md-6" formGroup={true}>

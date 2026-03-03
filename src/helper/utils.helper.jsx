@@ -1,3 +1,5 @@
+import { alertKit } from "alert-kit";
+
 /**
  *
  * @param {Number} time Tiempo de espera del time out
@@ -621,29 +623,33 @@ export function formatDate(date) {
  * @returns {string} La cadena de tiempo formateada.
  */
 export function formatTime(time, addSeconds = false) {
-  const timeRegex =
-    /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
-  const match = time.match(timeRegex);
+  try {
+    const timeRegex =
+      /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
+    const match = time.match(timeRegex);
 
-  if (!match) {
-    return 'Invalid Time';
+    if (!match) {
+      throw new Error("Invalid Time");
+    }
+
+    const parts = time.split(':');
+
+    const HH = Number(parts[0]);
+    const mm = parts[1];
+    const ss = parts[2] === undefined ? '00' : parts[2];
+
+    const thf = HH % 12 || 12;
+    const ampm = HH < 12 || HH === 24 ? 'AM' : 'PM';
+    const formattedHour = thf < 10 ? '0' + thf : thf;
+
+    if (addSeconds) {
+      return `${formattedHour}:${mm}:${ss} ${ampm}`;
+    }
+
+    return `${formattedHour}:${mm} ${ampm}`;
+  } catch (e) {
+    return e.message ?? "Invalid Time";
   }
-
-  const parts = time.split(':');
-
-  const HH = Number(parts[0]);
-  const mm = parts[1];
-  const ss = parts[2] === undefined ? '00' : parts[2];
-
-  const thf = HH % 12 || 12;
-  const ampm = HH < 12 || HH === 24 ? 'AM' : 'PM';
-  const formattedHour = thf < 10 ? '0' + thf : thf;
-
-  if (addSeconds) {
-    return `${formattedHour}:${mm}:${ss} ${ampm}`;
-  }
-
-  return `${formattedHour}:${mm} ${ampm}`;
 }
 
 export function getUrlFileExtension(url) {
@@ -660,8 +666,7 @@ export function reorder(list, startIndex, endIndex) {
   return result;
 }
 
-export const formatBytes = (bytes) =>
-  `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+export const formatBytes = (bytes) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
 /**
  * 
@@ -703,7 +708,7 @@ export function convertNullText(value) {
  * Esta función es útil para condiciones donde quieras saber si una variable está vacía
  * sin preocuparte del tipo (null, undefined, string vacío, array vacío, objeto sin claves, etc).
  *
- * @param {*} object - El valor a verificar.
+ * @param {*} value - El valor a verificar.
  * @returns {boolean} `true` si está vacío, `false` si contiene datos.
  *
  * ✔️ Soporta:
@@ -712,7 +717,7 @@ export function convertNullText(value) {
  * - Arrays o `FileList`
  * - Objetos (devuelve true si no tiene claves)
  *
- * ❌ Otros tipos (como números o funciones) siempre devolverán `false`.
+ * ❌ Otros tipos (funciones) siempre devolverán `false`.
  *
  * @example
  * if (isEmpty(nombre)) {
@@ -723,22 +728,35 @@ export function convertNullText(value) {
  *   procesar(data);
  * }
  */
-export function isEmpty(object) {
-  if (object === null || typeof object === 'undefined') {
+export function isEmpty(value) {
+  if (value === null || typeof value === 'undefined') {
     return true;
   }
 
-  if (Array.isArray(object) || object instanceof FileList) {
-    return object.length === 0;
+  if (typeof value === 'string') {
+    return value.trim() === '';
   }
 
-  if (typeof object === 'string') {
-    return object.trim() === '';
+  if (typeof value === 'boolean' && value === true) {
+    return true;
   }
 
-  if (typeof object === 'object') {
-    return Object.keys(object).length === 0;
+  if (Array.isArray(value)) {
+    return value.length === 0;
   }
+
+  if (value instanceof Map || value instanceof Set) {
+    return value.size === 0;
+  }
+
+  if (typeof FileList !== 'undefined' && value instanceof FileList) {
+    return value.length === 0;
+  }
+
+  if (typeof value === 'object') {
+    return Object.keys(value).length === 0;
+  }
+
 
   return false;
 }
@@ -819,19 +837,9 @@ export function validateNumericInputs(ref, type = 'number') {
 
   for (const input of inputs) {
     const inputValue = input.value.trim();
-
-    if (type === 'number') {
-      if (!isNumeric(inputValue)) {
-        input.focus();
-        break;
-      }
-    }
-
-    if (type === 'string') {
-      if (isEmpty(inputValue)) {
-        input.focus();
-        break;
-      }
+    if (isEmpty(inputValue) || (typeof inputValue === 'number' && !isNumeric(inputValue))) {
+      input.focus();
+      break;
     }
   }
 }
@@ -1043,3 +1051,38 @@ export function getPathNavigation(opcion, idNavegacion) {
 
   return "#";
 }
+
+export const validateForm = async ({
+  title = "POS",
+  value,
+  message,
+  ref = null,
+  callback,
+}) => {
+  if (isEmpty(value) || (typeof value === "number" && !isNumeric(value))) {
+    alertKit.warning({
+      title: title,
+      message,
+      onClose: () => {
+        ref?.current?.focus();
+      }
+    }, () => {
+      callback?.();
+    });
+
+    return false;
+  }
+
+  return true;
+};
+
+export const validateMany = async (rules = [], title = "POS") => {
+  for (const rule of rules) {
+    const valid = await validateForm({
+      ...rule,
+      title: title,
+    });
+    if (!valid) return false;
+  }
+  return true;
+};

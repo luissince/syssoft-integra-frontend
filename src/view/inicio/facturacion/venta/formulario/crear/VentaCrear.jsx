@@ -21,7 +21,7 @@ import {
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
-  detailForIdVenta,
+  detailsForIdVenta,
   createVenta,
   // obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
@@ -1383,7 +1383,7 @@ class VentaCrear extends CustomComponent {
       idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailForIdVenta(
+    const response = await detailsForIdVenta(
       params,
       this.abortControllerVenta.signal,
     );

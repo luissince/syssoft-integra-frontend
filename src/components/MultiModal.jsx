@@ -61,7 +61,7 @@ const ModalImpresion = ({
       isOpen={isOpen}
       onClose={handleClose}
       onHidden={handleHidden}
-      contentLabel={'Modal de Impresión'}
+      contentLabel={"Modal de Impresión"}
       shouldCloseOnEsc={false}
     >
       <CustomModalContentHeader contentRef={refModal} showClose={false}>
@@ -82,7 +82,7 @@ const ModalImpresion = ({
         <div className="alert alert-primary text-center">
           {subTitle}
         </div>
-        <div className="d-flex justify-content-center">
+        <div className="flex justify-center">
           <Button
             autoFocus
             className="btn-danger"
@@ -97,7 +97,7 @@ const ModalImpresion = ({
             </div>
           </Button>
         </div>
-        <div className="d-flex justify-content-center align-items-center flex-wrap gap-2-5 mt-3">
+        <div className="flex justify-center items-center flex-wrap gap-2-5 mt-3">
           {
             Capacitor.isNativePlatform() ? (
               <Button
@@ -167,12 +167,13 @@ class ModalPreImpresion extends Component {
     super(props);
     this.state = {
       loading: false,
-      message: '',
+      message: "",
     };
 
     this.peticion = false;
     this.abortController = null;
 
+    this.refPhone = React.createRef();
     this.refModal = React.createRef();
   }
 
@@ -197,24 +198,19 @@ class ModalPreImpresion extends Component {
 
     this.setState({
       loading: true,
-      message: 'Generando pre impresión...',
+      message: "Generando pre impresión...",
     });
 
-    await this.props.handleProcess(
-      type,
-      this.abortController,
-      () => {
-        this.peticion = true;
-        this.abortController = null;
+    await this.props.handleProcess(type, this.abortController, () => {
+      this.peticion = true;
+      this.abortController = null;
 
-        this.setState({ loading: false });
-      },
-      () => {
-        this.peticion = false;
-        this.abortController = null;
-        this.setState({ loading: false });
-      },
-    );
+      this.setState({ loading: false });
+    }, () => {
+      this.peticion = false;
+      this.abortController = null;
+      this.setState({ loading: false });
+    });
   };
 
   render() {
@@ -228,7 +224,7 @@ class ModalPreImpresion extends Component {
         isOpen={isOpen}
         onClose={handleClose}
         onHidden={this.handleOnHidden}
-        contentLabel={'Modal Pre Impresión'}
+        contentLabel={"Modal Pre Impresión"}
       >
         <CustomModalContentHeader contentRef={this.refModal}>
           SysSoft Integra
@@ -238,13 +234,14 @@ class ModalPreImpresion extends Component {
           <SpinnerView loading={loading} message={message} />
 
           <h5 className="text-center">Opciones de pre-impresión</h5>
+
           <div className="d-flex justify-content-center align-items-center gap-2-5 mt-3">
             <Button
               className="btn-outline-info"
               onClick={() => this.handlePrint('a4')}
             >
               <i className="fa fa-file-pdf-o"></i> A4
-            </Button>{' '}
+            </Button>
             <Button
               className="btn-outline-info"
               onClick={() => this.handlePrint('ticket')}
@@ -279,20 +276,25 @@ ModalPreImpresion.propTypes = {
  * @extends React.Component
  */
 class ModalPersona extends Component {
+
+  /**
+   * 
+   * @param {*} props 
+   */
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idTipoDocumento: '',
-      documento: '',
-      informacion: '',
-      celular: '',
-      email: '',
-      direccion: '',
-      idUbigeo: '',
+      idTipoDocumento: "",
+      documento: "",
+      informacion: "",
+      celular: "",
+      email: "",
+      direccion: "",
+      idUbigeo: "",
 
       tiposDocumentos: [],
 
@@ -337,7 +339,7 @@ class ModalPersona extends Component {
       this.abortController = null;
 
       this.setState({
-        msgLoading: 'Se produjo un error un interno, intente nuevamente.',
+        msgLoading: "Se produjo un error un interno, intente nuevamente.",
       });
     }
   };
@@ -351,15 +353,15 @@ class ModalPersona extends Component {
 
     this.setState({
       loading: true,
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idTipoDocumento: '',
-      documento: '',
-      informacion: '',
-      celular: '',
-      email: '',
-      direccion: '',
-      idUbigeo: '',
+      idTipoDocumento: "",
+      documento: "",
+      informacion: "",
+      celular: "",
+      email: "",
+      direccion: "",
+      idUbigeo: "",
 
       tiposDocumentos: [],
 
@@ -397,18 +399,16 @@ class ModalPersona extends Component {
   handleGetApiReniec = async () => {
     if (this.state.documento.length !== 8) {
       alertKit.warning({
-        title: 'Persona',
-        message:
-          'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-      }, () => {
-        this.refDocumento.current.focus();
+        title: "Persona",
+        message: "Para iniciar la busqueda en número dni debe tener 8 caracteres.",
+        onClose: () => this.refDocumento.current.focus(),
       });
       return;
     }
 
     this.setState({
       loading: true,
-      msgLoading: 'Consultando número de DNI...',
+      msgLoading: "Consultando número de DNI...",
     });
 
     const response = await getDni(this.state.documento);
@@ -416,19 +416,14 @@ class ModalPersona extends Component {
     if (response instanceof SuccessReponse) {
       this.setState({
         documento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
+        informacion: convertNullText(response.data.apellidoPaterno) + " " + convertNullText(response.data.apellidoMaterno) + " " + convertNullText(response.data.nombres),
         loading: false,
       });
     }
 
     if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Persona',
+        title: "Persona",
         message: response.getMessage(),
       }, () => {
         this.setState({
@@ -441,20 +436,16 @@ class ModalPersona extends Component {
   handleGetApiSunat = async () => {
     if (this.state.documento.length !== 11) {
       alertKit.warning({
-        title: 'Persona',
-        message:
-          'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-      },
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+        title: "Persona",
+        message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
+        onClose: () => this.refDocumento.current.focus()
+      });
       return;
     }
 
     this.setState({
       loading: true,
-      msgLoading: 'Consultando número de RUC...',
+      msgLoading: "Consultando número de RUC...",
     });
 
     const response = await getRuc(this.state.documento);
@@ -470,7 +461,7 @@ class ModalPersona extends Component {
 
     if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Persona',
+        title: "Persona",
         message: response.getMessage(),
       }, () => {
         this.setState({
@@ -482,7 +473,7 @@ class ModalPersona extends Component {
 
   handleFilter = async (value) => {
     const searchWord = value;
-    this.setState({ idUbigeo: '' });
+    this.setState({ idUbigeo: "" });
 
     if (isEmpty(searchWord)) {
       this.setState({ ubigeos: [] });
@@ -505,16 +496,7 @@ class ModalPersona extends Component {
   };
 
   handleSelectItem = async (value) => {
-    this.refUbigeo.current.initialize(
-      value.departamento +
-      ' - ' +
-      value.provincia +
-      ' - ' +
-      value.distrito +
-      ' (' +
-      value.ubigeo +
-      ')',
-    );
+    this.refUbigeo.current.initialize(value.departamento + " - " + value.provincia + " - " + value.distrito + " (" + value.ubigeo + ")",);
     this.setState({
       ubigeos: [],
       idUbigeo: value.idUbigeo,
@@ -532,21 +514,21 @@ class ModalPersona extends Component {
 
     if (isEmpty(this.state.idTipoDocumento)) {
       alertKit.warning({
-          title: 'Persona',
-          message: 'Seleccione el tipo de documento.',
-        },() => {
-          this.refTipoDocumento.current.focus();
-        });
+        title: "Persona",
+        message: "Seleccione el tipo de documento.",
+      }, () => {
+        this.refTipoDocumento.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.documento)) {
       alertKit.warning({
-          title: 'Persona',
-          message: 'Ingrese el número de documento.',
-        },() => {
-          this.refDocumento.current.focus();
-        });
+        title: "Persona",
+        message: "Ingrese el número de documento.",
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
@@ -556,27 +538,27 @@ class ModalPersona extends Component {
       tipoDocumento.longitud !== this.state.documento.length
     ) {
       alertKit.warning({
-          title: 'Persona',
-          message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
-        },() => {
-          this.refDocumento.current.focus();
-        });
+        title: "Persona",
+        message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
       alertKit.warning({
-          title: 'Persona',
-          message: 'Ingrese los apellidos y nombres.',
-        },() => {
-          this.refInformacion.current.focus();
-        });
+        title: "Persona",
+        message: "Ingrese los apellidos y nombres.",
+      }, () => {
+        this.refInformacion.current.focus();
+      });
       return;
     }
 
     const accept = await alertKit.question({
-      title: 'Persona',
-      message: '¿Estás seguro de continuar?',
+      title: "Persona",
+      message: "¿Estás seguro de continuar?",
       acceptButton: {
         html: "<i class='fa fa-check'></i> Aceptar",
       },
@@ -593,33 +575,33 @@ class ModalPersona extends Component {
         cliente: true,
         proveedor: true,
         conductor: false,
-        licenciaConducir: '',
+        licenciaConducir: "",
         personal: false,
-        telefono: '',
+        telefono: "",
         celular: this.state.celular.toString().trim().toUpperCase(),
         fechaNacimiento: currentDate(),
         email: this.state.email.trim(),
-        genero: '',
+        genero: "",
         direccion: this.state.direccion.trim().toUpperCase(),
         idUbigeo: this.state.idUbigeo,
-        estadoCivil: '',
+        estadoCivil: "",
         predeterminado: false,
         estado: true,
-        observacion: '',
+        observacion: "",
         idUsuario: this.props.idUsuario,
       };
 
       alertKit.loading({
-        message: 'Procesando información...',
+        message: "Procesando información...",
       });
 
       const response = await createPersona(data);
 
       if (response instanceof SuccessReponse) {
         alertKit.success({
-            title: 'Persona',
-            message: response.data,
-          },
+          title: "Persona",
+          message: response.data,
+        },
           async () => {
             await this.refModal.current.handleOnClose();
           },
@@ -628,7 +610,7 @@ class ModalPersona extends Component {
 
       if (response instanceof ErrorResponse) {
         alertKit.warning({
-          title: 'Persona',
+          title: "Persona",
           message: response.getMessage(),
         });
       }
@@ -647,7 +629,7 @@ class ModalPersona extends Component {
       tiposDocumentos
     } = this.state;
 
-    const { contentLabel = 'Modal Persona', titleHeader = 'Agregar Persona', isOpen, onClose } = this.props;
+    const { contentLabel = "Modal Persona", titleHeader = "Agregar Persona", isOpen, onClose } = this.props;
 
     const tipoDocumento = tiposDocumentos.find((item) => item.idTipoDocumento === idTipoDocumento);
 
@@ -851,7 +833,7 @@ class ModalSendWhatsApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      phone: '',
+      phone: "",
     };
 
     this.refPhone = React.createRef();
@@ -859,7 +841,7 @@ class ModalSendWhatsApp extends React.Component {
 
   handleOpen = async () => {
     this.refPhone.current.focus();
-    this.setState({ phone: this.props.phone ?? '' });
+    this.setState({ phone: this.props.phone ?? "" });
   };
 
   handleInputPhone = (event) => {
@@ -868,15 +850,11 @@ class ModalSendWhatsApp extends React.Component {
 
   handleSendWhatsapp = async () => {
     if (!validateNumberWhatsApp(this.state.phone)) {
-      alertKit.warning(
-        {
-          title: 'WhatsApp',
-          message: 'El número de teléfono no es válido.',
-        },
-        () => {
-          this.refPhone.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: "WhatsApp",
+        message: "El número de teléfono no es válido.",
+        onClose: () => this.refPhone.current.focus(),
+      });
       return;
     }
 
@@ -895,7 +873,7 @@ class ModalSendWhatsApp extends React.Component {
         onOpen={this.handleOpen}
         onClose={handleClose}
         onHidden={handleHidden}
-        contentLabel={'Modal de Enviar Whatsapp'}
+        contentLabel={"Modal de Enviar Whatsapp"}
         shouldCloseOnOverlayClick={true}
         shouldCloseOnEsc={true}
       >
@@ -908,14 +886,14 @@ class ModalSendWhatsApp extends React.Component {
         </CustomModalContentHeader>
 
         <CustomModalContentBody>
-          <h4>Enviar Mensaje WhatsApp</h4>
+          <h5>Enviar Mensaje WhatsApp</h5>
 
           <Row>
             <Column formGroup={true}>
               <Input
                 autoFocus={true}
-                label={'Número de teléfono (con código de país)'}
-                placeholder={'Ej: +51966750883'}
+                label={"Número de teléfono (con código de país)"}
+                placeholder={"Ej: +51966750883"}
                 ref={this.refPhone}
                 value={this.state.phone}
                 onChange={this.handleInputPhone}
@@ -928,7 +906,7 @@ class ModalSendWhatsApp extends React.Component {
             <Column formGroup={true}>
               <Button
                 autoFocus={true}
-                className="btn-dark"
+                className="btn-dark !flex items-center gap-2"
                 onClick={this.handleSendWhatsapp}
               >
                 <img src={images.whatsapp} width={22} /> Enviar mensaje
