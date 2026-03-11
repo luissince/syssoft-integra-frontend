@@ -21,7 +21,7 @@ import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import Search from '@/components/Search';
 import { cn } from '@/lib/utils';
-import { ACTIVO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { ACTIVO_FIJO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -509,7 +509,7 @@ const ItemView = (props) => {
         idTipoProducto === PRODUCTO && cantidad <= 0 && "border border-danger",
         idTipoProducto === SERVICIO && cantidad <= 0 && "",
         idTipoProducto === COMBO && cantidad <= 0 && "border border-danger",
-        idTipoProducto === ACTIVO && cantidad <= 0 && "border border-danger",
+        idTipoProducto === ACTIVO_FIJO && cantidad <= 0 && "border border-danger",
       )}
       onClick={handleAddItem}
     >
@@ -542,13 +542,13 @@ const ItemView = (props) => {
             idTipoProducto === PRODUCTO && cantidad <= 0 && "text-red-500",
             idTipoProducto === SERVICIO && cantidad <= 0 && "",
             idTipoProducto === COMBO && cantidad <= 0 && "text-red-500",
-            idTipoProducto === ACTIVO && cantidad <= 0 && "text-red-500",
+            idTipoProducto === ACTIVO_FIJO && cantidad <= 0 && "text-red-500",
           )}
         >
           {idTipoProducto === PRODUCTO && `STOCK: ${cantidad}`}
           {idTipoProducto === SERVICIO && "SERVICIO"}
           {idTipoProducto === COMBO && `STOCK: ${cantidad}`}
-          {idTipoProducto === ACTIVO && `STOCK: ${cantidad}`}
+          {idTipoProducto === ACTIVO_FIJO && `STOCK: ${cantidad}`}
         </p>
         <div className="flex items-center justify-center">
           <img

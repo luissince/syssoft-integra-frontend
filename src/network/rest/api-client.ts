@@ -6,10 +6,11 @@ import { CreditNoteGetInterface, CreditNoteResponseInterface } from '@/model/ts/
 import { CreditNotesReasonsOptionsInterface } from '@/model/ts/interface/credit-notes-reasons';
 import DashboardInterface from '@/model/ts/interface/dashboard';
 import { InventoryDashboardInterface } from '@/model/ts/interface/inventory';
+import { KardexListDepreciacionInterface, KardexResponseListDepreciacionInterface } from '@/model/ts/interface/kardex';
 import { ProfileOptionsInterface } from '@/model/ts/interface/profile';
 import { SaleFilterAllInterface, SaleGetIdInterface } from '@/model/ts/interface/sale';
-import { StoreOptionsInterface } from '@/model/ts/interface/store';
 import { AuthenticateInterface, UserGetInterface, UserResponseInterface } from '@/model/ts/interface/user';
+import { WarehouseOptionsInterface } from '@/model/ts/interface/warehouse';
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -168,8 +169,8 @@ export async function optionsPerfil(signal: AbortSignal): Promise<ResolveRespons
 |--------------------------------------------------------------------------
 */
 
-export async function optionsAlmacen(idSucursal: string, signal: AbortSignal): Promise<ResolveResponse<StoreOptionsInterface[]>> {
-  return await Resolve.safe<StoreOptionsInterface[]>(
+export async function optionsAlmacen(idSucursal: string, signal: AbortSignal): Promise<ResolveResponse<WarehouseOptionsInterface[]>> {
+  return await Resolve.safe<WarehouseOptionsInterface[]>(
     apiClient.get(`/api/almacen/${idSucursal}/options`, {
       signal: signal,
     }),
@@ -208,6 +209,28 @@ export async function filterAllVenta(params: Record<string, any>, signal: AbortS
 export async function getByIdVenta(idVenta, signal): Promise<ResolveResponse<SaleGetIdInterface>> {
   return await Resolve.safe<SaleGetIdInterface>(
     apiClient.get(`/api/venta/${idVenta}`, {
+      signal: signal,
+    }),
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE KARDEX
+|--------------------------------------------------------------------------
+*/
+
+export async function listarDepreciacionKardex(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<KardexResponseListDepreciacionInterface>> {
+  return await Resolve.safe<KardexResponseListDepreciacionInterface>(
+    apiClient.post('/api/kardex/depreciacion/lista', body, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function detalleDepreciacionKardex(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
+  return await Resolve.safe<any>(
+    apiClient.post('/api/kardex/depreciacion/detalle', body, {
       signal: signal,
     }),
   );

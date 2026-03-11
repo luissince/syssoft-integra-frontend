@@ -43,10 +43,10 @@ const principalSlice = createSlice({
       state.userToken = null;
       state.project = null;
     },
-    projectActive: (state, action) => {
+    activeProject: (state, action) => {
       state.project = action.payload.project;
     },
-    projectClose: (state) => {
+    closeProject: (state) => {
       state.project = null;
     },
     config: (state, action) => {
@@ -69,8 +69,8 @@ export const {
   restoreToken,
   signIn,
   signOut,
-  projectActive,
-  projectClose,
+  activeProject,
+  closeProject,
   config,
   configSave
 } = principalSlice.actions;

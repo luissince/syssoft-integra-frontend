@@ -99,6 +99,7 @@ class CpeElectronicos extends CustomComponent {
     this.refPaginacion = React.createRef();
 
     this.refSearch = React.createRef();
+    this.refPaginacion = React.createRef();
 
     this.abortControllerTable = new AbortController();
   }
@@ -952,6 +953,160 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
+  renderTable() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td colSpan={8} className="px-6 py-12 text-center">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+              <p className="text-gray-500">Cargando información...</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr>
+          <td colSpan={8} className="px-6 py-12 text-center">
+            <div className="text-gray-500">
+              <i className="bi bi-box text-4xl mb-3 block"></i>
+              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-sm">Intenta cambiar los filtros</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item, index) => {
+      const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
+      const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+      return (
+        <tr key={index} className="hover:bg-gray-50 transition-colors">
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-center">
+            {this.renderDropdownActions(item)}
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            {item.fecha}<br />
+            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            <Link
+              to={getPathNavigation(item.tipo, item.idComprobante)}
+              className="text-blue-600 hover:underline font-medium"
+            >
+              <span className="text-xs text-blue-500">{item.comprobante}</span>
+              <br />
+              <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+            </Link>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            <div className="text-xs text-gray-500">{item.tipoDocumento} - {item.documento}</div>
+            <div className="text-sm uppercase">{item.informacion}</div>
+          </td>
+          <td className="px-6 py-4 text-center">
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoSunatClass}`}>
+              {estadoSunatLabel}
+            </span>
+          </td>
+          <td className="px-6 py-4 text-center">
+            {this.renderEstado(item)}
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            {isEmpty(item.xmlDescripcion) ? "Por Generar Xml" : limitarCadena(item.xmlDescripcion, 90, "...")}
+          </td>
+        </tr>
+      )
+    });
+  }
+
+  renderCuadricula() {
+    if (this.state.loading) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <div className="text-center py-16 rounded border text-gray-500">
+          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+          <p className="text-lg font-medium">No se encontraron ventas</p>
+          <p className="text-sm">Intenta cambiar los filtros</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+        {
+          this.state.lista.map((item) => {
+            const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
+            const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+            return (
+              <div key={item.idComprobante}
+                className="bg-white rounded border flex flex-col h-full">
+                <div className="flex flex-col p-4 flex-1">
+                  {/* BODY */}
+                  <div className="flex-1 flex flex-col gap-3">
+                    <div className="flex justify-between items-center">
+                      <h5 className="font-semibold text-gray-900 text-sm">
+                        {item.comprobante}
+                        <br />
+                        {item.serie}-{formatNumberWithZeros(item.numeracion)}
+                      </h5>
+                      <span className={cn(
+                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                        estadoSunatClass
+                      )}>
+                        {estadoSunatLabel}
+                      </span>
+                    </div>
+
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
+                    </div>
+
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Cliente:</span> {item.informacion}
+                      <div className="text-sm text-gray-500">{item.tipoDocumento} - {item.documento}</div>
+                    </div>
+
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Observación:</span>
+                      <div className="text-sm text-gray-700 mt-1">
+                        {isEmpty(item.xmlDescripcion) ? "Por Generar Xml" : limitarCadena(item.xmlDescripcion, 90, "...")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FOOTER */}
+                  <div className="pt-3 border-t border-gray-100 flex justify-between">
+                    <div className="text-sm text-gray-600 mb-2">
+                      <div className="mt-1">{this.renderEstado(item)}</div>
+                    </div>
+
+                    {this.renderDropdownActions(item)}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    )
+
+  }
+
   render() {
     const { vista } = this.state;
 
@@ -1127,187 +1282,62 @@ class CpeElectronicos extends CustomComponent {
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        {vista === 'tabla' ? (
-          /* 📊 Vista Tabla */
-          <div className="bg-white rounded border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-5">#</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Acciones</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Fecha</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Comprobante</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Cliente</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-10">Tipo</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-10">Estado SUNAT</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Observación</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {this.state.loading ? (
+        <div
+          className={
+            vista === "tabla"
+              ? "bg-white rounded border overflow-hidden"
+              : "space-y-6"
+          }
+        >
+          {/* 📊 Vista Tabla  */}
+          {
+            vista === "tabla" && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                          <p className="text-gray-500">Cargando información...</p>
-                        </div>
-                      </td>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Acciones</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Cliente</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Tipo</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Estado SUNAT</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Observación</th>
                     </tr>
-                  ) : isEmpty(this.state.lista) ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center">
-                        <div className="text-gray-500">
-                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                          <p className="text-lg font-medium">No se encontraron comprobantes</p>
-                          <p className="text-sm">Intenta cambiar los filtros</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      const descripcion =
-                        item.xmlDescripcion === ''
-                          ? 'Por Generar Xml'
-                          : limitarCadena(item.xmlDescripcion, 90, '...');
-
-                      const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
-                      const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-
-                      return (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
-                          <td className="px-6 py-4 text-center">
-                            {this.renderDropdownActions(item)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {item.fecha}<br />
-                            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            <Link
-                              to={getPathNavigation(item.tipo, item.idComprobante)}
-                              className="text-blue-600 hover:underline font-medium"
-                            >
-                              {item.comprobante}<br />
-                              <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            <div>{item.tipoDocumento} - {item.documento}</div>
-                            <div className="text-xs text-gray-500">{item.informacion}</div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoSunatClass}`}>
-                              {estadoSunatLabel}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            {this.renderEstado(item)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {descripcion}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        ) : (
-          /* 🟦 Vista Cuadrícula */
-          <div className="space-y-6 mb-3">
-            {this.state.loading ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {this.renderTable()}
+                  </tbody>
+                </table>
               </div>
-            ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded border">
-                <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
-                <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron comprobantes</p>
-                <p className="text-sm text-gray-500">Intenta cambiar los filtros</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {this.state.lista.map((item, index) => {
-                  const descripcion =
-                    item.xmlDescripcion === ''
-                      ? 'Por Generar Xml'
-                      : limitarCadena(item.xmlDescripcion, 90, '...');
+            )
+          }
 
-                  const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
-                  const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+          {/* 🟦 Vista Cuadrícula */}
+          {
+            vista === "cuadricula" && (
+              <>{this.renderCuadricula()}</>
+            )
+          }
 
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white rounded border hover:shadow-md transition group overflow-hidden"
-                    >
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <h5 className="font-semibold text-gray-900 text-sm">
-                            {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
-                          </h5>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoSunatClass}`}>
-                            {estadoSunatLabel}
-                          </span>
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Cliente:</span> {item.informacion}
-                          <div className="text-sm text-gray-500">{item.tipoDocumento} - {item.documento}</div>
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-3">
-                          <span className="font-medium">Observación:</span>
-                          <div className="text-sm text-gray-700 mt-1">{descripcion}</div>
-                        </div>
-
-                        <div className="pt-3 border-t border-gray-100 flex justify-between">
-                          <div className="text-sm text-gray-600 mb-2">
-                            <div className="mt-1">{this.renderEstado(item)}</div>
-                          </div>
-
-                          {this.renderDropdownActions(item)}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        )}
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              vista === "tabla"
+                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }

@@ -13,10 +13,8 @@ import { CANCELED } from '@/constants/requestStatus';
 import ItemCard from './component/ItemCard';
 import Title from './component/Title';
 import { SpinnerView } from '../../components/Spinner';
-import { projectActive, signOut } from '../../redux/principalSlice';
+import { activeProject, signOut } from '../../redux/principalSlice';
 import PropTypes from 'prop-types';
-import { clearNoticacion } from '../../redux/noticacionSlice';
-import { clearPredeterminado } from '../../redux/predeterminadoSlice';
 import Input from '../../components/Input';
 import { images } from '../../helper';
 
@@ -143,7 +141,7 @@ class Principal extends CustomComponent {
 
     const projectToken = localStorage.getItem('project');
     if (projectToken !== null) {
-      this.props.projectActive({
+      this.props.activeProject({
         project: JSON.parse(projectToken),
       });
     }
@@ -174,7 +172,7 @@ class Principal extends CustomComponent {
     const proyect = item;
 
     localStorage.setItem('project', JSON.stringify(proyect));
-    this.props.projectActive({
+    this.props.activeProject({
       project: JSON.parse(localStorage.getItem('project')),
     });
   };
@@ -279,9 +277,7 @@ Principal.propTypes = {
     project: PropTypes.object,
   }),
   signOut: PropTypes.func,
-  projectActive: PropTypes.func,
-  clearPredeterminado: PropTypes.func,
-  clearNoticacion: PropTypes.func,
+  activeProject: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -292,9 +288,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   signOut,
-  projectActive,
-  clearPredeterminado,
-  clearNoticacion,
+  activeProject,
 };
 
 const ConnectedPrincipal = connect(

@@ -291,7 +291,6 @@ class RepProductos extends CustomComponent {
   renderPagination = (currentPage, totalPages, onPageChange, prefix = '') => {
     if (totalPages <= 1) return null;
 
-    const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -575,11 +574,13 @@ class RepProductos extends CustomComponent {
           </div>
 
           {/* Paginación para productos vendidos */}
-          {this.renderPagination(
-            currentPageProductos,
-            totalPagesProductos,
-            this.handlePageChangeProductos,
-          )}
+          {
+            this.renderPagination(
+              currentPageProductos,
+              totalPagesProductos,
+              this.handlePageChangeProductos,
+            )
+          }
         </div>
       </div>
     );

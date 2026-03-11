@@ -345,7 +345,7 @@ class Paginacion extends React.Component {
       this.isPrevBtnActive = "disabled";
       this.isNextBtnActive = "";
     }
-
+     
     return (
       <>
         {theme === "modern"

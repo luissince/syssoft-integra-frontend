@@ -25,9 +25,7 @@ const Menu = (props) => {
 
   const handleCloseSucursal = () => {
     window.localStorage.removeItem('project');
-    props.clearSucursal();
-    props.clearNoticacion();
-    props.projectClose();
+    props.closeProject();
   };
 
   return (
@@ -167,10 +165,7 @@ Menu.propTypes = {
   }),
   signOut: PropTypes.func,
 
-  clearSucursal: PropTypes.func,
-  clearNoticacion: PropTypes.func,
-
-  projectClose: PropTypes.func,
+  closeProject: PropTypes.func,
   onToggleSidebar: PropTypes.func,
   notificaciones: PropTypes.array,
   match: PropTypes.shape({

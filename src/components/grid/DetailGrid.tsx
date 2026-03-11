@@ -54,7 +54,7 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
 
       {
         detalles.map((item, index) => {
-          let cantidad = item.inventarioDetalles ? item.inventarioDetalles.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0) : item.cantidad;
+          const cantidad = item.inventarioDetalles ? item.inventarioDetalles.reduce((acumulador, item) => acumulador + Number(item.cantidad), 0) : item.cantidad;
 
           let total = 0;
 

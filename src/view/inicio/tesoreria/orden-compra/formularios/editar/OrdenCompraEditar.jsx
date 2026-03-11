@@ -29,7 +29,7 @@ import {
   ModalImpresion,
   ModalPersona,
 } from '@/components/MultiModal';
-import { PosContainerWrapper } from '@/components/Container';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
 import SidebarConfiguration from '@/components/SidebarConfiguration';
 import {
   SERVICIO,

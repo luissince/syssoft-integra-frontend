@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import Input from './Input';
 import Button from './Button';
 import { cn } from '@/lib/utils';
+import { SearchIcon } from 'lucide-react';
+import { IoIosClose } from 'react-icons/io';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -15,7 +17,7 @@ import { cn } from '@/lib/utils';
  * @returns {JSX.Element} The rendered search input component.
  */
 class SearchInput extends React.Component {
-  
+
   constructor(props) {
     super(props);
 
@@ -193,6 +195,8 @@ class SearchInput extends React.Component {
   };
 
   render() {
+    const { theme = 'classic' } = this.props;
+
     const { classNameContainer, disabled } = this.props;
 
     const { autoFocus, label, data, placeholder, refValue } = this.props;
@@ -205,43 +209,45 @@ class SearchInput extends React.Component {
 
     const { searchTerm, highlightedIndex } = this.state;
 
-    return (
-      <div
-        className={cn(
-          classNameContainer ? classNameContainer : 'mb-3 relative group',
-        )}
-      >
-        <Input
-          autoFocus={autoFocus}
-          group={true}
-          label={label}
-          iconLeft={renderIconLeft}
-          placeholder={placeholder}
-          ref={refValue}
-          value={searchTerm}
-          onChange={this.handleInputChange}
-          onKeyDown={this.handleKeyDown}
-          onBlur={this.handleBlur}
-          disabled={disabled}
-          buttonRight={
-            <>
-              {customButton}
+    if (theme === 'classic') {
 
-              <Button
-                className="btn-outline-secondary"
-                onClick={() => {
-                  handleClearInput();
-                  this.restart();
-                }}
-                disabled={disabled}
-              >
-                {renderIconRight || <i className="fa fa-close"></i>}
-              </Button>
-            </>
-          }
-        />
+      return (
+        <div
+          className={cn(
+            classNameContainer ? classNameContainer : 'mb-3 relative group',
+          )}
+        >
+          <Input
+            autoFocus={autoFocus}
+            group={true}
+            label={label}
+            iconLeft={renderIconLeft}
+            placeholder={placeholder}
+            ref={refValue}
+            value={searchTerm}
+            onChange={this.handleInputChange}
+            onKeyDown={this.handleKeyDown}
+            onBlur={this.handleBlur}
+            disabled={disabled}
+            buttonRight={
+              <>
+                {customButton}
 
-        {/* {
+                <Button
+                  className="btn-outline-secondary"
+                  onClick={() => {
+                    handleClearInput();
+                    this.restart();
+                  }}
+                  disabled={disabled}
+                >
+                  {renderIconRight || <i className="fa fa-close"></i>}
+                </Button>
+              </>
+            }
+          />
+
+          {/* {
           isLoading && (
             <div className="dataResult" ref={this.refContentResult}>
               <div className="h-full flex justify-center items-center gap-3">
@@ -250,6 +256,109 @@ class SearchInput extends React.Component {
             </div>
           )
         } */}
+
+          {
+            !isEmpty(data) && (
+              <ul
+                ref={this.refContentResult}
+                className={cn(
+                  "w-full h-[200px]",
+                  "flex flex-col",
+                  "pl-0 mb-0 mt-2",
+                  "bg-white",
+                  "overflow-hidden overflow-y-auto",
+                  "absolute z-[100]",
+                  "rounded border border-primary",
+                  "shadow-[rgba(0,0,0,0.1)_0px_0px_0px_1px,rgba(0,0,0,0.1)_0px_4px_11px]",
+
+                  "group-focus-within:border-[#80bdff]",
+                  "group-focus-within:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]"
+                )}
+                onMouseDown={(e) => {
+                  // ✅ evita que el input pierda foco
+                  e.preventDefault();
+
+                  // ✅ mantiene el cursor al final
+                  this.handleMouseDown();
+                }}
+              >
+                {
+                  data.map((value, index) => (
+                    <button
+                      key={index}
+                      tabIndex={-1}
+                      className={cn(
+                        "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200 hover:bg-gray-50",
+                        index === highlightedIndex && 'text-white bg-primary',
+                      )}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // ✅ no roba foco
+                        this.handleMouseDown(); // mantiene caret
+                      }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSelectItem(value);
+                      }}
+                    >
+                      {renderItem(value)}
+                    </button>
+                  ))
+                }
+              </ul>
+            )
+          }
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={cn(
+          classNameContainer ? classNameContainer : 'mb-3 relative group',
+        )}
+      >
+        <div className="relative">
+          {/* Icono búsqueda */}
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <SearchIcon className="h-5 w-5 text-gray-400" />
+          </div>
+
+          {/* Input */}
+          <input
+            type="text"
+            autoFocus={autoFocus}
+            className="w-full pl-10 pr-20 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={placeholder}
+            ref={refValue}
+            value={searchTerm}
+            onChange={this.handleInputChange}
+            onKeyDown={this.handleKeyDown}
+            onBlur={this.handleBlur}
+            disabled={disabled}
+          />
+
+          {/* Contenedor botones */}
+          <div className="absolute inset-y-0 right-0 flex h-full">
+
+            {customButton && (
+              <div className="flex items-center px-2 border-l border-gray-300">
+                {customButton}
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                handleClearInput();
+                this.restart();
+              }}
+              disabled={disabled}
+              className="flex items-center justify-center px-2 h-full border-l border-gray-300 hover:bg-gray-100"
+            >
+              <IoIosClose className="h-5 w-5 " />
+            </button>
+
+          </div>
+        </div>
 
         {
           !isEmpty(data) && (
@@ -265,7 +374,7 @@ class SearchInput extends React.Component {
                 "rounded border border-primary",
                 "shadow-[rgba(0,0,0,0.1)_0px_0px_0px_1px,rgba(0,0,0,0.1)_0px_4px_11px]",
 
-                "group-focus-within:border-[#80bdff]",
+                "group-focus-within:border-blue-500",
                 "group-focus-within:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]"
               )}
               onMouseDown={(e) => {
@@ -283,7 +392,7 @@ class SearchInput extends React.Component {
                     tabIndex={-1}
                     className={cn(
                       "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200 hover:bg-gray-50",
-                      index === highlightedIndex && 'text-white bg-primary',
+                      index === highlightedIndex && 'text-white bg-blue-500',
                     )}
                     onMouseDown={(e) => {
                       e.preventDefault(); // ✅ no roba foco
@@ -328,6 +437,8 @@ SearchInput.propTypes = {
   renderIconRight: PropTypes.element,
 
   customButton: PropTypes.element,
+
+  theme: PropTypes.oneOf(['classic', 'modern']),
 };
 
 export default SearchInput;

@@ -32,7 +32,7 @@ import Title from '@/components/Title';
 import { SpinnerView } from '@/components/Spinner';
 import ModalInventario from '../component/ModalInventario';
 import ModalProducto from '../component/ModalProducto';
-import { ACTIVO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { ACTIVO_FIJO, COMBO, PRODUCTO, SERVICIO, tipoProductoMap } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import RadioButton from '@/components/RadioButton';
 import Select from '@/components/Select';
@@ -850,13 +850,13 @@ class ProductoAgregar extends CustomComponent {
 
               <RadioButton
                 className="form-check-inline"
-                id={ACTIVO}
-                value={ACTIVO}
+                id={ACTIVO_FIJO}
+                value={ACTIVO_FIJO}
                 name="ckTipoProducto"
-                checked={idTipoProducto === ACTIVO}
+                checked={idTipoProducto === ACTIVO_FIJO}
                 onChange={this.handleOptionTipoProducto}
               >
-                Activo
+                Activo Fijo
               </RadioButton>
             </div>
 
@@ -1060,7 +1060,7 @@ class ProductoAgregar extends CustomComponent {
 
             {/* Metodo de depreciación */}
             {
-              [ACTIVO].includes(idTipoProducto) && (
+              [ACTIVO_FIJO].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">2</span> Método de depreciación

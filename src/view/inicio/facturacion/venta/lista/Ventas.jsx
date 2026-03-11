@@ -163,19 +163,15 @@ class Ventas extends CustomComponent {
   loadingData = async () => {
     const ventaLista = this.props.ventaLista;
     if (ventaLista && ventaLista.data && ventaLista.paginacion) {
+
       this.setState(ventaLista.data);
-      this.refPaginacion.current.upperPageBound =
-        ventaLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        ventaLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        ventaLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        ventaLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        ventaLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        ventaLista.paginacion.messagePaginacion;
+
+      this.refPaginacion.current.upperPageBound = ventaLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = ventaLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = ventaLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = ventaLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = ventaLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = ventaLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(ventaLista.data.buscar);
     } else {
@@ -412,8 +408,7 @@ class Ventas extends CustomComponent {
         alertKit.success({
           title: "Venta",
           message: response.data,
-        }, async () => {
-          await this.loadingInit();
+          onClose: () => this.loadingInit(),
         });
       }
 
@@ -498,8 +493,8 @@ class Ventas extends CustomComponent {
             <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
-            <div>{item.tipoDocumento} - {item.documento}</div>
-            <div className="text-xs text-gray-500">{item.informacion}</div>
+            <div className="text-xs text-gray-500">{item.tipoDocumento} - {item.documento}</div>
+            <div className="text-sm  uppercase">{item.informacion}</div>
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
             {item.comprobante}<br />
@@ -605,139 +600,148 @@ class Ventas extends CustomComponent {
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {this.state.lista.map((item) => {
-          const styleEstado = cn(
-            item.estado === 1
-              ? "bg-green-100 text-green-800"
-              : item.estado === 2
-                ? "bg-yellow-100 text-yellow-800"
-                : item.estado === 3
-                  ? "bg-red-100 text-red-800"
-                  : "bg-blue-100 text-blue-800"
-          );
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+        {
+          this.state.lista.map((item) => {
+            const styleEstado = cn(
+              item.estado === 1
+                ? "bg-green-100 text-green-800"
+                : item.estado === 2
+                  ? "bg-yellow-100 text-yellow-800"
+                  : item.estado === 3
+                    ? "bg-red-100 text-red-800"
+                    : "bg-blue-100 text-blue-800"
+            );
 
-          const estadoValue =
-            item.estado === 1
-              ? 'COBRADO' :
-              item.estado === 2
-                ? 'POR COBRAR' :
-                item.estado === 3
-                  ? 'ANULADO' : 'POR LLEVAR';
+            const estadoValue =
+              item.estado === 1
+                ? 'COBRADO' :
+                item.estado === 2
+                  ? 'POR COBRAR' :
+                  item.estado === 3
+                    ? 'ANULADO' : 'POR LLEVAR';
 
-          const tipo = item.idFormaPago === CONTADO
-            ? "CONTADO"
-            : "CREDITO"
+            const tipo = item.idFormaPago === CONTADO
+              ? "CONTADO"
+              : "CREDITO"
 
-          return (
-            <div
-              key={item.idVenta}
-              className="bg-white rounded border transition group overflow-hidden"
-            >
-              <div className="flex flex-col gap-2 p-4">
-                <div className="flex justify-between items-start">
-                  <h5 className="font-semibold text-gray-900 text-sm">
-                    <span>{item.comprobante}</span>
-                    <br />
-                    <span>{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
-                  </h5>
-                  <span className={cn("inline-flex items-center px-2 py-1 rounded-full text-xs font-medium", styleEstado)}>
-                    {estadoValue}
-                  </span>
-                </div>
+            return (
+              <div
+                key={item.idVenta}
+                className="bg-white rounded border flex flex-col h-full"
+              >
+                <div className="flex flex-col gap-2 p-4">
+                  {/* BODY */}
+                  <div className="flex-1 flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <h5 className="font-semibold text-gray-900 text-sm">
+                        <span>{item.comprobante}</span>
+                        <br />
+                        <span>{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+                      </h5>
+                      <span className={cn(
+                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                        styleEstado
+                      )}>
+                        {estadoValue}
+                      </span>
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
-                </div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
-                </div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">N° Documento:</span> {item.documento}
-                </div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">N° Documento:</span> {item.documento}
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Información:</span> {item.informacion}
-                </div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Información:</span> {item.informacion}
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Tipo:</span> {tipo}
-                </div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Tipo:</span> {tipo}
+                    </div>
 
-                <div className="text-lg font-bold text-gray-900 mb-3">
-                  {formatCurrency(item.total, item.codiso)}
-                </div>
+                    <div className="text-lg font-bold text-gray-900 mb-3 text-right">
+                      {formatCurrency(item.total, item.codiso)}
+                    </div>
+                  </div>
 
-                <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
-                  <button
-                    className={
-                      cn(
-                        "p-2 rounded-md text-sm font-medium transition",
-                        "text-blue-600 bg-white",
-                        "hover:bg-blue-50 hover:text-blue-700",
-                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                        "active:bg-blue-100 active:scale-[0.97]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )
-                    }
-                    onClick={() => this.handleDetalle(item.idVenta)}
-                    disabled={!this.state.detail}
-                    title="Ver detalle"
-                  >
-                    <i className="bi bi-eye text-lg" /> Ver
-                  </button>
+                  {/* FOOTER */}
+                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-blue-600 bg-white",
+                          "hover:bg-blue-50 hover:text-blue-700",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                          "active:bg-blue-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleDetalle(item.idVenta)}
+                      disabled={!this.state.detail}
+                      title="Ver detalle"
+                    >
+                      <i className="bi bi-eye text-lg" /> Ver
+                    </button>
 
-                  {item.guiaRemision === 1 ? (
-                    <span
-                      className="p-2 text-green-600 bg-green-50 rounded-md text-sm font-medium"
-                      title="Guía generada">
-                      <i className="fa fa-check mr-1" /> Lista
-                    </span>
-                  ) :
-                    (
-                      <Link
-                        to={getPathNavigation('guia-create', item.idVenta)}
-                        className={
-                          cn(
-                            "block text-center",
-                            "p-2 rounded-md text-sm font-medium transition",
-                            "text-gray-600 bg-white",
-                            "hover:bg-blue-50 hover:text-blue-700",
-                            "focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
-                            "active:bg-blue-100 active:scale-[0.97]",
-                            "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                          )
-                        }
-                        title="Generar guía"
-                      >
-                        <i className="fa fa-truck !text-lg" /> Guía
-                      </Link>
-                    )}
+                    {item.guiaRemision === 1 ? (
+                      <span
+                        className="p-2 text-green-600 bg-green-50 rounded-md text-sm font-medium"
+                        title="Guía generada">
+                        <i className="fa fa-check mr-1" /> Lista
+                      </span>
+                    ) :
+                      (
+                        <Link
+                          to={getPathNavigation('guia-create', item.idVenta)}
+                          className={
+                            cn(
+                              "block text-center",
+                              "p-2 rounded-md text-sm font-medium transition",
+                              "text-gray-600 bg-white",
+                              "hover:bg-blue-50 hover:text-blue-700",
+                              "focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
+                              "active:bg-blue-100 active:scale-[0.97]",
+                              "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                            )
+                          }
+                          title="Generar guía"
+                        >
+                          <i className="fa fa-truck !text-lg" /> Guía
+                        </Link>
+                      )}
 
-                  <button
-                    className={
-                      cn(
-                        "p-2 rounded-md text-sm font-medium transition",
-                        "text-red-600 bg-white",
-                        "hover:bg-red-50 hover:text-red-700",
-                        "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
-                        "active:bg-red-100 active:scale-[0.98]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )
-                    }
-                    onClick={() => this.handleAnular(item.idVenta)}
-                    disabled={!this.state.remove}
-                    title="Anular"
-                  >
-                    <i className="bi bi-trash text-lg" /> Anular
-                  </button>
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-red-600 bg-white",
+                          "hover:bg-red-50 hover:text-red-700",
+                          "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                          "active:bg-red-100 active:scale-[0.98]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleAnular(item.idVenta)}
+                      disabled={!this.state.remove}
+                      title="Anular"
+                    >
+                      <i className="bi bi-trash text-lg" /> Anular
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        }
       </div>
     );
   }

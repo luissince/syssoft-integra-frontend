@@ -19,6 +19,9 @@ import Inventario from './inventario/Inventario';
 
 import Kardex from './kardex/Kardex';
 
+import Depreciar from './depreciar';
+import DepreciarDetalle from './depreciar/detalle';
+
 import Catalogos from './catalogo/lista/Catalogos';
 import CatalogoCrear from './catalogo/formularios/crear/CatalogoCrear';
 import CatalogoEditar from './catalogo/formularios/editar/CatalogoEditar';
@@ -37,6 +40,8 @@ export {
   TrasladoDetalle,
   Inventario,
   Kardex,
+  Depreciar,
+  DepreciarDetalle,
   Catalogos,
   CatalogoCrear,
   CatalogoEditar,

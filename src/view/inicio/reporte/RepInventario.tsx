@@ -19,6 +19,7 @@ import { images } from '@/helper';
 import Image from '@/components/Image';
 import { useAppSelector } from '@/redux/hooks';
 import { useHistory } from "react-router-dom";
+import { WarehouseOptionsInterface } from '@/model/ts/interface/warehouse';
 
 enum URGENCIA {
   CRITICO = "critico",
@@ -54,7 +55,7 @@ const ReporteInventario = () => {
   const [msgLoading, setMsgLoading] = useState('Cargando información...');
 
   const [sucursales, setSucursales] = useState<Array<BranchInterface>>([]);
-  const [almacenes, setAlmacenes] = useState<Array<BranchInterface>>([]);
+  const [almacenes, setAlmacenes] = useState<Array<WarehouseOptionsInterface>>([]);
 
   const [fechaInicial, setFechaInicial] = useState(new Date());
   const [fechaFinal, setFechaFinal] = useState(new Date());

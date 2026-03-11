@@ -25,7 +25,8 @@ import { comboUbicacion } from '@/network/rest/principal.network';
 import { CANCELED } from '@/constants/requestStatus';
 import Select from '@/components/Select';
 import { cn } from '@/lib/utils';
-import { ACTIVO } from '@/model/types/tipo-producto';
+import { PRODUCTO, ACTIVO_FIJO } from '@/model/types/tipo-producto';
+import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -50,6 +51,7 @@ class ModalProducto extends Component {
       imagen: null,
       costo: "",
       idTipoProducto: "",
+      idMetodoDepreciacion: LINEA_RECTA,
 
       inventarioDetalles: [],
 
@@ -69,6 +71,20 @@ class ModalProducto extends Component {
     this.peticion = false;
     this.abortController = null;
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
   loadDatos = async (producto, type) => {
     this.abortController = new AbortController();
@@ -105,8 +121,8 @@ class ModalProducto extends Component {
         nombre: producto.nombre,
         imagen: producto.imagen,
         idTipoProducto: producto.idTipoProducto,
+        idMetodoDepreciacion: producto.idMetodoDepreciacion,
         inventarioDetalles: producto.inventarioDetalles,
-
         ubicaciones: ubicaciones,
 
         loading: false,
@@ -119,6 +135,7 @@ class ModalProducto extends Component {
         nombre: producto.nombre,
         imagen: producto.imagen,
         idTipoProducto: producto.idTipoProducto,
+        idMetodoDepreciacion: producto.idMetodoDepreciacion,
         inventarioDetalles: [
           ...this.state.inventarioDetalles,
           this.loadDetalleInventarioPorDefecto(),
@@ -133,17 +150,46 @@ class ModalProducto extends Component {
   loadDetalleInventarioPorDefecto = () => {
     const body = {
       id: guId(),
-      cantidad: { type: "number", value: 1 },
-      idUbicacion: { type: "text", value: null },
-      lote: { type: "text", value: null },
-      fechaVencimiento: { type: "date", value: null },
-      vidaUtil: { type: "number", value: null },
-      valorResidual: { type: "number", value: null },
-      porDefecto: { type: "boolean", value: true }
+      porDefecto: true,
+      cantidad: 1,
+
+      // producto
+      idUbicacion: null,
+      lote: null,
+      fechaVencimiento: null,
+      // activo
+      serie: null,
+      vidaUtil: null,
+      valorResidual: null,
     }
     return body;
   };
 
+  updateDetalleField = (id, field, value) => {
+    this.setState((prevState) => ({
+      inventarioDetalles: prevState.inventarioDetalles.map((detalle) =>
+        detalle.id === id
+          ? { ...detalle, [field]: value }
+          : detalle
+      ),
+    }));
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
   handleOnOpen = () => {
     this.refCosto.current.focus();
@@ -163,41 +209,21 @@ class ModalProducto extends Component {
 
 
   handleInputCosto = (event) => {
-    this.setState({ costo: event.target.value });
+    this.setState({ costo: event.target });
   };
 
   handleAgregarInventarioDetalle = () => {
     const inventarioDetalle = {
       id: guId(),
-
-      cantidad: {
-        type: 'number',
-        value: '',
-      },
-      idUbicacion: {
-        type: 'text',
-        value: '',
-      },
-      lote: {
-        type: 'text',
-        value: '',
-      },
-      fechaVencimiento: {
-        type: 'date',
-        value: '',
-      },
-      porDefecto: {
-        type: 'boolean',
-        value: false,
-      },
-      vidaUtil: {
-        type: 'number',
-        value: '',
-      },
-      valorResidual: {
-        type: 'number',
-        value: '',
-      },
+      porDefecto: false,
+      cantidad: "",
+      idUbicacion: "",
+      lote: "",
+      fechaVencimiento: "",
+      //
+      serie: "",
+      vidaUtil: "",
+      valorResidual: "",
     };
 
     const inventarioDetalles = [...this.state.inventarioDetalles, inventarioDetalle];
@@ -221,6 +247,7 @@ class ModalProducto extends Component {
       imagen,
       costo,
       idTipoProducto,
+      idMetodoDepreciacion,
       inventarioDetalles
     } = this.state;
 
@@ -235,8 +262,7 @@ class ModalProducto extends Component {
       });
       return;
     }
-
-    if (!isEmpty(inventarioDetalles.filter((item) => isEmpty(item.cantidad.value)))) {
+    if (inventarioDetalles.some(item => isEmpty(item.cantidad))) {
       alertKit.warning({
         title: "Compra",
         message: "Hay detalle(s) sin cantidad.",
@@ -246,18 +272,40 @@ class ModalProducto extends Component {
       return;
     }
 
-    if (inventarioDetalles.some((item) => item.porDefecto.value !== true && isEmpty(item.lote.value))) {
-      alertKit.warning({
-        title: "Compra",
-        message: "Hay detalle(s) sin lote.",
-      }, () => {
-        validateNumericInputs(this.refInventarioDetalles);
-      });
-      return;
+    if (idTipoProducto === PRODUCTO) {
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.lote))) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) sin lote.",
+        }, () => {
+          validateNumericInputs(this.refInventarioDetalles);
+        });
+        return;
+      }
+
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.fechaVencimiento))) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) sin fecha de vencimiento.",
+        }, () => {
+          validateNumericInputs(this.refInventarioDetalles);
+        });
+        return;
+      }
     }
 
-    if (idTipoProducto === ACTIVO) {
-      if (inventarioDetalles.some((item) => item.porDefecto.value !== true && isEmpty(item.vidaUtil.value))) {
+    if (idTipoProducto === ACTIVO_FIJO) {
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.serie))) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) sin serie.",
+        }, () => {
+          validateNumericInputs(this.refInventarioDetalles);
+        });
+        return;
+      }
+
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.vidaUtil))) {
         alertKit.warning({
           title: "Compra",
           message: "Hay detalle(s) sin vida útil.",
@@ -267,7 +315,7 @@ class ModalProducto extends Component {
         return;
       }
 
-      if (inventarioDetalles.some((item) => item.porDefecto.value !== true && isEmpty(item.valorResidual.value))) {
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.valorResidual))) {
         alertKit.warning({
           title: "Compra",
           message: "Hay detalle(s) sin valor residual.",
@@ -278,12 +326,9 @@ class ModalProducto extends Component {
       }
     }
 
-
     const nuevoDetalles = detalles.map((item) => ({ ...item }));
 
-    const existeDetalle = nuevoDetalles.find(
-      (item) => item.idProducto === idProducto,
-    );
+    const existeDetalle = nuevoDetalles.find((item) => item.idProducto === idProducto);
 
     const impuesto = impuestos.find((item) => item.idImpuesto === idImpuesto);
 
@@ -299,6 +344,7 @@ class ModalProducto extends Component {
         imagen: imagen,
         costo: Number(costo),
         idTipoProducto: idTipoProducto,
+        idMetodoDepreciacion: idMetodoDepreciacion,
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
@@ -313,6 +359,273 @@ class ModalProducto extends Component {
     );
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
+  renderPorDefecto = (item) => {
+    if (!item.porDefecto) return;
+
+    return (
+      <div className="w-full flex flex-row gap-3">
+        <div className="w-full">
+          <Input
+            autoFocus={true}
+            label="Cantidad:"
+            placeholder="0.00"
+            role="float"
+            tabIndex={1}
+            value={item.cantidad}
+            onChange={(e) =>
+              this.updateDetalleField(item.id, "cantidad", e.target.value)
+            }
+            onPaste={handlePasteFloat}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  renderProducto = (item) => {
+    if (this.state.idTipoProducto !== PRODUCTO) return;
+
+    if (item.porDefecto) return;
+
+    const { ubicaciones } = this.state;
+    return (
+      <>
+        <div className="w-full flex flex-row gap-3">
+          <div className="w-full">
+            <Input
+              autoFocus={true}
+              label="Cantidad:"
+              placeholder="0.00"
+              role="float"
+              tabIndex={1}
+              value={item.cantidad}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "cantidad", e.target.value)
+              }
+              onPaste={handlePasteFloat}
+            />
+          </div>
+
+          {
+            item.idUbicacion !== null && (
+              <div className="w-full">
+                <Select
+                  label="Ubicación en el inventario:"
+                  tabIndex={2}
+                  value={item.idUbicacion}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "idUbicacion", e.target.value)
+                  }
+                >
+                  <option value="">-- Seleccione --</option>
+                  {
+                    ubicaciones.map((ubicacion, idx) => (
+                      <option key={idx} value={ubicacion.idUbicacion}>
+                        {ubicacion.descripcion}
+                      </option>
+                    ))
+                  }
+                </Select>
+              </div>
+            )
+          }
+        </div>
+
+        <div className="w-full flex flex-row gap-3">
+          {
+            item.lote !== null && (
+              <div className="w-full">
+                <Input
+                  label="Lote:"
+                  placeholder="LT-0001"
+                  tabIndex={3}
+                  value={item.lote}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "lote", e.target.value)
+                  }
+                />
+              </div>
+            )
+          }
+
+          {
+            item.fechaVencimiento !== null && (
+              <div className="w-full">
+                <Input
+                  type="date"
+                  label="Fecha de Vencimiento:"
+                  tabIndex={4}
+                  value={item.fechaVencimiento}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "fechaVencimiento", e.target.value)
+                  }
+                />
+              </div>
+            )
+          }
+        </div>
+      </>
+    );
+  }
+
+  renderActivo = (item) => {
+    if (this.state.idTipoProducto !== ACTIVO_FIJO) return;
+
+    if (item.porDefecto) return;
+
+    const { ubicaciones } = this.state;
+    return (
+      <>
+        <div className="w-full flex flex-row gap-3">
+          <div className="w-full">
+            <Input
+              autoFocus={true}
+              label="Cantidad:"
+              placeholder="0.00"
+              role="float"
+              tabIndex={1}
+              value={item.cantidad}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "cantidad", e.target.value)
+              }
+              onPaste={handlePasteFloat}
+            />
+          </div>
+
+          {
+            item.idUbicacion !== null && (
+              <div className="w-full">
+                <Select
+                  label="Ubicación en el inventario:"
+                  tabIndex={2}
+                  value={item.idUbicacion}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "idUbicacion", e.target.value)
+                  }
+                >
+                  <option value="">-- Seleccione --</option>
+                  {
+                    ubicaciones.map((ubicacion, idx) => (
+                      <option key={idx} value={ubicacion.idUbicacion}>
+                        {ubicacion.descripcion}
+                      </option>
+                    ))
+                  }
+                </Select>
+              </div>
+            )
+          }
+        </div>
+
+        <div className="w-full flex flex-row gap-3">
+          {
+            item.serie !== null && (
+              <div className="w-full">
+                <Input
+                  label="Serie:"
+                  placeholder="Por ejemplo: SR-0001"
+                  tabIndex={2}
+                  value={item.serie}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "serie", e.target.value)
+                  }
+                  onPaste={handlePasteInteger}
+                />
+              </div>
+            )
+          }
+        </div>
+        <div className="w-full flex flex-row gap-3">
+          {
+            item.vidaUtil !== null && (
+              <div className="w-full">
+                <Input
+                  label="Vida útil:"
+                  placeholder="Por ejemplo: 1 año, 5 años..."
+                  tabIndex={3}
+                  role="integer"
+                  value={item.vidaUtil}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "vidaUtil", e.target.value)
+                  }
+                  onPaste={handlePasteInteger}
+                />
+              </div>
+            )
+          }
+          {
+            item.valorResidual !== null && (
+              <div className="w-full">
+                <Input
+                  label="Valor residual:"
+                  placeholder="Por ejemplo: 0, 100, 200..."
+                  tabIndex={4}
+                  role="float"
+                  value={item.valorResidual}
+                  onChange={(e) =>
+                    this.updateDetalleField(item.id, "valorResidual", e.target.value)
+                  }
+                  onPaste={handlePasteFloat}
+                />
+              </div>
+            )
+          }
+        </div>
+
+        <div className="w-full flex flex-row gap-3">
+          {this.state.idMetodoDepreciacion === LINEA_RECTA && (
+            <div className="flex flex-col gap-3">
+              <p className="text-gray-500">
+                Cuota fija anual igual durante toda la vida útil
+              </p>
+              <p className="text-orange-400">
+                Método seleccionado: Línea Recta (SL) — Depreciación = (Costo - Valor Residual) / Vida Útil
+              </p>
+            </div>
+          )}
+
+          {this.state.idMetodoDepreciacion === DIGITOS_DECRECIENTES && (
+            <div className="flex flex-col gap-3">
+              <p className="text-gray-500">
+                Mayor depreciación en primeros años
+              </p>
+              <p className="text-orange-400">
+                Método seleccionado: Doble Saldo Decreciente (DA) — Depreciación = Valor en Libros × (2 / Vida Útil)
+              </p>
+            </div>
+          )}
+
+          {this.state.idMetodoDepreciacion === SUMA_DE_DIGITOS && (
+            <div className="flex flex-col gap-3">
+              <p className="text-gray-500">
+                Depreciación acelerada basada en fracción de años
+              </p>
+              <p className="text-orange-400">
+                Método seleccionado: Suma de Dígitos de Años (SY) — Fracción decreciente sobre base depreciable
+              </p>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  }
+
   render() {
     const {
       loading,
@@ -322,7 +635,6 @@ class ModalProducto extends Component {
       imagen,
       costo,
       inventarioDetalles,
-      ubicaciones
     } = this.state;
 
     const { isOpen, onClose } = this.props;
@@ -389,11 +701,11 @@ class ModalProducto extends Component {
                   className="btn-warning"
                   title="Agregar detalle por defecto"
                   disabled={this.state.inventarioDetalles.some(
-                    (d) => d.porDefecto.value === true
+                    (d) => d.porDefecto === true
                   )}
                   onClick={() => {
                     const yaExiste = this.state.inventarioDetalles.some(
-                      (d) => d.porDefecto.value === true
+                      (d) => d.porDefecto === true
                     );
 
                     if (yaExiste) {
@@ -422,195 +734,15 @@ class ModalProducto extends Component {
                 className="flex flex-col gap-3 p-3 mb-3 border border-gray-300 rounded"
               >
                 {/* Cantidad y Ubicación */}
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-full">
-                    <Input
-                      autoFocus={true}
-                      label="Cantidad:"
-                      placeholder="0.00"
-                      role="float"
-                      tabIndex={1}
-                      value={item.cantidad.value}
-                      onChange={(e) => {
-                        const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
-                          if (inventarioDetalle.id === item.id) {
-                            return {
-                              ...inventarioDetalle,
-                              cantidad: {
-                                ...inventarioDetalle.cantidad,
-                                value: e.target.value,
-                              },
-                            };
-                          }
-                          return inventarioDetalle;
-                        });
-                        this.setState({ inventarioDetalles: updatedInventarioDetalles });
-                      }}
-                      onPaste={handlePasteFloat}
-                    />
-                  </div>
-                  {
-                    item.idUbicacion.value !== null && (
-                      <div className="w-full">
-                        <Select
-                          label="Ubicación en el inventario:"
-                          tabIndex={2}
-                          value={item.idUbicacion.value}
-                          onChange={(e) => {
-                            const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
-                              if (inventarioDetalle.id === item.id) {
-                                return {
-                                  ...inventarioDetalle,
-                                  idUbicacion: {
-                                    ...inventarioDetalle.idUbicacion,
-                                    value: e.target.value,
-                                  },
-                                };
-                              }
-                              return inventarioDetalle;
-                            });
-                            this.setState({ inventarioDetalles: updatedInventarioDetalles });
-                          }}
-                        >
-                          <option value="">-- Seleccione --</option>
-                          {
-                            ubicaciones.map((ubicacion, idx) => (
-                              <option key={idx} value={ubicacion.idUbicacion}>
-                                {ubicacion.descripcion}
-                              </option>
-                            ))
-                          }
-                        </Select>
-                      </div>
-                    )
-                  }
-                </div>
+                {this.renderPorDefecto(item)}
 
                 {/* Lote y Fecha de vencimiento */}
-                <div className="w-full flex flex-row gap-3">
-                  {
-                    item.lote.value !== null && (
-                      <div className="w-full">
-                        <Input
-                          label="Lote:"
-                          placeholder="LT-0001"
-                          tabIndex={3}
-                          value={item.lote.value}
-                          onChange={(e) => {
-                            const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
-                              if (inventarioDetalle.id === item.id) {
-                                return {
-                                  ...inventarioDetalle,
-                                  lote: {
-                                    ...inventarioDetalle.lote,
-                                    value: e.target.value,
-                                  },
-                                };
-                              }
-                              return inventarioDetalle;
-                            });
-                            this.setState({ inventarioDetalles: updatedInventarioDetalles });
-                          }}
-                        />
-                      </div>
-                    )
-                  }
-                  {
-                    item.fechaVencimiento.value !== null && (
-                      <div className="w-full">
-                        <Input
-                          type="date"
-                          label="Fecha de Vencimiento:"
-                          tabIndex={4}
-                          value={item.fechaVencimiento.value}
-                          onChange={(e) => {
-                            const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
-                              if (inventarioDetalle.id === item.id) {
-                                return {
-                                  ...inventarioDetalle,
-                                  fechaVencimiento: {
-                                    ...inventarioDetalle.fechaVencimiento,
-                                    value: e.target.value,
-                                  },
-                                };
-                              }
-                              return inventarioDetalle;
-                            });
-                            this.setState({ inventarioDetalles: updatedInventarioDetalles });
-                          }}
-                        />
-                      </div>
-                    )
-                  }
-                </div>
+                {this.renderProducto(item)}
 
                 {/* Vida útil y Valor residual */}
                 {
-                  this.state.idTipoProducto === ACTIVO && (
-                    <div className="w-full flex flex-row gap-3">
-                      {
-                        item.vidaUtil.value !== null && (
-                          <div className="w-full">
-                            <Input
-                              label="Vida útil:"
-                              placeholder="Por ejemplo: 1 año, 5 años..."
-                              tabIndex={5}
-                              role="integer"
-                              value={item.vidaUtil.value}
-                              onChange={(e) => {
-                                const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
-                                  if (inventarioDetalle.id === item.id) {
-                                    return {
-                                      ...inventarioDetalle,
-                                      vidaUtil: {
-                                        ...inventarioDetalle.vidaUtil,
-                                        value: e.target.value,
-                                      },
-                                    };
-                                  }
-                                  return inventarioDetalle;
-                                });
-                                this.setState({ inventarioDetalles: updatedInventarioDetalles });
-                              }}
-                              onPaste={handlePasteInteger}
-                            />
-                          </div>
-                        )
-                      }
-                      {
-                        item.valorResidual.value !== null && (
-                          <div className="w-full">
-                            <Input
-                              label="Valor residual:"
-                              placeholder="Por ejemplo: 0, 100, 200..."
-                              tabIndex={6}
-                              role="float"
-                              value={item.valorResidual.value}
-                              onChange={(e) => {
-                                const updatedInventarioDetalles = inventarioDetalles.map((inventarioDetalle) => {
-                                  if (inventarioDetalle.id === item.id) {
-                                    return {
-                                      ...inventarioDetalle,
-                                      valorResidual: {
-                                        ...inventarioDetalle.valorResidual,
-                                        value: e.target.value,
-                                      },
-                                    };
-                                  }
-                                  return inventarioDetalle;
-                                });
-                                this.setState({ inventarioDetalles: updatedInventarioDetalles });
-                              }}
-                              onPaste={handlePasteFloat}
-                            />
-                          </div>
-                        )
-                      }
-                    </div>
-                  )
+                  this.renderActivo(item)
                 }
-
-
                 <div className="flex justify-end">
                   <Button
                     className="btn-danger"

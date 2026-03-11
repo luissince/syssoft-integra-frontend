@@ -5,6 +5,7 @@ import {
   filtrarProductoVenta
 } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
+import { closeProject, signOut } from './principalSlice';
 
 export const starProduct = createAsyncThunk('productos/starProduct', async (data) => {
   await establecerPreferidoProducto({
@@ -466,230 +467,122 @@ const predeterminadoSlice = createSlice({
         paginacion: null,
       };
     },
-
-    clearSucursal: (state) => {
-      state.ventaLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.ventaCrear = {
-        state: null,
-        local: null,
-      };
-      state.ventaCrearClasico = {
-        state: null,
-        local: null,
-      };
-      state.notaCreditoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.notaCreditoCrear = {
-        state: null,
-        local: null,
-      };
-      state.cotizacionLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.cotizacionCrear = {
-        state: null,
-        local: null,
-      };
-      state.guiaRemisionLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.productoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.ajusteLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.inventarioLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.kardex = {
-        data: null,
-        paginacion: null,
-      };
-      state.trasladoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.compraLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.compraCrear = {
-        state: null,
-        local: null,
-      };
-      state.ordenCompraLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.ordenCompraCrear = {
-        state: null,
-        local: null,
-      };
-      state.pedidoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.pedidoCrear = {
-        state: null,
-        local: null,
-      };
-      state.catalogoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.catalogoCrear = {
-        state: null,
-        local: null,
-      };
-      state.cpeSunatLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.bancoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.finanzasLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.consultaLista = {
-        data: null,
-        paginacion: null,
-      };
-    },
-
-    clearPredeterminado: (state) => {
-      state.moneda = null;
-      state.empresa = null;
-      state.productos = [];
-      state.ventaLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.ventaCrear = {
-        state: null,
-        local: null,
-      };
-      state.ventaCrearClasico = {
-        state: null,
-        local: null,
-      };
-      state.notaCreditoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.notaCreditoCrear = {
-        state: null,
-        local: null,
-      };
-      state.cotizacionLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.cotizacionCrear = {
-        state: null,
-        local: null,
-      };
-      state.guiaRemisionLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.productoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.ajusteLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.inventarioLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.kardex = {
-        data: null,
-        paginacion: null,
-      };
-      state.trasladoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.compraLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.compraCrear = {
-        state: null,
-        local: null,
-      };
-      state.ordenCompraLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.ordenCompraCrear = {
-        state: null,
-        local: null,
-      };
-      state.pedidoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.pedidoCrear = {
-        state: null,
-        local: null,
-      };
-      state.catalogoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.catalogoCrear = {
-        state: null,
-        local: null,
-      };
-      state.cpeSunatLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.bancoLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.finanzasLista = {
-        data: null,
-        paginacion: null,
-      };
-      state.consultaLista = {
-        data: null,
-        paginacion: null,
-      };
-    },
   },
   extraReducers: (builder) => {
     builder
-      // .addCase(starProduct.pending, (state) => {
-      //   state.loading = true;
-      //   state.error = null;
-      // })
       .addCase(starProduct.fulfilled, (state, action) => {
         state.productos = action.payload;
       });
+
+    builder.addCase(signOut, (state) => {
+      state.ventaLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.ventaCrear = {
+        state: null,
+        local: null,
+      };
+      state.ventaCrearClasico = {
+        state: null,
+        local: null,
+      };
+      state.notaCreditoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.notaCreditoCrear = {
+        state: null,
+        local: null,
+      };
+      state.cotizacionLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.cotizacionCrear = {
+        state: null,
+        local: null,
+      };
+      state.guiaRemisionLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.productoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.ajusteLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.inventarioLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.kardex = {
+        data: null,
+        paginacion: null,
+      };
+      state.trasladoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.compraLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.compraCrear = {
+        state: null,
+        local: null,
+      };
+      state.ordenCompraLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.ordenCompraCrear = {
+        state: null,
+        local: null,
+      };
+      state.pedidoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.pedidoCrear = {
+        state: null,
+        local: null,
+      };
+      state.catalogoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.catalogoCrear = {
+        state: null,
+        local: null,
+      };
+      state.cpeSunatLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.bancoLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.finanzasLista = {
+        data: null,
+        paginacion: null,
+      };
+      state.consultaLista = {
+        data: null,
+        paginacion: null,
+      };
+    });
+    builder.addCase(closeProject, () => initialState);
+
     // .addCase(starProduct.rejected, (state, action) => {
     //   state.loading = false;
     //   state.error = action.error.message;
     // });
-  },
+  }
 });
 
 export const {
@@ -796,9 +689,7 @@ export const {
   setListaConsultaData,
   setListaConsultaPaginacion,
   clearListaConsulta,
-
-  clearSucursal,
-  clearPredeterminado,
+  
 } = predeterminadoSlice.actions;
 
 export default predeterminadoSlice.reducer;

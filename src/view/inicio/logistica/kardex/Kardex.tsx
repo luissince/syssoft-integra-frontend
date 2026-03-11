@@ -28,6 +28,7 @@ import {
 import Select from '@/components/Select';
 import Image from '@/components/Image';
 import { images } from '@/helper';
+import { BsDatabaseSlash } from 'react-icons/bs';
 
 interface Props {
   token: {
@@ -36,7 +37,9 @@ interface Props {
       nombre: string;
     };
     userToken: {
-      idUsuario: string;
+      usuario: {
+        idUsuario: string;
+      };
     };
   };
   moneda: {
@@ -167,7 +170,7 @@ class Kardex extends CustomComponent<Props, State> {
 
       this.setState({
         almacenes,
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
         initialLoad: false,
       }, () => {
         this.updateReduxState();
@@ -230,7 +233,7 @@ class Kardex extends CustomComponent<Props, State> {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const kardex = await this.fetchListarKardex(params);
@@ -274,6 +277,21 @@ class Kardex extends CustomComponent<Props, State> {
   |--------------------------------------------------------------------------
   */
 
+  handleSelectAlmacen = (event) => {
+    this.setState({
+      idAlmacen: event.target.value,
+      nombreAlmacen: isEmpty(event.target.value)
+        ? "TODOS LOS ALMACENES"
+        : this.refIdAlmacen.current.options[
+          this.refIdAlmacen.current.selectedIndex
+        ].innerText,
+    }, () => {
+      if (this.state.producto) {
+        this.loadDataKardex(this.state.producto.idProducto);
+      }
+    });
+  };
+
   //------------------------------------------------------------------------------------------
   // Filtrar producto
   //------------------------------------------------------------------------------------------
@@ -309,22 +327,6 @@ class Kardex extends CustomComponent<Props, State> {
     });
   };
 
-  handleSelectAlmacen = (event) => {
-    this.setState({
-      idAlmacen: event.target.value,
-      nombreAlmacen: isEmpty(event.target.value)
-        ? 'TODOS LOS ALMACENES'
-        : this.refIdAlmacen.current.options[
-          this.refIdAlmacen.current.selectedIndex
-        ].innerText,
-    }, () => {
-      if (this.state.producto) {
-        this.loadDataKardex(this.state.producto.idProducto);
-      }
-    });
-  };
-
-
   /*
   |--------------------------------------------------------------------------
   | Métodos de utilidad
@@ -332,30 +334,28 @@ class Kardex extends CustomComponent<Props, State> {
   */
 
   getLoteIcon = (codigoLote, fechaVencimiento) => {
-    if (codigoLote === 'N/A') return '';
-    if (codigoLote === 'SIN LOTE')
+    if (codigoLote === "N/A") return "";
+
+    if (codigoLote === "SIN LOTE") {
       return <span className="text-muted">📦</span>;
+    }
 
     // Verificar si está próximo a vencer (30 días)
-    if (fechaVencimiento && fechaVencimiento !== 'SIN FECHA') {
-      const [dia, mes, año] = fechaVencimiento.split('/');
+    if (fechaVencimiento && fechaVencimiento !== "SIN FECHA") {
+      const [dia, mes, año] = fechaVencimiento.split("/");
       const fechaVenc = new Date(año, mes - 1, dia);
       const hoy = new Date();
-      const diasRestantes = Math.ceil(
-        (fechaVenc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24),
-      );
+      const diasRestantes = Math.ceil((fechaVenc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
       if (diasRestantes <= 30 && diasRestantes > 0) {
         return (
-          <span className="text-warning" title="Próximo a vencer">
-            ⚠️
-          </span>
+          <span className="text-warning" title="Próximo a vencer">⚠️</span>
         );
-      } else if (diasRestantes <= 0) {
+      }
+
+      if (diasRestantes <= 0) {
         return (
-          <span className="text-danger" title="Vencido">
-            🚫
-          </span>
+          <span className="text-danger" title="Vencido">🚫</span>
         );
       }
     }
@@ -387,19 +387,7 @@ class Kardex extends CustomComponent<Props, State> {
         <tr>
           <td colSpan={manejaLote ? 12 : 10} className="px-6 py-12 text-center">
             <div className="flex flex-col items-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
+              <BsDatabaseSlash className="w-12 h-12 text-gray-400" />
               <p className="mt-2 text-sm font-medium text-gray-900">No hay datos para mostrar</p>
               <p className="mt-1 text-sm text-gray-500">Intenta cambiar los filtros</p>
             </div>
@@ -543,8 +531,8 @@ class Kardex extends CustomComponent<Props, State> {
         />
 
         {/* Filtros principales (estilo moderno) */}
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
+        <div className="max-w-7xl mx-auto mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="md:col-span-3">
               <SearchInput
                 ref={this.refProducto}
@@ -571,11 +559,12 @@ class Kardex extends CustomComponent<Props, State> {
                   </div>
                 )}
                 renderIconLeft={<i className="bi bi-search"></i>}
+                classNameContainer="w-full relative group"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Almacén
               </label>
               <Select
@@ -599,8 +588,9 @@ class Kardex extends CustomComponent<Props, State> {
         </div>
 
         {/* Información del producto */}
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="max-w-7xl mx-auto mb-3">
+          {/* Información del producto */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
             <div className="md:col-span-2 bg-white rounded border p-6 gap-3">
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-base font-semibold text-gray-900">
@@ -659,7 +649,7 @@ class Kardex extends CustomComponent<Props, State> {
         </div>
 
         {/* Tabla de movimientos */}
-        <div className="bg-white rounded border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded border border-gray-200 overflow-hidden mb">
           {/* Encabezado de la tabla */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">

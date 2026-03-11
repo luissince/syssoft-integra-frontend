@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatDecimal, isEmpty, formatCurrency } from "@/helper/utils.helper";
 import { SpinnerTransparent } from "@/components/Spinner";
 import Image from "@/components/Image";
-import { ACTIVO, COMBO, PRODUCTO, SERVICIO } from "@/model/types/tipo-producto";
+import { ACTIVO_FIJO, COMBO, PRODUCTO, SERVICIO } from "@/model/types/tipo-producto";
 import Button from "@/components/Button";
 
 type Operation = "addition" | "subtraction";
@@ -81,7 +81,7 @@ const ListGrid: React.FC<ListGridProps> = ({
                       {item.idTipoProducto === PRODUCTO && "Stock"}
                       {item.idTipoProducto === SERVICIO && "Servicio"}
                       {item.idTipoProducto === COMBO && "Servicio"}
-                      {item.idTipoProducto === ACTIVO && "Activo Fijo"}
+                      {item.idTipoProducto === ACTIVO_FIJO && "Activo Fijo"}
                     </span>
                     {
                       item.idTipoProducto !== SERVICIO && (

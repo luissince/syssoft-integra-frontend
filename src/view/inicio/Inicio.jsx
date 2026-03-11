@@ -5,11 +5,9 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import {
   addNotification,
-  clearNoticacion,
 } from '../../redux/noticacionSlice';
-import { projectClose, signOut } from '../../redux/principalSlice';
+import { closeProject, signOut } from '../../redux/principalSlice';
 import {
-  clearSucursal,
   setEmpresa,
   setMonedaNacional,
 } from '../../redux/predeterminadoSlice';
@@ -76,10 +74,12 @@ import Logistica, {
   TrasladoDetalle,
   Inventario,
   Kardex,
+  Depreciar,
   Catalogos,
   CatalogoCrear,
   CatalogoEditar,
   CatalogoDetalle,
+  DepreciarDetalle,
 } from './logistica/index.jsx';
 
 import Tesoreria, {
@@ -380,7 +380,7 @@ class Inicio extends React.Component {
     }
 
     if (projectToken === null) {
-      this.props.projectClose();
+      this.props.closeProject();
     }
   };
 
@@ -755,6 +755,20 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <Kardex {...props} />}
           />
+
+          <Route
+            path={`${path}/logistica/depreciar`}
+            exact={true}
+          >
+            <Depreciar />
+          </Route>
+
+          <Route
+            path={`${path}/logistica/depreciar/detalle`}
+            exact={true}
+          >
+            <DepreciarDetalle />
+          </Route>
 
           <Route
             path={`${path}/logistica/traslado`}
@@ -1289,13 +1303,12 @@ Inicio.propTypes = {
     userToken: PropTypes.object,
     project: PropTypes.object,
   }),
-  projectClose: PropTypes.func,
+  closeProject: PropTypes.func,
   match: PropTypes.object,
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }),
-  clearSucursal: PropTypes.func,
-  clearNoticacion: PropTypes.func,
+
   setMonedaNacional: PropTypes.func,
   setEmpresa: PropTypes.func,
 };
@@ -1309,10 +1322,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   signOut,
-  projectClose,
+  closeProject,
   addNotification,
-  clearSucursal,
-  clearNoticacion,
   setMonedaNacional,
   setEmpresa,
 };

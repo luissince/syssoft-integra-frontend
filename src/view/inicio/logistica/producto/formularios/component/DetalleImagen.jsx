@@ -1,8 +1,6 @@
 import Button from '../../../../../../components/Button';
 import { Switches } from '../../../../../../components/Checks';
-import Column from '../../../../../../components/Column';
 import { ImageUpload } from '../../../../../../components/Image';
-import Row from '../../../../../../components/Row';
 import { images } from '../../../../../../helper';
 import { formatDecimal } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';

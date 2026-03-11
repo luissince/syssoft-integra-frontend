@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { closeProject, signOut } from './principalSlice';
 
 const initialState = {
   notifications: [],
@@ -11,11 +12,12 @@ const notificationSlice = createSlice({
     addNotification: (state, action) => {
       state.notifications.push(action.payload);
     },
-    clearNoticacion: (state) => {
-      state.notifications = [];
+    extraReducers: (builder) => {
+      builder.addCase(signOut, () => initialState);
+      builder.addCase(closeProject, () => initialState);
     },
   },
 });
 
-export const { addNotification, clearNoticacion } = notificationSlice.actions;
+export const { addNotification } = notificationSlice.actions;
 export default notificationSlice.reducer;
