@@ -33,7 +33,7 @@ import {
 import Title from '@/components/Title';
 import { SpinnerView } from '@/components/Spinner';
 import ModalProducto from '../component/ModalProducto';
-import { ACTIVO_FIJO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { ACTIVO_FIJO, COMBO, EXISTENCIAL, MENOR_CUANTIA, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import ItemImage from '../component/ItemImagen';
 import Button from '@/components/Button';
@@ -644,7 +644,7 @@ class ProductoEditar extends CustomComponent {
         ref: this.refCosto
       },
       {
-        value: precio,
+        value: ![ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL].includes(idTipoProducto) && precio,
         message: 'Ingrese el precio.',
         ref: this.refPrecio
       },
@@ -884,6 +884,28 @@ class ProductoEditar extends CustomComponent {
                 onChange={this.handleOptionTipoProducto}
               >
                 Activo Fijo
+              </RadioButton>
+
+              <RadioButton
+                className="form-check-inline"
+                id={MENOR_CUANTIA}
+                value={MENOR_CUANTIA}
+                name="ckTipoProducto"
+                checked={idTipoProducto === MENOR_CUANTIA}
+                onChange={this.handleOptionTipoProducto}
+              >
+                Menor Cuantía
+              </RadioButton>
+
+              <RadioButton
+                className="form-check-inline"
+                id={EXISTENCIAL}
+                value={EXISTENCIAL}
+                name="ckTipoProducto"
+                checked={idTipoProducto === EXISTENCIAL}
+                onChange={this.handleOptionTipoProducto}
+              >
+                Existencial
               </RadioButton>
             </div>
 
@@ -1201,95 +1223,98 @@ class ProductoEditar extends CustomComponent {
             }
 
             {/* Precio */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">4</span> PRECIO
-              </h6>
+            {
+              ![ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL].includes(idTipoProducto) && (
+                <div className="flex flex-col gap-3">
+                  <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">4</span> PRECIO
+                  </h6>
 
-              <p>Indica el valor de venta de tu producto.</p>
+                  <p>Indica el valor de venta de tu producto.</p>
 
-              <div>
-                <Input
-                  label={
-                    <>
-                      Precio base:
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
-                  }
-                  className={`${precio ? '' : 'is-invalid'}`}
-                  placeholder=" S/ 0.00"
-                  ref={this.refPrecio}
-                  value={precio}
-                  onChange={this.handleInputPrecio}
-                  onKeyDown={keyNumberFloat}
-                />
-              </div>
+                  <div>
+                    <Input
+                      label={
+                        <>
+                          Precio base:
+                          <i className="fa fa-asterisk text-danger small"></i>
+                        </>
+                      }
+                      className={`${precio ? '' : 'is-invalid'}`}
+                      placeholder=" S/ 0.00"
+                      ref={this.refPrecio}
+                      value={precio}
+                      onChange={this.handleInputPrecio}
+                      onKeyDown={keyNumberFloat}
+                    />
+                  </div>
 
-              <div>
-                {
-                  precios.length !== 0 && (
-                    <div className="bg-white rounded border overflow-hidden">
-                      <div className="overflow-x-auto">
-                        <table ref={this.refPrecios} className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {
-                              precios.map((item, index) => {
-                                return (
-                                  <tr key={index}>
-                                    <td className="px-6 py-12 text-center">{item.id}</td>
-                                    <td className="px-6 py-12 text-center">
-                                      <Input
-                                        placeholder="Ingrese el nombre del precio..."
-                                        value={item.nombre}
-                                        onChange={(event) =>
-                                          this.handleInputNombrePrecios(event, item.id)
-                                        }
-                                      />
-                                    </td>
-                                    <td className="px-6 py-12 text-center">
-                                      <Input
-                                        placeholder="0.00"
-                                        value={item.precio}
-                                        onChange={(event) =>
-                                          this.handleInputPrecioPrecios(event, item.id)
-                                        }
-                                        onKeyDown={keyNumberFloat}
-                                      />
-                                    </td>
-                                    <td className="px-6 py-12 text-center">
-                                      <Button
-                                        className="btn-danger"
-                                        onClick={() => this.handleRemovePrecios(item.id)}
-                                      >
-                                        <i className="fa fa-remove"></i>
-                                      </Button>
-                                    </td>
-                                  </tr>
-                                );
-                              })
-                            }
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )
-                }
-              </div>
+                  <div>
+                    {
+                      precios.length !== 0 && (
+                        <div className="bg-white rounded border overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table ref={this.refPrecios} className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {
+                                  precios.map((item, index) => {
+                                    return (
+                                      <tr key={index}>
+                                        <td className="px-6 py-12 text-center">{item.id}</td>
+                                        <td className="px-6 py-12 text-center">
+                                          <Input
+                                            placeholder="Ingrese el nombre del precio..."
+                                            value={item.nombre}
+                                            onChange={(event) =>
+                                              this.handleInputNombrePrecios(event, item.id)
+                                            }
+                                          />
+                                        </td>
+                                        <td className="px-6 py-12 text-center">
+                                          <Input
+                                            placeholder="0.00"
+                                            value={item.precio}
+                                            onChange={(event) =>
+                                              this.handleInputPrecioPrecios(event, item.id)
+                                            }
+                                            onKeyDown={keyNumberFloat}
+                                          />
+                                        </td>
+                                        <td className="px-6 py-12 text-center">
+                                          <Button
+                                            className="btn-danger"
+                                            onClick={() => this.handleRemovePrecios(item.id)}
+                                          >
+                                            <i className="fa fa-remove"></i>
+                                          </Button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )
+                    }
+                  </div>
 
-              <div>
-                <Button className="text-success" onClick={this.handleAddPrecios}>
-                  <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
-                </Button>
-              </div>
-            </div>
+                  <div>
+                    <Button className="text-success" onClick={this.handleAddPrecios}>
+                      <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
+                    </Button>
+                  </div>
+                </div>
+              )}
 
             {/* Lista combo */}
             {

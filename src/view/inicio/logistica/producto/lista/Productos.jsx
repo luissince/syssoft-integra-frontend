@@ -27,7 +27,7 @@ import React from 'react';
 import { alertKit } from 'alert-kit';
 import { FaStar } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
-import { COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { ACTIVO_FIJO, COMBO, MENOR_CUANTIA, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -339,7 +339,7 @@ class Productos extends CustomComponent {
           <td colSpan={11} className="px-6 py-12 text-center">
             <div className="text-gray-500">
               <i className="bi bi-box text-4xl mb-3 block"></i>
-              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-lg font-medium">No se encontraron productos</p>
               <p className="text-sm">Intenta cambiar los filtros</p>
             </div>
           </td>
@@ -349,7 +349,12 @@ class Productos extends CustomComponent {
 
     return (
       this.state.lista.map((item) => {
-        const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO" : item.idTipoProducto === SERVICIO ? "SERVICIO" : item.idTipoProducto === COMBO ? "COMBO" : "ACTIVO FIJO";
+        const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO"
+          : item.idTipoProducto === SERVICIO ? "SERVICIO"
+            : item.idTipoProducto === COMBO ? "COMBO"
+              : item.idTipoProducto === ACTIVO_FIJO ? "ACTIVO FIJO"
+                : item.idTipoProducto === MENOR_CUANTIA ? "MENOR CUANTIA"
+                  : "EXISTENCIAL";
 
         const estadoClass = item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
 

@@ -25,7 +25,7 @@ import { comboUbicacion } from '@/network/rest/principal.network';
 import { CANCELED } from '@/constants/requestStatus';
 import Select from '@/components/Select';
 import { cn } from '@/lib/utils';
-import { PRODUCTO, ACTIVO_FIJO } from '@/model/types/tipo-producto';
+import { PRODUCTO, ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL } from '@/model/types/tipo-producto';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 
 /**
@@ -226,15 +226,16 @@ class ModalProducto extends Component {
       valorResidual: "",
     };
 
-    const inventarioDetalles = [...this.state.inventarioDetalles, inventarioDetalle];
+    this.setState((prevState) => ({
+      inventarioDetalles: [...prevState.inventarioDetalles, inventarioDetalle]
+    }));
 
-    this.setState({
-      inventarioDetalles,
-    });
+    // this.setState({
+    //   inventarioDetalles,
+    // });
   };
 
-  handleEliminarInventarioDetalle = (id) => {
-    const { inventarioDetalles } = this.state;
+  handleEliminarInventarioDetalle = (id) => {    const { inventarioDetalles } = this.state;
     const nuevosDetalles = inventarioDetalles.filter(item => item.id !== id);
     this.setState({ inventarioDetalles: nuevosDetalles });
   };
@@ -485,7 +486,8 @@ class ModalProducto extends Component {
   }
 
   renderActivo = (item) => {
-    if (this.state.idTipoProducto !== ACTIVO_FIJO) return;
+    // if (this.state.idTipoProducto !== ACTIVO_FIJO) return;
+    if (![ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL].includes(this.state.idTipoProducto)) return;
 
     if (item.porDefecto) return;
 
@@ -496,7 +498,12 @@ class ModalProducto extends Component {
           <div className="w-full">
             <Input
               autoFocus={true}
-              label="Cantidad:"
+              label={
+                <>
+                  Cantidad:
+                  <i className="fa fa-asterisk text-danger small"></i>
+                </>
+              }
               placeholder="0.00"
               role="float"
               tabIndex={1}
@@ -538,7 +545,12 @@ class ModalProducto extends Component {
             item.serie !== null && (
               <div className="w-full">
                 <Input
-                  label="Serie:"
+                  label={
+                    <>
+                      Serie:
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="Por ejemplo: SR-0001"
                   tabIndex={2}
                   value={item.serie}
@@ -556,7 +568,12 @@ class ModalProducto extends Component {
             item.vidaUtil !== null && (
               <div className="w-full">
                 <Input
-                  label="Vida útil:"
+                  label={
+                    <>
+                      Vida útil:
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="Por ejemplo: 1 año, 5 años..."
                   tabIndex={3}
                   role="integer"
@@ -573,7 +590,11 @@ class ModalProducto extends Component {
             item.valorResidual !== null && (
               <div className="w-full">
                 <Input
-                  label="Valor residual:"
+                  label={
+                    <>Valor residual:
+                      <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
                   placeholder="Por ejemplo: 0, 100, 200..."
                   tabIndex={4}
                   role="float"
@@ -691,7 +712,16 @@ class ModalProducto extends Component {
                 <Button
                   className="btn-light"
                   title="Agregar detalle"
-                  onClick={this.handleAgregarInventarioDetalle}
+                  onClick={() => {
+                    const detallePorDefecto = this.state.inventarioDetalles.find(
+                      d => d.porDefecto === true
+                    );
+
+                    if (detallePorDefecto) {
+                      this.handleEliminarInventarioDetalle(detallePorDefecto.id);
+                    }
+                    this.handleAgregarInventarioDetalle();
+                  }}
                 >
                   <i className="bi bi-plus-circle"></i>
                 </Button>
@@ -727,10 +757,10 @@ class ModalProducto extends Component {
               </div>
             </div>
 
-            {inventarioDetalles.map((item, index) => (
+            {inventarioDetalles.map((item) => (
               <div
-                key={index}
-                ref={this.refInventarioDetalles}
+                key={item.id}
+                // ref={this.refInventarioDetalles}
                 className="flex flex-col gap-3 p-3 mb-3 border border-gray-300 rounded"
               >
                 {/* Cantidad y Ubicación */}
