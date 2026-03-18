@@ -44,6 +44,7 @@ import Image from '@/components/Image';
 import { images } from '@/helper';
 import { cn } from '@/lib/utils';
 import { RxEyeNone } from 'react-icons/rx';
+import { COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 
 const CustomModalStock = React.lazy(
   () => import('@/view/inicio/logistica/inventario/component/ModalStock'),
@@ -564,7 +565,7 @@ class Inventario extends CustomComponent {
       const estadoInventario = this.determinarEstadoInventario(item);
       const tieneInventarioDetalles = item.inventarioDetalles && item.inventarioDetalles.length > 0;
       const porcentaje = this.calcularPorcentaje(item);
-
+      console.log("item: ", item)
       return (
         <React.Fragment key={`producto-${item.idInventario}`}>
           <tr className="hover:bg-gray-50 transition-colors">
@@ -694,7 +695,9 @@ class Inventario extends CustomComponent {
                               <div className="flex justify-between items-start mb-2">
                                 <div className="text-sm font-medium text-gray-900">
                                   {
-                                    inventarioDetalle.porDefecto === 1 ? "Por Defecto" : `Lote ${inventarioDetalleIndex + 1}`
+                                    [PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto)
+                                      ? (inventarioDetalle.porDefecto === 1 ? "Por Defecto" : `Lote ${inventarioDetalleIndex + 1}`)
+                                      : `Item ${inventarioDetalleIndex + 1}`
                                   }
                                 </div>
                                 <span
@@ -706,15 +709,26 @@ class Inventario extends CustomComponent {
                               </div>
                               <div className="space-y-2">
                                 <div className="text-sm">
-                                  <span className="text-gray-500">Código: </span>
-                                  <span className="font-medium">{inventarioDetalle.lote || "N/A"}</span>
+                                  <span className="text-gray-500">
+                                    {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? "Código: " : "Serie: "}
+                                  </span>
+                                  <span className="font-medium">
+                                    {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? inventarioDetalle.lote || "N/A" : inventarioDetalle.serie || "N/A"}
+                                  </span>
                                 </div>
                                 <div className="text-sm">
-                                  <span className="text-gray-500">Vencimiento: </span>
-                                  <span className="font-medium">{inventarioDetalle.fechaVencimiento || "N/A"}</span>
+                                  <span className="text-gray-500">
+                                    {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? "Vencimiento: " : "Vida útil: "}
+                                  </span>
+                                  <span className="font-medium">
+                                    {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? inventarioDetalle.fechaVencimiento || "N/A" : inventarioDetalle.vidaUtil || "N/A"}
+                                  </span>
                                 </div>
                                 <div className="text-sm">
-                                  <span className="text-gray-500">Días restantes: </span>
+                                  <span className="text-gray-500">
+                                    {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? "Días restantes: " : "Valor Residual: "}
+
+                                  </span>
                                   <span
                                     className={cn(
                                       "font-medium",
@@ -722,17 +736,18 @@ class Inventario extends CustomComponent {
                                         inventarioDetalle.diasRestantes <= 90 ? "text-orange-600" : "text-gray-900"
                                     )}
                                   >
-                                    {inventarioDetalle.diasRestantes} días
+                                    {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? inventarioDetalle.diasRestantes + " días" || "N/A" : inventarioDetalle.valorResidual}
                                   </span>
                                 </div>
                                 <div className="text-sm">
                                   <span className="text-gray-500">Cantidad: </span>
                                   <span className="font-medium">{inventarioDetalle.cantidad} {item.medida}</span>
                                 </div>
-                                <div className="text-sm">
+                                {inventarioDetalle.ubicacion && (<div className="text-sm">
                                   <span className="text-gray-500">Ubicación: </span>
                                   <span className="font-medium">{inventarioDetalle.ubicacion || "N/A"}</span>
-                                </div>
+                                </div>)}
+
                                 <div className="mt-2">
                                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                                     <span>Participación en stock</span>

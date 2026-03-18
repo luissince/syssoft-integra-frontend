@@ -147,6 +147,12 @@ import Configuracion, {
   Ubicaciones,
   UbicacionAgregar,
   UbicacionEditar,
+  Areas,
+  AreasAgregar,
+  AreasEditar,
+  Cargos,
+  CargosAgregar,
+  CargosEditar,
 } from './configuracion/index.jsx';
 
 import Reporte, {
@@ -1165,6 +1171,42 @@ class Inicio extends React.Component {
             path={`${path}/configuracion/ubicaciones/editar`}
             exact={true}
             render={(props) => <UbicacionEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/areas`}
+            exact={true}
+            render={(props) => <Areas {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/areas/agregar`}
+            exact={true}
+            render={(props) => <AreasAgregar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/areas/editar`}
+            exact={true}
+            render={(props) => <AreasEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/cargos`}
+            exact={true}
+            render={(props) => <Cargos {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/cargos/agregar`}
+            exact={true}
+            render={(props) => <CargosAgregar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/cargos/editar`}
+            exact={true}
+            render={(props) => <CargosEditar {...props} />}
           />
           {/* 
           --------------------------------------------------------

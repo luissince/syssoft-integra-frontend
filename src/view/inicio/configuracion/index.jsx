@@ -53,6 +53,14 @@ import Ubicaciones from './ubicacion/Ubicaciones.jsx';
 import UbicacionAgregar from './ubicacion/UbicacionAgregar.jsx';  
 import UbicacionEditar from './ubicacion/UbicacionEditar.jsx';
 
+import Areas from './area/Areas.jsx';
+import AreasAgregar from './area/AreasAgregar';
+import AreasEditar from './area/AreasEditar.jsx';
+
+import Cargos from './cargo/Cargos';
+import CargosAgregar from './cargo/CargosAgregar';
+import CargosEditar from './cargo/CargosEditar.jsx';
+
 export {
   Almacenes,
   AlmacenAgregar,
@@ -92,6 +100,12 @@ export {
   Ubicaciones,
   UbicacionAgregar,
   UbicacionEditar,
+  Areas,
+  AreasAgregar,
+  AreasEditar,
+  Cargos,
+  CargosAgregar,
+  CargosEditar
 };
 
 /**
