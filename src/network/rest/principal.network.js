@@ -1922,6 +1922,112 @@ export async function comboAtributo(idTipoAtributo, signal = null) {
 
 /*
 |--------------------------------------------------------------------------
+| ENDPOINTS DE AREA
+|--------------------------------------------------------------------------
+*/
+
+export async function listArea(params, signal = null) {
+  return await Resolve.resolve(
+    instancePrincipal.get('/api/area/', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function addArea(data) {
+  return await Resolve.resolve(
+    instancePrincipal.post('/api/area', data),
+  );
+}
+
+export async function updateArea(data) {
+  return await Resolve.resolve(
+    instancePrincipal.put('/api/area', data),
+  );
+}
+
+export async function getIdArea(idArea, signal = null) {
+  return await Resolve.resolve(
+    instancePrincipal.get(`/api/area/${idArea}/id`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function removeArea(idArea) {
+  return await Resolve.resolve(
+    instancePrincipal.delete(`/api/area/${idArea}`),
+  );
+}
+
+export async function comboArea(signal) {
+  return await Resolve.resolve(
+    instancePrincipal.get('/api/area/combo/', {
+      signal: signal,
+    }),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA AREA
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE CARGO
+|--------------------------------------------------------------------------
+*/
+
+export async function listCargo(params, signal = null) {
+  return await Resolve.resolve(
+    instancePrincipal.get('/api/cargo/', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function addCargo(data) {
+  return await Resolve.resolve(
+    instancePrincipal.post('/api/cargo', data),
+  );
+}
+
+export async function updateCargo(data) {
+  return await Resolve.resolve(
+    instancePrincipal.put('/api/cargo', data),
+  );
+}
+
+export async function getIdCargo(idCargo, signal = null) {
+  return await Resolve.resolve(
+    instancePrincipal.get(`/api/cargo/${idCargo}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function removeCargo(idCargo) {
+  return await Resolve.resolve(
+    instancePrincipal.delete(`/api/cargo/${idCargo}/id`),
+  );
+}
+
+export async function comboCargo(signal) {
+  return await Resolve.resolve(
+    instancePrincipal.get('/api/cargo/combo', {
+      signal: signal,
+    }),
+  );
+}
+
+// ------------------------------------------------------------------------
+// FIN PARA CARGO
+// ------------------------------------------------------------------------
+
+/*
+|--------------------------------------------------------------------------
 | ENDPOINTS DE UBICACION
 |--------------------------------------------------------------------------
 */

@@ -19,6 +19,8 @@ import {
   getPersona,
   getUbigeo,
   comboTipoDocumento,
+  comboArea,
+  comboCargo,
 } from '@/network/rest/principal.network';
 import { getDni, getRuc } from '@/network/rest/apisperu.network';
 import { CANCELED } from '@/constants/requestStatus';
@@ -48,7 +50,10 @@ class PersonaEditar extends CustomComponent {
       msgLoading: "Cargando datos...",
 
       idPersona: "",
+      idEmpleado: "",
       idTipoDocumento: "",
+      idArea: "",
+      idCargo: "",
       documento: "",
       informacion: "",
       cliente: true,
@@ -70,6 +75,8 @@ class PersonaEditar extends CustomComponent {
       observacion: "",
 
       tiposDocumentos: [],
+      areas: [],
+      cargos: [],
 
       ubigeos: [],
 
@@ -77,6 +84,8 @@ class PersonaEditar extends CustomComponent {
     };
 
     this.refTipoDocumento = React.createRef();
+    this.refAreas = React.createRef();
+    this.refCargos = React.createRef();
     this.refDocumento = React.createRef();
     this.refInformacion = React.createRef();
     this.refCelular = React.createRef();
@@ -111,34 +120,26 @@ class PersonaEditar extends CustomComponent {
       idPersona: id,
     };
 
-    const responseListaTipoDocumento = await comboTipoDocumento(this.abortController.signal);
+    const [responsePersona,responseListaTipoDocumento, responseAreas, responseCargos] = await Promise.all([
+      this.fetchPersona(params),
+      this.fetchComboTipoDocumento(),
+      this.fetchComboArea(),
+      this.fetchComboCargo(),
+    ]);
+    console.log(responsePersona);
+    console.log(responseListaTipoDocumento);
+    console.log(responseAreas);
+    console.log(responseCargos);
 
-    if (responseListaTipoDocumento instanceof ErrorResponse) {
-      if (responseListaTipoDocumento.getType() === CANCELED) return;
-
-      this.setState({
-        msgLoading: responseListaTipoDocumento.getMessage(),
-      });
-      return;
-    }
-
-    const responsePersona = await getPersona(params, this.abortController.signal);
-
-    if (responsePersona instanceof ErrorResponse) {
-      if (responsePersona.getType() === CANCELED) return;
-
-      this.setState({
-        msgLoading: responsePersona.getMessage(),
-      });
-      return;
-    }
-
-    const documentos = responseListaTipoDocumento.data;
-    const cliente = responsePersona.data
+    const documentos = responseListaTipoDocumento;
+    const cliente = responsePersona
 
     this.setState({
       idPersona: cliente.idPersona,
+      idEmpleado: cliente.idEmpleado === null ? '' : cliente.idEmpleado.toString(),
       idTipoDocumento: cliente.idTipoDocumento,
+      idArea: cliente.idArea === null ? '' : cliente.idArea.toString(),
+      idCargo: cliente.idCargo === null ? '' : cliente.idCargo.toString(),
       documento: text(cliente.documento),
       informacion: text(cliente.informacion),
       cliente: cliente.cliente === 1 ? true : false,
@@ -161,6 +162,8 @@ class PersonaEditar extends CustomComponent {
       observacion: text(cliente.observacion),
 
       tiposDocumentos: documentos,
+      areas: responseAreas,
+      cargos: responseCargos,
 
       loading: false,
     }, () => {
@@ -170,8 +173,88 @@ class PersonaEditar extends CustomComponent {
     });
   };
 
+  async fetchPersona(params) {
+    const result = await getPersona(params, this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return;
+    }
+  }
+
+  async fetchComboTipoDocumento() {
+    const result = await comboTipoDocumento(this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return [];
+    }
+  }
+
+  async fetchComboArea() {
+    const result = await comboArea(this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return [];
+    }
+  }
+
+  async fetchComboCargo() {
+    const result = await comboCargo(this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return [];
+    }
+  }
+
   handleSelectTipoDocumento = (event) => {
     this.setState({ idTipoDocumento: event.target.value });
+  };
+
+  handleSelectAreas = (event) => {
+    this.setState({ idArea: event.target.value });
+  };
+
+  handleSelectCargos = (event) => {
+    this.setState({ idCargo: event.target.value });
   };
 
   handleInputNumeroDocumento = (event) => {
@@ -416,6 +499,26 @@ class PersonaEditar extends CustomComponent {
       return;
     }
 
+    if (this.state.personal && isEmpty(this.state.idArea)) {
+      alertKit.warning({
+        title: "Persona",
+        message: "Seleccione el área.",
+      }, () => {
+        this.refAreas.current.focus();
+      });
+      return;
+    }
+
+    if (this.state.personal && isEmpty(this.state.idCargo)) {
+      alertKit.warning({
+        title: "Persona",
+        message: "Seleccione el cargo.",
+      }, () => {
+        this.refCargos.current.focus();
+      });
+      return;
+    }
+
     const accept = await alertKit.question({
       title: "Persona",
       message: "¿Estás seguro de continuar?",
@@ -430,7 +533,10 @@ class PersonaEditar extends CustomComponent {
     if (accept) {
       const data = {
         idPersona: this.state.idPersona,
+        idEmpleado: this.state.idEmpleado,
         idTipoDocumento: this.state.idTipoDocumento,
+        idArea: this.state.idArea,
+        idCargo: this.state.idCargo,
         documento: this.state.documento.toString().trim(),
         informacion: this.state.informacion.trim().toUpperCase(),
         cliente: this.state.cliente,
@@ -480,6 +586,8 @@ class PersonaEditar extends CustomComponent {
   render() {
     const {
       idTipoDocumento,
+      idArea,
+      idCargo,
       documento,
       informacion,
       genero,
@@ -496,7 +604,9 @@ class PersonaEditar extends CustomComponent {
       loading,
       msgLoading,
 
-      tiposDocumentos
+      tiposDocumentos,
+      areas,
+      cargos,
     } = this.state;
 
     const tipoEntidad = tiposDocumentos.find((item) => item.idTipoDocumento === idTipoDocumento)?.tipoEntidad;
@@ -676,6 +786,56 @@ class PersonaEditar extends CustomComponent {
             </CheckBox>
           </Column>
         </Row>
+
+        {this.state.personal && (
+          <Row>
+            <Column className="col-md-6 col-12" formGroup={true}>
+              <Select
+                label={
+                  <>
+                    Area:
+                  </>
+                }
+                className={`${idArea ? '' : 'is-invalid'}`}
+                value={idArea}
+                ref={this.refAreas}
+                onChange={this.handleSelectAreas}
+              >
+                <option value="">-- Seleccione --</option>
+                {
+                  areas.map((item, index) => (
+                    <option key={index} value={item.idArea}>
+                      {item.nombre}
+                    </option>
+                  ))
+                }
+              </Select>
+            </Column>
+
+            <Column className="col-md-6 col-12" formGroup={true}>
+              <Select
+                label={
+                  <>
+                    Cargo:
+                  </>
+                }
+                className={`${idCargo ? '' : 'is-invalid'}`}
+                value={idCargo}
+                ref={this.refCargos}
+                onChange={this.handleSelectCargos}
+              >
+                <option value="">-- Seleccione --</option>
+                {
+                  cargos.map((item, index) => (
+                    <option key={index} value={item.idCargo}>
+                      {item.nombre}
+                    </option>
+                  ))
+                }
+              </Select>
+            </Column>
+          </Row>
+        )}
 
         {tipoEntidad !== JURIDICA && (
           <Row>

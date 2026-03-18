@@ -26,6 +26,7 @@ import Image from '@/components/Image';
 import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 import { CONTADO } from '@/model/types/forma-transaccion';
+import { COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -165,7 +166,7 @@ class CompraDetalle extends CustomComponent {
       usuario
     } = compra.cabecera;
 
-    const monto = compra.detalles.reduce((accumlate, item) => accumlate + item.costo * item.cantidad,0,);
+    const monto = compra.detalles.reduce((accumlate, item) => accumlate + item.costo * item.cantidad, 0,);
 
     const nuevoEstado =
       estado === 1 ? (
@@ -215,7 +216,7 @@ class CompraDetalle extends CustomComponent {
       loading: false,
     });
   }
-  
+
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -232,7 +233,7 @@ class CompraDetalle extends CustomComponent {
   |
   */
 
-    handleGoBack = () => {
+  handleGoBack = () => {
     this.props.history.goBack();
   };
 
@@ -298,6 +299,7 @@ class CompraDetalle extends CustomComponent {
 
         {/* Detalles de inventario */}
         {item.inventarioDetalles && !isEmpty(item.inventarioDetalles) && (
+
           <tr>
             <td colSpan={9} className="py-2 bg-gray-50">
               <div className="overflow-x-auto">
@@ -305,13 +307,13 @@ class CompraDetalle extends CustomComponent {
                   <thead>
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Código Lote
+                        {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? "Código Lote" : "Serie"}
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Fecha Vencimiento
+                        {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? "Fecha Vencimiento" : "Vida Útil"}
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Ubicación
+                        {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? "Ubicación" : "Valor Residual"}
                       </th>
                       <th className="px-4 py-2 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
                         Cantidad
@@ -322,13 +324,13 @@ class CompraDetalle extends CustomComponent {
                     {item.inventarioDetalles.map((inventarioDetalle, loteIndex) => (
                       <tr key={loteIndex} className="hover:bg-gray-50">
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                          {inventarioDetalle.lote}
+                          {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? inventarioDetalle.lote : inventarioDetalle.serie}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                          {inventarioDetalle.fechaVencimiento || 'N/A'}
+                          {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? inventarioDetalle.fechaVencimiento : inventarioDetalle.vidaUtil}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                          {inventarioDetalle.ubicacion || 'N/A'}
+                          {[PRODUCTO, SERVICIO, COMBO].includes(item.idTipoProducto) ? inventarioDetalle.ubicacion : inventarioDetalle.valorResidual}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
                           {rounded(inventarioDetalle.cantidad)}
