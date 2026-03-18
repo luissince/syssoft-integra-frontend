@@ -949,13 +949,19 @@ class Inicio extends React.Component {
           />
 
           <Route
+            path={`${path}/contactos/conductores/editar`}
+            exact={true}
+            render={(props) => <PersonaEditar {...props} />}
+          />
+
+          <Route
             path={`${path}/contactos/personales`}
             exact={true}
             render={(props) => <Personales {...props} />}
           />
 
           <Route
-            path={`${path}/contactos/conductores/editar`}
+            path={`${path}/contactos/personales/editar`}
             exact={true}
             render={(props) => <PersonaEditar {...props} />}
           />

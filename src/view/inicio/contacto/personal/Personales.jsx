@@ -283,6 +283,9 @@ class Personales extends CustomComponent {
             <span>{item.documento}</span>
           </TableCell>
           <TableCell>
+            {item.area}
+          </TableCell>
+          <TableCell>
             {item.cargo}
           </TableCell>
           <TableCell>
@@ -353,6 +356,7 @@ class Personales extends CustomComponent {
                 <TableRow>
                   <TableHead width="5%" className="text-center">#</TableHead>
                   <TableHead width="35%">Nombre</TableHead>
+                  <TableHead width="20%">Area</TableHead>
                   <TableHead width="20%">Cargo</TableHead>
                   <TableHead width="20%">Contacto</TableHead>
                   <TableHead width="10%">Estado</TableHead>

@@ -1949,7 +1949,7 @@ export async function updateArea(data) {
 
 export async function getIdArea(idArea, signal = null) {
   return await Resolve.resolve(
-    instancePrincipal.get(`/api/area/${idArea}`, {
+    instancePrincipal.get(`/api/area/${idArea}/id`, {
       signal: signal,
     }),
   );
@@ -1958,6 +1958,14 @@ export async function getIdArea(idArea, signal = null) {
 export async function removeArea(idArea) {
   return await Resolve.resolve(
     instancePrincipal.delete(`/api/area/${idArea}`),
+  );
+}
+
+export async function comboArea(signal) {
+  return await Resolve.resolve(
+    instancePrincipal.get('/api/area/combo/', {
+      signal: signal,
+    }),
   );
 }
 
@@ -2002,7 +2010,15 @@ export async function getIdCargo(idCargo, signal = null) {
 
 export async function removeCargo(idCargo) {
   return await Resolve.resolve(
-    instancePrincipal.delete(`/api/cargo/${idCargo}`),
+    instancePrincipal.delete(`/api/cargo/${idCargo}/id`),
+  );
+}
+
+export async function comboCargo(signal) {
+  return await Resolve.resolve(
+    instancePrincipal.get('/api/cargo/combo', {
+      signal: signal,
+    }),
   );
 }
 
