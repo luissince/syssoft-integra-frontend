@@ -8,8 +8,10 @@ import Depreciaciones from './depreciacion/Depreciaciones';
 import DepreciacionDetalle from './depreciacion/DepreciacionDetalle';
 
 import Gestiones from './gestion/Gestiones';
-import GestioneCrear from './gestion/GestioneCrear';
-import GestioneEditar from './gestion/GestioneEditar';
+import GestioneCrear from './gestion/GestionCrear';
+import GestioneEditar from './gestion/GestionEditar';
+import GestionDevolver from './gestion/GestionDevolver';
+import Historiales from './historial/Historiales';
 
 const Activo = () => {
   const token = useAppSelector((state) => state.principal);
@@ -76,6 +78,20 @@ const ActivoRoutes = () => {
         exact={true}
       >
         <GestioneEditar />
+      </Route>
+
+       <Route
+        path={`${match.path}/gestiones/devolver`}
+        exact={true}
+      >
+        <GestionDevolver />
+      </Route>
+
+        <Route
+        path={`${match.path}/historiales`}
+        exact={true}
+      >
+        <Historiales />
       </Route>
     </>
   );

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useRouteMatch } from 'react-router-dom';
 import { images } from '../../helper';
 import { isEmpty } from '../../helper/utils.helper';
 import Image from '../Image';
@@ -10,11 +10,12 @@ import { AuthenticateInterface } from '@/model/ts/interface/user';
 import { ProjectInterface } from '@/model/ts/interface/project';
 
 interface MenuMobileProps {
-  userToken: AuthenticateInterface,
-  url: string;
+  userToken: AuthenticateInterface
 }
 
-const MenuMobile = ({ userToken, url }: MenuMobileProps) => {
+const MenuMobile = ({ userToken }: MenuMobileProps) => {
+  const match = useRouteMatch();
+
   const pageSize = 3;
   const [page, setPage] = useState(0);
 
@@ -44,7 +45,7 @@ const MenuMobile = ({ userToken, url }: MenuMobileProps) => {
           {visibleMenus.map((menu, index) => (
             <NavLink
               key={index}
-              to={`${url}/${menu.ruta}`}
+              to={`${match.url}/${menu.ruta}`}
               className="w-full flex flex-col items-center px-2 py-2 text-gray-400 hover:text-white"
               activeClassName="text-white bg-[#004099]"
             >
@@ -72,12 +73,12 @@ const MenuMobile = ({ userToken, url }: MenuMobileProps) => {
 interface MenuDesktopProps {
   refSideBar: React.RefObject<HTMLDivElement>;
   userToken: AuthenticateInterface;
-  url: string;
   rutaLogo: string;
   project: ProjectInterface;
 }
 
-const MenuDesktop = ({ refSideBar, userToken, url, rutaLogo, project }: MenuDesktopProps) => {
+const MenuDesktop = ({ refSideBar, userToken, rutaLogo, project }: MenuDesktopProps) => {
+  const match = useRouteMatch();
 
   const onEventOverlay = () => {
     refSideBar.current.classList.remove('toggled');
@@ -107,7 +108,7 @@ const MenuDesktop = ({ refSideBar, userToken, url, rutaLogo, project }: MenuDesk
                   return (
                     <li key={index}>
                       <NavLink
-                        to={`${url}/${menu.ruta}`}
+                        to={`${match.url}/${menu.ruta}`}
                         className="pro-inner-item"
                         activeClassName="active-link"
                         role="button"
@@ -136,7 +137,7 @@ const MenuDesktop = ({ refSideBar, userToken, url, rutaLogo, project }: MenuDesk
                   return (
                     <li key={index}>
                       <NavLink
-                        to={`${url}/${menu.ruta}`}
+                        to={`${match.url}/${menu.ruta}`}
                         className="pro-inner-item"
                         activeClassName="active-link"
                         role="button"
@@ -200,11 +201,10 @@ const MenuDesktop = ({ refSideBar, userToken, url, rutaLogo, project }: MenuDesk
 
 interface MenuProps {
   refSideBar: React.RefObject<HTMLDivElement>;
-  url: string;
   rutaLogo: string;
 }
 
-const Menu = ({ refSideBar, url, rutaLogo }: MenuProps) => {
+const Menu = ({ refSideBar, rutaLogo }: MenuProps) => {
   const isScreen = useScreenSize();
   const userToken = useAppSelector((state) => state.principal.userToken);
   const project = useAppSelector((state) => state.principal.project);
@@ -213,7 +213,6 @@ const Menu = ({ refSideBar, url, rutaLogo }: MenuProps) => {
     return (
       <MenuMobile
         userToken={userToken}
-        url={url}
       />
     );
   }
@@ -222,7 +221,6 @@ const Menu = ({ refSideBar, url, rutaLogo }: MenuProps) => {
     <MenuDesktop
       refSideBar={refSideBar}
       userToken={userToken}
-      url={url}
       rutaLogo={rutaLogo}
       project={project}
     />
