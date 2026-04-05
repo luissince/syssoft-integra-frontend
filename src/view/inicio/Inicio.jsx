@@ -19,7 +19,7 @@ import Menu from '../../components/menu/Menu';
 import Head from '../../components/head/Head';
 
 import Notifications from './notificacion/Notifications';
-// import Dashboard from './dashboard/Dashboard.jsx';
+// import Dashboard from './dashboard/Dashboard';
 
 const Dashboard = React.lazy(() => import('./dashboard/Dashboard'));
 
@@ -32,7 +32,7 @@ import Seguridad, {
   UsuarioEditar,
   UsuarioResetear,
   Accesos,
-} from './seguridad/index.jsx';
+} from './seguridad/index';
 
 import Facturacion, {
   Ventas,
@@ -59,7 +59,7 @@ import Facturacion, {
   PedidoCrear,
   PedidoEditar,
   PedidoDetalle,
-} from './facturacion/index.jsx';
+} from './facturacion/index';
 
 import Logistica, {
   Productos,
@@ -74,13 +74,11 @@ import Logistica, {
   TrasladoDetalle,
   Inventario,
   Kardex,
-  Depreciar,
   Catalogos,
   CatalogoCrear,
   CatalogoEditar,
-  CatalogoDetalle,
-  DepreciarDetalle,
-} from './logistica/index.jsx';
+  CatalogoDetalle
+} from './logistica/index';
 
 import Tesoreria, {
   Gastos,
@@ -95,7 +93,7 @@ import Tesoreria, {
   OrdenCompraCrear,
   OrdenCompraEditar,
   OrdenCompraDetalle,
-} from './tesoreria/index.jsx';
+} from './tesoreria/index';
 
 import Contacto, {
   Personas,
@@ -106,7 +104,7 @@ import Contacto, {
   Proveedores,
   Conductores,
   Personales,
-} from './contacto/index.jsx';
+} from './contacto/index';
 
 import Configuracion, {
   Almacenes,
@@ -147,7 +145,13 @@ import Configuracion, {
   Ubicaciones,
   UbicacionAgregar,
   UbicacionEditar,
-} from './configuracion/index.jsx';
+  Areas,
+  AreaAgregar,
+  AreaEditar,
+  Cargos,
+  CargoAgregar,
+  CargoEditar,
+} from './configuracion/index';
 
 import Reporte, {
   RepVentas,
@@ -156,9 +160,9 @@ import Reporte, {
   RepProductos,
   RepCpeSunat,
   RepInventario,
-} from './reporte/index.jsx';
+} from './reporte/index';
 
-import CpeSunat, { CpeElectronicos, CpeConsultar } from './cpesunat/index.jsx';
+import CpeSunat, { CpeElectronicos, CpeConsultar } from './cpesunat/index';
 
 import Finanzas, {
   Bancos,
@@ -166,12 +170,9 @@ import Finanzas, {
   BancoAgregar,
   BancoEditar,
   Transacciones,
-} from './finanzas/index.jsx';
+} from './finanzas/index';
 
-import Crm, {
-  Consultas,
-  Web,
-} from './crm/index.jsx';
+import CrmRoutes from './crm/index';
 
 import {
   configEmpresa,
@@ -186,6 +187,7 @@ import { images } from '../../helper/index';
 import { SpinnerView } from '../../components/Spinner';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
 import ContainerWrapper from '@/components/ui/container-wrapper';
+import ActivoRoutes from './activo/index';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -479,10 +481,13 @@ class Inicio extends React.Component {
           <Route path="/inicio" exact={true}>
             <Redirect to={`${path}/main`} />
           </Route>
+
           <Route
             path={`${path}/main`}
-            render={(props) => <Bienvenido {...props} />}
-          />
+          >
+            <Bienvenido />
+          </Route>
+
           <Route
             path={`${path}/dashboard`}
           >
@@ -704,8 +709,9 @@ class Inicio extends React.Component {
           <Route
             path={`${path}/logistica`}
             exact={true}
-            render={(props) => <Logistica {...props} />}
-          />
+          >
+            <Logistica />
+          </Route>
 
           <Route
             path={`${path}/logistica/productos`}
@@ -755,20 +761,6 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <Kardex {...props} />}
           />
-
-          <Route
-            path={`${path}/logistica/depreciar`}
-            exact={true}
-          >
-            <Depreciar />
-          </Route>
-
-          <Route
-            path={`${path}/logistica/depreciar/detalle`}
-            exact={true}
-          >
-            <DepreciarDetalle />
-          </Route>
 
           <Route
             path={`${path}/logistica/traslado`}
@@ -943,13 +935,19 @@ class Inicio extends React.Component {
           />
 
           <Route
+            path={`${path}/contactos/conductores/editar`}
+            exact={true}
+            render={(props) => <PersonaEditar {...props} />}
+          />
+
+          <Route
             path={`${path}/contactos/personales`}
             exact={true}
             render={(props) => <Personales {...props} />}
           />
 
           <Route
-            path={`${path}/contactos/conductores/editar`}
+            path={`${path}/contactos/personales/editar`}
             exact={true}
             render={(props) => <PersonaEditar {...props} />}
           />
@@ -962,8 +960,9 @@ class Inicio extends React.Component {
           <Route
             path={`${path}/configuracion`}
             exact={true}
-            render={(props) => <Configuracion {...props} />}
-          />
+          >
+            <Configuracion />
+          </Route>
 
           <Route
             path={`${path}/configuracion/categorias`}
@@ -1166,6 +1165,42 @@ class Inicio extends React.Component {
             exact={true}
             render={(props) => <UbicacionEditar {...props} />}
           />
+
+          <Route
+            path={`${path}/configuracion/areas`}
+            exact={true}
+            render={(props) => <Areas {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/areas/agregar`}
+            exact={true}
+            render={(props) => <AreaAgregar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/areas/editar`}
+            exact={true}
+            render={(props) => <AreaEditar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/cargos`}
+            exact={true}
+            render={(props) => <Cargos {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/cargos/agregar`}
+            exact={true}
+            render={(props) => <CargoAgregar {...props} />}
+          />
+
+          <Route
+            path={`${path}/configuracion/cargos/editar`}
+            exact={true}
+            render={(props) => <CargoEditar {...props} />}
+          />
           {/* 
           --------------------------------------------------------
           | REPORTE
@@ -1270,21 +1305,18 @@ class Inicio extends React.Component {
           | CRM
           ----------------------------------------------------------
           */}
+          <Route path={`${path}/crm`}>
+            <CrmRoutes />
+          </Route>
 
-          <Route
-            path={`${path}/crm`}
-            exact={true}
-            render={(props) => <Crm {...props} />}
-          />
+          {/*
+          ----------------------------------------------------------
+          | ACTIVOS
+          ----------------------------------------------------------
+          */}
 
-          <Route
-            path={`${path}/crm/consulta`}
-            exact={true}
-            render={(props) => <Consultas {...props} />}
-          />
-
-          <Route path={`${path}/crm/web`}>
-            <Web />
+          <Route path={`${path}/activo`}>
+            <ActivoRoutes />
           </Route>
 
           <Route component={NotFoundMain} />

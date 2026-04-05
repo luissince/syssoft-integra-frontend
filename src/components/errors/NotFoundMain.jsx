@@ -1,29 +1,31 @@
+import { useHistory } from 'react-router-dom';
 import { images } from '../../helper';
 import Button from '../Button';
+import Image from '../Image';
 
-const NotFoundMain = (props) => {
+const NotFoundMain = () => {
+  const history = useHistory();
+
   return (
-    <div className="px-4 py-5 my-5 text-center w-100">
+    <div className="w-full h-full flex flex-col items-center justify-center gap-3">
       <Image
         default={images.noImage}
         src={images.icono}
-        alt={'Logo'}
+        alt={'No encontrado'}
         width={150}
       />
-      <h1 className="display-5 fw-bold">Error 404 página no encontrada</h1>
-      <div className="col-lg-6 mx-auto">
-        <p className="lead mb-4">
-          No se encuentra la página que ha solicitado.
-        </p>
-        <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
-          <Button
-            onClick={() => props.history.goBack()}
-            className="btn-outline-secondary btn-lg px-4"
-          >
-            <i className="bi bi-arrow-left"></i> Regresar
-          </Button>
-        </div>
-      </div>
+      <h4 className="">Error 404 página no encontrada</h4>
+
+      <p>
+        No se encuentra la página que ha solicitado.
+      </p>
+
+      <Button
+        onClick={() => history.goBack()}
+        className="btn-outline-secondary btn-lg px-4"
+      >
+        <i className="bi bi-arrow-left"></i> Regresar
+      </Button>
     </div>
   );
 };

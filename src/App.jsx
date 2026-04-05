@@ -25,7 +25,7 @@ const App = (props) => {
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      const listener = PrinterPlugin.addListener('onPrintJobUpdate', (event) => {        
+      const listener = PrinterPlugin.addListener('onPrintJobUpdate', (event) => {
         // Notificación rápida
         if (event.status === 'printing') {
           toastKit.info({
@@ -75,8 +75,9 @@ const App = (props) => {
         <Route
           path="/login"
           exact={true}
-          render={(props) => <Login {...props} />}
-        />
+        >
+          <Login />
+        </Route>
 
         <Route
           path="/principal"

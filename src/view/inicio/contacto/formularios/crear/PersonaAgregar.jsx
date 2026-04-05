@@ -31,6 +31,8 @@ import Input from '@/components/Input';
 import CheckBox, { Switches } from '@/components/Checks';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
+import { comboArea, comboCargo } from '@/network/rest/api-client';
+import { FaAsterisk } from 'react-icons/fa';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -44,6 +46,8 @@ class PersonaAgregar extends CustomComponent {
       msgLoading: "Cargando datos...",
 
       idTipoDocumento: "",
+      idArea: "",
+      idCargo: "",
       documento: "",
       informacion: "",
       cliente: true,
@@ -65,6 +69,8 @@ class PersonaAgregar extends CustomComponent {
       observacion: "",
 
       tiposDocumentos: [],
+      areas: [],
+      cargos: [],
 
       ubigeos: [],
 
@@ -72,6 +78,8 @@ class PersonaAgregar extends CustomComponent {
     };
 
     this.refTipoDocumento = React.createRef();
+    this.refAreas = React.createRef();
+    this.refCargos = React.createRef();
     this.refDocumento = React.createRef();
     this.refInformacion = React.createRef();
     this.refCelular = React.createRef();
@@ -96,7 +104,11 @@ class PersonaAgregar extends CustomComponent {
   }
 
   loadingData = async () => {
-    const responseListaTipoDocumento = await comboTipoDocumento(this.abortController.signal);
+    const [responseListaTipoDocumento, responseAreas, responseCargos] = await Promise.all([
+      this.fetchComboTipoDocumento(),
+      this.fetchComboArea(),
+      this.fetchComboCargo(),
+    ]);
 
     if (responseListaTipoDocumento instanceof ErrorResponse) {
       if (responseListaTipoDocumento.getType() === CANCELED) return;
@@ -108,13 +120,77 @@ class PersonaAgregar extends CustomComponent {
     }
 
     this.setState({
-      tiposDocumentos: responseListaTipoDocumento.data,
+      tiposDocumentos: responseListaTipoDocumento,
+      areas: responseAreas,
+      cargos: responseCargos,
       loading: false,
     });
   };
 
+  async fetchComboTipoDocumento() {
+    const result = await comboTipoDocumento(this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return [];
+    }
+  }
+
+  async fetchComboArea() {
+    const result = await comboArea(this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return [];
+    }
+  }
+
+  async fetchComboCargo() {
+    const result = await comboCargo(this.abortController.signal);
+
+    if (result instanceof SuccessReponse) {
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      this.setState({
+        msgLoading: result.getMessage(),
+      });
+
+      return [];
+    }
+  }
+
   handleSelectTipoDocumento = (event) => {
     this.setState({ idTipoDocumento: event.target.value });
+  };
+
+  handleSelectAreas = (event) => {
+    this.setState({ idArea: event.target.value });
+  };
+
+  handleSelectCargos = (event) => {
+    this.setState({ idCargo: event.target.value });
   };
 
   handleInputNumeroDocumento = (event) => {
@@ -357,6 +433,26 @@ class PersonaAgregar extends CustomComponent {
       return;
     }
 
+    if (this.state.personal && isEmpty(this.state.idArea)) {
+      alertKit.warning({
+        title: "Persona",
+        message: "Seleccione el área.",
+      }, () => {
+        this.refAreas.current.focus();
+      });
+      return;
+    }
+
+    if (this.state.personal && isEmpty(this.state.idCargo)) {
+      alertKit.warning({
+        title: "Persona",
+        message: "Seleccione el cargo.",
+      }, () => {
+        this.refCargos.current.focus();
+      });
+      return;
+    }
+
     const accept = await alertKit.question({
       title: "Persona",
       message: "¿Estás seguro de continuar?",
@@ -371,6 +467,8 @@ class PersonaAgregar extends CustomComponent {
     if (accept) {
       const data = {
         idTipoDocumento: this.state.idTipoDocumento,
+        idArea: this.state.idArea,
+        idCargo: this.state.idCargo,
         documento: this.state.documento.toString().trim(),
         informacion: this.state.informacion.trim().toUpperCase(),
         cliente: this.state.cliente,
@@ -419,7 +517,12 @@ class PersonaAgregar extends CustomComponent {
 
   render() {
     const {
+      loading,
+      msgLoading,
+
       idTipoDocumento,
+      idArea,
+      idCargo,
       documento,
       informacion,
       genero,
@@ -433,10 +536,9 @@ class PersonaAgregar extends CustomComponent {
       direccion,
       estado,
 
-      loading,
-      msgLoading,
-
-      tiposDocumentos
+      tiposDocumentos,
+      areas,
+      cargos,
     } = this.state;
 
     const tipoEntidad = tiposDocumentos.find((item) => item.idTipoDocumento === idTipoDocumento)?.tipoEntidad;
@@ -464,9 +566,9 @@ class PersonaAgregar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
-                  Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Tipo Documento:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
               }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
@@ -488,9 +590,9 @@ class PersonaAgregar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
-                  N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">N° de documento ({documento.length}):</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
               }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
@@ -529,10 +631,9 @@ class PersonaAgregar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
-                  {tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">{tipoEntidad === JURIDICA ? "Razón Social:" : "Apellidos y Nombres:"}</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
               }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}
@@ -544,10 +645,10 @@ class PersonaAgregar extends CustomComponent {
         </Row>
 
         <Row>
-          <Column>
-            <label>
-              Tipo de Roles: <i className="fa fa-asterisk text-danger small"></i>
-            </label>
+          <Column formGroup={true}>
+            <div className="flex items-center gap-1">
+              <p className="text-gray-700 font-medium">Tipo de Roles:</p> <FaAsterisk className="text-red-500" size={8} />
+            </div>
           </Column>
         </Row>
 
@@ -617,11 +718,65 @@ class PersonaAgregar extends CustomComponent {
           </Column>
         </Row>
 
+        {this.state.personal && (
+          <Row>
+            <Column className="col-md-6 col-12" formGroup={true}>
+              <Select
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Area:</p>
+                  </div>
+                }
+                className={`${idArea ? '' : 'is-invalid'}`}
+                value={idArea}
+                ref={this.refAreas}
+                onChange={this.handleSelectAreas}
+              >
+                <option value="">-- Seleccione --</option>
+                {
+                  areas.map((item, index) => (
+                    <option key={index} value={item.idArea}>
+                      {item.nombre}
+                    </option>
+                  ))
+                }
+              </Select>
+            </Column>
+
+            <Column className="col-md-6 col-12" formGroup={true}>
+              <Select
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Cargo:</p>
+                  </div>
+                }
+                className={`${idCargo ? '' : 'is-invalid'}`}
+                value={idCargo}
+                ref={this.refCargos}
+                onChange={this.handleSelectCargos}
+              >
+                <option value="">-- Seleccione --</option>
+                {
+                  cargos.map((item, index) => (
+                    <option key={index} value={item.idCargo}>
+                      {item.nombre}
+                    </option>
+                  ))
+                }
+              </Select>
+            </Column>
+          </Row>
+        )}
+
         {tipoEntidad !== JURIDICA && (
           <Row>
             <Column className="col-md-4" formGroup={true}>
               <Select
-                label={'Genero:'}
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Genero:</p>
+                  </div>
+                }
                 ref={this.refGenero}
                 value={genero}
                 onChange={this.handleSelectGenero}
@@ -634,7 +789,11 @@ class PersonaAgregar extends CustomComponent {
 
             <Column className="col-md-4" formGroup={true}>
               <Select
-                label={'Estado Civil:'}
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Estado Civl:</p>
+                  </div>
+                }
                 value={estadoCivil}
                 onChange={this.handleSelectEstadoCvil}
               >
@@ -648,7 +807,11 @@ class PersonaAgregar extends CustomComponent {
 
             <Column className="col-md-4" formGroup={true}>
               <Input
-                label={'Fecha de Nacimiento:'}
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Fecha de Nacimiento:</p>
+                  </div>
+                }
                 type="date"
                 ref={this.refFechaNacimiento}
                 value={fechaNacimiento}
@@ -661,7 +824,11 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={'Observación:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Observación:</p>
+                </div>
+              }
               value={observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -672,7 +839,11 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={'N° de Celular:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">N° de Celular:</p>
+                </div>
+              }
               value={celular}
               ref={this.refCelular}
               onChange={this.handleInputCelular}
@@ -683,7 +854,11 @@ class PersonaAgregar extends CustomComponent {
 
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={'N° de Telefono:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">N° de Telefono:</p>
+                </div>
+              }
               value={telefono}
               ref={this.refTelefono}
               onChange={this.handleInputTelefono}
@@ -696,7 +871,11 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={'E-Mail:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Email:</p>
+                </div>
+              }
               type="email"
               value={email}
               onChange={this.handleInputEmail}
@@ -706,7 +885,11 @@ class PersonaAgregar extends CustomComponent {
 
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
-              label={'Contraseña:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Contraseña:</p>
+                </div>
+              }
               type="password"
               value={clave}
               onChange={this.handleInputClave}
@@ -718,7 +901,11 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <Input
-              label={'Dirección:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Dirección:</p>
+                </div>
+              }
               ref={this.refDireccion}
               value={direccion}
               onChange={this.handleInputDireccion}
@@ -731,7 +918,11 @@ class PersonaAgregar extends CustomComponent {
           <Column formGroup={true}>
             <SearchInput
               ref={this.refUbigeo}
-              label={'Ubigeo:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Ubigeo:</p>
+                </div>
+              }
               placeholder="Escribe para iniciar a filtrar..."
               refValue={this.refValueUbigeo}
               data={this.state.ubigeos}
@@ -757,7 +948,11 @@ class PersonaAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-6 col-12" formGroup={true}>
             <Switches
-              label={'Estado:'}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Estado:</p>
+                </div>
+              }
               id={'stEstado'}
               checked={estado}
               onChange={this.handleInputEstado}
@@ -767,19 +962,17 @@ class PersonaAgregar extends CustomComponent {
           </Column>
         </Row>
 
-        <Row>
-          <Column>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cancelar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cancelar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }

@@ -32,7 +32,6 @@ export interface AuthenticateInterface {
     }
 }
 
-
 export interface UserListInterface {
     idUsuario: string;
     id: number;

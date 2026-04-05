@@ -1,4 +1,4 @@
-export interface ProductoFilterInterface {
+export interface ProductFilterInterface {
   categoria: string
   codigo: string
   codigoBarras: string

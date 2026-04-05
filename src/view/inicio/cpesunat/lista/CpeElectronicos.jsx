@@ -156,7 +156,7 @@ class CpeElectronicos extends CustomComponent {
       this.refPaginacion.current.isPrevBtnActive = cpeSunatLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive = cpeSunatLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = cpeSunatLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = cpeSunatLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage = cpeSunatLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(cpeSunatLista.data.buscar);
     } else {
@@ -195,7 +195,7 @@ class CpeElectronicos extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

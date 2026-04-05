@@ -120,7 +120,7 @@ class Compras extends CustomComponent {
       this.refPaginacion.current.isPrevBtnActive = compraLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive = compraLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = compraLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = compraLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage = compraLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(compraLista.data.buscar);
     } else {
@@ -137,7 +137,7 @@ class Compras extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

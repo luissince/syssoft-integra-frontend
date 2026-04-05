@@ -15,16 +15,43 @@ import { images } from '@/helper';
 import Image from '@/components/Image';
 import { cn } from '@/lib/utils';
 
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  handleSave: () => void;
+}
+
+interface State {
+  loading: boolean;
+  message: string;
+
+  nombre: string;
+  imagen: string;
+  idInventario: string;
+  stockMinimo: string;
+  stockMaximo: string;
+}
+
 /**
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-class CustomModalStock extends Component {
+class CustomModalStock extends Component<Props, State> {
+
+  private initial: State;
+
+  private refModal: React.RefObject<CustomModal>;
+  private refStockMaximo: React.RefObject<HTMLInputElement>;
+  private refStockMinimo: React.RefObject<HTMLInputElement>;
+
+  private peticion: boolean;
+  private abortController: AbortController | null;
+
   /**
    *
    * Constructor
    */
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -43,7 +70,6 @@ class CustomModalStock extends Component {
     this.refModal = React.createRef();
     this.refStockMaximo = React.createRef();
     this.refStockMinimo = React.createRef();
-    this.refLote = React.createRef();
 
     this.peticion = false;
     this.abortController = null;
@@ -63,7 +89,7 @@ class CustomModalStock extends Component {
   |
   */
 
-  loadDatos = async (producto) => {
+  loadDatos = async (producto: any) => {
     this.abortController = new AbortController();
 
     const params = {
@@ -323,12 +349,5 @@ class CustomModalStock extends Component {
     );
   }
 }
-
-CustomModalStock.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-
-  handleSave: PropTypes.func.isRequired,
-};
 
 export default CustomModalStock;

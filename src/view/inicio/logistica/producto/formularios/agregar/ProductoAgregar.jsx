@@ -30,9 +30,8 @@ import {
 } from '@/model/types/tipo-tratamiento-producto';
 import Title from '@/components/Title';
 import { SpinnerView } from '@/components/Spinner';
-import ModalInventario from '../component/ModalInventario';
 import ModalProducto from '../component/ModalProducto';
-import { ACTIVO_FIJO, COMBO, EXISTENCIAL, MENOR_CUANTIA, PRODUCTO, SERVICIO, tipoProductoMap } from '@/model/types/tipo-producto';
+import { ACTIVO_FIJO, COMBO, EXISTENCIAL, MENOR_CUANTIA, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import RadioButton from '@/components/RadioButton';
 import Select from '@/components/Select';
@@ -40,7 +39,6 @@ import Input from '@/components/Input';
 import Button from '@/components/Button';
 import TextArea from '@/components/TextArea';
 import ItemImage from '../component/ItemImagen';
-import ItemAlmacen from '../component/ItemAlmacen';
 import ItemProducto from '../component/ItemProducto';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 
@@ -70,7 +68,7 @@ class ProductoAgregar extends CustomComponent {
       idMedida: "",
       idCategoria: "",
 
-      idTipoTratamiento: UNIDADES,
+      idTipoTratamientoProducto: UNIDADES,
 
       costo: "",
 
@@ -306,7 +304,7 @@ class ProductoAgregar extends CustomComponent {
 
   handleOptionTipoTratamiento = (event) => {
     this.setState({
-      idTipoTratamiento: event.target.value,
+      idTipoTratamientoProducto: event.target.value,
     });
   }
 
@@ -576,7 +574,7 @@ class ProductoAgregar extends CustomComponent {
       idMedida,
       idCategoria,
       idMarca,
-      idTipoTratamiento,
+      idTipoTratamientoProducto,
       idMetodoDepreciacion,
       precio,
       costo,
@@ -682,7 +680,7 @@ class ProductoAgregar extends CustomComponent {
         idMarca: idMarca,
         descripcionCorta: descripcionCorta,
         descripcionLarga: descripcionLarga,
-        idTipoTratamientoProducto: idTipoTratamiento,
+        idTipoTratamientoProducto: idTipoTratamientoProducto,
         idMetodoDepreciacion: idMetodoDepreciacion,
         costo: costo,
         precio: precio,

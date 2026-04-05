@@ -127,7 +127,7 @@ class Traslado extends CustomComponent {
       this.refPaginacion.current.isPrevBtnActive = trasladoLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive = trasladoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = trasladoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = trasladoLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage = trasladoLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(trasladoLista.data.buscar);
     } else {
@@ -155,7 +155,7 @@ class Traslado extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 
@@ -227,11 +227,11 @@ class Traslado extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const data = {

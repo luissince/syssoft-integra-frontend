@@ -368,7 +368,9 @@ class Clientes extends CustomComponent {
                   <TableHead width="5%" className="text-center">Preferido</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>{this.generateBody()}</TableBody>
+              <TableBody>
+                {this.generateBody()}
+              </TableBody>
             </Table>
           </Column>
         </Row>

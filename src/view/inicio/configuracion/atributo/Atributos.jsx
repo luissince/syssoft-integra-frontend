@@ -286,27 +286,23 @@ class Atributos extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-outline-info" onClick={this.handleAgregar}>
-              <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>{' '}
-            <Button className="btn-outline-secondary" onClick={this.loadInit}>
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex flex-col sm:flex-row mb-3 gap-3">
+          <Button className="btn-outline-info" onClick={this.handleAgregar}>
+            <i className="bi bi-file-plus"></i> Nuevo Registro
+          </Button>{' '}
+          <Button className="btn-outline-secondary" onClick={this.loadInit}>
+            <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+          </Button>
+        </div>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              onSearch={this.searchText}
-              placeholder="Buscar por nombre..."
-            />
-          </Column>
-        </Row>
+        <div className="flex flex-col sm:flex-row mb-3 gap-3">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search"></i>}
+            onSearch={this.searchText}
+            placeholder="Buscar por nombre..."
+          />
+        </div>
 
         <Row>
           <Column>

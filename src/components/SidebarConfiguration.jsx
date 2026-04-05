@@ -87,8 +87,7 @@ const SidebarConfiguration = (props) => {
               <Row>
                 <Column formGroup={true}>
                   <label>
-                    Almacen:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>{' '}
+                    Almacen: <i className="fa fa-asterisk text-danger small"></i>{' '}
                   </label>
                   <Select
                     title="Lista de Almacenes"
@@ -160,8 +159,7 @@ const SidebarConfiguration = (props) => {
           <div className="card-footer bg-white">
             <div className="d-flex align-items-center justify-content-between">
               <span className="d-block">
-                Campos obligatorios{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
+                Campos obligatorios <i className="fa fa-asterisk text-danger small"></i>
               </span>
               <div>
                 <Button

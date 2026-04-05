@@ -1,9 +1,9 @@
+import { cn } from '@/lib/utils';
 import { forwardRef, ReactNode, TextareaHTMLAttributes } from 'react';
 
 interface TextAreaProps
   extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string | ReactNode;
-  rows?: number;
   group?: boolean;
   iconLeft?: ReactNode;
   buttonRight?: ReactNode;
@@ -30,7 +30,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       iconLeft,
       buttonRight,
       className = 'border border-primary',
-      ...rest // autoFocus, placeholder, value, onChange, etc.
+      ...rest
     },
     ref
   ) => {
@@ -38,15 +38,22 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       <textarea
         ref={ref}
         rows={rows}
-        className={`form-control border border-primary ${className}`}
+        className={cn(
+          "form-control border border-primary",
+          className,
+        )}
         {...rest}
       />
     );
 
     if (group) {
       return (
-        <>
-          {label && <label>{label}</label>}
+        <div className="flex flex-col gap-2">
+          {label && (
+            typeof label === "string"
+              ? <label>{label}</label>
+              : label
+          )}
           <div className="input-group">
             {iconLeft && (
               <div className="input-group-prepend">
@@ -60,15 +67,19 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
               </div>
             )}
           </div>
-        </>
+        </div>
       );
     }
 
     return (
-      <>
-        {label && <label>{label}</label>}
+      <div className="flex flex-col gap-2">
+        {label && (
+          typeof label === "string"
+            ? <label>{label}</label>
+            : label
+        )}
         {textareaElement}
-      </>
+      </div>
     );
   }
 );

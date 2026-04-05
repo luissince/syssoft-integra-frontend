@@ -1,6 +1,4 @@
 import { ContainerMenu } from '../../../components/Container';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 
 import Productos from './producto/lista/Productos';
 import ProductoAgregar from './producto/formularios/agregar/ProductoAgregar';
@@ -19,13 +17,13 @@ import Inventario from './inventario/Inventario';
 
 import Kardex from './kardex/Kardex';
 
-import Depreciar from './depreciar';
-import DepreciarDetalle from './depreciar/detalle';
-
 import Catalogos from './catalogo/lista/Catalogos';
 import CatalogoCrear from './catalogo/formularios/crear/CatalogoCrear';
 import CatalogoEditar from './catalogo/formularios/editar/CatalogoEditar';
 import CatalogoDetalle from './catalogo/detalle/CatalogoDetalle';
+
+import { useAppSelector } from '@/redux/hooks';
+import { useRouteMatch } from "react-router-dom";
 
 export {
   Productos,
@@ -40,8 +38,6 @@ export {
   TrasladoDetalle,
   Inventario,
   Kardex,
-  Depreciar,
-  DepreciarDetalle,
   Catalogos,
   CatalogoCrear,
   CatalogoEditar,
@@ -52,33 +48,18 @@ export {
  * Componente que representa una funcionalidad específica.
  * @extends React.Component
  */
-const Logistica = (props) => {
+const Logistica = () => {
+  const token = useAppSelector((state) => state.principal);
+
+  const match = useRouteMatch();
+
   return (
     <ContainerMenu
       title={'Seleccione el módulo correspondiente'}
-      subMenus={props.token.userToken.menus[3].subMenus}
-      url={props.match.url}
+      subMenus={token.userToken.menus[3].subMenus}
+      url={match.url}
     />
   );
 };
 
-Logistica.propTypes = {
-  token: PropTypes.shape({
-    userToken: PropTypes.shape({
-      menus: PropTypes.array.isRequired,
-    }).isRequired,
-  }).isRequired,
-  match: PropTypes.shape({
-    url: PropTypes.string,
-  }),
-};
-
-const mapStateToProps = (state) => {
-  return {
-    token: state.principal,
-  };
-};
-
-const ConnectedLogistica = connect(mapStateToProps, null)(Logistica);
-
-export default ConnectedLogistica;
+export default Logistica;

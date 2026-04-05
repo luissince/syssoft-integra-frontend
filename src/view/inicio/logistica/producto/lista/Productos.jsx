@@ -119,8 +119,8 @@ class Productos extends CustomComponent {
         productoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         productoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        productoLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        productoLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(productoLista.data.buscar);
     } else {
@@ -137,7 +137,7 @@ class Productos extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

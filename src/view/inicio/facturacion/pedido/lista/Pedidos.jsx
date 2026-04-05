@@ -123,8 +123,8 @@ class Pedidos extends CustomComponent {
         pedidoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         pedidoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        pedidoLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        pedidoLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(pedidoLista.data.buscar);
     } else {
@@ -141,7 +141,7 @@ class Pedidos extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

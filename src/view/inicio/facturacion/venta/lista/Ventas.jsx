@@ -171,7 +171,7 @@ class Ventas extends CustomComponent {
       this.refPaginacion.current.isPrevBtnActive = ventaLista.paginacion.isPrevBtnActive;
       this.refPaginacion.current.isNextBtnActive = ventaLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound = ventaLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion = ventaLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage = ventaLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(ventaLista.data.buscar);
     } else {
@@ -187,7 +187,7 @@ class Ventas extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 
@@ -947,7 +947,6 @@ class Ventas extends CustomComponent {
             }
           />
         </div>
-
       </ContainerWrapper >
     );
   }

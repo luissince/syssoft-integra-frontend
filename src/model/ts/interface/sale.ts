@@ -83,7 +83,6 @@ export interface SaleTransaccionInterface {
     detalles: SaleTransaccionDetalleInterface[];
 }
 
-
 export interface SaleGetIdInterface {
     cabecera: SaleCabeceraInterface;
     detalles: SaleDetalleInterface[];

@@ -215,11 +215,10 @@ export async function preferredPersona(params) {
   );
 }
 
-export async function getPersona(params, signal) {
+export async function getIdPersona(idPersona, signal) {
   return await Resolve.resolve(
-    instancePrincipal.get('/api/persona/id', {
+    instancePrincipal.get(`/api/persona/${idPersona}/id`, {
       signal: signal,
-      params: params,
     }),
   );
 }
@@ -1875,16 +1874,16 @@ export async function comboMarca(signal) {
 */
 export async function listAtributo(params, signal = null) {
   return await Resolve.resolve(
-    instancePrincipal.get('/api/atributo/list', {
+    instancePrincipal.get('/api/atributo/', {
       signal: signal,
       params: params,
     }),
   );
 }
 
-export async function getIdAtributo(idUbicacion, signal = null) {
+export async function getIdAtributo(idAtributo, signal = null) {
   return await Resolve.resolve(
-    instancePrincipal.get(`/api/atributo/${idUbicacion}`, {
+    instancePrincipal.get(`/api/atributo/${idAtributo}/id`, {
       signal: signal,
     }),
   );
@@ -1902,15 +1901,15 @@ export async function updateAtributo(data) {
   );
 }
 
-export async function removeAtributo(idUbicacion) {
+export async function removeAtributo(idAtributo) {
   return await Resolve.resolve(
-    instancePrincipal.delete(`/api/atributo/${idUbicacion}`),
+    instancePrincipal.delete(`/api/atributo/${idAtributo}`),
   );
 }
 
-export async function comboAtributo(idTipoAtributo, signal = null) {
+export async function optionsAtributo(idTipoAtributo, signal = null) {
   return await Resolve.safe(
-    instancePrincipal.get(`/api/atributo/combo/${idTipoAtributo}`, {
+    instancePrincipal.get(`/api/atributo/${idTipoAtributo}/options`, {
       signal: signal,
     }),
   );
@@ -2242,23 +2241,6 @@ export async function sendWhatsappNotaCredito(idNotaCredito, signal) {
 
 // ------------------------------------------------------------------------
 // FIN PARA NOTA DE CRÉDITO
-// ------------------------------------------------------------------------
-
-/*
-|--------------------------------------------------------------------------
-| ENDPOINTS DE KARDEX
-|--------------------------------------------------------------------------
-*/
-export async function listKardex(params, signal) {
-  return await Resolve.resolve(
-    instancePrincipal.get('/api/kardex/list', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-// ------------------------------------------------------------------------
-// FIN PARA KARDEX
 // ------------------------------------------------------------------------
 
 /*

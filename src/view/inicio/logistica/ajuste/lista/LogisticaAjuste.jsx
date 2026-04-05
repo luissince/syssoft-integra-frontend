@@ -127,8 +127,8 @@ class LogisticaAjuste extends CustomComponent {
         this.props.ajusteLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         this.props.ajusteLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.ajusteLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        this.props.ajusteLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(this.props.ajusteLista.data.buscar);
     } else {
@@ -155,7 +155,7 @@ class LogisticaAjuste extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

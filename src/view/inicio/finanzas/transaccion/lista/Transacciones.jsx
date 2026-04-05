@@ -151,8 +151,8 @@ class Transacciones extends CustomComponent {
         finanzasLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         finanzasLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        finanzasLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        finanzasLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(finanzasLista.data.buscar);
     } else {
@@ -168,7 +168,7 @@ class Transacciones extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

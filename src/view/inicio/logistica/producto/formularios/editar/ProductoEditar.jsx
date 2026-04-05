@@ -71,7 +71,7 @@ class ProductoEditar extends CustomComponent {
       idMarca: "",
       idMedida: "",
       idCategoria: "",
-      idTipoTratamiento: UNIDADES,
+      idTipoTratamientoProducto: UNIDADES,
       costo: "",
       precio: "",
 
@@ -177,7 +177,7 @@ class ProductoEditar extends CustomComponent {
       idMarca: producto.idMarca,
       idMedida: producto.idMedida,
       idCategoria: producto.idCategoria,
-      idTipoTratamiento: producto.idTipoTratamiento,
+      idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
       idMetodoDepreciacion: producto.idMetodoDepreciacion,
       costo: String(producto.costo),
       precio: String(producto.precio),
@@ -329,7 +329,7 @@ class ProductoEditar extends CustomComponent {
 
   handleOptionTipoTratamiento = (event) => {
     this.setState({
-      idTipoTratamiento: event.target.value,
+      idTipoTratamientoProducto: event.target.value,
     });
   }
 
@@ -600,7 +600,7 @@ class ProductoEditar extends CustomComponent {
       idMedida,
       idCategoria,
       idMarca,
-      idTipoTratamiento,
+      idTipoTratamientoProducto,
       idMetodoDepreciacion,
       precio,
       costo,
@@ -709,7 +709,7 @@ class ProductoEditar extends CustomComponent {
         idMarca: idMarca,
         descripcionCorta: descripcionCorta,
         descripcionLarga: descripcionLarga,
-        idTipoTratamiento: idTipoTratamiento,
+        idTipoTratamientoProducto: idTipoTratamientoProducto,
         idMetodoDepreciacion: idMetodoDepreciacion,
         costo: costo,
         precio: precio,
@@ -781,7 +781,7 @@ class ProductoEditar extends CustomComponent {
       idMedida,
       idCategoria,
 
-      idTipoTratamiento,
+      idTipoTratamientoProducto,
       idMetodoDepreciacion,
 
       costo,
@@ -1075,7 +1075,7 @@ class ProductoEditar extends CustomComponent {
                       id={UNIDADES}
                       value={UNIDADES}
                       name="ckTipoTratamiento"
-                      checked={idTipoTratamiento === UNIDADES}
+                      checked={idTipoTratamientoProducto === UNIDADES}
                       onChange={this.handleOptionTipoTratamiento}
                     >
                       Unidades
@@ -1086,7 +1086,7 @@ class ProductoEditar extends CustomComponent {
                       id={VALOR_MONETARIO}
                       value={VALOR_MONETARIO}
                       name="ckTipoTratamiento"
-                      checked={idTipoTratamiento === VALOR_MONETARIO}
+                      checked={idTipoTratamientoProducto === VALOR_MONETARIO}
                       onChange={this.handleOptionTipoTratamiento}
                     >
                       Valor monetario
@@ -1097,7 +1097,7 @@ class ProductoEditar extends CustomComponent {
                       id={A_GRANEL}
                       value={A_GRANEL}
                       name="ckTipoTratamiento"
-                      checked={idTipoTratamiento === A_GRANEL}
+                      checked={idTipoTratamientoProducto === A_GRANEL}
                       onChange={this.handleOptionTipoTratamiento}
                     >
                       A Granel

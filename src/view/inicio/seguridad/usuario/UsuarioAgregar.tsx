@@ -100,22 +100,18 @@ const UsuarioAgregar = () => {
             setClientes([]);
             return;
         }
-        try {
-            const params = {
-                opcion: 1,
-                filter: text,
-                cliente: true,
-            };
 
-            const response = await filtrarPersona(params, abortController.current.signal);
+        const params = {
+            opcion: 1,
+            filter: text,
+            cliente: true,
+        };
 
-            if (response instanceof SuccessReponse) {
-                setClientes(response.data);
-            } else {
-                setClientes([]);
-            }
-        } catch (error) {
-            console.error("Error filtrando clientes:", error);
+        const response = await filtrarPersona(params, abortController.current.signal);
+
+        if (response instanceof SuccessReponse) {
+            setClientes(response.data);
+        } else {
             setClientes([]);
         }
     };

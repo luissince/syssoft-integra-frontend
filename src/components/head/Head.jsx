@@ -11,7 +11,7 @@ const Menu = (props) => {
   const isScreen = useScreenSize();
 
   const add = getStatePrivilegio(
-    props.token.userToken.menus,
+    props.token  .userToken.menus,
     FACTURACION,
     VENTAS,
     REALIZAR_VENTA,
@@ -163,7 +163,6 @@ Menu.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func,
   }),
-  signOut: PropTypes.func,
 
   closeProject: PropTypes.func,
   onToggleSidebar: PropTypes.func,

@@ -1,12 +1,13 @@
 import ErrorResponse from '@/model/class/error-response';
 import Resolve, { ResolveResponse } from '@/model/class/resolve';
 import SuccessResponse from '@/model/class/response';
+import { AssetMetricsInterface, AssetResponseInterface } from '@/model/ts/interface/asset';
 import BranchInterface from '@/model/ts/interface/branch';
 import { CreditNoteGetInterface, CreditNoteResponseInterface } from '@/model/ts/interface/credit-note';
 import { CreditNotesReasonsOptionsInterface } from '@/model/ts/interface/credit-notes-reasons';
 import DashboardInterface from '@/model/ts/interface/dashboard';
 import { InventoryDashboardInterface } from '@/model/ts/interface/inventory';
-import { KardexListDepreciacionInterface, KardexResponseListDepreciacionInterface } from '@/model/ts/interface/kardex';
+import { KardexResponseListDepreciacionInterface } from '@/model/ts/interface/kardex';
 import { ProfileOptionsInterface } from '@/model/ts/interface/profile';
 import { SaleFilterAllInterface, SaleGetIdInterface } from '@/model/ts/interface/sale';
 import { AuthenticateInterface, UserGetInterface, UserResponseInterface } from '@/model/ts/interface/user';
@@ -219,10 +220,36 @@ export async function getByIdVenta(idVenta, signal): Promise<ResolveResponse<Sal
 | ENDPOINTS DE KARDEX
 |--------------------------------------------------------------------------
 */
+export async function listKardex(params: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
+  return await Resolve.safe<any>(
+    apiClient.get('/api/kardex', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
+
+export async function listarBienKardex(params: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<AssetResponseInterface>> {
+  return await Resolve.safe<AssetResponseInterface>(
+    apiClient.get('/api/kardex/asset/list', {
+      params: params,
+      signal: signal,
+    }),
+  );
+}
 
 export async function listarDepreciacionKardex(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<KardexResponseListDepreciacionInterface>> {
   return await Resolve.safe<KardexResponseListDepreciacionInterface>(
-    apiClient.post('/api/kardex/depreciacion/lista', body, {
+    apiClient.post('/api/kardex/depreciacion/list', body, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function metricasDepreciacionKardex(params: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<AssetMetricsInterface>> {
+  return await Resolve.safe<AssetMetricsInterface>(
+    apiClient.get('/api/kardex/depreciacion/metrics', {
+      params: params,
       signal: signal,
     }),
   );
@@ -231,6 +258,14 @@ export async function listarDepreciacionKardex(body: Record<string, any>, signal
 export async function detalleDepreciacionKardex(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
   return await Resolve.safe<any>(
     apiClient.post('/api/kardex/depreciacion/detalle', body, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function createDepreciacionKardex(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<string>> {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/kardex/depreciacion/create', body, {
       signal: signal,
     }),
   );
@@ -266,4 +301,135 @@ export async function getByIdNotaCredito(idNotaCredito: string, signal: AbortSig
 
 export function pdfNotaCredito(idNotaCredito: string, size: string, outputType: string = "pdf"): string {
   return `${import.meta.env.VITE_APP_BACK_END}/api/notacredito/${idNotaCredito}/pdf/${size}/${outputType}`;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE GESTION
+|--------------------------------------------------------------------------
+*/
+
+export async function listGestion(params: Record<string, any>, signal: AbortSignal): Promise<ResolveResponse<CreditNoteResponseInterface>> {
+  return await Resolve.safe(
+    apiClient.get('/api/activo-gestion/', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function createGestion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<string>> {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/activo-gestion/', body, {
+      signal: signal,
+    }),
+  );
+}
+
+
+export async function updateGestion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<string>> {
+  return await Resolve.safe<string>(
+    apiClient.put('/api/activo-gestion/', body, {
+      signal: signal,
+    }),
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE AREA
+|--------------------------------------------------------------------------
+*/
+
+export async function listArea(params: Record<string, any>, signal: AbortSignal = null) {
+  return await Resolve.resolve(
+    apiClient.get('/api/area', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function createArea(data: Record<string, any>) {
+  return await Resolve.resolve(
+    apiClient.post('/api/area', data),
+  );
+}
+
+export async function updateArea(data: Record<string, any>) {
+  return await Resolve.resolve(
+    apiClient.put('/api/area', data),
+  );
+}
+
+export async function getIdArea(idArea: string, signal: AbortSignal = null) {
+  return await Resolve.resolve(
+    apiClient.get(`/api/area/${idArea}/id`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function removeArea(idArea: string) {
+  return await Resolve.resolve(
+    apiClient.delete(`/api/area/${idArea}`),
+  );
+}
+
+export async function comboArea(signal: AbortSignal = null) {
+  return await Resolve.resolve(
+    apiClient.get('/api/area/options', {
+      signal: signal,
+    }),
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE CARGO
+|--------------------------------------------------------------------------
+*/
+
+export async function listCargo(params: Record<string, any>, signal: AbortSignal = null) {
+  return await Resolve.resolve(
+    apiClient.get('/api/cargo', {
+      signal: signal,
+      params: params,
+    }),
+  );
+}
+
+export async function createCargo(data: Record<string, any>) {
+  return await Resolve.resolve(
+    apiClient.post('/api/cargo', data),
+  );
+}
+
+export async function updateCargo(data: Record<string, any>) {
+  return await Resolve.resolve(
+    apiClient.put('/api/cargo', data),
+  );
+}
+
+export async function getIdCargo(idCargo: string, signal: AbortSignal = null) {
+  return await Resolve.resolve(
+    apiClient.get(`/api/cargo/${idCargo}/id`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function removeCargo(idCargo: string) {
+  return await Resolve.resolve(
+    apiClient.delete(`/api/cargo/${idCargo}/id`),
+  );
+}
+
+export async function comboCargo(signal: AbortSignal = null) {
+  return await Resolve.resolve(
+    apiClient.get('/api/cargo/options', {
+      signal: signal,
+    }),
+  );
 }

@@ -145,8 +145,8 @@ class NotaCredito extends CustomComponent {
         notaCreditoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         notaCreditoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        notaCreditoLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        notaCreditoLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(notaCreditoLista.data.buscar);
     } else {
@@ -162,7 +162,7 @@ class NotaCredito extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

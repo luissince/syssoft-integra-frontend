@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Row from './Row';
-import Column from './Column';
 import Button from './Button';
 import { cn } from '@/lib/utils';
 
@@ -18,8 +16,32 @@ class Paginacion extends React.Component {
     this.isPrevBtnActive = "disabled";
     this.isNextBtnActive = "";
     this.pageBound = 3;
-    this.messagePaginacion = "Mostranto 0 de 0 Páginas";
+    this.paginationMessage = "Mostranto 0 de 0 Páginas";
   }
+
+  getBounds = () => {
+    return {
+      upperPageBound: this.upperPageBound,
+      lowerPageBound: this.lowerPageBound,
+      isPrevBtnActive: this.isPrevBtnActive,
+      isNextBtnActive: this.isNextBtnActive,
+      pageBound: this.pageBound,
+      paginationMessage: this.paginationMessage,
+    };
+  };
+
+  setBounds = (state) => {
+    if (!state) return;
+
+    this.upperPageBound = state.upperPageBound ?? this.upperPageBound;
+    this.lowerPageBound = state.lowerPageBound ?? this.lowerPageBound;
+    this.isPrevBtnActive = state.isPrevBtnActive ?? this.isPrevBtnActive;
+    this.isNextBtnActive = state.isNextBtnActive ?? this.isNextBtnActive;
+    this.pageBound = state.pageBound ?? this.pageBound;
+    this.paginationMessage = state.paginationMessage ?? this.paginationMessage;
+
+    this.forceUpdate();
+  };
 
   setPrevAndNextBtnClass = async (listid) => {
     const { totalPaginacion } = this.props;
@@ -139,6 +161,7 @@ class Paginacion extends React.Component {
 
     const ArrowButton = ({ direction, onClick, disabled }) => {
       const d = direction === "prev" ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7";
+
       return (
         <button
           onClick={onClick}
@@ -174,7 +197,7 @@ class Paginacion extends React.Component {
     return (
       <div className={`flex items-center justify-between ${className}`}>
         <div className="flex flex-col md:flex-row gap-y-2 items-center justify-between w-full">
-          <div className="text-sm text-gray-700">{this.messagePaginacion}</div>
+          <div className="text-sm text-gray-700">{this.paginationMessage}</div>
           <div className="flex items-center space-x-2">
             <ArrowButton
               direction="prev"
@@ -223,8 +246,8 @@ class Paginacion extends React.Component {
             className={`page-item ${number === paginacion ? "" : ""}`}
           >
             {number === paginacion ? (
-              <span 
-                id={number.toString()} 
+              <span
+                id={number.toString()}
                 className="page-link"
               >
                 {number}
@@ -306,26 +329,23 @@ class Paginacion extends React.Component {
     }
 
     return (
-      <Row className={className}>
-        <Column className="col-sm-12 col-md-5">
-          <div className="flex h-full items-center">
-            <span className='text-sm'>{this.messagePaginacion}</span>
-          </div>
-        </Column>
-        <Column className="col-sm-12 col-md-7">
-          <div className="flex justify-end">
-            <nav aria-label="Page">
-              <ul className="pagination m-0">
-                {renderPrevBtn}
-                {pageDecrementBtn}
-                {renderPageNumbers}
-                {pageIncrementBtn}
-                {renderNextBtn}
-              </ul>
-            </nav>
-          </div>
-        </Column>
-      </Row>
+      <div className={`flex items-center justify-between flex-wrap ${className}`}>
+        <div className="w-full md:w-auto flex justify-center">
+          <span className='text-sm'>{this.paginationMessage}</span>
+        </div>
+
+        <div className="w-full md:w-auto flex justify-center">
+          <nav aria-label="Page">
+            <ul className="pagination m-0">
+              {renderPrevBtn}
+              {pageDecrementBtn}
+              {renderPageNumbers}
+              {pageIncrementBtn}
+              {renderNextBtn}
+            </ul>
+          </nav>
+        </div>
+      </div>
     );
   }
 
@@ -337,7 +357,7 @@ class Paginacion extends React.Component {
       theme = "classic"
     } = this.props;
 
-    this.messagePaginacion = `Mostrando ${data.length} de ${totalPaginacion === 1 ? "1 Página" : `${totalPaginacion} Páginas`}`;
+    this.paginationMessage = `Mostrando ${data.length} de ${totalPaginacion === 1 ? "1 Página" : `${totalPaginacion} Páginas`}`;
 
     if (restart) {
       this.upperPageBound = 3;
@@ -345,7 +365,7 @@ class Paginacion extends React.Component {
       this.isPrevBtnActive = "disabled";
       this.isNextBtnActive = "";
     }
-     
+
     return (
       <>
         {theme === "modern"

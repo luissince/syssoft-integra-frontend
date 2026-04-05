@@ -58,6 +58,10 @@ class SearchInput extends React.Component {
     this.selectItem = select;
   };
 
+  getSearchTerm = () => {
+    return this.state.searchTerm;
+  };
+
   restart = async () => {
     this.setState({
       searchTerm: '',
@@ -247,16 +251,6 @@ class SearchInput extends React.Component {
             }
           />
 
-          {/* {
-          isLoading && (
-            <div className="dataResult" ref={this.refContentResult}>
-              <div className="h-full flex justify-center items-center gap-3">
-                <i className="fa fa-spinner fa-spin"></i> Cargando...
-              </div>
-            </div>
-          )
-        } */}
-
           {
             !isEmpty(data) && (
               <ul
@@ -360,6 +354,7 @@ class SearchInput extends React.Component {
           </div>
         </div>
 
+        {/* DROPDOWN */}
         {
           !isEmpty(data) && (
             <ul
@@ -391,8 +386,17 @@ class SearchInput extends React.Component {
                     key={index}
                     tabIndex={-1}
                     className={cn(
-                      "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200 hover:bg-gray-50",
-                      index === highlightedIndex && 'text-white bg-blue-500',
+                      "relative flex py-3 px-4 w-full text-sm text-left",
+                      "border-b border-gray-200 last:border-b-0",
+
+                      // 🔥 control total de estados
+                      "focus:outline-none focus:bg-transparent",
+
+                      // hover solo si NO está seleccionado
+                      index !== highlightedIndex && "hover:bg-gray-50",
+
+                      // seleccionado manda
+                      index === highlightedIndex && "!bg-blue-500 !text-white"
                     )}
                     onMouseDown={(e) => {
                       e.preventDefault(); // ✅ no roba foco

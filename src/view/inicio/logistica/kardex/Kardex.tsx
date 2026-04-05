@@ -13,7 +13,6 @@ import ErrorResponse from '@/model/class/error-response';
 import {
   comboAlmacen,
   filtrarProducto,
-  listKardex,
 } from '@/network/rest/principal.network';
 import { connect } from 'react-redux';
 import SearchInput from '@/components/SearchInput';
@@ -29,6 +28,8 @@ import Select from '@/components/Select';
 import Image from '@/components/Image';
 import { images } from '@/helper';
 import { BsDatabaseSlash } from 'react-icons/bs';
+import { listKardex } from '@/network/rest/api-client';
+import { alertKit } from 'alert-kit';
 
 interface Props {
   token: {
@@ -198,19 +199,6 @@ class Kardex extends CustomComponent<Props, State> {
     }
   }
 
-  async fetchListarKardex(params) {
-    const response = await listKardex(params, this.abortControllerTable.signal);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-      return [];
-    }
-  }
-
   async fetchFiltrarProducto(params) {
     const response = await filtrarProducto(params);
 
@@ -227,7 +215,6 @@ class Kardex extends CustomComponent<Props, State> {
     const params = {
       idProducto: idProducto,
       idAlmacen: this.state.idAlmacen,
-      idSucursal: this.state.idSucursal,
     };
 
     this.setState({
@@ -236,7 +223,17 @@ class Kardex extends CustomComponent<Props, State> {
       messageTable: "Cargando información...",
     });
 
-    const kardex = await this.fetchListarKardex(params);
+    const { success, data, message } = await listKardex(params, this.abortControllerTable.signal);
+
+    if (!success) {
+      alertKit.warning({
+        title: "Kardex",
+        message: message,
+      });
+      return;
+    }
+
+    const kardex = data;
 
     // Verificar si el producto maneja lotes
     const manejaLote = kardex.length > 0 ? kardex[0].manejaLote === 1 : false;
@@ -244,8 +241,8 @@ class Kardex extends CustomComponent<Props, State> {
     const cantidad = kardex.reduce((accumlate, item) => {
       accumlate +=
         item.tipo === "INGRESO"
-          ? parseFloat(item.cantidad)
-          : -parseFloat(item.cantidad);
+          ? Number(item.cantidad)
+          : -Number(item.cantidad);
       return accumlate;
     }, 0);
 
@@ -537,7 +534,11 @@ class Kardex extends CustomComponent<Props, State> {
               <SearchInput
                 ref={this.refProducto}
                 autoFocus={true}
-                label="Filtrar los productos por código o nombre:"
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Filtrar los productos por código o nombre:</p>
+                  </div>
+                }
                 placeholder="Filtrar productos..."
                 refValue={this.refValueProducto}
                 data={this.state.productos}
@@ -564,11 +565,13 @@ class Kardex extends CustomComponent<Props, State> {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Almacén
-              </label>
               <Select
                 group={false}
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700 font-medium">Almacén:</p>
+                  </div>
+                }
                 ref={this.refIdAlmacen}
                 value={this.state.idAlmacen}
                 onChange={this.handleSelectAlmacen}
@@ -590,8 +593,8 @@ class Kardex extends CustomComponent<Props, State> {
         {/* Información del producto */}
         <div className="max-w-7xl mx-auto mb-3">
           {/* Información del producto */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-            <div className="md:col-span-2 bg-white rounded border p-6 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+            <div className="lg:col-span-3 rounded border p-3 gap-3">
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-base font-semibold text-gray-900">
                   Información del Producto
@@ -617,7 +620,8 @@ class Kardex extends CustomComponent<Props, State> {
               </div>
             </div>
 
-            <div className="bg-white rounded border p-6 flex items-center justify-center">
+            {/*  Imagen del producto */}
+            <div className="rounded border p-6 flex items-center justify-center">
               <Image
                 default={images.noImage}
                 src={(producto && producto.imagen) || null}
@@ -649,11 +653,11 @@ class Kardex extends CustomComponent<Props, State> {
         </div>
 
         {/* Tabla de movimientos */}
-        <div className="bg-white rounded border border-gray-200 overflow-hidden mb">
+        <div className="rounded border border-gray-200 overflow-hidden">
           {/* Encabezado de la tabla */}
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-3 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900">Movimientos de Kardex</h2>
+              <h2 className="text-base font-semibold text-gray-900">Movimientos de Kardex</h2>
               {manejaLote && (
                 <div className="flex items-center space-x-4 text-sm">
                   <div className="flex items-center">
@@ -759,7 +763,6 @@ class Kardex extends CustomComponent<Props, State> {
             </table>
           </div>
         </div>
-
       </ContainerWrapper>
     );
   }

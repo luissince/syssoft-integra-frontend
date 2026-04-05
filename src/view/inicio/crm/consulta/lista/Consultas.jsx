@@ -91,7 +91,7 @@ class Consultas extends CustomComponent {
       this.refPaginacion.current.pageBound =
         this.props.consultaLista.paginacion.pageBound;
       this.refPaginacion.current.messagePaginacion =
-        this.props.consultaLista.paginacion.messagePaginacion;
+        this.props.consultaLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(this.props.consultaLista.data.buscar);
     } else {
@@ -108,7 +108,7 @@ class Consultas extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

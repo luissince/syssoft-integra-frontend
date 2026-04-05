@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 const Usuarios = () => {
   const history = useHistory();
   const location = useLocation();
-  const token = useAppSelector((state) => state.principal);
 
   const [loading, setLoading] = useState(false);
   const [lista, setLista] = useState<UserListInterface[]>([]);

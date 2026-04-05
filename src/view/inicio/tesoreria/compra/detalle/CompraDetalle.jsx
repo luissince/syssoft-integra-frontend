@@ -26,6 +26,7 @@ import Image from '@/components/Image';
 import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 import { CONTADO } from '@/model/types/forma-transaccion';
+import { ACTIVO_FIJO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -268,7 +269,7 @@ class CompraDetalle extends CustomComponent {
   renderDetalles() {
     return this.state.detalles.map((item, index) => (
       <React.Fragment key={index}>
-        <tr className="hover:bg-gray-50 border-b border-gray-100">
+        <tr className="border-b border-gray-100">
           <td className="px-4 py-3 text-gray-700">{item.id}</td>
           <td className="px-4 py-3 text-center">
             <div className="w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
@@ -305,10 +306,10 @@ class CompraDetalle extends CustomComponent {
                   <thead>
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Código Lote
+                        { item.idTipoProducto !== ACTIVO_FIJO ? "Código Lote": "Serie" }
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Fecha Vencimiento
+                          { item.idTipoProducto !== ACTIVO_FIJO ? "Fecha Vencimiento": "Vida útil" }
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                         Ubicación
@@ -322,10 +323,14 @@ class CompraDetalle extends CustomComponent {
                     {item.inventarioDetalles.map((inventarioDetalle, loteIndex) => (
                       <tr key={loteIndex} className="hover:bg-gray-50">
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                          {inventarioDetalle.lote}
+                          {
+                            (item.idTipoProducto !== ACTIVO_FIJO ? inventarioDetalle.lote : inventarioDetalle.serie) || 'N/A'
+                          }
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                          {inventarioDetalle.fechaVencimiento || 'N/A'}
+                           {
+                            (item.idTipoProducto !== ACTIVO_FIJO ? inventarioDetalle.fechaVencimiento : inventarioDetalle.vidaUtil) || 'N/A'
+                          }
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
                           {inventarioDetalle.ubicacion || 'N/A'}

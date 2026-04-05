@@ -127,8 +127,8 @@ class Cotizaciones extends CustomComponent {
         this.props.cotizacionLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         this.props.cotizacionLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.cotizacionLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        this.props.cotizacionLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(this.props.cotizacionLista.data.buscar);
     } else {
@@ -145,7 +145,7 @@ class Cotizaciones extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

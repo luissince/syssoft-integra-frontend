@@ -146,8 +146,8 @@ class GuiaRemision extends CustomComponent {
         this.props.guiaRemisionLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         this.props.guiaRemisionLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.guiaRemisionLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        this.props.guiaRemisionLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(
         this.props.guiaRemisionLista.data.buscar,
@@ -166,7 +166,7 @@ class GuiaRemision extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

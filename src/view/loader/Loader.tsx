@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 
 import { restoreToken } from "../../redux/principalSlice";
 import { refreshTokenUsuario } from "@/network/rest/api-client";
+import { SpinnerView } from "@/components/Spinner";
 
 export default function Loader() {
   const dispatch = useDispatch();
@@ -50,24 +51,10 @@ export default function Loader() {
   }, [dispatch]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="flex flex-col items-center space-y-6">
+    <SpinnerView
+      loading={true}
+      message={"Cargando sesión..."}
+    />
 
-        {/* Dots */}
-        <div className="flex space-x-2">
-          <span className="h-3 w-3 animate-bounce rounded-full bg-blue-600"></span>
-          <span className="h-3 w-3 animate-bounce rounded-full bg-gray-400 delay-150"></span>
-          <span className="h-3 w-3 animate-bounce rounded-full bg-gray-400 delay-300"></span>
-        </div>
-
-        <h2 className="text-lg font-semibold text-gray-700">
-          Cargando...
-        </h2>
-
-        <p className="text-sm text-gray-500">
-          Por favor espere un momento.
-        </p>
-      </div>
-    </div>
   );
 }

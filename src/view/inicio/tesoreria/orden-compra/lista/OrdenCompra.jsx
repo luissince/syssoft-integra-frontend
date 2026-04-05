@@ -104,8 +104,8 @@ class OrdenCompras extends CustomComponent {
         this.props.ordenCompraLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         this.props.ordenCompraLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.ordenCompraLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        this.props.ordenCompraLista.paginacion.paginationMessage;
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -120,7 +120,7 @@ class OrdenCompras extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

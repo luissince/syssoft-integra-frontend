@@ -126,8 +126,8 @@ class Catalogos extends CustomComponent {
         this.props.catalogoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         this.props.catalogoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.catalogoLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        this.props.catalogoLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(this.props.catalogoLista.data.buscar);
     } else {
@@ -144,7 +144,7 @@ class Catalogos extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

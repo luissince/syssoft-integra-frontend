@@ -36,7 +36,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  PackageOpen,
   PackagePlus,
   Plus,
 } from 'lucide-react';
@@ -46,7 +45,7 @@ import { cn } from '@/lib/utils';
 import { RxEyeNone } from 'react-icons/rx';
 
 const CustomModalStock = React.lazy(
-  () => import('@/view/inicio/logistica/inventario/component/ModalStock'),
+  () => import('@/components/view/producto/ModalStock'),
 );
 
 /**
@@ -143,7 +142,7 @@ class Inventario extends CustomComponent {
   */
 
   async componentDidMount() {
-    await this.loadingData();
+    await this.loadData();
   }
 
   componentWillUnmount() {
@@ -164,28 +163,20 @@ class Inventario extends CustomComponent {
   |
   */
 
-  async loadingData() {
-    if (
-      this.props.inventarioLista &&
-      this.props.inventarioLista.data &&
-      this.props.inventarioLista.paginacion
-    ) {
-      this.setState(this.props.inventarioLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.inventarioLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.inventarioLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.inventarioLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.inventarioLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.inventarioLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.inventarioLista.paginacion.messagePaginacion;
+  async loadData() {
+    const inventarioLista = this.props.inventarioLista;
 
-      // this.refSearch.current.initialize(this.props.inventarioLista.data.buscar);
-      this.refSearch.current.value = this.props.inventarioLista.data.buscar;
+    if (inventarioLista && inventarioLista.data && inventarioLista.paginacion) {
+      this.setState(inventarioLista.data);
+      this.refPaginacion.current.upperPageBound = inventarioLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = inventarioLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = inventarioLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = inventarioLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = inventarioLista.paginacion.pageBound;
+      this.refPaginacion.current.paginationMessage = inventarioLista.paginacion.paginationMessage;
+
+      // this.refSearch.current.initialize(inventarioLista.data.buscar);
+      this.refSearch.current.value = inventarioLista.data.buscar;
     } else {
       const [almacenes] = await Promise.all([
         this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
@@ -198,13 +189,13 @@ class Inventario extends CustomComponent {
         idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
         initialLoad: false,
       }, async () => {
-        await this.loadingSummary();
-        await this.loadingInit();
+        await this.loadSummary();
+        await this.loadInit();
       });
     }
   }
 
-  loadingSummary = async () => {
+  loadSummary = async () => {
     const response = await summaryInventario(
       this.state.idAlmacen,
       this.abortControllerTable.signal,
@@ -231,11 +222,11 @@ class Inventario extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -359,8 +350,8 @@ class Inventario extends CustomComponent {
   };
 
   handleRecargar = async () => {
-    await this.loadingSummary();
-    await this.loadingInit();
+    await this.loadSummary();
+    await this.loadInit();
   }
 
   //------------------------------------------------------------------------------------------
@@ -382,16 +373,16 @@ class Inventario extends CustomComponent {
 
   handleSelectAlmacen = (event) => {
     this.setState({ idAlmacen: event.target.value }, async () => {
-      await this.loadingSummary();
-      await this.loadingInit();
+      await this.loadSummary();
+      await this.loadInit();
     });
   };
 
   // Nuevo handler para el filtro de estado
   handleSelectEstado = (event) => {
     this.setState({ estadoFiltro: event.target.value }, async () => {
-      await this.loadingSummary();
-      await this.loadingInit();
+      await this.loadSummary();
+      await this.loadInit();
     });
   };
 
@@ -431,15 +422,6 @@ class Inventario extends CustomComponent {
   };
 
   determinarEstadoLote = (inventarioDetalle) => {
-    if (inventarioDetalle.porDefecto === 1) {
-      return {
-        estado: "",
-        clase: "",
-        icono: RxEyeNone,
-        colorBarra: '',
-      };
-    }
-
     if (isEmpty(inventarioDetalle.fechaVencimiento)) {
       return {
         estado: "",
@@ -693,9 +675,7 @@ class Inventario extends CustomComponent {
                             >
                               <div className="flex justify-between items-start mb-2">
                                 <div className="text-sm font-medium text-gray-900">
-                                  {
-                                    inventarioDetalle.porDefecto === 1 ? "Por Defecto" : `Lote ${inventarioDetalleIndex + 1}`
-                                  }
+                                  {inventarioDetalleIndex + 1}
                                 </div>
                                 <span
                                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoLote.clase}`}
@@ -811,7 +791,7 @@ class Inventario extends CustomComponent {
                     overrideClass="mb-3 w-full h-40 object-contain"
                   />
 
-                  <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-base">
+                  <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-base mb-1">
                     {item.producto}
                   </h5>
 
@@ -824,13 +804,19 @@ class Inventario extends CustomComponent {
                   </div>
 
                   <div className="text-sm text-gray-900 mb-1">
-                    <span className="font-medium">Stock:</span>
-                    <span className={`${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
-                      {rounded(item.cantidad)} <small>{item.medida}</small>
-                    </span>
+                    <div className="flex gap-2">
+                      <span className="font-medium">Stock:</span>
+                      <span className={`${getNumber(item.cantidad) <= 0 ? 'text-red-500' : 'text-gray-900'} `}>
+                        {rounded(item.cantidad)} <small>{item.medida}</small>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-gray-900 mb-1">
                     <div className="text-sm text-gray-500">
                       Min: {item.cantidadMinima} | Max: {item.cantidadMaxima}
                     </div>
+
                     <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
                       <div
                         className={cn(
@@ -969,7 +955,7 @@ class Inventario extends CustomComponent {
             ref={this.refModalStock}
             isOpen={this.state.isOpenStock}
             onClose={this.handleCloseStock}
-            handleSave={this.loadingInit}
+            handleSave={this.loadInit}
           />
         </Suspense>
 

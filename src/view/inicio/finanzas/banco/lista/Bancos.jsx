@@ -125,8 +125,8 @@ class Bancos extends CustomComponent {
         bancoLista.paginacion.isNextBtnActive;
       this.refPaginacion.current.pageBound =
         bancoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        bancoLista.paginacion.messagePaginacion;
+      this.refPaginacion.current.paginationMessage =
+        bancoLista.paginacion.paginationMessage;
 
       this.refSearch.current.initialize(bancoLista.data.buscar);
     } else {
@@ -143,7 +143,7 @@ class Bancos extends CustomComponent {
       isPrevBtnActive: this.refPaginacion.current.isPrevBtnActive,
       isNextBtnActive: this.refPaginacion.current.isNextBtnActive,
       pageBound: this.refPaginacion.current.pageBound,
-      messagePaginacion: this.refPaginacion.current.messagePaginacion,
+      paginationMessage: this.refPaginacion.current.paginationMessage,
     });
   }
 

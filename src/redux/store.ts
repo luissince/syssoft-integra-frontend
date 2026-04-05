@@ -4,6 +4,11 @@ import noticacionReducer from './noticacionSlice';
 import predeterminadoReducer from './predeterminadoSlice';
 import downloadReducer from './downloadSlice';
 import printerReducer from './printerSlice';
+
+import activoBienRedurcer from './activo/bienSlice';
+import activoDepreciacionReduce from './activo/depreciacionSlice';
+import activoGestionReduce from './activo/gestionSlice';
+
 import { combineReducers } from '@reduxjs/toolkit';
 
 const reducer = combineReducers({
@@ -12,6 +17,10 @@ const reducer = combineReducers({
   principal: principalReduce,
   download: downloadReducer,
   printer: printerReducer,
+
+  activoBien: activoBienRedurcer,
+  activoDepreciacion: activoDepreciacionReduce,
+  activoGestion: activoGestionReduce,
 });
 
 const store = configureStore({
