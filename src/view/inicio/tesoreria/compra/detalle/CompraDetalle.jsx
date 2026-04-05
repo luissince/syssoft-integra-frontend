@@ -26,7 +26,7 @@ import Image from '@/components/Image';
 import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 import { CONTADO } from '@/model/types/forma-transaccion';
-import { ACTIVO_FIJO } from '@/model/types/tipo-producto';
+import { ACTIVO_FIJO, PRODUCTO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -267,6 +267,7 @@ class CompraDetalle extends CustomComponent {
   */
 
   renderDetalles() {
+    console.log(this.state.detalles);
     return this.state.detalles.map((item, index) => (
       <React.Fragment key={index}>
         <tr className="border-b border-gray-100">
@@ -298,7 +299,7 @@ class CompraDetalle extends CustomComponent {
         </tr>
 
         {/* Detalles de inventario */}
-        {item.inventarioDetalles && !isEmpty(item.inventarioDetalles) && (
+        {item.inventarioDetalles && !isEmpty(item.inventarioDetalles) && (item.idTipoProducto === ACTIVO_FIJO || item.idTipoProducto === PRODUCTO) && (
           <tr>
             <td colSpan={9} className="py-2 bg-gray-50">
               <div className="overflow-x-auto">
@@ -336,7 +337,9 @@ class CompraDetalle extends CustomComponent {
                           {inventarioDetalle.ubicacion || 'N/A'}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                          {rounded(inventarioDetalle.cantidad)}
+                          {
+                            (item.idTipoProducto !== ACTIVO_FIJO ? inventarioDetalle.cantidadLote : inventarioDetalle.cantidadActivo) || 'N/A'
+                          }
                         </td>
                       </tr>
                     ))}
