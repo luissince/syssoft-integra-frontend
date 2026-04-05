@@ -27,6 +27,7 @@ import Select from '@/components/Select';
 import { cn } from '@/lib/utils';
 import { PRODUCTO, ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL } from '@/model/types/tipo-producto';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
+import { FaAsterisk } from 'react-icons/fa';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -235,7 +236,8 @@ class ModalProducto extends Component {
     // });
   };
 
-  handleEliminarInventarioDetalle = (id) => {    const { inventarioDetalles } = this.state;
+  handleEliminarInventarioDetalle = (id) => {
+    const { inventarioDetalles } = this.state;
     const nuevosDetalles = inventarioDetalles.filter(item => item.id !== id);
     this.setState({ inventarioDetalles: nuevosDetalles });
   };
@@ -380,21 +382,23 @@ class ModalProducto extends Component {
     if (!item.porDefecto) return;
 
     return (
-      <div className="w-full flex flex-row gap-3">
-        <div className="w-full">
-          <Input
-            autoFocus={true}
-            label="Cantidad:"
-            placeholder="0.00"
-            role="float"
-            tabIndex={1}
-            value={item.cantidad}
-            onChange={(e) =>
-              this.updateDetalleField(item.id, "cantidad", e.target.value)
-            }
-            onPaste={handlePasteFloat}
-          />
-        </div>
+      <div className="w-full flex flex-col gap-3">
+        <Input
+          autoFocus
+          label={
+            <div className="flex items-center gap-1">
+              <p className="text-gray-700 font-medium">Cantidad:</p>
+            </div>
+          }
+          placeholder="0.00"
+          role="float"
+          tabIndex={1}
+          value={item.cantidad}
+          onChange={(e) =>
+            this.updateDetalleField(item.id, "cantidad", e.target.value)
+          }
+          onPaste={handlePasteFloat}
+        />
       </div>
     );
   }
@@ -408,10 +412,14 @@ class ModalProducto extends Component {
     return (
       <>
         <div className="w-full flex flex-row gap-3">
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-3">
             <Input
               autoFocus={true}
-              label="Cantidad:"
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Cantidad:</p>
+                </div>
+              }
               placeholder="0.00"
               role="float"
               tabIndex={1}
@@ -427,7 +435,11 @@ class ModalProducto extends Component {
             item.idUbicacion !== null && (
               <div className="w-full">
                 <Select
-                  label="Ubicación en el inventario:"
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Ubicación en el inventario:</p>
+                    </div>
+                  }
                   tabIndex={2}
                   value={item.idUbicacion}
                   onChange={(e) =>
@@ -451,9 +463,13 @@ class ModalProducto extends Component {
         <div className="w-full flex flex-row gap-3">
           {
             item.lote !== null && (
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-3">
                 <Input
-                  label="Lote:"
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Lote:</p>
+                    </div>
+                  }
                   placeholder="LT-0001"
                   tabIndex={3}
                   value={item.lote}
@@ -467,10 +483,14 @@ class ModalProducto extends Component {
 
           {
             item.fechaVencimiento !== null && (
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-3">
                 <Input
                   type="date"
-                  label="Fecha de Vencimiento:"
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Fecha de Vencimiento:</p>
+                    </div>
+                  }
                   tabIndex={4}
                   value={item.fechaVencimiento}
                   onChange={(e) =>
@@ -495,14 +515,13 @@ class ModalProducto extends Component {
     return (
       <>
         <div className="w-full flex flex-row gap-3">
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-3">
             <Input
               autoFocus={true}
               label={
-                <>
-                  Cantidad:
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700 font-medium">Cantidad:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
               }
               placeholder="0.00"
               role="float"
@@ -519,7 +538,11 @@ class ModalProducto extends Component {
             item.idUbicacion !== null && (
               <div className="w-full">
                 <Select
-                  label="Ubicación en el inventario:"
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Ubicación en el inventario:</p>
+                    </div>
+                  }
                   tabIndex={2}
                   value={item.idUbicacion}
                   onChange={(e) =>
@@ -543,13 +566,12 @@ class ModalProducto extends Component {
         <div className="w-full flex flex-row gap-3">
           {
             item.serie !== null && (
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-3">
                 <Input
                   label={
-                    <>
-                      Serie:
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Serie:</p> <FaAsterisk className="text-red-500" size={8} />
+                    </div>
                   }
                   placeholder="Por ejemplo: SR-0001"
                   tabIndex={2}
@@ -566,13 +588,12 @@ class ModalProducto extends Component {
         <div className="w-full flex flex-row gap-3">
           {
             item.vidaUtil !== null && (
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-3">
                 <Input
                   label={
-                    <>
-                      Vida útil:
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Vida útil:</p> <FaAsterisk className="text-red-500" size={8} />
+                    </div>
                   }
                   placeholder="Por ejemplo: 1 año, 5 años..."
                   tabIndex={3}
@@ -588,12 +609,12 @@ class ModalProducto extends Component {
           }
           {
             item.valorResidual !== null && (
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-3">
                 <Input
                   label={
-                    <>Valor residual:
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700 font-medium">Valor residual:</p> <FaAsterisk className="text-red-500" size={8} />
+                    </div>
                   }
                   placeholder="Por ejemplo: 0, 100, 200..."
                   tabIndex={4}

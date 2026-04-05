@@ -99,7 +99,10 @@ const Depreciaciones = () => {
     };
 
     const loadDetail = async () => {
-        abortControllerDetalle.current?.abort();
+        if (abortControllerDetalle.current) {
+            abortControllerDetalle.current.abort();
+        }
+
         abortControllerDetalle.current = new AbortController();
 
         dispatch(setActivoDepreciacionState({
@@ -107,36 +110,46 @@ const Depreciaciones = () => {
             msgLoading: "Cargando datos de depreciación..."
         }));
 
-        const body = {
-            opcion: state.opcion,
-            idProducto: state.producto?.idProducto,
-            idAlmacen: state.idAlmacen,
-            posicionPagina: (state.paginacion - 1) * state.filasPorPagina,
-            filasPorPagina: state.filasPorPagina,
-        };
+        try {
+            const body = {
+                opcion: state.opcion,
+                idProducto: state.producto?.idProducto,
+                idAlmacen: state.idAlmacen,
+                posicionPagina: (state.paginacion - 1) * state.filasPorPagina,
+                filasPorPagina: state.filasPorPagina,
+            };
 
-        const { success, data, message } = await listarDepreciacionKardex(body, abortControllerDetalle.current.signal);
+            const { success, data, message } = await listarDepreciacionKardex(body, abortControllerDetalle.current.signal);
 
-        if (!success) {
-            alertKit.warning({
-                title: "Depreciar",
-                message: message,
-            });
+            if (!success) {
+                alertKit.warning({
+                    title: "Depreciar",
+                    message: message,
+                });
+
+                dispatch(setActivoDepreciacionState({
+                    loading: false
+                }));
+                return;
+            }
+
+            const total = Math.ceil(Number(data.total) / state.filasPorPagina);
 
             dispatch(setActivoDepreciacionState({
+                totalPaginacion: total,
+                lista: data.result,
                 loading: false
             }));
-            return;
+        } catch (error) {
+            // Ignorar errores de cancelación
+            if (error.name !== 'AbortError' && !abortControllerDetalle.current?.signal.aborted) {
+            }
+        } finally {
+            // Solo limpiar si no hay otra petición pendiente
+            if (abortControllerDetalle.current && !abortControllerDetalle.current.signal.aborted) {
+                abortControllerDetalle.current = null;
+            }
         }
-
-        const total = Math.ceil(Number(data.total) / state.filasPorPagina);
-
-        abortControllerDetalle.current = null;
-        dispatch(setActivoDepreciacionState({
-            totalPaginacion: total,
-            lista: data.result,
-            loading: false
-        }));
     };
 
     // =============================

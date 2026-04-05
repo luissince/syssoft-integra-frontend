@@ -34,6 +34,7 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import { listOrdenCompra } from '../../../../../../network/rest/principal.network';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -165,22 +166,19 @@ class ModalOrdenCompra extends CustomComponent {
   };
 
   handleFechaInicio = (event) => {
-    this.setState(
-      {
-        fechaInicio: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaInicio: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   handleFechaFinal = (event) => {
     this.setState({
-        fechaFinal: event.target.value,
-      }, () => {
-        this.handleSearchFecha();
-      });
+      fechaFinal: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   generateBody = () => {
@@ -236,11 +234,9 @@ class ModalOrdenCompra extends CustomComponent {
           <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-center">
             <span
-              className={
-                item.ligado == 0
-                  ? 'badge badge-secondary'
-                  : 'badge badge-success'
-              }
+              className={cn(
+                item.ligado == 0 ? 'badge badge-secondary' : 'badge badge-success',
+              )}
             >
               {item.ligado}
             </span>
@@ -298,7 +294,7 @@ class ModalOrdenCompra extends CustomComponent {
             <CustomModalContentOverflow>
               <div className="p-3">
                 <Row>
-                  <Column className={'col-md-6 col-12'} formGroup={true}>
+                  <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
                       group={true}
                       label={
@@ -358,23 +354,19 @@ class ModalOrdenCompra extends CustomComponent {
                       <Table className="table-bordered">
                         <TableHeader>
                           <TableRow>
-                            <TableHead width="5%" className="text-center">
-                              #
-                            </TableHead>
+                            <TableHead width="5%" className="text-center">#</TableHead>
                             <TableHead width="10%">Fecha</TableHead>
                             <TableHead width="15%">Comprobante</TableHead>
                             <TableHead width="15%">Proveedor</TableHead>
                             <TableHead width="5%">Estado</TableHead>
                             <TableHead width="5%">Ligado</TableHead>
-                            <TableHead width="10%" className="text-center">
-                              Total
-                            </TableHead>
-                            <TableHead width="5%" className="text-center">
-                              Seleccionar
-                            </TableHead>
+                            <TableHead width="10%" className="text-center">Total</TableHead>
+                            <TableHead width="5%" className="text-center">Seleccionar</TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody>{this.generateBody()}</TableBody>
+                        <TableBody>{
+                          this.generateBody()
+                        }</TableBody>
                       </Table>
                     </TableResponsive>
                   </Column>

@@ -1,17 +1,29 @@
-import { Link } from 'react-router-dom';
+import { Link, useRouteMatch } from 'react-router-dom';
 import { images } from '../../helper';
-import PropTypes from 'prop-types';
 import { getStatePrivilegio } from '../../helper/utils.helper';
 import { FACTURACION, REALIZAR_VENTA, VENTAS } from '../../model/types/menu';
 import Button from '../Button';
 import { useScreenSize } from '@/hooks/use-mobile';
+import { useAppSelector } from '@/redux/hooks';
+import { closeProject } from '../../redux/principalSlice';
+import { useDispatch } from 'react-redux';
 
-const Menu = (props) => {
+interface MenuProps {
+  onToggleSidebar: () => void;
+  notificaciones: any[];
+}
+
+const Menu = (props: MenuProps) => {
+  const token = useAppSelector((state) => state.principal);
 
   const isScreen = useScreenSize();
 
+  const match = useRouteMatch();
+
+  const dispatch = useDispatch();
+
   const add = getStatePrivilegio(
-    props.token  .userToken.menus,
+    token.userToken.menus,
     FACTURACION,
     VENTAS,
     REALIZAR_VENTA,
@@ -25,7 +37,7 @@ const Menu = (props) => {
 
   const handleCloseSucursal = () => {
     window.localStorage.removeItem('project');
-    props.closeProject();
+    dispatch(closeProject());
   };
 
   return (
@@ -58,7 +70,7 @@ const Menu = (props) => {
           <div className="dropdown">
             <Link
               className="app-nav__item"
-              to={`${props.match.url}/facturacion/ventas/crear`}
+              to={`${match.url}/facturacion/ventas/crear`}
             >
               {' '}
               <i className="fast-sale fa fa-shopping-cart fa-lg"></i> {!isScreen ? 'Nueva venta' : ''}
@@ -111,8 +123,7 @@ const Menu = (props) => {
               </li>
             ) : (
               <li className="app-notification__footer">
-                <Link to={`${props.match.url}/notifications`}>
-                  {' '}
+                <Link to={`${match.url}/notifications`}>
                   Mostrar mas a detalle
                 </Link>
               </li>
@@ -136,10 +147,10 @@ const Menu = (props) => {
               <img src={images.usuario} className="img-circle" alt="Usuario" />
               <p>
                 <span>
-                  {props.token.userToken.nombres + ' ' + props.token.userToken.apellidos}
+                  {token.userToken.usuario.informacion}
                 </span>
-                <small>{' '}
-                  <i>{props.token.userToken.rol}</i>{' '}
+                <small>
+                  <i>{token.userToken.usuario.perfil}</i>
                 </small>
               </p>
             </li>
@@ -157,27 +168,6 @@ const Menu = (props) => {
       </ul>
     </header>
   );
-};
-
-Menu.propTypes = {
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
-
-  closeProject: PropTypes.func,
-  onToggleSidebar: PropTypes.func,
-  notificaciones: PropTypes.array,
-  match: PropTypes.shape({
-    url: PropTypes.string,
-  }),
-  token: PropTypes.shape({
-    userToken: PropTypes.shape({
-      nombres: PropTypes.string,
-      apellidos: PropTypes.string,
-      rol: PropTypes.string,
-      menus: PropTypes.array,
-    }),
-  }),
 };
 
 export default Menu;

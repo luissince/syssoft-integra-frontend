@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { forwardRef, useState, useEffect } from 'react';
 
 interface SelectActiveProps {
@@ -79,7 +80,10 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
     <select
       id={id}
       ref={ref}
-      className={`form-control border border-primary ${className}`}
+      className={cn(
+        "form-control border border-primary",
+        className
+      )}
       {...rest}
     >
       {children}

@@ -73,6 +73,7 @@ const Bienes = () => {
     if (!success) {
       if (type === CANCELED) return;
 
+      abortControllerAlmacen.current = null;
       alertKit.warning({
         title: "Depreciar",
         message: message,
@@ -80,10 +81,8 @@ const Bienes = () => {
       return;
     }
 
-    abortControllerAlmacen.current = null;
-
     const idAlmacen = data.find((item) => item.predefinido === 1)?.idAlmacen ?? '';
-
+    abortControllerAlmacen.current = null;
     dispatch(setActivoBienState({
       almacenes: data,
       idAlmacen: idAlmacen
@@ -98,9 +97,12 @@ const Bienes = () => {
       idAlmacen: state.idAlmacen,
     };
 
-    const { success, data, message } = await metricasDepreciacionKardex(params, abortControllerMetrics.current.signal);
+    const { success, data, message, type } = await metricasDepreciacionKardex(params, abortControllerMetrics.current.signal);
 
     if (!success) {
+      if (type === CANCELED) return;
+
+      abortControllerMetrics.current = null;
       alertKit.warning({
         title: "Depreciar",
         message: message,
@@ -111,49 +113,6 @@ const Bienes = () => {
     abortControllerMetrics.current = null;
     dispatch(setActivoBienState({
       metricas: data,
-    }));
-  };
-
-  const loadAll = async () => {
-    dispatch(setActivoBienState({
-      loading: true,
-      msgLoading: "Cargando datos de depreciación..."
-    }));
-
-    await loadAlmacen();
-
-    dispatch(setActivoBienState({
-      loading: false
-    }));
-  };
-
-  const loadInit = async () => {
-    if (state.loading) return;
-
-    dispatch(setActivoBienState({
-      opcion: 0,
-      paginacion: 1,
-      restart: true,
-    }));
-  };
-
-  const handleSearchText = async (text: string) => {
-    if (state.loading) return;
-
-    if (text.trim().length === 0) return;
-
-    dispatch(setActivoBienState({
-      opcion: 1,
-      buscar: text,
-      paginacion: 1,
-      restart: true,
-    }));
-  }
-
-  const handlePaginacion = (page: number) => {
-    dispatch(setActivoBienState({
-      paginacion: page,
-      restart: false
     }));
   };
 
@@ -236,23 +195,66 @@ const Bienes = () => {
   useEffect(() => {
     if (!state.idAlmacen) return;
 
+    if (state.loading) return;
+
     fillTable();
 
     return () => {
       abortControllerTable.current?.abort();
     };
-  }, [
-    state.idAlmacen,
-    state.opcion,
-    state.buscar,
-    state.paginacion,
-    state.filasPorPagina,
-    state.restart
-  ]);
+  }, [state.idAlmacen, state.fechaInicio, state.fechaFinal ,state.paginacion]);
+
+  // =============================
+  // FLOWS
+  // =============================
+
+  const loadAll = async () => {
+    dispatch(setActivoBienState({
+      loading: true,
+      msgLoading: "Cargando datos de depreciación..."
+    }));
+
+    await loadAlmacen();
+
+    dispatch(setActivoBienState({
+      loading: false
+    }));
+  };
+
+  const loadInit = async () => {
+    if (state.loading) return;
+
+    dispatch(setActivoBienState({
+      opcion: 0,
+      paginacion: 1,
+      restart: true,
+    }));
+  };
 
   // =============================
   // HANDLERS
   // =============================
+
+  // Eventos para filtrar el producto
+  const handleSearchText = async (text: string) => {
+    if (state.loading) return;
+
+    if (text.trim().length === 0) return;
+
+    dispatch(setActivoBienState({
+      opcion: 1,
+      buscar: text,
+      paginacion: 1,
+      restart: true,
+    }));
+  }
+
+  const handlePaginacion = (page: number) => {
+    dispatch(setActivoBienState({
+      paginacion: page,
+      restart: false
+    }));
+  };
 
   // Modal de stock
   const handleOpenModalStock = async (producto: any) => {

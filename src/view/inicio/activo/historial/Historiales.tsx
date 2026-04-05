@@ -99,13 +99,13 @@ const Historiales = () => {
           </tbody>
         </table>
 
-        <Paginacion
+        {/* <Paginacion
           totalPaginacion={totalPaginacion}
           paginacion={paginacion}
           fillTable={setPaginacion}
           theme="modern"
           className="md:px-4 py-3 bg-white border-t border-gray-200"
-        />
+        /> */}
       </div>
     </ContainerWrapper>
   );

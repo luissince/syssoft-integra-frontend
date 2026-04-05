@@ -462,12 +462,10 @@ class Inicio extends React.Component {
       <div className="app">
         <Menu
           refSideBar={this.refSideBar}
-          url={url}
           rutaLogo={this.state.rutaLogo}
         />
 
         <Head
-          {...this.props}
           onToggleSidebar={this.onToggleSidebar}
           notificaciones={this.state.notificaciones}
         />
