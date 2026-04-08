@@ -64,7 +64,8 @@ const Depreciaciones = () => {
     // API
     // =============================
 
-    const loadAlmacen = async () => {
+    // Obtiene los almacenes disponibles
+    const fetchAlmacen = async () => {
         abortControllerAlmacen.current = new AbortController();
 
         const { success, data, message, type } = await optionsAlmacen(token.project.idSucursal, abortControllerAlmacen.current.signal);
@@ -85,23 +86,9 @@ const Depreciaciones = () => {
         }));
     };
 
-    const loadAll = async () => {
-        dispatch(setActivoDepreciacionState({
-            loading: true,
-            msgLoading: "Cargando datos de depreciación..."
-        }));
-
-        await loadAlmacen();
-
-        dispatch(setActivoDepreciacionState({
-            loading: false
-        }));
-    };
-
-    const loadDetail = async () => {
-        if (abortControllerDetalle.current) {
-            abortControllerDetalle.current.abort();
-        }
+    // Obtiene los movimientos de depreciación
+    const fetchDetail = async () => {
+        abortControllerDetalle.current?.abort();
 
         abortControllerDetalle.current = new AbortController();
 
@@ -110,46 +97,39 @@ const Depreciaciones = () => {
             msgLoading: "Cargando datos de depreciación..."
         }));
 
-        try {
-            const body = {
-                opcion: state.opcion,
-                idProducto: state.producto?.idProducto,
-                idAlmacen: state.idAlmacen,
-                posicionPagina: (state.paginacion - 1) * state.filasPorPagina,
-                filasPorPagina: state.filasPorPagina,
-            };
+        const body = {
+            opcion: state.opcion,
+            idProducto: state.producto?.idProducto,
+            idAlmacen: state.idAlmacen,
+            posicionPagina: (state.paginacion - 1) * state.filasPorPagina,
+            filasPorPagina: state.filasPorPagina,
+        };
 
-            const { success, data, message } = await listarDepreciacionKardex(body, abortControllerDetalle.current.signal);
+        const { success, data, message, type } = await listarDepreciacionKardex(body, abortControllerDetalle.current.signal);
 
-            if (!success) {
-                alertKit.warning({
-                    title: "Depreciar",
-                    message: message,
-                });
+        if (!success) {
+            if (type === CANCELED) return;
 
-                dispatch(setActivoDepreciacionState({
-                    loading: false
-                }));
-                return;
-            }
-
-            const total = Math.ceil(Number(data.total) / state.filasPorPagina);
+            abortControllerDetalle.current = null;
+            alertKit.warning({
+                title: "Depreciar",
+                message: message,
+            });
 
             dispatch(setActivoDepreciacionState({
-                totalPaginacion: total,
-                lista: data.result,
                 loading: false
             }));
-        } catch (error) {
-            // Ignorar errores de cancelación
-            if (error.name !== 'AbortError' && !abortControllerDetalle.current?.signal.aborted) {
-            }
-        } finally {
-            // Solo limpiar si no hay otra petición pendiente
-            if (abortControllerDetalle.current && !abortControllerDetalle.current.signal.aborted) {
-                abortControllerDetalle.current = null;
-            }
+            return;
         }
+
+        const total = Math.ceil(Number(data.total) / state.filasPorPagina);
+
+        abortControllerDetalle.current = null;
+        dispatch(setActivoDepreciacionState({
+            totalPaginacion: total,
+            lista: data.result,
+            loading: false
+        }));
     };
 
     // =============================
@@ -181,9 +161,27 @@ const Depreciaciones = () => {
     useEffect(() => {
         if (!state.producto || !state.idAlmacen) return;
 
-        loadDetail();
+        fetchDetail();
 
     }, [state.producto, state.paginacion, state.idAlmacen]);
+
+    // =============================
+    // FLOWS
+    // =============================
+
+    const loadAll = async () => {
+        dispatch(setActivoDepreciacionState({
+            loading: true,
+            msgLoading: "Cargando datos de depreciación..."
+        }));
+
+        await fetchAlmacen();
+
+        dispatch(setActivoDepreciacionState({
+            loading: false
+        }));
+    };
+
 
     // =============================
     // HANDLERS
