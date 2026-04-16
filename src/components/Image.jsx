@@ -4,9 +4,9 @@ import { images } from '../helper';
 import Button from './Button';
 import { alertKit } from 'alert-kit';
 import { imageBase64 } from '../helper/utils.helper';
-import { is, th } from 'date-fns/locale';
 
 const ImageUpload = ({
+  className,
   label,
   subtitle,
   imageUrl,
@@ -17,51 +17,50 @@ const ImageUpload = ({
   accept,
   onChange,
   onClear,
-  onDownload,
+  onDownload = null,
 }) => (
-  <div className="text-center">
+  <div className={`${className}`}>
     {label && (
-      <>
-        <span>{label}</span> <br />
-      </>
+      <span>{label}</span>
     )}
     {subtitle && (
-      <>
-        <small>{subtitle}</small> <br />{' '}
-      </>
+      <small>{subtitle}</small>
     )}
-    <div className="text-center mt-2 mb-2">
-      <Image
-        default={defaultImage}
-        src={imageUrl}
-        alt={alt}
-        className="img-fluid border border-primary rounded"
-        width={width}
-      />
-    </div>
-    <input
-      type="file"
-      id={inputId}
-      accept={accept}
-      className="display-none"
-      onChange={onChange}
+
+    <Image
+      default={defaultImage}
+      src={imageUrl}
+      alt={alt}
+      className="img-fluid border border-primary rounded"
+      width={width}
     />
-    <label htmlFor={inputId} className="btn btn-outline-secondary m-0">
-      <div className="content-button">
-        <i className="bi bi-image"></i>
-        <span></span>
-      </div>
-    </label>{' '}
-    {onClear && (
-      <Button className="btn-outline-secondary" onClick={onClear}>
-        <i className="bi bi-trash"></i>
-      </Button>
-    )}
-    {onDownload && (
-      <Button className="btn-outline-secondary" onClick={onDownload}>
-        <i className="bi bi-download"></i>
-      </Button>
-    )}
+
+    <div className="flex gap-3">
+      <input
+        type="file"
+        id={inputId}
+        accept={accept}
+        className="display-none"
+        onChange={onChange}
+      />
+      <label htmlFor={inputId} className="btn btn-outline-secondary m-0">
+        <div className="content-button">
+          <i className="bi bi-image"></i>
+          <span></span>
+        </div>
+      </label>
+
+      {onClear && (
+        <Button className="btn-outline-secondary" onClick={onClear}>
+          <i className="bi bi-trash"></i>
+        </Button>
+      )}
+      {onDownload && (
+        <Button className="btn-outline-secondary" onClick={onDownload}>
+          <i className="bi bi-download"></i>
+        </Button>
+      )}
+    </div>
   </div>
 );
 
@@ -89,8 +88,18 @@ class MultiImages extends Component {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } =
-        await imageBase64(file);
+
+      const getImageBase64 = await imageBase64(file);
+
+      if (!getImageBase64) {
+        alertKit.warning({
+          title: 'Imagen',
+          message: 'La imagen ' + file.name + ' no es válida.',
+        });
+        continue;
+      }
+
+      const { size, base64String, extension, width, height } = getImageBase64;
 
       if (this.props.width && this.props.height) {
         if (width !== this.props.width || height !== this.props.height) {
@@ -240,7 +249,7 @@ export { MultiImages, ImageUpload };
  * <Image
  *   src="/path/to/image.jpg"
  *   alt="Example"
- *   overrideClass="rounded-lg shadow-lg cursor-pointer"
+ *   overrideClass="rounded shadow-lg cursor-pointer"
  * />
  *
  * @prop {string} [default] - Fallback image source if no image is provided.
@@ -327,8 +336,8 @@ class Image extends Component {
   * @returns {JSX.Element}
   */
   render() {
-    const { alt, isFullScreen, className, width, height, overrideClass, overrideStyle } = this.props;
-    const { image, showFullScreen } = this.state;
+    const { alt, className, width, height, overrideClass, overrideStyle } = this.props;
+    const { image, showFullScreen, isFullScreen } = this.state;
     const appliedClass = overrideClass || `${className} img-thumbnail`;
     const appliedStyle = overrideStyle ? {} : { cursor: 'pointer' };
 
@@ -349,17 +358,16 @@ class Image extends Component {
         {/* Imagen en pantalla completa */}
         {showFullScreen && (
           <div
-            className="fullscreen-container position-fixed top-0 left-0 vw-100 vh-100 d-flex justify-content-center align-items-center z-index-9999"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+            className="fullscreen-container fixed top-0 left-0 vw-100 vh-100 flex justify-center items-center z-index-9999 bg-black bg-opacity-80"
             onClick={this.toggleFullScreen}
           >
-            <span className="btn btn-light position-absolute top-3-5 right-3-5">
+            <span className="btn btn-light absolute top-3-5 right-3-5">
               &times;
             </span>
             <img
               src={image}
               alt={alt}
-              className="mw-90 mh-90 rounded-sm shadow"
+              className="max-w-[90%] max-h-[90%]"
             />
           </div>
         )}
