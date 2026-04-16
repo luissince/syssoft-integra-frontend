@@ -14,7 +14,7 @@ class Search extends React.Component {
       searchTerm: '',
     };
 
-    this.debounceTime = this.props.debounceTime || 250;
+    this.debounceTime = this.props.debounceTime || 550;
     this.debouncedSearch = this.debounce(
       this.props.onSearch,
       this.debounceTime,

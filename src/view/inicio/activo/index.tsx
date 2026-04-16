@@ -1,7 +1,7 @@
+import { Switch, Route, useRouteMatch } from 'react-router-dom';
 import { ContainerMenu } from '@/components/Container';
 
 import { useAppSelector } from '@/redux/hooks';
-import { Route, useRouteMatch } from 'react-router-dom';
 import Bienes from './bien/Bienes';
 
 import Depreciaciones from './depreciacion/Depreciaciones';
@@ -29,71 +29,72 @@ const Activo = () => {
 
 const ActivoRoutes = () => {
   const match = useRouteMatch();
+  
   return (
-    <>
+    <Switch>
       <Route
         path={match.path}
-        exact={true}
+        exact
       >
         <Activo />
       </Route>
 
       <Route
         path={`${match.path}/bien`}
-        exact={true}
+        exact
       >
         <Bienes />
       </Route>
 
       <Route
         path={`${match.path}/depreciacion`}
-        exact={true}
+        exact
       >
         <Depreciaciones />
       </Route>
 
       <Route
         path={`${match.path}/depreciacion/detalle`}
-        exact={true}
+        exact
       >
         <DepreciacionDetalle />
       </Route>
 
       <Route
         path={`${match.path}/gestiones`}
-        exact={true}
+        exact
       >
         <Gestiones />
       </Route>
 
       <Route
         path={`${match.path}/gestiones/crear`}
-        exact={true}
+        exact
       >
         <GestioneCrear />
       </Route>
 
       <Route
         path={`${match.path}/gestiones/editar`}
-        exact={true}
+        exact
       >
         <GestioneEditar />
       </Route>
 
        <Route
         path={`${match.path}/gestiones/devolver`}
-        exact={true}
+        exact
       >
         <GestionDevolver />
       </Route>
 
         <Route
         path={`${match.path}/historiales`}
-        exact={true}
+        exact
       >
         <Historiales />
       </Route>
-    </>
+    </Switch>
   );
 };
 

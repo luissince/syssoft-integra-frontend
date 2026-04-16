@@ -175,7 +175,7 @@ class Ventas extends CustomComponent {
 
       this.refSearch.current.initialize(ventaLista.data.buscar);
     } else {
-      await this.loadingInitData();
+      await this.loadData();
     }
   };
 
@@ -191,7 +191,7 @@ class Ventas extends CustomComponent {
     });
   }
 
-  loadingInitData = async () => {
+  loadData = async () => {
     const params = {
       tipo: VENTA,
       idSucursal: this.state.idSucursal,
@@ -206,7 +206,7 @@ class Ventas extends CustomComponent {
         title: "Ventas",
         message: comprobantesResponse.getMessage(),
         onClose: async () => {
-          await this.loadingInitData();
+          await this.loadData();
         },
       });
       return;
@@ -216,12 +216,12 @@ class Ventas extends CustomComponent {
       comprobantes: comprobantesResponse.data,
       initialLoad: false,
     }, async () => {
-      await this.loadingInit();
+      await this.loadInit();
       this.updateReduxState();
     });
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -408,7 +408,7 @@ class Ventas extends CustomComponent {
         alertKit.success({
           title: "Venta",
           message: response.data,
-          onClose: () => this.loadingInit(),
+          onClose: () => this.loadInit(),
         });
       }
 
@@ -785,7 +785,7 @@ class Ventas extends CustomComponent {
                 "bg-gray-200 text-gray-700 text-sm font-medium rounded",
                 "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
               )}
-              onClick={this.loadingInit}
+              onClick={this.loadInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
               Recargar Vista

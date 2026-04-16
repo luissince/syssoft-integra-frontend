@@ -114,10 +114,6 @@ const initialState = {
     data: null,
     paginacion: null,
   },
-  bancoLista: {
-    data: null,
-    paginacion: null,
-  },
   finanzasLista: {
     data: null,
     paginacion: null,
@@ -429,19 +425,6 @@ const predeterminadoSlice = createSlice({
       };
     },
 
-    setListaBancoData: (state, action) => {
-      state.bancoLista.data = action.payload;
-    },
-    setListaBancoPaginacion: (state, action) => {
-      state.bancoLista.paginacion = action.payload;
-    },
-    clearListaBanco: (state) => {
-      state.bancoLista = {
-        data: null,
-        paginacion: null,
-      };
-    },
-
     setListaFinanzasData: (state, action) => {
       state.finanzasLista.data = action.payload;
     },
@@ -563,10 +546,6 @@ const predeterminadoSlice = createSlice({
         data: null,
         paginacion: null,
       };
-      state.bancoLista = {
-        data: null,
-        paginacion: null,
-      };
       state.finanzasLista = {
         data: null,
         paginacion: null,
@@ -649,10 +628,6 @@ export const {
   setListaCpeSunatData,
   setListaCpeSunatPaginacion,
   clearListaCpeSunat,
-
-  setListaBancoData,
-  setListaBancoPaginacion,
-  clearListaBanco,
 
   setListaFinanzasData,
   setListaFinanzasPaginacion,

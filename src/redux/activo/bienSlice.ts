@@ -5,6 +5,8 @@ import { currentDate } from "@/helper/utils.helper";
 import { AssetListInterface, AssetMetricsInterface } from "@/model/ts/interface/asset";
 
 interface BienState {
+    didMount: boolean;
+
     loading: boolean;
     msgLoading: string;
 
@@ -38,6 +40,8 @@ interface BienState {
 }
 
 const initialState: BienState = {
+    didMount: false,
+
     loading: false,
     msgLoading: "Cargando información...",
 
@@ -75,7 +79,7 @@ const initialState: BienState = {
     inventarioDetallesVisible: {},
 };
 
-const depreciationSlice = createSlice({
+const activoBienSlice = createSlice({
     name: "ACTIVO BIEN",
     initialState,
     reducers: {
@@ -92,6 +96,6 @@ const depreciationSlice = createSlice({
 
 export const {
     setActivoBienState,
-} = depreciationSlice.actions;
+} = activoBienSlice.actions;
 
-export default depreciationSlice.reducer;
+export default activoBienSlice.reducer;

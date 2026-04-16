@@ -68,6 +68,11 @@ const Bienes = () => {
     abortControllerAlmacen.current?.abort();
     abortControllerAlmacen.current = new AbortController();
 
+    dispatch(setActivoBienState({
+      loading: true,
+      msgLoading: "Cargando datos de depreciación..."
+    }));
+
     const { success, data, message, type } = await optionsAlmacen(token.project.idSucursal, abortControllerAlmacen.current.signal);
 
     if (!success) {
@@ -85,7 +90,8 @@ const Bienes = () => {
     abortControllerAlmacen.current = null;
     dispatch(setActivoBienState({
       almacenes: data,
-      idAlmacen: idAlmacen
+      idAlmacen: idAlmacen,
+      loading: false,
     }));
   };
 
@@ -111,6 +117,7 @@ const Bienes = () => {
     }
 
     abortControllerMetrics.current = null;
+
     dispatch(setActivoBienState({
       metricas: data,
     }));
@@ -150,8 +157,8 @@ const Bienes = () => {
     }
 
     const totalPaginacion = parseInt(String(Math.ceil(Number(data.total) / state.filasPorPagina)));
-
     abortControllerTable.current = null;
+
     dispatch(setActivoBienState({
       lista: data.result,
       totalPaginacion,
@@ -167,59 +174,50 @@ const Bienes = () => {
     const buscar = state.buscar;
     const pagState = state.paginacionState;
 
-    if (pagState && refPaginacion.current) {
+    if (pagState && refPaginacion.current && state.didMount) {
       refPaginacion.current.setBounds(pagState);
     }
 
-    if (buscar && refSearch.current) {
+    if (buscar && refSearch.current && state.didMount) {
       refSearch.current.initialize(buscar);
     }
 
-    if (!state.lista?.length) {
-      loadAll();
+    if (!state.didMount) {
+      dispatch(setActivoBienState({
+        didMount: true
+      }));
     }
 
     return () => {
       abortControllerAlmacen.current?.abort();
       abortControllerMetrics.current?.abort();
+      abortControllerTable.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (!state.didMount) return;
+
+      loadAlmacen();
+  }, [state.didMount]);
 
   useEffect(() => {
     if (!state.idAlmacen) return;
 
     loadMetrics();
-
   }, [state.idAlmacen]);
 
   useEffect(() => {
     if (!state.idAlmacen) return;
 
-    if (state.loading) return;
+    if (!state.didMount) return;
 
     fillTable();
-
-    return () => {
-      abortControllerTable.current?.abort();
-    };
-  }, [state.idAlmacen, state.fechaInicio, state.fechaFinal ,state.paginacion]);
+  }, [state.didMount, state.idAlmacen, state.fechaInicio, state.fechaFinal, state.opcion, state.buscar, state.paginacion]);
 
   // =============================
   // FLOWS
   // =============================
-
-  const loadAll = async () => {
-    dispatch(setActivoBienState({
-      loading: true,
-      msgLoading: "Cargando datos de depreciación..."
-    }));
-
-    await loadAlmacen();
-
-    dispatch(setActivoBienState({
-      loading: false
-    }));
-  };
 
   const loadInit = async () => {
     if (state.loading) return;
@@ -281,7 +279,7 @@ const Bienes = () => {
   };
 
   // Cambiar vista
-  const changeView = (value: string) => {
+  const handleChangeView = (value: string) => {
     dispatch(setActivoBienState({
       vista: value,
     }));
@@ -743,7 +741,7 @@ const Bienes = () => {
                 state.vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
               )
             }
-            onClick={changeView.bind(this, "tabla")}
+            onClick={handleChangeView.bind(this, "tabla")}
           >
             <i className="bi bi-list-ul"></i>
             <span className="hidden sm:inline">Tabla</span>
@@ -758,7 +756,7 @@ const Bienes = () => {
                 state.vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
               )
             }
-            onClick={changeView.bind(this, "cuadricula")}
+            onClick={handleChangeView.bind(this, "cuadricula")}
           >
             <i className="bi bi-grid-3x3"></i>
             <span className="hidden sm:inline">Cuadrícula</span>

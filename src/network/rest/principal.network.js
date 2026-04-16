@@ -1978,7 +1978,7 @@ export async function comboUbicacion(signal) {
 |--------------------------------------------------------------------------
 */
 export async function listBancos(params, signal = null) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/banco/list', {
       signal: signal,
       params: params,

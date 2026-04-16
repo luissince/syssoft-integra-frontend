@@ -1,10 +1,10 @@
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
+
 import { ContainerMenu } from '@/components/Container';
 
 import Consultas from './consulta/lista/Consultas';
 import Web from './web/index';
 import { useAppSelector } from '@/redux/hooks';
-import { Route, useRouteMatch } from 'react-router-dom';
-import React from 'react';
 
 const Crm = () => {
   const token = useAppSelector((state) => state.principal);
@@ -20,29 +20,28 @@ const Crm = () => {
   );
 };
 
-
 const CrmRoutes = () => {
   const match = useRouteMatch();
 
   return (
-    <>
+    <Switch>
       <Route
         path={`${match.path}`}
-        exact={true}
+        exact
       >
         <Crm />
       </Route>
 
       <Route
         path={`${match.path}/consulta`}
-        exact={true}
+        exact
         render={(props) => <Consultas {...props} />}
       />
 
-      <Route path={`${match.path}/web`}>
+      <Route path={`${match.path}/web`} exact>
         <Web />
       </Route>
-    </>
+    </Switch>
   );
 };
 

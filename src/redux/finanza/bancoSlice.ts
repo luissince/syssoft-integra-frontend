@@ -1,26 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { closeProject, signOut } from "../principalSlice";
-import { ProductFilterInterface } from "@/model/ts/interface/product";
-import { WarehouseOptionsInterface } from "@/model/ts/interface/warehouse";
-import { KardexListDepreciacionInterface } from "@/model/ts/interface/kardex";
+import { BankListInterface } from "@/model/ts/interface/bank";
 
-interface DepreciationState {
+interface BancoState {
+    didMount: boolean;
+
     loading: boolean;
     msgLoading: string;
 
-    producto: ProductFilterInterface;
-    productos: ProductFilterInterface[];
-
-    idAlmacen: string;
-    almacenes: WarehouseOptionsInterface[];
-
     opcion: number;
     buscar: string;
-    lista: KardexListDepreciacionInterface[];
+    lista: BankListInterface[];
     paginacion: number;
     totalPaginacion: number;
     filasPorPagina: number;
     restart: boolean;
+    messageTable: string;
     paginacionState: {
         upperPageBound: number;
         lowerPageBound: number;
@@ -29,25 +24,24 @@ interface DepreciationState {
         pageBound: number;
         paginationMessage: string;
     };
+
+    vista: string;
 }
 
-const initialState: DepreciationState = {
+const initialState: BancoState = {
+    didMount: false,
+    
     loading: false,
     msgLoading: "Cargando información...",
 
-    producto: null,
-    productos: [],
-
-    idAlmacen: "",
-    almacenes: [],
-
-    opcion: 1,
+    opcion: 0,
     buscar: "",
     lista: [],
     paginacion: 1,
     totalPaginacion: 0,
     filasPorPagina: 10,
     restart: false,
+    messageTable: "Cargando información...",
     paginacionState: {
         upperPageBound: 3,
         lowerPageBound: 0,
@@ -55,14 +49,16 @@ const initialState: DepreciationState = {
         isNextBtnActive: "",
         pageBound: 3,
         paginationMessage: "Mostrando 0 de 0 Páginas"
-    }
+    },
+
+    vista: "tabla",
 };
 
-const activoDepreciationSlice = createSlice({
-    name: "ACTIVO DEPRECIACION",
+const finanzasBancoSlice = createSlice({
+    name: "FINANZAS BANCO",
     initialState,
     reducers: {
-        setActivoDepreciacionState: (state, action) => (
+        setFinanzasBancoState: (state, action) => (
             Object.assign(state, action.payload)
         ),
     },
@@ -74,7 +70,7 @@ const activoDepreciationSlice = createSlice({
 });
 
 export const {
-    setActivoDepreciacionState,
-} = activoDepreciationSlice.actions;
+    setFinanzasBancoState,
+} = finanzasBancoSlice.actions;
 
-export default activoDepreciationSlice.reducer;
+export default finanzasBancoSlice.reducer;

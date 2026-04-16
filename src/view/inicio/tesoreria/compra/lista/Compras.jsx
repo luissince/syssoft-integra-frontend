@@ -340,6 +340,249 @@ class Compras extends CustomComponent {
   |
   */
 
+  renderTable() {
+    if (this.state.loading) {
+      return (
+        <tr>
+          <td colSpan={9} className="px-6 py-12 text-center">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+              <p className="text-gray-500">Cargando información...</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <tr>
+          <td colSpan={9} className="px-6 py-12 text-center">
+            <div className="text-gray-500">
+              <i className="bi bi-box text-4xl mb-3 block"></i>
+              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-sm">Intenta cambiar los filtros</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    return this.state.lista.map((item) => {
+      const estadoClassName = cn(
+        item.estado === 1 ? "bg-green-100 text-green-800" :
+          item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
+            item.estado === 3 ? "bg-red-100 text-red-800" :
+              "bg-blue-100 text-blue-800"
+      );
+
+      const estadoValue =
+        item.estado === 1 ? "PAGADO" :
+          item.estado === 2 ? "POR PAGAR" : "ANULADO";
+
+      const tipo = item.idFormaPago === CONTADO
+        ? "CONTADO"
+        : "CREDITO"
+
+      return (
+        <tr key={item.idCompra} className="hover:bg-gray-50 transition-colors">
+          <td className="px-2 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-2 py-4 text-sm text-gray-900">
+            {item.fecha}<br />
+            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
+          </td>
+          <td className="px-2 py-4 text-sm text-gray-900">
+            <div>{item.tipoDocumento} - {item.documento}</div>
+            <div className="text-xs text-gray-500">{item.informacion}</div>
+          </td>
+          <td className="px-2 py-4 text-sm text-gray-900">
+            {item.comprobante}<br />
+            <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+          </td>
+          <td className="px-2 py-4 text-sm text-gray-900">{tipo}</td>
+          <td className="px-2 py-4 text-center">
+            <span
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                estadoClassName
+              )}
+            >
+              {estadoValue}
+            </span>
+          </td>
+          <td className="px-2 py-4 text-sm font-medium text-gray-900 text-right">
+            {formatCurrency(item.total, item.codiso)}
+          </td>
+          <td className="px-2 py-4 text-center">
+            <button
+              className={
+                cn(
+                  "rounded-md transition p-2",
+                  "text-blue-600 bg-white",
+                  "hover:bg-blue-50 hover:text-blue-700",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                  "active:bg-blue-100 active:scale-[0.97]",
+                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                )
+              }
+              title="Ver detalle"
+              onClick={() => this.handleDetalle(item.idCompra)}
+            >
+              <i className="bi bi-eye text-lg"></i>
+            </button>
+          </td>
+          <td className="px-2 py-4 text-center">
+            <button
+              className={
+                cn(
+                  "rounded-md transition p-2",
+                  "text-red-600 bg-white",
+                  "hover:bg-red-50 hover:text-red-700",
+                  "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                  "active:bg-red-100 active:scale-[0.98]",
+                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                )
+              }
+              title="Anular venta"
+              onClick={() => this.handleAnular(item.idCompra)}
+            >
+              <i className="bi bi-trash text-lg"></i>
+            </button>
+          </td>
+        </tr>
+      );
+    });
+  }
+
+  renderCuadricula() {
+    if (this.state.loading) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(this.state.lista)) {
+      return (
+        <div className="text-center py-16 rounded border text-gray-500">
+          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+          <p className="text-lg font-medium">No se encontraron ventas</p>
+          <p className="text-sm">Intenta cambiar los filtros</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+        {
+          this.state.lista.map((item) => {
+            const estadoClassName = cn(
+              item.estado === 1
+                ? "bg-green-100 text-green-800"
+                : item.estado === 2
+                  ? "bg-yellow-100 text-yellow-800"
+                  : item.estado === 3
+                    ? "bg-red-100 text-red-800"
+                    : "bg-blue-100 text-blue-800"
+            );
+
+            const estadoValue =
+              item.estado === 1 ? "PAGADO" :
+                item.estado === 2 ? "POR PAGAR" : "ANULADO";
+
+            const tipo = item.idFormaPago === CONTADO
+              ? "CONTADO"
+              : "CREDITO"
+
+            return (
+              <div
+                key={item.idCompra}
+                className="bg-white rounded border transition group overflow-hidden"
+              >
+                <div className="flex flex-col gap-2 p-4">
+                  <div className="flex justify-between items-start">
+                    <h5 className="font-semibold text-gray-900 text-sm">
+                      {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
+                    </h5>
+                    <span className={cn(
+                      "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                      estadoClassName)
+                    }>
+                      {estadoValue}
+                    </span>
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">N° Documento:</span> {item.documento}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Información:</span> {item.informacion}
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Tipo:</span> {tipo}
+                  </div>
+
+                  <div className="text-lg font-bold text-gray-900 mb-3">
+                    {formatCurrency(item.total, item.codiso)}
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-blue-600 bg-white",
+                          "hover:bg-blue-50 hover:text-blue-700",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                          "active:bg-blue-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleDetalle(item.idCompra)}
+                      title="Ver detalle"
+                    >
+                      <i className="bi bi-eye text-lg" /> Ver
+                    </button>
+
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-red-600 bg-white",
+                          "hover:bg-red-50 hover:text-red-700",
+                          "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                          "active:bg-red-100 active:scale-[0.98]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleAnular(item.idCompra)}
+                      title="Anular"
+                    >
+                      <i className="bi bi-trash text-lg" /> Anular
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }
+
+
   render() {
     const { vista } = this.state;
 
@@ -453,274 +696,64 @@ class Compras extends CustomComponent {
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        {vista === "tabla" ? (
-          /* 📊 Vista Tabla */
-          <div className="bg-white rounded border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Proveedor</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Total</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Detalle</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Anular</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {this.state.loading ? (
+        <div
+          className={
+            vista === "tabla"
+              ? "bg-white rounded border overflow-hidden"
+              : "space-y-6"
+          }
+        >
+
+          {/* 📊 Vista Tabla  */}
+          {
+            vista === "tabla" && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan={9} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                          <p className="text-gray-500">Cargando información...</p>
-                        </div>
-                      </td>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Proveedor</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Total</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Detalle</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Anular</th>
                     </tr>
-                  ) : isEmpty(this.state.lista) ? (
-                    <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center">
-                        <div className="text-gray-500">
-                          <i className="bi bi-box text-4xl mb-3 block"></i>
-                          <p className="text-lg font-medium">No se encontraron ventas</p>
-                          <p className="text-sm">Intenta cambiar los filtros</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item) => {
-                      const estadoClassName = cn(
-                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                        item.estado === 1 ? "bg-green-100 text-green-800" :
-                          item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
-                            item.estado === 3 ? "bg-red-100 text-red-800" :
-                              "bg-blue-100 text-blue-800"
-                      );
-
-                      const estadoValue =
-                        item.estado === 1 ? "PAGADO" :
-                          item.estado === 2 ? "POR PAGAR" : "ANULADO";
-
-                      const tipo = item.idFormaPago === CONTADO
-                        ? "CONTADO"
-                        : "CREDITO"
-
-                      return (
-                        <tr key={item.idCompra} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-2 py-4 text-sm text-gray-900 text-center">{item.id}</td>
-                          <td className="px-2 py-4 text-sm text-gray-900">
-                            {item.fecha}<br />
-                            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
-                          </td>
-                          <td className="px-2 py-4 text-sm text-gray-900">
-                            <div>{item.tipoDocumento} - {item.documento}</div>
-                            <div className="text-xs text-gray-500">{item.informacion}</div>
-                          </td>
-                          <td className="px-2 py-4 text-sm text-gray-900">
-                            {item.comprobante}<br />
-                            <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
-                          </td>
-                          <td className="px-2 py-4 text-sm text-gray-900">{tipo}</td>
-                          <td className="px-2 py-4 text-center">
-                            <span
-                              className={estadoClassName}
-                            >
-                              {estadoValue}
-                            </span>
-                          </td>
-                          <td className="px-2 py-4 text-sm font-medium text-gray-900 text-right">
-                            {formatCurrency(item.total, item.codiso)}
-                          </td>
-                          <td className="px-2 py-4 text-center">
-                            <button
-                              className={
-                                cn(
-                                  "rounded-md transition p-2",
-                                  "text-blue-600 bg-white",
-                                  "hover:bg-blue-50 hover:text-blue-700",
-                                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                                  "active:bg-blue-100 active:scale-[0.97]",
-                                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                                )
-                              }
-                              title="Ver detalle"
-                              onClick={() => this.handleDetalle(item.idCompra)}
-                            >
-                              <i className="bi bi-eye text-lg"></i>
-                            </button>
-                          </td>
-                          <td className="px-2 py-4 text-center">
-                            <button
-                              className={
-                                cn(
-                                  "rounded-md transition p-2",
-                                  "text-red-600 bg-white",
-                                  "hover:bg-red-50 hover:text-red-700",
-                                  "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
-                                  "active:bg-red-100 active:scale-[0.98]",
-                                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                                )
-                              }
-                              title="Anular venta"
-                              onClick={() => this.handleAnular(item.idCompra)}
-                            >
-                              <i className="bi bi-trash text-lg"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        ) : (
-          /* 🟦 Vista Cuadrícula */
-          <div className="space-y-6">
-            {this.state.loading ? (
-              <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                <p className="text-gray-500">Cargando información...</p>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {this.renderTable()}
+                  </tbody>
+                </table>
               </div>
-            ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 rounded border text-gray-500">
-                <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                <p className="text-lg font-medium">No se encontraron ventas</p>
-                <p className="text-sm">Intenta cambiar los filtros</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {this.state.lista.map((item) => {
-                  const estadoClassName = cn(
-                    "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                    item.estado === 1
-                      ? "bg-green-100 text-green-800"
-                      : item.estado === 2
-                        ? "bg-yellow-100 text-yellow-800"
-                        : item.estado === 3
-                          ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
-                  );
+            )
+          }
 
-                  const estadoValue =
-                    item.estado === 1 ? "PAGADO" :
-                      item.estado === 2 ? "POR PAGAR" : "ANULADO";
+          {/* 🟦 Vista Cuadrícula */}
+          {
+            vista === "cuadricula" && (
+              <>{this.renderCuadricula()}</>
+            )
+          }
 
-                  const tipo = item.idFormaPago === CONTADO
-                    ? "CONTADO"
-                    : "CREDITO"
-
-                  return (
-                    <div
-                      key={item.idCompra}
-                      className="bg-white rounded border transition group overflow-hidden"
-                    >
-                      <div className="flex flex-col gap-2 p-4">
-                        <div className="flex justify-between items-start">
-                          <h5 className="font-semibold text-gray-900 text-sm">
-                            {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
-                          </h5>
-                          <span className={estadoClassName}>
-                            {estadoValue}
-                          </span>
-                        </div>
-
-                        <div className="text-sm text-gray-600">
-                          <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
-                        </div>
-
-                        <div className="text-sm text-gray-600">
-                          <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
-                        </div>
-
-                        <div className="text-sm text-gray-600">
-                          <span className="font-medium">N° Documento:</span> {item.documento}
-                        </div>
-
-                        <div className="text-sm text-gray-600">
-                          <span className="font-medium">Información:</span> {item.informacion}
-                        </div>
-
-                        <div className="text-sm text-gray-600">
-                          <span className="font-medium">Tipo:</span> {tipo}
-                        </div>
-
-                        <div className="text-lg font-bold text-gray-900 mb-3">
-                          {formatCurrency(item.total, item.codiso)}
-                        </div>
-
-                        <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
-                          <button
-                            className={
-                              cn(
-                                "p-2 rounded-md text-sm font-medium transition",
-                                "text-blue-600 bg-white",
-                                "hover:bg-blue-50 hover:text-blue-700",
-                                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                                "active:bg-blue-100 active:scale-[0.97]",
-                                "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                              )
-                            }
-                            onClick={() => this.handleDetalle(item.idCompra)}
-                            title="Ver detalle"
-                          >
-                            <i className="bi bi-eye text-lg" /> Ver
-                          </button>
-
-                          <button
-                            className={
-                              cn(
-                                "p-2 rounded-md text-sm font-medium transition",
-                                "text-red-600 bg-white",
-                                "hover:bg-red-50 hover:text-red-700",
-                                "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
-                                "active:bg-red-100 active:scale-[0.98]",
-                                "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                              )
-                            }
-                            onClick={() => this.handleAnular(item.idCompra)}
-                            title="Anular"
-                          >
-                            <i className="bi bi-trash text-lg" /> Anular
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        )}
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              vista === "tabla"
+                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }

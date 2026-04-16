@@ -51,7 +51,7 @@ const initialState: GestionState = {
     gestionDetallesVisible: false,
 };
 
-const gestionSlice = createSlice({
+const activoGestionSlice = createSlice({
     name: "ACTIVO GESTION",
     initialState,
     reducers: {
@@ -68,6 +68,6 @@ const gestionSlice = createSlice({
 
 export const {
     setGestionState,
-} = gestionSlice.actions;
+} = activoGestionSlice.actions;
 
-export default gestionSlice.reducer;
+export default activoGestionSlice.reducer;

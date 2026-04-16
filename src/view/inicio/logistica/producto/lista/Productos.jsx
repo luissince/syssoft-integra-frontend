@@ -356,8 +356,6 @@ class Productos extends CustomComponent {
                 : item.idTipoProducto === MENOR_CUANTIA ? "MENOR CUANTIA"
                   : "EXISTENCIAL";
 
-        const estadoClass = item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-
         return (
           <tr key={item.idProducto} className="hover:bg-gray-50 transition-colors">
             <td className="px-2 py-4 text-sm text-gray-900 text-center">
@@ -381,7 +379,7 @@ class Productos extends CustomComponent {
               <div className="text-sm text-gray-500">
                 {item.codigo}
               </div>
-              <div className="text-sm font-medium text-gray-900">
+              <div className="text-sm font-medium text-gray-900 uppercase">
                 {item.nombre}
               </div>
               {
@@ -404,14 +402,26 @@ class Productos extends CustomComponent {
             </td>
             <td className="px-2 py-4 text-center">
               <span
-                className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoClass}`}
+                className={cn(
+                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                  item.estado === 1 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
+                )}
               >
-                {item.estado === 1 ? 'Activo' : 'Inactivo'}
+                {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
               </span>
             </td>
             <td className="px-2 py-4 text-center">
               <button
-                className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                className={
+                  cn(
+                    "p-2 rounded-md text-sm font-medium transition",
+                    "text-yellow-600 bg-white",
+                    "hover:bg-yellow-50 hover:text-yellow-700",
+                    "focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2",
+                    "active:bg-yellow-100 active:scale-[0.98]",
+                    "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                  )
+                }
                 title="Editar"
                 onClick={() => this.handleEditar(item.idProducto)}
               >
@@ -420,7 +430,16 @@ class Productos extends CustomComponent {
             </td>
             <td className="px-2 py-4 text-center">
               <button
-                className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
+                className={
+                  cn(
+                    "p-2 rounded-md text-sm font-medium transition",
+                    "text-red-600 bg-white",
+                    "hover:bg-red-50 hover:text-red-700",
+                    "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                    "active:bg-red-100 active:scale-[0.98]",
+                    "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                  )
+                }
                 title="Eliminar"
                 onClick={() => this.handleEliminar(item.idProducto)}
               >
@@ -459,8 +478,6 @@ class Productos extends CustomComponent {
           this.state.lista.map((item) => {
             const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO" : item.idTipoProducto === SERVICIO ? "SERVICIO" : item.idTipoProducto === COMBO ? "COMBO" : "ACTIVO FIJO";
 
-            const estadoClass = item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-
             return (
               <div
                 key={item.idProducto}
@@ -483,9 +500,9 @@ class Productos extends CustomComponent {
 
                 <div className="py-2 px-3">
                   <div className="flex justify-between items-start mb-2">
-                    <h5 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
+                    <h6 className="font-semibold text-gray-900 line-clamp-2 leading-tight uppercase">
                       {item.nombre}
-                    </h5>
+                    </h6>
                   </div>
 
                   <div className="text-sm text-gray-500 mb-1">
@@ -496,10 +513,6 @@ class Productos extends CustomComponent {
                     <span className="font-medium">Tipo:</span> {tipo}
                   </div>
 
-                  <div className="text-lg font-bold text-gray-900 mb-2">
-                    {formatCurrency(item.precio, this.state.codiso)}
-                  </div>
-
                   <div className="text-sm text-gray-600 mb-1">
                     <span className="font-medium">Medida:</span> {item.medida}
                   </div>
@@ -508,23 +521,47 @@ class Productos extends CustomComponent {
                     <span className="font-medium">Categoría:</span> {item.categoria}
                   </div>
 
+                  <div className="text-lg font-bold text-gray-900 mb-2">
+                    {formatCurrency(item.precio, this.state.codiso)}
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${estadoClass}`}
+                      className={cn(
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                      )}
                     >
-                      {item.estado === 1 ? 'Activo' : 'Inactivo'}
+                      {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
                     </span>
-
                     <div className="flex gap-1">
                       <button
-                        className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                        className={
+                          cn(
+                            "p-2 rounded-md text-sm font-medium transition",
+                            "text-yellow-600 bg-white",
+                            "hover:bg-yellow-50 hover:text-yellow-700",
+                            "focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2",
+                            "active:bg-yellow-100 active:scale-[0.98]",
+                            "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                          )
+                        }
                         title="Editar"
                         onClick={() => this.handleEditar(item.idProducto)}
                       >
                         <i className="bi bi-pencil text-lg"></i>
                       </button>
                       <button
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-300"
+                        className={
+                          cn(
+                            "p-2 rounded-md text-sm font-medium transition",
+                            "text-red-600 bg-white",
+                            "hover:bg-red-50 hover:text-red-700",
+                            "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                            "active:bg-red-100 active:scale-[0.98]",
+                            "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                          )
+                        }
                         title="Eliminar"
                         onClick={() => this.handleEliminar(item.idProducto)}
                       >

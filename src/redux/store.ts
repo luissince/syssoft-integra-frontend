@@ -9,6 +9,8 @@ import activoBienRedurcer from './activo/bienSlice';
 import activoDepreciacionReduce from './activo/depreciacionSlice';
 import activoGestionReduce from './activo/gestionSlice';
 
+import finanzasBancoReducer from './finanza/bancoSlice';
+
 import { combineReducers } from '@reduxjs/toolkit';
 
 const reducer = combineReducers({
@@ -21,6 +23,8 @@ const reducer = combineReducers({
   activoBien: activoBienRedurcer,
   activoDepreciacion: activoDepreciacionReduce,
   activoGestion: activoGestionReduce,
+
+  finanzasBanco: finanzasBancoReducer,
 });
 
 const store = configureStore({

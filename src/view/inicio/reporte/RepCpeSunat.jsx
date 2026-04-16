@@ -12,7 +12,7 @@ import {
   Cell,
 } from 'recharts';
 import { connect } from 'react-redux';
-import ContainerWrapper from '@/components/Container';
+import ContainerWrapper from '@/components/ui/container-wrapper';
 import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '@/components/Spinner';
 import Title from '@/components/Title';
@@ -255,6 +255,23 @@ class RepCpeSunat extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
   */
+
+  renderCustomizedLabel = (props) => {
+    const { x, y, width, value } = props;
+    return (
+      <g>
+        <text
+          x={x + width / 2}
+          y={y ? y - 5 : 0}
+          fontSize={15}
+          textAnchor="middle"
+        >
+          {formatCurrency(value, this.state.codIso)}
+        </text>
+      </g>
+    );
+  };
+
   render() {
     return (
       <ContainerWrapper>
@@ -431,28 +448,16 @@ class RepCpeSunat extends CustomComponent {
                       ]}
                     />
                     <Legend />
-                    <Bar name="Total" dataKey="total" fill="#000000">
+                    <Bar label="Total" dataKey="total" fill="#000000">
                       <LabelList
-                        dataKey="Total"
-                        content={(props) => {
-                          const { x, y, width, value } = props;
-                          return (
-                            <g>
-                              <text
-                                x={x + width / 2}
-                                y={y ? y - 5 : 0}
-                                fontSize={15}
-                                textAnchor="middle"
-                              >
-                                {formatCurrency(value, this.state.codIso)}
-                              </text>
-                            </g>
-                          );
-                        }}
+                        dataKey="total"
+                        content={this.renderCustomizedLabel}
                       />
-                      {this.state.ventasCompras.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
+                      {
+                        this.state.ventasCompras.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))
+                      }
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>

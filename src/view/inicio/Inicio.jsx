@@ -164,13 +164,7 @@ import Reporte, {
 
 import CpeSunat, { CpeElectronicos, CpeConsultar } from './cpesunat/index';
 
-import Finanzas, {
-  Bancos,
-  BancoDetalle,
-  BancoAgregar,
-  BancoEditar,
-  Transacciones,
-} from './finanzas/index';
+import FinanzasRoutes from './finanzas/index';
 
 import CrmRoutes from './crm/index';
 
@@ -476,7 +470,7 @@ class Inicio extends React.Component {
           | DASBOARD
           --------------------------------------------------------
           */}
-          <Route path="/inicio" exact={true}>
+          <Route path="/inicio" exact>
             <Redirect to={`${path}/main`} />
           </Route>
 
@@ -506,50 +500,50 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/seguridad`}
-            exact={true}
+            exact
             render={(props) => <Seguridad {...props} />}
           />
 
           <Route
             path={`${path}/seguridad/perfiles`}
-            exact={true}
+            exact
             render={(props) => <Perfiles {...props} />}
           />
           <Route
             path={`${path}/seguridad/perfiles/agregar`}
-            exact={true}
+            exact
             render={(props) => <PerfilAgregar {...props} />}
           />
           <Route
             path={`${path}/seguridad/perfiles/editar`}
-            exact={true}
+            exact
             render={(props) => <PerfilEditar {...props} />}
           />
 
           <Route
             path={`${path}/seguridad/usuarios`}
-            exact={true}
+            exact
           >
             <Usuarios />
           </Route>
 
           <Route
             path={`${path}/seguridad/usuarios/agregar`}
-            exact={true}
+            exact
           >
             <UsuarioAgregar />
           </Route>
 
           <Route
             path={`${path}/seguridad/usuarios/editar`}
-            exact={true}
+            exact
           >
             <UsuarioEditar />
           </Route>
 
           <Route
             path={`${path}/seguridad/usuarios/resetear`}
-            exact={true}
+            exact
           >
             <UsuarioResetear />
           </Route>
@@ -566,136 +560,136 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/facturacion`}
-            exact={true}
+            exact
             render={(props) => <Facturacion {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/ventas`}
-            exact={true}
+            exact
             render={(props) => <Ventas {...props} />}
           />
           <Route
             path={`${path}/facturacion/ventas/crear`}
-            exact={true}
+            exact
             render={(props) => <VentaCrear {...props} />}
           />
           <Route
             path={`${path}/facturacion/ventas/crear-clasico`}
-            exact={true}
+            exact
             render={(props) => <VentaCrearEscritorio {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/ventas/detalle`}
-            exact={true}
+            exact
             render={(props) => <VentaDetalle {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/cobros`}
-            exact={true}
+            exact
             render={(props) => <Cobros {...props} />}
           />
           <Route
             path={`${path}/facturacion/cobros/crear`}
-            exact={true}
+            exact
             render={(props) => <CobroCrear {...props} />}
           />
           <Route
             path={`${path}/facturacion/cobros/detalle`}
-            exact={true}
+            exact
             render={(props) => <CobroDetalle {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/notacredito`}
-            exact={true}
+            exact
             render={(props) => <NotaCredito {...props} />}
           />
           <Route
             path={`${path}/facturacion/notacredito/crear`}
-            exact={true}
+            exact
           >
             <NotaCreditoCrear />
           </Route>
           <Route
             path={`${path}/facturacion/notacredito/detalle`}
-            exact={true}
+            exact
             render={(props) => <NotaCreditoDetalle {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/cotizaciones`}
-            exact={true}
+            exact
             render={(props) => <Cotizaciones {...props} />}
           />
           <Route
             path={`${path}/facturacion/cotizaciones/crear`}
-            exact={true}
+            exact
             render={(props) => <CotizacioneCrear {...props} />}
           />
           <Route
             path={`${path}/facturacion/cotizaciones/editar`}
-            exact={true}
+            exact
             render={(props) => <CotizacioneEditar {...props} />}
           />
           <Route
             path={`${path}/facturacion/cotizaciones/detalle`}
-            exact={true}
+            exact
             render={(props) => <CotizacionDetalle {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/guiaremision`}
-            exact={true}
+            exact
             render={(props) => <GuiaRemision {...props} />}
           />
           <Route
             path={`${path}/facturacion/guiaremision/crear`}
-            exact={true}
+            exact
             render={(props) => <GuiaRemisionCrear {...props} />}
           />
           <Route
             path={`${path}/facturacion/guiaremision/editar`}
-            exact={true}
+            exact
             render={(props) => <GuiaRemisionEditar {...props} />}
           />
           <Route
             path={`${path}/facturacion/guiaremision/detalle`}
-            exact={true}
+            exact
             render={(props) => <GuiaRemisionDetalle {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/cuentacobrar`}
-            exact={true}
+            exact
             render={(props) => <CuentasPorCobrar {...props} />}
           />
           <Route
             path={`${path}/facturacion/cuentacobrar/detalle`}
-            exact={true}
+            exact
             render={(props) => <CuentasPorCobrarAbonar {...props} />}
           />
 
           <Route
             path={`${path}/facturacion/pedidos`}
-            exact={true}
+            exact
             render={(props) => <Pedidos {...props} />}
           />
           <Route
             path={`${path}/facturacion/pedidos/crear`}
-            exact={true}
+            exact
             render={(props) => <PedidoCrear {...props} />}
           />
           <Route
             path={`${path}/facturacion/pedidos/editar`}
-            exact={true}
+            exact
             render={(props) => <PedidoEditar {...props} />}
           />
           <Route
             path={`${path}/facturacion/pedidos/detalle`}
-            exact={true}
+            exact
             render={(props) => <PedidoDetalle {...props} />}
           />
 
@@ -706,94 +700,94 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/logistica`}
-            exact={true}
+            exact
           >
             <Logistica />
           </Route>
 
           <Route
             path={`${path}/logistica/productos`}
-            exact={true}
+            exact
             render={(props) => <Productos {...props} />}
           />
           <Route
             path={`${path}/logistica/productos/detalle`}
-            exact={true}
+            exact
             render={(props) => <ProductoDetalle {...props} />}
           />
           <Route
             path={`${path}/logistica/productos/agregar`}
-            exact={true}
+            exact
             render={(props) => <ProductoAgregar {...props} />}
           />
           <Route
             path={`${path}/logistica/productos/editar`}
-            exact={true}
+            exact
             render={(props) => <ProductoEditar {...props} />}
           />
 
           <Route
             path={`${path}/logistica/ajuste`}
-            exact={true}
+            exact
             render={(props) => <LogisticaAjuste {...props} />}
           />
           <Route
             path={`${path}/logistica/ajuste/crear`}
-            exact={true}
+            exact
             render={(props) => <LogisticaAjusteCrear {...props} />}
           />
           <Route
             path={`${path}/logistica/ajuste/detalle`}
-            exact={true}
+            exact
             render={(props) => <LogisticaAjusteDetalle {...props} />}
           />
 
           <Route
             path={`${path}/logistica/inventario`}
-            exact={true}
+            exact
             render={(props) => <Inventario {...props} />}
           />
 
           <Route
             path={`${path}/logistica/kardex`}
-            exact={true}
+            exact
             render={(props) => <Kardex {...props} />}
           />
 
           <Route
             path={`${path}/logistica/traslado`}
-            exact={true}
+            exact
             render={(props) => <Traslado {...props} />}
           />
           <Route
             path={`${path}/logistica/traslado/crear`}
-            exact={true}
+            exact
             render={(props) => <TrasladoCrear {...props} />}
           />
           <Route
             path={`${path}/logistica/traslado/detalle`}
-            exact={true}
+            exact
             render={(props) => <TrasladoDetalle {...props} />}
           />
 
           <Route
             path={`${path}/logistica/catalogo`}
-            exact={true}
+            exact
             render={(props) => <Catalogos {...props} />}
           />
           <Route
             path={`${path}/logistica/catalogo/crear`}
-            exact={true}
+            exact
             render={(props) => <CatalogoCrear {...props} />}
           />
           <Route
             path={`${path}/logistica/catalogo/editar`}
-            exact={true}
+            exact
             render={(props) => <CatalogoEditar {...props} />}
           />
           <Route
             path={`${path}/logistica/catalogo/detalle`}
-            exact={true}
+            exact
             render={(props) => <CatalogoDetalle {...props} />}
           />
 
@@ -804,71 +798,71 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/tesoreria`}
-            exact={true}
+            exact
             render={(props) => <Tesoreria {...props} />}
           />
 
           <Route
             path={`${path}/tesoreria/gastos`}
-            exact={true}
+            exact
             render={(props) => <Gastos {...props} />}
           />
           <Route
             path={`${path}/tesoreria/gastos/crear`}
-            exact={true}
+            exact
             render={(props) => <GastoCrear {...props} />}
           />
           <Route
             path={`${path}/tesoreria/gastos/detalle`}
-            exact={true}
+            exact
             render={(props) => <GastoDetalle {...props} />}
           />
 
           <Route
             path={`${path}/tesoreria/compras`}
-            exact={true}
+            exact
             render={(props) => <Compras {...props} />}
           />
           <Route
             path={`${path}/tesoreria/compras/crear`}
-            exact={true}
+            exact
             render={(props) => <CompraCrear {...props} />}
           />
           <Route
             path={`${path}/tesoreria/compras/detalle`}
-            exact={true}
+            exact
             render={(props) => <CompraDetalle {...props} />}
           />
 
           <Route
             path={`${path}/tesoreria/cuentapagar`}
-            exact={true}
+            exact
             render={(props) => <CuentasPorPagar {...props} />}
           />
           <Route
             path={`${path}/tesoreria/cuentapagar/detalle`}
-            exact={true}
+            exact
             render={(props) => <CuentasPorPagarAmortizar {...props} />}
           />
 
           <Route
             path={`${path}/tesoreria/ordencompras`}
-            exact={true}
+            exact
             render={(props) => <OrdenCompras {...props} />}
           />
           <Route
             path={`${path}/tesoreria/ordencompras/crear`}
-            exact={true}
+            exact
             render={(props) => <OrdenCompraCrear {...props} />}
           />
           <Route
             path={`${path}/tesoreria/ordencompras/editar`}
-            exact={true}
+            exact
             render={(props) => <OrdenCompraEditar {...props} />}
           />
           <Route
             path={`${path}/tesoreria/ordencompras/detalle`}
-            exact={true}
+            exact
             render={(props) => <OrdenCompraDetalle {...props} />}
           />
 
@@ -879,74 +873,74 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/contactos`}
-            exact={true}
+            exact
             render={(props) => <Contacto {...props} />}
           />
 
           <Route
             path={`${path}/contactos/todos`}
-            exact={true}
+            exact
             render={(props) => <Personas {...props} />}
           />
           <Route
             path={`${path}/contactos/todos/agregar`}
-            exact={true}
+            exact
             render={(props) => <PersonaAgregar {...props} />}
           />
           <Route
             path={`${path}/contactos/todos/editar`}
-            exact={true}
+            exact
             render={(props) => <PersonaEditar {...props} />}
           />
           <Route
             path={`${path}/contactos/todos/detalle`}
-            exact={true}
+            exact
             render={(props) => <PersonaDetalle {...props} />}
           />
 
           <Route
             path={`${path}/contactos/clientes`}
-            exact={true}
+            exact
             render={(props) => <Clientes {...props} />}
           />
           <Route
             path={`${path}/contactos/clientes/editar`}
-            exact={true}
+            exact
             render={(props) => <PersonaEditar {...props} />}
           />
 
           <Route
             path={`${path}/contactos/proveedores`}
-            exact={true}
+            exact
             render={(props) => <Proveedores {...props} />}
           />
           <Route
             path={`${path}/contactos/proveedores/editar`}
-            exact={true}
+            exact
             render={(props) => <PersonaEditar {...props} />}
           />
 
           <Route
             path={`${path}/contactos/conductores`}
-            exact={true}
+            exact
             render={(props) => <Conductores {...props} />}
           />
 
           <Route
             path={`${path}/contactos/conductores/editar`}
-            exact={true}
+            exact
             render={(props) => <PersonaEditar {...props} />}
           />
 
           <Route
             path={`${path}/contactos/personales`}
-            exact={true}
+            exact
             render={(props) => <Personales {...props} />}
           />
 
           <Route
             path={`${path}/contactos/personales/editar`}
-            exact={true}
+            exact
             render={(props) => <PersonaEditar {...props} />}
           />
 
@@ -957,246 +951,246 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/configuracion`}
-            exact={true}
+            exact
           >
             <Configuracion />
           </Route>
 
           <Route
             path={`${path}/configuracion/categorias`}
-            exact={true}
+            exact
             render={(props) => <Categorias {...props} />}
           />
           <Route
             path={`${path}/configuracion/categorias/agregar`}
-            exact={true}
+            exact
             render={(props) => <CategoriaAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/categorias/editar`}
-            exact={true}
+            exact
             render={(props) => <CategoriaEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/almacenes`}
-            exact={true}
+            exact
             render={(props) => <Almacenes {...props} />}
           />
           <Route
             path={`${path}/configuracion/almacenes/agregar`}
-            exact={true}
+            exact
             render={(props) => <AlmacenAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/almacenes/editar`}
-            exact={true}
+            exact
             render={(props) => <AlmacenEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/medida`}
-            exact={true}
+            exact
             render={(props) => <Medidas {...props} />}
           />
           <Route
             path={`${path}/configuracion/medida/agregar`}
-            exact={true}
+            exact
             render={(props) => <MedidaAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/medida/editar`}
-            exact={true}
+            exact
             render={(props) => <MedidaEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/comprobantes`}
-            exact={true}
+            exact
             render={(props) => <Comprobantes {...props} />}
           />
           <Route
             path={`${path}/configuracion/comprobantes/agregar`}
-            exact={true}
+            exact
             render={(props) => <ComprobanteAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/comprobantes/editar`}
-            exact={true}
+            exact
             render={(props) => <ComprobanteEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/monedas`}
-            exact={true}
+            exact
             render={(props) => <Monedas {...props} />}
           />
           <Route
             path={`${path}/configuracion/monedas/agregar`}
-            exact={true}
+            exact
             render={(props) => <MonedaAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/monedas/editar`}
-            exact={true}
+            exact
             render={(props) => <MonedaEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/empresa`}
-            exact={true}
+            exact
             render={(props) => <Empresa {...props} />}
           />
           <Route
             path={`${path}/configuracion/empresa/proceso`}
-            exact={true}
+            exact
             render={(props) => <EmpresaEditar {...props} />}
           />
           <Route
             path={`${path}/configuracion/sucursales`}
-            exact={true}
+            exact
             render={(props) => <Sucursales {...props} />}
           />
           <Route
             path={`${path}/configuracion/sucursales/agregar`}
-            exact={true}
+            exact
             render={(props) => <SucursalAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/sucursales/editar`}
-            exact={true}
+            exact
             render={(props) => <SucursalEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/impuestos`}
-            exact={true}
+            exact
             render={(props) => <Impuestos {...props} />}
           />
           <Route
             path={`${path}/configuracion/impuestos/agregar`}
-            exact={true}
+            exact
             render={(props) => <ImpuestoAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/impuestos/editar`}
-            exact={true}
+            exact
             render={(props) => <ImpuestoEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/vehiculo`}
-            exact={true}
+            exact
             render={(props) => <Vehiculos {...props} />}
           />
           <Route
             path={`${path}/configuracion/vehiculo/agregar`}
-            exact={true}
+            exact
             render={(props) => <VehiculoAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/vehiculo/editar`}
-            exact={true}
+            exact
             render={(props) => <VehiculoEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/conceptos`}
-            exact={true}
+            exact
             render={(props) => <Conceptos {...props} />}
           />
           <Route
             path={`${path}/configuracion/conceptos/agregar`}
-            exact={true}
+            exact
             render={(props) => <ConceptoAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/conceptos/editar`}
-            exact={true}
+            exact
             render={(props) => <ConceptoEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/marcas`}
-            exact={true}
+            exact
             render={(props) => <Marcas {...props} />}
           />
           <Route
             path={`${path}/configuracion/marcas/agregar`}
-            exact={true}
+            exact
             render={(props) => <MarcaAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/marcas/editar`}
-            exact={true}
+            exact
             render={(props) => <MarcaEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/atributos`}
-            exact={true}
+            exact
             render={(props) => <Atributos {...props} />}
           />
           <Route
             path={`${path}/configuracion/atributos/agregar`}
-            exact={true}
+            exact
             render={(props) => <AtributosAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/atributos/editar`}
-            exact={true}
+            exact
             render={(props) => <AtributosEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/ubicaciones`}
-            exact={true}
+            exact
             render={(props) => <Ubicaciones {...props} />}
           />
           <Route
             path={`${path}/configuracion/ubicaciones/agregar`}
-            exact={true}
+            exact
             render={(props) => <UbicacionAgregar {...props} />}
           />
           <Route
             path={`${path}/configuracion/ubicaciones/editar`}
-            exact={true}
+            exact
             render={(props) => <UbicacionEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/areas`}
-            exact={true}
+            exact
             render={(props) => <Areas {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/areas/agregar`}
-            exact={true}
+            exact
             render={(props) => <AreaAgregar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/areas/editar`}
-            exact={true}
+            exact
             render={(props) => <AreaEditar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/cargos`}
-            exact={true}
+            exact
             render={(props) => <Cargos {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/cargos/agregar`}
-            exact={true}
+            exact
             render={(props) => <CargoAgregar {...props} />}
           />
 
           <Route
             path={`${path}/configuracion/cargos/editar`}
-            exact={true}
+            exact
             render={(props) => <CargoEditar {...props} />}
           />
           {/* 
@@ -1206,32 +1200,37 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/reportes`}
-            exact={true}
+            exact
             render={(props) => <Reporte {...props} />}
           />
 
           <Route
             path={`${path}/reportes/repfinanciero`}
+            exact
             render={(props) => <RepFinanciero {...props} />}
           />
 
           <Route
             path={`${path}/reportes/repventas`}
+            exact
             render={(props) => <RepVentas {...props} />}
           />
 
           <Route
             path={`${path}/reportes/repcompras`}
+            exact
             render={(props) => <RepCompras {...props} />}
           />
 
           <Route
             path={`${path}/reportes/repproductos`}
+            exact
             render={(props) => <RepProductos {...props} />}
           />
 
           <Route
             path={`${path}/reportes/repcepsunat`}
+            exact
             render={(props) => <RepCpeSunat {...props} />}
           />
 
@@ -1246,16 +1245,18 @@ class Inicio extends React.Component {
           */}
           <Route
             path={`${path}/cpesunat`}
-            exact={true}
+            exact
             render={(props) => <CpeSunat {...props} />}
           />
 
           <Route
             path={`${path}/cpesunat/cpeelectronicos`}
+            exact
             render={(props) => <CpeElectronicos {...props} />}
           />
           <Route
             path={`${path}/cpesunat/cpeconsultar`}
+            exact
             render={(props) => <CpeConsultar {...props} />}
           />
 
@@ -1264,39 +1265,11 @@ class Inicio extends React.Component {
           | FINANZAS
           ----------------------------------------------------------
           */}
-
           <Route
             path={`${path}/finanzas`}
-            exact={true}
-            render={(props) => <Finanzas {...props} />}
-          />
-
-          <Route
-            path={`${path}/finanzas/bancos`}
-            exact={true}
-            render={(props) => <Bancos {...props} />}
-          />
-          <Route
-            path={`${path}/finanzas/bancos/detalle`}
-            exact={true}
-            render={(props) => <BancoDetalle {...props} />}
-          />
-          <Route
-            path={`${path}/finanzas/bancos/agregar`}
-            exact={true}
-            render={(props) => <BancoAgregar {...props} />}
-          />
-          <Route
-            path={`${path}/finanzas/bancos/editar`}
-            exact={true}
-            render={(props) => <BancoEditar {...props} />}
-          />
-
-          <Route
-            path={`${path}/finanzas/transacciones`}
-            exact={true}
-            render={(props) => <Transacciones {...props} />}
-          />
+          >
+            <FinanzasRoutes />
+          </Route>
 
           {/*
           ----------------------------------------------------------
