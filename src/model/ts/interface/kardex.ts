@@ -11,11 +11,14 @@ export interface KardexListDepreciacionInterface {
   idProducto: string;
   opcion: string;
   producto: string;
+  idInventarioActivo: string;
   serie: string;
   tipo: string;
   ubicacion: string;
   valorResidual: number;
   vidaUtil: number;
+  idPersona: string;
+  informacion: string;
 }
 
 export interface KardexResponseListDepreciacionInterface {

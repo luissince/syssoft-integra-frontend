@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 import { listGestion } from "@/network/rest/api-client";
 import { setGestionState } from "@/redux/activo/gestionSlice";
 import { useAppSelector } from "@/redux/hooks";
-import React, { useRef } from "react";
+import { ChevronDown, ChevronUp, Minus, Plus } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
@@ -36,6 +37,7 @@ const Gestiones = () => {
   // =============================
   // STATE
   // =============================
+  const [inventarioDetallesVisible, setinventarioDetallesVisible] = useState<Record<number, boolean>>({});
 
   // =============================
   // REFS
@@ -71,7 +73,6 @@ const Gestiones = () => {
     }
 
     const { success, data, message, type } = await listGestion(params, abortControllerTable.current.signal);
-
     if (!success) {
       if (type === CANCELED) return;
 
@@ -99,6 +100,10 @@ const Gestiones = () => {
   // EFFECTS
   // =============================
 
+  useEffect(() => {
+    fillTable();
+  }, []);
+
   // =============================
   // HANDLERS
   // =============================
@@ -115,9 +120,24 @@ const Gestiones = () => {
     });
   };
 
+  // Evento de cambio de paginación
+  const handleGoToBienDevolver = () => {
+    history.push({
+      pathname: `${history.location.pathname}/devolver`,
+    });
+  };
+
   // =============================
   // RENDER HELPERS
   // =============================
+  const toggleActivosVisibility = (index) => {
+    dispatch(setGestionState({
+      gestionDetallesVisible: {
+        ...state.gestionDetallesVisible,
+        [index]: !state.gestionDetallesVisible?.[index],
+      },
+    }));
+  };
 
   const renderTable = () => {
     if (state.loading) {
@@ -139,7 +159,7 @@ const Gestiones = () => {
           <td colSpan={6} className="px-6 py-12 text-center">
             <div className="text-gray-500">
               <i className="bi bi-box text-4xl mb-3 block"></i>
-              <p className="text-lg font-medium">No se encontraron ventas</p>
+              <p className="text-lg font-medium">No se encontraron gestiones</p>
               <p className="text-sm">Intenta cambiar los filtros</p>
             </div>
           </td>
@@ -148,48 +168,123 @@ const Gestiones = () => {
     }
 
     return state.lista.map((item, index) => {
-
       return (
-        <React.Fragment key={`producto-${item.idInventario}`}>
+        <React.Fragment key={`producto-${index}`}>
           <tr className="hover:bg-gray-50 transition-colors">
             <td className="px-6 py-4">
-              <div className="flex items-center">
-                <Image
-                  default={images.noImage}
-                  src={item.imagen}
-                  alt={item.producto}
-                  overrideClass="w-20 h-20 object-contain border border-solid border-[#e2e8f0] rounded"
-                />
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    {item.producto}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {item.codigo}
-                  </div>
+              {item.id}
+            </td>
+            <td>
+              <div className="ml-4">
+                <div className="text-sm font-medium text-gray-900">
+                  {item.documento} - {item.numeroDocumento}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {item.responsable}
                 </div>
               </div>
             </td>
             <td className="px-6 py-4">
               <div className="text-sm text-gray-900">
-                {item.categoria}
+                {item.tipo}
               </div>
             </td>
             <td className="px-6 py-4">
-
+              <div className="text-sm font-medium text-gray-900">
+                {item.fecha.split("T")[0]}
+              </div>
+              <div className="text-sm text-gray-500">
+                {item.hora}
+              </div>
             </td>
             <td className="px-6 py-4">
+              <div className="flex justify-center space-x-2">
+                <button
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                // onClick={() => handleOpenModalStock(item)}
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+                {/* <button
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                >
+                  <Minus className="h-5 w-5" onClick={handleGoToBienDevolver} />
+                </button> */}
 
-            </td>
-            <td className="px-6 py-4">
-
-            </td>
-            <td className="px-6 py-4">
-
+                <button
+                  onClick={() => toggleActivosVisibility(index)}
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                >
+                  {state.gestionDetallesVisible[index] ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </td>
           </tr>
 
-
+          {/* Lotes rows */}
+          {state.gestionDetallesVisible[index] && (
+            <tr>
+              <td colSpan={6} className="px-0 py-0 bg-gray-50">
+                <div className="rounded p-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">
+                    Detalles de la gestión
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {
+                      item.gestionDetalle.map((gestionDetalle, gestionDetalleIndex) => {
+                        return (
+                          <div
+                            key={gestionDetalleIndex}
+                            className="bg-white rounded p-4 border"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="text-sm font-medium text-gray-900">
+                                {gestionDetalleIndex + 1}
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <span className="text-gray-500">Proucto: </span>
+                                <span className="font-medium">{gestionDetalle.producto}</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Código: </span>
+                                <span className="font-medium">{gestionDetalle.codigo || "N/A"}</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Serie: </span>
+                                <span className="font-medium">{gestionDetalle.serie || "N/A"}</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">SKU: </span>
+                                <span className="font-medium">{gestionDetalle.sku || "N/A"}</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Categoría: </span>
+                                <span className="font-medium">{gestionDetalle.categoria || "N/A"}</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Cantidad: </span>
+                                <span className="font-medium">{gestionDetalle.cantidad} {item.medida}</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-gray-500">Ubicación: </span>
+                                <span className="font-medium">{gestionDetalle.ubicacion || "N/A"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          )}
         </React.Fragment>
       );
     });
@@ -253,7 +348,19 @@ const Gestiones = () => {
             onClick={handleGoToBienCrear}
           >
             <i className="bi bi-file-plus"></i>
-            Nuevo Registro
+            Asignar
+          </button>
+          <button
+            className={cn(
+              "inline-flex items-center gap-2 px-4 py-2",
+              "bg-green-600 text-white text-sm font-medium rounded",
+              "hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition",
+            )}
+            aria-label="Crear nueva venta"
+            onClick={handleGoToBienDevolver}
+          >
+            <i className="bi bi-file-plus"></i>
+            Devolver
           </button>
           <button
             className={cn(
@@ -380,11 +487,10 @@ const Gestiones = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Activo</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Serie</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Ubicación</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Responsable</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">N°</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Reponsable</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
+                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Fecha / hora</th>
                     <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Acciones</th>
                   </tr>
                 </thead>

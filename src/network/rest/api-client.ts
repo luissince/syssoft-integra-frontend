@@ -6,6 +6,7 @@ import BranchInterface from '@/model/ts/interface/branch';
 import { CreditNoteGetInterface, CreditNoteResponseInterface } from '@/model/ts/interface/credit-note';
 import { CreditNotesReasonsOptionsInterface } from '@/model/ts/interface/credit-notes-reasons';
 import DashboardInterface from '@/model/ts/interface/dashboard';
+import { GestionListInterface } from '@/model/ts/interface/gestion';
 import { InventoryDashboardInterface } from '@/model/ts/interface/inventory';
 import { KardexResponseListDepreciacionInterface } from '@/model/ts/interface/kardex';
 import { ProfileOptionsInterface } from '@/model/ts/interface/profile';
@@ -246,6 +247,14 @@ export async function listarDepreciacionKardex(body: Record<string, any>, signal
   );
 }
 
+export async function listarDepreciacionDevolucion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<KardexResponseListDepreciacionInterface>> {
+  return await Resolve.safe<KardexResponseListDepreciacionInterface>(
+    apiClient.post('/api/kardex/depreciacion/devolver', body, {
+      signal: signal,
+    }),
+  );
+}
+
 export async function metricasDepreciacionKardex(params: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<AssetMetricsInterface>> {
   return await Resolve.safe<AssetMetricsInterface>(
     apiClient.get('/api/kardex/depreciacion/metrics', {
@@ -310,7 +319,7 @@ export function pdfNotaCredito(idNotaCredito: string, size: string, outputType: 
 |--------------------------------------------------------------------------
 */
 
-export async function listGestion(params: Record<string, any>, signal: AbortSignal): Promise<ResolveResponse<CreditNoteResponseInterface>> {
+export async function listGestion(params: Record<string, any>, signal: AbortSignal): Promise<ResolveResponse<GestionListInterface>> {
   return await Resolve.safe(
     apiClient.get('/api/activo-gestion/', {
       signal: signal,
@@ -327,6 +336,13 @@ export async function createGestion(body: Record<string, any>, signal: AbortSign
   );
 }
 
+export async function devolverGestion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<string>> {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/activo-gestion/devolver', body, {
+      signal: signal,
+    }),
+  );
+}
 
 export async function updateGestion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<string>> {
   return await Resolve.safe<string>(

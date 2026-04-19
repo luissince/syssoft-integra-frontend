@@ -31,6 +31,7 @@ const GestionCrear = () => {
   // REDUX
   // =============================
   const moneda = useAppSelector((state) => state.predeterminado.moneda);
+  const token = useAppSelector((state) => state.principal);
 
   // =============================
   // ROUTER
@@ -48,11 +49,11 @@ const GestionCrear = () => {
   const [responsable, setResponsable] = useState<PersonFilterInterface | null>(null);
   const [responsables, setResponsables] = useState<PersonFilterInterface[]>([]);
 
-  const [activo, setActivo] = useState<ProductFilterInterface>(null);
+  const [activo, setActivo] = useState<ProductFilterInterface | null>(null);
   const [activos, setActivos] = useState<ProductFilterInterface[]>([]);
-  const [activoSeleccionado, setActivoSeleccionado] = useState<KardexListDepreciacionInterface | null>(null);
+  const [activoSeleccionado, setActivoSeleccionado] = useState<KardexListDepreciacionInterface[] | null>(null);
 
-  const [descripcion, setDescripcion] = useState("");
+  const [observacion, setObservacion] = useState("");
 
   const [lista, setLista] = useState<KardexListDepreciacionInterface[]>([]);
   const [paginacion, setPaginacion] = useState(1);
@@ -97,7 +98,6 @@ const GestionCrear = () => {
     };
 
     const { success, data, message } = await listarDepreciacionKardex(body, abortControllerDetalle.current.signal);
-
     if (!success) {
       alertKit.warning({
         title: "Depreciar",
@@ -124,7 +124,7 @@ const GestionCrear = () => {
   useEffect(() => { setLoading(false); }, []);
 
   useEffect(() => {
-    if (activo && paginacion) {
+    if (activo?.idProducto && paginacion) {
       loadDetail();
     }
   }, [activo, paginacion]);
@@ -186,7 +186,6 @@ const GestionCrear = () => {
     };
 
     const response = await filtrarProducto(params);
-
     if (response instanceof SuccessResponse) {
       const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === ACTIVO_FIJO);
 
@@ -198,17 +197,35 @@ const GestionCrear = () => {
     refActivo.current.initialize(producto.nombre);
 
     setActivo(producto);
+    setLista([]);
     setActivos([]);
   }
 
   // Evento para ingresar el detalle de la gestión
-  const handleInputDescripcion = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDescripcion(event.target.value);
+  const handleInputDetalles = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setObservacion(event.target.value);
   };
 
   // Evento para seleccionar el activo
   const handleSelectActivo = (value: KardexListDepreciacionInterface) => {
-    setActivoSeleccionado(value);
+    setActivoSeleccionado(prev => {
+      if (!prev) return [value];
+
+      const exists = prev.some(
+        item =>
+          item.id === value.id &&
+          item.idProducto === value.idProducto
+      );
+
+      if (exists) {
+        return prev.filter(
+          item =>
+            !(item.id === value.id && item.idProducto === value.idProducto)
+        );
+      }
+
+      return [...prev, value];
+    });
   };
 
   // Evento para cambiar la paginación
@@ -232,10 +249,15 @@ const GestionCrear = () => {
 
     if (accept) {
       const body = {
+        tipo: "ENTREGA",
         idPersona: responsable.idPersona,
-        idProducto: activo.idProducto,
-        descripcion: descripcion,
-        serie: activoSeleccionado.serie,
+        descripcion: observacion,
+        activos: activoSeleccionado?.map(item => ({
+          idProducto: item.idProducto,
+          idInventarioActivo: item.idInventarioActivo,
+          cantidad: item.cantidad,
+        })),
+        idUsuario: token.userToken.usuario.idUsuario,
       };
 
       const { success, data, message } = await createGestion(body);
@@ -257,12 +279,23 @@ const GestionCrear = () => {
     }
   };
 
+  const onClear = (id: number, idProducto: string) => {
+    setActivoSeleccionado(prev => {
+      if (!prev) return prev;
+
+      return prev.filter(
+        item =>
+          !(item.id === id && item.idProducto === idProducto)
+      );
+    });
+  };
+
   // =============================
   // RENDER HELPERS
   // =============================
 
   const renderBody = () => {
-    if (isEmpty(lista)) {
+    if (!lista || lista.length === 0) {
       return (
         <tr>
           <td colSpan={8} className="px-6 py-12 text-center">
@@ -275,25 +308,34 @@ const GestionCrear = () => {
       );
     }
 
-    return lista.map((item, index) => (
-      <tr
-        key={index}
-        className={activoSeleccionado?.serie === item.serie ? "bg-blue-50" : ""}
-      >
-        <td className="px-6 py-4 text-sm text-gray-900">{item.serie}</td>
-        <td className="px-6 py-4 text-sm text-gray-900">{item.almacen}</td>
-        <td className="px-6 py-4 text-sm text-gray-900">{item.ubicacion}</td>
-        <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.cantidad}</td>
-        <td className="px-6 py-4 text-sm text-gray-900 text-center">
-          <button
-            className={`p-1 rounded-full ${activoSeleccionado?.serie === item.serie ? "bg-blue-100" : "hover:bg-gray-100"}`}
-            onClick={() => handleSelectActivo(item)}
-          >
-            <GrUserAdd className={`h-5 w-5 ${activoSeleccionado?.serie === item.serie ? "text-blue-600" : "text-gray-500"}`} />
-          </button>
-        </td>
-      </tr>
-    ));
+    return lista.map((item) => {
+      const isSelected = activoSeleccionado?.some(
+        (selected) =>
+          selected.id === item.id &&
+          selected.idProducto === item.idProducto
+      );
+
+      return (
+        <tr
+          key={`${item.idProducto}-${item.id}`}
+          className={isSelected ? "bg-blue-50" : ""}
+        >
+          <td className="px-6 py-4 text-sm text-gray-900">{item.serie}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">{item.almacen}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">{item.ubicacion}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.cantidad}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+            <button
+              className={`p-1 rounded-full ${isSelected? "bg-blue-100" : "hover:bg-gray-100"} ${item.cantidad === 0 ? "cursor-not-allowed opacity-50" : ""}`}
+              onClick={() => handleSelectActivo(item)}
+              disabled={item.cantidad === 0}
+            >
+              <GrUserAdd className={`h-5 w-5 ${isSelected ? "text-blue-600" : "text-gray-500"}`} />
+            </button>
+          </td>
+        </tr>
+      );
+    });
   };
 
   // =============================
@@ -399,8 +441,8 @@ const GestionCrear = () => {
             }
             rows={3}
             ref={refDetalle}
-            value={descripcion}
-            onChange={handleInputDescripcion}
+            value={observacion}
+            onChange={handleInputDetalles}
           />
         </div>
 
@@ -456,17 +498,33 @@ const GestionCrear = () => {
           </div>
         </div>
 
-        {activoSeleccionado && responsable && (
+        {activoSeleccionado && activoSeleccionado.length > 0 && responsable && (
           <div className="md:col-span-2 bg-green-50 p-4 rounded-lg border border-green-200">
             <h3 className="font-semibold text-lg mb-2 text-green-700">Resumen de Asignación</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Activo:</p>
-                <p className="font-medium">{activoSeleccionado.serie} - {activoSeleccionado.ubicacion}</p>
-              </div>
-              <div>
+              {/* IZQUIERDA - PERSONA */}
+              <div className="">
                 <p className="text-sm font-medium text-gray-600">Asignado a:</p>
                 <p className="font-medium">{responsable.informacion}</p>
+              </div>
+
+              {/* DERECHA - ACTIVOS */}
+              <div className="flex flex-col gap-4">
+                {activoSeleccionado.map((activo) => (
+                  <div key={`${activo.idProducto}-${activo.id}`} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{activo.producto}</p>
+                      <p className="font-medium">{activo.serie} {activo.ubicacion ? ` - ${activo.ubicacion}` : ""}</p>
+                    </div>
+
+                    <Button
+                      className="btn-outline-secondary"
+                      onClick={() => onClear(activo.id, activo.idProducto)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -478,7 +536,7 @@ const GestionCrear = () => {
         <Button
           className={`btn-success sm:w-auto w-full flex items-center justify-center gap-2 ${!activoSeleccionado || !responsable ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={handleGuardar}
-          disabled={!activoSeleccionado || !responsable}
+          disabled={!activoSeleccionado || activoSeleccionado.length === 0 || !responsable}
         >
           <i className="fa fa-save"></i> Guardar
         </Button>

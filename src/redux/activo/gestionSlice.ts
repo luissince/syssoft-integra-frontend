@@ -23,6 +23,7 @@ interface GestionState {
     };
 
     vista: string;
+    gestionDetallesVisible: any;
 }
 
 const initialState: GestionState = {
@@ -47,6 +48,7 @@ const initialState: GestionState = {
     },
 
     vista: "tabla",
+    gestionDetallesVisible: false,
 };
 
 const gestionSlice = createSlice({
