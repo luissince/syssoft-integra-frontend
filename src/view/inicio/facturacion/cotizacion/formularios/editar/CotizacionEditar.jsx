@@ -221,9 +221,7 @@ class CotizacionEditar extends CustomComponent {
 
       impuestos,
       idImpuesto: isEmpty(cabecera.idImpuesto) ? '' : cabecera.idImpuesto,
-      idComprobante: isEmpty(cabecera.idComprobante)
-        ? ''
-        : cabecera.idComprobante,
+      idComprobante: isEmpty(cabecera.idComprobante) ? '' : cabecera.idComprobante,
       idMoneda: isEmpty(cabecera.idMoneda) ? '' : cabecera.idMoneda,
       codiso: isEmpty(moneda) ? '' : moneda.codiso,
       idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
@@ -602,8 +600,6 @@ class CotizacionEditar extends CustomComponent {
       codiso: moneda.codiso,
       detalles,
     }, () => {
-      this.updateReduxState();
-
       const invoice = document.getElementById(this.idSidebarConfiguration);
       invoice.classList.remove('toggled');
     });
