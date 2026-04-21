@@ -609,7 +609,6 @@ class CotizacionEditar extends CustomComponent {
         detalles,
       },
       async () => {
-        this.updateReduxState();
 
         const invoice = document.getElementById(this.idSidebarConfiguration);
         invoice.classList.remove('toggled');
