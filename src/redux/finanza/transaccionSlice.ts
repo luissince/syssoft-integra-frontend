@@ -1,16 +1,27 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { closeProject, signOut } from "../principalSlice";
-import { BankListInterface } from "@/model/ts/interface/bank";
 
-interface BancoState {
+interface TransaccionState {
     didMount: boolean;
+
+    initialLoad: boolean;
+    initialMessage: string;
+
+    fechaInicio: string;
+    fechaFinal: string;
+    idTipoConcepto: string;
+    idSucursal: string;
+    idUsuario: string;
+
+    usuarios: any[];
+    sucursales: any[];
 
     loading: boolean;
     msgLoading: string;
 
     opcion: number;
     buscar: string;
-    lista: BankListInterface[];
+    lista: any[];
     paginacion: number;
     totalPaginacion: number;
     filasPorPagina: number;
@@ -28,9 +39,21 @@ interface BancoState {
     vista: string;
 }
 
-const initialState: BancoState = {
+const initialState: TransaccionState = {
     didMount: false,
-    
+
+    initialLoad: true,
+    initialMessage: "Cargando datos...",
+
+    fechaInicio: "",
+    fechaFinal: "",
+    idTipoConcepto: "",
+    idSucursal: "",
+    idUsuario: "",
+
+    usuarios: [],
+    sucursales: [],
+
     loading: false,
     msgLoading: "Cargando información...",
 
@@ -54,11 +77,11 @@ const initialState: BancoState = {
     vista: "tabla",
 };
 
-const finanzaBancoSlice = createSlice({
-    name: "FINANZAS BANCO",
+const finanzaTransaccionSlice = createSlice({
+    name: "FINANZAS TRANSACCION",
     initialState,
     reducers: {
-        setFinanzaBancoState: (state, action) => (
+        setFinanzaTransaccionState: (state, action) => (
             Object.assign(state, action.payload)
         ),
     },
@@ -70,7 +93,7 @@ const finanzaBancoSlice = createSlice({
 });
 
 export const {
-    setFinanzaBancoState,
-} = finanzaBancoSlice.actions;
+    setFinanzaTransaccionState,
+} = finanzaTransaccionSlice.actions;
 
-export default finanzaBancoSlice.reducer;
+export default finanzaTransaccionSlice.reducer;

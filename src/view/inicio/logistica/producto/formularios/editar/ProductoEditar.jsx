@@ -43,6 +43,7 @@ import ItemProducto from '../component/ItemProducto';
 import RadioButton from '@/components/RadioButton';
 import Select from '@/components/Select';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
+import { FaAsterisk } from 'react-icons/fa';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -921,13 +922,12 @@ class ProductoEditar extends CustomComponent {
               </p>
 
               {/* Nombre del producto */}
-              <div>
+              <div className="flex flex-col gap-2">
                 <Input
                   label={
-                    <>
-                      Nombre del producto:
-                      <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    <div className="flex items-center gap-1">
+                      <p>Nombre del Producto:</p>  <FaAsterisk className="text-red-500" size={8} />
+                    </div>
                   }
                   className={`${nombre ? '' : 'is-invalid'}`}
                   placeholder="Dijite un nombre..."
@@ -939,12 +939,12 @@ class ProductoEditar extends CustomComponent {
 
               {/* Código y SKU */}
               <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-2">
                   <Input
                     label={
-                      <>
-                        Código: <i className="fa fa-asterisk text-danger small"></i>
-                      </>
+                      <div className="flex items-center gap-1">
+                        <p>Código:</p>  <FaAsterisk className="text-red-500" size={8} />
+                      </div>
                     }
                     className={`${codigo ? '' : 'is-invalid'}`}
                     placeholder="Ejemplo: CAS002 ..."
@@ -955,9 +955,13 @@ class ProductoEditar extends CustomComponent {
 
                 </div>
 
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-2">
                   <Input
-                    label={<>SKU:</>}
+                    label={
+                      <div className="flex items-center gap-1">
+                        <p>SKU:</p>
+                      </div>
+                    }
                     placeholder="Ejemplo: CAM-NIKE-001 ..."
                     ref={this.refSku}
                     value={sku}
@@ -968,13 +972,13 @@ class ProductoEditar extends CustomComponent {
 
               {/* Código de Barras y Marca */}
               <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-2">
                   <Input
                     group
                     label={
-                      <>
-                        Código de Barras: <i className="bi bi-upc-scan"></i>
-                      </>
+                      <div className="flex items-center gap-1">
+                        <p>Código de Barras:</p>
+                      </div>
                     }
                     placeholder="Ejemplo: 1234567890123 ..."
                     ref={this.refCodigoBarras}
@@ -992,9 +996,13 @@ class ProductoEditar extends CustomComponent {
                   />
                 </div>
 
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-2">
                   <Select
-                    label={'Marca:'}
+                    label={
+                      <div className="flex items-center gap-1">
+                        <p>Marca:</p>
+                      </div>
+                    }
                     ref={this.refIdMarca}
                     value={idMarca}
                     onChange={this.handleSelectIdMarca}
@@ -1011,13 +1019,12 @@ class ProductoEditar extends CustomComponent {
 
               {/* Unidad de medida y Categoria */}
               <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-2">
                   <Select
                     label={
-                      <>
-                        Unidad de medida:
-                        <i className="fa fa-asterisk text-danger small"></i>
-                      </>
+                      <div className="flex items-center gap-1">
+                        <p>Unidad de Medida:</p> <FaAsterisk className="text-red-500" size={8} />
+                      </div>
                     }
                     className={`${idMedida ? '' : 'is-invalid'}`}
                     ref={this.refIdMedida}
@@ -1033,12 +1040,12 @@ class ProductoEditar extends CustomComponent {
                   </Select>
                 </div>
 
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-2">
                   <Select
                     label={
-                      <>
-                        Categoria: <i className="fa fa-asterisk text-danger small"></i>
-                      </>
+                      <div className="flex items-center gap-1">
+                        <p>Categoría:</p> <FaAsterisk className="text-red-500" size={8} />
+                      </div>
                     }
                     className={`form-control ${idCategoria ? '' : 'is-invalid'}`}
                     ref={this.refIdCategoria}
@@ -1202,13 +1209,12 @@ class ProductoEditar extends CustomComponent {
 
                   <p>Indica el valor de costo de compra de tu producto.</p>
 
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <Input
                       label={
-                        <>
-                          Costo inicial:
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <div className="flex items-center gap-1">
+                          <p>Costo Inicial:</p> <FaAsterisk className="text-red-500" size={8} />
+                        </div>
                       }
                       className={`${costo ? '' : 'is-invalid'}`}
                       placeholder="S/ 0.00"
@@ -1235,10 +1241,9 @@ class ProductoEditar extends CustomComponent {
                   <div>
                     <Input
                       label={
-                        <>
-                          Precio base:
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <div className="flex items-center gap-1">
+                          <p>Precio Base:</p> <FaAsterisk className="text-red-500" size={8} />
+                        </div>
                       }
                       className={`${precio ? '' : 'is-invalid'}`}
                       placeholder=" S/ 0.00"
@@ -1352,9 +1357,13 @@ class ProductoEditar extends CustomComponent {
 
               <p>Agregar un resumen del producto</p>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <TextArea
-                  label={'Descripción Corta:'}
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p>Descripción Corta:</p>
+                    </div>
+                  }
                   rows={3}
                   ref={this.refDescripcionCorta}
                   value={descripcionCorta}
@@ -1362,9 +1371,13 @@ class ProductoEditar extends CustomComponent {
                 />
               </div>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <TextArea
-                  label={'Descripción Larga:'}
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p>Descripción Larga:</p>
+                    </div>
+                  }
                   rows={6}
                   ref={this.refDescripcionLarga}
                   value={descripcionLarga}

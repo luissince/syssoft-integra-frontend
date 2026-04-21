@@ -19,14 +19,14 @@ import { cn } from '@/lib/utils';
 import { SiSlideshare } from "react-icons/si";
 import { useAppSelector } from '@/redux/hooks';
 import { useHistory } from 'react-router-dom';
-import { setFinanzasBancoState } from '@/redux/finanza/bancoSlice';
+import { setFinanzaBancoState } from '@/redux/finanza/bancoSlice';
 
 const Bancos = () => {
   // =============================
   // REDUX
   // =============================
 
-  const state = useAppSelector((state) => state.finanzasBanco);
+  const state = useAppSelector((state) => state.finanzaBanco);
   const token = useAppSelector((state) => state.principal);
 
   const dispatch = useDispatch();
@@ -63,7 +63,7 @@ const Bancos = () => {
     abortControllerTable.current?.abort();
     abortControllerTable.current = new AbortController();
 
-    dispatch(setFinanzasBancoState({
+    dispatch(setFinanzaBancoState({
       loading: true,
       lista: [],
       messageTable: "Cargando información...",
@@ -83,7 +83,7 @@ const Bancos = () => {
       if (type === CANCELED) return;
 
       abortControllerTable.current = null;
-      dispatch(setFinanzasBancoState({
+      dispatch(setFinanzaBancoState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
@@ -95,7 +95,7 @@ const Bancos = () => {
     const totalPaginacion = parseInt(String(Math.ceil(Number(data.total) / state.filasPorPagina)));
 
     abortControllerTable.current = null;
-    dispatch(setFinanzasBancoState({
+    dispatch(setFinanzaBancoState({
       lista: data.result,
       totalPaginacion,
       loading: false,
@@ -119,7 +119,7 @@ const Bancos = () => {
     }
 
     if (!state.didMount) {
-      dispatch(setFinanzasBancoState({
+      dispatch(setFinanzaBancoState({
         didMount: true
       }));
     }
@@ -142,7 +142,7 @@ const Bancos = () => {
   const loadInit = async () => {
     if (state.loading) return;
 
-    dispatch(setFinanzasBancoState({
+    dispatch(setFinanzaBancoState({
       opcion: 0,
       paginacion: 1,
       restart: true,
@@ -159,7 +159,7 @@ const Bancos = () => {
 
     if (text.trim().length === 0) return;
 
-    dispatch(setFinanzasBancoState({
+    dispatch(setFinanzaBancoState({
       opcion: 1,
       buscar: text,
       paginacion: 1,
@@ -168,7 +168,7 @@ const Bancos = () => {
   };
 
   const handlePaginacion = (page: number) => {
-    dispatch(setFinanzasBancoState({
+    dispatch(setFinanzaBancoState({
       paginacion: page,
       restart: false
     }));
@@ -176,7 +176,7 @@ const Bancos = () => {
 
   // Eventos para cambiar la vista
   const handleChangeView = (value: string) => {
-    dispatch(setFinanzasBancoState({
+    dispatch(setFinanzaBancoState({
       vista: value,
     }));
   };
@@ -234,7 +234,7 @@ const Bancos = () => {
         title: "Banco",
         message: response.data,
       }, () => {
-        dispatch(setFinanzasBancoState({
+        dispatch(setFinanzaBancoState({
           opcion: 0,
           paginacion: 1,
           restart: true,

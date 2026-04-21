@@ -48,7 +48,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
     if (group) {
       return (
-        <div className="flex flex-col gap-2">
+        <>
           {label && (
             typeof label === "string"
               ? <label>{label}</label>
@@ -67,19 +67,19 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
               </div>
             )}
           </div>
-        </div>
+        </>
       );
     }
 
     return (
-      <div className="flex flex-col gap-2">
+      <>
         {label && (
           typeof label === "string"
             ? <label>{label}</label>
             : label
         )}
         {textareaElement}
-      </div>
+      </>
     );
   }
 );

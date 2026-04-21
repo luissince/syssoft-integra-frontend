@@ -658,7 +658,7 @@ export function documentsExcelVenta() {
 */
 
 export async function listTransaccion(params, signal) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/transaccion/list', {
       params: params,
       signal: signal,
@@ -2021,7 +2021,7 @@ export async function addBanco(data, signal = null) {
 }
 
 export async function getIdBando(params, signal = null) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/banco/id', {
       signal: signal,
       params: params,
@@ -2030,7 +2030,7 @@ export async function getIdBando(params, signal = null) {
 }
 
 export async function updateBanco(data, signal = null) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.put('/api/banco/', data, {
       signal: signal,
     }),

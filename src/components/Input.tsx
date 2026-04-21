@@ -58,7 +58,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     if (group) {
       return (
-        <div className="flex flex-col gap-2">
+        <>
           {label && (
             typeof label === "string"
               ? <label>{label}</label>
@@ -83,7 +83,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               <div className="input-group-append">{buttonRight}</div>
             )}
           </div>
-        </div>
+        </>
       );
     }
 

@@ -111,7 +111,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
 
   return (
     <>
-      {label && <label htmlFor={id}>{label}</label>}
+      {label && (
+        typeof label === "string"
+          ? <label>{label}</label>
+          : label
+      )}
       {selectElement}
     </>
   );
