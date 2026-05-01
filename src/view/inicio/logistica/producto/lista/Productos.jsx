@@ -27,7 +27,7 @@ import React from 'react';
 import { alertKit } from 'alert-kit';
 import { FaStar } from 'react-icons/fa';
 import { cn } from '@/lib/utils';
-import { ACTIVO_FIJO, COMBO, MENOR_CUANTIA, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_ACTIVO_FIJO, tipoProductoMap } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -349,21 +349,20 @@ class Productos extends CustomComponent {
 
     return (
       this.state.lista.map((item) => {
-        const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO"
-          : item.idTipoProducto === SERVICIO ? "SERVICIO"
-            : item.idTipoProducto === COMBO ? "COMBO"
-              : item.idTipoProducto === ACTIVO_FIJO ? "ACTIVO FIJO"
-                : item.idTipoProducto === MENOR_CUANTIA ? "MENOR CUANTIA"
-                  : "EXISTENCIAL";
+
+        const tipoProducto = tipoProductoMap.get(item.idTipoProducto);
+        const Icon = tipoProducto.icon;
 
         return (
           <tr key={item.idProducto} className="hover:bg-gray-50 transition-colors">
             <td className="px-2 py-4 text-sm text-gray-900 text-center">
               {item.id}
             </td>
-            <td className="px-2 py-4 text-sm text-gray-900">
-              {tipo}
-              <div className="text-sm text-gray-500">{item.venta}</div>
+            <td className="px-2 py-4 text-gray-900 uppercase">
+              <div className="flex items-center gap-2 px-2 py-1 rounded text-xs font-medium bg-green-300">
+                <Icon size={19} />
+                {tipoProducto.label}
+              </div>
             </td>
             <td className="px-2 py-4">
               <div className="w-full flex justify-center">
@@ -476,13 +475,26 @@ class Productos extends CustomComponent {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {
           this.state.lista.map((item) => {
-            const tipo = item.idTipoProducto === PRODUCTO ? "PRODUCTO" : item.idTipoProducto === SERVICIO ? "SERVICIO" : item.idTipoProducto === COMBO ? "COMBO" : "ACTIVO FIJO";
+            const tipoProducto = tipoProductoMap.get(item.idTipoProducto);
+            const Icon = tipoProducto.icon;
 
             return (
               <div
                 key={item.idProducto}
                 className="bg-white rounded border transition group overflow-hidden relative"
               >
+                <div className={cn(
+                  "absolute top-2 left-1 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-300",
+                )}>
+                  <span className={cn(
+                    "flex items-center gap-2",
+                    tipoProducto.color
+                  )}>
+                    <Icon size={17} />
+                    {tipoProducto.label}
+                  </span>
+                </div>
+
                 <div className=" bg-white flex items-center justify-center p-2">
                   <Image
                     default={images.noImage}
@@ -507,10 +519,6 @@ class Productos extends CustomComponent {
 
                   <div className="text-sm text-gray-500 mb-1">
                     <span className="font-medium">Código:</span> {item.codigo}
-                  </div>
-
-                  <div className="text-sm text-gray-600 mb-1">
-                    <span className="font-medium">Tipo:</span> {tipo}
                   </div>
 
                   <div className="text-sm text-gray-600 mb-1">

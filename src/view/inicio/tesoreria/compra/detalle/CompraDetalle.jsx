@@ -14,7 +14,7 @@ import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import {
-  detailCompra,
+  getByIdCompra,
   documentsPdfInvoicesCompra,
 } from '@/network/rest/principal.network';
 import Title from '@/components/Title';
@@ -26,7 +26,8 @@ import Image from '@/components/Image';
 import { images } from '@/helper';
 import { alertKit } from 'alert-kit';
 import { CONTADO } from '@/model/types/forma-transaccion';
-import { ACTIVO_FIJO, PRODUCTO } from '@/model/types/tipo-producto';
+import { TIPO_PRODUCTO_ACTIVO_FIJO, TIPO_PRODUCTO_LOTE } from '@/model/types/tipo-producto';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -47,35 +48,9 @@ class CompraDetalle extends CustomComponent {
 
       // Atributos principales
       idCompra: "",
-      comprobante: "",
-      serie: "",
-      numeracion: 0,
-      fecha: "",
-      hora: "",
-
-      tipoDocumento: "",
-      documento: "",
-      informacion: "",
-      telefono: "",
-      celular: "",
-      email: "",
-      direccion: "",
-
-      almacen: "",
-
-      tipo: "",
-      estado: "",
-
-      observacion: "",
-      notas: "",
-
-      codiso: "",
-      total: 0,
-
+      cabecera: {},
       detalles: [],
       transaccion: [],
-
-      usuario: ""
     };
 
     this.abortControllerView = new AbortController();
@@ -120,103 +95,29 @@ class CompraDetalle extends CustomComponent {
       idCompra: id,
     };
 
-    const response = await detailCompra(
-      params,
-      this.abortControllerView.signal,
-    );
+    const { success, data, message, type } = await getByIdCompra(params, this.abortControllerView.signal);
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Compra",
-        message: response.getMessage(),
+        message: message,
         onClose: this.handleGoBack,
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const compra = response.data;
-
-    const {
-      fecha,
-      hora,
-
-      comprobante,
-      serie,
-      numeracion,
-
-      tipoDocumento,
-      documento,
-      informacion,
-      telefono,
-      celular,
-      email,
-      direccion,
-
-      almacen,
-
-      idFormaPago,
-      estado,
-      observacion,
-      nota,
-      codiso,
-
-      usuario
-    } = compra.cabecera;
-
-    const monto = compra.detalles.reduce((accumlate, item) => accumlate + item.costo * item.cantidad,0,);
-
-    const nuevoEstado =
-      estado === 1 ? (
-        <span className="text-success">COBRADO</span>
-      ) : estado === 2 ? (
-        <span className="text-warning">POR COBRAR</span>
-      ) : (
-        <span className="text-danger">ANULADO</span>
-      );
-
-    const tipo =
-      idFormaPago === CONTADO
-        ? "CONTADO"
-        : "CREDITO"
-
     this.setState({
       idCompra: id,
-      fecha: fecha,
-      hora: hora,
-
-      comprobante: comprobante,
-      serie: serie,
-      numeracion: numeracion,
-
-      tipoDocumento: tipoDocumento,
-      documento: documento,
-      informacion: informacion,
-      telefono: telefono,
-      celular: celular,
-      email: email,
-      direccion: direccion,
-
-      almacen: almacen,
-
-      tipo: tipo,
-      estado: nuevoEstado,
-      observacion: observacion,
-      notas: nota,
-      codiso: codiso,
-      total: monto,
-
-      detalles: compra.detalles,
-      transaccion: compra.transaccion,
-
-      usuario: usuario,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
+      transaccion: data.transaccion,
 
       loading: false,
     });
   }
-  
+
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -233,7 +134,7 @@ class CompraDetalle extends CustomComponent {
   |
   */
 
-    handleGoBack = () => {
+  handleGoBack = () => {
     this.props.history.goBack();
   };
 
@@ -267,8 +168,10 @@ class CompraDetalle extends CustomComponent {
   */
 
   renderDetalles() {
-    console.log(this.state.detalles);
-    return this.state.detalles.map((item, index) => (
+    const { detalles } = this.state;
+    const { codiso } = this.state.cabecera;
+
+    return detalles.map((item, index) => (
       <React.Fragment key={index}>
         <tr className="border-b border-gray-100">
           <td className="px-4 py-3 text-gray-700">{item.id}</td>
@@ -291,55 +194,56 @@ class CompraDetalle extends CustomComponent {
           <td className="px-4 py-3 text-gray-700">{item.medida}</td>
           <td className="px-4 py-3 text-gray-700 text-right">{item.impuesto}</td>
           <td className="px-4 py-3 text-gray-900 font-medium text-right">
-            {formatCurrency(item.costo, this.state.codiso)}
+            {formatCurrency(item.costo, codiso)}
           </td>
           <td className="px-4 py-3 text-gray-900 font-medium text-right">
-            {formatCurrency(item.cantidad * item.costo, this.state.codiso)}
+            {formatCurrency(item.cantidad * item.costo, codiso)}
           </td>
         </tr>
 
         {/* Detalles de inventario */}
-        {item.inventarioDetalles && !isEmpty(item.inventarioDetalles) && (item.idTipoProducto === ACTIVO_FIJO || item.idTipoProducto === PRODUCTO) && (
+        {item.inventarioDetalles && !isEmpty(item.inventarioDetalles) && (item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO || item.idTipoProducto === TIPO_PRODUCTO_LOTE) && (
           <tr>
             <td colSpan={9} className="py-2 bg-gray-50">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        { item.idTipoProducto !== ACTIVO_FIJO ? "Código Lote": "Serie" }
-                      </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                          { item.idTipoProducto !== ACTIVO_FIJO ? "Fecha Vencimiento": "Vida útil" }
-                      </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Ubicación
-                      </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-600 uppercase tracking-wider w-[20%]">
                         Cantidad
                       </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[20%]">
+                        {item.idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO ? "Código Lote" : "Serie"}
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[20%]">
+                        {item.idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO ? "Fecha Vencimiento" : "Vida útil"}
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-[30%]">
+                        Ubicación
+                      </th>
+
                     </tr>
                   </thead>
                   <tbody>
                     {item.inventarioDetalles.map((inventarioDetalle, loteIndex) => (
                       <tr key={loteIndex} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-center">
                           {
-                            (item.idTipoProducto !== ACTIVO_FIJO ? inventarioDetalle.lote : inventarioDetalle.serie) || 'N/A'
+                            (item.idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO ? inventarioDetalle.cantidadLote : inventarioDetalle.cantidadActivo) || 'N/A'
                           }
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                           {
-                            (item.idTipoProducto !== ACTIVO_FIJO ? inventarioDetalle.fechaVencimiento : inventarioDetalle.vidaUtil) || 'N/A'
+                          {
+                            (item.idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO ? inventarioDetalle.lote : inventarioDetalle.serie) || 'N/A'
+                          }
+                        </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                          {
+                            (item.idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO ? inventarioDetalle.fechaVencimiento : inventarioDetalle.vidaUtil) || 'N/A'
                           }
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
                           {inventarioDetalle.ubicacion || 'N/A'}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                          {
-                            (item.idTipoProducto !== ACTIVO_FIJO ? inventarioDetalle.cantidadLote : inventarioDetalle.cantidadActivo) || 'N/A'
-                          }
                         </td>
                       </tr>
                     ))}
@@ -355,77 +259,65 @@ class CompraDetalle extends CustomComponent {
 
 
   renderTotal() {
-    let subTotal = 0;
-    let total = 0;
+    const { detalles } = this.state;
+    const { codiso } = this.state.cabecera;
 
-    for (const item of this.state.detalles) {
-      const cantidad = item.cantidad;
-      const valor = item.costo;
+    const { subTotal, total, impuestos } = detalles.reduce((acc, item) => {
+      const totalItem = item.cantidad * item.costo;
+      const subNeto = calculateTaxBruto(item.porcentaje, totalItem);
+      const impuestoValor = calculateTax(item.porcentaje, subNeto);
 
-      const impuesto = item.porcentaje;
+      acc.subTotal += subNeto;
+      acc.total += subNeto + impuestoValor;
 
-      const valorActual = cantidad * valor;
-      const valorSubNeto = calculateTaxBruto(impuesto, valorActual);
-      const valorImpuesto = calculateTax(impuesto, valorSubNeto);
-      const valorNeto = valorSubNeto + valorImpuesto;
+      if (!acc.impuestos[item.idImpuesto]) {
+        acc.impuestos[item.idImpuesto] = {
+          nombre: item.impuesto,
+          valor: 0,
+        };
+      }
 
-      subTotal += valorSubNeto;
-      total += valorNeto;
-    }
+      acc.impuestos[item.idImpuesto].valor += impuestoValor;
 
-    const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.costo;
-        const subTotal = calculateTaxBruto(item.porcentaje, total);
-        const impuestoTotal = calculateTax(item.porcentaje, subTotal);
+      return acc;
+    }, { subTotal: 0, total: 0, impuestos: {} });
 
-        const existingImpuesto = acc.find(
-          (imp) => imp.idImpuesto === item.idImpuesto,
-        );
-
-        if (existingImpuesto) {
-          existingImpuesto.valor += impuestoTotal;
-        } else {
-          acc.push({
-            idImpuesto: item.idImpuesto,
-            nombre: item.impuesto,
-            valor: impuestoTotal,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      return resultado.map((impuesto, index) => {
-        return (
-          <tr key={index}>
-            <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
-            <td className="p-2 text-gray-900 font-medium text-right">
-              {formatCurrency(impuesto.valor, this.state.codiso)}
-            </td>
-          </tr>
-        );
-      });
-    };
+    const impuestosGenerado = Object.entries(impuestos).map(
+      ([id, impuesto], index) => (
+        <tr key={index}>
+          <th className="p-2 text-gray-600 text-right">
+            {impuesto.nombre}:
+          </th>
+          <td className="p-2 text-gray-900 font-medium text-right">
+            {formatCurrency(impuesto.valor, codiso)}
+          </td>
+        </tr>
+      )
+    );
 
     return (
       <>
         <tr>
           <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
           <td className="p-2 text-gray-900 font-medium text-right">
-            {formatCurrency(subTotal, this.state.codiso)}
+            {formatCurrency(subTotal, codiso)}
           </td>
         </tr>
-        {impuestosGenerado()}
+
+        {impuestosGenerado}
+
         <tr>
           <td colSpan={2} className="py-2">
             <div className="border-t border-gray-200"></div>
           </td>
         </tr>
+
         <tr>
-          <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+          <th className="p-2 text-gray-800 font-bold text-right text-lg">
+            TOTAL:
+          </th>
           <td className="p-2 text-gray-900 font-bold text-right text-lg">
-            {formatCurrency(total, this.state.codiso)}
+            {formatCurrency(total, codiso)}
           </td>
         </tr>
       </>
@@ -476,6 +368,8 @@ class CompraDetalle extends CustomComponent {
   }
 
   render() {
+    const { cabecera, detalles } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
@@ -517,27 +411,30 @@ class CompraDetalle extends CustomComponent {
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {[
-              { label: 'Comprobante:', value: this.state.comprobante },
-              { label: 'Serie - Num.:', value: this.state.serie + '-' + formatNumberWithZeros(this.state.numeracion) },
-              { label: 'Tipo Doc.:', value: this.state.tipoDocumento + " - " + this.state.documento },
-              { label: 'Proveedor:', value: this.state.informacion },
-              { label: 'N° de celular:', value: this.state.celular },
-              { label: 'Correo electr.:', value: this.state.email },
-              { label: 'Fecha:', value: this.state.fecha },
-              { label: 'Hora:', value: formatTime(this.state.hora) },
-              { label: 'Observación:', value: this.state.observacion },
-              { label: 'Nota:', value: this.state.nota },
-              { label: 'Forma de Pago:', value: this.state.tipo },
-              { label: 'Estado:', value: this.state.estado },
-              { label: 'Usuario:', value: this.state.usuario },
-              { label: 'Almacen:', value: this.state.almacen },
-              { label: 'Total:', value: formatCurrency(this.state.total, this.state.codiso) },
+              { label: "Comprobante:", value: cabecera.comprobante + " (" + cabecera.serie + " - " + formatNumberWithZeros(cabecera.numeracion) + ")" },
+              { label: 'Tipo Doc.:', value: cabecera.tipoDocumento + " - " + cabecera.documento },
+              { label: 'Proveedor:', value: cabecera.informacion },
+              { label: 'Fecha y Hora:', value: cabecera.fecha + " - " + formatTime(cabecera.hora) },
+              { label: 'Observación:', value: cabecera.observacion },
+              { label: 'Nota:', value: cabecera.nota },
+              { label: 'Forma de Pago:', value: cabecera.idFormaPago === CONTADO ? "CONTADO" : "CREDITO" },
+              {
+                label: 'Estado:',
+                value: cabecera.estado === 1 ? "PAGADO" : cabecera.estado === 2 ? "POR PAGAR" : "ANULADO",
+                valueClass: cabecera.estado === 1 ? "bg-green-100 text-green-800" : cabecera.estado === 2 ? "bg-orange-100 text-orange-800" : "bg-red-100 text-red-800"
+              },
+              { label: 'Usuario:', value: cabecera.usuario },
+              { label: 'Almacen:', value: cabecera.almacen },
+              { label: 'Total:', value: formatCurrency(detalles.reduce((accumlate, item) => accumlate + item.costo * item.cantidad, 0), cabecera.codiso) },
             ].map((item, index) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-4 items-center gap-5 py-2">
                 <p className="text-sm text-gray-600 uppercase">
                   {item.label}
                 </p>
-                <p className="text-sm md:col-span-3 text-gray-900 font-medium">
+                <p className={cn(
+                  "text-sm md:col-span-3 font-medium w-fit px-2 py-1 rounded",
+                  item.valueClass ?? "text-gray-900"
+                )}>
                   {item.value}
                 </p>
               </div>

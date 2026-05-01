@@ -19,7 +19,6 @@ import { listVenta } from '@/network/rest/principal.network';
 import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
-import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -32,9 +31,9 @@ import Search from '@/components/Search';
 class ModalVenta extends CustomComponent {
 
   /**
-    * Inicializa un nuevo componente.
-    * @param {Object} props - Las propiedades pasadas al componente.
-    */
+   * Inicializa un nuevo componente.
+   * @param {Object} props - Las propiedades pasadas al componente.
+   */
   constructor(props) {
     super(props);
     this.state = {
@@ -53,10 +52,13 @@ class ModalVenta extends CustomComponent {
       fechaFinal: currentDate(),
     };
 
+    // Guardar el estado inicial para poder restablecerlo cuando se cierre el modal
     this.initial = { ...this.state };
 
+    // Referencia al modal
     this.refModal = React.createRef();
 
+    // Anular las peticiones
     this.peticion = false;
     this.abortController = null;
   }
@@ -88,12 +90,12 @@ class ModalVenta extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
-  async searchOpciones() {
+  searchOpciones = async () => {
     if (this.state.loading) return;
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
@@ -124,7 +126,7 @@ class ModalVenta extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '',) => {
+  fillTable = async (opcion) => {
     this.abortController = new AbortController();
 
     this.setState({
@@ -135,7 +137,7 @@ class ModalVenta extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: this.state.buscar,
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idComprobante: '',
@@ -207,10 +209,6 @@ class ModalVenta extends CustomComponent {
     this.peticion = false;
   };
 
-  handleInputBuscar = (event) => {
-    this.setState({ buscar: event.target.value });
-  };
-
   handleFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value, }, () => {
       this.searchOpciones();
@@ -271,49 +269,55 @@ class ModalVenta extends CustomComponent {
     }
 
     return lista.map((item, index) => {
-      const estado = <span className={cn(
-        item.estado === 1 ? "text-success" :
-          item.estado === 2 ? "text-warning" :
-            item.estado === 3 ? "text-danger" :
-              "text-primary"
-      )}>
-        {
-          item.estado === 1 ? "COBRADO" :
-            item.estado === 2 ? "POR COBRAR" :
-              item.estado === 3 ? "ANULADO" :
-                "POR LLEVAR"
-        }
-      </span>;
-
       return (
         <tr key={index} className="hover:bg-gray-50 transition-colors">
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
+            {item.id}
+          </td>
           <td className="px-6 py-4 text-sm text-gray-900">
             {item.fecha}
             <br />
             {formatTime(item.hora)}
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
-            {item.documento}
-            <br />
-            {item.informacion}
+            <div className="text-xs text-gray-500">{item.tipoDocumento} - {item.documento}</div>
+            <div className="text-sm  uppercase">{item.informacion}</div>
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
             {item.comprobante}
             <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
+            <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
           </td>
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">{estado}</td>
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+          <td className="px-6 py-4 text-center">
+            <span
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                item.estado === 1 && "bg-green-100 text-green-800",
+                item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                item.estado === 3 && "bg-red-100 text-red-800",
+                item.estado === 4 && "bg-blue-100 text-blue-800"
+              )}
+            >
+              {
+                item.estado === 1 ? "COBRADO" :
+                  item.estado === 2 ? "POR COBRAR" :
+                    item.estado === 3 ? "ANULADO" : "POR LLEVAR"
+              }
+            </span>
+          </td>
+          <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
             {formatCurrency(item.total, item.codiso)}{' '}
           </td>
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+          <td className="px-6 py-4 text-center">
             <button
               className={
                 cn(
-                  "inline-flex items-center gap-2 px-3 py-1",
-                  "bg-blue-600 text-white text-sm font-medium rounded",
-                  "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+                  "p-2 rounded-md text-sm font-medium transition",
+                  "text-blue-600 bg-white",
+                  "hover:bg-blue-50 hover:text-blue-700",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                  "active:bg-blue-100 active:scale-[0.97]",
+                  "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
               title="Agregar Detalle"
@@ -355,7 +359,7 @@ class ModalVenta extends CustomComponent {
       >
         <CustomModalContentScroll>
           <CustomModalContentHeader contentRef={this.refModal}>
-            Lista de Ventas
+            Ventas
           </CustomModalContentHeader>
 
           <CustomModalContentSubHeader className="pb-3">
@@ -413,13 +417,13 @@ class ModalVenta extends CustomComponent {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="w-[5%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                      <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                      <th className="w-[15%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
-                      <th className="w-[15%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                      <th className="w-[5%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                      <th className="w-[10%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                      <th className="w-[5%] px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Seleccionar</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">#</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Cliente</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Total</th>
+                      <th className="px-6 py-3  text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Seleccionar</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">

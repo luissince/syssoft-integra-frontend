@@ -2,11 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import ContainerWrapper from '@/components/ui/container-wrapper';
 import SuccessReponse from '@/model/class/response';
-import ErrorResponse from '@/model/class/error-response';
 import {
     filtrarPersona,
 } from '@/network/rest/principal.network';
-import { CANCELED } from '@/constants/requestStatus';
 import { SpinnerView } from '@/components/Spinner';
 import Title from '@/components/Title';
 import Input from '@/components/Input';
@@ -17,9 +15,23 @@ import { Switches } from '@/components/Checks';
 import SearchInput from '@/components/SearchInput';
 import { isEmpty } from '@/helper/utils.helper';
 import { createUsuario, optionsPerfil } from '@/network/rest/api-client';
+import { FaAsterisk } from 'react-icons/fa';
+import { useAppSelector } from '@/redux/hooks';
 
 const UsuarioAgregar = () => {
+    // =============================
+    // REDUX
+    // =============================
+    const token = useAppSelector((state) => state.principal);
+
+    // =============================
+    // ROUTER
+    // =============================
     const history = useHistory();
+
+    // =============================
+    // STATE
+    // =============================
 
     // Estados de carga
     const [loading, setLoading] = useState(true);
@@ -37,7 +49,10 @@ const UsuarioAgregar = () => {
     const [configClave, setConfigClave] = useState("");
     const [estado, setEstado] = useState(true);
 
-    // Referencias para el foco
+    // =============================
+    // REFS
+    // =============================
+
     const refCliente = useRef<any>(null);
     const refValueCliente = useRef<any>(null);
     const refPerfil = useRef<HTMLSelectElement>(null);
@@ -45,23 +60,35 @@ const UsuarioAgregar = () => {
     const refClave = useRef<HTMLInputElement>(null);
     const refConfigClave = useRef<HTMLInputElement>(null);
 
-    const abortController = useRef(null);
+    // =============================
+    // CONTROLLERS
+    // =============================
 
-    // Cargar datos iniciales
+    const abortControllerPerfil = useRef<AbortController | null>(null);
+    const abortControllerFiltrar = useRef<AbortController | null>(null);
+
+    // =============================
+    // API
+    // =============================
+
+    const loadOptionsPerfil = async () => {
+        abortControllerPerfil.current = new AbortController();
+
+        const { success, data, message } = await optionsPerfil(abortControllerPerfil.current.signal);
+
+        if (!success) {
+            throw new Error(message);
+        }
+
+        abortControllerPerfil.current = null;
+        setPerfiles(data);
+    };
+
+    // =============================
+    // EFFECTS
+    // =============================
+
     useEffect(() => {
-        const loadOptionsPerfil = async () => {
-            abortController.current = new AbortController();
-
-            const { success, data, message } = await optionsPerfil(abortController.current.signal);
-
-            if (!success) {
-                throw new Error(message);
-            }
-
-            abortController.current = null;
-            setPerfiles(data);
-        };
-
         const loadData = async () => {
             try {
                 await loadOptionsPerfil();
@@ -81,11 +108,19 @@ const UsuarioAgregar = () => {
         loadData();
 
         return () => {
-            if (abortController.current) {
-                abortController.current.abort();
-            }
+            abortControllerPerfil.current?.abort();
+            abortControllerFiltrar.current?.abort();
         };
     }, []);
+
+    // =============================
+    // FLOWS
+    // =============================
+
+
+    // =============================
+    // HANDLERS
+    // =============================
 
     // Manejo de filtro de clientes
     const handleClearInputCliente = () => {
@@ -94,7 +129,8 @@ const UsuarioAgregar = () => {
     };
 
     const handleFilterCliente = async (text: string) => {
-        abortController.current = new AbortController();
+        abortControllerFiltrar.current?.abort();
+        abortControllerFiltrar.current = new AbortController();
 
         if (isEmpty(text)) {
             setClientes([]);
@@ -107,7 +143,7 @@ const UsuarioAgregar = () => {
             cliente: true,
         };
 
-        const response = await filtrarPersona(params, abortController.current.signal);
+        const response = await filtrarPersona(params, abortControllerFiltrar.current.signal);
 
         if (response instanceof SuccessReponse) {
             setClientes(response.data);
@@ -233,6 +269,10 @@ const UsuarioAgregar = () => {
         }
     };
 
+    // =============================
+    // RENDER
+    // =============================
+
     return (
         <ContainerWrapper>
             <SpinnerView
@@ -246,109 +286,110 @@ const UsuarioAgregar = () => {
                 handleGoBack={() => history.goBack()}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                    <SearchInput
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Cliente <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        ref={refCliente}
-                        placeholder="Buscar personal"
-                        refValue={refValueCliente}
-                        data={clientes}
-                        handleClearInput={handleClearInputCliente}
-                        handleFilter={handleFilterCliente}
-                        handleSelectItem={handleSelectItemCliente}
-                        renderItem={(value: any) => (
-                            <div className="flex flex-col">
-                                <span className="font-medium">{value.documento}</span>
-                                <span className="text-sm">{value.informacion}</span>
-                            </div>
-                        )}
-                        classNameContainer="w-full relative group"
-                    />
+            <div className="flex flex-col gap-3">
+                {/*  */}
+                <SearchInput
+                    label={
+                        <div className="flex items-center gap-1 mb-2">
+                            <p>Personal:</p> <FaAsterisk className="text-red-500" size={8} />
+                        </div>
+                    }
+                    ref={refCliente}
+                    placeholder="Buscar personal"
+                    refValue={refValueCliente}
+                    data={clientes}
+                    handleClearInput={handleClearInputCliente}
+                    handleFilter={handleFilterCliente}
+                    handleSelectItem={handleSelectItemCliente}
+                    renderItem={(value: any) => (
+                        <div className="flex flex-col">
+                            <span className="font-medium">{value.documento}</span>
+                            <span className="text-sm">{value.informacion}</span>
+                        </div>
+                    )}
+                    classNameContainer="w-full relative group"
+                />
+
+                {/*  */}
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
+                        <Select
+                            label={
+                                <div className="flex items-center gap-1">
+                                    <p>Perfil:</p> <FaAsterisk className="text-red-500" size={8} />
+                                </div>
+                            }
+                            ref={refPerfil}
+                            value={idPerfil}
+                            onChange={(event) => setIdPerfil(event.target.value)}
+                            className="w-full"
+                        >
+                            <option value="">-- Seleccione --</option>
+                            {perfiles.map((item, index) => (
+                                <option key={index} value={item.idPerfil}>
+                                    {item.descripcion}
+                                </option>
+                            ))}
+                        </Select>
+                    </div>
+
+                    <div className="w-full flex flex-col gap-2">
+                        <Input
+                            group={true}
+                            label={
+                                <div className="flex items-center gap-1">
+                                    <p>Usuario:</p> <FaAsterisk className="text-red-500" size={8} />
+                                </div>
+                            }
+                            id="usuario"
+                            value={usuario}
+                            ref={refUsuario}
+                            onChange={(event) => setUsuario(event.target.value)}
+                            placeholder="Ingrese el nombre de usuario"
+                            className="w-full"
+                        />
+                    </div>
                 </div>
 
-                <div className="md:col-span-1">
-                    <Select
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Perfil <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        ref={refPerfil}
-                        value={idPerfil}
-                        onChange={(event) => setIdPerfil(event.target.value)}
-                        className="w-full"
-                    >
-                        <option value="">-- Seleccione --</option>
-                        {perfiles.map((item, index) => (
-                            <option key={index} value={item.idPerfil}>
-                                {item.descripcion}
-                            </option>
-                        ))}
-                    </Select>
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
+                        <Input
+                            label={
+                                <div className="flex items-center gap-1">
+                                    <p>Contraseña:</p> <FaAsterisk className="text-red-500" size={8} />
+                                </div>
+                            }
+                            type="password"
+                            id="contraseña"
+                            placeholder="Ingrese su contraseña"
+                            ref={refClave}
+                            value={clave}
+                            onChange={(event) => setClave(event.target.value)}
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div className="w-full flex flex-col gap-2">
+                        <Input
+                            label={
+                                <div className="flex items-center gap-1">
+                                    <p>Confirmar Contraseña:</p> <FaAsterisk className="text-red-500" size={8} />
+                                </div>
+                            }
+                            type="password"
+                            id="contraseña2"
+                            value={configClave}
+                            ref={refConfigClave}
+                            onChange={(event) => setConfigClave(event.target.value)}
+                            placeholder="Confirme su contraseña"
+                            className="w-full"
+                        />
+                    </div>
                 </div>
 
-                <div className="md:col-span-1">
-                    <Input
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Usuario <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        id="usuario"
-                        value={usuario}
-                        ref={refUsuario}
-                        onChange={(event) => setUsuario(event.target.value)}
-                        placeholder="Ingrese el nombre de usuario"
-                        className="w-full"
-                    />
-                </div>
-
-                <div className="md:col-span-1">
-                    <Input
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Contraseña <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        type="password"
-                        id="contraseña"
-                        placeholder="Ingrese su contraseña"
-                        ref={refClave}
-                        value={clave}
-                        onChange={(event) => setClave(event.target.value)}
-                        className="w-full"
-                    />
-                </div>
-
-                <div className="md:col-span-1">
-                    <Input
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Confirmar Contraseña <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        type="password"
-                        id="contraseña2"
-                        value={configClave}
-                        ref={refConfigClave}
-                        onChange={(event) => setConfigClave(event.target.value)}
-                        placeholder="Confirme su contraseña"
-                        className="w-full"
-                    />
-                </div>
-
-                <div className="md:col-span-2">
-                    <div className="flex items-center">
+                {/*  */}
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
                         <Switches
                             id="customSwitchEstado"
                             checked={estado}
@@ -360,18 +401,17 @@ const UsuarioAgregar = () => {
                         </Switches>
                     </div>
                 </div>
-
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mt-3 pt-6 border-t border-gray-100">
+            <div className="flex flex-col md:flex-row gap-3 mt-3 pt-3 border-t border-gray-200">
                 <Button
-                    className="btn-success sm:w-auto w-full flex items-center justify-center gap-2"
+                    className="btn-success"
                     onClick={handleGuardar}
                 >
-                    <i className="fa fa-save"></i> Guardar Usuario
+                    <i className="fa fa-save"></i> Guardar
                 </Button>
                 <Button
-                    className="btn-danger sm:w-auto w-full flex items-center justify-center gap-2"
+                    className="btn-danger"
                     onClick={() => history.goBack()}
                 >
                     <i className="fa fa-close"></i> Cancelar

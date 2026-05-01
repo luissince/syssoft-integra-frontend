@@ -13,8 +13,6 @@ import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   documentsPdfInvoicesVenta,
 } from '@/network/rest/principal.network';
-import SuccessReponse from '@/model/class/response';
-import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import CustomComponent from '@/components/CustomComponent';
 import {
@@ -31,7 +29,6 @@ import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
 import ModalPrinter from './component/ModalPrinter';
-import { th } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { getByIdVenta } from '@/network/rest/api-client';
 
@@ -54,6 +51,7 @@ class VentaDetalle extends CustomComponent {
       loading: true,
       msgLoading: "Cargando datos...",
 
+      // Atributos principales
       idVenta: "",
       cabecera: {},
       detalles: [],
@@ -117,32 +115,28 @@ class VentaDetalle extends CustomComponent {
   async loadData(id) {
     this.abortControllerView = new AbortController();
 
-    const response = await getByIdVenta(id, this.abortControllerView.signal);
+    const { success, data, message, type } = await getByIdVenta(id, this.abortControllerView.signal);
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Venta",
-        message: response.getMessage(),
+        message: message,
         onClose: this.handleGoBack,
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const venta = response.data;
-
     this.setState({
       idVenta: id,
-      cabecera: venta.cabecera,
-      detalles: venta.detalles,
-      transaccion: venta.transaccion,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
+      transaccion: data.transaccion,
 
       loading: false,
     });
   }
-
 
   /*
   |--------------------------------------------------------------------------
@@ -272,7 +266,10 @@ class VentaDetalle extends CustomComponent {
   */
 
   renderDetalles() {
-    return this.state.detalles.map((item, index) => (
+    const { detalles } = this.state;
+    const { codiso } = this.state.cabecera;
+
+    return detalles.map((item, index) => (
       <tr key={index} className="hover:bg-gray-50">
         <td className="p-4 text-gray-700">{item.id}</td>
         <td className="p-4 text-center">
@@ -293,17 +290,18 @@ class VentaDetalle extends CustomComponent {
         <td className="p-4 text-gray-700 text-right">{rounded(item.cantidad)}</td>
         <td className="p-4 text-gray-700 text-right">{item.impuesto}</td>
         <td className="p-4 text-gray-700 text-right">
-          {formatCurrency(item.precio, this.state.codiso)} <small>x{item.medida}</small>
+          {formatCurrency(item.precio, codiso)} <small>x{item.medida}</small>
         </td>
         <td className="p-4 text-gray-900 font-medium text-right">
-          {formatCurrency(item.cantidad * item.precio, this.state.codiso)}
+          {formatCurrency(item.cantidad * item.precio, codiso)}
         </td>
       </tr>
     ));
   }
 
   renderTotal() {
-    const { detalles, codiso } = this.state;
+    const { detalles } = this.state;
+    const { codiso } = this.state.cabecera;
 
     const { subTotal, total, impuestos } = detalles.reduce((acc, item) => {
       const totalItem = item.cantidad * item.precio;
@@ -489,14 +487,21 @@ class VentaDetalle extends CustomComponent {
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {[
-              { label: 'Comprobante.:', value: cabecera.comprobante + ' (' + cabecera.serie + ' - ' + formatNumberWithZeros(cabecera.numeracion) + ')' },
-                 { label: 'Cliente:', value: cabecera.documento + ' - ' + cabecera.informacion },
-               { label: 'Fecha:', value: cabecera.fecha + ' ' + formatTime(cabecera.hora) },
-              { label: 'Forma de Pago:', value: cabecera.idFormaPago === CONTADO ? "CONTADO" : "CREDITO" },
-              { label: 'Estado:', value: cabecera.estado === 1 ? "COBRADO" : cabecera.estado === 2 ? "POR COBRAR" : cabecera.estado === 3 ? "ANULADO" : "POR LLEVAR", valueClass: cabecera.estado === 1 ? "bg-green-100 text-green-800" : cabecera.estado === 2 ? "bg-orange-100 text-orange-800" : cabecera.estado === 3 ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800" },
-              { label: 'Observación:', value: cabecera.observacion },
-              { label: 'Nota:', value: cabecera.nota },
-              { label: 'Usuario:', value: cabecera.usuario },
+              { label: "Comprobante:", value: cabecera.comprobante + " (" + cabecera.serie + " - " + formatNumberWithZeros(cabecera.numeracion) + ")" },
+              { label: "Tipo Doc.:", value: cabecera.tipoDocumento + " - " + cabecera.documento },
+              { label: "Cliente:", value: cabecera.informacion },
+              { label: "Fecha y Hora:", value: cabecera.fecha + " - " + formatTime(cabecera.hora) },
+              { label: "Forma de Pago:", value: cabecera.idFormaPago === CONTADO ? "CONTADO" : "CREDITO" },
+              {
+                label: "Estado:",
+                value: cabecera.estado === 1 ? "COBRADO" : cabecera.estado === 2 ? "POR COBRAR" : cabecera.estado === 3 ? "ANULADO" : "POR LLEVAR",
+                valueClass: cabecera.estado === 1 ? "bg-green-100 text-green-800" : cabecera.estado === 2 ? "bg-orange-100 text-orange-800" : cabecera.estado === 3 ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800"
+              },
+              { label: "Observación:", value: cabecera.observacion },
+              { label: "Nota:", value: cabecera.nota },
+              { label: "Usuario:", value: cabecera.usuario },
+              { label: 'Total:', value: formatCurrency(detalles.reduce((accumlate, item) => accumlate + item.precio * item.cantidad, 0), cabecera.codiso) },
+
             ].map((item, i) => (
               <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-2">
                 <p className="text-sm text-gray-600 uppercase px-2 py-1">

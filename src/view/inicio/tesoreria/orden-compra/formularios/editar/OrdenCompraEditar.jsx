@@ -32,7 +32,7 @@ import {
 import { PosContainerWrapper } from '@/components/ui/container-wrapper';
 import SidebarConfiguration from '@/components/SidebarConfiguration';
 import {
-  SERVICIO,
+  TIPO_PRODUCTO_SERVICIO,
 } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import PanelIzquierdo from '../../../component/PanelIzquierdo';
@@ -450,7 +450,7 @@ class OrdenCompraEditar extends CustomComponent {
 
     const productos = await this.fetchFiltrarProductos(params);
 
-    const filteredProductos = productos.filter((item) => item.idTipoProducto !== SERVICIO);
+    const filteredProductos = productos.filter((item) => item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO);
 
     this.setState({
       productos: filteredProductos,

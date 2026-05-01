@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ContainerWrapper from '@/components/ui/container-wrapper';
 import {
   isEmpty,
@@ -22,7 +22,6 @@ import { useAppSelector } from '@/redux/hooks';
 import { useHistory } from 'react-router-dom';
 
 const BancoAgregar = () => {
-
   // =============================
   // REDUX
   // =============================
@@ -72,7 +71,7 @@ const BancoAgregar = () => {
   // API
   // =============================
 
-  const fetchMonedaCombo = async () => {
+  const loadMonedaCombo = async () => {
     abortController.current?.abort();
     abortController.current = new AbortController();
 
@@ -106,7 +105,7 @@ const BancoAgregar = () => {
   // =============================
 
   const loadData = async () => {
-    const [monedas] = await Promise.all([fetchMonedaCombo()]);
+    const monedas = await loadMonedaCombo();
 
     setMonedas(monedas);
     setLoading(false);
@@ -201,7 +200,6 @@ const BancoAgregar = () => {
     }
   };
 
-
   // =============================
   // RENDER
   // =============================
@@ -219,7 +217,9 @@ const BancoAgregar = () => {
         handleGoBack={() => history.goBack()}
       />
 
+      {/* Formulario de datos */}
       <div className="flex flex-col gap-3">
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Input
@@ -259,6 +259,7 @@ const BancoAgregar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Select
@@ -299,6 +300,7 @@ const BancoAgregar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Input
@@ -334,6 +336,7 @@ const BancoAgregar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Switches
@@ -370,6 +373,7 @@ const BancoAgregar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Switches
@@ -407,6 +411,7 @@ const BancoAgregar = () => {
         </div>
       </div>
 
+      {/* Botones de acción */}
       <div className="flex flex-col md:flex-row gap-3 mt-3 pt-3 border-t border-gray-200">
         <Button className="btn-success" onClick={handleGuardar}>
           <i className="fa fa-save"></i> Guardar

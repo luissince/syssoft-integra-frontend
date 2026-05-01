@@ -7,17 +7,14 @@ import Title from "@/components/Title";
 import ContainerWrapper from "@/components/ui/container-wrapper";
 import { images } from "@/helper";
 import { isEmpty } from "@/helper/utils.helper";
-import { cn } from "@/lib/utils";
 import SuccessResponse from "@/model/class/response";
 import { ProductFilterInterface } from "@/model/ts/interface/product";
-import { ACTIVO_FIJO } from "@/model/types/tipo-producto";
+import { TIPO_PRODUCTO_ACTIVO_FIJO } from "@/model/types/tipo-producto";
 import { updateGestion } from "@/network/rest/api-client";
 import { filtrarPersona, filtrarProducto } from "@/network/rest/principal.network";
-import { useAppSelector } from "@/redux/hooks";
 import { alertKit } from "alert-kit";
 import React, { useRef, useState } from "react";
 import { FaAsterisk } from "react-icons/fa";
-import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 const GestionEditar = () => {
@@ -117,7 +114,7 @@ const GestionEditar = () => {
     const response = await filtrarProducto(params);
 
     if (response instanceof SuccessResponse) {
-      const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === ACTIVO_FIJO);
+      const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO);
 
       setActivos(productosFiltrados);
     }

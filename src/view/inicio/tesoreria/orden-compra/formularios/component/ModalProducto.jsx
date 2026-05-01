@@ -59,13 +59,14 @@ class ModalProducto extends Component {
       this.peticion = true;
       this.abortController = null;
 
+      const cantidad = isNumeric(producto.cantidad) ? producto.cantidad <= 0 ? 1 : producto.cantidad : 1;
+
       this.setState(
         {
           medidas: response.data,
           idProducto: producto.idProducto,
           codigo: producto.codigo,
-          // cantidad: producto.cantidad ?? 1,
-          cantidad: 1,
+          cantidad: cantidad,
           costo: producto.costo,
           descripcion: producto.nombre,
           imagen: producto.imagen,

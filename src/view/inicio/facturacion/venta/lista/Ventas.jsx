@@ -468,28 +468,14 @@ class Ventas extends CustomComponent {
     }
 
     return this.state.lista.map((item) => {
-      const estadoClassName = cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-        item.estado === 1 ? "bg-green-100 text-green-800" :
-          item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
-            item.estado === 3 ? "bg-red-100 text-red-800" :
-              "bg-blue-100 text-blue-800"
-      );
-
-      const estadoValue =
-        item.estado === 1 ? "COBRADO" :
-          item.estado === 2 ? "POR COBRAR" :
-            item.estado === 3 ? "ANULADO" : "POR LLEVAR";
-
-      const tipo = item.idFormaPago === CONTADO
-        ? "CONTADO"
-        : "CREDITO"
-
       return (
         <tr key={item.idVenta} className="hover:bg-gray-50 transition-colors">
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+            {item.id}
+          </td>
           <td className="px-6 py-4 text-sm text-gray-900">
-            {item.fecha}<br />
+            {item.fecha}
+            <br />
             <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
@@ -497,15 +483,28 @@ class Ventas extends CustomComponent {
             <div className="text-sm  uppercase">{item.informacion}</div>
           </td>
           <td className="px-6 py-4 text-sm text-gray-900">
-            {item.comprobante}<br />
+            {item.comprobante}
+            <br />
             <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
           </td>
-          <td className="px-6 py-4 text-sm text-gray-900">{tipo}</td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            {item.idFormaPago === CONTADO ? "CONTADO" : "CREDITO"}
+          </td>
           <td className="px-6 py-4 text-center">
             <span
-              className={estadoClassName}
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                item.estado === 1 && "bg-green-100 text-green-800",
+                item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                item.estado === 3 && "bg-red-100 text-red-800",
+                item.estado === 4 && "bg-blue-100 text-blue-800"
+              )}
             >
-              {estadoValue}
+              {
+                item.estado === 1 ? "COBRADO" :
+                  item.estado === 2 ? "POR COBRAR" :
+                    item.estado === 3 ? "ANULADO" : "POR LLEVAR"
+              }
             </span>
           </td>
           <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
@@ -603,28 +602,6 @@ class Ventas extends CustomComponent {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
         {
           this.state.lista.map((item) => {
-            const styleEstado = cn(
-              item.estado === 1
-                ? "bg-green-100 text-green-800"
-                : item.estado === 2
-                  ? "bg-yellow-100 text-yellow-800"
-                  : item.estado === 3
-                    ? "bg-red-100 text-red-800"
-                    : "bg-blue-100 text-blue-800"
-            );
-
-            const estadoValue =
-              item.estado === 1
-                ? 'COBRADO' :
-                item.estado === 2
-                  ? 'POR COBRAR' :
-                  item.estado === 3
-                    ? 'ANULADO' : 'POR LLEVAR';
-
-            const tipo = item.idFormaPago === CONTADO
-              ? "CONTADO"
-              : "CREDITO"
-
             return (
               <div
                 key={item.idVenta}
@@ -640,10 +617,18 @@ class Ventas extends CustomComponent {
                         <span>{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
                       </h5>
                       <span className={cn(
-                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                        styleEstado
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        item.estado === 1 && "bg-green-100 text-green-800",
+                        item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                        item.estado === 3 && "bg-red-100 text-red-800",
+                        item.estado === 4 && "bg-blue-100 text-blue-800"
                       )}>
-                        {estadoValue}
+                        {
+                          item.estado === 1 ? "COBRADO" :
+                            item.estado === 2 ? "POR COBRAR" :
+                              item.estado === 3 ? "ANULADO" :
+                                "POR LLEVAR"
+                        }
                       </span>
                     </div>
 
@@ -664,7 +649,10 @@ class Ventas extends CustomComponent {
                     </div>
 
                     <div className="text-sm text-gray-600">
-                      <span className="font-medium">Tipo:</span> {tipo}
+                      <span className="font-medium">Tipo:</span>
+                      <span>
+                        {item.idFormaPago === CONTADO ? "CONTADO" : "CREDITO"}
+                      </span>
                     </div>
 
                     <div className="text-lg font-bold text-gray-900 mb-3 text-right">

@@ -4,7 +4,7 @@ import { ImageUpload } from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import { formatDecimal } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
-import { PRODUCTO } from '../../../../../../model/types/tipo-producto';
+import { TIPO_PRODUCTO_NORMAL } from '../../../../../../model/types/tipo-producto';
 
 const DetalleImagen = (props) => {
   const { idTipoProducto } = props;
@@ -69,7 +69,7 @@ const DetalleImagen = (props) => {
         </Switches>
 
 
-        {idTipoProducto === PRODUCTO && (
+        {idTipoProducto === TIPO_PRODUCTO_NORMAL && (
           <Switches
             id="customSwitchVentaNegativo"
             checked={negativo}

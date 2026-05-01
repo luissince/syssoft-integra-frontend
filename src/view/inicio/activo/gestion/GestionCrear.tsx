@@ -8,12 +8,11 @@ import Title from "@/components/Title";
 import ContainerWrapper from "@/components/ui/container-wrapper";
 import { images } from "@/helper";
 import { isEmpty } from "@/helper/utils.helper";
-import { cn } from "@/lib/utils";
 import SuccessResponse from "@/model/class/response";
-import { KardexListDepreciacionInterface, KardexResponseListDepreciacionInterface } from "@/model/ts/interface/kardex";
+import { KardexListDepreciacionInterface } from "@/model/ts/interface/kardex";
 import { PersonFilterInterface } from "@/model/ts/interface/person";
 import { ProductFilterInterface } from "@/model/ts/interface/product";
-import { ACTIVO_FIJO } from "@/model/types/tipo-producto";
+import { TIPO_PRODUCTO_ACTIVO_FIJO } from "@/model/types/tipo-producto";
 import { createGestion, listarDepreciacionKardex } from "@/network/rest/api-client";
 import { filtrarPersona, filtrarProducto } from "@/network/rest/principal.network";
 import { useAppSelector } from "@/redux/hooks";
@@ -22,7 +21,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { BsDatabaseSlash } from "react-icons/bs";
 import { FaAsterisk } from "react-icons/fa";
 import { GrUserAdd } from "react-icons/gr";
-import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 const GestionCrear = () => {
@@ -187,7 +185,7 @@ const GestionCrear = () => {
 
     const response = await filtrarProducto(params);
     if (response instanceof SuccessResponse) {
-      const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === ACTIVO_FIJO);
+      const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO);
 
       setActivos(productosFiltrados);
     }

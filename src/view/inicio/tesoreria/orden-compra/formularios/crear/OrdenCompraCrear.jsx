@@ -1,5 +1,5 @@
 import React from 'react';
-import { PosContainerWrapper } from '@/components/Container';
+import { PosContainerWrapper } from '@/components/ui/container-wrapper';
 import CustomComponent from '@/components/CustomComponent';
 import {
   isEmpty,
@@ -35,7 +35,7 @@ import {
 } from '@/components/MultiModal';
 import SidebarConfiguration from '@/components/SidebarConfiguration';
 import {
-  SERVICIO,
+  TIPO_PRODUCTO_SERVICIO,
 } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import PanelIzquierdo from '../../../component/PanelIzquierdo';
@@ -458,7 +458,7 @@ class OrdenCompraCrear extends CustomComponent {
 
     const productos = await this.fetchFiltrarProductos(params);
 
-    const filteredProductos = productos.filter((item) => item.idTipoProducto !== SERVICIO);
+    const filteredProductos = productos.filter((item) => item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO);
 
     this.setState({
       productos: filteredProductos,

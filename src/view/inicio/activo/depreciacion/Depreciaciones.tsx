@@ -11,7 +11,7 @@ import SuccessResponse from "@/model/class/response";
 import { KardexListDepreciacionInterface } from "@/model/ts/interface/kardex";
 import { ProductFilterInterface } from "@/model/ts/interface/product";
 import { metodoDepreciacionMap } from "@/model/types/metodo-depreciacion";
-import { ACTIVO_FIJO, tipoProductoMap } from "@/model/types/tipo-producto";
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_ACTIVO_FIJO, tipoProductoMap } from "@/model/types/tipo-producto";
 import { listarDepreciacionKardex, optionsAlmacen } from "@/network/rest/api-client";
 import { filtrarProducto } from "@/network/rest/principal.network";
 import { setActivoDepreciacionState } from "@/redux/activo/depreciacionSlice";
@@ -225,7 +225,7 @@ const Depreciaciones = () => {
         const response = await filtrarProducto(params);
 
         if (response instanceof SuccessResponse) {
-            const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === ACTIVO_FIJO);
+            const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO);
 
             dispatch(setActivoDepreciacionState({
                 buscar: text,
@@ -336,7 +336,7 @@ const Depreciaciones = () => {
             <div className="max-w-7xl mx-auto mb-3">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
                     <div className="lg:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm text-gray-700 mb-2">
                             Filtrar los productos por código o nombre:
                         </label>
                         <SearchInput
@@ -368,7 +368,7 @@ const Depreciaciones = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm text-gray-700 mb-2">
                             Almacén
                         </label>
                         <select
@@ -398,7 +398,7 @@ const Depreciaciones = () => {
                     {/* Información del producto */}
                     <div className="lg:col-span-3 rounded border p-6 gap-3">
                         <div className="flex items-center justify-between mb-3">
-                            <h5 className="text-base font-semibold text-gray-900">
+                            <h5 className="text-base text-gray-900">
                                 Información del Producto
                             </h5>
                         </div>
@@ -440,7 +440,7 @@ const Depreciaciones = () => {
                 {/* Encabezado de la tabla */}
                 <div className="p-3 border-b border-gray-200">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-base font-semibold text-gray-900">Tabla de Depreciación</h2>
+                        <h2 className="text-base text-gray-900">Tabla de Depreciación</h2>
                     </div>
                 </div>
 

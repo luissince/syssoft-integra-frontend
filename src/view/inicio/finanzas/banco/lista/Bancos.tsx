@@ -444,7 +444,7 @@ const Bancos = () => {
                   </div>
 
                   {/* FOOTER */}
-                  <div className="pt-3 border-t border-gray-100 flex justify-between">          
+                  <div className="pt-3 border-t border-gray-100 flex justify-between">
                     <button
                       className={
                         cn(
@@ -457,7 +457,7 @@ const Bancos = () => {
                         )
                       }
                       onClick={() => handleDetalle(item.idBanco)}
-                      title="Detalle banco"
+                      title="Detalle"
                     >
                       <i className="bi bi-eye text-lg" />
                     </button>
@@ -491,7 +491,7 @@ const Bancos = () => {
                         )
                       }
                       onClick={() => handleBorrar(item.idBanco)}
-                      title="Eliminar banco"
+                      title="Eliminar"
                     >
                       <i className="bi bi-trash text-lg" />
                     </button>

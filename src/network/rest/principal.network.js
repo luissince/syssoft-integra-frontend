@@ -261,7 +261,7 @@ export function documentsExcelPersonaProveedor() {
 |--------------------------------------------------------------------------
 */
 export async function listInventario(params, signal) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/inventario/list', {
       params: params,
       signal: signal,
@@ -1007,7 +1007,7 @@ export async function comboTipoEntrega(signal) {
 |--------------------------------------------------------------------------
 */
 export async function listCompra(params, signal) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/compra/list', {
       params: params,
       signal: signal,
@@ -1015,8 +1015,8 @@ export async function listCompra(params, signal) {
   );
 }
 
-export async function detailCompra(params, signal) {
-  return await Resolve.resolve(
+export async function getByIdCompra(params, signal) {
+  return await Resolve.safe(
     instancePrincipal.get('/api/compra/detail', {
       params: params,
       signal: signal,
@@ -1266,7 +1266,7 @@ export function documentsPdfListsCotizacion(idCotizacion) {
 |--------------------------------------------------------------------------
 */
 export async function listOrdenCompra(params, signal) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/ordencompra/list', {
       params: params,
       signal: signal,
@@ -1326,7 +1326,7 @@ export async function cancelOrdenCompra(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
+export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size, outputType = "pdf") {
   return `${import.meta.env.VITE_APP_BACK_END
     }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }

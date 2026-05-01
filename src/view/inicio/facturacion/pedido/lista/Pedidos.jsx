@@ -422,7 +422,9 @@ class Pedidos extends CustomComponent {
     return this.state.lista.map((item) => {
       return (
         <tr key={item.idPedido} className="hover:bg-gray-50 transition-colors">
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+            {item.id}
+          </td>
           <td className="px-6 py-4 text-sm text-gray-900">
             {item.fecha}<br />
             <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
@@ -447,11 +449,10 @@ class Pedidos extends CustomComponent {
 
           <td className="px-6 py-4 text-sm text-gray-900">
             <span
-              className={
-                item.ligado == 0
-                  ? 'badge badge-secondary'
-                  : 'badge badge-success'
-              }
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                item.ligado === 0 ? "bg-gray-500 text-white" : "bg-green-500 text-white",
+              )}
             >
               {item.ligado}
             </span>
@@ -473,7 +474,7 @@ class Pedidos extends CustomComponent {
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Ver detalle"
+              title="Detalle"
               onClick={() => this.handleDetalle(item.idPedido)}
             >
               <i className="bi bi-eye text-lg" />
@@ -487,12 +488,12 @@ class Pedidos extends CustomComponent {
                   "p-2 rounded-md text-sm font-medium transition",
                   "text-yellow-600 bg-white",
                   "hover:bg-yellow-50 hover:text-yellow-700",
-                  "focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
-                  "active:bg-yellow-100 active:scale-[0.97]",
+                  "focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2",
+                  "active:bg-yellow-100 active:scale-[0.98]",
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Ver detalle"
+              title="Editar"
               onClick={() => this.handleEditar(item.idPedido)}
             >
               <i className="bi bi-pencil text-lg" />
@@ -511,7 +512,7 @@ class Pedidos extends CustomComponent {
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Anular venta"
+              title="Anular"
               onClick={() => this.handleAnular(item.idPedido)}
             >
               <i className="bi bi-trash text-lg" />
@@ -582,8 +583,8 @@ class Pedidos extends CustomComponent {
                   </div>
 
                   <div className={cn(
-                    "text-lg font-bold text-gray-900 mb-3",
-                    item.ligado == 0 ? "badge badge-secondary" : "badge badge-success"
+                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                    item.ligado === 0 ? "bg-gray-500 text-white" : "bg-green-500 text-white",
                   )}>
                     Ligado: {item.ligado}
                   </div>

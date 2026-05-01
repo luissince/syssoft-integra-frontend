@@ -31,7 +31,7 @@ import {
 import Title from '@/components/Title';
 import { SpinnerView } from '@/components/Spinner';
 import ModalProducto from '../component/ModalProducto';
-import { ACTIVO_FIJO, COMBO, EXISTENCIAL, MENOR_CUANTIA, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO, tipoProducto } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import RadioButton from '@/components/RadioButton';
 import Select from '@/components/Select';
@@ -39,7 +39,6 @@ import Input from '@/components/Input';
 import Button from '@/components/Button';
 import TextArea from '@/components/TextArea';
 import ItemImage from '../component/ItemImagen';
-import ItemProducto from '../component/ItemProducto';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 import { FaAsterisk } from 'react-icons/fa';
 
@@ -59,7 +58,7 @@ class ProductoAgregar extends CustomComponent {
       loading: true,
       msgLoading: "Cargando datos...",
 
-      idTipoProducto: PRODUCTO,
+      idTipoProducto: TIPO_PRODUCTO_NORMAL,
 
       nombre: "",
       codigo: "",
@@ -93,12 +92,6 @@ class ProductoAgregar extends CustomComponent {
       negativo: false,
       preferido: false,
       estado: true,
-
-      // Atributos del modal inventario
-      isOpenInventario: false,
-
-      // Atributos del modal inventario
-      isOpenProducto: false,
 
       // Lista de datos
       medidas: [],
@@ -428,59 +421,6 @@ class ProductoAgregar extends CustomComponent {
     this.setState({ imagenes: newImgs });
   };
 
-  handleRemoveCombo = (idProducto) => {
-    this.setState((prevState) => ({
-      combos: prevState.combos.filter((item) => item.idProducto !== idProducto),
-    }));
-  };
-
-  handleInputCantidadCombo = (event, idProducto) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      combos: prevState.combos.map((item) =>
-        item.idProducto === idProducto
-          ? { ...item, cantidad: value ? parseFloat(value) : '' }
-          : item,
-      ),
-    }));
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal producto
-  //------------------------------------------------------------------------------------------
-  handleOpenModalProducto = () => {
-    this.setState({ isOpenProducto: true });
-  };
-
-  handleCloseProducto = async () => {
-    this.setState({ isOpenProducto: false });
-  };
-
-  handleAddProducto = async (item, callback = async function () { }) => {
-    this.setState((prevState) => ({
-      combos: [...prevState.combos, item],
-    }));
-
-    await callback();
-  };
-
-  handleRemoveProducto = (idProducto) => {
-    this.setState((prevState) => ({
-      combos: prevState.combos.filter((item) => item.idProducto !== idProducto),
-    }));
-  };
-
-  handleInputCantidadCombos = (event, idProducto) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      combos: prevState.combos.map((item) =>
-        item.idProducto === idProducto
-          ? { ...item, cantidad: value ? parseFloat(value) : '' }
-          : item,
-      ),
-    }));
-  };
-
   //------------------------------------------------------------------------------------------
   // Detalle general
   //------------------------------------------------------------------------------------------
@@ -619,7 +559,7 @@ class ProductoAgregar extends CustomComponent {
         ref: this.refCosto
       },
       {
-        value: ![ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL].includes(idTipoProducto) && precio,
+        value: ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && precio,
         message: 'Ingrese el precio.',
         ref: this.refPrecio
       },
@@ -781,13 +721,6 @@ class ProductoAgregar extends CustomComponent {
 
     return (
       <ContainerWrapper>
-        <ModalProducto
-          isOpen={this.state.isOpenProducto}
-          onClose={this.handleCloseProducto}
-          combos={this.state.combos}
-          handleAddProducto={this.handleAddProducto}
-        />
-
         <SpinnerView
           loading={loading}
           message={msgLoading}
@@ -814,71 +747,22 @@ class ProductoAgregar extends CustomComponent {
                 Selecciona el tipo de producto que deseas crear, esto te ayudará a organizar mejor tu catálogo.
               </p>
 
-              <RadioButton
-                className="form-check-inline"
-                id={PRODUCTO}
-                value={PRODUCTO}
-                name="ckTipoProducto"
-                checked={idTipoProducto === PRODUCTO}
-                onChange={this.handleOptionTipoProducto}
-              >
-                Producto
-              </RadioButton>
+              {
+                tipoProducto.map((item, index) => (
+                  <RadioButton
+                    key={`tipo-producto-${index}`}
+                    className="form-check-inline"
+                    id={item.value}
+                    value={item.value}
+                    name="ckTipoProducto"
+                    checked={idTipoProducto === item.value}
+                    onChange={this.handleOptionTipoProducto}
+                  >
+                    {item.label}
+                  </RadioButton>
 
-              <RadioButton
-                className="form-check-inline"
-                id={SERVICIO}
-                value={SERVICIO}
-                name="ckTipoProducto"
-                checked={idTipoProducto === SERVICIO}
-                onChange={this.handleOptionTipoProducto}
-              >
-                Servicio
-              </RadioButton>
-
-              <RadioButton
-                className="form-check-inline"
-                id={COMBO}
-                value={COMBO}
-                name="ckTipoProducto"
-                checked={idTipoProducto === COMBO}
-                onChange={this.handleOptionTipoProducto}
-              >
-                Combo
-              </RadioButton>
-
-              <RadioButton
-                className="form-check-inline"
-                id={ACTIVO_FIJO}
-                value={ACTIVO_FIJO}
-                name="ckTipoProducto"
-                checked={idTipoProducto === ACTIVO_FIJO}
-                onChange={this.handleOptionTipoProducto}
-              >
-                Activo Fijo
-              </RadioButton>
-
-              <RadioButton
-                className="form-check-inline"
-                id={MENOR_CUANTIA}
-                value={MENOR_CUANTIA}
-                name="ckTipoProducto"
-                checked={idTipoProducto === MENOR_CUANTIA}
-                onChange={this.handleOptionTipoProducto}
-              >
-                Menor Cuantía
-              </RadioButton>
-
-              <RadioButton
-                className="form-check-inline"
-                id={EXISTENCIAL}
-                value={EXISTENCIAL}
-                name="ckTipoProducto"
-                checked={idTipoProducto === EXISTENCIAL}
-                onChange={this.handleOptionTipoProducto}
-              >
-                Existencial
-              </RadioButton>
+                ))
+              }
             </div>
 
             {/* Información general */}
@@ -1036,7 +920,7 @@ class ProductoAgregar extends CustomComponent {
 
             {/* Forma de venta */}
             {
-              [PRODUCTO].includes(idTipoProducto) && (
+              [TIPO_PRODUCTO_NORMAL].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">3</span> FORMA DE VENTA
@@ -1087,7 +971,7 @@ class ProductoAgregar extends CustomComponent {
 
             {/* Metodo de depreciación */}
             {
-              [ACTIVO_FIJO].includes(idTipoProducto) && (
+              [TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">4</span> Método de depreciación
@@ -1172,7 +1056,7 @@ class ProductoAgregar extends CustomComponent {
 
             {/* Costo */}
             {
-              ![SERVICIO, COMBO].includes(idTipoProducto) && (
+              ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">4</span> COSTO
@@ -1201,7 +1085,7 @@ class ProductoAgregar extends CustomComponent {
 
             {/* Precio */}
             {
-              ![ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL].includes(idTipoProducto) && (
+              ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">5</span> PRECIO
@@ -1289,34 +1173,6 @@ class ProductoAgregar extends CustomComponent {
                       <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
                     </Button>
                   </div>
-                </div>
-              )
-            }
-
-            {/* Lista combo */}
-            {
-              [COMBO].includes(idTipoProducto) && (
-                <div className="flex flex-col gap-3">
-                  <h6 className="flex items-center gap-2">
-                    <span className="badge badge-primary">3</span> COMBO
-                  </h6>
-
-                  <p>
-                    Selecciona los productos y sus cantidades para armar un combo
-                  </p>
-
-                  {
-                    combos.map((item, index) => {
-                      return (
-                        <ItemProducto
-                          key={index}
-                          item={item}
-                          handleInputCantidadCombos={this.handleInputCantidadCombo}
-                          handleRemoveItemCombo={this.handleRemoveCombo}
-                        />
-                      );
-                    })
-                  }
                 </div>
               )
             }

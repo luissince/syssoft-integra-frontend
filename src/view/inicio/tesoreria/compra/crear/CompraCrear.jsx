@@ -133,9 +133,6 @@ class CompraCrear extends CustomComponent {
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
 
-    // Referencia al modal de orden de compra
-    this.refModalOrdenCompra = React.createRef();
-
     //Anular las peticiones
     this.abortController = new AbortController();
     this.abortControllerOrdenCompra = new AbortController();
@@ -1071,7 +1068,6 @@ class CompraCrear extends CustomComponent {
         />
 
         <ModalOrdenCompra
-          refModal={this.refModalOrdenCompra}
           isOpen={this.state.isOpenOrdenCompra}
           idSucursal={this.state.idSucursal}
           handleClose={this.handleCloseOrdenCompra}

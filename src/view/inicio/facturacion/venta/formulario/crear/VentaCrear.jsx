@@ -64,11 +64,9 @@ import ModalTransaccion from '@/components/ModalTransaccion';
 import SidebarProducto from './component/SidebarProducto';
 import ModalPedido from '../common/ModalPedido';
 import { alertKit } from 'alert-kit';
-import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import ContentSale from './component/ContentSale';
 import ModalPrinter from '../../detalle/component/ModalPrinter';
 import pdfVisualizer from 'pdf-visualizer';
-import { cn } from '@/lib/utils';
 import ModalInventarioDetalle from '../common/ModalInventarioDetalle';
 import FloatingCartButton from './component/FloatingCartButton';
 
@@ -177,12 +175,6 @@ class VentaCrear extends CustomComponent {
 
     // Referencia al modal impresión
     this.refModalImpresion = React.createRef();
-
-    // Referencia al modal de cotización
-    this.refModalCotizacion = React.createRef();
-
-    // Referencia al modal de cotización
-    this.refModalPedido = React.createRef();
 
     // Referencia al tipo de comprobante
     this.refComprobante = React.createRef();
@@ -2351,7 +2343,6 @@ class VentaCrear extends CustomComponent {
         />
 
         <ModalCotizacion
-          refModal={this.refModalCotizacion}
           isOpen={this.state.isOpenModalCotizacion}
           idSucursal={this.state.idSucursal}
           handleClose={this.handleCloseModalCotizacion}
@@ -2359,7 +2350,6 @@ class VentaCrear extends CustomComponent {
         />
 
         <ModalPedido
-          refModal={this.refModalPedido}
           isOpen={this.state.isOpenModalPedido}
           idSucursal={this.state.idSucursal}
           handleClose={this.handleCloseModalPedido}

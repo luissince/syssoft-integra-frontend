@@ -21,7 +21,7 @@ import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import Search from '@/components/Search';
 import { cn } from '@/lib/utils';
-import { ACTIVO_FIJO, COMBO, PRODUCTO, SERVICIO } from '@/model/types/tipo-producto';
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_ACTIVO_FIJO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -506,10 +506,10 @@ const ItemView = (props) => {
     <Button
       contentClassName={cn(
         "item-view",
-        idTipoProducto === PRODUCTO && cantidad <= 0 && "border border-danger",
-        idTipoProducto === SERVICIO && cantidad <= 0 && "",
-        idTipoProducto === COMBO && cantidad <= 0 && "border border-danger",
-        idTipoProducto === ACTIVO_FIJO && cantidad <= 0 && "border border-danger",
+        idTipoProducto === TIPO_PRODUCTO_NORMAL && cantidad <= 0 && "border border-danger",
+        idTipoProducto === TIPO_PRODUCTO_SERVICIO && cantidad <= 0 && "",
+        idTipoProducto === TIPO_PRODUCTO_LOTE && cantidad <= 0 && "border border-danger",
+        idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && cantidad <= 0 && "border border-danger",
       )}
       onClick={handleAddItem}
     >
@@ -539,16 +539,16 @@ const ItemView = (props) => {
         <p
           className={cn(
             "item-view_describe-title absolute",
-            idTipoProducto === PRODUCTO && cantidad <= 0 && "text-red-500",
-            idTipoProducto === SERVICIO && cantidad <= 0 && "",
-            idTipoProducto === COMBO && cantidad <= 0 && "text-red-500",
-            idTipoProducto === ACTIVO_FIJO && cantidad <= 0 && "text-red-500",
+            idTipoProducto === TIPO_PRODUCTO_NORMAL && cantidad <= 0 && "text-red-500",
+            idTipoProducto === TIPO_PRODUCTO_SERVICIO && cantidad <= 0 && "",
+            idTipoProducto === TIPO_PRODUCTO_LOTE && cantidad <= 0 && "text-red-500",
+            idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && cantidad <= 0 && "text-red-500",
           )}
         >
-          {idTipoProducto === PRODUCTO && `STOCK: ${cantidad}`}
-          {idTipoProducto === SERVICIO && "SERVICIO"}
-          {idTipoProducto === COMBO && `STOCK: ${cantidad}`}
-          {idTipoProducto === ACTIVO_FIJO && `STOCK: ${cantidad}`}
+          {idTipoProducto === TIPO_PRODUCTO_NORMAL && `STOCK: ${cantidad}`}
+          {idTipoProducto === TIPO_PRODUCTO_SERVICIO && "SERVICIO"}
+          {idTipoProducto === TIPO_PRODUCTO_LOTE && `STOCK: ${cantidad}`}
+          {idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && `STOCK: ${cantidad}`}
         </p>
         <div className="flex items-center justify-center">
           <img
@@ -567,9 +567,9 @@ const ItemView = (props) => {
 
       <span className={cn(
         "text-center block w-full my-1 text-xs",
-        idTipoProducto !== SERVICIO && negativo === 1 ? "text-green-600" : "text-red-500"
+        idTipoProducto !== TIPO_PRODUCTO_SERVICIO && negativo === 1 ? "text-green-600" : "text-red-500"
       )}>
-        {idTipoProducto === SERVICIO
+        {idTipoProducto === TIPO_PRODUCTO_SERVICIO
           ? "SIN CONTROL DE STOCK"
           : negativo === 1
             ? "VENTA CON CONTROL DE STOCK"

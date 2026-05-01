@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { closeProject, signOut } from "../principalSlice";
 import { WarehouseOptionsInterface } from "@/model/ts/interface/warehouse";
-import { currentDate } from "@/helper/utils.helper";
 import { AssetListInterface, AssetMetricsInterface } from "@/model/ts/interface/asset";
 
 interface BienState {
@@ -10,8 +9,11 @@ interface BienState {
     loading: boolean;
     msgLoading: string;
 
-    fechaInicio: string;
-    fechaFinal: string;
+    estadoFiltro: string;
+    estadosOptions: {
+        value: string;
+        label: string;
+    }[];
 
     idAlmacen: string;
     almacenes: WarehouseOptionsInterface[];
@@ -45,8 +47,14 @@ const initialState: BienState = {
     loading: false,
     msgLoading: "Cargando información...",
 
-    fechaInicio: currentDate(),
-    fechaFinal: currentDate(),
+    estadoFiltro: "",
+    estadosOptions: [
+        { value: "", label: "Todos los estados" },
+        { value: "critico", label: "Stock Crítico" },
+        { value: "optimo", label: "Stock Óptimo" },
+        { value: "exceso", label: "Stock Excedente" },
+        { value: "vencer", label: "Lotes por Vencer" },
+    ],
 
     idAlmacen: "",
     almacenes: [],

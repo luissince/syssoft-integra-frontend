@@ -11,10 +11,9 @@ import { images } from "@/helper";
 import { isEmpty } from "@/helper/utils.helper";
 import SuccessResponse from "@/model/class/response";
 import { KardexListDepreciacionInterface } from "@/model/ts/interface/kardex";
-import { PersonFilterInterface } from "@/model/ts/interface/person";
 import { ProductFilterInterface } from "@/model/ts/interface/product";
-import { ACTIVO_FIJO } from "@/model/types/tipo-producto";
-import { devolverGestion, listarDepreciacionDevolucion, listarDepreciacionKardex } from "@/network/rest/api-client";
+import { TIPO_PRODUCTO_ACTIVO_FIJO } from "@/model/types/tipo-producto";
+import { devolverGestion, listarDepreciacionDevolucion } from "@/network/rest/api-client";
 import { filtrarProducto } from "@/network/rest/principal.network";
 import { useAppSelector } from "@/redux/hooks";
 import { alertKit } from "alert-kit";
@@ -151,7 +150,7 @@ const GestionDevolver = () => {
     const response = await filtrarProducto(params);
 
     if (response instanceof SuccessResponse) {
-      const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === ACTIVO_FIJO);
+      const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO);
 
       setActivos(productosFiltrados);
     }

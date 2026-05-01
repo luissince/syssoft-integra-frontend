@@ -1,17 +1,35 @@
-export const PRODUCTO = 'TP0001';
-export const SERVICIO = 'TP0002';
-export const COMBO = 'TP0003';
-export const ACTIVO_FIJO = 'TP0004';
-export const MENOR_CUANTIA = 'TP0005';
-export const EXISTENCIAL = 'TP0006';
+import { Box, Wrench, Layers, Building2 } from 'lucide-react';
 
-const tipoProducto = [
-    { value: PRODUCTO, label: 'Producto' },
-    { value: SERVICIO, label: 'Servicio' },
-    { value: COMBO, label: 'Combo' },
-    { value: ACTIVO_FIJO, label: 'Activo Fijo' },
-    { value: MENOR_CUANTIA, label: 'Menor Cuantía' },
-    { value: EXISTENCIAL, label: 'Existencial' },
+export const TIPO_PRODUCTO_NORMAL = 'TP0001';
+export const TIPO_PRODUCTO_SERVICIO = 'TP0002';
+export const TIPO_PRODUCTO_LOTE = 'TP0003';
+export const TIPO_PRODUCTO_ACTIVO_FIJO = 'TP0004';
+
+export const tipoProducto = [
+    {
+        value: TIPO_PRODUCTO_NORMAL,
+        label: 'Normal',
+        icon: Box,
+        color: '#6c757d'
+    },
+    {
+        value: TIPO_PRODUCTO_SERVICIO,
+        label: 'Servicio',
+        icon: Wrench,
+        color: '#0d6efd'
+    },
+    {
+        value: TIPO_PRODUCTO_LOTE,
+        label: 'Lote',
+        icon: Layers,
+        color: '#fd7e14'
+    },
+    {
+        value: TIPO_PRODUCTO_ACTIVO_FIJO,
+        label: 'Activo Fijo',
+        icon: Building2,
+        color: '#198754'
+    },
 ];
 
 export const tipoProductoMap = new Map(

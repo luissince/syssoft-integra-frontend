@@ -272,44 +272,35 @@ class Inventario extends CustomComponent {
     const params = {
       opcion: opcion,
       buscar: buscar,
-      idSucursal: this.state.idSucursal,
       idAlmacen: this.state.idAlmacen,
       estado: this.state.estadoFiltro,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listInventario(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const { success, data, message, type } = await listInventario(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      const result = response.data.result;
-      const total = response.data.total;
-      const totalPaginacion = parseInt(
-        String(Math.ceil(Number(total) / this.state.filasPorPagina),)
-      );
-
-      this.setState({
-        loading: false,
-        lista: result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(String(Math.ceil(Number(data.total) / this.state.filasPorPagina)));
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   async fetchComboAlmacen(params) {
@@ -1021,11 +1012,11 @@ class Inventario extends CustomComponent {
         {/* Body */}
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-gray-700">
                 Almacén
-              </label>
+              </p>
               <select
                 className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 value={this.state.idAlmacen}
@@ -1045,10 +1036,10 @@ class Inventario extends CustomComponent {
             </div>
 
             {/* Nuevo filtro de estado */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-gray-700">
                 Estado del Stock
-              </label>
+              </p>
               <select
                 className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 value={this.state.estadoFiltro}
@@ -1064,10 +1055,10 @@ class Inventario extends CustomComponent {
               </select>
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="md:col-span-2 flex flex-col gap-2">
+              <p className="text-sm text-gray-700">
                 Buscar producto
-              </label>
+              </p>
               <Search
                 group={true}
                 iconLeft={<i className="bi bi-search" />}
@@ -1080,7 +1071,7 @@ class Inventario extends CustomComponent {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-3">
             <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">

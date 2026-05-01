@@ -198,7 +198,7 @@ const Bienes = () => {
   useEffect(() => {
     if (!state.didMount) return;
 
-      loadAlmacen();
+    loadAlmacen();
   }, [state.didMount]);
 
   useEffect(() => {
@@ -213,7 +213,7 @@ const Bienes = () => {
     if (!state.didMount) return;
 
     fillTable();
-  }, [state.didMount, state.idAlmacen, state.fechaInicio, state.fechaFinal, state.opcion, state.buscar, state.paginacion]);
+  }, [state.didMount, state.idAlmacen, state.estadoFiltro, state.opcion, state.buscar, state.paginacion]);
 
   // =============================
   // FLOWS
@@ -285,19 +285,13 @@ const Bienes = () => {
     }));
   };
 
-  // Eventos de fecha de inicio
-  const handleInputFechaInicio = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Eventos de estado del stock
+  const handleSelectEstado = (event: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(setActivoBienState({
-      fechaInicio: event.target.value,
+      estadoFiltro: event.target.value,
     }));
   };
 
-  // Eventos de fecha final
-  const handleInputFechaFinal = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setActivoBienState({
-      fechaFinal: event.target.value
-    }));
-  };
 
   // Eventos de idAlmacen
   const handleSelectIdAlmacen = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -764,189 +758,198 @@ const Bienes = () => {
         </div>
       </div>
 
-      {/* Filtros de fechas, comprobante y estado */}
       <div className="flex flex-col gap-y-4 mb-4">
         <div>
           <p className="text-gray-600 mt-1">
-            Puedes ver las ventas echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
+            Puedes ver todos los productos con diferentes filtros, por ejemplo: almacen, stock y filtro.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input
-            type="date"
-            value={state.fechaInicio}
-            onChange={handleInputFechaInicio}
-            className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-
-          <input
-            type="date"
-            value={state.fechaFinal}
-            onChange={handleInputFechaFinal}
-            className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-
-          <select
-            ref={refIdAlmacen}
-            value={state.idAlmacen}
-            onChange={handleSelectIdAlmacen}
-            className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">-- Almacenes --</option>
-            {state.almacenes.map((item) => (
-              <option key={item.idAlmacen} value={item.idAlmacen}>
-                {item.nombre}
-              </option>
-            ))}
-          </select>
-
-          <select
-            // value={this.state.estado}
-            // onChange={this.handleSelectEstado}
-            className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="0">TODOS</option>
-            <option value="1">COBRADO</option>
-            <option value="2">POR COBRAR</option>
-            <option value="3">ANULADO</option>
-          </select>
-        </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded border p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FaBuilding className="h-8 w-8 text-indigo-600" />
+      {/* Body */}
+      <div className="max-w-7xl mx-auto">
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-gray-700">
+              Almacén
+            </p>
+            <select
+              className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              ref={refIdAlmacen}
+              value={state.idAlmacen}
+              onChange={handleSelectIdAlmacen}
+            >
+              <option value="">Seleccione un almacén</option>
+              {
+                state.almacenes.map((item, index) => {
+                  return (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre} - {item.tipoAlmacen}
+                    </option>
+                  );
+                })
+              }
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-gray-700">
+              Estado del Stock
+            </p>
+            <select
+              className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              value={state.estadoFiltro}
+              onChange={handleSelectEstado}
+            >
+              {
+                state.estadosOptions.map((option, index) => (
+                  <option key={index} value={option.value}>
+                    {option.label}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          <div className="md:col-span-2 flex flex-col gap-2">
+            <p className="text-sm text-gray-700">
+              Buscar producto
+            </p>
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search text-gray-400"></i>}
+              ref={refSearch}
+              onSearch={handleSearchText}
+              placeholder="Buscar por nombre del bien..."
+              theme="modern"
+            />
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+          <div className="bg-white rounded border p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FaBuilding className="h-8 w-8 text-indigo-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  Activos vigentes
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {rounded(state.metricas.totalAssets, 0)}
+                </p>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
-                Activos vigentes
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {rounded(state.metricas.totalAssets, 0)}
-              </p>
+          </div>
+
+          <div className="bg-white rounded border p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FaMoneyBillWave className="h-8 w-8 text-orange-500" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  Costo total (con mejoras)
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(state.metricas.totalCost, moneda.codiso)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded border p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FaChartLine className="h-8 w-8 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  Dep. acumulada total
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(state.metricas.totalDepreciation, moneda.codiso)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded border p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FaBalanceScale className="h-8 w-8 text-green-500" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  Valor en libros hoy
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(state.metricas.totalBookValue, moneda.codiso)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded border p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FaMoneyBillWave className="h-8 w-8 text-orange-500" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
-                Costo total (con mejoras)
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(state.metricas.totalCost, moneda.codiso)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded border p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FaChartLine className="h-8 w-8 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
-                Dep. acumulada total
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(state.metricas.totalDepreciation, moneda.codiso)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded border p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <FaBalanceScale className="h-8 w-8 text-green-500" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
-                Valor en libros hoy
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(state.metricas.totalBookValue, moneda.codiso)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Barra de búsqueda */}
-      <div className="w-full mb-4">
-        <Search
-          group={true}
-          iconLeft={<i className="bi bi-search text-gray-400"></i>}
-          ref={refSearch}
-          onSearch={handleSearchText}
-          placeholder="Buscar por nombre del bien..."
-          theme="modern"
-        />
-      </div>
-
-      {/* Render condicional: Tabla o Cuadrícula */}
-      <div
-        className={
-          state.vista === "tabla"
-            ? "bg-white rounded border overflow-hidden"
-            : "space-y-6"
-        }
-      >
-
-        {/* 📊 Vista Tabla  */}
-        {
-          state.vista === "tabla" && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Producto</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Categoría</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Stock</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Costo</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {renderTable()}
-                </tbody>
-              </table>
-            </div>
-          )
-        }
-
-        {/* 🟦 Vista Cuadrícula */}
-        {
-          state.vista === "cuadricula" && (
-            <>{renderCuadricula()}</>
-          )
-        }
-
-        {/* ✅ Paginación única */}
-        <Paginacion
-          ref={refPaginacion}
-          loading={state.loading}
-          data={state.lista}
-          totalPaginacion={state.totalPaginacion}
-          paginacion={state.paginacion}
-          fillTable={handlePaginacion}
-          restart={state.restart}
-          theme="modern"
+        {/* Render condicional: Tabla o Cuadrícula */}
+        <div
           className={
             state.vista === "tabla"
-              ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-              : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+              ? "bg-white rounded border overflow-hidden"
+              : "space-y-6"
           }
-        />
+        >
+
+          {/* 📊 Vista Tabla  */}
+          {
+            state.vista === "tabla" && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Producto</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Categoría</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Stock</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Costo</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%] text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {renderTable()}
+                  </tbody>
+                </table>
+              </div>
+            )
+          }
+
+          {/* 🟦 Vista Cuadrícula */}
+          {
+            state.vista === "cuadricula" && (
+              <>{renderCuadricula()}</>
+            )
+          }
+
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={refPaginacion}
+            loading={state.loading}
+            data={state.lista}
+            totalPaginacion={state.totalPaginacion}
+            paginacion={state.paginacion}
+            fillTable={handlePaginacion}
+            restart={state.restart}
+            theme="modern"
+            className={
+              state.vista === "tabla"
+                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+            }
+          />
+        </div>
       </div>
     </ContainerWrapper>
   );

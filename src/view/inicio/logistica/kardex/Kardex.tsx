@@ -30,6 +30,11 @@ import { images } from '@/helper';
 import { BsDatabaseSlash } from 'react-icons/bs';
 import { listKardex } from '@/network/rest/api-client';
 import { alertKit } from 'alert-kit';
+import { TIPO_PRODUCTO_ACTIVO_FIJO, TIPO_PRODUCTO_LOTE, tipoProductoMap } from '@/model/types/tipo-producto';
+import { ProductFilterInterface } from '@/model/ts/interface/product';
+import { cn } from '@/lib/utils';
+import { TIPO_KARDEX_INGRESO, TIPO_KARDEX_SALIDA } from '@/model/types/tipo-kardex';
+import { format } from 'date-fns';
 
 interface Props {
   token: {
@@ -61,11 +66,10 @@ interface State {
   initialLoad: boolean;
   initialMessage: string;
 
-  producto: any;
+  producto: ProductFilterInterface | null;
   cantidad: number;
   costo: number;
   valor: number;
-  manejaLote: boolean;
 
   productos: Array<any>;
 
@@ -115,7 +119,6 @@ class Kardex extends CustomComponent<Props, State> {
       cantidad: 0,
       costo: 0,
       valor: 0,
-      manejaLote: false,
 
       productos: [],
 
@@ -162,44 +165,44 @@ class Kardex extends CustomComponent<Props, State> {
   loadingData = async () => {
     if (this.props.kardex && this.props.kardex.data) {
       this.setState(this.props.kardex.data);
-    } else {
-      const [almacenes] = await Promise.all([
-        this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
-      ]);
-
-      const almacenFilter = almacenes.find((item) => item.predefinido === 1);
-
-      this.setState({
-        almacenes,
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
-        initialLoad: false,
-      }, () => {
-        this.updateReduxState();
-      });
+      return;
     }
+
+    const params = {
+      idSucursal: this.state.idSucursal,
+    };
+
+    const response = await comboAlmacen(params, this.abortControllerTable.signal);
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      alertKit.warning({
+        title: "Kardex",
+        message: response.getMessage(),
+      });
+      return;
+    }
+
+    const almacenes = response.data;
+
+    const almacenFilter = almacenes.find((item) => item.predefinido === 1);
+
+    this.setState({
+      almacenes,
+      idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
+      nombreAlmacen: almacenFilter ? almacenFilter.nombre : "-",
+      initialLoad: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   updateReduxState() {
     this.props.setKardexData(this.state);
   }
 
-  async fetchComboAlmacen(params) {
-    const response = await comboAlmacen(
-      params,
-      this.abortControllerTable.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-      return [];
-    }
-  }
-
-  async fetchFiltrarProducto(params) {
+  async fetchFiltrarProducto(params: Record<string, any>) {
     const response = await filtrarProducto(params);
 
     if (response instanceof SuccessReponse) {
@@ -211,7 +214,7 @@ class Kardex extends CustomComponent<Props, State> {
     }
   }
 
-  async loadDataKardex(idProducto) {
+  async loadDataKardex(idProducto: string) {
     const params = {
       idProducto: idProducto,
       idAlmacen: this.state.idAlmacen,
@@ -223,7 +226,7 @@ class Kardex extends CustomComponent<Props, State> {
       messageTable: "Cargando información...",
     });
 
-    const { success, data, message } = await listKardex(params, this.abortControllerTable.signal);
+    const { success, data: kardex, message } = await listKardex(params, this.abortControllerTable.signal);
 
     if (!success) {
       alertKit.warning({
@@ -233,26 +236,17 @@ class Kardex extends CustomComponent<Props, State> {
       return;
     }
 
-    const kardex = data;
+    const { cantidad, valor } = kardex.reduce((acc: { cantidad: number, valor: number }, item) => {
+      const cantidadItem = Number(item.cantidad) || 0;
+      const costoItem = Number(item.costo) || 0;
 
-    // Verificar si el producto maneja lotes
-    const manejaLote = kardex.length > 0 ? kardex[0].manejaLote === 1 : false;
+      const factor = item.idTipoKardex === TIPO_KARDEX_INGRESO ? 1 : -1;
 
-    const cantidad = kardex.reduce((accumlate, item) => {
-      accumlate +=
-        item.tipo === "INGRESO"
-          ? Number(item.cantidad)
-          : -Number(item.cantidad);
-      return accumlate;
-    }, 0);
+      acc.cantidad += factor * cantidadItem;
+      acc.valor += factor * costoItem * cantidadItem;
 
-    const valor = kardex.reduce((accumlate, item) => {
-      accumlate +=
-        item.tipo === "INGRESO"
-          ? Number(item.costo * item.cantidad)
-          : -Number(item.costo * item.cantidad);
-      return accumlate;
-    }, 0);
+      return acc;
+    }, { cantidad: 0, valor: 0 });
 
     const costo = isEmpty(kardex) ? 0 : kardex[kardex.length - 1].costo;
 
@@ -261,7 +255,6 @@ class Kardex extends CustomComponent<Props, State> {
       cantidad: cantidad,
       costo: costo,
       valor: valor,
-      manejaLote: manejaLote,
       loading: false,
     }, () => {
       this.updateReduxState();
@@ -274,17 +267,19 @@ class Kardex extends CustomComponent<Props, State> {
   |--------------------------------------------------------------------------
   */
 
-  handleSelectAlmacen = (event) => {
+  handleSelectAlmacen = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { producto, almacenes } = this.state;
+
+    const nombreAlmacen = isEmpty(event.target.value)
+      ? "TODOS LOS ALMACENES"
+      : almacenes.find((item) => item.idAlmacen === event.target.value)?.nombre;
+
     this.setState({
       idAlmacen: event.target.value,
-      nombreAlmacen: isEmpty(event.target.value)
-        ? "TODOS LOS ALMACENES"
-        : this.refIdAlmacen.current.options[
-          this.refIdAlmacen.current.selectedIndex
-        ].innerText,
+      nombreAlmacen: nombreAlmacen,
     }, () => {
-      if (this.state.producto) {
-        this.loadDataKardex(this.state.producto.idProducto);
+      if (producto) {
+        this.loadDataKardex(producto.idProducto);
       }
     });
   };
@@ -297,7 +292,7 @@ class Kardex extends CustomComponent<Props, State> {
     this.setState({ productos: [], producto: null });
   };
 
-  handleFilterProducto = async (value) => {
+  handleFilterProducto = async (value: string) => {
     const searchWord = value;
     this.setState({ producto: null });
 
@@ -314,7 +309,7 @@ class Kardex extends CustomComponent<Props, State> {
     this.setState({ productos });
   };
 
-  handleSelectItemProducto = async (value) => {
+  handleSelectItemProducto = async (value: ProductFilterInterface) => {
     this.refProducto.current.initialize(value.nombre);
     this.setState({
       producto: value,
@@ -330,31 +325,21 @@ class Kardex extends CustomComponent<Props, State> {
   |--------------------------------------------------------------------------
   */
 
-  getLoteIcon = (codigoLote, fechaVencimiento) => {
-    if (codigoLote === "N/A") return "";
+  getLoteIcon = (fechaVencimiento: any) => {
+    const fechaVenc = new Date(fechaVencimiento);
+    const hoy = new Date();
+    const diasRestantes = Math.ceil((fechaVenc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (codigoLote === "SIN LOTE") {
-      return <span className="text-muted">📦</span>;
+    if (diasRestantes <= 30 && diasRestantes > 0) {
+      return (
+        <span className="text-warning" title="Próximo a vencer">⚠️</span>
+      );
     }
 
-    // Verificar si está próximo a vencer (30 días)
-    if (fechaVencimiento && fechaVencimiento !== "SIN FECHA") {
-      const [dia, mes, año] = fechaVencimiento.split("/");
-      const fechaVenc = new Date(año, mes - 1, dia);
-      const hoy = new Date();
-      const diasRestantes = Math.ceil((fechaVenc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-
-      if (diasRestantes <= 30 && diasRestantes > 0) {
-        return (
-          <span className="text-warning" title="Próximo a vencer">⚠️</span>
-        );
-      }
-
-      if (diasRestantes <= 0) {
-        return (
-          <span className="text-danger" title="Vencido">🚫</span>
-        );
-      }
+    if (diasRestantes <= 0) {
+      return (
+        <span className="text-danger" title="Vencido">🚫</span>
+      );
     }
 
     return <span className="text-success">✅</span>;
@@ -370,19 +355,128 @@ class Kardex extends CustomComponent<Props, State> {
   // Generar Body HTML
   //------------------------------------------------------------------------------------------
 
-  generateBody() {
-    const { loading, messageTable, manejaLote, lista } = this.state;
+  renderInformacionProducto() {
+    const { producto, nombreAlmacen, cantidad, costo, valor } = this.state;
+
+    const { codiso } = this.props.moneda;
+
+    if (!producto) {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 animate-pulse mb-3">
+          <div className="lg:col-span-3 rounded border p-3">
+            <div className="h-5 bg-gray-300 rounded w-1/3 mb-4"></div>
+
+            <div className="flex flex-col gap-3">
+              <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+            </div>
+          </div>
+
+          {/* Imagen skeleton */}
+          <div className="rounded border p-6 flex items-center justify-center">
+            <div className="w-40 h-40 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+      );
+    }
+
+    const tipoProducto = tipoProductoMap.get(producto.idTipoProducto);
+    if (!tipoProducto) return null;
+
+    const { icon: Icon, color, label } = tipoProducto;
+
+    return (
+      <div className="max-w-7xl mx-auto mb-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 mb-3">
+          <div className="lg:col-span-3 rounded border p-3 gap-3">
+            <div className="flex items-center justify-between mb-3">
+              <h5 className="text-base font-semibold text-gray-900">
+                Información del Producto
+              </h5>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-gray-600">
+                <strong className="text-gray-900">Código:</strong> {producto.codigo}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong className="text-gray-900">Nombre:</strong> {producto.nombre}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong className="text-gray-900">Almacén:</strong> {nombreAlmacen}
+              </p>
+              <div className="flex items-center gap-1">
+                <strong className="text-sm text-gray-900">Tipo Producto:</strong>
+                <span className={cn("text-sm flex items-center gap-1", color)}>
+                  <Icon size={17} />
+                  {label}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/*  Imagen del producto */}
+          <div className="rounded border p-6 flex items-center justify-center">
+            <Image
+              default={images.noImage}
+              src={producto.imagen || null}
+              alt={producto.nombre || 'Producto sin imagen'}
+              overrideClass="w-40 h-40 object-contain"
+            />
+          </div>
+        </div>
+
+        {/* Tarjetas resumen */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded border p-6">
+            <p className="text-sm font-medium text-gray-600">Unidades Disponibles</p>
+            <p className="text-xl font-bold text-gray-900">{rounded(cantidad)}</p>
+          </div>
+          <div className="bg-white rounded border p-6">
+            <p className="text-sm font-medium text-gray-600">Costo Promedio</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(costo, codiso)}</p>
+          </div>
+          <div className="bg-white rounded border p-6">
+            <p className="text-sm font-medium text-gray-600">Valor Total</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(valor, codiso)}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderGenerateBody() {
+    const { loading, messageTable, lista, producto } = this.state;
+
+    const { codiso } = this.props.moneda;
+
+    if (!producto) {
+      return (
+        <tr>
+          <td colSpan={10} className="px-6 py-12 text-center">
+            <div className="flex flex-col items-center">
+              <BsDatabaseSlash className="w-12 h-12 text-gray-400" />
+              <p className="mt-2 text-sm font-medium text-gray-900">No hay datos para mostrar</p>
+              <p className="mt-1 text-sm text-gray-500">Intenta cambiar los filtros</p>
+            </div>
+          </td>
+        </tr>
+      );
+    };
+
+    const tipo = producto.idTipoProducto === TIPO_PRODUCTO_LOTE || producto.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO;
 
     if (loading) {
       return (
-        <SpinnerTable colSpan={manejaLote ? 12 : 10} message={messageTable} />
+        <SpinnerTable colSpan={tipo ? 12 : 10} message={messageTable} />
       );
     }
 
     if (isEmpty(lista)) {
       return (
         <tr>
-          <td colSpan={manejaLote ? 12 : 10} className="px-6 py-12 text-center">
+          <td colSpan={tipo ? 12 : 10} className="px-6 py-12 text-center">
             <div className="flex flex-col items-center">
               <BsDatabaseSlash className="w-12 h-12 text-gray-400" />
               <p className="mt-2 text-sm font-medium text-gray-900">No hay datos para mostrar</p>
@@ -397,8 +491,13 @@ class Kardex extends CustomComponent<Props, State> {
     let costoAcumulado = 0;
 
     return lista.map((item, index) => {
-      cantidadAcumulada += item.tipo === "INGRESO" ? Number(item.cantidad) : -Number(item.cantidad);
-      costoAcumulado += item.tipo === "INGRESO" ? Number(item.costo * item.cantidad) : -Number(item.costo * item.cantidad);
+      // Determinar el factor de cantidad y costo
+      const factor = item.idTipoKardex === TIPO_KARDEX_INGRESO ? 1 : -1;
+      cantidadAcumulada += factor * Number(item.cantidad);
+      costoAcumulado += factor * Number(item.costo) * Number(item.cantidad);
+
+      const esIngreso = item.idTipoKardex === TIPO_KARDEX_INGRESO;
+      const esSalida = item.idTipoKardex === TIPO_KARDEX_SALIDA;
 
       // Determinar el color de fondo para filas alternas
       const rowBgColor = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
@@ -423,16 +522,33 @@ class Kardex extends CustomComponent<Props, State> {
             </Link>
           </td>
 
-          {/* Lote (si aplica) */}
           {
-            manejaLote && (
+            producto && producto.idTipoProducto === TIPO_PRODUCTO_LOTE && (
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div className="flex items-center">
-                  {this.getLoteIcon(item.lote, item.fechaVencimiento)}
+                  {this.getLoteIcon(item.fechaVencimiento)}
                   <div className="ml-2">
                     <div className="font-medium">{item.lote}</div>
                     <div className="text-xs text-gray-500">
-                      {item.fechaVencimiento !== 'SIN FECHA' ? item.fechaVencimiento : 'Sin fecha'}
+                      {format(new Date(item.fechaVencimiento), 'dd/MM/yyyy')}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {item.ubicacion}
+                    </div>
+                  </div>
+                </div>
+              </td>
+            )
+          }
+
+          {
+            producto && producto.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && (
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <div className="flex items-center">
+                  <div className="ml-2">
+                    <div className="font-medium">{item.serie}</div>
+                    <div className="text-xs text-gray-500">
+                      {item.ubicacion}
                     </div>
                   </div>
                 </div>
@@ -442,59 +558,59 @@ class Kardex extends CustomComponent<Props, State> {
 
           {/* Ingreso: Cantidad */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium">
-            <span className={item.tipo === 'INGRESO' ? 'text-green-600' : 'text-gray-400'}>
-              {item.tipo === 'INGRESO' ? `+${rounded(item.cantidad)}` : '--'}
+            <span className={esIngreso ? 'text-green-700' : 'text-gray-400'}>
+              {esIngreso ? `+${rounded(item.cantidad)}` : '--'}
             </span>
           </td>
 
           {/* Ingreso: Costo Unitario */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-            <span className={item.tipo === 'INGRESO' ? 'text-green-600' : 'text-gray-400'}>
-              {item.tipo === 'INGRESO' ? formatCurrency(item.costo, this.props.moneda.codiso) : '--'}
+            <span className={esIngreso ? 'text-green-700' : 'text-gray-400'}>
+              {esIngreso ? formatCurrency(item.costo, codiso) : '--'}
             </span>
           </td>
 
           {/* Ingreso: Total */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium">
-            <span className={item.tipo === 'INGRESO' ? 'text-green-600' : 'text-gray-400'}>
-              {item.tipo === 'INGRESO' ? `+${formatCurrency(item.costo * item.cantidad, this.props.moneda.codiso)}` : '--'}
+            <span className={esIngreso ? 'text-green-700' : 'text-gray-400'}>
+              {esIngreso ? `+${formatCurrency(item.costo * item.cantidad, codiso)}` : '--'}
             </span>
           </td>
 
           {/* Salida: Cantidad */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium">
-            <span className={item.tipo === 'SALIDA' ? 'text-red-600' : 'text-gray-400'}>
-              {item.tipo === 'SALIDA' ? `-${rounded(item.cantidad)}` : '--'}
+            <span className={esSalida ? 'text-red-600' : 'text-gray-400'}>
+              {esSalida ? `-${rounded(item.cantidad)}` : '--'}
             </span>
           </td>
 
           {/* Salida: Costo Unitario */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-            <span className={item.tipo === 'SALIDA' ? 'text-red-600' : 'text-gray-400'}>
-              {item.tipo === 'SALIDA' ? formatCurrency(item.costo, this.props.moneda.codiso) : '--'}
+            <span className={esSalida ? 'text-red-600' : 'text-gray-400'}>
+              {esSalida ? formatCurrency(item.costo, codiso) : '--'}
             </span>
           </td>
 
           {/* Salida: Total */}
           <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium">
-            <span className={item.tipo === 'SALIDA' ? 'text-red-600' : 'text-gray-400'}>
-              {item.tipo === 'SALIDA' ? `-${formatCurrency(item.costo * item.cantidad, this.props.moneda.codiso)}` : '--'}
+            <span className={esSalida ? 'text-red-600' : 'text-gray-400'}>
+              {esSalida ? `-${formatCurrency(item.costo * item.cantidad, codiso)}` : '--'}
             </span>
           </td>
 
           {/* Saldo: Cantidad */}
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-gray-900">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-gray-500">
             {rounded(cantidadAcumulada)}
           </td>
 
           {/* Saldo: Costo Unitario */}
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-            {formatCurrency(cantidadAcumulada > 0 ? costoAcumulado / cantidadAcumulada : 0, this.props.moneda.codiso)}
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+            {formatCurrency(cantidadAcumulada > 0 ? costoAcumulado / cantidadAcumulada : 0, codiso)}
           </td>
 
           {/* Saldo: Total */}
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-gray-900">
-            {formatCurrency(costoAcumulado, this.props.moneda.codiso)}
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-gray-500">
+            {formatCurrency(costoAcumulado, codiso)}
           </td>
         </tr>
       );
@@ -506,13 +622,7 @@ class Kardex extends CustomComponent<Props, State> {
   //------------------------------------------------------------------------------------------
 
   render() {
-    const {
-      producto,
-      cantidad,
-      costo,
-      valor,
-      manejaLote,
-    } = this.state;
+    const { producto } = this.state;
 
     return (
       <ContainerWrapper>
@@ -534,18 +644,14 @@ class Kardex extends CustomComponent<Props, State> {
               <SearchInput
                 ref={this.refProducto}
                 autoFocus={true}
-                label={
-                  <div className="flex items-center gap-1">
-                    <p className="text-gray-700 font-medium">Filtrar los productos por código o nombre:</p>
-                  </div>
-                }
+                label={<p className="mb-2">Filtrar los productos por código o nombre:</p>}
                 placeholder="Filtrar productos..."
                 refValue={this.refValueProducto}
                 data={this.state.productos}
                 handleClearInput={this.handleClearInputProducto}
                 handleFilter={this.handleFilterProducto}
                 handleSelectItem={this.handleSelectItemProducto}
-                renderItem={(value) => (
+                renderItem={(value: ProductFilterInterface) => (
                   <div className="flex items-center">
                     <Image
                       default={images.noImage}
@@ -564,14 +670,10 @@ class Kardex extends CustomComponent<Props, State> {
               />
             </div>
 
-            <div>
+            <div className="w-full flex flex-col gap-2">
               <Select
                 group={false}
-                label={
-                  <div className="flex items-center gap-1">
-                    <p className="text-gray-700 font-medium">Almacén:</p>
-                  </div>
-                }
+                label={<p>Almacén:</p>}
                 ref={this.refIdAlmacen}
                 value={this.state.idAlmacen}
                 onChange={this.handleSelectAlmacen}
@@ -591,66 +693,7 @@ class Kardex extends CustomComponent<Props, State> {
         </div>
 
         {/* Información del producto */}
-        <div className="max-w-7xl mx-auto mb-3">
-          {/* Información del producto */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-            <div className="lg:col-span-3 rounded border p-3 gap-3">
-              <div className="flex items-center justify-between mb-3">
-                <h5 className="text-base font-semibold text-gray-900">
-                  Información del Producto
-                </h5>
-                {
-                  manejaLote && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                      Maneja Lotes
-                    </span>
-                  )
-                }
-              </div>
-              <div className="flex flex-col gap-2">
-                <p className="text-sm text-gray-600">
-                  <strong className="text-gray-900">Código:</strong> {producto && producto.codigo}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong className="text-gray-900">Nombre:</strong> {producto && producto.nombre}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong className="text-gray-900">Almacén:</strong> {this.state.nombreAlmacen}
-                </p>
-              </div>
-            </div>
-
-            {/*  Imagen del producto */}
-            <div className="rounded border p-6 flex items-center justify-center">
-              <Image
-                default={images.noImage}
-                src={(producto && producto.imagen) || null}
-                alt={(producto && producto.nombre) || 'Producto sin imagen'}
-                overrideClass="w-40 h-40 object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Tarjetas resumen */}
-          {
-            producto && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white rounded border p-6">
-                  <p className="text-sm font-medium text-gray-600">Unidades Disponibles</p>
-                  <p className="text-xl font-bold text-gray-900">{rounded(cantidad)}</p>
-                </div>
-                <div className="bg-white rounded border p-6">
-                  <p className="text-sm font-medium text-gray-600">Costo Promedio</p>
-                  <p className="text-xl font-bold text-gray-900">{formatCurrency(costo, this.props.moneda.codiso)}</p>
-                </div>
-                <div className="bg-white rounded border p-6">
-                  <p className="text-sm font-medium text-gray-600">Valor Total</p>
-                  <p className="text-xl font-bold text-gray-900">{formatCurrency(valor, this.props.moneda.codiso)}</p>
-                </div>
-              </div>
-            )
-          }
-        </div>
+        {this.renderInformacionProducto()}
 
         {/* Tabla de movimientos */}
         <div className="rounded border border-gray-200 overflow-hidden">
@@ -658,22 +701,6 @@ class Kardex extends CustomComponent<Props, State> {
           <div className="p-3 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <h2 className="text-base font-semibold text-gray-900">Movimientos de Kardex</h2>
-              {manejaLote && (
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center">
-                    <span className="text-green-600 mr-1">✅</span>
-                    <span>Lote válido</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-orange-600 mr-1">⚠️</span>
-                    <span>Próximo a vencer</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-red-600 mr-1">🚫</span>
-                    <span>Vencido</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -685,42 +712,51 @@ class Kardex extends CustomComponent<Props, State> {
                 <tr>
                   <th
                     rowSpan={2}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    style={{ width: '120px' }}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]"
                   >
                     Fecha
                   </th>
                   <th
                     rowSpan={2}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    style={{ width: '200px' }}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]"
                   >
                     Descripción
                   </th>
-                  {manejaLote && (
-                    <th
-                      rowSpan={2}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      style={{ width: '150px' }}
-                    >
-                      Lote
-                    </th>
-                  )}
+                  {
+                    producto && producto.idTipoProducto === TIPO_PRODUCTO_LOTE && (
+                      <th
+                        rowSpan={2}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]"
+                      >
+                        Lote
+                      </th>
+                    )
+                  }
+                  {
+                    producto && producto.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && (
+                      <th
+                        rowSpan={2}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]"
+                      >
+                        Serie
+                      </th>
+                    )
+                  }
                   <th
                     colSpan={3}
-                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-green-50"
+                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-green-50 w-[20%]"
                   >
                     Ingreso
                   </th>
                   <th
                     colSpan={3}
-                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-red-50"
+                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-red-50 w-[20%]"
                   >
                     Salida
                   </th>
                   <th
                     colSpan={3}
-                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50"
+                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50 w-[20%]"
                   >
                     Saldo
                   </th>
@@ -758,7 +794,7 @@ class Kardex extends CustomComponent<Props, State> {
 
               {/* Cuerpo de la tabla */}
               <tbody className="bg-white divide-y divide-gray-200">
-                {this.generateBody()}
+                {this.renderGenerateBody()}
               </tbody>
             </table>
           </div>

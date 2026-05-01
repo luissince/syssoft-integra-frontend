@@ -56,7 +56,6 @@ const ContentSale = ({
 
     const isScreen = useScreenSize();
 
-
     return (
         <>
             <section className={`invoice-left ${isScreen && activeTab !== "productos" && "hidden"}`}>

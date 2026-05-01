@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { connect } from 'react-redux';
+import { useEffect, useRef, useState } from 'react';
 import ContainerWrapper from '@/components/ui/container-wrapper';
-import CustomComponent from '@/components/CustomComponent';
 import {
   isEmpty,
   isText,
@@ -26,7 +24,6 @@ import { useAppSelector } from '@/redux/hooks';
 import { useHistory, useLocation } from 'react-router-dom';
 
 const BancoEditar = () => {
-
   // =============================
   // REDUX
   // =============================
@@ -80,6 +77,51 @@ const BancoEditar = () => {
   const abortController = useRef<AbortController | null>(null);
 
   // =============================
+  // API
+  // =============================
+
+
+  const loadMonedaCombo = async () => {
+    abortControllerMoneda.current?.abort();
+    abortControllerMoneda.current = new AbortController();
+
+    const result = await comboMoneda(abortControllerMoneda.current.signal);
+
+    if (result instanceof SuccessReponse) {
+      abortControllerMoneda.current = null;
+      return result.data;
+    }
+
+    if (result instanceof ErrorResponse) {
+      if (result.getType() === CANCELED) return;
+
+      abortControllerMoneda.current = null;
+      return [];
+    }
+  }
+
+  const loadObtenerBanco = async (id) => {
+    abortControllerBanco.current?.abort();
+    abortControllerBanco.current = new AbortController();
+
+    const params = {
+      idBanco: id,
+    };
+
+    const { success, data, type } = await getIdBando(params, abortControllerBanco.current.signal);
+
+    if (!success) {
+      if (type === CANCELED) return;
+
+      abortControllerBanco.current = null;
+      return [];
+    }
+
+    abortControllerBanco.current = null;
+    return data;
+  }
+
+  // =============================
   // EFFECTS
   // =============================
 
@@ -105,8 +147,8 @@ const BancoEditar = () => {
 
   const loadData = async (idBanco: string) => {
     const [monedas, banco] = await Promise.all([
-      fetchMonedaCombo(),
-      fetchObtenerBanco(idBanco),
+      loadMonedaCombo(),
+      loadObtenerBanco(idBanco),
     ]);
 
     setMonedas(monedas);
@@ -124,61 +166,9 @@ const BancoEditar = () => {
     setLoading(false);
   }
 
-  const fetchMonedaCombo = async () => {
-    abortControllerMoneda.current?.abort();
-    abortControllerMoneda.current = new AbortController();
-
-    const result = await comboMoneda(abortControllerMoneda.current.signal);
-
-    if (result instanceof SuccessReponse) {
-      abortControllerMoneda.current = null;
-      return result.data;
-    }
-
-    if (result instanceof ErrorResponse) {
-      if (result.getType() === CANCELED) return;
-
-      abortControllerMoneda.current = null;
-      return [];
-    }
-  }
-
-  const fetchObtenerBanco = async (id) => {
-    abortControllerBanco.current?.abort();
-    abortControllerBanco.current = new AbortController();
-
-    const params = {
-      idBanco: id,
-    };
-
-    const { success, data, type } = await getIdBando(params, abortControllerBanco.current.signal);
-
-    if (!success) {
-      if (type === CANCELED) return;
-
-      abortControllerBanco.current = null;
-      return [];
-    }
-
-    abortControllerBanco.current = null;
-    return data;
-  }
-
-  /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  // =============================
+  // HANDLERS
+  // =============================
 
   const handleGuardar = async () => {
     if (isEmpty(nombre)) {
@@ -268,21 +258,9 @@ const BancoEditar = () => {
     }
   };
 
-  /*
-    |--------------------------------------------------------------------------
-    | Método de renderizado
-    |--------------------------------------------------------------------------
-    |
-    | El método render() es esencial en los componentes de React y se encarga de determinar
-    | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
-    | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
-    | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
-    | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
-    | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
-    | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
-    | actuales del componente para determinar lo que se mostrará.
-    |
-    */
+  // =============================
+  // RENDER
+  // =============================
 
   return (
     <ContainerWrapper>
@@ -297,7 +275,9 @@ const BancoEditar = () => {
         handleGoBack={() => history.goBack()}
       />
 
+      {/* Formulario de datos */}
       <div className="flex flex-col gap-3">
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Input
@@ -337,6 +317,7 @@ const BancoEditar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Select
@@ -377,6 +358,7 @@ const BancoEditar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Input
@@ -412,6 +394,7 @@ const BancoEditar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Switches
@@ -448,6 +431,7 @@ const BancoEditar = () => {
           </div>
         </div>
 
+        {/*  */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="w-full flex flex-col gap-2">
             <Switches
@@ -485,6 +469,7 @@ const BancoEditar = () => {
         </div>
       </div>
 
+      {/* Botones de acción */}
       <div className="flex flex-col md:flex-row gap-3 mt-3 pt-3 border-t border-gray-200">
         <Button className="btn-warning" onClick={handleGuardar}>
           <i className="fa fa-save"></i> Guardar

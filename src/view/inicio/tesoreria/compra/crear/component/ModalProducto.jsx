@@ -25,7 +25,7 @@ import { comboUbicacion } from '@/network/rest/principal.network';
 import { CANCELED } from '@/constants/requestStatus';
 import Select from '@/components/Select';
 import { cn } from '@/lib/utils';
-import { PRODUCTO, ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL } from '@/model/types/tipo-producto';
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO, TIPO_PRODUCTO_LOTE } from '@/model/types/tipo-producto';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 import { FaAsterisk } from 'react-icons/fa';
 
@@ -139,7 +139,7 @@ class ModalProducto extends Component {
         idMetodoDepreciacion: producto.idMetodoDepreciacion,
         inventarioDetalles: [
           ...this.state.inventarioDetalles,
-          this.loadDetalleInventarioPorDefecto(),
+          this.loadDetalleInventarioPorDefecto(producto.idTipoProducto),
         ],
         ubicaciones: ubicaciones,
 
@@ -148,22 +148,68 @@ class ModalProducto extends Component {
     }
   };
 
-  loadDetalleInventarioPorDefecto = () => {
-    const body = {
-      id: guId(),
-      porDefecto: true,
-      cantidad: 1,
+  loadDetalleInventarioPorDefecto = (idTipoProducto) => {
+    const tipo = this.state.idTipoProducto || idTipoProducto;
 
-      // producto
-      idUbicacion: null,
-      lote: null,
-      fechaVencimiento: null,
-      // activo
-      serie: null,
-      vidaUtil: null,
-      valorResidual: null,
+    if (tipo === TIPO_PRODUCTO_NORMAL) {
+      return {
+        id: guId(),
+        porDefecto: true,
+        cantidad: 1,
+
+        // producto
+        lote: null,
+        fechaVencimiento: null,
+
+        // activo
+        serie: null,
+        vidaUtil: null,
+        valorResidual: null,
+
+        // atributos
+        idUbicacion: null,
+      };
     }
-    return body;
+
+    if (tipo === TIPO_PRODUCTO_LOTE) {
+      return {
+        id: guId(),
+        porDefecto: false,
+        cantidad: 1,
+
+        // producto
+        lote: "",
+        fechaVencimiento: "",
+
+        // activo
+        serie: null,
+        vidaUtil: null,
+        valorResidual: null,
+
+        // atributos
+        idUbicacion: "",
+      };
+    }
+
+    if (tipo === TIPO_PRODUCTO_ACTIVO_FIJO) {
+      return {
+        id: guId(),
+        porDefecto: false,
+        cantidad: 1,
+
+        // lote
+        lote: null,
+        fechaVencimiento: null,
+
+        // activo
+        serie: "",
+        vidaUtil: "",
+        valorResidual: "",
+
+        // atributos
+        idUbicacion: "",
+      };
+    }
   };
 
   updateDetalleField = (id, field, value) => {
@@ -214,26 +260,75 @@ class ModalProducto extends Component {
   };
 
   handleAgregarInventarioDetalle = () => {
-    const inventarioDetalle = {
-      id: guId(),
-      porDefecto: false,
-      cantidad: "",
-      idUbicacion: "",
-      lote: "",
-      fechaVencimiento: "",
-      //
-      serie: "",
-      vidaUtil: "",
-      valorResidual: "",
-    };
+    const tipo = this.state.idTipoProducto;
+
+    if (!tipo) return;
+
+    let inventarioDetalle;
+
+    if (tipo === TIPO_PRODUCTO_NORMAL) {
+      inventarioDetalle = {
+        id: guId(),
+        porDefecto: true,
+        cantidad: 1,
+
+        // producto
+        lote: null,
+        fechaVencimiento: null,
+
+        // activo
+        serie: null,
+        vidaUtil: null,
+        valorResidual: null,
+
+        // atributos
+        idUbicacion: null,
+      };
+    }
+
+    if (tipo === TIPO_PRODUCTO_LOTE) {
+      inventarioDetalle = {
+        id: guId(),
+        porDefecto: false,
+        cantidad: 1,
+
+        // producto
+        lote: "",
+        fechaVencimiento: "",
+
+        // activo
+        serie: null,
+        vidaUtil: null,
+        valorResidual: null,
+
+        // atributos
+        idUbicacion: "",
+      };
+    }
+
+    if (tipo === TIPO_PRODUCTO_ACTIVO_FIJO) {
+      inventarioDetalle = {
+        id: guId(),
+        porDefecto: false,
+        cantidad: 1,
+
+        // lote
+        lote: null,
+        fechaVencimiento: null,
+
+        // activo
+        serie: "",
+        vidaUtil: "",
+        valorResidual: "",
+
+        // atributos
+        idUbicacion: "",
+      };
+    }
 
     this.setState((prevState) => ({
       inventarioDetalles: [...prevState.inventarioDetalles, inventarioDetalle]
     }));
-
-    // this.setState({
-    //   inventarioDetalles,
-    // });
   };
 
   handleEliminarInventarioDetalle = (id) => {
@@ -265,17 +360,21 @@ class ModalProducto extends Component {
       });
       return;
     }
-    if (inventarioDetalles.some(item => isEmpty(item.cantidad))) {
-      alertKit.warning({
-        title: "Compra",
-        message: "Hay detalle(s) sin cantidad.",
-      }, () => {
-        validateNumericInputs(this.refInventarioDetalles);
-      });
-      return;
+
+
+    if (idTipoProducto === TIPO_PRODUCTO_NORMAL) {
+      if (inventarioDetalles.some(item => isEmpty(item.cantidad))) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) sin cantidad.",
+        }, () => {
+          validateNumericInputs(this.refInventarioDetalles);
+        });
+        return;
+      }
     }
 
-    if (idTipoProducto === PRODUCTO) {
+    if (idTipoProducto === TIPO_PRODUCTO_LOTE) {
       if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.lote))) {
         alertKit.warning({
           title: "Compra",
@@ -297,7 +396,7 @@ class ModalProducto extends Component {
       }
     }
 
-    if (idTipoProducto === ACTIVO_FIJO) {
+    if (idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO) {
       if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.serie))) {
         alertKit.warning({
           title: "Compra",
@@ -387,7 +486,7 @@ class ModalProducto extends Component {
           autoFocus
           label={
             <div className="flex items-center gap-1">
-              <p className="text-gray-700 font-medium">Cantidad:</p>
+              <p className="text-gray-700">Cantidad:</p>
             </div>
           }
           placeholder="0.00"
@@ -400,11 +499,12 @@ class ModalProducto extends Component {
           onPaste={handlePasteFloat}
         />
       </div>
+
     );
   }
 
-  renderProducto = (item) => {
-    if (this.state.idTipoProducto !== PRODUCTO) return;
+  renderLote = (item) => {
+    if (![TIPO_PRODUCTO_LOTE].includes(this.state.idTipoProducto)) return;
 
     if (item.porDefecto) return;
 
@@ -417,7 +517,7 @@ class ModalProducto extends Component {
               autoFocus={true}
               label={
                 <div className="flex items-center gap-1">
-                  <p className="text-gray-700 font-medium">Cantidad:</p>
+                  <p className="text-gray-700">Cantidad:</p>
                 </div>
               }
               placeholder="0.00"
@@ -431,83 +531,70 @@ class ModalProducto extends Component {
             />
           </div>
 
-          {
-            item.idUbicacion !== null && (
-              <div className="w-full">
-                <Select
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Ubicación en el inventario:</p>
-                    </div>
-                  }
-                  tabIndex={2}
-                  value={item.idUbicacion}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "idUbicacion", e.target.value)
-                  }
-                >
-                  <option value="">-- Seleccione --</option>
-                  {
-                    ubicaciones.map((ubicacion, idx) => (
-                      <option key={idx} value={ubicacion.idUbicacion}>
-                        {ubicacion.descripcion}
-                      </option>
-                    ))
-                  }
-                </Select>
-              </div>
-            )
-          }
+          <div className="w-full  flex flex-col gap-3">
+            <Select
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Ubicación en el inventario:</p>
+                </div>
+              }
+              tabIndex={2}
+              value={item.idUbicacion}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "idUbicacion", e.target.value)
+              }
+            >
+              <option value="">-- Seleccione --</option>
+              {
+                ubicaciones.map((ubicacion, idx) => (
+                  <option key={idx} value={ubicacion.idUbicacion}>
+                    {ubicacion.descripcion}
+                  </option>
+                ))
+              }
+            </Select>
+          </div>
         </div>
 
         <div className="w-full flex flex-row gap-3">
-          {
-            item.lote !== null && (
-              <div className="w-full flex flex-col gap-3">
-                <Input
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Lote:</p>
-                    </div>
-                  }
-                  placeholder="LT-0001"
-                  tabIndex={3}
-                  value={item.lote}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "lote", e.target.value)
-                  }
-                />
-              </div>
-            )
-          }
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Lote:</p>
+                </div>
+              }
+              placeholder="LT-0001"
+              tabIndex={3}
+              value={item.lote}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "lote", e.target.value)
+              }
+            />
+          </div>
 
-          {
-            item.fechaVencimiento !== null && (
-              <div className="w-full flex flex-col gap-3">
-                <Input
-                  type="date"
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Fecha de Vencimiento:</p>
-                    </div>
-                  }
-                  tabIndex={4}
-                  value={item.fechaVencimiento}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "fechaVencimiento", e.target.value)
-                  }
-                />
-              </div>
-            )
-          }
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              type="date"
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Fecha de Vencimiento:</p>
+                </div>
+              }
+              tabIndex={4}
+              value={item.fechaVencimiento}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "fechaVencimiento", e.target.value)
+              }
+            />
+          </div>
         </div>
       </>
     );
   }
 
   renderActivo = (item) => {
-    // if (this.state.idTipoProducto !== ACTIVO_FIJO) return;
-    if (![ACTIVO_FIJO, MENOR_CUANTIA, EXISTENCIAL].includes(this.state.idTipoProducto)) return;
+    if (![TIPO_PRODUCTO_ACTIVO_FIJO].includes(this.state.idTipoProducto)) return;
 
     if (item.porDefecto) return;
 
@@ -520,7 +607,7 @@ class ModalProducto extends Component {
               autoFocus={true}
               label={
                 <div className="flex items-center gap-1">
-                  <p className="text-gray-700 font-medium">Cantidad:</p> <FaAsterisk className="text-red-500" size={8} />
+                  <p className="text-gray-700">Cantidad:</p> <FaAsterisk className="text-red-500" size={8} />
                 </div>
               }
               placeholder="0.00"
@@ -534,100 +621,83 @@ class ModalProducto extends Component {
             />
           </div>
 
-          {
-            item.idUbicacion !== null && (
-              <div className="w-full">
-                <Select
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Ubicación en el inventario:</p>
-                    </div>
-                  }
-                  tabIndex={2}
-                  value={item.idUbicacion}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "idUbicacion", e.target.value)
-                  }
-                >
-                  <option value="">-- Seleccione --</option>
-                  {
-                    ubicaciones.map((ubicacion, idx) => (
-                      <option key={idx} value={ubicacion.idUbicacion}>
-                        {ubicacion.descripcion}
-                      </option>
-                    ))
-                  }
-                </Select>
-              </div>
-            )
-          }
+          <div className="w-full flex flex-col gap-3">
+            <Select
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Ubicación en el inventario:</p>
+                </div>
+              }
+              tabIndex={2}
+              value={item.idUbicacion}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "idUbicacion", e.target.value)
+              }
+            >
+              <option value="">-- Seleccione --</option>
+              {
+                ubicaciones.map((ubicacion, idx) => (
+                  <option key={idx} value={ubicacion.idUbicacion}>
+                    {ubicacion.descripcion}
+                  </option>
+                ))
+              }
+            </Select>
+          </div>
         </div>
 
         <div className="w-full flex flex-row gap-3">
-          {
-            item.serie !== null && (
-              <div className="w-full flex flex-col gap-3">
-                <Input
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Serie:</p> <FaAsterisk className="text-red-500" size={8} />
-                    </div>
-                  }
-                  placeholder="Por ejemplo: SR-0001"
-                  tabIndex={2}
-                  value={item.serie}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "serie", e.target.value)
-                  }
-                  onPaste={handlePasteInteger}
-                />
-              </div>
-            )
-          }
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Serie:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
+              }
+              placeholder="Por ejemplo: SR-0001"
+              tabIndex={2}
+              value={item.serie}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "serie", e.target.value)
+              }
+            />
+          </div>
         </div>
+
         <div className="w-full flex flex-row gap-3">
-          {
-            item.vidaUtil !== null && (
-              <div className="w-full flex flex-col gap-3">
-                <Input
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Vida útil:</p> <FaAsterisk className="text-red-500" size={8} />
-                    </div>
-                  }
-                  placeholder="Por ejemplo: 1 año, 5 años..."
-                  tabIndex={3}
-                  role="integer"
-                  value={item.vidaUtil}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "vidaUtil", e.target.value)
-                  }
-                  onPaste={handlePasteInteger}
-                />
-              </div>
-            )
-          }
-          {
-            item.valorResidual !== null && (
-              <div className="w-full flex flex-col gap-3">
-                <Input
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700 font-medium">Valor residual:</p> <FaAsterisk className="text-red-500" size={8} />
-                    </div>
-                  }
-                  placeholder="Por ejemplo: 0, 100, 200..."
-                  tabIndex={4}
-                  role="float"
-                  value={item.valorResidual}
-                  onChange={(e) =>
-                    this.updateDetalleField(item.id, "valorResidual", e.target.value)
-                  }
-                  onPaste={handlePasteFloat}
-                />
-              </div>
-            )
-          }
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Vida útil:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
+              }
+              placeholder="Por ejemplo: 1 año, 5 años..."
+              tabIndex={3}
+              role="integer"
+              value={item.vidaUtil}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "vidaUtil", e.target.value)
+              }
+            />
+          </div>
+
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Valor residual:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
+              }
+              placeholder="Por ejemplo: 0, 100, 200..."
+              tabIndex={4}
+              role="float"
+              value={item.valorResidual}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "valorResidual", e.target.value)
+              }
+            />
+          </div>
         </div>
 
         <div className="w-full flex flex-row gap-3">
@@ -672,7 +742,6 @@ class ModalProducto extends Component {
     const {
       loading,
       message,
-
       nombre,
       imagen,
       costo,
@@ -713,11 +782,15 @@ class ModalProducto extends Component {
             </div>
 
             <div className="flex gap-3">
-              <div className="w-full md:w-1/2">
+              <div className="w-full md:w-1/2 flex flex-col gap-3">
                 <Input
-                  label="Costo:"
+                  label={
+                    <div className="flex items-center gap-1">
+                      <p className="text-gray-700">Costo:</p> <FaAsterisk className="text-red-500" size={8} />
+                    </div>
+                  }
                   placeholder="0.00"
-                  role={'float'}
+                  role="float"
                   ref={this.refCosto}
                   value={costo}
                   onChange={this.handleInputCosto}
@@ -726,57 +799,30 @@ class ModalProducto extends Component {
               </div>
             </div>
 
-            <div className="d-flex justify-content-start align-items-center">
-              <h6 className="mr-2">Agregar detalles</h6>
-              <div className="flex gap-3">
-                {/* Botón agregar detalle normal */}
-                <Button
-                  className="btn-light"
-                  title="Agregar detalle"
-                  onClick={() => {
-                    const detallePorDefecto = this.state.inventarioDetalles.find(
-                      d => d.porDefecto === true
-                    );
+            {
+              [TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_ACTIVO_FIJO].includes(this.state.idTipoProducto) && (
+                <div className="d-flex justify-content-start align-items-center">
+                  <h6 className="mr-2">Agregar detalles</h6>
+                  <div className="flex gap-3">
+                    {/* Botón agregar detalle normal */}
+                    <Button
+                      className="btn-light"
+                      title="Agregar detalle"
+                      onClick={() => {
+                        const detallePorDefecto = this.state.inventarioDetalles.find(d => d.porDefecto === true);
 
-                    if (detallePorDefecto) {
-                      this.handleEliminarInventarioDetalle(detallePorDefecto.id);
-                    }
-                    this.handleAgregarInventarioDetalle();
-                  }}
-                >
-                  <i className="bi bi-plus-circle"></i>
-                </Button>
-
-                {/* Botón agregar detalle por defecto */}
-                <Button
-                  className="btn-warning"
-                  title="Agregar detalle por defecto"
-                  disabled={this.state.inventarioDetalles.some(
-                    (d) => d.porDefecto === true
-                  )}
-                  onClick={() => {
-                    const yaExiste = this.state.inventarioDetalles.some(
-                      (d) => d.porDefecto === true
-                    );
-
-                    if (yaExiste) {
-                      alertKit.warning({
-                        title: "Detalle",
-                        message: "Ya existe un inventario por defecto."
-                      });
-                      return;
-                    }
-
-                    const nuevo = this.loadDetalleInventarioPorDefecto();
-                    this.setState({
-                      inventarioDetalles: [...this.state.inventarioDetalles, nuevo]
-                    });
-                  }}
-                >
-                  <i className="bi bi-stars"></i>
-                </Button>
-              </div>
-            </div>
+                        if (detallePorDefecto) {
+                          this.handleEliminarInventarioDetalle(detallePorDefecto.id);
+                        }
+                        this.handleAgregarInventarioDetalle();
+                      }}
+                    >
+                      <i className="bi bi-plus-circle"></i>
+                    </Button>
+                  </div>
+                </div>
+              )
+            }
 
             {inventarioDetalles.map((item) => (
               <div
@@ -788,26 +834,31 @@ class ModalProducto extends Component {
                 {this.renderPorDefecto(item)}
 
                 {/* Lote y Fecha de vencimiento */}
-                {this.renderProducto(item)}
+                {this.renderLote(item)}
 
                 {/* Vida útil y Valor residual */}
+                {this.renderActivo(item)}
+
                 {
-                  this.renderActivo(item)
+                  [TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_ACTIVO_FIJO].includes(this.state.idTipoProducto) && (
+                    <div className="flex justify-end">
+                      <Button
+                        className="btn-danger"
+                        onClick={() => this.handleEliminarInventarioDetalle(item.id)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </Button>
+                    </div>
+                  )
                 }
-                <div className="flex justify-end">
-                  <Button
-                    className="btn-danger"
-                    onClick={() => this.handleEliminarInventarioDetalle(item.id)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </Button>
-                </div>
               </div>
             ))}
           </CustomModalContentBody>
 
           <CustomModalContentFooter>
-            <Button type="submit" className="btn-primary">
+            <Button
+              type="submit"
+              className="btn-primary">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button

@@ -16,13 +16,9 @@ import {
   cancelNotaCredito,
   comboComprobante,
 } from '@/network/rest/principal.network';
-
 import SuccessReponse from '@/model/class/response';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
-import {
-  CONTADO,
-} from '@/model/types/forma-transaccion';
 import Title from '@/components/Title';
 import { SpinnerView } from '@/components/Spinner';
 import { NOTA_DE_CREDITO } from '@/model/types/tipo-comprobante';
@@ -264,7 +260,7 @@ class NotaCredito extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const {success, data, message, type} = await listNotaCredito(params, this.abortControllerTable.signal);
+    const { success, data, message, type } = await listNotaCredito(params, this.abortControllerTable.signal);
 
     if (success) {
       const totalPaginacion = parseInt(
@@ -444,20 +440,11 @@ class NotaCredito extends CustomComponent {
     }
 
     return this.state.lista.map((item) => {
-      const estadoClassName = cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-        item.estado === 1 ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
-      );
-
-      const estadoValue =
-        item.estado === 1
-          ? 'ACTIVO' :
-          'ANULADO';
-
       return (
         <tr key={item.idNotaCredito} className="hover:bg-gray-50 transition-colors">
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+            {item.id}
+          </td>
           <td className="px-6 py-4 text-sm text-gray-900">
             {item.fecha}<br />
             <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
@@ -471,8 +458,10 @@ class NotaCredito extends CustomComponent {
             <br />
             <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
           </td>
-          <td className="px-6 py-4 text-sm text-gray-900">{item.motivo}</td>
-          <td className="px-6 py-4 text-sm text-gray-900">         
+          <td className="px-6 py-4 text-sm text-gray-900">
+            {item.motivo}
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
             <Link
               to={getPathNavigation("venta", item.idVenta)}
               className="text-blue-600 hover:underline font-medium"
@@ -483,9 +472,12 @@ class NotaCredito extends CustomComponent {
           </td>
           <td className="px-6 py-4 text-center">
             <span
-              className={estadoClassName}
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                item.estado === 1 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
+              )}
             >
-              {estadoValue}
+              {item.estado === 1 ? "ACTIVO" : "ANULADO"}
             </span>
           </td>
           <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
@@ -503,7 +495,7 @@ class NotaCredito extends CustomComponent {
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Ver detalle"
+              title="Detalle"
               onClick={() => this.handleDetalle(item.idNotaCredito)}
             >
               <i className="bi bi-eye text-lg"></i>
@@ -521,7 +513,7 @@ class NotaCredito extends CustomComponent {
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Anular nota de crédito"
+              title="Anular"
               onClick={() => this.handleAnular(item.idNotaCredito)}
             >
               <i className="bi bi-trash text-lg"></i>
@@ -554,102 +546,99 @@ class NotaCredito extends CustomComponent {
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {this.state.lista.map((item) => {
-          const styleEstado = cn(
-            item.estado === 1
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          );
+        {
+          this.state.lista.map((item) => {
+            return (
+              <div
+                key={item.idTraslado}
+                className="bg-white rounded border transition group overflow-hidden"
+              >
+                <div className="flex flex-col gap-2 p-4">
+                  <div className="flex justify-between items-start">
+                    <h5 className="font-semibold text-gray-900 text-sm">
+                      <span>{item.comprobante}</span>
+                      <br />
+                      <span>{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+                    </h5>
 
-          const estadoValue =
-            item.estado === 1
-              ? 'ACTIVO' :
-              'ANULADO';
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                        item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                      )}
+                    >
+                      {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
+                    </span>
+                  </div>
 
-          return (
-            <div
-              key={item.idTraslado}
-              className="bg-white rounded border transition group overflow-hidden"
-            >
-              <div className="flex flex-col gap-2 p-4">
-                <div className="flex justify-between items-start">
-                  <h5 className="font-semibold text-gray-900 text-sm">
-                    <span>{item.comprobante}</span>
-                    <br />
-                    <span>{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
-                  </h5>
-                  <span className={cn("inline-flex items-center px-2 py-1 rounded-full text-xs font-medium", styleEstado)}>
-                    {estadoValue}
-                  </span>
-                </div>
+                  <div className="text-sm text-gray-600 mb-1">
+                    <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
+                  </div>
 
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
-                </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
+                  </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
-                </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">N° Documento:</span> {item.documento}
+                  </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">N° Documento:</span> {item.documento}
-                </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Información:</span> {item.informacion}
+                  </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Información:</span> {item.informacion}
-                </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Motivo:</span> {item.motivo}
+                  </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Motivo:</span> {item.motivo}
-                </div>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Referencia:</span> {item.comprobanteVenta} - ({item.serieVenta}-{formatNumberWithZeros(item.numeracionVenta)})
+                  </div>
 
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Referencia:</span> {item.comprobanteVenta} - ({item.serieVenta}-{formatNumberWithZeros(item.numeracionVenta)})
-                </div>
+                  <div className="text-lg font-bold text-gray-900 mb-3">
+                    {formatCurrency(item.total, item.codiso)}
+                  </div>
 
-                <div className="text-lg font-bold text-gray-900 mb-3">
-                  {formatCurrency(item.total, item.codiso)}
-                </div>
+                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-blue-600 bg-white",
+                          "hover:bg-blue-50 hover:text-blue-700",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                          "active:bg-blue-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleDetalle(item.idNotaCredito)}
+                      title="Detalle"
+                    >
+                      <i className="bi bi-eye text-lg" /> Ver
+                    </button>
 
-                <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
-                  <button
-                    className={
-                      cn(
-                        "p-2 rounded-md text-sm font-medium transition",
-                        "text-blue-600 bg-white",
-                        "hover:bg-blue-50 hover:text-blue-700",
-                        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                        "active:bg-blue-100 active:scale-[0.97]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )
-                    }
-                    onClick={() => this.handleDetalle(item.idNotaCredito)}
-                    title="Ver detalle"
-                  >
-                    <i className="bi bi-eye text-lg" /> Ver
-                  </button>
-
-                  <button
-                    className={
-                      cn(
-                        "p-2 rounded-md text-sm font-medium transition",
-                        "text-red-600 bg-white",
-                        "hover:bg-red-50 hover:text-red-700",
-                        "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
-                        "active:bg-red-100 active:scale-[0.98]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )
-                    }
-                    onClick={() => this.handleAnular(item.idNotaCredito)}
-                    title="Anular"
-                  >
-                    <i className="bi bi-trash text-lg" /> Anular
-                  </button>
+                    <button
+                      className={
+                        cn(
+                          "p-2 rounded-md text-sm font-medium transition",
+                          "text-red-600 bg-white",
+                          "hover:bg-red-50 hover:text-red-700",
+                          "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                          "active:bg-red-100 active:scale-[0.98]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )
+                      }
+                      onClick={() => this.handleAnular(item.idNotaCredito)}
+                      title="Anular"
+                    >
+                      <i className="bi bi-trash text-lg" /> Anular
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        }
       </div>
     );
   }

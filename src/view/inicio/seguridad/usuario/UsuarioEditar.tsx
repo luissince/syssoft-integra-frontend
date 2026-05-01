@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import ContainerWrapper from '@/components/ui/container-wrapper';
-
 import { SpinnerView } from '@/components/Spinner';
 import Title from '@/components/Title';
 import Input from '@/components/Input';
@@ -11,11 +10,24 @@ import { alertKit } from 'alert-kit';
 import { Switches } from '@/components/Checks';
 import { isText } from '@/helper/utils.helper';
 import { getUsuario, optionsPerfil, updateUsuario } from '@/network/rest/api-client';
+import { FaAsterisk } from 'react-icons/fa';
+import { CANCELED } from '@/constants/requestStatus';
 
 const UsuarioEditar = () => {
-    // 
+    // =============================
+    // REDUX
+    // =============================
     const history = useHistory();
     const location = useLocation();
+
+    // =============================
+    // ROUTER
+    // =============================
+
+
+    // =============================
+    // STATE
+    // =============================
 
     // Estados de carga
     const [loading, setLoading] = useState(true);
@@ -30,78 +42,105 @@ const UsuarioEditar = () => {
     const [usuario, setUsuario] = useState("");
     const [estado, setEstado] = useState(true);
 
-    // Referencias
+    // =============================
+    // REFS
+    // =============================
+
     const refPerfil = useRef<HTMLSelectElement>(null);
     const refUsuario = useRef<HTMLInputElement>(null);
 
-    const abortController = useRef(null);
+    // =============================
+    // CONTROLLERS
+    // =============================
 
-    // Cargar datos
+    const abortControllerPerfil = useRef<AbortController | null>(null);
+    const abortControllerUsuario = useRef<AbortController | null>(null);
+
+    // =============================
+    // API
+    // =============================
+
+    const loadOptionsPerfil = async () => {
+        abortControllerPerfil.current = new AbortController();
+
+        const { success, data, message, type } = await optionsPerfil(abortControllerPerfil.current.signal);
+
+        if (!success) {
+            if (type === CANCELED) return;
+
+            abortControllerPerfil.current = null;
+            alertKit.warning({
+                title: "Usuario",
+                message: message,
+            });
+            return;
+        }
+
+        abortControllerPerfil.current = null;
+        return data;
+    };
+
+    const loadGetUsuario = async (idUsuario: string) => {
+        abortControllerUsuario.current = new AbortController();
+
+        const { success, data, message, type } = await getUsuario(idUsuario, abortControllerUsuario.current.signal);
+
+        if (!success) {
+            if (type === CANCELED) return;
+
+            alertKit.warning({
+                title: "Usuario",
+                message: message,
+            });
+
+            abortControllerUsuario.current = null;
+            return;
+        }
+
+        abortControllerUsuario.current = null;
+        return data;
+    };
+
+    // =============================
+    // EFFECTS
+    // =============================
+
     useEffect(() => {
-        const loadOptionsPerfil = async () => {
-            abortController.current = new AbortController();
+        const searchParams = new URLSearchParams(location.search);
+        const idUsuario = searchParams.get('idUsuario');
 
-            const { success, data, message } = await optionsPerfil(abortController.current.signal);
-
-            if (!success) {
-                throw new Error(message);
-            }
-
-            abortController.current = null;
-            setPerfiles(data);
-        };
-
-        const loadGetUsuario = async (idUsuario: string) => {
-            abortController.current = new AbortController();
-
-            const { success, data, message } = await getUsuario(idUsuario, abortController.current.signal);
-
-            if (!success) {
-                throw new Error(message);
-            }
-
-            abortController.current = null;
-            setIdPerfil(data.idPerfil);
-            setUsuario(data.usuario);
-            setEstado(data.estado === 1);
-
-        };
-
-        const loadData = async () => {
-            const searchParams = new URLSearchParams(location.search);
-            const id = searchParams.get('idUsuario');
-
-            if (!isText(id)) {
-                throw new Error("No se proporciono un id de usuario");
-            }
-
-            setIdUsuario(id);
-
-            try {
-                await loadOptionsPerfil();
-                await loadGetUsuario(id);
-
-                setLoading(false);
-            } catch (error) {
-                alertKit.error({
-                    title: "Usuario",
-                    message: error.message,
-                    onClose: () => {
-                        history.goBack();
-                    }
-                });
-            }
-        };
-
-        loadData();
+        if (isText(idUsuario)) {
+            loadData(idUsuario);
+        } else {
+            history.goBack();
+        }
 
         return () => {
-            if (abortController.current) {
-                abortController.current.abort();
-            }
+            abortControllerPerfil.current?.abort();
+            abortControllerUsuario.current?.abort();
         };
-    }, [location.search, history]);
+    }, []);
 
+    // =============================
+    // FLOWS
+    // =============================
+
+    const loadData = async (idUsuario: string) => {
+        const [perfiles, usuario] = await Promise.all([
+            loadOptionsPerfil(),
+            loadGetUsuario(idUsuario),
+        ]);
+
+        setPerfiles(perfiles);
+        setIdPerfil(perfiles.find((item) => item.idPerfil === usuario.idPerfil)?.idPerfil);
+        setUsuario(usuario.usuario);
+        setEstado(usuario.estado === 1);
+        setLoading(false);
+    }
+
+    // =============================
+    // HANDLERS
+    // =============================
 
     const handleGuardar = async () => {
         const accept = await alertKit.question({
@@ -140,6 +179,10 @@ const UsuarioEditar = () => {
         }
     };
 
+    // =============================
+    // RENDER
+    // =============================
+
     return (
         <ContainerWrapper>
             <SpinnerView
@@ -153,48 +196,50 @@ const UsuarioEditar = () => {
                 handleGoBack={() => history.goBack()}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-1">
-                    <Select
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Perfil <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        ref={refPerfil}
-                        value={idPerfil}
-                        onChange={(event) => setIdPerfil(event.target.value)}
-                        className="w-full"
-                    >
-                        <option value="">-- Seleccione --</option>
-                        {perfiles.map((item, index) => (
-                            <option key={index} value={item.idPerfil}>
-                                {item.descripcion}
-                            </option>
-                        ))}
-                    </Select>
+            <div className="flex flex-col gap-3">
+                {/*  */}
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
+                        <Select
+                            label={
+                                <div className="flex items-center gap-1">
+                                    <p>Perfil:</p> <FaAsterisk className="text-red-500" size={8} />
+                                </div>
+                            }
+                            ref={refPerfil}
+                            value={idPerfil}
+                            onChange={(event) => setIdPerfil(event.target.value)}
+                            className="w-full"
+                        >
+                            <option value="">-- Seleccione --</option>
+                            {perfiles.map((item, index) => (
+                                <option key={index} value={item.idPerfil}>
+                                    {item.descripcion}
+                                </option>
+                            ))}
+                        </Select>
+                    </div>
+
+                    <div className="w-full flex flex-col gap-2">
+                        <Input
+                            label={
+                                <div className="flex items-center gap-1">
+                                    <p>Usuario:</p> <FaAsterisk className="text-red-500" size={8} />
+                                </div>
+                            }
+                            id="usuario"
+                            ref={refUsuario}
+                            value={usuario}
+                            onChange={(event) => setUsuario(event.target.value)}
+                            placeholder="Ingrese el nombre de usuario"
+                            className="w-full"
+                        />
+                    </div>
                 </div>
 
-                <div className="md:col-span-1">
-                    <Input
-                        group={true}
-                        label={
-                            <span className="text-gray-700 font-medium">
-                                Usuario <span className="text-red-500">*</span>
-                            </span>
-                        }
-                        id="usuario"
-                        value={usuario}
-                        ref={refUsuario}
-                        onChange={(event) => setUsuario(event.target.value)}
-                        placeholder="Ingrese el nombre de usuario"
-                        className="w-full"
-                    />
-                </div>
-
-                <div className="md:col-span-2">
-                    <div className="flex items-center">
+                {/*  */}
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
                         <Switches
                             id="customSwitchEstado"
                             checked={estado}
@@ -206,18 +251,16 @@ const UsuarioEditar = () => {
                         </Switches>
                     </div>
                 </div>
-
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 mt-6 pt-6 border-t border-gray-100">
+            <div className="flex flex-col md:flex-row gap-3 mt-3 pt-3 border-t border-gray-200">
                 <Button
-                    className="btn-warning sm:w-auto w-full flex items-center justify-center gap-2"
+                    className="btn-warning"
                     onClick={handleGuardar}
                 >
-                    <i className="fa fa-save"></i> Guardar Cambios
+                    <i className="fa fa-save"></i> Guardar
                 </Button>
                 <Button
-                    className="btn-danger sm:w-auto w-full flex items-center justify-center gap-2"
+                    className="btn-danger"
                     onClick={() => history.goBack()}
                 >
                     <i className="fa fa-close"></i> Cancelar

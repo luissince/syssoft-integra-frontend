@@ -30,7 +30,7 @@ import Title from '@/components/Title';
 import RadioButton from '@/components/RadioButton';
 import Image from '@/components/Image';
 import { images } from '@/helper';
-import { SERVICIO } from '@/model/types/tipo-producto';
+import { TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
 import { ENTRE_ALMACENES, ENTRE_SUCURSALES } from '@/model/types/tipo-traslado';
@@ -390,7 +390,7 @@ class TrasladorCrear extends CustomComponent {
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
     const filteredProductos = productos.filter(
-      (item) => item.idTipoProducto !== SERVICIO,
+      (item) => item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO,
     );
 
     this.setState({

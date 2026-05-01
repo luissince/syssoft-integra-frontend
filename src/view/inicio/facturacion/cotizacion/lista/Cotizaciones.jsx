@@ -400,16 +400,11 @@ class Cotizaciones extends CustomComponent {
     }
 
     return this.state.lista.map((item) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">ACTIVO</span>
-        ) : (
-          <span className="text-danger">ANULADO</span>
-        );
-
       return (
         <tr key={item.idCotizacion} className="hover:bg-gray-50 transition-colors">
-          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
+          <td className="px-6 py-4 text-sm text-gray-900 text-center">
+            {item.id}
+          </td>
           <td className="px-6 py-4 text-sm text-gray-900">
             {item.fecha}<br />
             <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
@@ -422,14 +417,22 @@ class Cotizaciones extends CustomComponent {
             {item.comprobante}<br />
             <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
           </td>
-          <td className="px-6 py-4 text-sm text-gray-900">{estado}</td>
           <td className="px-6 py-4 text-sm text-gray-900">
             <span
-              className={
-                item.ligado == 0
-                  ? 'badge badge-secondary'
-                  : 'badge badge-success'
-              }
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                item.estado === 1 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
+              )}
+            >
+              {item.estado === 1 ? "ACTIVO" : "ANULADO"}
+            </span>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-900">
+            <span
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                item.ligado === 0 ? "bg-gray-500 text-white" : "bg-green-500 text-white",
+              )}
             >
               {item.ligado}
             </span>
@@ -523,13 +526,6 @@ class Cotizaciones extends CustomComponent {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {
           this.state.lista.map((item) => {
-            const estado =
-              item.estado === 1 ? (
-                <span className="text-success">ACTIVO</span>
-              ) : (
-                <span className="text-danger">ANULADO</span>
-              );
-
             return (
               <div
                 key={item.idGuiaRemision}
@@ -540,7 +536,15 @@ class Cotizaciones extends CustomComponent {
                     <h5 className="font-semibold text-gray-900 text-sm">
                       {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
                     </h5>
-                    {estado}
+
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                        item.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                      )}
+                    >
+                      {item.estado === 1 ? "ACTIVO" : "INACTIVO"}
+                    </span>
                   </div>
 
                   <div className="text-sm text-gray-600">
@@ -559,8 +563,11 @@ class Cotizaciones extends CustomComponent {
                     <span className="font-medium">Información:</span> {item.informacion}
                   </div>
 
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Ligado :</span> {item.ligado}
+                  <div className={cn(
+                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                    item.ligado === 0 ? "bg-gray-500 text-white" : "bg-green-500 text-white",
+                  )}>
+                    Ligado: {item.ligado}
                   </div>
 
                   <div className="text-sm text-gray-600">

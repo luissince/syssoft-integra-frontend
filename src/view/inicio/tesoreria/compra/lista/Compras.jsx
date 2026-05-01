@@ -206,32 +206,32 @@ class Compras extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listCompra(params, this.abortControllerTable.signal);
+    const { success, data, message, type } = await listCompra(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
-      );
-
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(Number(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   /*
@@ -249,7 +249,6 @@ class Compras extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
-
 
   handleCambiarVista = (value) => {
     this.setState({ vista: value }, () => this.updateReduxState());
@@ -369,21 +368,6 @@ class Compras extends CustomComponent {
     }
 
     return this.state.lista.map((item) => {
-      const estadoClassName = cn(
-        item.estado === 1 ? "bg-green-100 text-green-800" :
-          item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
-            item.estado === 3 ? "bg-red-100 text-red-800" :
-              "bg-blue-100 text-blue-800"
-      );
-
-      const estadoValue =
-        item.estado === 1 ? "PAGADO" :
-          item.estado === 2 ? "POR PAGAR" : "ANULADO";
-
-      const tipo = item.idFormaPago === CONTADO
-        ? "CONTADO"
-        : "CREDITO"
-
       return (
         <tr key={item.idCompra} className="hover:bg-gray-50 transition-colors">
           <td className="px-2 py-4 text-sm text-gray-900 text-center">{item.id}</td>
@@ -399,15 +383,22 @@ class Compras extends CustomComponent {
             {item.comprobante}<br />
             <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
           </td>
-          <td className="px-2 py-4 text-sm text-gray-900">{tipo}</td>
+          <td className="px-2 py-4 text-sm text-gray-900">
+            {item.idFormaPago === CONTADO ? "CONTADO" : "CREDITO"}
+          </td>
           <td className="px-2 py-4 text-center">
             <span
               className={cn(
                 "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                estadoClassName
+                item.estado === 1 && "bg-green-100 text-green-800",
+                item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                item.estado === 3 && "bg-red-100 text-red-800",
+                item.estado === 4 && "bg-blue-100 text-blue-800"
               )}
             >
-              {estadoValue}
+              {
+                item.estado === 1 ? "PAGADO" : item.estado === 2 ? "POR PAGAR" : "ANULADO"
+              }
             </span>
           </td>
           <td className="px-2 py-4 text-sm font-medium text-gray-900 text-right">
@@ -417,7 +408,7 @@ class Compras extends CustomComponent {
             <button
               className={
                 cn(
-                  "rounded-md transition p-2",
+                  "p-2 rounded-md text-sm font-medium transition",
                   "text-blue-600 bg-white",
                   "hover:bg-blue-50 hover:text-blue-700",
                   "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
@@ -425,7 +416,7 @@ class Compras extends CustomComponent {
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Ver detalle"
+              title="Detalle"
               onClick={() => this.handleDetalle(item.idCompra)}
             >
               <i className="bi bi-eye text-lg"></i>
@@ -435,7 +426,7 @@ class Compras extends CustomComponent {
             <button
               className={
                 cn(
-                  "rounded-md transition p-2",
+                  "p-2 rounded-md text-sm font-medium transition",
                   "text-red-600 bg-white",
                   "hover:bg-red-50 hover:text-red-700",
                   "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
@@ -443,7 +434,7 @@ class Compras extends CustomComponent {
                   "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
                 )
               }
-              title="Anular venta"
+              title="Anular"
               onClick={() => this.handleAnular(item.idCompra)}
             >
               <i className="bi bi-trash text-lg"></i>
@@ -478,24 +469,6 @@ class Compras extends CustomComponent {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
         {
           this.state.lista.map((item) => {
-            const estadoClassName = cn(
-              item.estado === 1
-                ? "bg-green-100 text-green-800"
-                : item.estado === 2
-                  ? "bg-yellow-100 text-yellow-800"
-                  : item.estado === 3
-                    ? "bg-red-100 text-red-800"
-                    : "bg-blue-100 text-blue-800"
-            );
-
-            const estadoValue =
-              item.estado === 1 ? "PAGADO" :
-                item.estado === 2 ? "POR PAGAR" : "ANULADO";
-
-            const tipo = item.idFormaPago === CONTADO
-              ? "CONTADO"
-              : "CREDITO"
-
             return (
               <div
                 key={item.idCompra}
@@ -508,9 +481,12 @@ class Compras extends CustomComponent {
                     </h5>
                     <span className={cn(
                       "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                      estadoClassName)
-                    }>
-                      {estadoValue}
+                      item.estado === 1 && "bg-green-100 text-green-800",
+                      item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                      item.estado === 3 && "bg-red-100 text-red-800",
+                      item.estado === 4 && "bg-blue-100 text-blue-800"
+                    )}>
+                      {item.estado === 1 ? "PAGADO" : item.estado === 2 ? "POR PAGAR" : "ANULADO"}
                     </span>
                   </div>
 
@@ -531,7 +507,10 @@ class Compras extends CustomComponent {
                   </div>
 
                   <div className="text-sm text-gray-600">
-                    <span className="font-medium">Tipo:</span> {tipo}
+                    <span className="font-medium">Tipo:</span>
+                    <span>
+                      {item.idFormaPago === CONTADO ? "CONTADO" : "CREDITO"}
+                    </span>
                   </div>
 
                   <div className="text-lg font-bold text-gray-900 mb-3">
@@ -581,7 +560,6 @@ class Compras extends CustomComponent {
       </div>
     );
   }
-
 
   render() {
     const { vista } = this.state;
@@ -711,15 +689,15 @@ class Compras extends CustomComponent {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Proveedor</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Total</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Detalle</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Anular</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Proveedor</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Comprobante</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-right">Total</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Detalle</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%] text-center">Anular</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
