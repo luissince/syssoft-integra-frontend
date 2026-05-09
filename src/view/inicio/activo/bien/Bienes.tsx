@@ -629,7 +629,7 @@ const Bienes = () => {
                         <button
                           className="p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
                           onClick={() => toggleLotesVisibility(index)}
-                          title="Ver lotes"
+                          title="Ver detalles"
                         >
                           {state.inventarioDetallesVisible[index] ? (
                             <ChevronUp className="h-4 w-4" />

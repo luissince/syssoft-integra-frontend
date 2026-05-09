@@ -1042,7 +1042,7 @@ export async function cancelCompra(params, signal) {
 }
 
 export async function listAccountsPayableCompra(params, signal) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/compra/list/accounts/payable', {
       params: params,
       signal: signal,

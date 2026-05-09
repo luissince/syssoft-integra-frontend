@@ -16,23 +16,8 @@ import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/constants/requestStatus';
 import { connect } from 'react-redux';
 import Title from '@/components/Title';
-import Row from '@/components/Row';
-import Column from '@/components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '@/components/Table';
-import { SpinnerTable } from '@/components/Spinner';
 import Paginacion from '@/components/Paginacion';
-import Button from '@/components/Button';
 import Search from '@/components/Search';
-import Input from '@/components/Input';
-import Select from '@/components/Select';
 import PropTypes from 'prop-types';
 import {
   setListaOrdenCompraData,
@@ -81,7 +66,8 @@ class OrdenCompras extends CustomComponent {
     this.refSearch = React.createRef();
     this.refPaginacion = React.createRef();
 
-    this.abortControllerTable = new AbortController();
+    this.peticion = false;
+    this.abortController = null;
   }
 
   /*
@@ -103,7 +89,12 @@ class OrdenCompras extends CustomComponent {
   }
 
   componentWillUnmount() {
-    this.abortControllerTable.abort();
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
   }
 
   /*
@@ -121,24 +112,16 @@ class OrdenCompras extends CustomComponent {
   */
 
   loadingData = async () => {
-    if (
-      this.props.ordenCompraLista &&
-      this.props.ordenCompraLista.data &&
-      this.props.ordenCompraLista.paginacion
-    ) {
-      this.setState(this.props.ordenCompraLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.ordenCompraLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.ordenCompraLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.ordenCompraLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.ordenCompraLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.ordenCompraLista.paginacion.pageBound;
-      this.refPaginacion.current.paginationMessage =
-        this.props.ordenCompraLista.paginacion.paginationMessage;
+    const ordenCompraLista = this.props.ordenCompraLista;
+
+    if (ordenCompraLista && ordenCompraLista.data && ordenCompraLista.paginacion) {
+      this.setState(ordenCompraLista.data);
+      this.refPaginacion.current.upperPageBound = ordenCompraLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = ordenCompraLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = ordenCompraLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = ordenCompraLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = ordenCompraLista.paginacion.pageBound;
+      this.refPaginacion.current.paginationMessage = ordenCompraLista.paginacion.paginationMessage;
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -206,11 +189,13 @@ class OrdenCompras extends CustomComponent {
     }
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion, buscar = "") => {
+    this.abortController = new AbortController();
+
     this.setState({
       loading: true,
       lista: [],
-      messageTable: 'Cargando información...',
+      messageTable: "Cargando información...",
     });
 
     const params = {
@@ -224,10 +209,14 @@ class OrdenCompras extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const { success, data, message, type } = await listOrdenCompra(params, this.abortControllerTable.signal);
+    const { success, data, message, type } = await listOrdenCompra(params, this.abortController.signal);
 
     if (!success) {
       if (type === CANCELED) return;
+
+
+      this.peticion = false;
+      this.abortController = null;
 
       this.setState({
         loading: false,
@@ -238,9 +227,10 @@ class OrdenCompras extends CustomComponent {
       return;
     }
 
-    const totalPaginacion = parseInt(
-      String(Math.ceil(Number(data.total) / this.state.filasPorPagina)),
-    );
+    const totalPaginacion = parseInt(String(Math.ceil(Number(data.total) / this.state.filasPorPagina)));
+
+    this.peticion = true;
+    this.abortController = null;
 
     this.setState({
       loading: false,
@@ -310,17 +300,16 @@ class OrdenCompras extends CustomComponent {
   };
 
   handleAnular = async (id) => {
-    const accept = await alertKit.question(
-      {
-        title: 'Orden de Compra',
-        message: '¿Estás seguro de anular la orden de compra?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: "Orden de Compra",
+      message: "¿Estás seguro de anular la orden de compra?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const params = {
@@ -328,27 +317,23 @@ class OrdenCompras extends CustomComponent {
         idUsuario: this.state.idUsuario,
       };
 
-      alertKit.loading({
-        message: 'Procesando petición...',
-      });
+      alertKit.loading({ message: "Procesando petición..." });
 
       const response = await cancelOrdenCompra(params);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Orden de Compra',
-            message: response.data,
-          },
+        alertKit.success({
+          title: "Orden de Compra",
+          message: response.data,
+        },
           async () => {
             await this.loadingInit();
-          },
-        );
+          });
       }
 
       if (response instanceof ErrorResponse) {
         alertKit.warning({
-          title: 'Orden de Compra',
+          title: "Orden de Compra",
           message: response.getMessage(),
         });
       }
@@ -644,8 +629,6 @@ class OrdenCompras extends CustomComponent {
           subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
-
-
 
         {/* Acciones principales + Toggle vista */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
