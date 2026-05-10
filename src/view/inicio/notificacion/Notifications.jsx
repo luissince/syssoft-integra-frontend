@@ -1,11 +1,10 @@
 import {
   formatTime,
   isEmpty,
-  formatNumberWithZeros,
-  getPathNavigation,
+  formatDate,
 } from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
-import ContainerWrapper from '../../../components/Container';
+import ContainerWrapper from '../../../components/ui/container-wrapper';
 import CustomComponent from '../../../model/class/custom-component';
 import { detailNotifications } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
@@ -19,7 +18,7 @@ import { SpinnerTable } from '../../../components/Spinner';
  * @extends CustomComponent
  */
 class Notications extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
 
@@ -88,7 +87,7 @@ class Notications extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -123,39 +122,75 @@ class Notications extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <tr className="text-center">
-          <td colSpan="4">¡No hay datos registrados!</td>
+          <td colSpan={4}>
+            ¡No hay datos registrados!
+          </td>
         </tr>
       );
     }
 
     return this.state.lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">DECLARAR</span>
+
+      /**
+       * Color de prioridad
+       */
+      const prioridad =
+        item.prioridad === 'danger' ? (
+          <span className="text-danger">
+            {item.subtitulo}
+          </span>
+        ) : item.prioridad === 'warning' ? (
+          <span className="text-warning">
+            {item.subtitulo}
+          </span>
         ) : (
-          <span className="text-danger">ANULAR</span>
+          <span className="text-success">
+            {item.subtitulo}
+          </span>
         );
+
+      /**
+       * Contenido principal
+       */
+      const content = (
+        <>
+          {item.titulo}
+          <br />
+
+          <small className="text-muted">
+            {item.descripcion}
+          </small>
+        </>
+      );
 
       return (
         <tr key={index}>
-          <td className="text-center">{item.id}</td>
-          <td>
-            <Link
-              className="btn-link"
-              to={getPathNavigation('cpe', `${item.serie}-${item.numeracion}`)}
-            >
-              {item.comprobante}
-              <br />
-              {item.serie}-{formatNumberWithZeros(item.numeracion)}
-            </Link>
-            {/* {item.comprobante}
-            {<br />}
-            {item.serie + '-' + item.numeracion} */}
+          <td className="text-center">
+            {item.id}
           </td>
-          <td>{estado}</td>
+
           <td>
-            {item.fecha}
-            {<br />}
+            {
+              item.route ? (
+                <Link
+                  className="btn-link"
+                  to={item.route}
+                >
+                  {content}
+                </Link>
+              ) : (
+                content
+              )
+            }
+          </td>
+
+          <td>
+            {prioridad}
+          </td>
+
+          <td>
+            {formatDate(item.fecha)}
+            <br />
             {formatTime(item.hora)}
           </td>
         </tr>
@@ -182,12 +217,10 @@ class Notications extends CustomComponent {
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center">
-                      #
-                    </th>
-                    <th width="15%">Título</th>
-                    <th width="30%">Detalle</th>
-                    <th width="10%">Fecha</th>
+                    <th className="text-center w-[5%]">#</th>
+                    <th className="w-[15%]">Título</th>
+                    <th className="w-[30%]">Detalle</th>
+                    <th className="w-[10%]">Fecha</th>
                   </tr>
                 </thead>
                 <tbody>{this.generateBody()}</tbody>
