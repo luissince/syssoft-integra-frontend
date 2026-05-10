@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "bash ./start-dev.sh",
     "build": "vite build",
+    "current": "vite",
     "build:mobile": "vite build && npx cap sync",
     "excute:android": "npx cap run android",
     "excute:ios": "npx cap run ios",

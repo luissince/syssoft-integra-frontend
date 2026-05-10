@@ -1387,7 +1387,6 @@ export async function listPedido(params, signal) {
 export async function getIdPedido(idPedido, signal) {
   return await Resolve.create(
     instancePrincipal.get(`/api/pedido/id/${idPedido}`, {
-      params: params,
       signal: signal,
     }),
   );
@@ -1819,15 +1818,11 @@ export async function getIdCategoria(params, signal = null) {
 }
 
 export async function addCategoria(data) {
-  return await Resolve.create(
-    await instancePrincipal.post('/api/categoria/', data),
-  );
+  return await Resolve.create(instancePrincipal.post('/api/categoria/', data),);
 }
 
 export async function updateCategoria(data) {
-  return await Resolve.create(
-    await instancePrincipal.put('/api/categoria', data),
-  );
+  return await Resolve.create(instancePrincipal.put('/api/categoria', data),);
 }
 
 export async function removeCategoria(params) {
@@ -1874,13 +1869,11 @@ export async function getIdMarca(params, signal = null) {
 }
 
 export async function addMarca(data) {
-  return await Resolve.create(
-    await instancePrincipal.post('/api/marca/', data),
-  );
+  return await Resolve.create(instancePrincipal.post('/api/marca/', data),);
 }
 
 export async function updateMarca(data) {
-  return await Resolve.create(await instancePrincipal.put('/api/marca', data));
+  return await Resolve.create(instancePrincipal.put('/api/marca', data));
 }
 
 export async function removeMarca(params) {
@@ -1927,15 +1920,11 @@ export async function getIdAtributo(params, signal = null) {
 }
 
 export async function addAtributo(data) {
-  return await Resolve.create(
-    await instancePrincipal.post('/api/atributo/', data),
-  );
+  return await Resolve.create( instancePrincipal.post('/api/atributo/', data),);
 }
 
 export async function updateAtributo(data) {
-  return await Resolve.create(
-    await instancePrincipal.put('/api/atributo', data),
-  );
+  return await Resolve.create(instancePrincipal.put('/api/atributo', data),);
 }
 
 export async function removeAtributo(params) {
@@ -2069,7 +2058,6 @@ export async function getIdConsulta(idConsulta, signal = null) {
   return await Resolve.create(
     instancePrincipal.get(`/api/consulta/${idConsulta}`, {
       signal: signal,
-      params: params,
     }),
   );
 }
@@ -2084,9 +2072,7 @@ export async function updateConsulta(data, signal = null) {
 
 export async function deleteConsulta(idConsulta) {
   return await Resolve.create(
-    instancePrincipal.delete(`/api/consulta/${idConsulta}`, {
-      params: params,
-    }),
+    instancePrincipal.delete(`/api/consulta/${idConsulta}`),
   );
 }
 // ------------------------------------------------------------------------
@@ -2149,13 +2135,11 @@ export async function getIdMedida(params, signal = null) {
 }
 
 export async function addMedida(data) {
-  return await Resolve.create(
-    await instancePrincipal.post('/api/medida/', data),
-  );
+  return await Resolve.create(instancePrincipal.post('/api/medida/', data),);
 }
 
 export async function updateMedida(data) {
-  return await Resolve.create(await instancePrincipal.put('/api/medida', data));
+  return await Resolve.create(instancePrincipal.put('/api/medida', data));
 }
 
 export async function removeMedida(params) {

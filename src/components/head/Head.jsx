@@ -96,10 +96,10 @@ const Menu = (props) => {
                       </span>
                       <div>
                         <p className="app-notification__message">
-                          {item.cantidad} {item.nombre}
+                           {item.titulo}
                         </p>
                         <p className="app-notification__meta">
-                          {item.estado}
+                         {item.subtitulo}
                         </p>
                       </div>
                     </div>
