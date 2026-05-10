@@ -51,7 +51,7 @@ export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
 /**
  * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
  * @param {File} file - Archivo seleccionado
- * @returns {Promise<{ base64String: string, extension: string, width: number, height: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho y altura; o false si no se selecciona ningún archivo.
+ * @returns {Promise<{ base64String: string, extension: string, width: number, height: number, size: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho, altura y tamaño; o false si no se selecciona ningún archivo.
  */
 export async function imageBase64(file) {
   if (!file) {
@@ -594,14 +594,19 @@ export function debounce(func, delay) {
 }
 
 /**
- * Formatea una cadena de fecha en un formato de "DD/MM/YYYY"
+ * Formatea una cadena de fecha en un formato de "dd/MM/yyyy"
  *
  * @param {string} date
  * @returns {string} La cadena de fecha formateada.
  */
 export function formatDate(date) {
   const parts = date.split('-');
-  const today = new Date(parts[0], parts[1] - 1, parts[2]);
+
+  if (parts.length !== 3) {
+    return 'Invalid Date';
+  }
+
+  const today = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
   const day = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
   const month =
     today.getMonth() + 1 > 9
@@ -619,29 +624,33 @@ export function formatDate(date) {
  * @returns {string} La cadena de tiempo formateada.
  */
 export function formatTime(time, addSeconds = false) {
-  const timeRegex =
-    /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
-  const match = time.match(timeRegex);
+  try {
+    const timeRegex =
+      /^(0\d|1\d|2[0-4]):((0[0-9])|([1-5][0-9])|59)(?::([0-5][0-9]))?$/;
+    const match = time.match(timeRegex);
 
-  if (!match) {
-    return 'Invalid Time';
+    if (!match) {
+      throw new Error("Invalid Time");
+    }
+
+    const parts = time.split(':');
+
+    const HH = Number(parts[0]);
+    const mm = parts[1];
+    const ss = parts[2] === undefined ? '00' : parts[2];
+
+    const thf = HH % 12 || 12;
+    const ampm = HH < 12 || HH === 24 ? 'AM' : 'PM';
+    const formattedHour = thf < 10 ? '0' + thf : thf;
+
+    if (addSeconds) {
+      return `${formattedHour}:${mm}:${ss} ${ampm}`;
+    }
+
+    return `${formattedHour}:${mm} ${ampm}`;
+  } catch (e) {
+    return e.message ?? "Invalid Time";
   }
-
-  const parts = time.split(':');
-
-  const HH = parts[0];
-  const mm = parts[1];
-  const ss = parts[2] === undefined ? '00' : parts[2];
-
-  const thf = HH % 12 || 12;
-  const ampm = HH < 12 || HH === 24 ? 'AM' : 'PM';
-  const formattedHour = thf < 10 ? '0' + thf : thf;
-
-  if (addSeconds) {
-    return `${formattedHour}:${mm}:${ss} ${ampm}`;
-  }
-
-  return `${formattedHour}:${mm} ${ampm}`;
 }
 
 export function getUrlFileExtension(url) {
@@ -761,12 +770,12 @@ export function hideModal(id) {
   myModal.hide();
 }
 
-export function viewModal(id, callback = function () {}) {
+export function viewModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('shown.bs.modal', callback);
 }
 
-export function clearModal(id, callback = function () {}) {
+export function clearModal(id, callback = function () { }) {
   const myModalEl = document.getElementById(id);
   myModalEl.addEventListener('hidden.bs.modal', callback);
 }
@@ -921,9 +930,10 @@ export function imageSizeData(data) {
     const image = new Image();
     image.src = data;
     image.onload = function () {
-      const height = this.height;
-      const width = this.width;
-      resolve({ width, height });
+      resolve({
+        width: image.width,
+        height: image.height,
+      });
     };
     image.onerror = reject;
   });
@@ -1070,7 +1080,7 @@ export function alertInfo(title, message) {
   });
 }
 
-export function alertHTML(title, html, callback = function () {}) {
+export function alertHTML(title, html, callback = function () { }) {
   Swal({
     html: html,
     showConfirmButton: false,
@@ -1084,7 +1094,7 @@ export function alertHTML(title, html, callback = function () {}) {
   });
 }
 
-export function alertSuccess(title, message, callback = function () {}) {
+export function alertSuccess(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,
@@ -1099,7 +1109,7 @@ export function alertSuccess(title, message, callback = function () {}) {
   });
 }
 
-export function alertWarning(title, message, callback = function () {}) {
+export function alertWarning(title, message, callback = function () { }) {
   Swal({
     title: title,
     text: message,

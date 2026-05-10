@@ -11,7 +11,7 @@ import {
   guId,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/Container';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import { images } from '../../../../helper';
 import {
   getIdEmpresa,
@@ -35,7 +35,7 @@ import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class EmpresaProceso extends CustomComponent {
   /**
@@ -47,25 +47,26 @@ class EmpresaProceso extends CustomComponent {
 
     this.state = {
       loading: true,
-      messageWarning: '',
-      msgLoading: 'Cargando datos...',
+      msgLoading: "Cargando datos...",
 
-      idEmpresa: '',
-      documento: '',
-      razonSocial: '',
-      nombreEmpresa: '',
-      email: '',
+      idEmpresa: "",
+      documento: "",
+      razonSocial: "",
+      nombreEmpresa: "",
+      email: "",
 
-      usuarioSolSunat: '',
-      claveSolSunat: '',
+      usuarioSolSunat: "",
+      claveSolSunat: "",
 
-      idApiSunat: '',
-      claveApiSunat: '',
+      idApiSunat: "",
+      claveApiSunat: "",
 
-      certificado: 'Hacer click para seleccionar su archivo.',
-      claveCertificado: '',
+      certificado: "Hacer click para seleccionar su archivo.",
+      claveCertificado: "",
+      certificadoInicio: "",
+      certificadoExpiracion: "",
 
-      fireBaseCertificado: 'Hacer click para seleccionar su archivo.',
+      fireBaseCertificado: "Hacer click para seleccionar su archivo.",
 
       logo: {
         src: images.noImage,
@@ -87,25 +88,25 @@ class EmpresaProceso extends CustomComponent {
 
       banners: [],
 
-      numeroWhatsapp: '',
-      tituloWhatsapp: '',
-      mensajeWhatsapp: '',
-      informacion: '',
-      acercaNosotros: '',
-      politicasPrivacidad: '',
-      terminosCondiciones: '',
+      numeroWhatsapp: "",
+      tituloWhatsapp: "",
+      mensajeWhatsapp: "",
+      informacion: "",
+      acercaNosotros: "",
+      politicasPrivacidad: "",
+      terminosCondiciones: "",
 
       lookPasswordEmail: false,
       lookPasswordSol: false,
       lookPasswordClave: false,
       lookPasswordClaveCertificado: false,
 
-      paginaWeb: '',
-      youTubePagina: '',
-      facebookPagina: '',
-      twitterPagina: '',
-      instagramPagina: '',
-      tiktokPagina: '',
+      paginaWeb: "",
+      youTubePagina: "",
+      facebookPagina: "",
+      twitterPagina: "",
+      instagramPagina: "",
+      tiktokPagina: "",
 
       idUsuario: this.props.token.userToken.idUsuario,
     };
@@ -147,7 +148,7 @@ class EmpresaProceso extends CustomComponent {
 
   componentDidMount() {
     const url = this.props.location.search;
-    const idEmpresa = new URLSearchParams(url).get('idEmpresa');
+    const idEmpresa = new URLSearchParams(url).get("idEmpresa");
     if (isText(idEmpresa)) {
       this.loadingData(idEmpresa);
     } else {
@@ -193,20 +194,22 @@ class EmpresaProceso extends CustomComponent {
         nombreEmpresa: empresa.nombreEmpresa,
         email: empresa.email,
 
-        usuarioSolSunat: empresa.usuarioSolSunat ?? '',
-        claveSolSunat: empresa.claveSolSunat ?? '',
+        usuarioSolSunat: empresa.usuarioSolSunat ?? "",
+        claveSolSunat: empresa.claveSolSunat ?? "",
 
-        idApiSunat: empresa.idApiSunat ?? '',
-        claveApiSunat: empresa.claveApiSunat ?? '',
+        idApiSunat: empresa.idApiSunat ?? "",
+        claveApiSunat: empresa.claveApiSunat ?? "",
 
         certificado:
           empresa.certificadoSunat ??
-          'Hacer click para seleccionar su archivo.',
-        claveCertificado: empresa.claveCertificadoSunat ?? '',
+          "Hacer click para seleccionar su archivo.",
+        claveCertificado: empresa.claveCertificadoSunat ?? "",
+        certificadoInicio: empresa.certificadoInicio,
+        certificadoExpiracion: empresa.certificadoExpiracion,
 
         fireBaseCertificado:
           empresa.certificadoFirebase ??
-          'Hacer click para seleccionar su archivo.',
+          "Hacer click para seleccionar su archivo.",
 
         logo: empresa.rutaLogo ?? { src: images.noImage },
         image: empresa.rutaImage ?? { src: images.noImage },
@@ -215,13 +218,13 @@ class EmpresaProceso extends CustomComponent {
         portada: empresa.rutaPortada ?? { src: images.noImage },
         banners: empresa.banners ?? [],
 
-        numeroWhatsapp: empresa.numeroWhatsapp ?? '',
-        tituloWhatsapp: empresa.tituloWhatsapp ?? '',
-        mensajeWhatsapp: empresa.mensajeWhatsapp ?? '',
-        informacion: empresa.informacion ?? '',
-        acercaNosotros: empresa.acercaNosotros ?? '',
-        politicasPrivacidad: empresa.politicasPrivacidad ?? '',
-        terminosCondiciones: empresa.terminosCondiciones ?? '',
+        numeroWhatsapp: empresa.numeroWhatsapp ?? "",
+        tituloWhatsapp: empresa.tituloWhatsapp ?? "",
+        mensajeWhatsapp: empresa.mensajeWhatsapp ?? "",
+        informacion: empresa.informacion ?? "",
+        acercaNosotros: empresa.acercaNosotros ?? "",
+        politicasPrivacidad: empresa.politicasPrivacidad ?? "",
+        terminosCondiciones: empresa.terminosCondiciones ?? "",
 
         paginaWeb: empresa.paginaWeb,
         youTubePagina: empresa.youTubePagina,
@@ -346,14 +349,11 @@ class EmpresaProceso extends CustomComponent {
   };
 
   handleLookPasswordCertificado = () => {
-    this.setState(
-      {
-        lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado,
-      },
-      () => {
-        this.refPasswordClaveCertificado.current.focus();
-      },
-    );
+    this.setState({
+      lookPasswordClaveCertificado: !this.state.lookPasswordClaveCertificado,
+    }, () => {
+      this.refPasswordClaveCertificado.current.focus();
+    });
   };
 
   // ------------------------------------------------------------------------
@@ -363,39 +363,50 @@ class EmpresaProceso extends CustomComponent {
   handleFileLogo = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Logo repote',
-          message:
-            'El logo del reporte ' +
-            file.name +
-            ' no debe superar los 500KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        logo: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         logo: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (size > 500) {
+      alertKit.warning({
+        title: 'Logo repote',
+        message:
+          'El logo del reporte ' +
+          file.name +
+          ' no debe superar los 500KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      logo: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -403,39 +414,51 @@ class EmpresaProceso extends CustomComponent {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Logo pagina web',
-          message:
-            'El logo pagina web ' +
-            file.name +
-            ' no debe superar los 500KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        image: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         image: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (size > 500) {
+      alertKit.warning({
+        title: 'Logo pagina web',
+        message:
+          'El logo pagina web ' +
+          file.name +
+          ' no debe superar los 500KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      image: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
+
 
     event.target.value = null;
   };
@@ -444,36 +467,47 @@ class EmpresaProceso extends CustomComponent {
     const files = event.currentTarget.files;
 
     if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.size > 50) {
-        alertKit.warning({
-          title: 'Icono',
-          message:
-            'El icono ' + file.name + ' no debe superar los 50KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        icon: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
       this.setState({
         icon: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (size > 50) {
+      alertKit.warning({
+        title: 'Icono',
+        message:
+          'El icono ' + file.name + ' no debe superar los 50KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      icon: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -481,50 +515,62 @@ class EmpresaProceso extends CustomComponent {
   handleFileBanner = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.width !== 1200 && logoSend.height !== 1200) {
-        alertKit.warning({
-          title: 'Banner',
-          message:
-            'La imagen del banner ' +
-            file.name +
-            ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
-        });
-        return;
-      }
-
-      if (logoSend.size > 1024) {
-        alertKit.warning({
-          title: 'Banner',
-          message:
-            'La imagen del banner ' +
-            file.name +
-            ' no debe superar los 1024KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        banner: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         banner: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (width !== 1200 && height !== 1200) {
+      alertKit.warning({
+        title: 'Banner',
+        message:
+          'La imagen del banner ' +
+          file.name +
+          ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
+      });
+      return;
+    }
+
+    if (size > 1024) {
+      alertKit.warning({
+        title: 'Banner',
+        message:
+          'La imagen del banner ' +
+          file.name +
+          ' no debe superar los 1024KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      banner: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
+
 
     event.target.value = null;
   };
@@ -533,49 +579,61 @@ class EmpresaProceso extends CustomComponent {
     const files = event.currentTarget.files;
 
     if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-
-      if (logoSend.width !== 1200 && logoSend.height !== 1200) {
-        alertKit.warning({
-          title: 'Portada',
-          message:
-            'La imagen de la portada ' +
-            file.name +
-            ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
-        });
-        return;
-      }
-
-      if (logoSend.size > 1024) {
-        alertKit.warning({
-          title: 'Portada',
-          message:
-            'La imagen de la portada ' +
-            file.name +
-            ' no debe superar los 1024KB(Kilobytes).',
-        });
-        return;
-      }
-
-      this.setState({
-        portada: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
       this.setState({
         portada: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const logoSend = await imageBase64(file);
+
+    if (!logoSend) {
+      alertKit.warning({
+        title: "Empresa",
+        message: "Error en obtener la imagen.",
+      });
+      return;
+    }
+
+    const { base64String, extension, width, height, size } = logoSend;
+
+    if (width !== 1200 && height !== 1200) {
+      alertKit.warning({
+        title: 'Portada',
+        message:
+          'La imagen de la portada ' +
+          file.name +
+          ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
+      });
+      return;
+    }
+
+    if (size > 1024) {
+      alertKit.warning({
+        title: 'Portada',
+        message:
+          'La imagen de la portada ' +
+          file.name +
+          ' no debe superar los 1024KB(Kilobytes).',
+      });
+      return;
+    }
+
+    this.setState({
+      portada: {
+        base64: base64String,
+        extension,
+        width,
+        height,
+        size,
+        url,
+      },
+    });
+
 
     event.target.value = null;
   };
@@ -707,12 +765,12 @@ class EmpresaProceso extends CustomComponent {
       idApiSunat: this.state.idApiSunat.trim(),
       claveApiSunat: this.state.claveApiSunat.trim(),
 
-      certificado: certificadoSend.data ?? '',
-      extCertificado: certificadoSend.extension ?? '',
+      certificado: certificadoSend ? certificadoSend.data : '',
+      extCertificado: certificadoSend ? certificadoSend.extension : '',
       claveCertificado: this.state.claveCertificado,
 
-      fireBase: fireBaseSend.data ?? '',
-      extFireBase: fireBaseSend.extension ?? '',
+      fireBase: fireBaseSend ? fireBaseSend.data : '',
+      extFireBase: fireBaseSend ? fireBaseSend.extension : '',
 
       logo: this.state.logo,
       image: this.state.image,
@@ -862,7 +920,6 @@ class EmpresaProceso extends CustomComponent {
                 </>
               }
               placeholder="Ingrese el nombre comercial"
-              ref={this.refNombreEmpresa}
               value={this.state.nombreEmpresa}
               onChange={(event) =>
                 this.setState({ nombreEmpresa: event.target.value })
@@ -874,7 +931,6 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={<>Email:</>}
               placeholder="Ingrese el nombre comercial"
-              ref={this.refEmail}
               value={this.state.email}
               onChange={(event) => this.setState({ email: event.target.value })}
             />
@@ -899,7 +955,6 @@ class EmpresaProceso extends CustomComponent {
                 </>
               }
               placeholder="Usurio secundario"
-              ref={this.refUserSolSunat}
               value={this.state.usuarioSolSunat}
               onChange={(event) =>
                 this.setState({ usuarioSolSunat: event.target.value })
@@ -951,7 +1006,6 @@ class EmpresaProceso extends CustomComponent {
                 </>
               }
               placeholder="Usurio Api Sunat"
-              ref={this.refIdApiSunat}
               value={this.state.idApiSunat}
               onChange={(event) =>
                 this.setState({ idApiSunat: event.target.value })
@@ -990,6 +1044,24 @@ class EmpresaProceso extends CustomComponent {
                   ></i>
                 </Button>
               }
+            />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column className={'col-md-6'} formGroup={true}>
+            <Input
+              label="Fecha de inicio del certificado digital:"
+              defaultValue={this.state.certificadoInicio}
+              readOnly
+            />
+          </Column>
+
+          <Column className={'col-md-6'} formGroup={true}>
+            <Input
+              label="Fecha de vencimiento del certificado digital:"
+              defaultValue={this.state.certificadoExpiracion}
+              readOnly
             />
           </Column>
         </Row>
