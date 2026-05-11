@@ -36,7 +36,7 @@ const ImageUpload = ({
       default={defaultImage}
       src={imageUrl}
       alt={alt}
-      className="img-fluid border border-primary rounded"
+      className="img-fluid border rounded"
       width={width}
     />
 
@@ -168,13 +168,13 @@ class MultiImages extends Component {
 
   render() {
     return (
-      <div className="d-flex flex-wrap position-relative mt-3 gap-8">
+      <div className="flex flex-wrap relative mt-3 gap-8">
         {this.props.images.map((imagen, index) => {
           if (imagen.remover === false || imagen.remover === undefined) {
             return (
               <div
                 key={index}
-                className="d-flex justify-content-center border align-items-center position-relative p-2 col-xl-3 col-md-4 col-sm-5 col-12"
+                className="flex justify-center items-center border rounded relative p-2 col-xl-3 col-md-4 col-sm-5 col-12"
               >
                 <img
                   alt="vista previa"
@@ -200,7 +200,9 @@ class MultiImages extends Component {
           return null;
         })}
 
-        <div className="d-flex justify-content-center border align-items-center p-2 col-xl-3 col-md-4 col-sm-5 col-12">
+        <div 
+          className="flex justify-center items-center border rounded relative p-2 col-xl-3 col-md-4 col-sm-5 col-12"
+        >
           <input
             type="file"
             id="fileSelectImage"

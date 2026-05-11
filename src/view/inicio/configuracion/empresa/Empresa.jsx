@@ -109,7 +109,8 @@ class Empresa extends React.Component {
               default={images.noImage}
               src={item.rutaLogo}
               alt={'Logo'}
-              width={96}
+              width={80}
+              className="mx-auto rounded border border-gray-200"
             />
           </TableCell>
           <TableCell>
@@ -117,14 +118,15 @@ class Empresa extends React.Component {
               default={images.noImage}
               src={item.rutaImage}
               alt={'Imagen'}
-              width={96}
+              width={80}
+              className="mx-auto rounded border border-gray-200"
             />
           </TableCell>
           <TableCell className="text-center">
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEdit(item.idEmpresa)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -149,20 +151,18 @@ class Empresa extends React.Component {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">N° Documento</TableHead>
                     <TableHead width="15%">Razón Social</TableHead>
                     <TableHead width="15%">Nombre Comercial</TableHead>
                     <TableHead width="10%">Logo</TableHead>
                     <TableHead width="10%">Imagen</TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Editar
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">Editar</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>
