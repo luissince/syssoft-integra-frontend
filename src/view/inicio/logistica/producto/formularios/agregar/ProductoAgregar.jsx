@@ -2118,7 +2118,6 @@ class ProductoAgregar extends CustomComponent {
             <DetalleImagen
               idTipoProducto={idTipoProducto}
               imagen={imagen}
-              refFileImagen={this.refFileImagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
               nombre={nombre}

@@ -1162,6 +1162,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Logo reporte"
               subtitle={
                 <>
@@ -1184,6 +1185,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Logo pagina web"
               subtitle={
                 <>
@@ -1206,6 +1208,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Icono"
               subtitle={
                 <>
@@ -1343,6 +1346,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Banner de portada"
               subtitle={
                 <>
@@ -1366,6 +1370,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
+              className="w-full flex flex-col items-center text-center gap-2"
               label="Imagen de portada"
               subtitle={
                 <>

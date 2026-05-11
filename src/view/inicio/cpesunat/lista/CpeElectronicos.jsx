@@ -12,7 +12,7 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/Container';
+import ContainerWrapper from '../../../../components/ui/container-wrapper';
 import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -36,22 +36,9 @@ import {
   GUIA_DE_REMISION,
   NOTA_DE_CREDITO,
 } from '../../../../model/types/tipo-comprobante';
-import { SpinnerTable, SpinnerView } from '../../../../components/Spinner';
+import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../components/Table';
-import Select from '../../../../components/Select';
 import Button from '../../../../components/Button';
-import Input from '../../../../components/Input';
 import Search from '../../../../components/Search';
 import {
   setListaCpeSunatData,
@@ -63,6 +50,7 @@ import { toastKit, ToastStyle } from 'toast-kit';
 import { Link } from 'react-router-dom';
 import DropdownActions from '../../../../components/DropdownActions';
 import { alertKit } from 'alert-kit';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -344,19 +332,16 @@ class CpeElectronicos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -808,7 +793,7 @@ class CpeElectronicos extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -817,23 +802,33 @@ class CpeElectronicos extends CustomComponent {
           </div>
 
           {/* Toggle vista */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-gray-100 rounded p-1 gap-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition",
+                  vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+                )
+              }
             >
               <i className="bi bi-list-ul"></i>
               <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
               onClick={() => this.handleChangeView('cuadricula')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "px-4 py-2",
+                  "text-sm font-medium",
+                  "rounded-md transition",
+                  vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+                )
+              }
             >
               <i className="bi bi-grid-3x3"></i>
               <span className="hidden sm:inline">Cuadrícula</span>
@@ -881,21 +876,18 @@ class CpeElectronicos extends CustomComponent {
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
 
             <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
 
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"            >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item, index) => (
                 <option key={index} value={item.idComprobante}>
@@ -907,8 +899,7 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"            >
               <option value="0">TODOS</option>
               <option value="1">POR DECLARAR</option>
               <option value="2">POR ANULAR</option>
@@ -933,7 +924,7 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"            
             >
               {this.state.sucursales.map((item, index) => (
                 <option key={index} value={item.idSucursal}>
