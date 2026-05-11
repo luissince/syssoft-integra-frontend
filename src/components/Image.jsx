@@ -4,6 +4,7 @@ import { images } from '../helper';
 import Button from './Button';
 import { alertKit } from 'alert-kit';
 import { imageBase64 } from '../helper/utils.helper';
+import { cn } from '@/lib/utils';
 
 const ImageUpload = ({
   className,
@@ -19,12 +20,16 @@ const ImageUpload = ({
   onClear,
   onDownload = null,
 }) => (
-  <div className={`${className}`}>
-    {label && (
-      <span>{label}</span>
+  <div className={cn(className)}>
+     {label && (
+      typeof label === "string"
+        ? <span>{label}</span>
+        : label
     )}
     {subtitle && (
-      <small>{subtitle}</small>
+      typeof subtitle === "string"
+        ? <small>{subtitle}</small>
+        : subtitle
     )}
 
     <Image
@@ -40,7 +45,7 @@ const ImageUpload = ({
         type="file"
         id={inputId}
         accept={accept}
-        className="display-none"
+        className="hidden"
         onChange={onChange}
       />
       <label htmlFor={inputId} className="btn btn-outline-secondary m-0">
