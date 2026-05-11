@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { images } from '../../helper';
 import { isEmpty } from '../../helper/utils.helper';
-import PropTypes from 'prop-types';
 import Image from '../Image';
 import { useScreenSize } from '@/hooks/use-mobile';
 import { MoveLeft, MoveRight } from 'lucide-react';
@@ -73,10 +72,10 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
       <div className="pro-sidebar-inner">
         <div className="pro-sidebar-layout">
           <div className="sidebar-header">
-            <Image
+             <Image
               default={images.icono}
               src={rutaLogo}
-              className="rounded-circle d-block mx-auto mb-2 object-contain"
+              className=" rounded-[50%]  block mx-auto mb-2 object-contain"
               alt={'Logo'}
               width={130}
             />
@@ -180,7 +179,8 @@ const MenuDesktop = ({ refSideBar, url, menus, nombres, apellidos, rutaLogo, pro
   );
 }
 
-const Menu = ({ refSideBar, url, pathname, project, userToken, rutaLogo }) => {
+
+const Menu = ({ refSideBar, url, pathname, project, userToken, rutaLogo }: any) => {
   const isScreen = useScreenSize();
 
   if (isScreen) {
@@ -203,16 +203,6 @@ const Menu = ({ refSideBar, url, pathname, project, userToken, rutaLogo }) => {
       project={project}
     />
   );
-};
-
-Menu.propTypes = {
-  refSideBar: PropTypes.object,
-  path: PropTypes.string,
-  url: PropTypes.string,
-  pathname: PropTypes.string,
-  project: PropTypes.object,
-  userToken: PropTypes.object,
-  rutaLogo: PropTypes.string,
 };
 
 export default Menu;
