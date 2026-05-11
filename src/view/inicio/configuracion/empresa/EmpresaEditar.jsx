@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   convertNullText,
-  alertDialog,
   keyNumberInteger,
   imageBase64,
   isText,
@@ -1163,14 +1162,16 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               className="w-full flex flex-col items-center text-center gap-2"
-              label="Logo reporte"
+              label={
+                <p className="font-bold text-base">Logo reporte</p>
+              }
               subtitle={
-                <>
-                  Para mostrar en los reportes.{' '}
-                  <b className="text-danger">
+                <div>
+                  <p>Para mostrar en los reportes.</p>
+                  <span className="text-red-500 text-sm">
                     La imagen no debe superar los 500KB(Kilobytes).
-                  </b>
-                </>
+                  </span>
+                </div>
               }
               imageUrl={this.state.logo.url}
               defaultImage={images.noImage}
@@ -1186,14 +1187,16 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               className="w-full flex flex-col items-center text-center gap-2"
-              label="Logo pagina web"
+              label={
+                <p className="font-bold text-base">Logo pagina web</p>
+              }
               subtitle={
-                <>
-                  Para mostrar en la página web como banner.{' '}
-                  <b className="text-danger">
+                <div>
+                  <p> Para mostrar en la página web como banner</p>
+                  <span className="text-red-500 text-sm">
                     La imagen no debe superar los 500KB(Kilobytes).
-                  </b>
-                </>
+                  </span>
+                </div>
               }
               imageUrl={this.state.image.url}
               defaultImage={images.noImage}
@@ -1209,14 +1212,16 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-4 col-12'} formGroup={true}>
             <ImageUpload
               className="w-full flex flex-col items-center text-center gap-2"
-              label="Icono"
+              label={
+                <p className="font-bold text-base">Icono</p>
+              }
               subtitle={
-                <>
-                  Para mostrar como favicon de la página web.{' '}
-                  <b className="text-danger">
+                <div>
+                  <p> Para mostrar como favicon de la página web.</p>
+                  <span className="text-red-500 text-sm">
                     La imagen no debe superar los 50KB(Kilobytes).
-                  </b>
-                </>
+                  </span>
+                </div>
               }
               imageUrl={this.state.icon.url}
               defaultImage={images.noImage}
@@ -1347,15 +1352,17 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
               className="w-full flex flex-col items-center text-center gap-2"
-              label="Banner de portada"
+              label={
+                <p className="font-bold text-base">Logo reporte</p>
+              }
               subtitle={
-                <>
-                  Para mostrar en la página web y debe tener un tamaño de 1200 ×
-                  1200 pixele.{' '}
-                  <b className="text-danger">
+                <div>
+                  <p>Para mostrar en la página web y debe tener un tamaño de 1200 ×
+                    1200 pixele.</p>
+                  <span className="text-red-500 text-sm">
                     La imagen no debe superar los 1MB(Megabytes).
-                  </b>
-                </>
+                  </span>
+                </div>
               }
               imageUrl={this.state.banner.url}
               defaultImage={images.noImage}
@@ -1371,15 +1378,17 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <ImageUpload
               className="w-full flex flex-col items-center text-center gap-2"
-              label="Imagen de portada"
+              label={
+                <p className="font-bold text-base">Imagen de portada</p>
+              }
               subtitle={
-                <>
-                  Para mostrar en la página web y debe tener un tamaño de 1200 ×
-                  1200 pixele.{' '}
-                  <b className="text-danger">
+                <div>
+                  <p>  Para mostrar en la página web y debe tener un tamaño de 1200 ×
+                    1200 pixele.</p>
+                  <span className="text-red-500 text-sm">
                     La imagen no debe superar los 1MB(Megabytes).
-                  </b>
-                </>
+                  </span>
+                </div>
               }
               imageUrl={this.state.portada.url}
               defaultImage={images.noImage}
