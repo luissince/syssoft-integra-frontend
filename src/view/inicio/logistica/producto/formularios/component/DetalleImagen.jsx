@@ -35,6 +35,7 @@ const DetalleImagen = (props) => {
           formGroup={true}
         >
           <ImageUpload
+            className="w-full flex flex-col items-center text-center gap-2"
             label="Imagen principal del producto"
             subtitle="Las imagenes no debe superar los 500 KB."
             imageUrl={imagen.url}

@@ -10,15 +10,11 @@ import {
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
-import Row from '../../components/Row';
 import ItemCard from './component/ItemCard';
 import Title from './component/Title';
 import { SpinnerView } from '../../components/Spinner';
 import { projectActive, signOut } from '../../redux/principalSlice';
 import PropTypes from 'prop-types';
-import { clearNoticacion } from '../../redux/noticacionSlice';
-import { clearPredeterminado } from '../../redux/predeterminadoSlice';
-import Column from '../../components/Column';
 import Input from '../../components/Input';
 import { images } from '../../helper';
 
@@ -229,34 +225,40 @@ class Principal extends CustomComponent {
             handleSignOut={this.handleSignOut}
           />
 
-          <Row>
-            <Column className="col-md-12 col-sm-12 col-12" formGroup={true}>
-              <Input
-                group={true}
-                iconLeft={<i className="bi bi-search"></i>}
-                className="bg-transparent"
-                type="search"
-                placeholder="Filtar por nombre de sucursal"
-                ref={this.refTxtSearch}
-                onKeyUp={(event) => this.handleSearch(event.target.value)}
-              />
-            </Column>
-          </Row>
+          <div className="flex flex-col gap-3">
+            <Input
+              group={true}
+              iconLeft={<i className="bi bi-search"></i>}
+              className="bg-transparent"
+              type="search"
+              placeholder="Filtar por nombre de sucursal"
+              ref={this.refTxtSearch}
+              onKeyUp={this.handleSearch}
+            />
 
-          <Row>
-            {this.state.sucursales.map((item, index) => (
-              <ItemCard
-                key={index}
-                item={item}
-                handleIngresar={this.handleIngresar}
-              />
-            ))}
-            {isEmpty(this.state.sucursales) && (
-              <div className="col-12 d-flex justify-content-center">
-                <p className="text-center">No hay datos para mostrar.</p>
+            <div className="flex">
+
+              {
+                isEmpty(this.state.sucursales) && (
+                  <div className="w-full flex justify-center">
+                    <p className="text-center">No hay datos para mostrar.</p>
+                  </div>
+                )
+              }
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {
+                  this.state.sucursales.map((item, index) => (
+                    <ItemCard
+                      key={index}
+                      item={item}
+                      handleIngresar={this.handleIngresar}
+                    />
+                  ))
+                }
               </div>
-            )}
-          </Row>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -270,8 +272,6 @@ Principal.propTypes = {
   }),
   signOut: PropTypes.func,
   projectActive: PropTypes.func,
-  clearPredeterminado: PropTypes.func,
-  clearNoticacion: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -282,9 +282,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   signOut,
-  projectActive,
-  clearPredeterminado,
-  clearNoticacion,
+  projectActive
 };
 
 const ConnectedPrincipal = connect(
