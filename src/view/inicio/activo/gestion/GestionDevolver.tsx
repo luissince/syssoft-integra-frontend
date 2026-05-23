@@ -59,6 +59,7 @@ const GestionDevolver = () => {
   // =============================
 
   const refActivo = useRef<any>(null);
+  const refInputActivo = useRef<any>(null);
   const refEstado = useRef<any>(null);
   const refObservaciones = useRef<any>(null);
   const refPaginacion = useRef<any>(null);
@@ -332,6 +333,7 @@ const GestionDevolver = () => {
               <p className="text-gray-700 font-medium">Activo:</p> <FaAsterisk className="text-red-500" size={8} />
             </div>
           }
+          refValue={refInputActivo}
           ref={refActivo}
           placeholder="Buscar activo"
           data={activos}

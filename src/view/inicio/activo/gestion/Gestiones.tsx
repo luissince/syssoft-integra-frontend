@@ -107,6 +107,19 @@ const Gestiones = () => {
   // =============================
   // HANDLERS
   // =============================
+  // Eventos para filtrar el producto
+    const handleSearchText = async (text: string) => {
+      if (state.loading) return;
+  
+      if (text.trim().length === 0) return;
+  
+      dispatch(setGestionState({
+        opcion: 1,
+        buscar: text,
+        paginacion: 1,
+        restart: true,
+      }));
+    }
 
   // Eventos de paginación
   const handlePaginacion = (page: number, limit: number) => {
@@ -465,7 +478,7 @@ const Gestiones = () => {
           group={true}
           iconLeft={<i className="bi bi-search text-gray-400"></i>}
           // ref={refSearch}
-          // onSearch={handleSearchText}
+          onSearch={handleSearchText}
           placeholder="Buscar por nombre del bien..."
           theme="modern"
         />
