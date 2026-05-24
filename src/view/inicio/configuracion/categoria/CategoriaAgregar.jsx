@@ -34,6 +34,7 @@ class CategoriaAgregar extends React.Component {
     };
 
     this.refNombre = React.createRef();
+    this.refCodigo = React.createRef();
   }
 
   handleInputCodigo = (event) => {
@@ -117,6 +118,17 @@ class CategoriaAgregar extends React.Component {
       return;
     }
 
+    if (isEmpty(this.state.codigo)) {
+      alertKit.warning({
+        title: 'Categoría',
+        message: '!Ingrese el código de la categoría!',
+        onClose: () => {
+          this.refCodigo.current.focus();
+        },
+      });
+      return;
+    }
+
     const accept = await alertKit.question(
       {
         title: 'Categoría',
@@ -186,6 +198,7 @@ class CategoriaAgregar extends React.Component {
               autoFocus
               label="Código:"
               placeholder="Ingrese el código"
+              ref={this.refCodigo}
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
             />

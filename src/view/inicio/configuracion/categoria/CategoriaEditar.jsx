@@ -44,6 +44,7 @@ class CategoriaEditar extends CustomComponent {
     };
 
     this.refNombre = React.createRef();
+    this.refCodigo = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -189,6 +190,17 @@ class CategoriaEditar extends CustomComponent {
       return;
     }
 
+    if (isEmpty(this.state.codigo)) {
+      alertKit.warning({
+        title: 'Categoría',
+        message: '!Ingrese el código de la categoría!',
+        onClose: () => {
+          this.refCodigo.current.focus();
+        },
+      });
+      return;
+    }
+
     const accept = await alertKit.question(
       {
         title: 'Categoría',
@@ -264,6 +276,7 @@ class CategoriaEditar extends CustomComponent {
               autoFocus
               label="Código:"
               placeholder="Ingrese el código"
+              ref={this.refCodigo}
               value={this.state.codigo}
               onChange={this.handleInputCodigo}
             />

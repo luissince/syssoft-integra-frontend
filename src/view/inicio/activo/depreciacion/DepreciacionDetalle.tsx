@@ -110,8 +110,6 @@ const DepreciacionDetalle = () => {
         // FORMATEAR DEPRECIACIONES
         // =============================
 
-        console.log(data);
-
         const lista = data.depreciaciones.map((item: any) => {
 
             const year = new Date(item.periodo).getFullYear();
