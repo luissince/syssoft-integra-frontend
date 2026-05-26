@@ -64,6 +64,8 @@ class ProductoEditar extends CustomComponent {
 
       idTipoProducto: TIPO_PRODUCTO_NORMAL,
 
+      correlativo: "",
+
       nombre: "",
       codigo: "",
       sku: "",
@@ -166,6 +168,7 @@ class ProductoEditar extends CustomComponent {
     await this.setStateAsync({
       idProducto: idProducto,
       idTipoProducto: producto.idTipoProducto,
+      correlativo: producto.correlativo,
       nombre: producto.nombre,
       codigo: producto.codigo,
       sku: producto.sku,
@@ -725,6 +728,8 @@ class ProductoEditar extends CustomComponent {
       msgLoading,
 
       idTipoProducto,
+
+      correlativo,
 
       nombre,
       codigo,
@@ -1362,6 +1367,8 @@ class ProductoEditar extends CustomComponent {
               imagen={imagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
+
+              correlativo={correlativo}
 
               nombre={nombre}
               precio={precio}

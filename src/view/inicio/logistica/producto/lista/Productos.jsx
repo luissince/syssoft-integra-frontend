@@ -376,6 +376,9 @@ class Productos extends CustomComponent {
             </td>
             <td className="px-2 py-4">
               <div className="text-sm text-gray-500">
+                {item.correlativo}
+              </div>
+              <div className="text-sm text-gray-500">
                 {item.codigo}
               </div>
               <div className="text-sm font-medium text-gray-900 uppercase">
@@ -682,7 +685,7 @@ class Productos extends CustomComponent {
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">#</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Tipo</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Imagen</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Nombre</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[25%]">Nombre</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Precio</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Medida</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Categoría</th>

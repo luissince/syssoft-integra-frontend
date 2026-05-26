@@ -11,6 +11,8 @@ const DetalleImagen = (props) => {
 
   const { imagen, handleInputImagen, handleRemoveImagen } = props;
 
+  const { correlativo } = props;
+
   const { nombre, precio } = props;
 
   const { publicar, handleSelectPublico } = props;
@@ -40,6 +42,12 @@ const DetalleImagen = (props) => {
           onChange={handleInputImagen}
           onClear={handleRemoveImagen}
         />
+      </div>
+
+      <div className="flex flex-col items-center justify-center gap-3">
+        <h4 className="text-gray-500">
+          {correlativo}
+        </h4>
       </div>
 
       <div className="flex flex-col items-center justify-center gap-3">
@@ -129,6 +137,8 @@ DetalleImagen.propTypes = {
   imagen: PropTypes.object,
   handleInputImagen: PropTypes.func,
   handleRemoveImagen: PropTypes.func,
+
+  correlativo: PropTypes.string,
 
   nombre: PropTypes.string,
   precio: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
