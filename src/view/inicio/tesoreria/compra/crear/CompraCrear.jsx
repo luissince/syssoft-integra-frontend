@@ -885,7 +885,7 @@ class CompraCrear extends CustomComponent {
       alertKit.loading({
         message: "Procesando información...",
       });
-
+      
       const response = await createCompra(data);
 
       if (response instanceof SuccessReponse) {

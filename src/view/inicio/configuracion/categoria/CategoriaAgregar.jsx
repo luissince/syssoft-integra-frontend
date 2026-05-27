@@ -23,6 +23,7 @@ class CategoriaAgregar extends React.Component {
     this.state = {
       codigo: '',
       nombre: '',
+      porcentaje: '',
       descripcion: '',
       imagen: {
         url: images.noImage,
@@ -35,6 +36,7 @@ class CategoriaAgregar extends React.Component {
 
     this.refNombre = React.createRef();
     this.refCodigo = React.createRef();
+    this.refPorcentaje = React.createRef();
   }
 
   handleInputCodigo = (event) => {
@@ -45,8 +47,32 @@ class CategoriaAgregar extends React.Component {
     this.setState({ nombre: event.target.value });
   };
 
+  handleInputPorcentaje = (event) => {
+    const value = event.target.value;
+
+    // Permitir vacío
+    if (value === "") {
+      this.setState({ porcentaje: "" });
+      return;
+    }
+
+    // Solo números y un decimal
+    if (!/^\d*\.?\d*$/.test(value)) return;
+
+    const numero = Number(value);
+
+    // Rango 1 - 100
+    if (numero >= 1 && numero <= 100) {
+      this.setState({ porcentaje: value });
+    }
+  };
+
   handleInputDescripcion = (event) => {
     this.setState({ descripcion: event.target.value });
+  };
+
+  handleSelectEstadoActivo = (event) => {
+    this.setState({ estadoActivo: event.target.checked });
   };
 
   handleSelectEstado = (event) => {
@@ -150,6 +176,7 @@ class CategoriaAgregar extends React.Component {
     const data = {
       codigo: this.state.codigo,
       nombre: this.state.nombre,
+      porcentaje: this.state.porcentaje,
       descripcion: this.state.descripcion,
       estado: this.state.estado,
       imagen: this.state.imagen,
@@ -229,6 +256,24 @@ class CategoriaAgregar extends React.Component {
               value={this.state.descripcion}
               onChange={this.handleInputDescripcion}
             />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column formGroup={true}>
+            <Input
+              label={'Porcentaje de depreciación'}
+              placeholder="Ingrese el porcentaje"
+              value={this.state.porcentaje}
+              onChange={this.handleInputPorcentaje}
+            />
+          </Column>
+        </Row>
+        <Row>
+          <Column formGroup={true}>
+            <label>
+              NOTA: El porcentaje de depreciación se utilizará para calcular la amortización de los productos asociados a esta categoría, lo que implica que los productos asociados a esta categoría serán considerados como activos fijos y estarán sujetos a las políticas de depreciación establecidas por la empresa.
+            </label>
           </Column>
         </Row>
 

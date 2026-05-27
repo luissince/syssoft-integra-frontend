@@ -31,6 +31,8 @@ export interface AssetListInterface {
     idInventario: number;
     idMetodoDepreciacion: string;
     idProducto: string;
+    fechaAdquisicion: string;
+    fechaDepreciacion: string;
     correlativo: string;
     imagen: string | null;
     inventarioDetalles: AssetDetailInterface[];

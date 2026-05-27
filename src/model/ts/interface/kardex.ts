@@ -12,6 +12,8 @@ export interface KardexListDepreciacionInterface {
   opcion: string;
   producto: string;
   idInventarioActivo: string;
+  fechaAdquisicion: string,
+  fechaDepreciacion: string,
   serie: string;
   tipo: string;
   ubicacion: string;

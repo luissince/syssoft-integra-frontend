@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState, Component } from 'react';
 import PropTypes from 'prop-types';
+import DatePickerPopover from "@/components/DatePickerPopover";
 import Button from '@/components/Button';
 import CustomModal,
 {
@@ -68,6 +69,9 @@ class ModalProducto extends Component {
     this.refModal = React.createRef();
     this.refCosto = React.createRef();
     this.refInventarioDetalles = React.createRef();
+
+    this.refFechaAdquisicion = React.createRef();
+    this.refFechaDepreciacion = React.createRef();
 
     this.peticion = false;
     this.abortController = null;
@@ -168,6 +172,9 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: null,
+
+        fechaAdquisicion: "",
+        fechaDepreciacion: "",
       };
     }
 
@@ -188,6 +195,9 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+
+        fechaAdquisicion: "",
+        fechaDepreciacion: "",
       };
     }
 
@@ -208,6 +218,9 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+
+        fechaAdquisicion: "",
+        fechaDepreciacion: "",
       };
     }
   };
@@ -283,6 +296,9 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: null,
+
+        fechaAdquisicion: "",
+        fechaDepreciacion: "",
       };
     }
 
@@ -303,6 +319,9 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+
+        fechaAdquisicion: "",
+        fechaDepreciacion: "",
       };
     }
 
@@ -323,6 +342,9 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+
+        fechaAdquisicion: "",
+        fechaDepreciacion: "",
       };
     }
 
@@ -423,6 +445,26 @@ class ModalProducto extends Component {
           message: "Hay detalle(s) sin valor residual.",
         }, () => {
           validateNumericInputs(this.refInventarioDetalles);
+        });
+        return;
+      }
+
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.fechaAdquisicion))) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) sin fecha de adquisición.",
+        }, () => {
+          validateNumericInputs(this.refFechaAdquisicion);
+        });
+        return;
+      }
+
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.fechaDepreciacion))) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) sin fecha de depreciación.",
+        }, () => {
+          validateNumericInputs(this.refFechaDepreciacion);
         });
         return;
       }
@@ -649,6 +691,39 @@ class ModalProducto extends Component {
         <div className="w-full flex flex-row gap-3">
           <div className="w-full flex flex-col gap-3">
             <Input
+              type="date"
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Fecha de Adquisición:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
+              }
+              tabIndex={4}
+              value={item.fechaAdquisicion || ""}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "fechaAdquisicion", e.target.value)
+              }
+            />
+          </div>
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              type="date"
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Fecha de Depreciación:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
+              }
+              tabIndex={4}
+              value={item.fechaDepreciacion || ""}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "fechaDepreciacion", e.target.value)
+              }
+            />
+          </div>
+        </div>
+
+        <div className="w-full flex flex-row gap-3">
+          <div className="w-full flex flex-col gap-3">
+            <Input
               label={
                 <div className="flex items-center gap-1">
                   <p className="text-gray-700">Serie:</p> <FaAsterisk className="text-red-500" size={8} />
@@ -662,9 +737,6 @@ class ModalProducto extends Component {
               }
             />
           </div>
-        </div>
-
-        <div className="w-full flex flex-row gap-3">
           <div className="w-full flex flex-col gap-3">
             <Input
               label={

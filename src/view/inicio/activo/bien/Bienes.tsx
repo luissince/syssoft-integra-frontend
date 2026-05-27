@@ -8,6 +8,7 @@ import ContainerWrapper from "@/components/ui/container-wrapper";
 import { CANCELED } from "@/constants/requestStatus";
 import { images } from "@/helper";
 import { formatCurrency, getNumber, isEmpty, rounded } from "@/helper/utils.helper";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { listarBienKardex, metricasDepreciacionKardex, optionsAlmacen } from "@/network/rest/api-client";
 import { setActivoBienState } from "@/redux/activo/bienSlice";
@@ -403,7 +404,12 @@ const Bienes = () => {
             </td>
             <td className="px-6 py-4">
               <div className="text-sm text-gray-900">
-                {item.categoria}
+                {item.fechaAdquisicion ? format(item.fechaAdquisicion, "dd-MM-yyyy") : "N/A"}
+              </div>
+            </td>
+            <td className="px-6 py-4">
+              <div className="text-sm text-gray-900">
+                {item.fechaDepreciacion ? format(item.fechaDepreciacion, "dd-MM-yyyy") : "N/A"}
               </div>
             </td>
             <td className="px-6 py-4">
@@ -481,6 +487,11 @@ const Bienes = () => {
                                 </div>
                               </div>
                               <div className="space-y-2">
+                                <div className="text-sm">
+                                  <span className="text-gray-500">Categoria: </span>
+                                  <span className="font-medium"> {item.categoria || "N/A"}</span>
+                                </div>
+
                                 <div className="text-sm">
                                   <span className="text-gray-500">Serie: </span>
                                   <span className="font-medium">{inventarioDetalle.serie || "N/A"}</span>
@@ -915,9 +926,10 @@ const Bienes = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[40%]">Producto</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[35%]">Producto</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Correlativo</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Categoría</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha Adquisición</th>
+                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha Depreciación</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Stock</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Costo</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Estado</th>

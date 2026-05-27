@@ -7,6 +7,7 @@ import ContainerWrapper from "@/components/ui/container-wrapper";
 import { CANCELED } from "@/constants/requestStatus";
 import { images } from "@/helper";
 import { formatCurrency, isEmpty } from "@/helper/utils.helper";
+import { format } from "date-fns";
 import SuccessResponse from "@/model/class/response";
 import { KardexListDepreciacionInterface } from "@/model/ts/interface/kardex";
 import { ProductFilterInterface } from "@/model/ts/interface/product";
@@ -289,7 +290,8 @@ const Depreciaciones = () => {
         return state.lista.map((item, index) => (
             <tr key={index}>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.serie}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{item.fecha}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{item.fechaAdquisicion ? format(item.fechaAdquisicion, "dd-MM-yyyy") : "N/A"}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{item.fechaDepreciacion ? format(item.fechaDepreciacion, "dd-MM-yyyy") : "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.cantidad}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.ubicacion}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(item.costo, moneda.codiso)}</td>
@@ -453,25 +455,28 @@ const Depreciaciones = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Serie
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Fecha Adquisición
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                                    Fecha Depreciación
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Cantidad
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Ubicación
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Costo
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Dep. Acum.
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Vida Útil
                                 </th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Acción
                                 </th>
                             </tr>

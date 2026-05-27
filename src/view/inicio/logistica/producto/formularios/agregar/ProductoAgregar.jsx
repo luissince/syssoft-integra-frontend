@@ -559,7 +559,7 @@ class ProductoAgregar extends CustomComponent {
         ref: this.refCosto
       },
       {
-        value: ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && precio,
+        value: ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && precio,
         message: 'Ingrese el precio.',
         ref: this.refPrecio
       },
@@ -1085,7 +1085,7 @@ class ProductoAgregar extends CustomComponent {
 
             {/* Precio */}
             {
-              ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && (
+              ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">5</span> PRECIO
