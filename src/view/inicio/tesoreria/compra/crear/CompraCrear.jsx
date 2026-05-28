@@ -253,16 +253,9 @@ class CompraCrear extends CustomComponent {
   importeTotal = () => {
     return this.state.detalles.reduce((accumulate, item) => {
 
-      let cantidad = 0;
-      if (item.lote) {
-        cantidad = item.lotes.reduce((acumulador, item) => acumulador + Number(item.cantidad.value), 0);
-      } else {
-        cantidad = item.cantidad;
-      }
-
       const costo = item.costo;
 
-      return accumulate + cantidad * costo;
+      return accumulate + item.cantidad * costo;
     }, 0);
   };
 

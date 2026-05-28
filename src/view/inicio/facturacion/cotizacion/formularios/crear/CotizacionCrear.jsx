@@ -54,7 +54,7 @@ import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto'
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CotizacionCrear extends CustomComponent {
   /**

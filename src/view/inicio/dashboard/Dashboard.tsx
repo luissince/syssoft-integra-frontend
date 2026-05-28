@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ContainerWrapper from "@/components/ui/container-wrapper";
+import ContainerWrapper from '@/components/Container';
 import { connect } from "react-redux";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import CommercialDashboard from "./component/CommercialDashboard";

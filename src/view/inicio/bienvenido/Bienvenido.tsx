@@ -1,4 +1,4 @@
-import ContainerWrapper from '@/components/ui/container-wrapper';
+import ContainerWrapper from '@/components/Container';
 import { useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 

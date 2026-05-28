@@ -1,42 +1,33 @@
+x-service-template: &frontend-service
+  build:
+    context: .
+    dockerfile: Dockerfile
+
 services:
   leatsac-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: leatsac-frontend
 
   ferreteria-rym-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: ferreteria-rym-frontend
 
   importmuneli-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: importmuneli-frontend
 
   supermarketya-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: supermarketya-frontend
 
   dracoly-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: dracoly-frontend
 
   main-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: main-frontend
 
   desarrollo-services:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *frontend-service
     image: desarrollo-frontend

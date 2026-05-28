@@ -28,14 +28,10 @@ import {
 } from '../../../../redux/predeterminadoSlice';
 import pdfVisualizer from 'pdf-visualizer';
 import {
-  AlertCircle,
   AlertTriangle,
   Barcode,
   Box,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Clock,
   PackageOpen,
   PackagePlus,
   Plus,
@@ -85,10 +81,7 @@ class Inventario extends CustomComponent {
         totalStockCritico: 0,
         totalStockExcedente: 0,
         totalStockOptimo: 0,
-        totalLotesPorVencer: 0,
       },
-
-      lotesVisible: {},
 
       buscar: '',
 
@@ -120,6 +113,7 @@ class Inventario extends CustomComponent {
     // Opciones para el filtro de estado
     this.estadosOptions = [
       { value: '', label: 'Todos los estados' },
+      { value: "activo", label: "Stock Activo" },
       { value: 'critico', label: 'Stock Crítico' },
       { value: 'exceso', label: 'Stock Excedente' },
       { value: 'optimo', label: 'Stock Óptimo' },
@@ -264,15 +258,11 @@ class Inventario extends CustomComponent {
     );
 
     if (response instanceof SuccessReponse) {
-      const result = response.data.result;
-      const total = response.data.total;
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(total) / this.state.filasPorPagina),
-      );
+      const totalPaginacion = parseInt(String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)));
 
       this.setState({
         loading: false,
-        lista: result,
+        lista: response.data.result,
         totalPaginacion: totalPaginacion,
       }, () => {
         this.updateReduxState();
@@ -345,64 +335,6 @@ class Inventario extends CustomComponent {
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
-  };
-
-  toggleLotesVisibility = (index) => {
-    this.setState((prevState) => ({
-      lotesVisible: {
-        ...prevState.lotesVisible,
-        [index]: !prevState.lotesVisible?.[index],
-      },
-    }));
-  };
-
-  getLotesEnRiesgo = (lotes) => {
-    if (!lotes || lotes.length === 0) return 0;
-
-    return lotes.filter(
-      (lote) => lote.diasRestantes <= 30 || lote.estado === 'Crítico',
-    ).length;
-  };
-
-  getProximoVencimiento = (lotes) => {
-    if (!lotes || lotes.length === 0) return 'N/A';
-
-    const lotesOrdenados = [...lotes].sort(
-      (a, b) => a.diasRestantes - b.diasRestantes,
-    );
-    return lotesOrdenados[0].fechaVencimiento;
-  };
-
-  determinarEstadoLote = (lote) => {
-    if (lote.diasRestantes <= 0) {
-      return {
-        estado: 'Vencido',
-        clase: 'bg-red-600 text-white',
-        icono: AlertCircle,
-        colorBarra: 'bg-red-600',
-      };
-    } else if (lote.diasRestantes > 0 && lote.diasRestantes <= 30) {
-      return {
-        estado: 'Próximo',
-        clase: 'bg-orange-500 text-white',
-        icono: Clock,
-        colorBarra: 'bg-orange-500',
-      };
-    } else if (lote.diasRestantes <= 90) {
-      return {
-        estado: 'Vigilar',
-        clase: 'bg-yellow-500 text-white',
-        icono: AlertTriangle,
-        colorBarra: 'bg-yellow-500',
-      };
-    } else {
-      return {
-        estado: 'Óptimo',
-        clase: 'bg-green-500 text-white',
-        icono: CheckCircle,
-        colorBarra: 'bg-green-500',
-      };
-    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -520,7 +452,7 @@ class Inventario extends CustomComponent {
                 Almacén
               </label>
               <select
-                className="w-full px-3 py-2 h-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={this.state.idAlmacen}
                 onChange={this.handleSelectAlmacen}
               >
@@ -541,7 +473,7 @@ class Inventario extends CustomComponent {
                 Estado del Stock
               </label>
               <select
-                className="w-full px-3 py-2 h-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={this.state.estadoFiltro}
                 onChange={this.handleSelectEstado}
               >
@@ -570,7 +502,7 @@ class Inventario extends CustomComponent {
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Box className="h-8 w-8 text-indigo-600" />
@@ -586,23 +518,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Clock className="h-8 w-8 text-orange-500" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Lotes por Vencer
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {rounded(this.state.resumen.totalLotesPorVencer, 0)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <AlertTriangle className="h-8 w-8 text-red-600" />
@@ -618,7 +534,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <CheckCircle className="h-8 w-8 text-green-500" />
@@ -634,7 +550,7 @@ class Inventario extends CustomComponent {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border p-6">
+            <div className="bg-white rounded border p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <PackagePlus className="h-8 w-8 text-blue-600" />
@@ -654,7 +570,7 @@ class Inventario extends CustomComponent {
           {/* Render condicional: Tabla o Cuadrícula */}
           {this.state.vista === 'tabla' ? (
             /* 📊 Vista Tabla */
-            <div className="bg-white rounded-xl border overflow-hidden">
+            <div className="bg-white rounded border overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -706,7 +622,6 @@ class Inventario extends CustomComponent {
                     ) : (
                       this.state.lista.map((item, index) => {
                         const estadoInventario = this.determinarEstadoInventario(item);
-                        const tieneLotes = item.lotes && item.lotes.length > 0;
                         const porcentaje = this.calcularPorcentaje(item);
 
                         return (
@@ -727,18 +642,6 @@ class Inventario extends CustomComponent {
                                     <div className="text-sm text-gray-500">
                                       {item.codigo}
                                     </div>
-                                    {tieneLotes && (
-                                      <div className="flex items-center mt-1">
-                                        <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                          {item.lotes.length} lote(s)
-                                        </div>
-                                        {this.getLotesEnRiesgo(item.lotes) > 0 && (
-                                          <div className="ml-2 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-                                            {this.getLotesEnRiesgo(item.lotes)} en riesgo
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
                                   </div>
                                 </div>
                               </td>
@@ -746,11 +649,6 @@ class Inventario extends CustomComponent {
                                 <div className="text-sm text-gray-900">
                                   {item.categoria}
                                 </div>
-                                {tieneLotes && (
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    Próx. venc: {this.getProximoVencimiento(item.lotes)}
-                                  </div>
-                                )}
                               </td>
                               <td className="px-6 py-4">
                                 <div>
@@ -800,98 +698,9 @@ class Inventario extends CustomComponent {
                                   >
                                     <Barcode className="h-5 w-5" />
                                   </button>
-                                  {tieneLotes && (
-                                    <button
-                                      onClick={() => this.toggleLotesVisibility(index)}
-                                      className="text-gray-400 hover:text-indigo-600 transition-colors"
-                                    >
-                                      {this.state.lotesVisible[index] ? (
-                                        <ChevronUp className="h-5 w-5" />
-                                      ) : (
-                                        <ChevronDown className="h-5 w-5" />
-                                      )}
-                                    </button>
-                                  )}
                                 </div>
                               </td>
                             </tr>
-
-                            {/* Lotes rows */}
-                            {tieneLotes && this.state.lotesVisible[index] && (
-                              <tr>
-                                <td colSpan={6} className="px-6 py-0 bg-gray-50">
-                                  <div className="rounded-lg p-4 mb-4">
-                                    <h4 className="text-sm font-medium text-gray-900 mb-3">
-                                      Lotes del producto
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                      {item.lotes.map((lote, loteIndex) => {
-                                        const estadoLote = this.determinarEstadoLote(lote);
-                                        const porcentajeLote = (lote.cantidad / item.cantidad) * 100;
-
-                                        return (
-                                          <div
-                                            key={lote.idLote}
-                                            className="bg-white rounded-lg p-4"
-                                          >
-                                            <div className="flex justify-between items-start mb-2">
-                                              <div className="text-sm font-medium text-gray-900">
-                                                Lote {loteIndex + 1}
-                                              </div>
-                                              <span
-                                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoLote.clase}`}
-                                              >
-                                                <estadoLote.icono className="h-3 w-3 mr-1" />
-                                                {estadoLote.estado}
-                                              </span>
-                                            </div>
-                                            <div className="space-y-2">
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Código: </span>
-                                                <span className="font-medium">{lote.codigoLote}</span>
-                                              </div>
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Vencimiento: </span>
-                                                <span className="font-medium">{lote.fechaVencimiento}</span>
-                                              </div>
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Días restantes: </span>
-                                                <span
-                                                  className={`font-medium ${lote.diasRestantes <= 30
-                                                    ? 'text-red-600'
-                                                    : lote.diasRestantes <= 90
-                                                      ? 'text-orange-600'
-                                                      : 'text-gray-900'
-                                                    }`}
-                                                >
-                                                  {lote.diasRestantes} días
-                                                </span>
-                                              </div>
-                                              <div className="text-sm">
-                                                <span className="text-gray-500">Cantidad: </span>
-                                                <span className="font-medium">{lote.cantidad} {item.medida}</span>
-                                              </div>
-                                              <div className="mt-2">
-                                                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                                  <span>Participación en stock</span>
-                                                  <span>{rounded(porcentajeLote, 0)}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                  <div
-                                                    className={`h-2 rounded-full ${estadoLote.colorBarra}`}
-                                                    style={{ width: `${porcentajeLote}%` }}
-                                                  ></div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
                           </React.Fragment>
                         );
                       })
@@ -933,7 +742,6 @@ class Inventario extends CustomComponent {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {this.state.lista.map((item, index) => {
                     const estadoInventario = this.determinarEstadoInventario(item);
-                    const tieneLotes = item.lotes && item.lotes.length > 0;
                     const porcentaje = this.calcularPorcentaje(item);
 
                     return (
@@ -994,24 +802,6 @@ class Inventario extends CustomComponent {
                             {formatCurrency(item.costo, this.state.codIso)}
                           </div>
 
-                          {tieneLotes && (
-                            <div className="mb-3">
-                              <div className="flex items-center gap-1 mb-1">
-                                <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                  {item.lotes.length} lote(s)
-                                </div>
-                                {this.getLotesEnRiesgo(item.lotes) > 0 && (
-                                  <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-                                    {this.getLotesEnRiesgo(item.lotes)} en riesgo
-                                  </div>
-                                )}
-                              </div>
-                              <div className="text-xs text-gray-600">
-                                <span className="font-medium">Próx. venc:</span> {this.getProximoVencimiento(item.lotes)}
-                              </div>
-                            </div>
-                          )}
-
                           <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
                             <button
                               className="flex-1 p-2 text-indigo-600 hover:bg-indigo-50 rounded-md text-sm font-medium transition"
@@ -1028,58 +818,7 @@ class Inventario extends CustomComponent {
                             >
                               <Barcode className="h-4 w-4 inline mr-1" /> Código
                             </button>
-
-                            {tieneLotes && (
-                              <button
-                                className="p-2 text-gray-600 hover:bg-gray-50 rounded-md text-sm font-medium transition"
-                                onClick={() => this.toggleLotesVisibility(index)}
-                                title="Ver lotes"
-                              >
-                                {this.state.lotesVisible[index] ? (
-                                  <ChevronUp className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
-                                )}
-                              </button>
-                            )}
                           </div>
-
-                          {/* Lotes expandidos */}
-                          {tieneLotes && this.state.lotesVisible[index] && (
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                              <h6 className="text-xs font-medium text-gray-900 mb-2">Lotes</h6>
-                              <div className="space-y-3">
-                                {item.lotes.map((lote, loteIndex) => {
-                                  const estadoLote = this.determinarEstadoLote(lote);
-                                  const porcentajeLote = (lote.cantidad / item.cantidad) * 100;
-
-                                  return (
-                                    <div key={lote.idLote} className="text-xs bg-gray-50 p-2 rounded">
-                                      <div className="flex justify-between items-center mb-1">
-                                        <span className="font-medium">Lote {loteIndex + 1}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${estadoLote.clase}`}>
-                                          {estadoLote.estado}
-                                        </span>
-                                      </div>
-                                      <div>Cód: {lote.codigoLote}</div>
-                                      <div>Venc: {lote.fechaVencimiento}</div>
-                                      <div className={`${lote.diasRestantes <= 30 ? 'text-red-600' : lote.diasRestantes <= 90 ? 'text-orange-600' : ''}`}>
-                                        {lote.diasRestantes} días restantes
-                                      </div>
-                                      <div className="mt-1">
-                                        <div className="w-full bg-gray-200 rounded h-1.5">
-                                          <div
-                                            className={`h-1.5 rounded ${estadoLote.colorBarra}`}
-                                            style={{ width: `${porcentajeLote}%` }}
-                                          ></div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     );

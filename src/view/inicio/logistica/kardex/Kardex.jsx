@@ -62,7 +62,6 @@ class Kardex extends CustomComponent {
       cantidad: 0,
       costo: 0,
       valor: 0,
-      manejaLote: false,
 
       productos: [],
 
@@ -75,7 +74,6 @@ class Kardex extends CustomComponent {
       restart: false,
 
       // Filtros adicionales
-      mostrarSinLote: true,
       filtroFecha: 'todos', // 'todos', 'hoy', 'semana', 'mes'
 
       opcion: 0,
@@ -194,9 +192,6 @@ class Kardex extends CustomComponent {
 
     const kardex = await this.fetchListarKardex(params);
 
-    // Verificar si el producto maneja lotes
-    const manejaLote = kardex.length > 0 ? kardex[0].manejaLote === 1 : false;
-
     const cantidad = kardex.reduce((accumlate, item) => {
       accumlate +=
         item.tipo === 'INGRESO'
@@ -208,26 +203,22 @@ class Kardex extends CustomComponent {
     const valor = kardex.reduce((accumlate, item) => {
       accumlate +=
         item.tipo === 'INGRESO'
-          ? parseFloat(item.costo * item.cantidad)
-          : -parseFloat(item.costo * item.cantidad);
+          ? Number(item.costo) * Number(item.cantidad)
+          : -Number(item.costo) * Number(item.cantidad);
       return accumlate;
     }, 0);
 
     const costo = isEmpty(kardex) ? 0 : kardex[kardex.length - 1].costo;
 
-    this.setState(
-      {
-        lista: kardex,
-        cantidad: cantidad,
-        costo: costo,
-        valor: valor,
-        manejaLote: manejaLote,
-        loading: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      lista: kardex,
+      cantidad: cantidad,
+      costo: costo,
+      valor: valor,
+      loading: false,
+    }, () => {
+      this.updateReduxState();
+    });
   }
 
   /*
@@ -281,8 +272,8 @@ class Kardex extends CustomComponent {
         nombreAlmacen: isEmpty(event.target.value)
           ? 'TODOS LOS ALMACENES'
           : this.refIdAlmacen.current.options[
-              this.refIdAlmacen.current.selectedIndex
-            ].innerText,
+            this.refIdAlmacen.current.selectedIndex
+          ].innerText,
       },
       () => {
         if (this.state.producto) {
@@ -292,9 +283,6 @@ class Kardex extends CustomComponent {
     );
   };
 
-  handleToggleSinLote = () => {
-    this.setState({ mostrarSinLote: !this.state.mostrarSinLote });
-  };
 
   handleFilterFecha = (event) => {
     this.setState({ filtroFecha: event.target.value });
@@ -308,13 +296,6 @@ class Kardex extends CustomComponent {
 
   getFilteredData = () => {
     let filteredData = this.state.lista;
-
-    // Filtrar por lotes si es necesario
-    if (this.state.manejaLote && !this.state.mostrarSinLote) {
-      filteredData = filteredData.filter(
-        (item) => item.codigoLote !== 'SIN LOTE',
-      );
-    }
 
     // Filtrar por fecha
     if (this.state.filtroFecha !== 'todos') {
@@ -342,38 +323,6 @@ class Kardex extends CustomComponent {
     return filteredData;
   };
 
-  getLoteIcon = (codigoLote, fechaVencimiento) => {
-    if (codigoLote === 'N/A') return '';
-    if (codigoLote === 'SIN LOTE')
-      return <span className="text-muted">📦</span>;
-
-    // Verificar si está próximo a vencer (30 días)
-    if (fechaVencimiento && fechaVencimiento !== 'SIN FECHA') {
-      const [dia, mes, año] = fechaVencimiento.split('/');
-      const fechaVenc = new Date(año, mes - 1, dia);
-      const hoy = new Date();
-      const diasRestantes = Math.ceil(
-        (fechaVenc - hoy) / (1000 * 60 * 60 * 24),
-      );
-
-      if (diasRestantes <= 30 && diasRestantes > 0) {
-        return (
-          <span className="text-warning" title="Próximo a vencer">
-            ⚠️
-          </span>
-        );
-      } else if (diasRestantes <= 0) {
-        return (
-          <span className="text-danger" title="Vencido">
-            🚫
-          </span>
-        );
-      }
-    }
-
-    return <span className="text-success">✅</span>;
-  };
-
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -385,12 +334,12 @@ class Kardex extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   generateBody() {
-    const { loading, messageTable, manejaLote, codiso } = this.state;
+    const { loading, messageTable, codiso } = this.state;
 
     if (loading) {
       return (
         <SpinnerTable
-          colSpan={manejaLote ? '15' : '13'}
+          colSpan={13}
           message={messageTable}
         />
       );
@@ -401,7 +350,7 @@ class Kardex extends CustomComponent {
     if (isEmpty(filteredData)) {
       return (
         <TableRow className="text-center">
-          <TableCell colSpan={manejaLote ? '15' : '13'}>
+          <TableCell colSpan={13}>
             ¡No hay datos para mostrar!
           </TableCell>
         </TableRow>
@@ -420,8 +369,8 @@ class Kardex extends CustomComponent {
       costo =
         costo +
         (item.tipo === 'INGRESO'
-          ? parseFloat(item.costo * item.cantidad)
-          : -parseFloat(item.costo * item.cantidad));
+          ? Number(item.costo) * Number(item.cantidad)
+          : -Number(item.costo) * Number(item.cantidad));
 
       return (
         <TableRow key={index}>
@@ -439,25 +388,6 @@ class Kardex extends CustomComponent {
             </Link>
           </TableCell>
 
-          {/* Columnas de lote (solo si el producto maneja lotes) */}
-          {manejaLote && (
-            <TableCell>
-              <div className="d-flex align-items-center">
-                {this.getLoteIcon(item.codigoLote, item.fechaVencimiento)}
-                <span className="ml-1">{item.codigoLote}</span>
-              </div>
-              <div className="d-flex align-items-center">
-                <span
-                  className={
-                    item.fechaVencimiento === 'SIN FECHA' ? 'text-muted' : ''
-                  }
-                >
-                  {item.fechaVencimiento}
-                </span>
-              </div>
-            </TableCell>
-          )}
-
           {/* Columnas de Ingreso */}
           <TableCell className="bg-success text-white">
             {item.tipo === 'INGRESO' ? '+' + rounded(item.cantidad) : ''}
@@ -466,9 +396,7 @@ class Kardex extends CustomComponent {
             {item.tipo === 'INGRESO' ? formatCurrency(item.costo, codiso) : ''}
           </TableCell>
           <TableCell>
-            {item.tipo === 'INGRESO'
-              ? '+' + formatCurrency(item.costo * item.cantidad, codiso)
-              : ''}
+            {item.tipo === 'INGRESO' ? '+' + formatCurrency(item.costo * item.cantidad, codiso) : ''}
           </TableCell>
 
           {/* Columnas de Salida */}
@@ -479,9 +407,7 @@ class Kardex extends CustomComponent {
             {item.tipo === 'SALIDA' ? formatCurrency(item.costo, codiso) : ''}
           </TableCell>
           <TableCell>
-            {item.tipo === 'SALIDA'
-              ? '-' + formatCurrency(item.costo * item.cantidad, codiso)
-              : ''}
+            {item.tipo === 'SALIDA' ? '-' + formatCurrency(item.costo * item.cantidad, codiso) : ''}
           </TableCell>
 
           {/* Columnas de Saldo */}
@@ -512,8 +438,6 @@ class Kardex extends CustomComponent {
       cantidad,
       costo,
       valor,
-      manejaLote,
-      mostrarSinLote,
       filtroFecha,
     } = this.state;
 
@@ -555,9 +479,7 @@ class Kardex extends CustomComponent {
                     <strong>{value.codigo}</strong>
                     <br />
                     {value.nombre}
-                    {value.lote === 1 && (
-                      <span className="badge badge-info ml-2">Con Lotes</span>
-                    )}
+
                   </div>
                 </div>
               )}
@@ -603,23 +525,6 @@ class Kardex extends CustomComponent {
                 <option value="mes">Último mes</option>
               </Select>
             </Column>
-
-            {manejaLote && (
-              <Column className="col-md-4 col-12" formGroup={true}>
-                <div className="form-check mt-4">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="mostrarSinLote"
-                    checked={mostrarSinLote}
-                    onChange={this.handleToggleSinLote}
-                  />
-                  <label className="form-check-label" htmlFor="mostrarSinLote">
-                    Mostrar movimientos sin lote
-                  </label>
-                </div>
-              </Column>
-            )}
           </Row>
         )}
 
@@ -630,9 +535,6 @@ class Kardex extends CustomComponent {
               <div className="card-body">
                 <h5 className="card-title">
                   Información del Producto
-                  {manejaLote && (
-                    <span className="badge badge-info ml-2">Maneja Lotes</span>
-                  )}
                 </h5>
                 <Row>
                   <Column className="col-md-6">
@@ -687,17 +589,6 @@ class Kardex extends CustomComponent {
               <div className="card-header">
                 <h5 className="mb-0">
                   Movimientos de Kardex
-                  {manejaLote && (
-                    <span className="float-right">
-                      <small>
-                        <span className="text-success">✅ Lote válido</span>
-                        <span className="text-warning ml-2">
-                          ⚠️ Próximo a vencer
-                        </span>
-                        <span className="text-danger ml-2">🚫 Vencido</span>
-                      </small>
-                    </span>
-                  )}
                 </h5>
               </div>
               <div className="card-body">
@@ -719,19 +610,6 @@ class Kardex extends CustomComponent {
                         >
                           Descripción
                         </TableHead>
-
-                        {/* Columnas de lote (solo si el producto maneja lotes) */}
-                        {manejaLote && (
-                          <>
-                            <TableHead
-                              width="15%"
-                              className="text-center align-bottom"
-                              rowSpan={2}
-                            >
-                              Lote
-                            </TableHead>
-                          </>
-                        )}
 
                         <TableHead
                           width="18%"

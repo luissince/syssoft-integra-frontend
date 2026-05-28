@@ -445,9 +445,6 @@ class Productos extends CustomComponent {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                       Categoría
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                      Lote
-                    </th>
                     <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-center">
                       Estado
                     </th>
@@ -530,9 +527,6 @@ class Productos extends CustomComponent {
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {item.categoria}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {item.lote == 1 ? <Layers className="w-5 h-5 text-green-600" /> : <RxValueNone className="w-5 h-5 text-gray-500" />}
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span
@@ -637,10 +631,6 @@ class Productos extends CustomComponent {
                         {item.preferido === 1 && (
                           <FaStar className="w-6 h-6 text-yellow-500 m-2" />
                         )}
-                      </div>
-
-                      <div className="absolute left-0 top-0">
-                        {item.lote == 1 ? <Layers className="w-5 h-5 text-green-600 m-2" /> : <RxValueNone className="w-5 h-5 text-gray-500 m-2" />}
                       </div>
 
                       <div className="py-2 px-3">

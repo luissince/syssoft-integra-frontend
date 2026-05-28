@@ -52,7 +52,7 @@ import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto'
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CotizacionEditar extends CustomComponent {
   /**
@@ -957,7 +957,7 @@ class CotizacionEditar extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-          clear={this.clearView}
+          clear={this.close}
           handleClose={this.handleCloseImpresion}
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}

@@ -12,7 +12,7 @@ import {
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
-import ContainerWrapper from '../../../../components/ui/container-wrapper';
+import ContainerWrapper from '@/components/Container';
 import { images } from '../../../../helper';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
@@ -876,18 +876,21 @@ class CpeElectronicos extends CustomComponent {
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
 
             <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
 
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"            >
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item, index) => (
                 <option key={index} value={item.idComprobante}>
@@ -899,7 +902,8 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"            >
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
               <option value="0">TODOS</option>
               <option value="1">POR DECLARAR</option>
               <option value="2">POR ANULAR</option>
@@ -924,7 +928,7 @@ class CpeElectronicos extends CustomComponent {
             <select
               value={this.state.idSucursal}
               onChange={this.handleSelectSucursal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"            
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               {this.state.sucursales.map((item, index) => (
                 <option key={index} value={item.idSucursal}>
