@@ -1,6 +1,6 @@
 services:
   desarrollo-services:    
-    image: ${NAME_SERVICE}-latest
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end-development:${NAME_SERVICE}-latest
     container_name: ${NAME_SERVICE}-frontend
     networks:
       - luis
