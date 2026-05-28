@@ -585,7 +585,7 @@ class VentaCrearEscritorio extends CustomComponent {
     }));
   };
 
-  addItemDetalle = (producto, precio, cantidad, index = -1, lotes = []) => {
+  addItemDetalle = (producto, precio, cantidad, index = -1) => {
     const { almacenes, idAlmacen, idImpuesto, detalleVenta } = this.state;
 
     // Clonar el estado actual de detalleVenta para evitar mutaciones directas
@@ -600,12 +600,11 @@ class VentaCrearEscritorio extends CustomComponent {
     );
 
     // Función auxiliar para crear un nuevo inventario
-    const createInventory = (can, lotes) => ({
+    const createInventory = (can) => ({
       idAlmacen: almacen.idAlmacen,
       almacen: almacen.nombre,
       idInventario: producto.idInventario,
-      cantidad: can,
-      lotes: lotes,
+      cantidad: can
     });
 
     // Función auxiliar para crear un nuevo item de detalle
@@ -625,25 +624,18 @@ class VentaCrearEscritorio extends CustomComponent {
     // Lógica principal basada en el tipo de tratamiento del producto
     if (producto.idTipoTratamientoProducto === UNIDADES) {
       if (!existingItem) {
-        const newAmount = !isEmpty(lotes)
-          ? cantidad
-          : cantidad
-            ? Number(producto.cantidad)
-            : 1;
+        const newAmount = cantidad
+          ? Number(producto.cantidad)
+          : 1;
 
         const newItem = createNewItem(Number(producto.precio));
-        newItem.inventarios = [createInventory(newAmount, lotes)];
+        newItem.inventarios = [createInventory(newAmount)];
 
         return [...detalles, newItem];
       } else {
         for (const inventario of existingItem.inventarios) {
           if (inventario.idInventario === producto.idInventario) {
-            if (!isEmpty(lotes)) {
-              inventario.cantidad = Number(cantidad);
-              inventario.lotes = lotes;
-            } else {
-              inventario.cantidad += 1;
-            }
+            inventario.cantidad += 1;
           }
         }
       }
@@ -1747,7 +1739,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (isEmpty(cliente)) {
       this.alert.warning('Venta', 'Seleccione un cliente.', () =>
-        this.refCliente.current.focus(),
+        this.refPersona.current.focus(),
       );
       return;
     }

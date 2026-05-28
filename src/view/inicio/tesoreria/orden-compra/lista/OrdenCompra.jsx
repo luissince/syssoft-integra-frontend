@@ -1,4 +1,4 @@
-import ContainerWrapper from '../../../../../components/Container';
+import ContainerWrapper from '@/components/Container';
 import {
   currentDate,
   formatNumberWithZeros,

@@ -7,11 +7,8 @@ import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import {
-  guId,
   handlePasteFloat,
-  isEmpty,
   isNumeric,
-  validateNumericInputs,
 } from '../../../../../../helper/utils.helper';
 import { images } from '../../../../../../helper';
 import Image from '../../../../../../components/Image';
@@ -36,9 +33,6 @@ class ModalProducto extends Component {
       costo: '',
       cantidad: '',
       tipoProducto: '',
-      lote: false,
-
-      lotes: [],
     };
 
     this.initial = { ...this.state };
@@ -46,7 +40,6 @@ class ModalProducto extends Component {
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
     this.refCosto = React.createRef();
-    this.refLote = React.createRef();
   }
 
   loadDatos = async (producto, type) => {
@@ -59,8 +52,6 @@ class ModalProducto extends Component {
         nombre: producto.nombre,
         imagen: producto.imagen,
         tipoProducto: producto.tipoProducto,
-        lote: producto.lote,
-        lotes: producto.lotes,
         loading: false,
       });
     } else {
@@ -72,7 +63,6 @@ class ModalProducto extends Component {
         nombre: producto.nombre,
         imagen: producto.imagen,
         tipoProducto: producto.tipoProducto,
-        lote: producto.lote === 1 ? true : false,
 
         loading: false,
       });
@@ -80,13 +70,8 @@ class ModalProducto extends Component {
   };
 
   handleOnOpen = () => {
-    if (!this.state.lote) {
-      this.refCantidad.current.focus();
-      this.refCantidad.current.select();
-    } else {
-      this.refCosto.current.focus();
-      this.refCosto.current.select();
-    }
+    this.refCantidad.current.focus();
+    this.refCantidad.current.select();
   };
 
   handleOnHidden = () => {
@@ -101,151 +86,62 @@ class ModalProducto extends Component {
     this.setState({ costo: event.target.value });
   };
 
-  handleAddLote = () => {
-    const lote = {
-      id: guId(),
-
-      cantidad: {
-        type: 'number',
-        value: '',
-      },
-      serie: {
-        type: 'text',
-        value: '',
-      },
-      fechaVencimiento: {
-        type: 'date',
-        value: '',
-      },
-    };
-    const lotes = [...this.state.lotes, lote];
-    this.setState({
-      lotes,
-    });
-  };
-
   handleOnSubmit = async () => {
-    const { idProducto, codigo, nombre, imagen, cantidad, costo, lote, lotes } =
+    const { idProducto, codigo, nombre, imagen, cantidad, costo } =
       this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
-    if (!lote && !isNumeric(cantidad)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Ingrese la cantidad.',
-        },
-        () => {
-          this.refCantidad.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (!lote && parseFloat(cantidad) <= 0) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'La cantidad no puede ser menor a cero.',
-        },
-        () => {
-          this.refCantidad.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (lote && isEmpty(lotes)) {
+    if (!isNumeric(cantidad)) {
       alertKit.warning({
         title: 'Compra',
-        message: 'Debes agregar al menos un lote.',
+        message: 'Ingrese la cantidad.',
+      }, () => {
+        this.refCantidad.current.focus();
       });
+
       return;
     }
 
-    if (
-      lote &&
-      !isEmpty(lotes.filter((item) => isEmpty(item.cantidad.value)))
-    ) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Hay lotes sin cantidad.',
-        },
-        () => {
-          validateNumericInputs(this.refLote);
-        },
-      );
-      return;
-    }
+    if (Number(cantidad) <= 0) {
+      alertKit.warning({
+        title: 'Compra',
+        message: 'La cantidad no puede ser menor a cero.',
+      }, () => {
+        this.refCantidad.current.focus();
+      });
 
-    if (lote && !isEmpty(lotes.filter((item) => isEmpty(item.serie.value)))) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Hay lotes sin serie.',
-        },
-        () => {
-          validateNumericInputs(this.refLote, 'string');
-        },
-      );
-      return;
-    }
-
-    if (
-      lote &&
-      !isEmpty(lotes.filter((item) => isEmpty(item.fechaVencimiento.value)))
-    ) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Hay lotes sin fecha de vencimiento.',
-        },
-        () => {
-          validateNumericInputs(this.refLote, 'string');
-        },
-      );
       return;
     }
 
     if (!isNumeric(costo)) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'Ingrese el costo.',
-        },
-        () => {
-          this.refCosto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Compra',
+        message: 'Ingrese el costo.',
+      }, () => {
+        this.refCosto.current.focus();
+      });
       return;
     }
 
-    if (parseFloat(costo) <= 0) {
-      alertKit.warning(
-        {
-          title: 'Compra',
-          message: 'El costo no puede ser menor a cero.',
-        },
-        () => {
-          this.refCosto.current.focus();
-        },
-      );
+    if (Number(costo) <= 0) {
+      alertKit.warning({
+        title: 'Compra',
+        message: 'El costo no puede ser menor a cero.',
+      }, () => {
+        this.refCosto.current.focus();
+      });
       return;
     }
 
     const nuevoDetalles = detalles.map((item) => ({ ...item }));
 
-    const existeDetalle = nuevoDetalles.find(
-      (item) => item.idProducto === idProducto,
-    );
+    const existeDetalle = nuevoDetalles.find((item) => item.idProducto === idProducto);
 
     const impuesto = impuestos.find((item) => item.idImpuesto === idImpuesto);
 
     if (existeDetalle) {
       existeDetalle.cantidad = Number(cantidad);
-      existeDetalle.lotes = lotes;
       existeDetalle.costo = Number(costo);
     } else {
       const data = {
@@ -254,13 +150,11 @@ class ModalProducto extends Component {
         codigo: codigo,
         nombre: nombre,
         imagen: imagen,
-        cantidad: lote ? 0 : Number(cantidad),
+        cantidad: Number(cantidad),
         costo: Number(costo),
-        lote: lote,
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
-        lotes: lotes,
       };
       nuevoDetalles.push(data);
     }
@@ -280,8 +174,6 @@ class ModalProducto extends Component {
       imagen,
       cantidad,
       costo,
-      lote,
-      lotes,
     } = this.state;
 
     const { isOpen, onClose } = this.props;
@@ -327,115 +219,19 @@ class ModalProducto extends Component {
                 />
               </Column>
 
-              {!lote && (
-                <Column formGroup={true}>
-                  <Input
-                    autoFocus={true}
-                    label={'Cantidad:'}
-                    placeholder={'0.00'}
-                    role={'float'}
-                    ref={this.refCantidad}
-                    value={cantidad}
-                    onChange={this.handleInputCantidad}
-                    onPaste={handlePasteFloat}
-                  />
-                </Column>
-              )}
+              <Column formGroup={true}>
+                <Input
+                  autoFocus={true}
+                  label={'Cantidad:'}
+                  placeholder={'0.00'}
+                  role={'float'}
+                  ref={this.refCantidad}
+                  value={cantidad}
+                  onChange={this.handleInputCantidad}
+                  onPaste={handlePasteFloat}
+                />
+              </Column>
             </Row>
-
-            {lote ? (
-              <>
-                <Row>
-                  <Column formGroup={true}>
-                    <div className="d-flex justify-content-start align-items-center">
-                      <h6 className="mr-2">Agregar mas lotes</h6>
-                      <Button
-                        className={'btn-light'}
-                        onClick={this.handleAddLote}
-                      >
-                        <i className="bi bi-plus-circle"></i>
-                      </Button>
-                    </div>
-                  </Column>
-                </Row>
-
-                {lotes.map((item, index) => (
-                  <Row key={index} ref={this.refLote}>
-                    <Column formGroup={true}>
-                      <Input
-                        autoFocus={true}
-                        label={'Cantidad:'}
-                        placeholder={'0.00'}
-                        role={'float'}
-                        value={item.cantidad.value}
-                        onChange={(e) => {
-                          const updatedLotes = lotes.map((lote) => {
-                            if (lote.id === item.id) {
-                              return {
-                                ...lote,
-                                cantidad: {
-                                  ...lote.cantidad,
-                                  value: e.target.value,
-                                },
-                              };
-                            }
-                            return lote;
-                          });
-                          this.setState({ lotes: updatedLotes });
-                        }}
-                        onPaste={handlePasteFloat}
-                      />
-                    </Column>
-
-                    <Column formGroup={true}>
-                      <Input
-                        label={'Lote:'}
-                        placeholder={'LT-0001'}
-                        value={item.serie.value}
-                        onChange={(e) => {
-                          const updatedLotes = lotes.map((lote) => {
-                            if (lote.id === item.id) {
-                              return {
-                                ...lote,
-                                serie: {
-                                  ...lote.serie,
-                                  value: e.target.value,
-                                },
-                              };
-                            }
-                            return lote;
-                          });
-                          this.setState({ lotes: updatedLotes });
-                        }}
-                      />
-                    </Column>
-
-                    <Column formGroup={true}>
-                      <Input
-                        type="date"
-                        label={'Fecha de Vencimiento:'}
-                        value={item.fechaVencimiento.value}
-                        onChange={(e) => {
-                          const updatedLotes = lotes.map((lote) => {
-                            if (lote.id === item.id) {
-                              return {
-                                ...lote,
-                                fechaVencimiento: {
-                                  ...lote.fechaVencimiento,
-                                  value: e.target.value,
-                                },
-                              };
-                            }
-                            return lote;
-                          });
-                          this.setState({ lotes: updatedLotes });
-                        }}
-                      />
-                    </Column>
-                  </Row>
-                ))}
-              </>
-            ) : null}
           </>
         }
         footer={

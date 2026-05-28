@@ -17,9 +17,9 @@ import { isEmpty } from '../helper/utils.helper';
  */
 const ContainerWrapper = forwardRef(({ children }, ref) => {
   return (
-    <main className="mb-[60px] md:mb-0" ref={ref}>
-      <div className="container-xl mt-3">
-        <div className="bg-white p-3 rounded relative">{children}</div>
+    <main ref={ref}>
+      <div className="container mx-auto mt-3">
+        <div className="bg-white p-3 rounded position-relative">{children}</div>
       </div>
 
       <Footer />

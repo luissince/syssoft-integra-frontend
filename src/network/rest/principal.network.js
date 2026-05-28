@@ -331,14 +331,6 @@ export async function comboProductos(signal) {
   );
 }
 
-export async function getLotesProducto(idInventario, signal) {
-  return await Resolve.create(
-    instancePrincipal.get(`/api/producto/lote/${idInventario}`, {
-      signal: signal,
-    }),
-  );
-}
-
 export async function filtrarProductoVenta(params) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/filtrar/venta', {

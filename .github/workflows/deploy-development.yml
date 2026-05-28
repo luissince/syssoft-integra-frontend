@@ -6,8 +6,8 @@ on:
       - "test"
 
 jobs:
-  build-reactjs-development:
-    name: Build Front-End (React Js)
+  build-and-push:
+    name: Build and Push Docker Image to ECR
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -18,10 +18,10 @@ jobs:
     environment: ${{ matrix.environment }}
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Crear archivo .env
+      - name: Create .env file
         run: |
           cat > .env <<EOL
           VITE_APP_BACK_END="${{secrets.VITE_APP_BACK_END}}"
@@ -31,7 +31,7 @@ jobs:
           VITE_APP_NAME="${{vars.VITE_APP_NAME}}"
           EOL
 
-      - name: Construyendo contenedor ReactJs
+      - name: Build Docker image
         run: docker compose -f docker-compose.build.yml build ${{ matrix.service }}
 
       - name: Configure AWS credentials
@@ -50,10 +50,10 @@ jobs:
       - name: Push front-end image to ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
 
-  deploy-reactjs-development:
-    name: Deploy Front-End (React Js)
+  deploy-to-runs-on:
+    name: Deploy to Production Server
     runs-on: webs
-    needs: build-reactjs-development
+    needs: build-and-push
 
     strategy:
       matrix:
@@ -67,7 +67,7 @@ jobs:
       NAME_SERVICE: ${{ matrix.environment }}
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
@@ -80,38 +80,19 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Descargar imagen desde ECR
+      - name: Download image from Amazon ECR
         run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
 
-      - name: Crear archivo Compose para ${{ matrix.environment }}
-        run: |
-          cat <<EOF > docker-compose-${{ matrix.environment }}.yml
-          services:
-            ${NAME_SERVICE}:
-              image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end-development:${NAME_SERVICE}-latest
-              container_name: ${NAME_SERVICE}-frontend
-              restart: always
-              networks:
-                - luis
-          networks:
-            luis:
-              external: true
-          EOF
+      - name: Create and run container
+        run: docker compose -f docker-compose.prod.yml up ${{ matrix.service }} -d
 
-      - name: Crear y ejecutar contenedor en producción
-        run: docker compose -f docker-compose-${{ matrix.environment }}.yml up -d ${{ matrix.environment }}
-
-      - name: Eliminar Compose temporal
-        run: rm docker-compose-${{ matrix.environment }}.yml
-
-      - name: Eliminar imágenes locales y builder
+      - name: Clean up local Docker images
         run: docker builder prune --all || true
   
-  clean-ecr-images-development:
-    name: Borrar imágenes antiguas de ECR
-    if: github.ref == 'refs/heads/test'
+  clean-ecr-images:
+    name: Clear up old images in ECR
     runs-on: ubuntu-latest
-    needs: deploy-reactjs-development
+    needs: deploy-to-runs-on
 
     strategy:
       matrix:
@@ -123,30 +104,35 @@ jobs:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
     steps:
-      - name: Configurar credenciales AWS
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Instalar jq
+      - name: Install jq
         run: sudo apt-get install -y jq
 
-      - name: Borrar imágenes sin tag '${{ matrix.environment }}-latest' - Frontend
+      - name: Delete old images from ECR
         run: |
           REPO="syssoftintegra/front-end-development"
           ENV="${{ matrix.environment }}"
           TAG="${ENV}-latest"
 
-          aws ecr list-images --repository-name "$REPO" \
-            --query "imageIds[?type(imageTag)==null || imageTag!='${TAG}']" \
-            --output json > images.json
+          aws ecr list-images \
+          --repository-name "$REPO" \
+          --query "imageIds[?type(imageTag)==null || imageTag!='${TAG}']" \
+          --output json > images.json
 
           COUNT=$(jq length images.json)
+
           if [ "$COUNT" -gt 0 ]; then
-            echo "🗑️ Borrando $COUNT imágenes antiguas..."
-            aws ecr batch-delete-image --repository-name "$REPO" --image-ids file://images.json
+            echo "🗑️ Cleaning up $COUNT old images from $REPO..."
+            
+            aws ecr batch-delete-image \
+              --repository-name "$REPO" \
+              --image-ids file://images.json
           else
-            echo "✅ No hay imágenes antiguas para borrar en $REPO"
+            echo "✅ There are no old images to delete from $REPO."
           fi

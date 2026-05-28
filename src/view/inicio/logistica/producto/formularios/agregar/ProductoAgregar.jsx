@@ -70,7 +70,6 @@ class ProductoAgregar extends CustomComponent {
         url: images.noImage,
       },
 
-      lote: false,
       publicar: false,
       negativo: false,
       preferido: false,
@@ -1087,12 +1086,6 @@ class ProductoAgregar extends CustomComponent {
     });
   };
 
-  handleSelectLote = (event) => {
-    this.setState({
-      lote: event.target.checked,
-    });
-  };
-
   handleSelectPublico = (event) => {
     this.setState({
       publicar: event.target.checked,
@@ -1294,7 +1287,6 @@ class ProductoAgregar extends CustomComponent {
         precio: this.state.precioProducto,
         inventarios: this.state.inventariosProducto,
         precios: this.state.precios,
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: this.state.negativo,
         preferido: this.state.preferido,
@@ -1460,7 +1452,6 @@ class ProductoAgregar extends CustomComponent {
         costo: 0,
         inventarios: [],
         precios: [],
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: false,
         preferido: this.state.preferido,
@@ -1625,7 +1616,6 @@ class ProductoAgregar extends CustomComponent {
         combos: [],
         inventarios: this.state.inventariosCombo,
         precios: [],
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: false,
         preferido: this.state.preferido,
@@ -1760,7 +1750,6 @@ class ProductoAgregar extends CustomComponent {
       medidas,
       categorias,
       marcas,
-      lote,
       publicar,
       negativo,
       preferido,
@@ -2120,18 +2109,22 @@ class ProductoAgregar extends CustomComponent {
               imagen={imagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
+
               nombre={nombre}
               precio={precio}
-              lote={lote}
-              handleSelectLote={this.handleSelectLote}
+
               publicar={publicar}
               handleSelectPublico={this.handleSelectPublico}
+
               negativo={negativo}
               handleSelectNegativo={this.handleSelectNegativo}
+
               preferido={preferido}
               handleSelectPreferido={this.handleSelectPreferido}
+
               estado={estado}
               handleSelectEstado={this.handleSelectEstado}
+
               handleRegistrar={this.handleRegistrar}
             />
           </Column>

@@ -15,8 +15,6 @@ const DetalleImagen = (props) => {
 
   const { nombre, precio } = props;
 
-  const { lote, handleSelectLote } = props;
-
   const { publicar, handleSelectPublico } = props;
 
   const { negativo, handleSelectNegativo } = props;
@@ -115,23 +113,6 @@ const DetalleImagen = (props) => {
           </Switches>
         </Column>
       </Row>
-
-      {idTipoProducto === PRODUCTO && (
-        <Row>
-          <Column className="col-md-12" formGroup={true}>
-            <Switches
-              id="customSwitchLote"
-              checked={lote}
-              onChange={handleSelectLote}
-            >
-              <div className="font-weight-bold text-black-50 ">Lote</div>
-              <div className="text-black-50">
-                Controla si el producto usa lote para manejar sus cantidades.
-              </div>
-            </Switches>
-          </Column>
-        </Row>
-      )}
 
       <Row>
         <Column className="col-md-12" formGroup={true}>
