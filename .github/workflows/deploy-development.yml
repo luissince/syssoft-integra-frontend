@@ -64,7 +64,8 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      NAME_SERVICE: ${{ matrix.environment }}
+      CONTAINER_NAME: ${{ matrix.environment }}-frontend
+      IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
 
     steps:
       - name: Checkout code
@@ -81,7 +82,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Download image from Amazon ECR
-        run: docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
+        run: docker pull $IMAGE_NAME
 
       - name: Create and run container
         run: docker compose -f docker-compose.prod.yml up ${{ matrix.service }} -d
@@ -98,10 +99,6 @@ jobs:
       matrix:
         include:
           - environment: desarrollo
-    
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
     steps:
       - name: Configure AWS credentials
