@@ -242,7 +242,6 @@ class Categorias extends CustomComponent {
           <TableCell>{item.codigo}</TableCell>
           <TableCell>{item.nombre}</TableCell>
           <TableCell>{item.descripcion}</TableCell>
-          <TableCell>{item.porcentaje ? item.porcentaje + " %" : "N/A"}</TableCell>
           <TableCell>
             <Image
               default={images.noImage}
@@ -318,7 +317,6 @@ class Categorias extends CustomComponent {
                     <TableHead width="10%">Código</TableHead>
                     <TableHead width="20%">Nombre</TableHead>
                     <TableHead width="30%">Descripción</TableHead>
-                    <TableHead width="10%">Porcentaje</TableHead>
                     <TableHead width="10%">Imagen</TableHead>
                     <TableHead width="10%" className="text-center">
                       Estado
