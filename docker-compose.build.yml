@@ -4,6 +4,10 @@ x-service-template: &frontend-service
     dockerfile: Dockerfile
 
 services:
+  sysintegra-services:
+    <<: *frontend-service
+    image: sysintegra-frontend
+    
   leatsac-services:
     <<: *frontend-service
     image: leatsac-frontend
@@ -27,7 +31,3 @@ services:
   main-services:
     <<: *frontend-service
     image: main-frontend
-
-  desarrollo-services:
-    <<: *frontend-service
-    image: desarrollo-frontend

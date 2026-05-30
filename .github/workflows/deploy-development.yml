@@ -12,10 +12,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: desarrollo
-            service: desarrollo-services
+          - environment: sysintegra
+            service: sysintegra-services
   
     environment: ${{ matrix.environment }}
+
+    env:
+      ECR_IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
 
     steps:
       - name: Checkout code
@@ -27,7 +30,6 @@ jobs:
           VITE_APP_BACK_END="${{secrets.VITE_APP_BACK_END}}"
           VITE_APP_APIS_PERU="${{secrets.VITE_APP_APIS_PERU}}"
           VITE_APP_ENV="${{vars.VITE_APP_ENV}}"
-          VITE_APP_VERSION="${{vars.VITE_APP_VERSION}}"
           VITE_APP_NAME="${{vars.VITE_APP_NAME}}"
           EOL
 
@@ -45,21 +47,21 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1 
       
       - name: Tag front-end image
-        run: docker tag ${{ matrix.environment }}-frontend ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
+        run: docker tag ${{ matrix.environment }}-frontend $ECR_IMAGE_URI
 
       - name: Push front-end image to ECR
-        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-development:${{ matrix.environment }}-latest
+        run: docker push $ECR_IMAGE_URI
 
   deploy-to-runs-on:
     name: Deploy to Production Server
-    runs-on: webs
+    runs-on: [self-hosted, client-dbsmart]
     needs: build-and-push
 
     strategy:
       matrix:
         include:
-          - environment: desarrollo
-            service: desarrollo-services
+          - environment: sysintegra
+            service: sysintegra-services
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -98,7 +100,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: desarrollo
+          - environment: sysintegra
 
     steps:
       - name: Configure AWS credentials
