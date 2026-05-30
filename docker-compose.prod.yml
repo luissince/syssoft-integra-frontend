@@ -4,12 +4,11 @@ x-service-template: &frontend-service
   restart: always
 
 services:
-  desarrollo-services:    
+  sysintegra-services:    
     <<: *frontend-service
     image: ${IMAGE_NAME}
     container_name: ${CONTAINER_NAME}
     
-
 networks:
   luis:
     external: true
