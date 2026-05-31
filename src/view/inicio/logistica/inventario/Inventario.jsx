@@ -682,25 +682,14 @@ class Inventario extends CustomComponent {
                               </div>
                               <div className="space-y-2">
                                 <div className="text-sm">
-                                  <span className="text-gray-500">Código: </span>
-                                  <span className="font-medium">{inventarioDetalle.lote || "N/A"}</span>
+                                  <span className="text-gray-500">Serie: </span>
+                                  <span className="font-medium">{inventarioDetalle.serie || "N/A"}</span>
                                 </div>
                                 <div className="text-sm">
                                   <span className="text-gray-500">Vencimiento: </span>
                                   <span className="font-medium">{inventarioDetalle.fechaVencimiento || "N/A"}</span>
                                 </div>
-                                <div className="text-sm">
-                                  <span className="text-gray-500">Días restantes: </span>
-                                  <span
-                                    className={cn(
-                                      "font-medium",
-                                      inventarioDetalle.diasRestantes <= 30 ? "text-red-600" :
-                                        inventarioDetalle.diasRestantes <= 90 ? "text-orange-600" : "text-gray-900"
-                                    )}
-                                  >
-                                    {inventarioDetalle.diasRestantes} días
-                                  </span>
-                                </div>
+                                
                                 <div className="text-sm">
                                   <span className="text-gray-500">Cantidad: </span>
                                   <span className="font-medium">{inventarioDetalle.cantidad} {item.medida}</span>

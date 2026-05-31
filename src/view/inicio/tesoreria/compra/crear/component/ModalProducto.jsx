@@ -22,7 +22,7 @@ import {
 import { images } from '@/helper';
 import Image from '@/components/Image';
 import { alertKit } from 'alert-kit';
-import { comboUbicacion } from '@/network/rest/principal.network';
+import { comboAtributo, comboUbicacion } from '@/network/rest/principal.network';
 import { CANCELED } from '@/constants/requestStatus';
 import Select from '@/components/Select';
 import { cn } from '@/lib/utils';
@@ -62,6 +62,9 @@ class ModalProducto extends Component {
       // sabores: [],
 
       ubicaciones: [],
+      atributos: [],
+
+      tiposAtributo: [],
     };
 
     this.initial = { ...this.state };
@@ -118,6 +121,47 @@ class ModalProducto extends Component {
 
     const ubicaciones = dataUbicacion;
 
+    const {
+      success: successAtributo,
+      message: messageAtributo,
+      type: typeAtributo,
+      data: dataAtributo
+    } = await comboAtributo(this.abortController.signal);
+
+    if (!successAtributo) {
+      if (typeAtributo === CANCELED) return;
+
+      this.setState({
+        message: messageAtributo
+      })
+
+      this.peticion = false;
+      this.abortController = null;
+      return;
+    }
+
+    const atributos = dataAtributo;
+
+    const tiposAtributo = Object.values(
+      atributos.reduce((acc, item) => {
+        const key = item.nombreTipoAtributo;
+
+        if (!acc[key]) {
+          acc[key] = {
+            nombreTipoAtributo: item.nombreTipoAtributo,
+            opciones: []
+          };
+        }
+
+        acc[key].opciones.push({
+          idAtributo: item.idAtributo,
+          nombre: item.nombre
+        });
+
+        return acc;
+      }, {})
+    );
+
     if (type === "edit") {
       this.setState({
         idProducto: producto.idProducto,
@@ -129,6 +173,8 @@ class ModalProducto extends Component {
         idMetodoDepreciacion: producto.idMetodoDepreciacion,
         inventarioDetalles: producto.inventarioDetalles,
         ubicaciones: ubicaciones,
+        atributos,
+        tiposAtributo,
 
         loading: false,
       });
@@ -146,6 +192,8 @@ class ModalProducto extends Component {
           this.loadDetalleInventarioPorDefecto(producto.idTipoProducto),
         ],
         ubicaciones: ubicaciones,
+        atributos,
+        tiposAtributo,
 
         loading: false,
       });
@@ -172,6 +220,7 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: null,
+        atributosAsignados: [],
 
         fechaAdquisicion: "",
         fechaDepreciacion: "",
@@ -195,6 +244,7 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+        atributosAsignados: [],
 
         fechaAdquisicion: "",
         fechaDepreciacion: "",
@@ -218,6 +268,7 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+        atributosAsignados: [],
 
         fechaAdquisicion: "",
         fechaDepreciacion: "",
@@ -235,6 +286,113 @@ class ModalProducto extends Component {
     }));
   };
 
+  // Metodos asociados a atributos personalizados
+  agregarAtributoDetalle = (inventarioId, nombreTipoAtributo) => {
+
+    if (!nombreTipoAtributo) return;
+
+    this.setState((prevState) => ({
+      inventarioDetalles:
+        prevState.inventarioDetalles.map((detalle) => {
+
+          if (detalle.id !== inventarioId) {
+            return detalle;
+          }
+
+          const existe =
+            detalle.atributosAsignados.some(
+              a =>
+                a.nombreTipoAtributo ===
+                nombreTipoAtributo
+            );
+
+          if (existe) return detalle;
+
+          return {
+            ...detalle,
+            selectedTipoAtributo: "",
+            atributosAsignados: [
+              ...detalle.atributosAsignados,
+              {
+                id: guId(),
+                nombreTipoAtributo,
+                idAtributo: ""
+              }
+            ]
+          };
+        })
+    }));
+  };
+
+  updateAtributoDetalle = (
+    inventarioId,
+    atributoId,
+    value
+  ) => {
+
+    this.setState((prevState) => ({
+      inventarioDetalles:
+        prevState.inventarioDetalles.map((detalle) => {
+
+          if (detalle.id !== inventarioId) {
+            return detalle;
+          }
+
+          return {
+            ...detalle,
+            atributosAsignados:
+              detalle.atributosAsignados.map((a) =>
+                a.id === atributoId
+                  ? { ...a, idAtributo: value }
+                  : a
+              )
+          };
+        })
+    }));
+  };
+
+  removeAtributoDetalle = (
+    inventarioId,
+    atributoId
+  ) => {
+
+    this.setState((prevState) => ({
+      inventarioDetalles:
+        prevState.inventarioDetalles.map((detalle) => {
+
+          if (detalle.id !== inventarioId) {
+            return detalle;
+          }
+
+          return {
+            ...detalle,
+            atributosAsignados:
+              detalle.atributosAsignados.filter(
+                a => a.id !== atributoId
+              )
+          };
+        })
+    }));
+  };
+
+  updateSelectedTipoAtributo = (
+    inventarioId,
+    value
+  ) => {
+
+    this.setState((prevState) => ({
+      inventarioDetalles:
+        prevState.inventarioDetalles.map((detalle) =>
+          detalle.id === inventarioId
+            ? {
+              ...detalle,
+              selectedTipoAtributo: value
+            }
+            : detalle
+        )
+    }));
+  };
+  
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -296,6 +454,7 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: null,
+        atributosAsignados: [],
 
         fechaAdquisicion: "",
         fechaDepreciacion: "",
@@ -319,6 +478,7 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+        atributosAsignados: [],
 
         fechaAdquisicion: "",
         fechaDepreciacion: "",
@@ -342,6 +502,7 @@ class ModalProducto extends Component {
 
         // atributos
         idUbicacion: "",
+        atributosAsignados: [],
 
         fechaAdquisicion: "",
         fechaDepreciacion: "",
@@ -770,6 +931,130 @@ class ModalProducto extends Component {
               }
             />
           </div>
+        </div>
+
+        <div className="border rounded p-3 flex flex-col gap-3">
+
+          <h6 className="text-gray-700">
+            Campos adicionales
+          </h6>
+
+          {/* selector superior */}
+          <div className="flex gap-2 items-end">
+
+            <div className="flex-1">
+              <Select
+                label="Buscar"
+                value={item.selectedTipoAtributo || ""}
+                onChange={(e) =>
+                  this.updateSelectedTipoAtributo(
+                    item.id,
+                    e.target.value
+                  )
+                }
+              >
+                <option value="">
+                  -- Seleccione --
+                </option>
+
+                {
+                  this.state.tiposAtributo.map((tipo, idx) => {
+
+                    const yaExiste =
+                      item.atributosAsignados?.some(
+                        a =>
+                          a.nombreTipoAtributo ===
+                          tipo.nombreTipoAtributo
+                      );
+
+                    if (yaExiste) return null;
+
+                    return (
+                      <option
+                        key={idx}
+                        value={tipo.nombreTipoAtributo}
+                      >
+                        {tipo.nombreTipoAtributo}
+                      </option>
+                    );
+                  })
+                }
+              </Select>
+            </div>
+
+            <Button
+              className="btn-primary"
+              onClick={() =>
+                this.agregarAtributoDetalle(
+                  item.id,
+                  item.selectedTipoAtributo
+                )
+              }
+            >
+              Agregar
+            </Button>
+          </div>
+
+          {/* atributos agregados */}
+          {
+            item.atributosAsignados?.map((atributo) => {
+
+              const tipo =
+                this.state.tiposAtributo.find(
+                  (t) =>
+                    t.nombreTipoAtributo ===
+                    atributo.nombreTipoAtributo
+                );
+
+              return (
+                <div
+                  key={atributo.id}
+                  className="flex gap-2 items-end"
+                >
+                  <div className="flex-1">
+                    <Select
+                      label={atributo.nombreTipoAtributo.toLowerCase()}
+                      value={atributo.idAtributo}
+                      onChange={(e) =>
+                        this.updateAtributoDetalle(
+                          item.id,
+                          atributo.id,
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="">
+                        -- Seleccione --
+                      </option>
+
+                      {
+                        tipo?.opciones.map((op, idx) => (
+                          <option
+                            key={idx}
+                            value={op.idAtributo}
+                          >
+                            {op.nombre}
+                          </option>
+                        ))
+                      }
+                    </Select>
+                  </div>
+
+                  <Button
+                    className="btn-danger"
+                    onClick={() =>
+                      this.removeAtributoDetalle(
+                        item.id,
+                        atributo.id
+                      )
+                    }
+                  >
+                    <i className="bi bi-trash"></i>
+                  </Button>
+                </div>
+              );
+            })
+          }
         </div>
 
         <div className="w-full flex flex-row gap-3">

@@ -18,6 +18,7 @@ import {
   getIdProducto,
   updateProducto,
   comboMarca,
+  comboAtributo,
 } from '@/network/rest/principal.network';
 import PropTypes from 'prop-types';
 import SuccessReponse from '@/model/class/response';
@@ -171,8 +172,8 @@ class ProductoEditar extends CustomComponent {
       correlativo: producto.correlativo,
       nombre: producto.nombre,
       codigo: producto.codigo,
-      sku: producto.sku,
-      codigoBarras: producto.codigoBarras,
+      sku: producto.sku ?? "",
+      codigoBarras: producto.codigoBarras ?? "",
       idMarca: producto.idMarca,
       idMedida: producto.idMedida,
       idCategoria: producto.idCategoria,
@@ -180,8 +181,8 @@ class ProductoEditar extends CustomComponent {
       idMetodoDepreciacion: producto.idMetodoDepreciacion,
       costo: String(producto.costo),
       precio: String(producto.precio),
-      descripcionCorta: producto.descripcionCorta,
-      descripcionLarga: producto.descripcionLarga,
+      descripcionCorta: producto.descripcionCorta ?? "",
+      descripcionLarga: producto.descripcionLarga ?? "",
       publicar: producto.publicar === 1 ? true : false,
       negativo: producto.negativo === 1 ? true : false,
       preferido: producto.preferido === 1 ? true : false,
@@ -600,12 +601,13 @@ class ProductoEditar extends CustomComponent {
         ref: this.refCosto
       },
       {
-        value: [TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && precio,
+        value: ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && precio,
         message: 'Ingrese el precio.',
         ref: this.refPrecio
       },
       {
-        value: parseFloat(this.state.precio) <= parseFloat(this.state.costo),
+        value: ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) &&
+          (parseFloat(this.state.precio) <= parseFloat(this.state.costo)),
         message: 'El costo no debe ser mayor o igual al precio.',
         ref: this.refCosto
       },
@@ -755,7 +757,6 @@ class ProductoEditar extends CustomComponent {
       medidas,
       categorias,
       marcas,
-
       combos,
 
       imagen,
@@ -873,29 +874,33 @@ class ProductoEditar extends CustomComponent {
 
               {/* Código de Barras y Marca */}
               <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full flex flex-col gap-2">
-                  <Input
-                    group
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Código de Barras:</p>
-                      </div>
-                    }
-                    placeholder="Ejemplo: 1234567890123 ..."
-                    ref={this.refCodigoBarras}
-                    value={codigoBarras}
-                    onChange={this.handleInputCodigoBarras}
-                    buttonRight={
-                      <Button
-                        className="btn-outline-secondary"
-                        title="Generar Código de Barras"
-                        onClick={this.handleChangeCodigoBarras}
-                      >
-                        <i className="bi-arrow-clockwise"></i>
-                      </Button>
-                    }
-                  />
-                </div>
+                {
+                  ![TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
+                    <div className="w-full flex flex-col gap-2">
+                      <Input
+                        group
+                        label={
+                          <div className="flex items-center gap-1">
+                            <p>Código de Barras:</p>
+                          </div>
+                        }
+                        placeholder="Ejemplo: 1234567890123 ..."
+                        ref={this.refCodigoBarras}
+                        value={codigoBarras}
+                        onChange={this.handleInputCodigoBarras}
+                        buttonRight={
+                          <Button
+                            className="btn-outline-secondary"
+                            title="Generar Código de Barras"
+                            onClick={this.handleChangeCodigoBarras}
+                          >
+                            <i className="bi-arrow-clockwise"></i>
+                          </Button>
+                        }
+                      />
+                    </div>
+                  )
+                }
 
                 <div className="w-full flex flex-col gap-2">
                   <Select
@@ -1131,94 +1136,96 @@ class ProductoEditar extends CustomComponent {
 
             {/* Precio */}
             {
-              <div className="flex flex-col gap-3">
-                <h6 className="flex items-center gap-2">
-                  <span className="badge badge-primary">4</span> PRECIO
-                </h6>
+              ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
+                <div className="flex flex-col gap-3">
+                  <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">4</span> PRECIO
+                  </h6>
 
-                <p>Indica el valor de venta de tu producto.</p>
+                  <p>Indica el valor de venta de tu producto.</p>
 
-                <div className="flex flex-col gap-2">
-                  <Input
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Precio Base:</p> <FaAsterisk className="text-red-500" size={8} />
-                      </div>
-                    }
-                    className={`${precio ? '' : 'is-invalid'}`}
-                    placeholder=" S/ 0.00"
-                    ref={this.refPrecio}
-                    value={precio}
-                    onChange={this.handleInputPrecio}
-                    onKeyDown={keyNumberFloat}
-                  />
-                </div>
-
-                <div>
-                  {
-                    precios.length !== 0 && (
-                      <div className="bg-white rounded border overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table ref={this.refPrecios} className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {
-                                precios.map((item, index) => {
-                                  return (
-                                    <tr key={index}>
-                                      <td className="px-6 py-12 text-center">{item.id}</td>
-                                      <td className="px-6 py-12 text-center">
-                                        <Input
-                                          placeholder="Ingrese el nombre del precio..."
-                                          value={item.nombre}
-                                          onChange={(event) =>
-                                            this.handleInputNombrePrecios(event, item.id)
-                                          }
-                                        />
-                                      </td>
-                                      <td className="px-6 py-12 text-center">
-                                        <Input
-                                          placeholder="0.00"
-                                          value={item.precio}
-                                          onChange={(event) =>
-                                            this.handleInputPrecioPrecios(event, item.id)
-                                          }
-                                          onKeyDown={keyNumberFloat}
-                                        />
-                                      </td>
-                                      <td className="px-6 py-12 text-center">
-                                        <Button
-                                          className="btn-danger"
-                                          onClick={() => this.handleRemovePrecios(item.id)}
-                                        >
-                                          <i className="fa fa-remove"></i>
-                                        </Button>
-                                      </td>
-                                    </tr>
-                                  );
-                                })
-                              }
-                            </tbody>
-                          </table>
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      label={
+                        <div className="flex items-center gap-1">
+                          <p>Precio Base:</p> <FaAsterisk className="text-red-500" size={8} />
                         </div>
-                      </div>
-                    )
-                  }
-                </div>
+                      }
+                      className={`${precio ? '' : 'is-invalid'}`}
+                      placeholder=" S/ 0.00"
+                      ref={this.refPrecio}
+                      value={precio}
+                      onChange={this.handleInputPrecio}
+                      onKeyDown={keyNumberFloat}
+                    />
+                  </div>
 
-                <div>
-                  <Button className="text-success" onClick={this.handleAddPrecios}>
-                    <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
-                  </Button>
+                  <div>
+                    {
+                      precios.length !== 0 && (
+                        <div className="bg-white rounded border overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table ref={this.refPrecios} className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {
+                                  precios.map((item, index) => {
+                                    return (
+                                      <tr key={index}>
+                                        <td className="px-6 py-12 text-center">{item.id}</td>
+                                        <td className="px-6 py-12 text-center">
+                                          <Input
+                                            placeholder="Ingrese el nombre del precio..."
+                                            value={item.nombre}
+                                            onChange={(event) =>
+                                              this.handleInputNombrePrecios(event, item.id)
+                                            }
+                                          />
+                                        </td>
+                                        <td className="px-6 py-12 text-center">
+                                          <Input
+                                            placeholder="0.00"
+                                            value={item.precio}
+                                            onChange={(event) =>
+                                              this.handleInputPrecioPrecios(event, item.id)
+                                            }
+                                            onKeyDown={keyNumberFloat}
+                                          />
+                                        </td>
+                                        <td className="px-6 py-12 text-center">
+                                          <Button
+                                            className="btn-danger"
+                                            onClick={() => this.handleRemovePrecios(item.id)}
+                                          >
+                                            <i className="fa fa-remove"></i>
+                                          </Button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )
+                    }
+                  </div>
+
+                  <div>
+                    <Button className="text-success" onClick={this.handleAddPrecios}>
+                      <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )
             }
 
             {/* Descripción */}

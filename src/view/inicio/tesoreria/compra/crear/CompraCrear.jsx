@@ -794,11 +794,13 @@ class CompraCrear extends CustomComponent {
         ref: this.refProductoValue,
       },
     ], "Compra");
-
+    console.log(this.state.detalles);
     if (!valid) return;
 
     this.handleOpenModalTerminal();
   };
+
+
 
   handleLimpiar = async () => {
     const accept = await alertKit.question({
@@ -885,7 +887,7 @@ class CompraCrear extends CustomComponent {
       alertKit.loading({
         message: "Procesando información...",
       });
-      
+
       const response = await createCompra(data);
 
       if (response instanceof SuccessReponse) {

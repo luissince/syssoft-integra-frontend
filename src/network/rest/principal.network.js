@@ -1915,6 +1915,14 @@ export async function optionsAtributo(idTipoAtributo, signal = null) {
   );
 }
 
+export async function comboAtributo(signal) {
+  return await Resolve.safe(
+    instancePrincipal.get('/api/atributo/combo', {
+      signal: signal
+    }),
+  );
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA ATRIBUTO
 // ------------------------------------------------------------------------

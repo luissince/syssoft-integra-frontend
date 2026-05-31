@@ -172,7 +172,7 @@ class ProductoAgregar extends CustomComponent {
       await Promise.all([
         this.fetchComboMedida(),
         this.fetchComboCategoria(),
-        this.fetchComboMarca(),
+        this.fetchComboMarca()
       ]);
 
     await this.setStateAsync({
@@ -564,7 +564,8 @@ class ProductoAgregar extends CustomComponent {
         ref: this.refPrecio
       },
       {
-        value: parseFloat(this.state.precio) <= parseFloat(this.state.costo),
+        value: ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) &&
+          (parseFloat(this.state.precio) <= parseFloat(this.state.costo)),
         message: 'El costo no debe ser mayor o igual al precio.',
         ref: this.refCosto
       },
@@ -826,30 +827,35 @@ class ProductoAgregar extends CustomComponent {
               </div>
 
               {/* Código de Barras y Marca */}
+
               <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full flex flex-col gap-2">
-                  <Input
-                    group
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Código de Barras:</p>
-                      </div>
-                    }
-                    placeholder="Ejemplo: 1234567890123 ..."
-                    ref={this.refCodigoBarras}
-                    value={codigoBarras}
-                    onChange={this.handleInputCodigoBarras}
-                    buttonRight={
-                      <Button
-                        className="btn-outline-secondary"
-                        title="Generar Código de Barras"
-                        onClick={this.handleChangeCodigoBarras}
-                      >
-                        <i className="bi-arrow-clockwise"></i>
-                      </Button>
-                    }
-                  />
-                </div>
+                {
+                  ![TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
+                    <div className="w-full flex flex-col gap-2">
+                      <Input
+                        group
+                        label={
+                          <div className="flex items-center gap-1">
+                            <p>Código de Barras:</p>
+                          </div>
+                        }
+                        placeholder="Ejemplo: 1234567890123 ..."
+                        ref={this.refCodigoBarras}
+                        value={codigoBarras}
+                        onChange={this.handleInputCodigoBarras}
+                        buttonRight={
+                          <Button
+                            className="btn-outline-secondary"
+                            title="Generar Código de Barras"
+                            onClick={this.handleChangeCodigoBarras}
+                          >
+                            <i className="bi-arrow-clockwise"></i>
+                          </Button>
+                        }
+                      />
+                    </div>
+                  )
+                }
 
                 <div className="w-full flex flex-col gap-2">
                   <Select
