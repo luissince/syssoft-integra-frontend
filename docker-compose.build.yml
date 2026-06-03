@@ -20,14 +20,18 @@ services:
     <<: *frontend-service
     image: importmuneli-frontend
 
-  supermarketya-services:
-    <<: *frontend-service
-    image: supermarketya-frontend
+  # supermarketya-services:
+  #   <<: *frontend-service
+  #   image: supermarketya-frontend
 
   dracoly-services:
     <<: *frontend-service
     image: dracoly-frontend
 
-  main-services:
-    <<: *frontend-service
-    image: main-frontend
+  # masa-y-miga-services:
+  #   <<: *backend-service
+  #   image: masa-y-miga-backend
+
+  # main-services:
+  #   <<: *backend-service
+  #   image: main-backend
