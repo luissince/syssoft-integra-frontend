@@ -277,34 +277,6 @@ class CompraDetalle extends CustomComponent {
             {formatCurrency(item.cantidad * item.costo, this.state.codiso)}
           </TableCell>
         </TableRow>
-
-        {/* Mostrar lotes si existen */}
-        {item.lotes && Array.isArray(item.lotes) && item.lotes.length > 0 && (
-          <TableRow>
-            <TableCell colSpan="9" className="pl-5 pr-5 pt-2 pb-2">
-              <Table className="table-sm table-bordered w-100">
-                <TableHeader>
-                  <TableRow className="table-light">
-                    <TableHead>Código Lote</TableHead>
-                    <TableHead>Fecha Vencimiento</TableHead>
-                    <TableHead className="text-right">Cantidad</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {item.lotes.map((lote, loteIndex) => (
-                    <TableRow key={loteIndex}>
-                      <TableCell>{lote.codigoLote}</TableCell>
-                      <TableCell>{lote.fechaVencimiento}</TableCell>
-                      <TableCell className="text-right">
-                        {rounded(lote.cantidad)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableCell>
-          </TableRow>
-        )}
       </React.Fragment>
     ));
   }

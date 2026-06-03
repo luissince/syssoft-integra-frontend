@@ -46,7 +46,6 @@ class CustomModalStock extends Component {
     this.refModal = React.createRef();
     this.refStockMaximo = React.createRef();
     this.refStockMinimo = React.createRef();
-    this.refLote = React.createRef();
 
     this.peticion = false;
     this.abortController = null;
@@ -268,7 +267,7 @@ class CustomModalStock extends Component {
               alt={nombre}
               width={100}
               height={100}
-              className="object-contain rounded-md border mb-2"
+              className="object-contain rounded border mb-2"
             />
 
             {/* Formulario Stock */}
@@ -284,7 +283,7 @@ class CustomModalStock extends Component {
                   ref={this.refStockMinimo}
                   value={stockMinimo}
                   onChange={this.handleInputStockMinimo}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -299,7 +298,7 @@ class CustomModalStock extends Component {
                   ref={this.refStockMaximo}
                   value={stockMaximo}
                   onChange={this.handleInputStockMaximo}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -309,14 +308,14 @@ class CustomModalStock extends Component {
           <>
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
               <i className="fa fa-save mr-2"></i> Guardar
             </button>
             <button
               type="button"
               onClick={async () => await this.refModal.current.handleOnClose()}
-              className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               <i className="fa fa-close mr-2"></i> Cerrar
             </button>

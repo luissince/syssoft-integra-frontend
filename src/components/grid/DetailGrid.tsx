@@ -11,8 +11,6 @@ interface DetalleItem {
   imagen: string;
   cantidad: number;
   costo: number;
-  lote?: boolean;
-  lotes?: { cantidad: { value: number } }[];
 }
 
 interface DetalleGridProps {
@@ -49,12 +47,7 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
       )}
 
       {detalles.map((item, index) => {
-        const cantidad = !item.lote
-          ? item.cantidad
-          : item.lotes?.reduce(
-            (acc, l) => acc + Number(l.cantidad.value),
-            0
-          ) ?? 0;
+        const cantidad = item.cantidad ?? 0;
 
         const total = cantidad * item.costo;
 

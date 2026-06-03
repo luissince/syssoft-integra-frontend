@@ -224,7 +224,7 @@ class InvoiceView extends CustomComponent {
     const response = await filtrarProductoVenta(params);
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
 
       // this.setState(prevState => ({
@@ -584,7 +584,7 @@ const ItemView = (props) => {
         </p>
         <div className="item-view_describe-image">
           <img
-            src={imagen ? imagen : images.sale}
+            src={imagen ?? images.sale}
             alt="Venta"
             width={96}
             height={96}

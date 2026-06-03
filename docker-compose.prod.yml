@@ -1,10 +1,48 @@
+x-service-template: &frontend-service
+  networks:
+    - luis
+  restart: always
+
 services:
-  app:    
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/syssoftintegra/front-end:${NAME_SERVICE}-latest
-    container_name: ${NAME_SERVICE}-frontend
-    networks:
-      - luis
-    restart: always
+  sysintegra-services:    
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+
+  leatsac-services:
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+
+  ferreteria-rym-services:
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+
+  importmuneli-services:
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+
+  # supermarketya-services:
+  #   <<: *frontend-service
+  #   image: ${IMAGE_NAME}
+  #   container_name: ${CONTAINER_NAME}
+
+  dracoly-services:
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+
+  # masa-y-miga-services:
+  #   <<: *frontend-service
+  #   image: ${IMAGE_NAME}
+  #   container_name: ${CONTAINER_NAME}
+
+  # main-services:
+  #   <<: *frontend-service
+  #   image: ${IMAGE_NAME}
+  #   container_name: ${CONTAINER_NAME}
 
 networks:
   luis:

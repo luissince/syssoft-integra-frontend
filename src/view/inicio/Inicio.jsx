@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 // import { io } from "socket.io-client";
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
+import ContainerWrapper from '@/components/Container';
 import {
   addNotification,
   clearNoticacion,
@@ -183,7 +184,6 @@ import FileDownloader from '../../components/FileDownloader';
 import { images } from '../../helper/index';
 import { SpinnerView } from '../../components/Spinner';
 import { DashboardSkeleton } from '@/components/ui/skeleton';
-import ContainerWrapper from '@/components/ui/container-wrapper';
 
 /**
  * Componente que representa una funcionalidad específica.

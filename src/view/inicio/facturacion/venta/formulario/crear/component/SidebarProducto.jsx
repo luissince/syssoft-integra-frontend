@@ -148,41 +148,6 @@ const SidebarProducto = (props) => {
                       </li>
                     ))}
                   </ul>
-
-                  {!isEmpty(producto.inventarios) &&
-                    !isEmpty(
-                      producto.inventarios.filter(
-                        (item) => !isEmpty(item.lotes),
-                      ),
-                    ) && (
-                      <>
-                        <label className="mt-3">Lotes:</label>
-                        <ul className="list-group">
-                          {producto.inventarios.map((inv, index) => {
-                            const lotes = inv.lotes;
-
-                            return lotes.map((lote, index) => (
-                              <li key={index} className="list-group-item">
-                                <div className="d-flex justify-content-between flex-row">
-                                  <div className="d-flex align-items-center gap-2">
-                                    <i className="bi bi-box text-muted"></i>
-                                    <span className="text-sm">
-                                      {lote.codigoLote}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="text-sm">
-                                      cantidad:{' '}
-                                      {rounded(lote.cantidadSeleccionada)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </li>
-                            ));
-                          })}
-                        </ul>
-                      </>
-                    )}
                 </Column>
               </Row>
             )}

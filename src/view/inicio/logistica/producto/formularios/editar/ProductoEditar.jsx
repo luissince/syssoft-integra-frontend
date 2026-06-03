@@ -77,7 +77,6 @@ class ProductoEditar extends CustomComponent {
       activeTabServicio: false,
       activeTabCombo: false,
 
-      lote: false,
       publicar: false,
       negativo: false,
       preferido: false,
@@ -293,7 +292,6 @@ class ProductoEditar extends CustomComponent {
         idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
         precioProducto: String(producto.precio),
         costoProducto: String(producto.costo),
-        lote: producto.lote === 1 ? true : false,
         publicar: producto.publicar === 1 ? true : false,
         negativo: producto.negativo === 1 ? true : false,
         preferido: producto.preferido === 1 ? true : false,
@@ -1163,11 +1161,6 @@ class ProductoEditar extends CustomComponent {
     });
   };
 
-  handleSelectLote = (event) => {
-    this.setState({
-      lote: event.target.checked,
-    });
-  };
 
   handleSelectEstado = (event) => {
     this.setState({
@@ -1345,7 +1338,6 @@ class ProductoEditar extends CustomComponent {
         costo: this.state.costoProducto,
         precio: this.state.precioProducto,
         precios: this.state.precios,
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: this.state.negativo,
         preferido: this.state.preferido,
@@ -1511,7 +1503,6 @@ class ProductoEditar extends CustomComponent {
         costo: 0,
         precio: this.state.precioServicio,
         precios: [],
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: false,
         preferido: this.state.preferido,
@@ -1676,7 +1667,6 @@ class ProductoEditar extends CustomComponent {
         precios: [],
         combos: [],
         inventarios: [],
-        lote: this.state.lote,
         publicar: this.state.publicar,
         negativo: false,
         preferido: this.state.preferido,
@@ -1818,7 +1808,6 @@ class ProductoEditar extends CustomComponent {
       medidas,
       categorias,
       marcas,
-      lote,
       publicar,
       negativo,
       preferido,
@@ -2176,22 +2165,27 @@ class ProductoEditar extends CustomComponent {
           <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
             <DetalleImagen
               idTipoProducto={idTipoProducto}
+
               imagen={imagen}
               handleInputImagen={this.handleInputImagen}
               handleRemoveImagen={this.handleRemoveImagen}
+
               nombre={nombre}
               precio={precio}
-              lote={lote}
-              handleSelectLote={this.handleSelectLote}
+
               publicar={publicar}
               handleSelectPublico={this.handleSelectPublico}
+
               negativo={negativo}
               handleSelectNegativo={this.handleSelectNegativo}
+
               preferido={preferido}
               handleSelectPreferido={this.handleSelectPreferido}
+
               estado={estado}
               handleSelectEstado={this.handleSelectEstado}
               handleRegistrar={this.handleRegistrar}
+
               handleCerrar={this.handleCerrar}
             />
           </Column>

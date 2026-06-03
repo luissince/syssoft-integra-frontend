@@ -1,11 +1,7 @@
 import React from 'react';
 import {
   alertDialog,
-  getNumber,
   isEmpty,
-  keyNumberFloat,
-  rounded,
-  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
@@ -35,19 +31,14 @@ import Input from '../../../../../components/Input';
 import RadioButton from '../../../../../components/RadioButton';
 import {
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableResponsive,
   TableRow,
-  TableTitle,
 } from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { SERVICIO } from '../../../../../model/types/tipo-producto';
-import { imagen } from '../../../../../helper/images.helper';
-import ModalLote from './component/ModalLote';
 import { alertKit } from 'alert-kit';
 import GenerarTabla from './component/GenerarTabla';
 
@@ -91,9 +82,6 @@ class LogisticaAjusteCrear extends CustomComponent {
       nombreMotivoAjuste: '',
       nombreAlmacen: '',
 
-      // Atributos del modal lote
-      isOpenLote: false,
-
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -110,9 +98,6 @@ class LogisticaAjusteCrear extends CustomComponent {
     this.refIdAlmacen = React.createRef();
     this.refProducto = React.createRef();
     this.refValueProducto = React.createRef();
-
-    // Referencia al modal lote
-    this.refModalLote = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -213,7 +198,7 @@ class LogisticaAjusteCrear extends CustomComponent {
     });
   }
 
-  addProducto(producto, lotes = null) {
+  addProducto(producto) {
     const exists = this.state.detalles.find(
       (item) => item.idProducto === producto.idProducto,
     );
@@ -234,7 +219,6 @@ class LogisticaAjusteCrear extends CustomComponent {
       cantidad: '',
       actual: producto.cantidad,
       unidad: producto.unidad,
-      lotes: lotes ? lotes : null,
     };
 
     this.setState((prevState) => ({
@@ -298,19 +282,12 @@ class LogisticaAjusteCrear extends CustomComponent {
   handleSelectItemProducto = (value) => {
     this.refProducto.current.initialize(value.nombre);
 
-    if (value.lote === 1) {
-      this.handleOpenLote(value);
-    } else {
-      this.setState(
-        {
-          producto: value,
-          productos: [],
-        },
-        () => {
-          this.addProducto(value);
-        },
-      );
-    }
+    this.setState({
+      producto: value,
+      productos: [],
+    }, () => {
+      this.addProducto(value);
+    });
   };
 
   handleSelectMetodoAjuste = (event) => {
@@ -420,30 +397,6 @@ class LogisticaAjusteCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Acciones del modal lote
-  //------------------------------------------------------------------------------------------
-  handleOpenLote = async (producto) => {
-    this.setState({ isOpenLote: true });
-    await this.refModalLote.current.loadDatos(producto);
-  };
-
-  handleCloseLote = () => {
-    this.setState({ isOpenLote: false });
-  };
-
-  handleSaveLote = async (producto, lotes) => {
-    this.setState(
-      {
-        producto: producto,
-        productos: [],
-      },
-      () => {
-        this.addProducto(producto, lotes);
-      },
-    );
-  };
-
-  //------------------------------------------------------------------------------------------
   // Acciones de proceso de registro
   //------------------------------------------------------------------------------------------
   handleSave = async () => {
@@ -460,24 +413,6 @@ class LogisticaAjusteCrear extends CustomComponent {
       return;
     }
 
-    if (
-      !isEmpty(
-        this.state.detalles.filter(
-          (item) => !item.lotes && getNumber(item.cantidad) <= 0,
-        ),
-      )
-    ) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Hay cantidades en lista de productos con valor 0 o vacío.',
-        },
-        () => {
-          validateNumericInputs(this.refTableBody);
-        },
-      );
-      return;
-    }
 
     const accept = await alertKit.question({
       title: 'Ajuste',
@@ -578,14 +513,6 @@ class LogisticaAjusteCrear extends CustomComponent {
           title="Ajuste de inventario"
           subTitle="CREAR"
           handleGoBack={() => this.props.history.goBack()}
-        />
-
-        <ModalLote
-          ref={this.refModalLote}
-          isOpen={this.state.isOpenLote}
-          idTipoAjuste={this.state.idTipoAjuste}
-          onClose={this.handleCloseLote}
-          handleAdd={this.handleSaveLote}
         />
 
         {/* Primero paso */}

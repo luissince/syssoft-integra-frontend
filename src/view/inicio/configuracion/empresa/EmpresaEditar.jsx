@@ -10,7 +10,7 @@ import {
   guId,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
-import ContainerWrapper from '../../../../components/ui/container-wrapper';
+import ContainerWrapper from '@/components/Container';
 import { images } from '../../../../helper';
 import {
   getIdEmpresa,

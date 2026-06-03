@@ -189,7 +189,7 @@ const SidebarConfiguration = (props) => {
 };
 
 SidebarConfiguration.propTypes = {
-  menus: PropTypes.array.isRequired,
+  menus: PropTypes.array,
   idSidebarConfiguration: PropTypes.string.isRequired,
 
   impuestos: PropTypes.array.isRequired,
