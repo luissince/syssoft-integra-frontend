@@ -102,6 +102,7 @@ const Depreciaciones = () => {
             opcion: state.opcion,
             idProducto: state.producto?.idProducto,
             idAlmacen: state.idAlmacen,
+            correlativo: state.correlativo,
             posicionPagina: (state.paginacion - 1) * state.filasPorPagina,
             filasPorPagina: state.filasPorPagina,
         };
@@ -160,11 +161,12 @@ const Depreciaciones = () => {
     }, []);
 
     useEffect(() => {
-        if (!state.producto || !state.idAlmacen) return;
+        // if (!state.producto || !state.idAlmacen) return;
+        if (!state.idAlmacen) return;
 
         fetchDetail();
 
-    }, [state.producto, state.paginacion, state.idAlmacen]);
+    }, [state.producto, state.paginacion, state.idAlmacen, state.opcion]);
 
     // =============================
     // FLOWS
@@ -199,6 +201,7 @@ const Depreciaciones = () => {
     // Evento completo para filtrar el producto
     const handleClearInputProducto = () => {
         dispatch(setActivoDepreciacionState({
+            opcion: 0,
             producto: null,
             productos: [],
             lista: [],
@@ -244,10 +247,11 @@ const Depreciaciones = () => {
             });
             return;
         }
-
         refProducto.current.initialize(producto.nombre);
         dispatch(setActivoDepreciacionState({
+            opcion: 2,
             buscar: producto.nombre,
+            correlativo: producto.correlativo,
             producto: producto,
             productos: []
         }));
@@ -256,15 +260,17 @@ const Depreciaciones = () => {
     // Evento para seleccionar el almacén
     const handleSelectAlmacen = (event: React.ChangeEvent<HTMLSelectElement>) => {
         dispatch(setActivoDepreciacionState({
+            opcion: 0,
             idAlmacen: event.target.value
         }));
+        setActivoDepreciacionState({buscar: ""});
     };
 
     // Evento para ir al detalle de depreciación del producto seleccionado
     const handleGoDetail = (item: KardexListDepreciacionInterface) => {
         history.push({
             pathname: `${history.location.pathname}/detalle`,
-            state: { idProducto: item.idProducto, idAlmacen: state.idAlmacen, serie: item.serie }
+            state: { idProducto: item.idProducto, idAlmacen: state.idAlmacen, serie: item.serie, correlativo: item.correlativo }
         });
     };
 
@@ -289,6 +295,7 @@ const Depreciaciones = () => {
 
         return state.lista.map((item, index) => (
             <tr key={index}>
+                <td className="px-6 py-4 text-sm text-gray-900">{item.correlativo}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.serie}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.fechaAdquisicion ? format(item.fechaAdquisicion, "dd-MM-yyyy") : "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.fechaDepreciacion ? format(item.fechaDepreciacion, "dd-MM-yyyy") : "N/A"}</td>
@@ -359,6 +366,9 @@ const Depreciaciones = () => {
                                         overrideClass="w-16 h-16 object-contain"
                                     />
                                     <div className="ml-2">
+                                        {value.codigo &&
+                                            <p className="text-xs font-bold">{value.correlativo}</p>
+                                        }
                                         <p className="text-xs font-bold">{value.codigo}</p>
                                         <p className="text-sm">{value.nombre}</p>
                                     </div>
@@ -453,6 +463,9 @@ const Depreciaciones = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                                    Correlativo
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Serie
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
@@ -461,7 +474,7 @@ const Depreciaciones = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Fecha Depreciación
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">
                                     Cantidad
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">

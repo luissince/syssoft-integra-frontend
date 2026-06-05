@@ -12,6 +12,7 @@ interface DepreciationState {
     productos: ProductFilterInterface[];
 
     idAlmacen: string;
+    correlativo: string;
     almacenes: WarehouseOptionsInterface[];
 
     opcion: number;
@@ -39,9 +40,10 @@ const initialState: DepreciationState = {
     productos: [],
 
     idAlmacen: "",
+    correlativo: "",
     almacenes: [],
 
-    opcion: 1,
+    opcion: 0,
     buscar: "",
     lista: [],
     paginacion: 1,

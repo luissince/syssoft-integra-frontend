@@ -399,11 +399,6 @@ const Bienes = () => {
             </td>
             <td className="px-6 py-4">
               <div className="text-sm text-gray-900">
-                {item.correlativo}
-              </div>
-            </td>
-            <td className="px-6 py-4">
-              <div className="text-sm text-gray-900">
                 {item.fechaAdquisicion ? format(item.fechaAdquisicion, "dd-MM-yyyy") : "N/A"}
               </div>
             </td>
@@ -495,6 +490,11 @@ const Bienes = () => {
                                 <div className="text-sm">
                                   <span className="text-gray-500">Serie: </span>
                                   <span className="font-medium">{inventarioDetalle.serie || "N/A"}</span>
+                                </div>
+
+                                <div className="text-sm">
+                                  <span className="text-gray-500">Correlativo: </span>
+                                  <span className="font-medium">{inventarioDetalle.correlativo || "N/A"}</span>
                                 </div>
 
                                 <div className="text-sm">
@@ -927,7 +927,6 @@ const Bienes = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[35%]">Producto</th>
-                      <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[5%]">Correlativo</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha Adquisición</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Fecha Depreciación</th>
                       <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Stock</th>

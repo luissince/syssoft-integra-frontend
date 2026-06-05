@@ -12,6 +12,7 @@ export interface AssetDetailInterface {
     idAlmacen: string;
     idKardex: string;
     serie: string;
+    correlativo: string;
     ubicacion: string;
     valorResidual: number;
     vidaUtil: number;

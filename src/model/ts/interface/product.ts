@@ -10,6 +10,7 @@ export interface ProductFilterInterface {
   idMetodoDepreciacion: string
   imagen: string | null
   nombre: string
+  correlativo: string | null
   precio: number
   sku: string
   tipoProducto: string

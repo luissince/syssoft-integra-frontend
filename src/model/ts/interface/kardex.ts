@@ -15,6 +15,7 @@ export interface KardexListDepreciacionInterface {
   fechaAdquisicion: string,
   fechaDepreciacion: string,
   serie: string;
+  correlativo: string;
   tipo: string;
   ubicacion: string;
   valorResidual: number;
