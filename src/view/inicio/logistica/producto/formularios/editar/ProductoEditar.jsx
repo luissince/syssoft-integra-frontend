@@ -596,7 +596,7 @@ class ProductoEditar extends CustomComponent {
         ref: this.refIdCategoria
       },
       {
-        value: costo,
+        value: ![TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && costo,
         message: 'Ingrese el costo.',
         ref: this.refCosto
       },
@@ -1107,7 +1107,7 @@ class ProductoEditar extends CustomComponent {
 
             {/* Costo */}
             {
-              ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && (
+              ![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
                 <div className="flex flex-col gap-3">
                   <h6 className="flex items-center gap-2">
                     <span className="badge badge-primary">3</span> COSTO
