@@ -76,8 +76,7 @@ const PanelDerecho: React.FC<Props> = ({
       const valor = item.costo;
 
       const porcentaje = item.porcentajeImpuesto;
-
-      const valorActual = cantidad * valor;
+      const valorActual = item.inventarioDetalles.some((item) => item.serie !== null) ? valor : cantidad * valor;
       const valorSubNeto = calculateTaxBruto(porcentaje, valorActual);
       const valorImpuesto = calculateTax(porcentaje, valorSubNeto);
       const valorNeto = valorSubNeto + valorImpuesto;
@@ -88,7 +87,7 @@ const PanelDerecho: React.FC<Props> = ({
 
     const impuestosGenerado = () => {
       const resultado = detalles.reduce((acc, item) => {
-        const cantidad = item.inventarioDetalles ? item.inventarioDetalles.reduce((acumulador: number, item: any) => acumulador + Number(item.cantidad),0,) : item.cantidad;
+        const cantidad = item.inventarioDetalles ? item.inventarioDetalles.reduce((acumulador: number, item: any) => acumulador + Number(item.cantidad), 0,) : item.cantidad;
         const total = cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
         const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);

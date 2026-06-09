@@ -14,7 +14,7 @@ interface DetalleItem {
   cantidad: number;
   costo: number;
   precio: number;
-  inventarioDetalles?: { cantidad: { value: number } }[];
+  inventarioDetalles?: { cantidad: { value: number }, serie: string | null }[];
 }
 
 interface DetalleGridProps {
@@ -61,7 +61,7 @@ const DetalleGrid: React.FC<DetalleGridProps> = ({
           if (operation === "addition") {
             total = cantidad * item.precio;
           } else {
-            total = cantidad * item.costo;
+            total = item.inventarioDetalles.some((detalle) => detalle.serie !== null) ? item.costo : cantidad * item.costo;
           }
 
           return (

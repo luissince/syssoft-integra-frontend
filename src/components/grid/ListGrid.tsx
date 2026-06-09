@@ -101,7 +101,7 @@ const ListGrid: React.FC<ListGridProps> = ({
                         {item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && "Activo Fijo"}
                       </span>
                       {
-                        item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO && (
+                        (![TIPO_PRODUCTO_SERVICIO, TIPO_PRODUCTO_ACTIVO_FIJO].includes(item.idTipoProducto)) && (
                           <span
                             className={cn(
                               "text-base font-bold",
@@ -118,15 +118,20 @@ const ListGrid: React.FC<ListGridProps> = ({
                   </div>
 
                   {/* Valores */}
-                  <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-                    <span className="text-sm font-medium text-gray-600">
-                      {operation === "addition" ? "Precio" : "Costo"}:
-                    </span>
-                    <span className="text-lg font-bold text-blue-600">
-                      {operation === "addition" ? formatCurrency(item.precio, codiso) : formatCurrency(item.costo, codiso)}{" "}
-                      <small className="text-xs">x {item.unidad}</small>
-                    </span>
-                  </div>
+                  {
+                    item.idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO && (
+                      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+                        <span className="text-sm font-medium text-gray-600">
+                          {operation === "addition" ? "Precio" : "Costo"}:
+                        </span>
+                        <span className="text-lg font-bold text-blue-600">
+                          {operation === "addition" ? formatCurrency(item.precio, codiso) : formatCurrency(item.costo, codiso)}{" "}
+                          <small className="text-xs">x {item.unidad}</small>
+                        </span>
+                      </div>
+                    )
+                  }
+
                 </div>
 
                 {/* Almacén */}

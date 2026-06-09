@@ -52,6 +52,7 @@ class ModalProducto extends Component {
       nombre: "",
       imagen: null,
       costo: "",
+      costoActivo: 0,
       idTipoProducto: "",
       idMetodoDepreciacion: LINEA_RECTA,
 
@@ -71,6 +72,7 @@ class ModalProducto extends Component {
 
     this.refModal = React.createRef();
     this.refCosto = React.createRef();
+    this.refCostoActivo = React.createRef();
     this.refInventarioDetalles = React.createRef();
 
     this.refFechaAdquisicion = React.createRef();
@@ -214,6 +216,7 @@ class ModalProducto extends Component {
         fechaVencimiento: null,
 
         // activo
+        costoActivo: 0,
         serie: null,
         vidaUtil: null,
         valorResidual: null,
@@ -238,6 +241,7 @@ class ModalProducto extends Component {
         fechaVencimiento: "",
 
         // activo
+        costoActivo: 0,
         serie: null,
         vidaUtil: null,
         valorResidual: null,
@@ -262,6 +266,7 @@ class ModalProducto extends Component {
         fechaVencimiento: null,
 
         // activo
+        costoActivo: 0,
         serie: "",
         vidaUtil: "",
         valorResidual: "",
@@ -392,7 +397,7 @@ class ModalProducto extends Component {
         )
     }));
   };
-  
+
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -448,6 +453,7 @@ class ModalProducto extends Component {
         fechaVencimiento: null,
 
         // activo
+        costoActivo: 0,
         serie: null,
         vidaUtil: null,
         valorResidual: null,
@@ -472,6 +478,7 @@ class ModalProducto extends Component {
         fechaVencimiento: "",
 
         // activo
+        costoActivo: 0,
         serie: null,
         vidaUtil: null,
         valorResidual: null,
@@ -496,6 +503,7 @@ class ModalProducto extends Component {
         fechaVencimiento: null,
 
         // activo
+        costoActivo: 0,
         serie: "",
         vidaUtil: "",
         valorResidual: "",
@@ -534,16 +542,17 @@ class ModalProducto extends Component {
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
-    if (!isNumeric(costo) || Number(costo) <= 0) {
-      alertKit.warning({
-        title: "Compra",
-        message: "El costo no puede ser menor a cero.",
-      }, () => {
-        this.refCosto.current.focus();
-      });
-      return;
+    if (idTipoProducto !== TIPO_PRODUCTO_ACTIVO_FIJO) {
+      if (!isNumeric(costo) || Number(costo) <= 0) {
+        alertKit.warning({
+          title: "Compra",
+          message: "El costo no puede ser menor a cero.",
+        }, () => {
+          this.refCosto.current.focus();
+        });
+        return;
+      }
     }
-
 
     if (idTipoProducto === TIPO_PRODUCTO_NORMAL) {
       if (inventarioDetalles.some(item => isEmpty(item.cantidad))) {
@@ -580,6 +589,16 @@ class ModalProducto extends Component {
     }
 
     if (idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO) {
+      if (inventarioDetalles.some((item) => !isNumeric(item.costoActivo) || Number(item.costoActivo) <= 0)) {
+        alertKit.warning({
+          title: "Compra",
+          message: "Hay detalle(s) con costo 0",
+        }, () => {
+          validateNumericInputs(this.refCostoActivo);
+        });
+        return;
+      }
+
       if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.serie))) {
         alertKit.warning({
           title: "Compra",
@@ -639,7 +658,14 @@ class ModalProducto extends Component {
 
     if (existeDetalle) {
       existeDetalle.inventarioDetalles = inventarioDetalles;
-      existeDetalle.costo = Number(costo);
+      const nuevoCosto = idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO
+        ? Number(inventarioDetalles.reduce(
+          (acumulado, item) => acumulado + (item.cantidad * item.costoActivo),
+          0
+        ))
+        : Number(costo);
+
+      existeDetalle.costo = nuevoCosto;
     } else {
       const data = {
         id: detalles.length + 1,
@@ -647,7 +673,12 @@ class ModalProducto extends Component {
         codigo: codigo,
         nombre: nombre,
         imagen: imagen,
-        costo: Number(costo),
+        costo: idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO
+          ? Number(inventarioDetalles.reduce(
+            (acumulado, item) => acumulado + (item.cantidad * item.costoActivo),
+            0
+          ))
+          : Number(costo),
         idTipoProducto: idTipoProducto,
         idMetodoDepreciacion: idMetodoDepreciacion,
         idImpuesto: impuesto.idImpuesto,
@@ -808,6 +839,35 @@ class ModalProducto extends Component {
           <div className="w-full flex flex-col gap-3">
             <Input
               autoFocus={true}
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Costo:</p> <FaAsterisk className="text-red-500" size={8} />
+                </div>
+              }
+              placeholder="0.00"
+              role="float"
+              tabIndex={0}
+              value={item.costoActivo}
+              onFocus={() => {
+                const val = parseFloat(item.costoActivo);
+                if (!isNaN(val) && val === 0) {
+                  this.updateDetalleField(item.id, "costoActivo", "");
+                }
+              }}
+              onChange={(e) => {
+
+                this.updateDetalleField(item.id, "costoActivo", e.target.value)
+              }
+
+              }
+              onPaste={handlePasteFloat}
+            />
+          </div>
+
+          <div className="w-full flex flex-col gap-3">
+            <Input
+              disabled
+              // autoFocus={true}
               label={
                 <div className="flex items-center gap-1">
                   <p className="text-gray-700">Cantidad:</p> <FaAsterisk className="text-red-500" size={8} />
@@ -1137,24 +1197,28 @@ class ModalProducto extends Component {
                 overrideClass="mb-2 h-40 object-contain rounded border border-solid border-[#e2e8f0]"
               />
             </div>
+            {
+              ![TIPO_PRODUCTO_ACTIVO_FIJO].includes(this.state.idTipoProducto) && (
+                <div className="flex gap-3">
+                  <div className="w-full md:w-1/2 flex flex-col gap-3">
+                    <Input
+                      label={
+                        <div className="flex items-center gap-1">
+                          <p className="text-gray-700">Costo:</p> <FaAsterisk className="text-red-500" size={8} />
+                        </div>
+                      }
+                      placeholder="0.00"
+                      role="float"
+                      ref={this.refCosto}
+                      value={costo}
+                      onChange={this.handleInputCosto}
+                      onPaste={handlePasteFloat}
+                    />
+                  </div>
+                </div>
+              )
+            }
 
-            <div className="flex gap-3">
-              <div className="w-full md:w-1/2 flex flex-col gap-3">
-                <Input
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p className="text-gray-700">Costo:</p> <FaAsterisk className="text-red-500" size={8} />
-                    </div>
-                  }
-                  placeholder="0.00"
-                  role="float"
-                  ref={this.refCosto}
-                  value={costo}
-                  onChange={this.handleInputCosto}
-                  onPaste={handlePasteFloat}
-                />
-              </div>
-            </div>
 
             {
               [TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_ACTIVO_FIJO].includes(this.state.idTipoProducto) && (
