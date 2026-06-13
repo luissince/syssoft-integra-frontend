@@ -88,9 +88,10 @@ const GestionCrear = () => {
     setMsgLoading("Cargando datos de depreciación...");
 
     const body = {
-      opcion: 0,
+      opcion: 3,
       idProducto: activo.idProducto,
       idAlmacen: "",
+      correlativo: activo.correlativo,
       posicionPagina: (paginacion - 1) * filasPorPagina,
       filasPorPagina: filasPorPagina,
     };
@@ -107,7 +108,6 @@ const GestionCrear = () => {
     }
 
     const total = Math.ceil(Number(data.total) / filasPorPagina);
-
     abortControllerDetalle.current = null;
     setTotalPaginacion(total);
     setLista(data.result);
@@ -186,12 +186,12 @@ const GestionCrear = () => {
     const response = await filtrarProducto(params);
     if (response instanceof SuccessResponse) {
       const productosFiltrados = response.data.filter((item: ProductFilterInterface) => item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO);
-
       setActivos(productosFiltrados);
     }
   }
 
   const handleSelectItemActivo = (producto: ProductFilterInterface) => {
+
     refActivo.current.initialize(producto.nombre);
 
     setActivo(producto);

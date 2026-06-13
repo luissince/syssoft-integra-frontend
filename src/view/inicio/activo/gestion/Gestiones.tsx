@@ -273,6 +273,10 @@ const Gestiones = () => {
                                 <span className="font-medium">{gestionDetalle.serie || "N/A"}</span>
                               </div>
                               <div className="text-sm">
+                                <span className="text-gray-500">Correlativo: </span>
+                                <span className="font-medium">{gestionDetalle.correlativo || "N/A"}</span>
+                              </div>
+                              <div className="text-sm">
                                 <span className="text-gray-500">SKU: </span>
                                 <span className="font-medium">{gestionDetalle.sku || "N/A"}</span>
                               </div>

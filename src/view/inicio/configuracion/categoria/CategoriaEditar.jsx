@@ -86,7 +86,6 @@ class CategoriaEditar extends CustomComponent {
     };
 
     const response = await getIdCategoria(params, this.abortController.signal);
-    console.log('response', response);
 
     if (response instanceof SuccessReponse) {
       return response.data;

@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { BsDatabaseSlash } from "react-icons/bs";
 import { FaAsterisk } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
+import ConnectedPersonales from "../../contacto/personal/Personales";
 
 const GestionDevolver = () => {
 
@@ -100,13 +101,11 @@ const GestionDevolver = () => {
       setLoading(false);
       return;
     }
-
     if (data.result = data.result || []) {
       setMessageData("Los items estan sin asignar");
     }
 
     const total = Math.ceil(Number(data.total) / filasPorPagina);
-
     abortControllerDetalle.current = null;
     setTotalPaginacion(total);
     setLista(data.result);

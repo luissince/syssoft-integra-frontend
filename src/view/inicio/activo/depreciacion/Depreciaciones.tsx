@@ -72,19 +72,27 @@ const Depreciaciones = () => {
         const { success, data, message, type } = await optionsAlmacen(token.project.idSucursal, abortControllerAlmacen.current.signal);
 
         if (!success) {
-            if (type === CANCELED) return;
+            if (type === CANCELED) return null;
 
             alertKit.warning({
                 title: "Depreciar",
                 message: message,
             });
-            return;
+            return null;
         }
 
         abortControllerAlmacen.current = null;
         dispatch(setActivoDepreciacionState({
             almacenes: data
         }));
+
+        if (!state.idAlmacen && Array.isArray(data) && data.length) {
+            dispatch(setActivoDepreciacionState({
+                idAlmacen: data[0].idAlmacen
+            }));
+        }
+
+        return data;
     };
 
     // Obtiene los movimientos de depreciación
@@ -247,6 +255,7 @@ const Depreciaciones = () => {
             });
             return;
         }
+
         refProducto.current.initialize(producto.nombre);
         dispatch(setActivoDepreciacionState({
             opcion: 2,

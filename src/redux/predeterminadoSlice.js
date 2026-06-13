@@ -74,6 +74,10 @@ const initialState = {
     data: null,
     paginacion: null,
   },
+  historial: {
+    data: null,
+    paginacion: null,
+  },
   trasladoLista: {
     data: null,
     paginacion: null,
@@ -286,6 +290,19 @@ const predeterminadoSlice = createSlice({
     },
     clearKardex: (state) => {
       state.kardex = {
+        data: null,
+        paginacion: null,
+      };
+    },
+
+    sethistorialData: (state, action) => {
+      state.historial.data = action.payload;
+    },
+    sethistorialPaginacion: (state, action) => {
+      state.historial.paginacion = action.payload;
+    },
+    clearhistorial: (state) => {
+      state.historial = {
         data: null,
         paginacion: null,
       };
@@ -595,6 +612,10 @@ export const {
   setKardexData,
   setKardexPaginacion,
   clearKardex,
+
+  sethistorialData,
+  sethistorialPaginacion,
+  clearhistorial,
 
   setListaTrasladoData,
   setListaTrasladoPaginacion,
