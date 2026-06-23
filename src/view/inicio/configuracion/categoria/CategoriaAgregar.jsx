@@ -58,40 +58,44 @@ class CategoriaAgregar extends React.Component {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } =
-        await imageBase64(file);
-
-      if (size > 500) {
-        alertKit.warning({
-          title: 'Categoría',
-          message:
-            'La imagen ' +
-            file.name +
-            ' tiene que tener un tamaño de menos de 500 KB',
-        });
-        return;
-      }
-
-      this.setState({
-        imagen: {
-          base64: base64String,
-          extension: extension,
-          width: width,
-          height: height,
-          size: size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         imagen: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const imageSend = await imageBase64(file);
+
+    if (!imageSend) {
+      alertKit.warning({
+        title: 'Categoría',
+        message: 'Error en obtener la imagen.',
+      });
+      return;
+    }
+
+    if (imageSend.size > 500) {
+      alertKit.warning({
+        title: 'Categoría',
+        message:
+          'La imagen ' +
+          file.name +
+          ' tiene que tener un tamaño de menos de 500 KB',
+      });
+      return;
+    }
+
+    this.setState({
+      imagen: {
+        ...imageSend,
+        url: url,
+      },
+    });
 
     event.target.value = null;
   };

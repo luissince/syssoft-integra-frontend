@@ -7,7 +7,7 @@ import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '../../../../../model/class/custom-component';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import { detailTraslado } from '../../../../../network/rest/principal.network';
+import { detailTraslado, getPdfTraslado } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -27,6 +27,7 @@ import {
 import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -34,6 +35,11 @@ import Button from '../../../../../components/Button';
  */
 class TrasladoDetalle extends CustomComponent {
   
+  /**
+   * Crea una nueva instancia del componente Venta.
+   *
+   * @param {Object} props - Propiedades recibidas del componente padre.
+   */
   constructor(props) {
     super(props);
 
@@ -41,7 +47,7 @@ class TrasladoDetalle extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idAjuste: '',
+      idTraslado: '',
 
       tipo: '',
       almacenOrigen: '',
@@ -61,6 +67,20 @@ class TrasladoDetalle extends CustomComponent {
     this.abortControllerView = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   componentDidMount() {
     const url = this.props.location.search;
     const idTraslado = new URLSearchParams(url).get('idTraslado');
@@ -75,10 +95,25 @@ class TrasladoDetalle extends CustomComponent {
     this.abortControllerView.abort();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
+
   async loadDataId(id) {
     const [traslado] = await Promise.all([this.fetchDetalleTraslado(id)]);
 
     this.setState({
+      idTraslado: id,
       fecha: traslado.cabecera.fecha,
       hora: traslado.cabecera.hora,
       tipo: traslado.cabecera.tipo,
@@ -115,6 +150,59 @@ class TrasladoDetalle extends CustomComponent {
     }
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
+
+  //------------------------------------------------------------------------------------------
+  // Eventos para impresión
+  //------------------------------------------------------------------------------------------
+
+  /**
+   * Función para imprimir el pdf
+   * @param {string} size - Tamaño del pdf A4, 80mm, 58mm
+   * @returns {Promise<void>}
+   */
+  handlePrintPdf = async (size) => {
+    const url = getPdfTraslado(this.state.idTraslado, size);
+
+    await pdfVisualizer.init({
+      url: url,
+      title: 'Traslado',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+    });
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
   render() {
     const {
       tipo,
@@ -145,19 +233,19 @@ class TrasladoDetalle extends CustomComponent {
           <Column formGroup={true}>
             <Button
               className="btn-light"
-              // onClick={this.handlePrintInvoices.bind(this, 'A4')}
+              onClick={this.handlePrintPdf.bind(this, 'A4')}
             >
               <i className="fa fa-print"></i> A4
             </Button>{' '}
             <Button
               className="btn-light"
-              // onClick={this.handlePrintInvoices.bind(this, '80mm')}
+              onClick={this.handlePrintPdf.bind(this, '80mm')}
             >
               <i className="fa fa-print"></i> 80MM
             </Button>{' '}
             <Button
               className="btn-light"
-              // onClick={this.handlePrintInvoices.bind(this, '58mm')}
+              onClick={this.handlePrintPdf.bind(this, '58mm')}
             >
               <i className="fa fa-print"></i> 58MM
             </Button>

@@ -40,6 +40,37 @@ class EmpresaProceso extends CustomComponent {
   /**
    *
    * Constructor
+   * @param {{loading: boolean}} props
+   * @param {{msgLoading: string}} props
+   * @param {{idEmpresa: string}} props
+   * @param {{documento: string}} props
+   * @param {{razonSocial: string}} props
+   * @param {{nombreEmpresa: string}} props
+   * @param {{email: string}} props
+   * @param {{usuarioSolSunat: string}} props
+   * @param {{claveSolSunat: string}} props
+   * @param {{idApiSunat: string}} props
+   * @param {{claveApiSunat: string}} props
+   * @param {{certificado: string | object}} props
+   * @param {{claveCertificado: string}} props
+   * @param {{logo: object}} props
+   * @param {{image: object}} props
+   * @param {{icon: object}} props
+   * @param {{banners: Array<object>}} props
+   * @param {{numeroWhatsapp: string}} props
+   * @param {{tituloWhatsapp: string}} props
+   * @param {{mensajeWhatsapp: string}} props
+   * @param {{informacion: string}} props
+   * @param {{acercaNosotros: string}} props
+   * @param {{politicasPrivacidad: string}} props
+   * @param {{terminosCondiciones: string}} props
+   * @param {{paginaWeb: string}} props
+   * @param {{youTubePagina: string}} props
+   * @param {{facebookPagina: string}} props
+   * @param {{twitterPagina: string}} props
+   * @param {{instagramPagina: string}} props
+   * @param {{tiktokPagina: string}} props
+   * @param {{idUsuario: string}} props
    */
   constructor(props) {
     super(props);
@@ -65,8 +96,6 @@ class EmpresaProceso extends CustomComponent {
       certificadoInicio: "",
       certificadoExpiracion: "",
 
-      fireBaseCertificado: "Hacer click para seleccionar su archivo.",
-
       logo: {
         src: images.noImage,
       },
@@ -74,14 +103,6 @@ class EmpresaProceso extends CustomComponent {
         src: images.noImage,
       },
       icon: {
-        src: images.noImage,
-      },
-
-      banner: {
-        src: images.noImage,
-      },
-
-      portada: {
         src: images.noImage,
       },
 
@@ -124,9 +145,6 @@ class EmpresaProceso extends CustomComponent {
     this.refTwitter = React.createRef();
     this.refInstagram = React.createRef();
     this.refTiktok = React.createRef();
-
-    this.refFileCertificado = React.createRef();
-    this.refFileFireBase = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -199,22 +217,14 @@ class EmpresaProceso extends CustomComponent {
         idApiSunat: empresa.idApiSunat ?? "",
         claveApiSunat: empresa.claveApiSunat ?? "",
 
-        certificado:
-          empresa.certificadoSunat ??
-          "Hacer click para seleccionar su archivo.",
+        certificado: empresa.certificadoSunat,
         claveCertificado: empresa.claveCertificadoSunat ?? "",
         certificadoInicio: empresa.certificadoInicio,
         certificadoExpiracion: empresa.certificadoExpiracion,
 
-        fireBaseCertificado:
-          empresa.certificadoFirebase ??
-          "Hacer click para seleccionar su archivo.",
-
         logo: empresa.rutaLogo ?? { src: images.noImage },
         image: empresa.rutaImage ?? { src: images.noImage },
         icon: empresa.rutaIcon ?? { src: images.noImage },
-        banner: empresa.rutaBanner ?? { src: images.noImage },
-        portada: empresa.rutaPortada ?? { src: images.noImage },
         banners: empresa.banners ?? [],
 
         numeroWhatsapp: empresa.numeroWhatsapp ?? "",
@@ -260,32 +270,6 @@ class EmpresaProceso extends CustomComponent {
   | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
   |
   */
-
-  handleFileCertificado = (event) => {
-    if (!isEmpty(event.target.files)) {
-      this.setState({ certificado: event.target.files[0].name });
-    } else {
-      this.setState(
-        { certificado: 'Hacer click para seleccionar su archivo.' },
-        () => {
-          this.refFileCertificado.current.value = '';
-        },
-      );
-    }
-  };
-
-  handleFileFireBaseBase = (event) => {
-    if (!isEmpty(event.target.files)) {
-      this.setState({ fireBaseCertificado: event.target.files[0].name });
-    } else {
-      this.setState(
-        { fireBaseCertificado: 'Hacer click para seleccionar su archivo.' },
-        () => {
-          this.refFileFireBase.current.value = '';
-        },
-      );
-    }
-  };
 
   async handleGetApiSunat() {
     if (isEmpty(this.state.documento)) {
@@ -355,6 +339,42 @@ class EmpresaProceso extends CustomComponent {
     });
   };
 
+  /**
+   * Funcion para manejar el archivo de certificado
+   * @param {*} event 
+   * @returns {Promise<void>}
+   */
+  handleFileCertificado = async (event) => {
+    const files = event.target.files;
+
+    if (isEmpty(files)) {
+      this.setState({
+        certificado: 'Hacer click para seleccionar su archivo.'
+      });
+      return;
+    }
+
+    const certificado = await convertFileBase64(files);
+
+    if (!certificado) {
+      alertKit.warning({
+        title: 'Empresa',
+        message: 'Error en subir el certificado.',
+      });
+      return;
+    }
+
+    this.setState({
+      certificado: {
+        ...certificado,
+        nombre: certificado.name,
+      }
+    });
+
+    event.target.value = null;
+  };
+
+
   // ------------------------------------------------------------------------
   // Eventos para manejo de imagenes
   // ------------------------------------------------------------------------
@@ -373,19 +393,17 @@ class EmpresaProceso extends CustomComponent {
 
     const file = files[0];
     let url = URL.createObjectURL(file);
-    const logoSend = await imageBase64(file);
+    const imageSend = await imageBase64(file);
 
-    if (!logoSend) {
+    if (!imageSend) {
       alertKit.warning({
-        title: "Empresa",
-        message: "Error en obtener la imagen.",
+        title: 'Empresa',
+        message: 'Error en obtener la imagen.',
       });
       return;
     }
 
-    const { base64String, extension, width, height, size } = logoSend;
-
-    if (size > 500) {
+    if (imageSend.size > 500) {
       alertKit.warning({
         title: 'Logo repote',
         message:
@@ -398,11 +416,7 @@ class EmpresaProceso extends CustomComponent {
 
     this.setState({
       logo: {
-        base64: base64String,
-        extension,
-        width,
-        height,
-        size,
+        ...imageSend,
         url,
       },
     });
@@ -424,19 +438,18 @@ class EmpresaProceso extends CustomComponent {
 
     const file = files[0];
     let url = URL.createObjectURL(file);
-    const logoSend = await imageBase64(file);
+    const imageSend = await imageBase64(file);
 
-    if (!logoSend) {
+    if (!imageSend) {
       alertKit.warning({
-        title: "Empresa",
-        message: "Error en obtener la imagen.",
+        title: 'Empresa',
+        message: 'Error en obtener la imagen.',
       });
       return;
     }
 
-    const { base64String, extension, width, height, size } = logoSend;
 
-    if (size > 500) {
+    if (imageSend.size > 500) {
       alertKit.warning({
         title: 'Logo pagina web',
         message:
@@ -449,11 +462,7 @@ class EmpresaProceso extends CustomComponent {
 
     this.setState({
       image: {
-        base64: base64String,
-        extension,
-        width,
-        height,
-        size,
+        ...imageSend,
         url,
       },
     });
@@ -465,7 +474,7 @@ class EmpresaProceso extends CustomComponent {
   handleFileIcon = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
+    if (isEmpty(files)) {
       this.setState({
         icon: {
           url: images.noImage,
@@ -476,19 +485,18 @@ class EmpresaProceso extends CustomComponent {
 
     const file = files[0];
     let url = URL.createObjectURL(file);
-    const logoSend = await imageBase64(file);
+    const imageSend = await imageBase64(file);
 
-    if (!logoSend) {
+    if (!imageSend) {
       alertKit.warning({
-        title: "Empresa",
-        message: "Error en obtener la imagen.",
+        title: 'Empresa',
+        message: 'Error en obtener la imagen.',
       });
       return;
     }
 
-    const { base64String, extension, width, height, size } = logoSend;
 
-    if (size > 50) {
+    if (imageSend.size > 50) {
       alertKit.warning({
         title: 'Icono',
         message:
@@ -499,140 +507,10 @@ class EmpresaProceso extends CustomComponent {
 
     this.setState({
       icon: {
-        base64: base64String,
-        extension,
-        width,
-        height,
-        size,
+        ...imageSend,
         url,
       },
     });
-
-    event.target.value = null;
-  };
-
-  handleFileBanner = async (event) => {
-    const files = event.currentTarget.files;
-
-    if (isEmpty(files)) {
-      this.setState({
-        banner: {
-          url: images.noImage,
-        },
-      });
-      return;
-    }
-
-    const file = files[0];
-    let url = URL.createObjectURL(file);
-    const logoSend = await imageBase64(file);
-
-    if (!logoSend) {
-      alertKit.warning({
-        title: "Empresa",
-        message: "Error en obtener la imagen.",
-      });
-      return;
-    }
-
-    const { base64String, extension, width, height, size } = logoSend;
-
-    if (width !== 1200 && height !== 1200) {
-      alertKit.warning({
-        title: 'Banner',
-        message:
-          'La imagen del banner ' +
-          file.name +
-          ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
-      });
-      return;
-    }
-
-    if (size > 1024) {
-      alertKit.warning({
-        title: 'Banner',
-        message:
-          'La imagen del banner ' +
-          file.name +
-          ' no debe superar los 1024KB(Kilobytes).',
-      });
-      return;
-    }
-
-    this.setState({
-      banner: {
-        base64: base64String,
-        extension,
-        width,
-        height,
-        size,
-        url,
-      },
-    });
-
-
-    event.target.value = null;
-  };
-
-  handleFilePortada = async (event) => {
-    const files = event.currentTarget.files;
-
-    if (!isEmpty(files)) {
-      this.setState({
-        portada: {
-          url: images.noImage,
-        },
-      });
-      return;
-    }
-
-    const file = files[0];
-    let url = URL.createObjectURL(file);
-    const logoSend = await imageBase64(file);
-
-    if (!logoSend) {
-      alertKit.warning({
-        title: "Empresa",
-        message: "Error en obtener la imagen.",
-      });
-      return;
-    }
-
-    const { base64String, extension, width, height, size } = logoSend;
-
-    if (width !== 1200 && height !== 1200) {
-      alertKit.warning({
-        title: 'Portada',
-        message:
-          'La imagen de la portada ' +
-          file.name +
-          ' tiene que tener un aspecto de 1200 x 1200 pixeles.',
-      });
-      return;
-    }
-
-    if (size > 1024) {
-      alertKit.warning({
-        title: 'Portada',
-        message:
-          'La imagen de la portada ' +
-          file.name +
-          ' no debe superar los 1024KB(Kilobytes).',
-      });
-      return;
-    }
-
-    this.setState({
-      portada: {
-        base64: base64String,
-        extension,
-        width,
-        height,
-        size,
-        url,
-      },
-    });
-
 
     event.target.value = null;
   };
@@ -656,22 +534,6 @@ class EmpresaProceso extends CustomComponent {
   handleClearIcono = () => {
     this.setState({
       icon: {
-        url: images.noImage,
-      },
-    });
-  };
-
-  handleClearBanner = () => {
-    this.setState({
-      banner: {
-        url: images.noImage,
-      },
-    });
-  };
-
-  handleClearPortada = () => {
-    this.setState({
-      portada: {
         url: images.noImage,
       },
     });
@@ -744,14 +606,6 @@ class EmpresaProceso extends CustomComponent {
       message: 'Procesando información...',
     });
 
-    const certificadoSend = await convertFileBase64(
-      this.refFileCertificado.current.files,
-    );
-
-    const fireBaseSend = await convertFileBase64(
-      this.refFileFireBase.current.files,
-    );
-
     const data = {
       documento: this.state.documento.trim(),
       razonSocial: this.state.razonSocial.trim(),
@@ -764,18 +618,12 @@ class EmpresaProceso extends CustomComponent {
       idApiSunat: this.state.idApiSunat.trim(),
       claveApiSunat: this.state.claveApiSunat.trim(),
 
-      certificado: certificadoSend ? certificadoSend.data : '',
-      extCertificado: certificadoSend ? certificadoSend.extension : '',
+      certificado: this.state.certificado,
       claveCertificado: this.state.claveCertificado,
-
-      fireBase: fireBaseSend ? fireBaseSend.data : '',
-      extFireBase: fireBaseSend ? fireBaseSend.extension : '',
 
       logo: this.state.logo,
       image: this.state.image,
       icon: this.state.icon,
-      banner: this.state.banner,
-      portada: this.state.portada,
       banners: this.state.banners,
 
       numeroWhatsapp: this.state.numeroWhatsapp.trim(),
@@ -1073,14 +921,13 @@ class EmpresaProceso extends CustomComponent {
               id="fileCertificado"
               accept=".p12,.pfx"
               className="display-none"
-              ref={this.refFileCertificado}
               onChange={this.handleFileCertificado}
             />
             <label
               htmlFor={'fileCertificado'}
               className="form-control cursor-pointer"
             >
-              {this.state.certificado}
+              {this.state.certificado?.nombre || "Seleccione un archivo"}
             </label>
           </Column>
 
@@ -1123,37 +970,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">4</span> Configuración de
-              Firebase para subir imagenes y documentos
-            </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
-
-          <Column formGroup={true}>
-            <label>
-              Seleccionar Archivo de Configuración de FireBase (.json):
-            </label>
-            <input
-              type="file"
-              id="fileFireBase"
-              accept=".json"
-              className="display-none"
-              ref={this.refFileFireBase}
-              onChange={this.handleFileFireBaseBase}
-            />
-            <label
-              htmlFor={'fileFireBase'}
-              className="form-control cursor-pointer"
-            >
-              {this.state.fireBaseCertificado}
-            </label>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className="col-12" formGroup={true}>
-            <h6>
-              <span className="badge badge-primary">5</span> Imagens para uso en
+              <span className="badge badge-primary">4</span> Imagens para uso en
               la página web y reportes
             </h6>
           </Column>
@@ -1192,7 +1009,7 @@ class EmpresaProceso extends CustomComponent {
               }
               subtitle={
                 <div>
-                  <p> Para mostrar en la página web como banner</p>
+                  <p> Para mostrar en la página web</p>
                   <span className="text-red-500 text-sm">
                     La imagen no debe superar los 500KB(Kilobytes).
                   </span>
@@ -1238,7 +1055,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">6</span> Imagenes para el
+              <span className="badge badge-primary">5</span> Imagenes para el
               banner de la página web
             </h6>
           </Column>
@@ -1273,7 +1090,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">7</span> Datos para
+              <span className="badge badge-primary">6</span> Datos para
               comunicación con la platadorma Whatsapp
             </h6>
           </Column>
@@ -1329,7 +1146,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">8</span> Información para
+              <span className="badge badge-primary">7</span> Información para
               mostrar en la pagina web
             </h6>
           </Column>
@@ -1344,60 +1161,6 @@ class EmpresaProceso extends CustomComponent {
               onChange={(event) =>
                 this.setState({ informacion: event.target.value })
               }
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <ImageUpload
-              className="w-full flex flex-col items-center text-center gap-2"
-              label={
-                <p className="font-bold text-base">Logo reporte</p>
-              }
-              subtitle={
-                <div>
-                  <p>Para mostrar en la página web y debe tener un tamaño de 1200 ×
-                    1200 pixele.</p>
-                  <span className="text-red-500 text-sm">
-                    La imagen no debe superar los 1MB(Megabytes).
-                  </span>
-                </div>
-              }
-              imageUrl={this.state.banner.url}
-              defaultImage={images.noImage}
-              alt="Banner de portada"
-              inputId="fileBanner"
-              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              onChange={this.handleFileBanner}
-              onClear={this.handleClearBanner}
-              onDownload={() => this.handleDownload(this.state.banner.url)}
-            />
-          </Column>
-
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <ImageUpload
-              className="w-full flex flex-col items-center text-center gap-2"
-              label={
-                <p className="font-bold text-base">Imagen de portada</p>
-              }
-              subtitle={
-                <div>
-                  <p>  Para mostrar en la página web y debe tener un tamaño de 1200 ×
-                    1200 pixele.</p>
-                  <span className="text-red-500 text-sm">
-                    La imagen no debe superar los 1MB(Megabytes).
-                  </span>
-                </div>
-              }
-              imageUrl={this.state.portada.url}
-              defaultImage={images.noImage}
-              alt="Imagen de portada"
-              inputId="filePortada"
-              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              onChange={this.handleFilePortada}
-              onClear={this.handleClearPortada}
-              onDownload={() => this.handleDownload(this.state.portada.url)}
             />
           </Column>
         </Row>

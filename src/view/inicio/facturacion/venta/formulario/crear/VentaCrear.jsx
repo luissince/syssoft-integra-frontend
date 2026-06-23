@@ -1976,12 +1976,16 @@ class VentaCrear extends CustomComponent {
           const body = response.getBody().map(
             (item) =>
               `<tr>
-                  <td>${item.nombre}</td>
+                  <td>
+                    ${item.codigo}
+                    <br />
+                    ${item.nombre}
+                  </td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                item.cantidadActual - item.cantidadReal,
-              )}</td>
+                    item.cantidadActual - item.cantidadReal,
+                  )}</td>
                 </tr>`,
           );
 
@@ -2088,7 +2092,11 @@ class VentaCrear extends CustomComponent {
         if (response.getBody() !== '') {
           const body = response.getBody().map((item) =>
             `<tr>
-                  <td>${item.nombre}</td>
+                  <td>
+                    ${item.codigo}
+                    <br />
+                    ${item.nombre}
+                  </td>
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(

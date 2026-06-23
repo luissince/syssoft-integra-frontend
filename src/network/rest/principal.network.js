@@ -218,27 +218,23 @@ export async function getPreferidoPersona(params, signal) {
 }
 
 export function documentsPdfReportsPersonaCliente() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/persona/cliente/documents/pdf/reports`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/persona/cliente/documents/pdf/reports`;
 }
 
 export function documentsExcelPersonaCliente() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/persona/cliente/documents/excel`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/persona/cliente/documents/excel`;
 }
 
 export function documentsPdfReportsPersonaProveedor() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/persona/proveedor/documents/pdf/reports`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/persona/proveedor/documents/pdf/reports`;
 }
 
 export function documentsExcelPersonaProveedor() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/persona/proveedor/documents/excel`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/persona/proveedor/documents/excel`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA CLIENTE
@@ -292,9 +288,8 @@ export async function updateStockInventario(data, signal) {
 |--------------------------------------------------------------------------
 */
 export function filtrarStreamProductoVenta(params) {
-  return `${
-    instancePrincipal.defaults.baseURL
-  }/api/producto/filtrar/venta?${params.toString()}`;
+  return `${instancePrincipal.defaults.baseURL
+    }/api/producto/filtrar/venta?${params.toString()}`;
 }
 
 export async function listProducto(params, signal) {
@@ -390,16 +385,15 @@ export async function updateProducto(data) {
 
 export async function deleteProducto(params) {
   return await Resolve.create(
-    instancePrincipal.delete(`/api/producto`,{
+    instancePrincipal.delete(`/api/producto`, {
       params: params
     }),
   );
 }
 
 export function documentsPdfReportsProducto() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/producto/documents/pdf/reports`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/producto/documents/pdf/reports`;
 }
 
 export function documentsExcelProducto() {
@@ -407,9 +401,8 @@ export function documentsExcelProducto() {
 }
 
 export function documentsPdfCodbarProducto() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/producto/documents/pdf/codbar`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/producto/documents/pdf/codbar`;
 }
 
 export async function dashboardProducto(data, signal) {
@@ -640,21 +633,18 @@ export async function dashboardVenta(params, signal) {
 }
 
 export function documentsPdfInvoicesVenta(idVenta, size, outputType = "pdf") {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/factura/documents/pdf/invoices/${idVenta}/${size}/${outputType}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/factura/documents/pdf/invoices/${idVenta}/${size}/${outputType}`;
 }
 
 export function documentsPdfAccountReceivableVenta(idCuota, idVenta, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/factura/documents/pdf/account/receivable/${idCuota}/${idVenta}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/factura/documents/pdf/account/receivable/${idCuota}/${idVenta}/${size}`;
 }
 
 export function documentsPdfReportsVenta() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/factura/documents/pdf/reports`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/factura/documents/pdf/reports`;
 }
 
 export function documentsExcelVenta() {
@@ -690,9 +680,8 @@ export async function dashboardTransaccion(params, signal) {
 }
 
 export function documentsPdfReportsTransaccion(params) {
-  const baseUrl = `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/transaccion/documents/pdf/reports`;
+  const baseUrl = `${import.meta.env.VITE_APP_BACK_END
+    }/api/transaccion/documents/pdf/reports`;
 
   // Crear una instancia de URLSearchParams para manejar los parámetros
   const queryParams = new URLSearchParams();
@@ -916,6 +905,11 @@ export async function cancelTraslado(params, signal) {
     }),
   );
 }
+
+export function getPdfTraslado(idTraslado, size = "A4", outputType = "pdf") {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/traslado/pdf/${idTraslado}/${size}`;
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA TRASLADO
 // ------------------------------------------------------------------------
@@ -1101,21 +1095,18 @@ export async function dashboardCompra(params, signal) {
 }
 
 export function documentsPdfInvoicesCompra(idCompra, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/compra/documents/pdf/invoices/${idCompra}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/compra/documents/pdf/invoices/${idCompra}/${size}`;
 }
 
 export function documentsPdfAccountPayableCompra(idPlazo, idCompra, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/compra/documents/pdf/account/payable/${idPlazo}/${idCompra}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/compra/documents/pdf/account/payable/${idPlazo}/${idCompra}/${size}`;
 }
 
 export function documentsPdfReportsCompra() {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/compra/documents/pdf/reports`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/compra/documents/pdf/reports`;
 }
 
 export function documentsExcelCompra() {
@@ -1192,9 +1183,8 @@ export async function cancelGuiaRemision(params, signal) {
 }
 
 export function documentsPdfInvoicesGuiaRemision(idGuiaRemision, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA GUÍA DE REMISIÓN
@@ -1267,15 +1257,13 @@ export async function cancelCotizacion(params, signal) {
 }
 
 export function documentsPdfInvoicesCotizacion(idCotizacion, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`;
 }
 
 export function documentsPdfListsCotizacion(idCotizacion) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/cotizacion/documents/pdf/lists/${idCotizacion}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/cotizacion/documents/pdf/lists/${idCotizacion}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA COTIZACION
@@ -1348,15 +1336,13 @@ export async function cancelOrdenCompra(params, signal) {
 }
 
 export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
 export function documentsPdfListsOrdenCompra(idOrdenCompra) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA ORDEN DE COMPRA
@@ -1427,15 +1413,13 @@ export async function cancelPedido(params, signal) {
 }
 
 export function documentsPdfInvoicesPedido(idOrdenCompra, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/pedido/documents/pdf/invoices/${idOrdenCompra}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/pedido/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
 export function documentsPdfListsPedido(idOrdenCompra) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/pedido/documents/pdf/lists/${idOrdenCompra}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/pedido/documents/pdf/lists/${idOrdenCompra}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA PEDIDO
@@ -1482,9 +1466,8 @@ export async function cancelCobro(params, signal) {
 }
 
 export function documentsPdfInvoicesCobro(idCobro, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/cobro/documents/pdf/invoices/${idCobro}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/cobro/documents/pdf/invoices/${idCobro}/${size}`;
 }
 
 // ------------------------------------------------------------------------
@@ -1532,9 +1515,8 @@ export async function cancelGasto(params, signal) {
 }
 
 export function documentsPdfInvoicesGasto(idGasto, size) {
-  return `${
-    import.meta.env.VITE_APP_BACK_END
-  }/api/gasto/documents/pdf/invoices/${idGasto}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END
+    }/api/gasto/documents/pdf/invoices/${idGasto}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA GASTO
@@ -1912,7 +1894,7 @@ export async function getIdAtributo(params, signal = null) {
 }
 
 export async function addAtributo(data) {
-  return await Resolve.create( instancePrincipal.post('/api/atributo/', data),);
+  return await Resolve.create(instancePrincipal.post('/api/atributo/', data),);
 }
 
 export async function updateAtributo(data) {

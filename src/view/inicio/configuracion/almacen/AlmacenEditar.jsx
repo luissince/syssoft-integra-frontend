@@ -303,17 +303,16 @@ class AlmacenEditar extends CustomComponent {
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Almacén',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Almacén',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       alertKit.loading({
@@ -345,6 +344,8 @@ class AlmacenEditar extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
         alertKit.warning({
           title: 'Almacén',
           message: response.getMessage(),
