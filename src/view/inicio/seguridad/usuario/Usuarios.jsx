@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import Paginacion from '../../../../components/Paginacion';
@@ -32,6 +28,7 @@ import {
 } from '../../../../components/Table';
 import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -178,32 +175,48 @@ class Usuarios extends CustomComponent {
     });
   };
 
-  handleBorrar(idUsuario) {
-    alertDialog(
-      'Usuario',
-      '¿Está seguro de que desea eliminar el usuario? Esta operación no se puede deshacer.',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idUsuario: idUsuario,
-          };
-
-          alertInfo('Usuario', 'Procesando información...');
-
-          const response = await removeUsuario(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Usuario', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Usuario', response.getMessage());
-          }
-        }
+  async handleBorrar(idUsuario) {
+    const accept = await alertKit.question({
+      title: 'Usuario',
+      message: '¿Está seguro de que desea eliminar el usuario? Esta operación no se puede deshacer.',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idUsuario: idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await removeUsuario(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Usuario',
+          message: response.data,
+          onClose: () => {
+            this.loadInit();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Usuario',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   generarBody() {

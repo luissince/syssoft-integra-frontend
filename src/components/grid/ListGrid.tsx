@@ -66,9 +66,12 @@ const ListGrid: React.FC<ListGridProps> = ({
                 />
 
                 {/* Nombre */}
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-3 min-h-16">
+                <p className="text-base text-gray-800">
+                  {item.codigo}
+                </p>
+                <p className="text-lg font-semibold text-gray-800 mb-3 line-clamp-3 min-h-16">
                   {item.nombre}
-                </h3>
+                </p>
 
                 {/* Stock o servicio */}
                 <div className="mt-auto space-y-2">

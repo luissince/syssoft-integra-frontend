@@ -13,7 +13,7 @@ export function sleep(time) {
 /**
  * Obtiene el estado de un privilegio específico dentro de un menú, submenú y privilegio dados.
  *
- * @param {Array} menus - Lista de menús, cada uno con sus submenús y privilegios.
+ * @param {Array} list - Lista de menús, cada uno con sus submenús y privilegios.
  * @param {string} idMenu - Id del menú en el que se encuentra el privilegio.
  * @param {string} idSubMenu - Id del submenú dentro del menú especificado.
  * @param {string} idPrivilegio - Id del privilegio dentro del submenú especificado.
@@ -51,7 +51,7 @@ export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
 /**
  * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
  * @param {File} file - Archivo seleccionado
- * @returns {Promise<{ base64String: string, extension: string, width: number, height: number, size: number } | false>} Un objeto que contiene la representación en base64 del archivo, su extensión, ancho, altura y tamaño; o false si no se selecciona ningún archivo.
+ * @returns {Promise<{ base64: string, mimeType: string, extension: string, width: number, height: number, size: number } | false>} Un objeto que contiene la representación en base64 del archivo, su tipo mime, su extensión, ancho, altura y tamaño; o false si no se selecciona ningún archivo.
  */
 export async function imageBase64(file) {
   if (!file) {
@@ -59,23 +59,35 @@ export async function imageBase64(file) {
   }
 
   const name = file.name;
+  const mimeType = file.type;
+
   const read = await readDataURL(file);
-  const base64String = read.replace(/^data:.+;base64,/, '');
+  const base64 = read.replace(/^data:.+;base64,/, '');
   const extension = getExtension(name);
   const { width, height } = await imageSizeData(read);
   const size = Number(rounded(file.size / 1024));
-  return { base64String, extension, width, height, size };
+  return { base64, mimeType, extension, width, height, size };
 }
 
+/**
+ * Obtiene el contenido de un archivo y devuelve un objeto con la información del archivo
+ * @param {File[]} files - Archivo seleccionado
+ * @returns {Promise<{ base64: string, name:string ,extension: string, mimeType: string } | false>} Un objeto que contiene el contenido del archivo, su extensión y tipo mime; o false si no se selecciona ningún archivo.
+ */
 export async function convertFileBase64(files) {
-  if (files.length !== 0) {
-    const file = files[0];
-    const data = await readDataFile(file);
-    const extension = getExtension(file.name);
-    return { data, extension };
+  if (files.length === 0) {
+    return false;
+
   }
 
-  return false;
+  const file = files[0];
+  const name = file.name;
+  const mimeType = file.type;
+
+  const base64 = await readDataFile(file);
+  const extension = getExtension(file.name);
+
+  return { base64, name, extension, mimeType };
 }
 
 /**
@@ -890,6 +902,11 @@ export function focusOnFirstInvalidInput(ref) {
   input.focus();
 }
 
+/**
+ * 
+ * @param {File} file 
+ * @returns 
+ */
 export function readDataURL(file) {
   return new Promise((resolve, reject) => {
     const blob = file.slice();
@@ -902,7 +919,12 @@ export function readDataURL(file) {
   });
 }
 
-export function readDataBlob(blob) {
+/**
+ * 
+ * @param {File} blob 
+ * @returns {Promise<string>} El contenido del archivo en base64
+ */
+export async function readDataBlob(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -913,7 +935,12 @@ export function readDataBlob(blob) {
   });
 }
 
-export function readDataFile(file) {
+/**
+ * 
+ * @param {File} file 
+ * @returns {Promise<string>} El contenido del archivo en base64
+ */
+export async function readDataFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -925,7 +952,7 @@ export function readDataFile(file) {
   });
 }
 
-export function imageSizeData(data) {
+export async function imageSizeData(data) {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.src = data;

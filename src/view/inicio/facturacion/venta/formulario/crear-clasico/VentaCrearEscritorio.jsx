@@ -1107,12 +1107,16 @@ class VentaCrearEscritorio extends CustomComponent {
               const body = response.getBody().map(
                 (item) =>
                   `<tr>
-                  <td>${item.nombre}</td>
-                  <td>${formatDecimal(item.cantidadActual)}</td>
-                  <td>${formatDecimal(item.cantidadReal)}</td>
-                  <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+                    <td>
+                      ${item.codigo}
+                      <br />
+                      ${item.nombre}
+                    </td>
+                    <td>${formatDecimal(item.cantidadActual)}</td>
+                    <td>${formatDecimal(item.cantidadReal)}</td>
+                    <td>${formatDecimal(
+                      item.cantidadActual - item.cantidadReal,
+                    )}</td>
                 </tr>`,
               );
 
@@ -1206,12 +1210,16 @@ class VentaCrearEscritorio extends CustomComponent {
               const body = response.getBody().map(
                 (item) =>
                   `<tr>
-                  <td>${item.nombre}</td>
-                  <td>${formatDecimal(item.cantidadActual)}</td>
-                  <td>${formatDecimal(item.cantidadReal)}</td>
-                  <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+                    <td>
+                      ${item.codigo}
+                      <br />
+                      ${item.nombre}
+                    </td>
+                    <td>${formatDecimal(item.cantidadActual)}</td>
+                    <td>${formatDecimal(item.cantidadReal)}</td>
+                    <td>${formatDecimal(
+                      item.cantidadActual - item.cantidadReal,
+                    )}</td>
                 </tr>`,
               );
 

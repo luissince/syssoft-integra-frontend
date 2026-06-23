@@ -38,7 +38,7 @@ import { alertKit } from 'alert-kit';
  * @extends CustomComponent
  */
 class SucursalEditar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -162,35 +162,41 @@ class SucursalEditar extends CustomComponent {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Sucursal',
-          message: 'La imagen a subir tiene que ser menor a 500 KB.',
-        });
-        return;
-      }
-      this.setState({
-        imagen: {
-          // name: file.name,
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         imagen: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const imageSend = await imageBase64(file);
+
+    if (!imageSend) {
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'Error en subir la imagen',
+      });
+      return;
+    }
+
+    if (imageSend.size > 500) {
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'La imagen a subir tiene que ser menor a 500 KB.',
+      });
+      return;
+    }
+
+    this.setState({
+      imagen: {
+        ...imageSend,
+        url: url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -289,17 +295,16 @@ class SucursalEditar extends CustomComponent {
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Sucursal',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Sucursal',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       alertKit.loading({

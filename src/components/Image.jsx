@@ -21,7 +21,7 @@ const ImageUpload = ({
   onDownload = null,
 }) => (
   <div className={cn(className)}>
-     {label && (
+    {label && (
       typeof label === "string"
         ? <span>{label}</span>
         : label
@@ -93,10 +93,9 @@ class MultiImages extends Component {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const url = URL.createObjectURL(file);
+      const imageSend = await imageBase64(file);
 
-      const getImageBase64 = await imageBase64(file);
-
-      if (!getImageBase64) {
+      if (!imageSend) {
         alertKit.warning({
           title: 'Imagen',
           message: 'La imagen ' + file.name + ' no es válida.',
@@ -104,10 +103,8 @@ class MultiImages extends Component {
         continue;
       }
 
-      const { size, base64String, extension, width, height } = getImageBase64;
-
       if (this.props.width && this.props.height) {
-        if (width !== this.props.width || height !== this.props.height) {
+        if (imageSend.width !== this.props.width || imageSend.height !== this.props.height) {
           alertKit.warning({
             title: 'Imagen',
             message:
@@ -123,7 +120,7 @@ class MultiImages extends Component {
         }
       }
 
-      if (size > maxKB) {
+      if (imageSend.size > maxKB) {
         alertKit.warning({
           title: 'Imagen',
           message:
@@ -132,7 +129,7 @@ class MultiImages extends Component {
             ' a subir tiene que ser menor a ' +
             maxKB +
             ' KB, la imagen tiene un peso aproximado de ' +
-            size +
+            imageSend.size +
             ' KB',
         });
         continue;
@@ -141,11 +138,7 @@ class MultiImages extends Component {
       arrayImages.push({
         index: indexInicial,
         name: file.name,
-        base64: base64String,
-        extension,
-        width,
-        height,
-        size,
+        ...imageSend,
         url,
       });
 
@@ -200,7 +193,7 @@ class MultiImages extends Component {
           return null;
         })}
 
-        <div 
+        <div
           className="flex justify-center items-center border rounded relative p-2 col-xl-3 col-md-4 col-sm-5 col-12"
         >
           <input

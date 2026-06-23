@@ -84,8 +84,6 @@ jobs:
           #   service: main-services
 
     env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       CONTAINER_NAME: ${{ matrix.environment }}-frontend
       IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/syssoftintegra/front-end-production:${{ matrix.environment }}-latest
 

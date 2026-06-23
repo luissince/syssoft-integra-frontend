@@ -1115,34 +1115,40 @@ class ProductoEditar extends CustomComponent {
   handleInputImagen = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Producto',
-          message: 'La imagen a subir tiene que ser menor a 500 KB.',
-        });
-        return;
-      }
-      this.setState({
-        imagen: {
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         imagen: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const imageSend = await imageBase64(file);
+
+    if (!imageSend) {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'Error en obtener la imagen.',
+      });
+      return;
+    }
+
+    if (imageSend.size > 500) {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'La imagen a subir tiene que ser menor a 500 KB.',
+      });
+      return;
+    }
+    this.setState({
+      imagen: {
+        ...imageSend,
+        url: url,
+      },
+    });
 
     event.target.value = null;
   };
