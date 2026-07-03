@@ -9,7 +9,7 @@ import {
 import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Button from '../../../../../../components/Button';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import React from 'react';
 import { filtrarProductoVenta } from '../../../../../../network/rest/principal.network';
 import {

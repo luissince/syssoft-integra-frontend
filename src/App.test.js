@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react';
 import App from './components/menu/Menu';
 import {
   currentDate,
@@ -7,7 +6,6 @@ import {
   rounded,
   formatTime,
   formatCurrency,
-  imageBase64,
   formatDecimal,
   formatNumberWithZeros,
 } from './helper/utils.helper';
@@ -302,25 +300,3 @@ describe('formatNumberWithZeros', () => {
     expect(formatNumberWithZeros(1234567)).toBe('1234567');
   });
 });
-
-// describe('imageBase64', () => {
-//   beforeAll(() => {
-//     jest.setTimeout(10000); // Ajusta el tiempo de espera a 10 segundos (10000 ms)
-//   });
-
-//   it('debería devolver un objeto que contiene la representación en base64 del archivo, su extensión, ancho y altura; o false si no se selecciona ningún archivo', async () => {
-//     const files = [
-//       new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' }),
-//     ]; // Simulando un archivo de imagen
-//     console.log(files[0].name)
-//     const result = await imageBase64(files);
-
-//     // if (result) {
-//     const expectedResultKeys = ['base64String', 'extension', 'width', 'height'];
-//     const resultKeys = Object.keys(result);
-//     expect(resultKeys).toEqual(expect.arrayContaining(expectedResultKeys));
-//     // } else {
-//     // expect(result).toBe(false);
-//     // }
-//   });
-// });

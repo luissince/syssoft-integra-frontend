@@ -17,7 +17,7 @@ import {
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../../components/SearchInput';
 import { CANCELED } from '../../../../../model/types/types';
 import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comprobante';

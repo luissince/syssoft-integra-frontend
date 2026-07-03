@@ -1,7 +1,7 @@
 import React from 'react';
-import { alertDialog, isEmpty } from '../../../../helper/utils.helper';
+import { isEmpty } from '../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../components/Container';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';

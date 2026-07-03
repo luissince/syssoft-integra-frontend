@@ -18,7 +18,7 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';

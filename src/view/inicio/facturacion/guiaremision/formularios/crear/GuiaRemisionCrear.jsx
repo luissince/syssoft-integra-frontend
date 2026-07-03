@@ -1,6 +1,6 @@
 import React from 'react';
 import ContainerWrapper from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   currentDate,
   keyNumberFloat,
@@ -13,15 +13,18 @@ import {
   comboMotivoTraslado,
   comboTipoPeso,
   createGuiaRemision,
-  detailOnlyVenta,
   documentsPdfInvoicesGuiaRemision,
   filtrarPersona,
   filtrarVehiculo,
   getDefaultVehiculo,
   getIdSucursal,
   getPreferidoPersona,
+  getShippingGuideTraslado,
   getUbigeo,
-  listFiltrarVenta,
+  getShippingGuideVenta,
+  filterVenta,
+  getDetailsShippingGuideVenta,
+  getDetailsShippingGuideTraslado,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -31,7 +34,6 @@ import SearchInput from '../../../../../../components/SearchInput';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import Row from '../../../../../../components/Row';
 import Column from '../../../../../../components/Column';
-import printJS from 'print-js';
 import {
   Table,
   TableBody,
@@ -47,11 +49,15 @@ import Select from '../../../../../../components/Select';
 import Input from '../../../../../../components/Input';
 import RadioButton from '../../../../../../components/RadioButton';
 import { ModalImpresion } from '../../../../../../components/MultiModal';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
+import { alertKit } from 'alert-kit';
+import pdfVisualizer from 'pdf-visualizer';
+import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
+import { MODALIDAD_TRASLADO } from '@/model/types/modalidad-traslado';
+import { Badge } from '@/components/ui/badge';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class GuiaRemisionCrear extends CustomComponent {
   /**
@@ -69,29 +75,34 @@ class GuiaRemisionCrear extends CustomComponent {
       // Atributos principales
       idGuiaRemision: '',
       idComprobante: '',
-      idModalidadTraslado: 'MT0001',
+      idModalidadTraslado: MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO,
       idMotivoTraslado: '',
       fechaTraslado: currentDate(),
       idTipoPeso: '',
       peso: '',
+
+      traslado: null,
+
+      codigoAnexoPartida: '',
       direccionPartida: '',
-      idUbigeoPartida: '',
+      idUbigeoPartida: 0,
+
+      codigoAnexoLlegada: '',
       direccionLlegada: '',
-      idUbigeoLlegada: '',
+      idUbigeoLlegada: 0,
 
       cliente: '',
       disabledPublica: true,
       disabledPrivado: false,
 
-      detalle: [],
+      detalles: [],
 
       // Lista de datos
       comprobantes: [],
       motivoTraslado: [],
       tipoPeso: [],
 
-      // Filtrar producto
-      loadingVenta: false,
+      // Filtrar venta
       venta: null,
       ventas: [],
 
@@ -122,13 +133,14 @@ class GuiaRemisionCrear extends CustomComponent {
 
     this.initial = { ...this.state };
 
-    this.alert = new SweetAlert();
-
     // Referencia de los atributos principales
     this.refComprobante = React.createRef();
     this.refMotivoTraslado = React.createRef();
     this.refTipoPeso = React.createRef();
     this.refPeso = React.createRef();
+
+    this.refCodigoAnexoPartida = React.createRef();
+    this.refCodigoAnexoLlegada = React.createRef();
 
     this.refDireccionPartida = React.createRef();
     this.refDireccionLlegada = React.createRef();
@@ -179,24 +191,99 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   async componentDidMount() {
-    const idVenta = new URLSearchParams(this.props.location.search).get(
-      'idVenta',
-    );
     await this.loadingData();
 
-    if (idVenta) {
-      this.setState({
-        loading: true,
-      });
+    const { state } = this.props.location;
 
-      const params = {
-        tipo: 2,
-        idSucursal: this.state.idSucursal,
-        filtrar: idVenta,
-      };
+    if (state) {
+      // En caso es venta
+      if (state.idVenta) {
+        this.setState({
+          loading: true,
+        });
 
-      const ventas = await this.fetchFiltrarVentas(params);
-      this.handleSelectItemVenta(ventas[0]);
+        const { success, data, message } = await getShippingGuideVenta(state.idVenta);
+
+        if (!success) {
+          alertKit.warning({
+            title: 'Guía de Remisión',
+            message: message,
+          }, () => {
+            this.props.history.goBack();
+          });
+          return;
+        }
+
+        this.handleSelectItemVenta(data);
+        this.setState({
+          idMotivoTraslado: state.idMotivoTraslado ?? ''
+        });
+      }
+
+      // En caso es traslado
+      if (state.idTraslado) {
+        this.setState({
+          loading: true,
+        });
+
+        const { success: successTraslado, data: traslado, message: messageTraslado } = await getShippingGuideTraslado(state.idTraslado);
+
+        if (!successTraslado) {
+          alertKit.warning({
+            title: 'Guía de Remisión',
+            message: messageTraslado,
+          }, () => {
+            this.props.history.goBack();
+          });
+          return;
+        }
+
+        const { success: successDetalle, data: detalles, message: messageDetalles } = await getDetailsShippingGuideTraslado(state.idTraslado);
+
+        if (!successDetalle) {
+          alertKit.warning({
+            title: 'Guía de Remisión',
+            message: messageDetalles,
+          }, () => {
+            this.props.history.goBack();
+          });
+          return;
+        }
+
+        this.setState({
+          idMotivoTraslado: state.idMotivoTraslado ?? ''
+        });
+
+        this.setState({
+          codigoAnexoPartida: traslado.codigoAnexoPartida,
+          direccionPartida: traslado.direccionPartida
+        });
+        this.handleSelectItemUbigeoPartido({
+          idUbigeo: traslado.idUbigeoPartida,
+          departamento: traslado.departamentoPartida,
+          provincia: traslado.provinciaPartida,
+          distrito: traslado.distritoPartida,
+          ubigeo: traslado.ubigeoPartida,
+        });
+
+        this.setState({
+          codigoAnexoLlegada: traslado.codigoAnexoLlegada,
+          direccionLlegada: traslado.direccionLlegada
+        });
+        this.handleSelectItemUbigeoLlegada({
+          idUbigeo: traslado.idUbigeoLlegada,
+          departamento: traslado.departamentoLlegada,
+          provincia: traslado.provinciaLlegada,
+          distrito: traslado.distritoLlegada,
+          ubigeo: traslado.ubigeoLlegada,
+        });
+
+        this.setState({
+          traslado: traslado,
+          detalles: detalles,
+          loading: false,
+        });
+      }
     }
   }
 
@@ -295,28 +382,8 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarVentas(params) {
-    const response = await listFiltrarVenta(
-      params,
-      this.abortController.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
   async fetchComboMotivoTraslado(params) {
-    const response = await comboMotivoTraslado(
-      params,
-      this.abortController.signal,
-    );
+    const response = await comboMotivoTraslado(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -330,7 +397,7 @@ class GuiaRemisionCrear extends CustomComponent {
   }
 
   async fetchComboTipoPeso(params) {
-    const response = await comboTipoPeso(params, this.abortController.signal);
+    const response = await comboTipoPeso(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -423,22 +490,6 @@ class GuiaRemisionCrear extends CustomComponent {
     }
   }
 
-  async fetchObtenerVentaDetalle() {
-    const params = {
-      idVenta: this.state.venta.idVenta,
-    };
-
-    const response = await detailOnlyVenta(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   clearView = () => {
     this.setState(this.initial, async () => {
       await this.refVenta.current.restart();
@@ -475,16 +526,18 @@ class GuiaRemisionCrear extends CustomComponent {
     this.setState({ isOpenImpresion: true, idGuiaRemision: idGuiaRemision });
   };
 
-  handlePrinterImpresion = (size) => {
-    printJS({
-      printable: documentsPdfInvoicesGuiaRemision(
-        this.state.idGuiaRemision,
-        size,
-      ),
-      type: 'pdf',
-      showModal: true,
-      modalMessage: 'Recuperando documento...',
-      onPrintDialogClose: () => {
+  handlePrinterImpresion = async (size) => {
+    const url = documentsPdfInvoicesGuiaRemision(
+      this.state.idGuiaRemision,
+      size,
+    );
+
+    await pdfVisualizer.init({
+      url: url,
+      title: 'Guia de Remision',
+      titlePageNumber: 'Página',
+      titleLoading: 'Cargando...',
+      onAfterClose: () => {
         this.clearView();
         this.handleCloseImpresion();
       },
@@ -514,16 +567,18 @@ class GuiaRemisionCrear extends CustomComponent {
       return;
     }
 
-    const params = {
-      tipo: 1,
-      idSucursal: this.state.idSucursal,
-      filtrar: searchWord,
-    };
+    const { success, data, message } = await filterVenta(searchWord, this.state.idSucursal);
 
-    const ventas = await this.fetchFiltrarVentas(params);
+    if (!success) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: message,
+      });
+      return;
+    }
 
     this.setState({
-      ventas: ventas,
+      ventas: data,
     });
   };
 
@@ -531,35 +586,40 @@ class GuiaRemisionCrear extends CustomComponent {
     this.refVenta.current.initialize(
       `${value.nombreComprobante} ${value.serie}-${value.numeracion}`,
     );
-    this.setState(
-      {
-        venta: value,
-        direccionLlegada: value.direccion,
-        ventas: [],
-      },
-      async () => {
-        const ubigeo = {
-          idUbigeo: value.idUbigeo,
-          departamento: value.departamento,
-          provincia: value.provincia,
-          distrito: value.distrito,
-          ubigeo: value.ubigeo,
-        };
+    this.setState({
+      venta: value,
+      direccionLlegada: value.direccion,
+      ventas: [],
+    }, async () => {
+      const ubigeo = {
+        idUbigeo: value.idUbigeo,
+        departamento: value.departamento,
+        provincia: value.provincia,
+        distrito: value.distrito,
+        ubigeo: value.ubigeo,
+      };
 
-        this.handleSelectItemUbigeoLlegada(ubigeo);
+      this.handleSelectItemUbigeoLlegada(ubigeo);
 
-        this.setState({
-          loading: true,
+      this.setState({
+        loading: true,
+      });
+
+      const { success, data, message } = await getDetailsShippingGuideVenta(value.idVenta);
+
+      if (!success) {
+        alertKit.warning({
+          title: 'Guia de Remisión',
+          message: message,
         });
+        return;
+      }
 
-        const ventaDetalle = await this.fetchObtenerVentaDetalle();
-
-        this.setState({
-          detalle: ventaDetalle,
-          loading: false,
-        });
-      },
-    );
+      this.setState({
+        detalles: data,
+        loading: false,
+      });
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -690,13 +750,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleClearInputaUbigeoPartido = () => {
     this.setState({
       ubigeosPartida: [],
-      idUbigeoPartida: '',
+      idUbigeoPartida: 0,
     });
   };
 
   handleFilterUbigeoPartido = async (text) => {
     const searchWord = text;
-    this.setState({ idUbigeoPartida: '' });
+    this.setState({ idUbigeoPartida: 0 });
 
     if (isEmpty(searchWord)) {
       this.setState({ ubigeosPartida: [] });
@@ -717,13 +777,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleSelectItemUbigeoPartido = (value) => {
     this.refUbigeoPartida.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeosPartida: [],
@@ -737,13 +797,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleClearInputaUbigeoLlegada = () => {
     this.setState({
       ubigeosLlegada: [],
-      idUbigeoLlegada: '',
+      idUbigeoLlegada: 0,
     });
   };
 
   handleFilterUbigeoLlegada = async (text) => {
     const searchWord = text;
-    this.setState({ idUbigeoLlegada: '' });
+    this.setState({ idUbigeoLlegada: 0 });
 
     if (isEmpty(searchWord)) {
       this.setState({ ubigeosLlegada: [] });
@@ -764,13 +824,13 @@ class GuiaRemisionCrear extends CustomComponent {
   handleSelectItemUbigeoLlegada = (value) => {
     this.refUbigeoLlegada.current.initialize(
       value.departamento +
-        ' - ' +
-        value.provincia +
-        ' - ' +
-        value.distrito +
-        ' (' +
-        value.ubigeo +
-        ')',
+      ' - ' +
+      value.provincia +
+      ' - ' +
+      value.distrito +
+      ' (' +
+      value.ubigeo +
+      ')',
     );
     this.setState({
       ubigeosLlegada: [],
@@ -790,7 +850,7 @@ class GuiaRemisionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleInputModalidadTraslado = (event) => {
     this.setState({ idModalidadTraslado: event.target.value }, () => {
-      if (event.target.value === 'MT0001') {
+      if (event.target.value === MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO) {
         this.setState({
           disabledPublica: true,
           disabledPrivado: false,
@@ -807,108 +867,120 @@ class GuiaRemisionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Evento para guardar la guía de remisión
   //------------------------------------------------------------------------------------------
-  handleSave = () => {
-    if (!this.state.venta) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Filtre una venta para continuar.',
-        () => {
-          this.refFiltrarVenta.current.focus();
-        },
-      );
+  handleSave = async () => {
+    if (
+      this.state.idMotivoTraslado === MOTIVO_TRASLADO.VENTA
+      &&
+      !this.state.venta
+    ) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Filtre una venta para continuar.',
+      }, () => {
+        this.refFiltrarVenta.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idComprobante)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione un comprobante.',
-        () => {
-          this.refComprobante.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Seleccione un comprobante.',
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMotivoTraslado)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el motivo de traslado.',
-        () => {
-          this.refMotivoTraslado.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Seleccione el motivo de traslado.',
+      }, () => {
+        this.refMotivoTraslado.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idTipoPeso)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el tipo de peso.',
-        () => {
-          this.refTipoPeso.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Seleccione el tipo de peso.',
+      }, () => {
+        this.refTipoPeso.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.peso)) {
-      this.alert.warning('Guía de Remisión', 'Ingrese el peso total.', () => {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Ingrese el peso total.',
+      }, () => {
         this.refPeso.current.focus();
       });
       return;
     }
 
     if (
-      this.state.idModalidadTraslado === 'MT0001' &&
+      this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO &&
       isEmpty(this.state.conductorPublico)
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el conductor que va trandportar.',
-        () => {
-          this.refFiltrarConductorPublico.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Seleccione el conductor que va trandportar.',
+      }, () => {
+        this.refFiltrarConductorPublico.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idModalidadTraslado === 'MT0002' &&
+      this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO &&
       isEmpty(this.state.vehiculo)
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el vehículo que va transportar.',
-        () => {
-          this.refFiltrarVehiculo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Seleccione el vehículo que va transportar.',
+      }, () => {
+        this.refFiltrarVehiculo.current.focus();
+      });
       return;
     }
 
     if (
-      this.state.idModalidadTraslado === 'MT0002' &&
+      this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO &&
       isEmpty(this.state.conductor)
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Seleccione el conductor que va transportar.',
-        () => {
-          this.refFiltrarConductor.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Seleccione el conductor que va transportar.',
+      }, () => {
+        this.refFiltrarConductor.current.focus();
+      });
+      return;
+    }
+
+    if (
+      this.state.idModalidadTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA &&
+      isEmpty(this.state.codigoAnexoPartida)
+    ) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Ingrese el código de anexo de partida.',
+      }, () => {
+        this.refCodigoAnexoPartida.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.direccionPartida)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Ingrese la dirección de partida.',
-        () => {
-          this.refDireccionPartida.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Ingrese la dirección de partida.',
+      }, () => {
+        this.refDireccionPartida.current.focus();
+      });
       return;
     }
 
@@ -916,24 +988,34 @@ class GuiaRemisionCrear extends CustomComponent {
       isEmpty(this.state.idUbigeoPartida) ||
       this.state.idUbigeoPartida <= 0
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Selecciona el ubigeo de partida.',
-        () => {
-          this.refFiltrarUbigeoPartida.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Selecciona el ubigeo de partida.',
+      }, () => {
+        this.refFiltrarUbigeoPartida.current.focus();
+      });
       return;
     }
 
+    if (
+      this.state.idModalidadTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA &&
+      isEmpty(this.state.codigoAnexoLlegada)
+    ) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Ingrese el código de anexo de llegada.',
+      }, () => {
+        this.refCodigoAnexoLlegada.current.focus();
+      });
+    }
+
     if (isEmpty(this.state.direccionLlegada)) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Ingrese la dirección de llegada.',
-        () => {
-          this.refDireccionLlegada.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Ingrese la dirección de llegada.',
+      }, () => {
+        this.refDireccionLlegada.current.focus();
+      });
       return;
     }
 
@@ -941,79 +1023,84 @@ class GuiaRemisionCrear extends CustomComponent {
       isEmpty(this.state.idUbigeoLlegada) ||
       this.state.idUbigeoLlegada <= 0
     ) {
-      this.alert.warning(
-        'Guía de Remisión',
-        'Selecciona el ubigeo de llegada.',
-        () => {
-          this.refFiltrarUbigeoLlegada.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: 'Selecciona el ubigeo de llegada.',
+      }, () => {
+        this.refFiltrarUbigeoLlegada.current.focus();
+      });
       return;
     }
 
-    this.alert.dialog(
-      'Guía de Remisión',
-      '¿Está seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idVenta: this.state.venta.idVenta,
-            idSucursal: this.state.idSucursal,
-            idComprobante: this.state.idComprobante,
-            idModalidadTraslado: this.state.idModalidadTraslado,
-            idMotivoTraslado: this.state.idMotivoTraslado,
-            fechaTraslado: this.state.fechaTraslado,
-            idTipoPeso: this.state.idTipoPeso,
-            peso: this.state.peso,
-            idVehiculo: this.state.vehiculo.idVehiculo,
-            idConductor:
-              this.state.idModalidadTraslado === 'MT0001'
-                ? this.state.conductorPublico.idPersona
-                : this.state.conductor.idPersona,
-            direccionPartida: this.state.direccionPartida,
-            idUbigeoPartida: this.state.idUbigeoPartida,
-            direccionLlegada: this.state.direccionLlegada,
-            idUbigeoLlegada: this.state.idUbigeoLlegada,
-            detalle: this.state.detalle,
-            estado: 1,
-            idUsuario: this.state.idUsuario,
-          };
+    const accept = await alertKit.question({
+      title: 'Guía de Remisión',
+      message: '¿Está seguro de continuar?',
+    });
 
-          this.alert.information(
-            'Guía de Remisión',
-            'Procesando información...',
-          );
+    if (accept) {
+      const data = {
+        idVenta: this.state.venta?.idVenta,
+        idTraslado: this.state.traslado?.idTraslado,
 
-          const response = await createGuiaRemision(data);
+        idSucursal: this.state.idSucursal,
+        idComprobante: this.state.idComprobante,
+        idModalidadTraslado: this.state.idModalidadTraslado,
+        idMotivoTraslado: this.state.idMotivoTraslado,
+        fechaTraslado: this.state.fechaTraslado,
+        idTipoPeso: this.state.idTipoPeso,
+        peso: this.state.peso,
+        idVehiculo: this.state.vehiculo.idVehiculo,
+        idConductor:
+          this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO
+            ? this.state.conductorPublico.idPersona
+            : this.state.conductor.idPersona,
 
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idGuiaRemision);
-          }
+        codigoAnexoPartida: this.state.codigoAnexoPartida,
+        direccionPartida: this.state.direccionPartida,
+        idUbigeoPartida: this.state.idUbigeoPartida,
 
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
+        codigoAnexoLlegada: this.state.codigoAnexoLlegada,
+        direccionLlegada: this.state.direccionLlegada,
+        idUbigeoLlegada: this.state.idUbigeoLlegada,
 
-            this.alert.warning('Guía de Remisión', response.getMessage());
-          }
-        }
-      },
-    );
+        detalles: this.state.detalles,
+        estado: 1,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+      const response = await createGuiaRemision(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idGuiaRemision);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Guía de Remisión',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   //------------------------------------------------------------------------------------------
   // Evento para limpiar la guía de remisión
   //------------------------------------------------------------------------------------------
-  handleClear = () => {
-    this.alert.dialog(
-      'Guía de Remisión',
-      '¿Está seguro de limpiar todo el contenido?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
-      },
-    );
+  handleClear = async () => {
+    const accept = await alertKit.question({
+      title: 'Guía de Remisión',
+      message: '¿Está seguro de limpiar todo el contenido?',
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -1089,38 +1176,46 @@ class GuiaRemisionCrear extends CustomComponent {
 
         {/* Seleccione la venta */}
         <h6>
-          <span className="badge badge-primary">1</span> Venta y Guía
+          <span className="badge badge-primary">1</span> Guía
         </h6>
 
         <div className="dropdown-divider"></div>
 
         <Row>
           <Column>
-            <SearchInput
-              ref={this.refVenta}
-              autoFocus={true}
-              label={
-                <>
-                  Filtrar Venta:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Ejm: B001, 1, F001..."
-              refValue={this.refFiltrarVenta}
-              data={this.state.ventas}
-              handleClearInput={this.handleClearInputVenta}
-              handleFilter={this.handleFilterVenta}
-              handleSelectItem={this.handleSelectItemVenta}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.nombreComprobante} {value.serie}-{value.numeracion}
-                  </span>
-                  {' / '}
-                  <span>{value.informacion}</span>
-                </>
-              )}
-            />
+            {
+              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA ?
+                <div className="mb-3">
+                  <Badge variant="outline" className="text-sm bg-primary text-white">Ligado a un traslado</Badge>
+                  {/* <span className="badge badge-primary text-lg">Ligado a un traslado</span> */}
+                </div>
+                :
+                <SearchInput
+                  ref={this.refVenta}
+                  autoFocus={true}
+                  label={
+                    <>
+                      Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
+                  placeholder="Ejm: B001, 1, F001..."
+                  refValue={this.refFiltrarVenta}
+                  data={this.state.ventas}
+                  handleClearInput={this.handleClearInputVenta}
+                  handleFilter={this.handleFilterVenta}
+                  handleSelectItem={this.handleSelectItemVenta}
+                  renderItem={(value) => (
+                    <>
+                      <span>
+                        {value.nombreComprobante} {value.serie}-{value.numeracion}
+                      </span>
+                      {' / '}
+                      <span>{value.informacion}</span>
+                    </>
+                  )}
+                />
+            }
+
           </Column>
         </Row>
 
@@ -1130,9 +1225,7 @@ class GuiaRemisionCrear extends CustomComponent {
             <Select
               label={
                 <>
-                  {' '}
-                  Comprobante:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Comprobante: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               ref={this.refComprobante}
@@ -1161,8 +1254,7 @@ class GuiaRemisionCrear extends CustomComponent {
             <Input
               label={
                 <>
-                  Selecciona un Cliente:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               value={
@@ -1185,10 +1277,10 @@ class GuiaRemisionCrear extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <RadioButton
-              id={'MT0001'}
-              value={'MT0001'}
+              id={MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO}
+              value={MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO}
               name={'ckModalidadTraslado'}
-              checked={this.state.idModalidadTraslado === 'MT0001'}
+              checked={this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO}
               onChange={this.handleInputModalidadTraslado}
             >
               Público
@@ -1197,10 +1289,10 @@ class GuiaRemisionCrear extends CustomComponent {
 
           <Column formGroup={true}>
             <RadioButton
-              id={'MT0002'}
-              value={'MT0002'}
+              id={MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO}
+              value={MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO}
               name={'ckModalidadTraslado'}
-              checked={this.state.idModalidadTraslado === 'MT0002'}
+              checked={this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO}
               onChange={this.handleInputModalidadTraslado}
             >
               Privado
@@ -1416,6 +1508,28 @@ class GuiaRemisionCrear extends CustomComponent {
 
             <div className="dropdown-divider"></div>
 
+            {
+              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA && (
+                <div className="form-group">
+                  <Input
+                    group={true}
+                    iconLeft={<i className="bi bi-search"></i>}
+                    label={
+                      <>
+                        Codigo Anexo Partida: <i className="fa fa-asterisk text-danger small"></i>
+                      </>
+                    }
+                    placeholder="Ingrese su código anexo de partida..."
+                    ref={this.refCodigoAnexoPartida}
+                    value={this.state.codigoAnexoPartida}
+                    onChange={(event) => {
+                      this.setState({ codigoAnexoPartida: event.target.value });
+                    }}
+                  />
+                </div>
+              )
+            }
+
             <div className="form-group">
               <Input
                 group={true}
@@ -1467,6 +1581,28 @@ class GuiaRemisionCrear extends CustomComponent {
             </h6>
 
             <div className="dropdown-divider"></div>
+
+            {
+              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA && (
+                <div className="form-group">
+                  <Input
+                    group={true}
+                    iconLeft={<i className="bi bi-search"></i>}
+                    label={
+                      <>
+                        Codigo Anexo Llegada: <i className="fa fa-asterisk text-danger small"></i>
+                      </>
+                    }
+                    placeholder="Ingrese su código anexo de llegada..."
+                    ref={this.refCodigoAnexoLlegada}
+                    value={this.state.codigoAnexoLlegada}
+                    onChange={(event) => {
+                      this.setState({ codigoAnexoLlegada: event.target.value });
+                    }}
+                  />
+                </div>
+              )
+            }
 
             <div className="form-group">
               <Input
@@ -1525,9 +1661,7 @@ class GuiaRemisionCrear extends CustomComponent {
               <Table className="table-bordered">
                 <TableHeader>
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="10%">Código</TableHead>
                     <TableHead width="35%">Descripción</TableHead>
                     <TableHead width="15%">Und/Medida</TableHead>
@@ -1535,7 +1669,7 @@ class GuiaRemisionCrear extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {this.state.detalle.map((item, index) => (
+                  {this.state.detalles.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="text-center">{++index}</TableCell>
                       <TableCell>{item.codigo}</TableCell>

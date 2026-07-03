@@ -1,11 +1,8 @@
 import React from 'react';
 import { PosContainerWrapper } from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
-  calculateTax,
-  calculateTaxBruto,
   isEmpty,
-  formatCurrency,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { ORDEN_DE_COMPRA } from '../../../../../../model/types/tipo-comprobante';
@@ -27,7 +24,6 @@ import ModalProducto from '../component/ModalProducto';
 import {
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import Button from '../../../../../../components/Button';
 import {
   clearCrearOrdenCompra,
   setCrearOrdenCompraLocal,

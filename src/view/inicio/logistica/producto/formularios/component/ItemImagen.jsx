@@ -35,33 +35,36 @@ class ItemImage extends React.Component {
       const file = files[i];
 
       let url = URL.createObjectURL(file);
+      const imageSend = await imageBase64(file);
 
-      const logoSend = await imageBase64(file);
+      if (!imageSend) {
+        alertWarning(
+          'Producto',
+          'Error en subir la imagen',
+        );
+        continue;
+      }
 
-      if (logoSend.size > 500) {
+      if (imageSend.size > 500) {
         alertWarning(
           'Producto',
           'La imagen ' +
-            file.name +
-            ' a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de ' +
-            logoSend.size +
-            ' KB',
+          file.name +
+          ' a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de ' +
+          imageSend.size +
+          ' KB',
         );
         continue;
-      } else {
-        arrayImages.push({
-          index: indexInicial,
-          name: file.name,
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url,
-        });
-
-        indexInicial++;
       }
+
+      arrayImages.push({
+        index: indexInicial,
+        name: file.name,
+        ...imageSend,
+        url,
+      });
+
+      indexInicial++;
     }
 
     event.target.value = null;

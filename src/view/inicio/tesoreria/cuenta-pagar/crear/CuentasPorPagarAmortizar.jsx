@@ -6,7 +6,7 @@ import {
   formatCurrency,
   rounded,
 } from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
 import PropTypes from 'prop-types';

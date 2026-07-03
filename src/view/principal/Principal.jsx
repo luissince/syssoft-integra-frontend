@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { isEmpty } from '../../helper/utils.helper';
-import CustomComponent from '../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   configEmpresa,
   initSucursales,

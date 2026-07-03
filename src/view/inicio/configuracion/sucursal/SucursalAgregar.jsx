@@ -14,7 +14,7 @@ import {
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../components/SearchInput';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
@@ -23,8 +23,9 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
-import Image, { ImageUpload } from '../../../../components/Image';
+import { ImageUpload } from '../../../../components/Image';
 import TextArea from '../../../../components/TextArea';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -38,7 +39,7 @@ class SucursalAgregar extends CustomComponent {
       telefono: '',
       celular: '',
       email: '',
-      paginaWeb: '',
+      codigoAnexo: '',
       direcion: '',
       idUbigeo: '',
       googleMaps: '',
@@ -59,7 +60,6 @@ class SucursalAgregar extends CustomComponent {
     this.refTelefono = React.createRef();
     this.refCelular = React.createRef();
     this.refEmail = React.createRef();
-    this.refPaginWeb = React.createRef();
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
     this.refValueUbigeo = React.createRef();
@@ -83,35 +83,41 @@ class SucursalAgregar extends CustomComponent {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const logoSend = await imageBase64(file);
-      if (logoSend.size > 500) {
-        alertKit.warning({
-          title: 'Sucursal',
-          message: 'La imagen a subir tiene que ser menor a 500 KB.',
-        });
-        return;
-      }
-      this.setState({
-        imagen: {
-          // name: file.name,
-          base64: logoSend.base64String,
-          extension: logoSend.extension,
-          width: logoSend.width,
-          height: logoSend.height,
-          size: logoSend.size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         imagen: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const imageSend = await imageBase64(file);
+
+    if (!imageSend) {
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'Error en subir la imagen',
+      });
+      return;
+    }
+
+    if (imageSend.size > 500) {
+      alertKit.warning({
+        title: 'Sucursal',
+        message: 'La imagen a subir tiene que ser menor a 500 KB.',
+      });
+      return;
+    }
+
+    this.setState({
+      imagen: {
+        ...imageSend,
+        url: url,
+      },
+    });
 
     event.target.value = null;
   };
@@ -230,7 +236,7 @@ class SucursalAgregar extends CustomComponent {
         telefono: this.state.telefono.trim(),
         celular: this.state.celular.trim(),
         email: this.state.email.trim(),
-        paginaWeb: this.state.paginaWeb.trim(),
+        codigoAnexo: this.state.codigoAnexo.trim(),
         direccion: this.state.direcion.trim().toUpperCase(),
         idUbigeo: this.state.idUbigeo,
         googleMaps: this.state.googleMaps,
@@ -336,15 +342,14 @@ class SucursalAgregar extends CustomComponent {
                 />
               </Column>
 
-              <Column className={'col-md-6'} formGroup={true}>
+              <Column formGroup={true}>
                 <Input
-                  label={'Página Web:'}
-                  ref={this.refPaginWeb}
-                  value={this.state.paginaWeb}
+                  label="Código Anexo:"
+                  value={this.state.codigoAnexo}
                   onChange={(event) =>
-                    this.setState({ paginaWeb: event.target.value })
+                    this.setState({ codigoAnexo: event.target.value })
                   }
-                  placeholder="Ingrese su página web ..."
+                  placeholder="Ingrese su código de anexo ..."
                 />
               </Column>
             </Row>
@@ -354,8 +359,7 @@ class SucursalAgregar extends CustomComponent {
                 <Input
                   label={
                     <>
-                      Dirección:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
+                      Dirección: <i className="fa fa-asterisk text-danger small"></i>
                     </>
                   }
                   ref={this.refDireccion}

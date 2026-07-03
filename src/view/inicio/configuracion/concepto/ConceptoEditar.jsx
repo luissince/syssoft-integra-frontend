@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   alertDialog,
   alertInfo,

@@ -1,5 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   alertWarning,
   calculateTax,
@@ -266,8 +266,8 @@ class CotizacionDetalle extends CustomComponent {
     phone,
     callback = async function () {},
   ) => {
-    const { razonSocial } = this.props.predeterminado.empresa;
-    const { paginaWeb, email } = this.props.token.project;
+    const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
+    const { email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
@@ -791,12 +791,12 @@ CotizacionDetalle.propTypes = {
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
+      paginaWeb: PropTypes.string,
       razonSocial: PropTypes.string,
     }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
-      paginaWeb: PropTypes.string,
       email: PropTypes.string,
     }),
   }),

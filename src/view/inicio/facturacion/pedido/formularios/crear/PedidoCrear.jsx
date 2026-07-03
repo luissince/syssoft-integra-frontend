@@ -1,6 +1,6 @@
 import React from 'react';
 import { PosContainerWrapper } from '../../../../../../components/Container';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,

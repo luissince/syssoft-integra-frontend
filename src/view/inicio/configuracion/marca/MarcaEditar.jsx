@@ -9,7 +9,7 @@ import {
   getIdMarca,
   updateMarca,
 } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import PropTypes from 'prop-types';
@@ -120,51 +120,55 @@ class MarcaEditar extends CustomComponent {
   handleFileImage = async (event) => {
     const files = event.currentTarget.files;
 
-    if (!isEmpty(files)) {
-      const file = files[0];
-      let url = URL.createObjectURL(file);
-      const { size, base64String, extension, width, height } =
-        await imageBase64(file);
-
-      if (width !== 300 || height !== 200) {
-        alertKit.warning({
-          title: 'Categoría',
-          message:
-            'La imagen ' +
-            file.name +
-            ' tiene que tener un aspecto de 300 x 200 pixeles',
-        });
-        return;
-      }
-
-      if (size > 500) {
-        alertKit.warning({
-          title: 'Categoría',
-          message:
-            'La imagen ' +
-            file.name +
-            ' tiene que tener un tamaño de menos de 500 KB',
-        });
-        return;
-      }
-
-      this.setState({
-        imagen: {
-          base64: base64String,
-          extension: extension,
-          width: width,
-          height: height,
-          size: size,
-          url: url,
-        },
-      });
-    } else {
+    if (isEmpty(files)) {
       this.setState({
         imagen: {
           url: images.noImage,
         },
       });
+      return;
     }
+
+    const file = files[0];
+    let url = URL.createObjectURL(file);
+    const imageSend = await imageBase64(file);
+
+    if (!imageSend) {
+      alertKit.warning({
+        title: 'Categoría',
+        message: 'Error en subir la imagen',
+      });
+      return;
+    }
+
+    if (imageSend.width !== 300 || imageSend.height !== 200) {
+      alertKit.warning({
+        title: 'Categoría',
+        message:
+          'La imagen ' +
+          file.name +
+          ' tiene que tener un aspecto de 300 x 200 pixeles',
+      });
+      return;
+    }
+
+    if (imageSend.size > 500) {
+      alertKit.warning({
+        title: 'Categoría',
+        message:
+          'La imagen ' +
+          file.name +
+          ' tiene que tener un tamaño de menos de 500 KB',
+      });
+      return;
+    }
+
+    this.setState({
+      imagen: {
+        ...imageSend,
+        url: url,
+      },
+    });
 
     event.target.value = null;
   };

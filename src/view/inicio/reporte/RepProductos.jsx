@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
 import { SpinnerView } from '../../../components/Spinner';
 import Title from '../../../components/Title';
-import CustomComponent from '../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { downloadFileAsync } from '../../../redux/downloadSlice';
 import {
   ChartNoAxesCombined,

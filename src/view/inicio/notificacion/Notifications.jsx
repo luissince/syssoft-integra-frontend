@@ -5,7 +5,7 @@ import {
 } from '../../../helper/utils.helper';
 import Paginacion from '../../../components/Paginacion';
 import ContainerWrapper from '@/components/Container';
-import CustomComponent from '../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { detailNotifications } from '../../../network/rest/principal.network';
 import SuccessReponse from '../../../model/class/response';
 import ErrorResponse from '../../../model/class/error-response';

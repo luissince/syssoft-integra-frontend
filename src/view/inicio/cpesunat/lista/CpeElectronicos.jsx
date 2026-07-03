@@ -30,7 +30,7 @@ import {
   obtenerXmlSunat,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   VENTA,
   GUIA_DE_REMISION,

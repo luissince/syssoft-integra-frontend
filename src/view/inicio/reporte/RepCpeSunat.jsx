@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../components/Container';
-import CustomComponent from '../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '../../../components/Spinner';
 import Title from '../../../components/Title';
 import Row from '../../../components/Row';

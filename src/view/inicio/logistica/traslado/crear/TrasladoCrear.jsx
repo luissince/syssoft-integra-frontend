@@ -8,7 +8,7 @@ import {
 } from '../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import {
@@ -386,10 +386,7 @@ class TrasladorCrear extends CustomComponent {
       idSucursal: event.target.value,
     };
 
-    const almacenes = await this.fetchComboAlmacen(
-      params,
-      this.abortController.signal,
-    );
+    const almacenes = await this.fetchComboAlmacen(params);
 
     this.setState({
       almacenesExterno: almacenes,
@@ -626,16 +623,16 @@ class TrasladorCrear extends CustomComponent {
       const data = {
         idTipoTraslado: this.state.idTipoTraslado,
         idMotivoTraslado: this.state.idMotivoTraslado,
+        idSucursalOrigen: this.state.idSucursal,
         idAlmacenOrigen:
           this.state.idTipoTraslado === 'TT0001'
             ? this.state.idAlmacenOrigenInterno
             : this.state.idAlmacenOrigenExterno,
+        idSucursalDestino: this.state.idSucursalExterno,
         idAlmacenDestino:
           this.state.idTipoTraslado === 'TT0001'
             ? this.state.idAlmacenDestinoInterno
             : this.state.idAlmacenDestinoExterno,
-        idSucursalDestino: this.state.idSucursalExterno,
-        idSucursal: this.state.idSucursal,
         observacion: this.state.observacion,
         idUsuario: this.state.idUsuario,
 

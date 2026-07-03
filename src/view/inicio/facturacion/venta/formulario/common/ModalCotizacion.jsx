@@ -27,7 +27,7 @@ import {
   keyUpSearch,
   formatCurrency,
 } from '../../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import { listCotizacion } from '../../../../../../network/rest/principal.network';

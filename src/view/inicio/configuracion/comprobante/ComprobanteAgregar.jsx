@@ -1,5 +1,5 @@
 import React from 'react';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import ContainerWrapper from '../../../../components/Container';
 import {
   alertDialog,

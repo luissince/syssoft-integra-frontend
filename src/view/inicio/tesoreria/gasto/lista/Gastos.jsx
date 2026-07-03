@@ -1,10 +1,6 @@
 import React from 'react';
 import {
   formatTime,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   formatNumberWithZeros,
   formatCurrency,
@@ -19,7 +15,7 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
@@ -36,6 +32,7 @@ import {
   TableRow,
 } from '../../../../../components/Table';
 import Search from '../../../../../components/Search';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -215,35 +212,49 @@ class Gastos extends CustomComponent {
     });
   };
 
-  handleAnular = (idGasto) => {
-    alertDialog(
-      'Gasto',
-      '¿Está seguro de que desea eliminar el gasto? Esta operación no se puede deshacer.',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idGasto: idGasto,
-            idUsuario: this.state.idUsuario,
-          };
-
-          alertInfo('Gasto', 'Procesando información...');
-
-          const response = await cancelGasto(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Gasto', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Gasto', response.getMessage());
-          }
-        }
+  handleAnular = async (idGasto) => {
+    const accept = await alertKit.question({
+      title: 'Gasto',
+      message: '¿Está seguro de que desea eliminar el gasto? Esta operación no se puede deshacer.',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idGasto: idGasto,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await cancelGasto(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Gasto',
+          message: response.data,
+          onClose: () => {
+            this.loadInit();
+          },
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Gasto',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   /*
