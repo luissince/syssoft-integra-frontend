@@ -36,7 +36,7 @@ import {
   TableResponsive,
   TableRow,
 } from '../../../components/Table';
-import CustomComponent from '../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import pdfVisualizer from 'pdf-visualizer';
 import {
   documentsExcelPersonaProveedor,

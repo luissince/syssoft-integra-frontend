@@ -15,11 +15,11 @@ import {
   findOneAcceso,
   saveAcceso,
   updateAcceso,
-} from '../../../../network/rest/principal.network.js';
-import SuccessReponse from '../../../../model/class/response.js';
-import ErrorResponse from '../../../../model/class/error-response.js';
+} from '../../../../network/rest/principal.network';
+import SuccessReponse from '../../../../model/class/response';
+import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types.js';
-import CustomComponent from '../../../../model/class/custom-component.js';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';

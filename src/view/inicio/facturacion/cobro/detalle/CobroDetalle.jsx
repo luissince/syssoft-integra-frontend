@@ -13,7 +13,7 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -211,8 +211,8 @@ class CobroDetalle extends CustomComponent {
     phone,
     callback = async function () {},
   ) => {
-    const { razonSocial } = this.props.predeterminado.empresa;
-    const { paginaWeb, email } = this.props.token.project;
+    const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
+    const { email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
@@ -539,12 +539,12 @@ CobroDetalle.propTypes = {
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
+      paginaWeb: PropTypes.string,
       razonSocial: PropTypes.string,
     }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
-      paginaWeb: PropTypes.string,
       email: PropTypes.string,
     }),
   }),

@@ -176,9 +176,9 @@ import {
   configEmpresa,
   listNotificacion,
   nacionalMoneda,
-} from '../../network/rest/principal.network.js';
-import SuccessReponse from '../../model/class/response.js';
-import ErrorResponse from '../../model/class/error-response.js';
+} from '../../network/rest/principal.network';
+import SuccessReponse from '../../model/class/response';
+import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types.js';
 import FileDownloader from '../../components/FileDownloader';
 import { images } from '../../helper/index';

@@ -27,7 +27,7 @@ import {
   keyUpSearch,
   formatCurrency,
 } from '../../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { listVenta } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';

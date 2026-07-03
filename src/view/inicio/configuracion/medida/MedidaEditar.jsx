@@ -16,7 +16,7 @@ import {
   getIdMedida,
   updateMedida,
 } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../components/Spinner';
 import Title from '../../../../components/Title';

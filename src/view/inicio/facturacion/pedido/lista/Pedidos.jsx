@@ -10,7 +10,7 @@ import {
   isEmpty,
   formatCurrency,
 } from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   listPedido,
   cancelPedido,

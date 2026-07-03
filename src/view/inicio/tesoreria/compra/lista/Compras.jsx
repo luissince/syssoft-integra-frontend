@@ -1,5 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Paginacion from '../../../../../components/Paginacion';
 import {
   formatTime,

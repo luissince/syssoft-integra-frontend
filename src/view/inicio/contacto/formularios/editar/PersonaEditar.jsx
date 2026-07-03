@@ -22,7 +22,7 @@ import {
 } from '../../../../../network/rest/principal.network';
 import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
 import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../../components/SearchInput';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';

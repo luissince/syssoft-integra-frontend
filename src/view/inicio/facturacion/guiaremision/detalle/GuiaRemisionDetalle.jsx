@@ -1,5 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   isText,
   formatTime,
@@ -39,7 +39,7 @@ import { images } from '../../../../../helper';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class GuiaRemisionDetalle extends CustomComponent {
   /**
@@ -262,8 +262,8 @@ class GuiaRemisionDetalle extends CustomComponent {
     phone,
     callback = async function () {},
   ) => {
-    const { razonSocial } = this.props.predeterminado.empresa;
-    const { paginaWeb, email } = this.props.token.project;
+    const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
+    const { email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
@@ -572,7 +572,6 @@ GuiaRemisionDetalle.propTypes = {
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
-      paginaWeb: PropTypes.string,
       email: PropTypes.string,
     }).isRequired,
   }).isRequired,
@@ -584,6 +583,7 @@ GuiaRemisionDetalle.propTypes = {
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
+      paginaWeb: PropTypes.string,
       razonSocial: PropTypes.string,
     }),
   }),
