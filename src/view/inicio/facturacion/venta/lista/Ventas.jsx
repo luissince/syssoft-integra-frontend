@@ -5,13 +5,13 @@ import {
   isEmpty,
   formatNumberWithZeros,
   currentDate,
-  getPathNavigation,
   getStatePrivilegio,
+  getPathRoute,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import {
   cancelVenta,
@@ -47,6 +47,7 @@ import {
 import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import { cn } from '@/lib/utils';
+import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -311,7 +312,7 @@ class Ventas extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -387,6 +388,16 @@ class Ventas extends CustomComponent {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
       search: '?idVenta=' + idVenta,
+    });
+  };
+
+  handleGuiaRemision = (idVenta) => {
+    this.props.history.push({
+      pathname: getPathRoute('guia-create'),
+      state: {
+        idVenta: idVenta,
+        idMotivoTraslado: MOTIVO_TRASLADO.VENTA,
+      }
     });
   };
 
@@ -733,9 +744,7 @@ class Ventas extends CustomComponent {
                                 <i className="fa fa-check text-lg"></i>
                               </span>
                             ) : (
-                              <Link
-                                to={getPathNavigation('guia-create', item.idVenta)}
-                                // className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-300"
+                              <button
                                 className={`
                                   block text-center
                                   p-2 rounded-md text-sm font-medium transition
@@ -746,9 +755,10 @@ class Ventas extends CustomComponent {
                                   disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
                                 `}
                                 title="Generar guía"
+                                onClick={() => this.handleGuiaRemision(item.idVenta)}
                               >
                                 <i className="fa fa-truck text-lg"></i>
-                              </Link>
+                              </button>
                             )}
                           </td>
                           <td className="px-6 py-4 text-center">
@@ -885,8 +895,7 @@ class Ventas extends CustomComponent {
                             </span>
                           ) :
                             (
-                              <Link
-                                to={getPathNavigation('guia-create', item.idVenta)}
+                              <button
                                 className={`
                                   block text-center
                                   p-2 rounded-md text-sm font-medium transition
@@ -897,9 +906,10 @@ class Ventas extends CustomComponent {
                                   disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
                                 `}
                                 title="Generar guía"
+                                onClick={() => this.handleGuiaRemision(item.idVenta)}
                               >
                                 <i className="fa fa-truck mr-1"></i> Guía
-                              </Link>
+                              </button>
                             )}
 
                           <button

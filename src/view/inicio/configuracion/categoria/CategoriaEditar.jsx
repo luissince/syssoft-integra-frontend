@@ -9,7 +9,7 @@ import {
   getIdCategoria,
   updateCategoria,
 } from '../../../../network/rest/principal.network';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import PropTypes from 'prop-types';

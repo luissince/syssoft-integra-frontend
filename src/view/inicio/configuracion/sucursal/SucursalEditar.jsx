@@ -20,7 +20,7 @@ import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
 import SearchInput from '../../../../components/SearchInput';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
 import Row from '../../../../components/Row';
@@ -50,7 +50,8 @@ class SucursalEditar extends CustomComponent {
       telefono: '',
       celular: '',
       email: '',
-      paginaWeb: '',
+
+      codigoAnexo: '',
       direcion: '',
       idUbigeo: '',
       googleMaps: '',
@@ -71,7 +72,6 @@ class SucursalEditar extends CustomComponent {
     this.refTelefono = React.createRef();
     this.refCelular = React.createRef();
     this.refEmail = React.createRef();
-    this.refPaginWeb = React.createRef();
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
     this.refValueUbigeo = React.createRef();
@@ -108,7 +108,7 @@ class SucursalEditar extends CustomComponent {
       telefono: sucursal.telefono,
       celular: sucursal.celular,
       email: sucursal.email,
-      paginaWeb: sucursal.paginaWeb,
+      codigoAnexo: sucursal.codigoAnexo,
       direcion: sucursal.direccion,
       googleMaps: sucursal.googleMaps,
       horarioAtencion: sucursal.horarioAtencion,
@@ -317,7 +317,7 @@ class SucursalEditar extends CustomComponent {
         telefono: this.state.telefono.trim(),
         celular: this.state.celular.trim(),
         email: this.state.email.trim(),
-        paginaWeb: this.state.paginaWeb.trim(),
+        codigoAnexo: this.state.codigoAnexo.trim(),
         direccion: this.state.direcion.trim(),
         idUbigeo: this.state.idUbigeo,
         googleMaps: this.state.googleMaps,
@@ -429,15 +429,14 @@ class SucursalEditar extends CustomComponent {
                 />
               </Column>
 
-              <Column className={'col-md-6'} formGroup={true}>
+              <Column formGroup={true}>
                 <Input
-                  label={'Página Web:'}
-                  ref={this.refPaginWeb}
-                  value={this.state.paginaWeb}
+                  label="Código Anexo:"
+                  value={this.state.codigoAnexo}
                   onChange={(event) =>
-                    this.setState({ paginaWeb: event.target.value })
+                    this.setState({ codigoAnexo: event.target.value })
                   }
-                  placeholder="Ingrese su página web ..."
+                  placeholder="Ingrese su código anexo ..."
                 />
               </Column>
             </Row>

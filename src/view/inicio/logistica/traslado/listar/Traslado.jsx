@@ -1,16 +1,13 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   formatTime,
+  getPathRoute,
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import Paginacion from '../../../../../components/Paginacion';
 import { currentDate } from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import PropTypes from 'prop-types';
@@ -43,6 +40,9 @@ import {
   setListaTrasladoData,
   setListaTrasladoPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
+import { alertKit } from 'alert-kit';
+import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -81,6 +81,8 @@ class Traslado extends CustomComponent {
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
+
+      view: "tabla",
     };
 
     this.refPaginacion = React.createRef();
@@ -125,17 +127,14 @@ class Traslado extends CustomComponent {
         this.fetchSucursal(),
       ]);
 
-      this.setState(
-        {
-          tipoTraslado,
-          sucursales,
-          initialLoad: false,
-        },
-        async () => {
-          await this.loadingInit();
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        tipoTraslado,
+        sucursales,
+        initialLoad: false,
+      }, async () => {
+        await this.loadInit();
+        this.updateReduxState();
+      });
     }
   };
 
@@ -151,7 +150,7 @@ class Traslado extends CustomComponent {
     });
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -241,19 +240,16 @@ class Traslado extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina)),
       );
 
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+        lista: response.data.result,
+        totalPaginacion: totalPaginacion,
+      }, () => {
+        this.updateReduxState();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -296,6 +292,10 @@ class Traslado extends CustomComponent {
     }
   }
 
+  handleChangeView(value) {
+    this.setState({ view: value }, () => this.updateReduxState());
+  };
+
   handleSelectTipoTraslado = (event) => {
     this.setState({ idTipoTraslado: event.target.value }, () => {
       this.searchTipoTraslado();
@@ -326,47 +326,74 @@ class Traslado extends CustomComponent {
     });
   };
 
-  handleDetalle = (idAjuste) => {
+  handleDetalle = (idTraslado) => {
     this.props.history.push({
       pathname: `${this.props.location.pathname}/detalle`,
-      search: '?idTraslado=' + idAjuste,
+      search: '?idTraslado=' + idTraslado,
     });
   };
 
-  handleCancelar = (idTraslado) => {
-    alertDialog(
-      'Traslado',
-      '¿Estás seguro de anular el traslado?',
-      async (acccept) => {
-        if (acccept) {
-          alertInfo('Traslado', 'Procesando información...');
+  handleGuiaRemision = (idTraslado) => {
+    this.props.history.push({
+      pathname: getPathRoute('guia-create'),
+      state: {
+        idTraslado: idTraslado,
+        idMotivoTraslado: MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA,
 
-          const params = {
-            idTraslado: idTraslado,
-            idUsuario: this.state.idUsuario,
-          };
+      }
+    });
+  };
 
-          const response = await cancelTraslado(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Ajuste', response.data, () => {
-              this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Ajuste', response.getMessage());
-          }
-        }
+  handleCancelar = async (idTraslado) => {
+    const accept = await alertKit.question({
+      title: 'Traslado',
+      message: '¿Estás seguro de anular el traslado?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const params = {
+        idTraslado: idTraslado,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await cancelTraslado(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Traslado',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Traslado',
+          message: response.getMessage(),
+        });
+      }
+    }
+
   };
 
   generateBody = () => {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan="10"
           message="Cargando información de la tabla..."
         />
       );
@@ -375,7 +402,7 @@ class Traslado extends CustomComponent {
     if (isEmpty(this.state.lista)) {
       return (
         <TableRow>
-          <TableCell className="text-center" colSpan="9">
+          <TableCell className="text-center" colSpan="10">
             ¡No hay datos registrados!
           </TableCell>
         </TableRow>
@@ -416,6 +443,14 @@ class Traslado extends CustomComponent {
           </TableCell>
           <TableCell className="text-center">
             <Button
+              className="btn-outline-secondary btn-sm"
+              onClick={() => this.handleGuiaRemision(item.idTraslado)}
+            >
+              <i className="fa fa-truck text-lg"></i>
+            </Button>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleCancelar(item.idTraslado)}
             >
@@ -428,102 +463,159 @@ class Traslado extends CustomComponent {
   };
 
   render() {
+    const { view } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
           loading={this.state.initialLoad}
           message={this.state.initialMessage}
-          // body={<>
-          //   <div className='d-flex flex-column align-items-center'>
-          //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
-          //     <Button
-          //       className='btn-danger'>
-          //       <i className='fa fa-refresh'></i> Recargar
-          //     </Button>
-          //   </div>
-          // </>}
+        // body={<>
+        //   <div className='d-flex flex-column align-items-center'>
+        //     <p>No se pudo obtener los datos requeridos, comuníquese con su proveedor del sistema.</p>
+        //     <Button
+        //       className='btn-danger'>
+        //       <i className='fa fa-refresh'></i> Recargar
+        //     </Button>
+        //   </div>
+        // </>}
         />
 
+        {/* Encabezado */}
         <Title
           title="Traslado"
           subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button className="btn-outline-info" onClick={this.handleAgregar}>
-              <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadingInit}
+        {/* Acciones principales + Toggle view */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-blue-600 text-white text-sm font-medium rounded",
+                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+              )}
+              onClick={this.handleAgregar}
+              aria-label="Crear nueva venta"
             >
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className="col-md-3" formGroup={true}>
-            <Select
-              label={'Tipo:'}
-              value={this.state.idTipoTraslado}
-              onChange={this.handleSelectTipoTraslado}
+              <i className="bi bi-file-plus"></i>
+              Nuevo Registro
+            </button>
+            <button
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
+              onClick={this.loadInit}
             >
-              <option value="0">-- Selecciona --</option>
-              {this.state.tipoTraslado.map((item, index) => (
-                <option key={index} value={item.idTipoTraslado}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
-          </Column>
+              <i className="bi bi-arrow-clockwise"></i>
+              Recargar Vista
+            </button>
+          </div>
 
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <Input
-              type="date"
-              label={'Fecha Inicio:'}
-              value={this.state.fechaInicio}
-              onChange={this.handleInputFechaInicio}
-            />
-          </Column>
-
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <Input
-              label={'Fecha Final:'}
-              type="date"
-              value={this.state.fechaFinal}
-              onChange={this.handleInputFechaFinal}
-            />
-          </Column>
-
-          <Column className="col-md-3 col-sm-12" formGroup={true}>
-            <Select
-              label={'Sucursal:'}
-              value={this.state.idSucursal}
-              onChange={this.handleSelectSucursal}
+          {/* Toggle view */}
+          <div className="flex bg-gray-100 rounded p-1 gap-1">
+            <button
+              onClick={() => this.handleChangeView("tabla")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
             >
-              {this.state.sucursales.map((item, index) => (
-                <option key={index} value={item.idSucursal}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
-          </Column>
-        </Row>
+              <i className="bi bi-list-ul"></i>
+              <span className="hidden sm:inline">Tabla</span>
+            </button>
+            <button
+              onClick={() => this.handleChangeView("cuadricula")}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-grid-3x3"></i>
+              <span className="hidden sm:inline">Cuadrícula</span>
+            </button>
+          </div>
+        </div>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar..."
-            />
-          </Column>
-        </Row>
+        <div className="flex flex-col gap-y-4 mb-4">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Puedes ver todos los traslados con diferentes filtros.
+            </p>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="max-w-7xl mx-auto">
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+            {/* Tipo Traslado */}
+            <div className="flex flex-col gap-2">             
+              <select
+                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                value={this.state.idTipoTraslado}
+                onChange={this.handleSelectTipoTraslado}
+              >
+                <option value="0">-- Selecciona --</option>
+                {
+                  this.state.tipoTraslado.map((item, index) => (
+                    <option key={index} value={item.idTipoTraslado}>
+                      {item.nombre}
+                    </option>
+                  ))
+                }
+              </select>
+            </div>
+
+            {/* Fecha Inicio */}
+            <div className="flex flex-col gap-2">             
+              <input
+                type="date"
+                value={this.state.fechaInicio}
+                onChange={this.handleInputFechaInicio}
+                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Fecha Final */}
+            <div className="flex flex-col gap-2">              
+              <input
+                type="date"
+                value={this.state.fechaFinal}
+                onChange={this.handleInputFechaFinal}
+                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Barra de búsqueda */}
+          <div className="w-full flex gap-4 mb-4">
+            <div className="w-full">
+              <Search
+                group={true}
+                iconLeft={<i className="bi bi-search text-gray-400"></i>}
+                ref={this.refSearch}
+                onSearch={this.searchText}
+                placeholder="Filtrar..."
+                theme="modern"
+              />
+            </div>
+          </div>
+        </div>
 
         <Row>
           <Column>
@@ -531,24 +623,21 @@ class Traslado extends CustomComponent {
               <Table className={'table-bordered'}>
                 <TableHeader className="thead-light">
                   <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">#</TableHead>
                     <TableHead width="15%">Fecha y Hora</TableHead>
                     <TableHead width="15%">Tipo / Motivo</TableHead>
                     <TableHead width="15%">Almacen Origen</TableHead>
                     <TableHead width="15%">Almacen Destino</TableHead>
                     <TableHead width="20%">Observación</TableHead>
                     <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Detalle
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Anular
-                    </TableHead>
+                    <TableHead width="5%" className="text-center">Detalle</TableHead>
+                    <TableHead width="5%" className="text-center">Guía</TableHead>
+                    <TableHead width="5%" className="text-center">Anular</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>{this.generateBody()}</TableBody>
+                <TableBody>
+                  {this.generateBody()}
+                </TableBody>
               </Table>
             </TableResponsive>
           </Column>

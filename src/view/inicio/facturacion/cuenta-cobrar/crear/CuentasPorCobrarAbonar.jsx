@@ -1,5 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,
@@ -304,8 +304,8 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     phone,
     callback = async function () {},
   ) => {
-    const { razonSocial } = this.props.predeterminado.empresa;
-    const { paginaWeb, email } = this.props.token.project;
+    const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
+    const { email } = this.props.token.project;
 
     const companyInfo = {
       name: razonSocial,
@@ -1028,7 +1028,6 @@ CuentasPorCobrarAbonar.propTypes = {
     }).isRequired,
     project: PropTypes.shape({
       idSucursal: PropTypes.string.isRequired,
-      paginaWeb: PropTypes.string,
       email: PropTypes.string,
     }).isRequired,
   }).isRequired,
@@ -1040,6 +1039,7 @@ CuentasPorCobrarAbonar.propTypes = {
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
+      paginaWeb: PropTypes.string,
       razonSocial: PropTypes.string,
     }),
   }),

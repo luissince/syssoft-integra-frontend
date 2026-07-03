@@ -14,7 +14,7 @@ import {
   validateNumericInputs,
   rounded,
 } from '../helper/utils.helper';
-import CustomComponent from '../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import {
   ADELANTADO,
   CONTADO,

@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
 import Paginacion from '../../../../../components/Paginacion';
 import { currentDate } from '../../../../../helper/utils.helper';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import {

@@ -537,12 +537,10 @@ export async function listVenta(params, signal) {
     }),
   );
 }
-
-export async function listFiltrarVenta(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/factura/filtrar', {
+export async function filterVenta(filter, idSucursal, signal) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/factura/filter/${filter}/${idSucursal}`, {
       signal: signal,
-      params: params,
     }),
   );
 }
@@ -556,15 +554,6 @@ export async function createVenta(data) {
 export async function detailVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/detail', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
-
-export async function detailOnlyVenta(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/factura/detail/only', {
       signal: signal,
       params: params,
     }),
@@ -631,6 +620,23 @@ export async function dashboardVenta(params, signal) {
     }),
   );
 }
+
+export async function getShippingGuideVenta(idVenta, signal) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/factura/shippingGuide/${idVenta}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function getDetailsShippingGuideVenta(idVenta, signal) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/factura/shippingGuide/${idVenta}/details`, {
+      signal: signal,
+    }),
+  );
+}
+
 
 export function documentsPdfInvoicesVenta(idVenta, size, outputType = "pdf") {
   return `${import.meta.env.VITE_APP_BACK_END
@@ -910,6 +916,22 @@ export function getPdfTraslado(idTraslado, size = "A4", outputType = "pdf") {
   return `${import.meta.env.VITE_APP_BACK_END}/api/traslado/pdf/${idTraslado}/${size}`;
 }
 
+export async function getShippingGuideTraslado(idTraslado, signal) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/traslado/shipping-guide/${idTraslado}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function getDetailsShippingGuideTraslado(idTraslado, signal) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/traslado/shipping-guide/${idTraslado}/details`, {
+      signal: signal,
+    }),
+  );
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA TRASLADO
 // ------------------------------------------------------------------------
@@ -1130,15 +1152,6 @@ export async function listGuiaRemision(params, signal) {
   );
 }
 
-export async function idGuiaRemision(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/guiaremision/id', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
-
 export async function detailGuiaRemision(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/guiaremision/detail', {
@@ -1148,10 +1161,9 @@ export async function detailGuiaRemision(params, signal) {
   );
 }
 
-export async function detailUpdateGuiaRemision(params, signal) {
+export async function getIdGuiaRemision(idGuiaRemision, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/guiaremision/detail/update', {
-      params: params,
+    instancePrincipal.get(`/api/guiaremision/id/${idGuiaRemision}`, {
       signal: signal,
     }),
   );
@@ -2364,9 +2376,11 @@ export async function loginApi(data, signal = null) {
   );
 }
 
-export async function validToken() {
+export async function validToken(signal = null) {
   return await Resolve.create(
-    instancePrincipal.get('/api/usuario/valid/token'),
+    instancePrincipal.get('/api/usuario/valid/token', {
+      signal: signal,
+    }),
   );
 }
 // ------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 
 /**
  * Componente que representa una funcionalidad específica.

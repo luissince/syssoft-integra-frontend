@@ -4,7 +4,7 @@ import {
   isText,
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { detailTraslado, getPdfTraslado } from '../../../../../network/rest/principal.network';
@@ -28,13 +28,14 @@ import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
 import Button from '../../../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class TrasladoDetalle extends CustomComponent {
-  
+
   /**
    * Crea una nueva instancia del componente Venta.
    *
@@ -48,16 +49,7 @@ class TrasladoDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idTraslado: '',
-
-      tipo: '',
-      almacenOrigen: '',
-      almacenDestino: '',
-      sucursalDestino: '',
-      estado: 0,
-      fecha: '',
-      hora: '',
-      motivo: '',
-      observacion: '',
+      cabecera: {},
       detalles: [],
 
       idSucursal: this.props.token.project.idSucursal,
@@ -114,16 +106,8 @@ class TrasladoDetalle extends CustomComponent {
 
     this.setState({
       idTraslado: id,
-      fecha: traslado.cabecera.fecha,
-      hora: traslado.cabecera.hora,
-      tipo: traslado.cabecera.tipo,
-      motivo: traslado.cabecera.motivo,
-      observacion: traslado.cabecera.observacion,
-      almacenOrigen: traslado.cabecera.almacenOrigen,
-      almacenDestino: traslado.cabecera.almacenDestino,
-      sucursalDestino: traslado.cabecera.sucursalDestino,
-      estado: traslado.cabecera.estado,
 
+      cabecera: traslado.cabecera,
       detalles: traslado.detalles,
       loading: false,
     });
@@ -205,15 +189,8 @@ class TrasladoDetalle extends CustomComponent {
 
   render() {
     const {
-      tipo,
-      motivo,
-      almacenOrigen,
-      almacenDestino,
-      sucursalDestino,
-      estado,
-      fecha,
-      hora,
-      observacion,
+      cabecera,
+      detalles
     } = this.state;
 
     return (
@@ -262,7 +239,7 @@ class TrasladoDetalle extends CustomComponent {
                       Fecha y Hora
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {fecha} - {formatTime(hora)}
+                      {cabecera && `${cabecera.fecha} ${formatTime(cabecera.hora)}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -270,7 +247,7 @@ class TrasladoDetalle extends CustomComponent {
                       Tipo de traslado
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {tipo}
+                      {cabecera && `${cabecera.tipo}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -278,7 +255,15 @@ class TrasladoDetalle extends CustomComponent {
                       Motivo
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {motivo}
+                      {cabecera && `${cabecera.motivo}`}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Sucursal de Origen
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {cabecera && `${cabecera.sucursalOrigen}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -286,7 +271,7 @@ class TrasladoDetalle extends CustomComponent {
                       Almacen de Origen
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {almacenOrigen}
+                      {cabecera && `${cabecera.almacenOrigen}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -294,7 +279,7 @@ class TrasladoDetalle extends CustomComponent {
                       Sucursal de Destino
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {sucursalDestino}
+                      {cabecera && `${cabecera.sucursalDestino}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -302,7 +287,7 @@ class TrasladoDetalle extends CustomComponent {
                       Almacen de Destino
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {almacenDestino}
+                      {cabecera && `${cabecera.almacenDestino}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -310,7 +295,7 @@ class TrasladoDetalle extends CustomComponent {
                       Observación
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {observacion}
+                      {cabecera && `${cabecera.observacion}`}
                     </TableHead>
                   </TableRow>
                   <TableRow>
@@ -318,11 +303,12 @@ class TrasladoDetalle extends CustomComponent {
                       Estado
                     </TableHead>
                     <TableHead
-                      className={`table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal ${
-                        estado === 1 ? 'text-success' : 'text-danger'
-                      }`}
+                      className={cn(
+                        'table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal',
+                        cabecera && `${cabecera.estado === 1 ? 'text-success' : 'text-danger'}`,
+                      )}
                     >
-                      {estado === 1 ? 'ACTIVO' : 'ANULADO'}
+                      {cabecera && `${cabecera.estado === 1 ? 'ACTIVO' : 'ANULADO'}`}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -347,7 +333,7 @@ class TrasladoDetalle extends CustomComponent {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {this.state.detalles.map((item, index) => {
+                  {detalles.map((item, index) => {
                     return (
                       <TableRow key={index}>
                         <TableCell className="text-center">{item.id}</TableCell>

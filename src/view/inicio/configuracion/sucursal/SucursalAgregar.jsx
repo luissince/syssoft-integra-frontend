@@ -14,7 +14,7 @@ import {
 } from '../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
-import CustomComponent from '../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../components/SearchInput';
 import { CANCELED } from '../../../../model/types/types';
 import Title from '../../../../components/Title';
@@ -39,7 +39,7 @@ class SucursalAgregar extends CustomComponent {
       telefono: '',
       celular: '',
       email: '',
-      paginaWeb: '',
+      codigoAnexo: '',
       direcion: '',
       idUbigeo: '',
       googleMaps: '',
@@ -60,7 +60,6 @@ class SucursalAgregar extends CustomComponent {
     this.refTelefono = React.createRef();
     this.refCelular = React.createRef();
     this.refEmail = React.createRef();
-    this.refPaginWeb = React.createRef();
     this.refDireccion = React.createRef();
     this.refUbigeo = React.createRef();
     this.refValueUbigeo = React.createRef();
@@ -237,7 +236,7 @@ class SucursalAgregar extends CustomComponent {
         telefono: this.state.telefono.trim(),
         celular: this.state.celular.trim(),
         email: this.state.email.trim(),
-        paginaWeb: this.state.paginaWeb.trim(),
+        codigoAnexo: this.state.codigoAnexo.trim(),
         direccion: this.state.direcion.trim().toUpperCase(),
         idUbigeo: this.state.idUbigeo,
         googleMaps: this.state.googleMaps,
@@ -343,15 +342,14 @@ class SucursalAgregar extends CustomComponent {
                 />
               </Column>
 
-              <Column className={'col-md-6'} formGroup={true}>
+              <Column formGroup={true}>
                 <Input
-                  label={'Página Web:'}
-                  ref={this.refPaginWeb}
-                  value={this.state.paginaWeb}
+                  label="Código Anexo:"
+                  value={this.state.codigoAnexo}
                   onChange={(event) =>
-                    this.setState({ paginaWeb: event.target.value })
+                    this.setState({ codigoAnexo: event.target.value })
                   }
-                  placeholder="Ingrese su página web ..."
+                  placeholder="Ingrese su código de anexo ..."
                 />
               </Column>
             </Row>
@@ -361,8 +359,7 @@ class SucursalAgregar extends CustomComponent {
                 <Input
                   label={
                     <>
-                      Dirección:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
+                      Dirección: <i className="fa fa-asterisk text-danger small"></i>
                     </>
                   }
                   ref={this.refDireccion}

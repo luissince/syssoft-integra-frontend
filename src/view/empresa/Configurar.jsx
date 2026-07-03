@@ -15,7 +15,7 @@ import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
 import { getRuc } from '../../network/rest/apisperu.network';
-import CustomComponent from '../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { configSave } from '../../redux/principalSlice';
 import Button from '../../components/Button';
 import { alertKit } from 'alert-kit';

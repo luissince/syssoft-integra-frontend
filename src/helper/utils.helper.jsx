@@ -1094,6 +1094,21 @@ export function getPathNavigation(opcion, idNavegacion) {
   }
 }
 
+/**
+ * 
+ * @param {String} namePath - Nombre del path
+ * @returns {String}
+ */
+export function getPathRoute(namePath) {
+  if (namePath == 'guia-create') {
+    return `/inicio/facturacion/guiaremision/crear`;
+  }
+
+  if (namePath == 'guia') {
+    return `/inicio/facturacion/guiaremision/detalle`;
+  }
+}
+
 export function alertInfo(title, message) {
   Swal({
     title: title,

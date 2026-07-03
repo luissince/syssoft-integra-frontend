@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { loginApi } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
-import CustomComponent from '../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import Title from './component/Title';
 import Form from './component/Form';
 import { signIn } from '../../redux/principalSlice';

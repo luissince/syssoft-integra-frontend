@@ -14,7 +14,7 @@ import {
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
-import CustomComponent from '../../../../../model/class/custom-component';
+import CustomComponent from '@/components/CustomComponent';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
@@ -290,12 +290,12 @@ ConsultaDetalle.propTypes = {
   }),
   predeterminado: PropTypes.shape({
     empresa: PropTypes.shape({
+      paginaWeb: PropTypes.string,
       razonSocial: PropTypes.string,
     }),
   }),
   token: PropTypes.shape({
     project: PropTypes.shape({
-      paginaWeb: PropTypes.string,
       email: PropTypes.string,
     }),
   }),
