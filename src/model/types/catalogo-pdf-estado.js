@@ -1,0 +1,6 @@
+export const CATALOGO_PDF_ESTADO = {
+  PENDIENTE: 'PENDIENTE',
+  LISTO: 'LISTO',
+  ERROR: 'ERROR',
+  LIBRE: 'LIBRE',
+};

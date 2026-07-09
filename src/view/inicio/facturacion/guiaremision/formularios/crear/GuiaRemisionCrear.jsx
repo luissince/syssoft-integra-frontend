@@ -5,6 +5,7 @@ import {
   currentDate,
   keyNumberFloat,
   isEmpty,
+  isNumeric,
 } from '../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -985,7 +986,7 @@ class GuiaRemisionCrear extends CustomComponent {
     }
 
     if (
-      isEmpty(this.state.idUbigeoPartida) ||
+      !isNumeric(this.state.idUbigeoPartida) ||
       this.state.idUbigeoPartida <= 0
     ) {
       alertKit.warning({
@@ -1020,7 +1021,7 @@ class GuiaRemisionCrear extends CustomComponent {
     }
 
     if (
-      isEmpty(this.state.idUbigeoLlegada) ||
+      !isNumeric(this.state.idUbigeoLlegada) ||
       this.state.idUbigeoLlegada <= 0
     ) {
       alertKit.warning({
