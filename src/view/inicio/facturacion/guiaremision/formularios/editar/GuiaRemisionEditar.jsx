@@ -184,7 +184,7 @@ class GuiaRemisionEditar extends CustomComponent {
     if (isText(idGuiaRemision)) {
       await this.loadingData(idGuiaRemision);
     } else {
-      this.close();
+      this.handleBack();
     }
   }
 
@@ -370,10 +370,6 @@ class GuiaRemisionEditar extends CustomComponent {
     }
   }
 
-  close = () => {
-    this.props.history.goBack();
-  };
-
   /*
   |--------------------------------------------------------------------------
   | Método de eventos
@@ -432,7 +428,7 @@ class GuiaRemisionEditar extends CustomComponent {
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false }, () => {
-      this.close();
+      this.handleBack();
     });
   };
 
@@ -930,7 +926,7 @@ class GuiaRemisionEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleBack = () => {
-    this.close();
+    this.props.history.goBack();
   };
 
   /*
@@ -970,7 +966,7 @@ class GuiaRemisionEditar extends CustomComponent {
           title="Guía Remisión"
           subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
-          handleGoBack={() => this.close()}
+          handleGoBack={this.handleBack}
         />
 
         <Row>

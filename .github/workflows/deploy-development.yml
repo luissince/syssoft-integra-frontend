@@ -54,7 +54,7 @@ jobs:
 
   deploy-to-runs-on:
     name: Deploy to Production Server
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, client-dbsmart]
     needs: build-and-push
 
     strategy:
