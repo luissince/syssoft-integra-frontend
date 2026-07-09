@@ -1,7 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import {
-  alertWarning,
   formatTime,
   isText,
 } from '../../../../../helper/utils.helper';
@@ -33,6 +32,7 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { alertKit } from 'alert-kit';
 import axios from 'axios';
+import { CATALOGO_PDF_ESTADO } from '@/model/types/catalogo-pdf-estado';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -48,6 +48,7 @@ class CatalogoDetalle extends CustomComponent {
 
       idCatalogo: '',
       nombre: '',
+      pdfEstado: CATALOGO_PDF_ESTADO.LIBRE,
       fechaHora: '',
       usuario: '',
 
@@ -106,7 +107,10 @@ class CatalogoDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Catálogo', response.getMessage(), () => {
+      alertKit.warning({
+        title: 'Catálogo',
+        message: response.getMessage(),
+      }, () => {
         this.close();
       });
       return;
@@ -256,6 +260,14 @@ class CatalogoDetalle extends CustomComponent {
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
                       {this.state.fechaHora}
+                    </TableHead>
+                  </TableRow>
+                  <TableRow>
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                      Estado:
+                    </TableHead>
+                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
+                      {CATALOGO_PDF_ESTADO[this.state.pdfEstado] ?? CATALOGO_PDF_ESTADO.LIBRE}
                     </TableHead>
                   </TableRow>
                   <TableRow>
