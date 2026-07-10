@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-import Button from '../../../../../components/Button';
-import Column from '../../../../../components/Column';
 import { CustomModalForm } from '../../../../../components/CustomModal';
-import Input from '../../../../../components/Input';
-import Row from '../../../../../components/Row';
 import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
 import { alertKit } from 'alert-kit';
@@ -81,19 +77,16 @@ class CustomModalStock extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState(
-        {
-          nombre: producto.producto,
-          imagen: producto.imagen,
-          stockMinimo: response.data.cantidadMinima,
-          stockMaximo: response.data.cantidadMaxima,
-          idInventario: producto.idInventario,
-          loading: false,
-        },
-        () => {
-          this.refStockMinimo.current.focus();
-        },
-      );
+      this.setState({
+        nombre: producto.producto,
+        imagen: producto.imagen,
+        stockMinimo: response.data.cantidadMinima,
+        stockMaximo: response.data.cantidadMaxima,
+        idInventario: producto.idInventario,
+        loading: false,
+      }, () => {
+        this.refStockMinimo.current.focus();
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -143,38 +136,31 @@ class CustomModalStock extends Component {
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.stockMinimo)) {
-      alertKit.warning(
-        {
-          title: 'Inventario',
-          message: 'Ingrese el stock mínimo.',
-        },
-        () => {
-          this.refStockMinimo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Inventario',
+        message: 'Ingrese el stock mínimo.',
+      }, () => {
+        this.refStockMinimo.current.focus();
+      });
       return;
     }
 
     if (!isNumeric(this.state.stockMaximo)) {
-      alertKit.warning(
-        {
-          title: 'Inventario',
-          message: 'Ingrese el stock máximo.',
-        },
-        () => {
-          this.refStockMaximo.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Inventario',
+        message: 'Ingrese el stock máximo.',
+      }, () => {
+        this.refStockMaximo.current.focus();
+      });
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Inventario',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
-        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
-      });
+    const accept = await alertKit.question({
+      title: 'Inventario',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
 
     if (accept) {
       const data = {
@@ -192,15 +178,12 @@ class CustomModalStock extends Component {
       const response = await updateStockInventario(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Inventario',
-            message: response.data,
-          },
-          () => {
-            this.props.handleSave();
-          },
-        );
+        alertKit.success({
+          title: 'Inventario',
+          message: response.data,
+        }, () => {
+          this.props.handleSave();
+        });
       }
 
       if (response instanceof ErrorResponse) {

@@ -39,6 +39,11 @@ import { CATALOGO_PDF_ESTADO } from '@/model/types/catalogo-pdf-estado';
  * @extends CustomComponent
  */
 class CatalogoDetalle extends CustomComponent {
+
+  /**
+   * 
+   * @param {object} props
+   */
   constructor(props) {
     super(props);
 
@@ -46,16 +51,18 @@ class CatalogoDetalle extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idCatalogo: '',
-      nombre: '',
-      pdfEstado: CATALOGO_PDF_ESTADO.LIBRE,
-      fechaHora: '',
-      usuario: '',
-
+      cabecera: {
+        nombre: '',
+        fecha: '',
+        hora: '',
+        pdfEstado: CATALOGO_PDF_ESTADO.LIBRE,
+        usuario: ''
+      },
       detalles: [],
     };
 
-    this.abortControllerView = new AbortController();
+    this.peticion = false;
+    this.abortController = null;
   }
 
   /*
@@ -79,12 +86,16 @@ class CatalogoDetalle extends CustomComponent {
     if (isText(idCatalogo)) {
       this.loadingData(idCatalogo);
     } else {
-      this.close();
+      this.handleGoBack();
     }
   }
 
   componentWillUnmount() {
-    this.abortControllerView.abort();
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
   }
 
   /*
@@ -102,37 +113,33 @@ class CatalogoDetalle extends CustomComponent {
   */
 
   async loadingData(id) {
-    const response = await detailCatalogo(id, this.abortControllerView.signal);
+     this.abortController = new AbortController();
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    const { success, data, message, type } = await detailCatalogo(id, this.abortController.signal);
+
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: 'Catálogo',
-        message: response.getMessage(),
+        message: message,
       }, () => {
-        this.close();
+        this.handleGoBack();
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const { cabecera, detalles } = response.data;
-
-    const { nombre, fecha, hora, usuario } = cabecera;
+     this.peticion = true;
+      this.abortController = null;
 
     this.setState({
-      idCatalogo: id,
-      nombre,
-      fechaHora: fecha + ' ' + formatTime(hora),
-      usuario,
-
-      detalles: detalles,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
       loading: false,
     });
   }
 
-  close = () => {
+  handleGoBack = () => {
     this.props.history.goBack();
   };
 
@@ -161,7 +168,7 @@ class CatalogoDetalle extends CustomComponent {
       message: 'Procesando información...',
     });
 
-    const response = await documentsPdfCatalogo(this.state.idCatalogo);
+    const response = await documentsPdfCatalogo(this.state.cabecera.idCatalogo);
 
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
@@ -170,7 +177,7 @@ class CatalogoDetalle extends CustomComponent {
         title: 'Catálogo',
         message: response.getMessage(),
       }, () => {
-        this.props.history.goBack();
+        this.handleGoBack();
       });
       return;
     }
@@ -217,6 +224,8 @@ class CatalogoDetalle extends CustomComponent {
    */
 
   render() {
+    const cabecera = this.state.cabecera;
+
     return (
       <ContainerWrapper>
         <SpinnerView
@@ -227,7 +236,7 @@ class CatalogoDetalle extends CustomComponent {
         <Title
           title="Catálogo"
           subTitle="DETALLE"
-          handleGoBack={() => this.close()}
+          handleGoBack={this.handleGoBack}
         />
 
         <Row>
@@ -247,35 +256,38 @@ class CatalogoDetalle extends CustomComponent {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Nombre:
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.nombre}
+                      {cabecera.nombre ?? '-'}
                     </TableHead>
                   </TableRow>
+
                   <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Fecha:
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.fechaHora}
+                      {cabecera.fecha ?? '-'} {cabecera.hora ? formatTime(cabecera.hora) : '-'}
                     </TableHead>
                   </TableRow>
+
                   <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Estado:
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {CATALOGO_PDF_ESTADO[this.state.pdfEstado] ?? CATALOGO_PDF_ESTADO.LIBRE}
+                      {CATALOGO_PDF_ESTADO[cabecera.pdfEstado] ?? CATALOGO_PDF_ESTADO.LIBRE}
                     </TableHead>
                   </TableRow>
+
                   <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
+                    <TableHead className="table-secondary w-25 p-1 font-weight-normal">
                       Usuario:
                     </TableHead>
                     <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.usuario}
+                      {cabecera.usuario ?? '-'}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
