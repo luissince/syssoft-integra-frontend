@@ -96,6 +96,9 @@ class EmpresaProceso extends CustomComponent {
       certificadoInicio: "",
       certificadoExpiracion: "",
 
+      notaSunat: "",
+      tipoEnvio: false,
+
       logo: {
         src: images.noImage,
       },
@@ -222,6 +225,9 @@ class EmpresaProceso extends CustomComponent {
         certificadoInicio: empresa.certificadoInicio,
         certificadoExpiracion: empresa.certificadoExpiracion,
 
+        notaSunat: empresa.notaSunat ?? "",
+        tipoEnvio: empresa.tipoEnvio === 1 ? true : false,
+
         logo: empresa.rutaLogo ?? { src: images.noImage },
         image: empresa.rutaImage ?? { src: images.noImage },
         icon: empresa.rutaIcon ?? { src: images.noImage },
@@ -301,8 +307,7 @@ class EmpresaProceso extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        headerTitle: 'SysSoft Integra',
-        title: 'Error',
+        title: 'Empresa',
         message: response.getMessage(),
         onClose: () => {
           this.setState({
@@ -565,7 +570,7 @@ class EmpresaProceso extends CustomComponent {
   handleGuardar = async () => {
     if (isEmpty(this.state.documento)) {
       alertKit.warning({
-        title: 'Documento',
+        title: 'Empresa',
         message: 'Ingrese el número de documento.',
         onClose: () => {
           this.refDocumento.current.focus();
@@ -576,7 +581,7 @@ class EmpresaProceso extends CustomComponent {
 
     if (isEmpty(this.state.razonSocial)) {
       alertKit.warning({
-        title: 'Razón Social',
+        title: 'Empresa',
         message: 'Ingrese la razón social.',
         onClose: () => {
           this.refRazonSocial.current.focus();
@@ -621,6 +626,8 @@ class EmpresaProceso extends CustomComponent {
       certificado: this.state.certificado,
       claveCertificado: this.state.claveCertificado,
 
+      notaSunat: this.state.notaSunat.trim(),
+
       logo: this.state.logo,
       image: this.state.image,
       icon: this.state.icon,
@@ -649,7 +656,6 @@ class EmpresaProceso extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       alertKit.success({
-        headerTitle: 'SysSoft Integra',
         title: 'Empresa',
         message: response.data,
         onClose: () => {
@@ -662,8 +668,7 @@ class EmpresaProceso extends CustomComponent {
       if (response.getType() === CANCELED) return;
 
       alertKit.error({
-        headerTitle: 'SysSoft Integra',
-        title: 'Error',
+        title: 'Empresa',
         message: response.getMessage(),
         onClose: () => {
           this.setState({
@@ -704,6 +709,7 @@ class EmpresaProceso extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
+        {/* ===================== 1 ======================= */}
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
@@ -717,8 +723,7 @@ class EmpresaProceso extends CustomComponent {
               group={true}
               label={
                 <>
-                  Ruc ({this.state.documento.length}):{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               placeholder="10909000223"
@@ -743,8 +748,7 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={
                 <>
-                  Razón Social:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Razón Social: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               placeholder="Ingrese la razón social"
@@ -762,8 +766,7 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={
                 <>
-                  Nombre Comercial:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               placeholder="Ingrese el nombre comercial"
@@ -784,10 +787,11 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== 2 ======================= */}
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">3</span> Credenciales para
+              <span className="badge badge-primary">2</span> Credenciales para
               envio de comprobantes electrónicos a SUNAT
             </h6>
           </Column>
@@ -848,8 +852,7 @@ class EmpresaProceso extends CustomComponent {
             <Input
               label={
                 <>
-                  Id Api Sunat(<small>Para el envío de guía de remisión</small>
-                  ):<i className="fa fa-asterisk text-danger small"></i>
+                  Id Api Sunat(<small>Para el envío de guía de remisión</small>): <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               placeholder="Usurio Api Sunat"
@@ -968,9 +971,32 @@ class EmpresaProceso extends CustomComponent {
         </Row>
 
         <Row>
+          <Column formGroup={true}>
+            <TextArea
+              label={<>Nota de Sunat:</>}
+              rows={1}
+              placeholder="Ingrese la nota de Sunat"
+              value={this.state.notaSunat}
+              onChange={(event) =>
+                this.setState({ notaSunat: event.target.value })
+              }
+            />
+          </Column>
+
+          <Column className={'col-md-6'} formGroup={true}>
+            <Input
+              label="Tipo de envío a Sunat:"
+              defaultValue={this.state.tipoEnvio ? "Producción" : "Test"}
+              readOnly
+            />
+          </Column>
+        </Row>
+
+        {/* ===================== 3 ======================= */}
+        <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">4</span> Imagens para uso en
+              <span className="badge badge-primary">3</span> Imagens para uso en
               la página web y reportes
             </h6>
           </Column>
@@ -1052,10 +1078,11 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== 4 ======================= */}
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">5</span> Imagenes para el
+              <span className="badge badge-primary">4</span> Imagenes para el
               banner de la página web
             </h6>
           </Column>
@@ -1087,10 +1114,11 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== 5 ======================= */}
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">6</span> Datos para
+              <span className="badge badge-primary">5</span> Datos para
               comunicación con la platadorma Whatsapp
             </h6>
           </Column>
@@ -1143,10 +1171,11 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== 6 ======================= */}
         <Row>
           <Column className="col-12" formGroup={true}>
             <h6>
-              <span className="badge badge-primary">7</span> Información para
+              <span className="badge badge-primary">6</span> Información para
               mostrar en la pagina web
             </h6>
           </Column>
@@ -1283,6 +1312,7 @@ class EmpresaProceso extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== Botones ===================== */}
         <Row>
           <Column formGroup={true}>
             <Button className="btn-warning" onClick={this.handleGuardar}>

@@ -439,7 +439,7 @@ export async function getIdCatalogo(idCatalogo, signal) {
 }
 
 export async function detailCatalogo(idCatalogo, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get(`/api/catalogo/detail/${idCatalogo}`, {
       signal: signal,
     }),
