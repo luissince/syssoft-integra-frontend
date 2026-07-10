@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  *
  * @component
  * @param {Object} props
- * @param {number} props.value - Porcentaje actual de progreso (entre 0 y 100).
+ * @param {number} [props.value] - Porcentaje actual de progreso (entre 0 y 100).
  * @param {string} [props.label] - Texto opcional a mostrar dentro de la barra (por defecto, `${value}%`).
  * @param {string} [props.className] - Clases adicionales para el contenedor de `progress-bar`.
  *
