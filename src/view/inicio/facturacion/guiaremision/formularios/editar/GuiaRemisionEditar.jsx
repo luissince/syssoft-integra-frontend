@@ -20,6 +20,7 @@ import {
   getDetailsShippingGuideVenta,
   getUbigeo,
   updateGuiaRemision,
+  getDetailsShippingGuideTraslado,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -47,6 +48,7 @@ import { alertKit } from 'alert-kit';
 import { MODALIDAD_TRASLADO } from '@/model/types/modalidad-traslado';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
 import pdfVisualizer from 'pdf-visualizer';
+import { Badge } from '@/components/ui/badge';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -72,6 +74,8 @@ class GuiaRemisionEditar extends CustomComponent {
       fechaTraslado: currentDate(),
       idTipoPeso: '',
       peso: '',
+
+      traslado: null,
 
       codigoAnexoPartida: '',
       direccionPartida: '',
@@ -182,9 +186,9 @@ class GuiaRemisionEditar extends CustomComponent {
     const url = this.props.location.search;
     const idGuiaRemision = new URLSearchParams(url).get('idGuiaRemision');
     if (isText(idGuiaRemision)) {
-      await this.loadingData(idGuiaRemision);
+      await this.loadData(idGuiaRemision);
     } else {
-      this.handleBack();
+      this.handleGoBack();
     }
   }
 
@@ -206,7 +210,7 @@ class GuiaRemisionEditar extends CustomComponent {
   |
   */
 
-  loadingData = async (idGuiaRemision) => {
+  loadData = async (idGuiaRemision) => {
     const [motivoTraslado, tipoPeso, guiaRemision] = await Promise.all([
       this.fetchComboMotivoTraslado(),
       this.fetchComboTipoPeso(),
@@ -214,15 +218,6 @@ class GuiaRemisionEditar extends CustomComponent {
     ]);
 
     const cabecera = guiaRemision.cabecera;
-
-    const comprobante = {
-      documento: cabecera.documento,
-      idVenta: cabecera.idVenta,
-      informacion: cabecera.informacion,
-      nombreComprobante: cabecera.nombreComprobante,
-      numeracion: cabecera.numeracion,
-      serie: cabecera.serie,
-    };
 
     const vehiculo = {
       idVehiculo: cabecera.idVehiculo,
@@ -252,7 +247,23 @@ class GuiaRemisionEditar extends CustomComponent {
       ubigeo: cabecera.ubigeoLlegada,
     };
 
-    this.handleSelectItemVenta(comprobante);
+    if (!isEmpty(cabecera.idVenta)) {
+      this.handleSelectItemVenta({
+        documento: cabecera.documento,
+        idVenta: cabecera.idVenta,
+        informacion: cabecera.informacion,
+        nombreComprobante: cabecera.nombreComprobante,
+        numeracion: cabecera.numeracion,
+        serie: cabecera.serie,
+      });
+    }
+
+    if (!isEmpty(cabecera.idTraslado)) {
+      await this.handleSelectItemTraslado({
+        idTraslado: cabecera.idTraslado,
+      });
+    }
+
     this.handleSelectItemUbigeoPartido(ubigeoPartida);
     this.handleSelectItemUbigeoLlegada(ubigeoLlegada);
 
@@ -282,8 +293,13 @@ class GuiaRemisionEditar extends CustomComponent {
       fechaTraslado: cabecera.fechaTraslado,
       idTipoPeso: cabecera.idTipoPeso,
       peso: cabecera.peso.toString(),
+
+      codigoAnexoPartida: cabecera.codigoAnexoPartida,
       direccionPartida: cabecera.direccionPartida,
+
+      codigoAnexoLlegada: cabecera.codigoAnexoLlegada,
       direccionLlegada: cabecera.direccionLlegada,
+
       loading: false,
     });
   };
@@ -428,7 +444,7 @@ class GuiaRemisionEditar extends CustomComponent {
 
   handleCloseImpresion = async () => {
     this.setState({ isOpenImpresion: false }, () => {
-      this.handleBack();
+      this.handleGoBack();
     });
   };
 
@@ -494,6 +510,33 @@ class GuiaRemisionEditar extends CustomComponent {
         loading: false,
       });
     },);
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Filtrar traslado
+  //------------------------------------------------------------------------------------------
+
+  handleSelectItemTraslado = async (value) => {
+    // this.refVenta.current.initialize(
+    //   `${value.nombreComprobante} ${value.serie}-${value.numeracion}`
+    // );
+
+    const { success, data, message } = await getDetailsShippingGuideTraslado(value.idTraslado);
+
+    if (!success) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: message,
+      }, () => {
+        this.props.history.goBack();
+      });
+      return;
+    }
+
+    this.setState({
+      traslado: value,
+      detalles: data,
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -874,6 +917,8 @@ class GuiaRemisionEditar extends CustomComponent {
       const data = {
         idGuiaRemision: this.state.idGuiaRemision,
         idVenta: this.state.venta.idVenta,
+        idTraslado: this.state.traslado.idTraslado,
+
         idSucursal: this.state.idSucursal,
         idModalidadTraslado: this.state.idModalidadTraslado,
         idMotivoTraslado: this.state.idMotivoTraslado,
@@ -925,7 +970,7 @@ class GuiaRemisionEditar extends CustomComponent {
   // Evento para cerrar la guía de remisión
   //------------------------------------------------------------------------------------------
 
-  handleBack = () => {
+  handleGoBack = () => {
     this.props.history.goBack();
   };
 
@@ -966,22 +1011,19 @@ class GuiaRemisionEditar extends CustomComponent {
           title="Guía Remisión"
           subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
-          handleGoBack={this.handleBack}
+          handleGoBack={this.handleGoBack}
         />
 
-        <Row>
-          <Column
-            className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+        <div className="mb-3">
+          <div className="flex flex-wrap gap-3">
             <Button className="btn-warning" onClick={this.handleSave}>
               <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button className="btn-outline-danger" onClick={this.handleBack}>
+            </Button>
+            <Button className="btn-outline-danger" onClick={this.handleGoBack}>
               <i className="fa fa-close"></i> Cancelar
             </Button>
-          </Column>
-        </Row>
+          </div>
+        </div>
 
         {/* Seleccione la venta */}
         <h6>
@@ -992,30 +1034,38 @@ class GuiaRemisionEditar extends CustomComponent {
 
         <Row>
           <Column>
-            <SearchInput
-              ref={this.refVenta}
-              autoFocus={true}
-              label={
-                <>
-                  Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Ejm: B001, 1, F001..."
-              refValue={this.refFiltrarVenta}
-              data={this.state.ventas}
-              handleClearInput={this.handleClearInputVenta}
-              handleFilter={this.handleFilterVenta}
-              handleSelectItem={this.handleSelectItemVenta}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.nombreComprobante} {value.serie}-{value.numeracion}
-                  </span>
-                  {' / '}
-                  <span>{value.informacion}</span>
-                </>
-              )}
-            />
+            {
+              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA ?
+                <div className="mb-3">
+                  <Badge variant="outline" className="text-sm bg-primary text-white">Ligado a un traslado</Badge>
+                </div>
+                :
+                <SearchInput
+                  ref={this.refVenta}
+                  autoFocus={true}
+                  label={
+                    <>
+                      Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
+                    </>
+                  }
+                  placeholder="Ejm: B001, 1, F001..."
+                  refValue={this.refFiltrarVenta}
+                  data={this.state.ventas}
+                  handleClearInput={this.handleClearInputVenta}
+                  handleFilter={this.handleFilterVenta}
+                  handleSelectItem={this.handleSelectItemVenta}
+                  renderItem={(value) => (
+                    <>
+                      <span>
+                        {value.nombreComprobante} {value.serie}-{value.numeracion}
+                      </span>
+                      {' / '}
+                      <span>{value.informacion}</span>
+                    </>
+                  )}
+                />
+            }
+
           </Column>
         </Row>
 
@@ -1031,8 +1081,7 @@ class GuiaRemisionEditar extends CustomComponent {
             <Input
               label={
                 <>
-                  Selecciona un Cliente:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
+                  Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
                 </>
               }
               value={

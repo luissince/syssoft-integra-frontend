@@ -192,98 +192,19 @@ class GuiaRemisionCrear extends CustomComponent {
   */
 
   async componentDidMount() {
-    await this.loadingData();
+    await this.loadData();
 
     const { state } = this.props.location;
 
     if (state) {
       // En caso es venta
       if (state.idVenta) {
-        this.setState({
-          loading: true,
-        });
-
-        const { success, data, message } = await getShippingGuideVenta(state.idVenta);
-
-        if (!success) {
-          alertKit.warning({
-            title: 'Guía de Remisión',
-            message: message,
-          }, () => {
-            this.props.history.goBack();
-          });
-          return;
-        }
-
-        this.handleSelectItemVenta(data);
-        this.setState({
-          idMotivoTraslado: state.idMotivoTraslado ?? ''
-        });
+        this.loadVenta(state);
       }
 
       // En caso es traslado
       if (state.idTraslado) {
-        this.setState({
-          loading: true,
-        });
-
-        const { success: successTraslado, data: traslado, message: messageTraslado } = await getShippingGuideTraslado(state.idTraslado);
-
-        if (!successTraslado) {
-          alertKit.warning({
-            title: 'Guía de Remisión',
-            message: messageTraslado,
-          }, () => {
-            this.props.history.goBack();
-          });
-          return;
-        }
-
-        const { success: successDetalle, data: detalles, message: messageDetalles } = await getDetailsShippingGuideTraslado(state.idTraslado);
-
-        if (!successDetalle) {
-          alertKit.warning({
-            title: 'Guía de Remisión',
-            message: messageDetalles,
-          }, () => {
-            this.props.history.goBack();
-          });
-          return;
-        }
-
-        this.setState({
-          idMotivoTraslado: state.idMotivoTraslado ?? ''
-        });
-
-        this.setState({
-          codigoAnexoPartida: traslado.codigoAnexoPartida,
-          direccionPartida: traslado.direccionPartida
-        });
-        this.handleSelectItemUbigeoPartido({
-          idUbigeo: traslado.idUbigeoPartida,
-          departamento: traslado.departamentoPartida,
-          provincia: traslado.provinciaPartida,
-          distrito: traslado.distritoPartida,
-          ubigeo: traslado.ubigeoPartida,
-        });
-
-        this.setState({
-          codigoAnexoLlegada: traslado.codigoAnexoLlegada,
-          direccionLlegada: traslado.direccionLlegada
-        });
-        this.handleSelectItemUbigeoLlegada({
-          idUbigeo: traslado.idUbigeoLlegada,
-          departamento: traslado.departamentoLlegada,
-          provincia: traslado.provinciaLlegada,
-          distrito: traslado.distritoLlegada,
-          ubigeo: traslado.ubigeoLlegada,
-        });
-
-        this.setState({
-          traslado: traslado,
-          detalles: detalles,
-          loading: false,
-        });
+        this.loadTraslado(state);
       }
     }
   }
@@ -306,7 +227,7 @@ class GuiaRemisionCrear extends CustomComponent {
   |
   */
 
-  loadingData = async () => {
+  loadData = async () => {
     const [
       comprobantes,
       motivoTraslado,
@@ -357,6 +278,93 @@ class GuiaRemisionCrear extends CustomComponent {
       loading: false,
     });
   };
+
+  loadVenta = async (state) => {
+    this.setState({
+      loading: true,
+    });
+
+    const { success, data, message } = await getShippingGuideVenta(state.idVenta);
+
+    if (!success) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: message,
+      }, () => {
+        this.props.history.goBack();
+      });
+      return;
+    }
+
+    this.handleSelectItemVenta(data);
+    this.setState({
+      idMotivoTraslado: state.idMotivoTraslado ?? ''
+    });
+  }
+
+  loadTraslado = async (state) => {
+    this.setState({
+      loading: true,
+    });
+
+    const { success: successTraslado, data: traslado, message: messageTraslado } = await getShippingGuideTraslado(state.idTraslado);
+
+    if (!successTraslado) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: messageTraslado,
+      }, () => {
+        this.props.history.goBack();
+      });
+      return;
+    }
+
+    const { success: successDetalle, data: detalles, message: messageDetalles } = await getDetailsShippingGuideTraslado(state.idTraslado);
+
+    if (!successDetalle) {
+      alertKit.warning({
+        title: 'Guía de Remisión',
+        message: messageDetalles,
+      }, () => {
+        this.props.history.goBack();
+      });
+      return;
+    }
+
+    this.setState({
+      idMotivoTraslado: state.idMotivoTraslado ?? ''
+    });
+
+    this.setState({
+      codigoAnexoPartida: traslado.codigoAnexoPartida,
+      direccionPartida: traslado.direccionPartida
+    });
+    this.handleSelectItemUbigeoPartido({
+      idUbigeo: traslado.idUbigeoPartida,
+      departamento: traslado.departamentoPartida,
+      provincia: traslado.provinciaPartida,
+      distrito: traslado.distritoPartida,
+      ubigeo: traslado.ubigeoPartida,
+    });
+
+    this.setState({
+      codigoAnexoLlegada: traslado.codigoAnexoLlegada,
+      direccionLlegada: traslado.direccionLlegada
+    });
+    this.handleSelectItemUbigeoLlegada({
+      idUbigeo: traslado.idUbigeoLlegada,
+      departamento: traslado.departamentoLlegada,
+      provincia: traslado.provinciaLlegada,
+      distrito: traslado.distritoLlegada,
+      ubigeo: traslado.ubigeoLlegada,
+    });
+
+    this.setState({
+      traslado: traslado,
+      detalles: detalles,
+      loading: false,
+    });
+  }
 
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
@@ -499,7 +507,7 @@ class GuiaRemisionCrear extends CustomComponent {
       await this.refConductorPublico.current.restart();
       await this.refUbigeoPartida.current.restart();
       await this.refUbigeoLlegada.current.restart();
-      await this.loadingData();
+      await this.loadData();
       this.refFiltrarVenta.current.focus();
     });
   };
@@ -1107,7 +1115,7 @@ class GuiaRemisionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Evento para cerrar la guía de remisión
   //------------------------------------------------------------------------------------------
-  handleBack() {
+  handleGoBack = () => {
     this.props.history.goBack();
   }
 
@@ -1149,33 +1157,30 @@ class GuiaRemisionCrear extends CustomComponent {
           title="Guía Remisión"
           subTitle="CREAR"
           icon={<i className="fa fa-plus"></i>}
-          handleGoBack={() => this.handleBack()}
+          handleGoBack={this.handleGoBack}
         />
 
-        <Row>
-          <Column
-            className="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Button className="btn-success" onClick={() => this.handleSave()}>
+        <div className="mb-3">
+          <div className="flex flex-wrap gap-3">
+            <Button className="btn-success w-full md:w-auto" onClick={this.handleSave}>
               <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
+            </Button>
             <Button
-              className="btn-outline-info"
+              className="btn-outline-info w-full md:w-auto"
               onClick={() => this.handleClear()}
             >
               <i className="fa fa-trash"></i> Limpiar
-            </Button>{' '}
+            </Button>
             <Button
-              className="btn-outline-danger"
-              onClick={() => this.handleBack()}
+              className="btn-outline-danger w-full md:w-auto"
+              onClick={this.handleGoBack}
             >
               <i className="fa fa-close"></i> Cancelar
             </Button>
-          </Column>
-        </Row>
+          </div>
+        </div>
 
-        {/* Seleccione la venta */}
+        {/* ===================== 1 ======================= */}
         <h6>
           <span className="badge badge-primary">1</span> Guía
         </h6>
@@ -1188,7 +1193,6 @@ class GuiaRemisionCrear extends CustomComponent {
               this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA ?
                 <div className="mb-3">
                   <Badge variant="outline" className="text-sm bg-primary text-white">Ligado a un traslado</Badge>
-                  {/* <span className="badge badge-primary text-lg">Ligado a un traslado</span> */}
                 </div>
                 :
                 <SearchInput
@@ -1243,7 +1247,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-        {/* Sección de los datos del cliente */}
+        {/* ===================== 2 ======================= */}
         <h6>
           <span className="badge badge-primary">2</span> Cliente
         </h6>
@@ -1268,7 +1272,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-        {/* Sección para modalidad traslado */}
+        {/* ===================== 3 ======================= */}
         <h6>
           <span className="badge badge-primary">3</span> Modalidad de Traslado
         </h6>
@@ -1301,7 +1305,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-        {/* Sección para datos del traslado */}
+        {/* ===================== 4 ======================= */}
         <h6>
           <span className="badge badge-primary">4</span> Datos del Traslado
         </h6>
@@ -1392,7 +1396,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-        {/* Sección de datos del vehículo */}
+        {/* ===================== 5 ======================= */}
         <h6>
           <span className="badge badge-primary">5</span> Datos del Transporte
           Privado
@@ -1428,7 +1432,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
-        {/* Sección de datos del conductor */}
+        {/* ===================== 6 ======================= */}
         <h6>
           <span className="badge badge-primary">6</span> Datos del Conductor
           Privado
@@ -1464,6 +1468,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== 7 ======================= */}
         <h6>
           <span className="badge badge-primary">7</span> Datos de la Empresa a
           Transportar - Pública
@@ -1501,6 +1506,7 @@ class GuiaRemisionCrear extends CustomComponent {
 
         <div className="dropdown-divider"></div>
 
+        {/* ===================== 8 y 9 ======================= */}
         <Row>
           <Column className="col-md-6 col-12">
             <h6>
@@ -1651,6 +1657,7 @@ class GuiaRemisionCrear extends CustomComponent {
           </Column>
         </Row>
 
+        {/* ===================== 10 ======================= */}
         <h6>
           <span className="badge badge-primary">10</span> Detalle de Guía de
           Remisión
