@@ -529,7 +529,7 @@ class Ventas extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
               onClick={this.handleOpenElegirInterfaz}
               disabled={!this.state.create}
               aria-label="Crear nueva venta"
@@ -538,7 +538,7 @@ class Ventas extends CustomComponent {
               Nuevo Registro
             </button>
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
               onClick={this.loadingInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
@@ -547,7 +547,7 @@ class Ventas extends CustomComponent {
           </div>
 
           {/* Toggle vista */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-gray-100 rounded p-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
               className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
@@ -583,20 +583,20 @@ class Ventas extends CustomComponent {
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">TODOS</option>
               {this.state.comprobantes.map((item) => (
@@ -609,7 +609,7 @@ class Ventas extends CustomComponent {
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">TODOS</option>
               <option value="1">COBRADO</option>
