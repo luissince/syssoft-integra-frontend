@@ -389,78 +389,127 @@ class Traslado extends CustomComponent {
 
   };
 
-  generateBody = () => {
-    if (this.state.loading) {
+  renderTable = () => {
+    const { loading, lista } = this.state;
+
+    if (loading) {
       return (
-        <SpinnerTable
-          colSpan="10"
-          message="Cargando información de la tabla..."
-        />
+        <div className="flex flex-col items-center py-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
       );
     }
 
-    if (isEmpty(this.state.lista)) {
+    if (isEmpty(lista)) {
       return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="10">
-            ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
+        <div className="text-center py-3">
+          <div className="text-gray-500">
+            <i className="bi bi-box text-4xl mb-3 block"></i>
+            <p className="text-lg font-medium">No se encontraron ventas</p>
+            <p className="text-sm">Intenta cambiar los filtros</p>
+          </div>
+        </div>
       );
     }
 
-    return this.state.lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="badge badge-success">Activo</span>
-        ) : (
-          <span className="badge badge-danger">Anulado</span>
-        );
+    return (
+      <div className="divide-y divide-gray-200">
+        {
+          lista.map((item, index) => {
+            const estado = item.estado === 1 ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">ACTIVO</span>
+            ) : (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">ANULADO</span>
+            );
 
-      return (
-        <TableRow key={index}>
-          <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>
-            {item.fecha} <br />
-            {formatTime(item.hora)}
-          </TableCell>
-          <TableCell>
-            {item.tipo}
-            <br />
-            {item.motivo}
-          </TableCell>
-          <TableCell>{item.almacenOrigen}</TableCell>
-          <TableCell>{item.almacenDestino}</TableCell>
-          <TableCell>{item.observacion}</TableCell>
-          <TableCell>{estado}</TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-info btn-sm"
-              onClick={() => this.handleDetalle(item.idTraslado)}
-            >
-              <i className="bi bi-eye"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-secondary btn-sm"
-              onClick={() => this.handleGuiaRemision(item.idTraslado)}
-            >
-              <i className="fa fa-truck text-lg"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
-              onClick={() => this.handleCancelar(item.idTraslado)}
-            >
-              <i className="bi bi-trash"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
-      );
-    });
-  };
+            return (
+              <div key={index} className="overflow-hidden text-sm ">
+                {/* 📱 MOBILE: Tarjeta con labels */}
+                <div className="md:hidden p-3">
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-sm">
+                    <span className="font-medium text-gray-600">Fecha:</span>
+                    <span>{item.fecha} {formatTime(item.hora)}</span>
+
+                    <span className="font-medium text-gray-600">Tipo:</span>
+                    <span>{item.tipo}</span>
+
+                    <span className="font-medium text-gray-600">Motivo:</span>
+                    <span>{item.motivo}</span>
+
+                    <span className="font-medium text-gray-600">Origen:</span>
+                    <span>{item.almacenOrigen}</span>
+
+                    <span className="font-medium text-gray-600">Destino:</span>
+                    <span>{item.almacenDestino}</span>
+
+                    <span className="font-medium text-gray-600">Observación:</span>
+                    <span className="col-span-1">{item.observacion}</span>
+
+                    <span className="font-medium text-gray-600">Estado:</span>
+                    <span>{estado}</span>
+                  </div>
+
+                  <div className="flex justify-between gap-3 pt-2">
+                    <button
+                      onClick={() => this.handleDetalle(item.idTraslado)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <i className="bi bi-eye text-lg"></i>
+                    </button>
+                    <button
+                      onClick={() => this.handleGuiaRemision(item.idTraslado)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <i className="fa fa-truck text-lg"></i>
+                    </button>
+                    <button
+                      onClick={() => this.handleCancelar(item.idTraslado)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <i className="bi bi-trash text-lg"></i>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 💻 DESKTOP: Fila de tabla */}
+                <div className="hidden md:grid md:grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3 text-sm text-gray-900 items-center">
+                  <div className="py-3 text-center">{item.id}</div>
+                  <div className="py-3">
+                    {item.fecha} <br />
+                    <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
+                  </div>
+                  <div className="py-3">
+                    {item.tipo} <br />
+                    <span className="text-xs text-gray-500">{item.motivo}</span>
+                  </div>
+                  <div className="py-3">{item.almacenOrigen}</div>
+                  <div className="py-3">{item.almacenDestino}</div>
+                  <div className="py-3 truncate">{item.observacion}</div>
+                  <div className="py-3 justify-self-center">{estado}</div>
+                  <div className="py-3 text-center">
+                    <button onClick={() => this.handleDetalle(item.idTraslado)} className="text-blue-500 hover:text-blue-700">
+                      <i className="bi bi-eye"></i>
+                    </button>
+                  </div>
+                  <div className="py-3 text-center">
+                    <button onClick={() => this.handleGuiaRemision(item.idTraslado)} className="text-gray-500 hover:text-gray-700">
+                      <i className="fa fa-truck"></i>
+                    </button>
+                  </div>
+                  <div className="py-3 text-center">
+                    <button onClick={() => this.handleCancelar(item.idTraslado)} className="text-red-500 hover:text-red-700">
+                      <i className="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }
 
   render() {
     const { view } = this.state;
@@ -493,7 +542,7 @@ class Traslado extends CustomComponent {
           <div className="flex flex-wrap gap-3">
             <button
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2",
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
                 "bg-blue-600 text-white text-sm font-medium rounded",
                 "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
               )}
@@ -505,7 +554,7 @@ class Traslado extends CustomComponent {
             </button>
             <button
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2",
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
                 "bg-gray-200 text-gray-700 text-sm font-medium rounded",
                 "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
               )}
@@ -551,107 +600,105 @@ class Traslado extends CustomComponent {
           </div>
         </div>
 
+        {/* Filtros de fechas, comprobante y estado */}
         <div className="flex flex-col gap-y-4 mb-4">
-          <div>
-            <p className="text-gray-600 mt-1">
-              Puedes ver todos los traslados con diferentes filtros.
-            </p>
-          </div>
+          <p className="text-gray-600 mt-1">
+            Puedes ver todos los traslados con diferentes filtros.
+          </p>
         </div>
 
-        {/* Body */}
-        <div className="max-w-7xl mx-auto">
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Tipo Traslado */}
-            <div className="flex flex-col gap-2">             
-              <select
-                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                value={this.state.idTipoTraslado}
-                onChange={this.handleSelectTipoTraslado}
-              >
-                <option value="0">-- Selecciona --</option>
-                {
-                  this.state.tipoTraslado.map((item, index) => (
-                    <option key={index} value={item.idTipoTraslado}>
-                      {item.nombre}
-                    </option>
-                  ))
-                }
-              </select>
-            </div>
+            <select
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={this.state.idTipoTraslado}
+              onChange={this.handleSelectTipoTraslado}
+            >
+              <option value="0">-- Selecciona --</option>
+              {
+                this.state.tipoTraslado.map((item, index) => (
+                  <option key={index} value={item.idTipoTraslado}>
+                    {item.nombre}
+                  </option>
+                ))
+              }
+            </select>
 
             {/* Fecha Inicio */}
-            <div className="flex flex-col gap-2">             
-              <input
-                type="date"
-                value={this.state.fechaInicio}
-                onChange={this.handleInputFechaInicio}
-                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
+            <input
+              type="date"
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInicio}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
 
             {/* Fecha Final */}
-            <div className="flex flex-col gap-2">              
-              <input
-                type="date"
-                value={this.state.fechaFinal}
-                onChange={this.handleInputFechaFinal}
-                className="w-full text-sm px-3 py-2 h-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Barra de búsqueda */}
-          <div className="w-full flex gap-4 mb-4">
-            <div className="w-full">
-              <Search
-                group={true}
-                iconLeft={<i className="bi bi-search text-gray-400"></i>}
-                ref={this.refSearch}
-                onSearch={this.searchText}
-                placeholder="Filtrar..."
-                theme="modern"
-              />
-            </div>
+            <input
+              type="date"
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
         </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className={'table-bordered'}>
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="15%">Fecha y Hora</TableHead>
-                    <TableHead width="15%">Tipo / Motivo</TableHead>
-                    <TableHead width="15%">Almacen Origen</TableHead>
-                    <TableHead width="15%">Almacen Destino</TableHead>
-                    <TableHead width="20%">Observación</TableHead>
-                    <TableHead width="10%">Estado</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Guía</TableHead>
-                    <TableHead width="5%" className="text-center">Anular</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Barra de búsqueda */}
+        <div className="w-full flex gap-4 mb-4">
+          <div className="w-full">
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search text-gray-400"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Filtrar..."
+              theme="modern"
+            />
+          </div>
+        </div>
 
-        <Paginacion
-          ref={this.refPaginacion}
-          loading={this.state.loading}
-          data={this.state.lista}
-          totalPaginacion={this.state.totalPaginacion}
-          paginacion={this.state.paginacion}
-          fillTable={this.paginacionContext}
-          restart={this.state.restart}
-        />
+        {/* Render condicional: Tabla o Cuadrícula */}
+        <div className="bg-white rounded border overflow-hidden">
+          <div className="min-w-full">
+            {/* Header (solo visible en desktop) */}
+            <div className="hidden md:block bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider">
+              <div className="grid md:grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3">
+                <div className="py-3 text-center">#</div>
+                <div className="py-3">Fecha y Hora</div>
+                <div className="py-3">Tipo / Motivo</div>
+                <div className="py-3">Almacén Origen</div>
+                <div className="py-3">Almacén Destino</div>
+                <div className="py-3">Observación</div>
+                <div className="py-3 text-center">Estado</div>
+                <div className="py-3 text-center">Detalle</div>
+                <div className="py-3 text-center">Guía</div>
+                <div className="py-3 text-center">Anular</div>
+              </div>
+
+            </div>
+
+            {this.renderTable()}
+          </div>
+
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={cn(
+              view === "tabla"
+                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
+                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+            )}
+          />
+        </div>
       </ContainerWrapper>
     );
   }
