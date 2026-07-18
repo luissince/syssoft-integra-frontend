@@ -219,7 +219,6 @@ class ModalTransaccion extends CustomComponent {
   };
 
   handleProcessContado = async () => {
-    console.log("handleProcessContado");
     const { formaPago, bancosAgregados, importeTotal, nota } = this.state;
 
     let metodoPagosLista = bancosAgregados.map((item) => ({ ...item }));
@@ -627,14 +626,14 @@ class ModalTransaccion extends CustomComponent {
     const { importeTotal, bancosAgregados } = this.state;
     const { codiso } = this.props;
 
-    const total = parseFloat(importeTotal);
+    const total = Number(importeTotal);
 
     if (isEmpty(bancosAgregados)) {
       return <h5 className="text-red-500">Agrega algún método de pago.</h5>;
     }
 
     const currentAmount = bancosAgregados.reduce((accumulator, item) => {
-      accumulator += item.monto ? parseFloat(item.monto) : 0;
+      accumulator += item.monto ? Number(item.monto) : 0;
       return accumulator;
     }, 0);
 

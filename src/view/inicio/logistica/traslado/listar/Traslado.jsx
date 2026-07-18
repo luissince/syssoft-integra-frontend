@@ -19,21 +19,7 @@ import {
 } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
-import Column from '../../../../../components/Column';
-import Select from '../../../../../components/Select';
-import Row from '../../../../../components/Row';
-import { SpinnerTable, SpinnerView } from '../../../../../components/Spinner';
-import Input from '../../../../../components/Input';
-import Button from '../../../../../components/Button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../components/Table';
+import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Search from '../../../../../components/Search';
 import {
@@ -390,7 +376,7 @@ class Traslado extends CustomComponent {
   };
 
   renderTable = () => {
-    const { loading, lista } = this.state;
+    const { loading, lista, view } = this.state;
 
     if (loading) {
       return (
@@ -414,7 +400,11 @@ class Traslado extends CustomComponent {
     }
 
     return (
-      <div className="divide-y divide-gray-200">
+      <div className={cn(
+        view === "tabla"
+          ? "divide-y divide-gray-200"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
+      )}>
         {
           lista.map((item, index) => {
             const estado = item.estado === 1 ? (
@@ -424,56 +414,81 @@ class Traslado extends CustomComponent {
             );
 
             return (
-              <div key={index} className="overflow-hidden text-sm ">
+              <React.Fragment key={index}>
                 {/* 📱 MOBILE: Tarjeta con labels */}
-                <div className="md:hidden p-3">
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-sm">
-                    <span className="font-medium text-gray-600">Fecha:</span>
-                    <span>{item.fecha} {formatTime(item.hora)}</span>
+                <div className={cn(
+                  view == "tabla" ? "hidden" : "flex bg-white rounded border flex-col h-full"
+                )}>
+                  <div className="flex flex-col gap-2 p-4 text-sm">
+                    {/* Body */}
+                    <div className="flex-1 flex flex-col gap-3">
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Fecha:</p>
+                        <p>{item.fecha} {formatTime(item.hora)}</p>
+                      </div>
 
-                    <span className="font-medium text-gray-600">Tipo:</span>
-                    <span>{item.tipo}</span>
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Tipo:</p>
+                        <p>{item.tipo}</p>
+                      </div>
 
-                    <span className="font-medium text-gray-600">Motivo:</span>
-                    <span>{item.motivo}</span>
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Motivo:</p>
+                        <p>{item.motivo}</p>
+                      </div>
 
-                    <span className="font-medium text-gray-600">Origen:</span>
-                    <span>{item.almacenOrigen}</span>
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Origen:</p>
+                        <p>{item.almacenOrigen}</p>
+                      </div>
 
-                    <span className="font-medium text-gray-600">Destino:</span>
-                    <span>{item.almacenDestino}</span>
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Destino:</p>
+                        <p>{item.almacenDestino}</p>
+                      </div>
 
-                    <span className="font-medium text-gray-600">Observación:</span>
-                    <span className="col-span-1">{item.observacion}</span>
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Observación:</p>
+                        <p className="col-span-1">{item.observacion}</p>
+                      </div>
 
-                    <span className="font-medium text-gray-600">Estado:</span>
-                    <span>{estado}</span>
-                  </div>
+                      <div className="flex items-center justify-start gap-3">
+                        <p className="font-medium text-gray-600">Estado:</p>
+                        <p>{estado}</p>
+                      </div>
+                    </div>
 
-                  <div className="flex justify-between gap-3 pt-2">
-                    <button
-                      onClick={() => this.handleDetalle(item.idTraslado)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      <i className="bi bi-eye text-lg"></i>
-                    </button>
-                    <button
-                      onClick={() => this.handleGuiaRemision(item.idTraslado)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <i className="fa fa-truck text-lg"></i>
-                    </button>
-                    <button
-                      onClick={() => this.handleCancelar(item.idTraslado)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <i className="bi bi-trash text-lg"></i>
-                    </button>
+                    {/* Footer */}
+                    <div className="flex items-center flex-col justify-between gap-2 pt-3 border-t border-gray-100">
+                      <div>
+                        <button
+                          onClick={() => this.handleDetalle(item.idTraslado)}
+                          className="flex-1 p-2 text-blue-500 hover:text-blue-700"
+                        >
+                          <i className="bi bi-eye text-lg"></i>
+                        </button>
+                        <button
+                          onClick={() => this.handleGuiaRemision(item.idTraslado)}
+                          className="flex-1 p-2 text-gray-500 hover:text-gray-700"
+                        >
+                          <i className="fa fa-truck text-lg"></i>
+                        </button>
+                        <button
+                          onClick={() => this.handleCancelar(item.idTraslado)}
+                          className="flex-1 p-2 text-red-500 hover:text-red-700"
+                        >
+                          <i className="bi bi-trash text-lg"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* 💻 DESKTOP: Fila de tabla */}
-                <div className="hidden md:grid md:grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3 text-sm text-gray-900 items-center">
+                <div className={cn(
+                  view == "tabla" ? "grid" : "hidden",
+                  "grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3 text-sm text-gray-900 items-center"
+                )}>
                   <div className="py-3 text-center">{item.id}</div>
                   <div className="py-3">
                     {item.fecha} <br />
@@ -503,7 +518,7 @@ class Traslado extends CustomComponent {
                     </button>
                   </div>
                 </div>
-              </div>
+              </React.Fragment>
             );
           })
         }
@@ -660,11 +675,19 @@ class Traslado extends CustomComponent {
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        <div className="bg-white rounded border overflow-hidden">
-          <div className="min-w-full">
+        <div className={cn(
+          view === "tabla" ? "rounded border overflow-hidden" : "space-y-6",
+          "bg-white"
+        )}>
+          <div className={cn(
+            view == "tabla" ? "block" : "hidden",
+            "min-w-full"
+          )}>
             {/* Header (solo visible en desktop) */}
-            <div className="hidden md:block bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider">
-              <div className="grid md:grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3">
+            <div className={cn(
+              "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
+            )}>
+              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3">
                 <div className="py-3 text-center">#</div>
                 <div className="py-3">Fecha y Hora</div>
                 <div className="py-3">Tipo / Motivo</div>
@@ -676,11 +699,10 @@ class Traslado extends CustomComponent {
                 <div className="py-3 text-center">Guía</div>
                 <div className="py-3 text-center">Anular</div>
               </div>
-
             </div>
-
-            {this.renderTable()}
           </div>
+
+          {this.renderTable()}
 
           {/* ✅ Paginación única */}
           <Paginacion
@@ -692,11 +714,11 @@ class Traslado extends CustomComponent {
             fillTable={this.paginacionContext}
             restart={this.state.restart}
             theme="modern"
-            className={cn(
+            className={
               view === "tabla"
                 ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
                 : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
-            )}
+            }
           />
         </div>
       </ContainerWrapper>
