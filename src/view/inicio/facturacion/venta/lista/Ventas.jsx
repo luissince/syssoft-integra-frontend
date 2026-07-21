@@ -48,6 +48,7 @@ import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import { cn } from '@/lib/utils';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
+import { Check, Eye, Trash, Truck } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -113,7 +114,7 @@ class Ventas extends CustomComponent {
         ACTIVAR_VISTA_ANTIGUA,
       ),
 
-      vista: 'tabla',
+      view: 'tabla',
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -200,7 +201,7 @@ class Ventas extends CustomComponent {
         comprobantes,
         initialLoad: false,
       }, async () => {
-        await this.loadingInit();
+        await this.loadInit();
         this.updateReduxState();
       });
     }
@@ -240,7 +241,7 @@ class Ventas extends CustomComponent {
     }
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -353,7 +354,7 @@ class Ventas extends CustomComponent {
   */
 
   handleChangeView = (value) => {
-    this.setState({ vista: value }, () => this.updateReduxState());
+    this.setState({ view: value }, () => this.updateReduxState());
   };
 
   handleCrearClasico = () => {
@@ -401,7 +402,7 @@ class Ventas extends CustomComponent {
     });
   };
 
-  async handleCancelar(idVenta) {
+  async handleAnular(idVenta) {
     if (!this.state.remove) {
       alertKit.warning({
         title: 'Venta',
@@ -438,7 +439,7 @@ class Ventas extends CustomComponent {
           title: 'Venta',
           message: response.data,
         }, () => {
-          this.loadingInit();
+          this.loadInit();
         });
       }
 
@@ -507,9 +508,274 @@ class Ventas extends CustomComponent {
   |
   */
 
+  renderTable = () => {
+    const { loading, lista, view } = this.state;
+
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center py-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(lista)) {
+      return (
+        <div className={cn(
+          "text-center py-6",
+          view === "tabla" ? "" : "rounded border",
+        )}>
+          <div className="text-gray-500">
+            <i className="bi bi-box text-4xl mb-3 block"></i>
+            <p className="text-lg font-medium">No se encontraron ventas</p>
+            <p className="text-sm">Intenta cambiar los filtros</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={cn(
+        view === "tabla"
+          ? "divide-y divide-gray-200"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
+      )}>
+        {
+          lista.map((item, index) => {
+            const estado = (
+              <span className={cn(
+                "inline-flex items-center rounded-full",
+                "text-xs font-medium",
+                "px-2.5 py-0.5",
+                item.estado === 1 && "bg-green-100 text-green-800",
+                item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                item.estado === 3 && "bg-red-100 text-red-800",
+                item.estado === 4 && "bg-blue-100 text-blue-800",
+              )}>
+                {item.estado === 1 && "COBRADO"}
+                {item.estado === 2 && "POR COBRAR"}
+                {item.estado === 3 && "ANULADO"}
+                {item.estado === 4 && "POR LLEVAR"}
+              </span>
+            );
+
+            const tipo = item.idFormaPago === CONTADO
+              ? 'CONTADO' : 'CREDITO';
+
+            return (
+              <React.Fragment key={index}>
+                {/* 📱 MOBILE: Tarjeta con labels */}
+                <div className={cn(
+                  view == "tabla" ? "hidden" : "flex bg-white rounded border flex-col h-full"
+                )}>
+                  <div className="flex flex-col gap-4 text-sm">
+                    {/* Body */}
+                    <div className="flex-1 flex flex-col px-4 pt-4 gap-3">
+                      {[
+                        { label: 'Fecha:', value: `${item.fecha} ${formatTime(item.hora)}` },
+                        { label: 'Cliente:', value: `${item.tipoDocumento} - ${item.documento}  ${item.informacion}` },
+                        { label: 'Comprobante:', value: `${item.comprobante}  ${item.serie}-${formatNumberWithZeros(item.numeracion)}` },
+                        { label: 'Forma de Transacción:', value: tipo },
+                        { label: 'Estado:', value: estado },
+                        { label: 'Total:', value: formatCurrency(item.total, item.codiso) },
+                      ].map((field, index) => (
+                        <div key={index} className="flex items-center justify-start gap-3">
+                          <p className="font-medium text-gray-600">{field.label}</p>
+                          <p>{field.value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="border-t border-gray-100"></div>
+
+                    {/* Footer */}
+                    <div className="flex items-center flex-row justify-end flex-wrap gap-4 px-4">
+                      <button
+                        onClick={() => this.handleDetalle(item.idVenta)}
+                        className={cn(
+                          "inline-flex items-center justify-center gap-2",
+                          "px-3 py-2",
+                          "transition rounded",
+                          "bg-gray-100 text-gray-600 text-sm font-medium",
+                          "hover:bg-gray-300",
+                          "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                          "active:bg-blue-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )}
+                      >
+                        <Eye className="w-5 h-5 text-blue-500" />
+                      </button>
+                      {
+                        item.guiaRemision === 1
+                          ? (
+                            <button
+                              className={cn(
+                                "inline-flex items-center justify-center gap-2",
+                                "px-3 py-2",
+                                "transition rounded",
+                                "bg-gray-100 text-gray-600 text-sm font-medium",
+                                "hover:bg-gray-300",
+                                "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                                "active:bg-blue-100 active:scale-[0.97]",
+                                "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                              )}
+                              title="Guía generada"
+                              disabled>
+                              <Check className="w-5 h-5 text-green-500" />
+                            </button>
+                          )
+                          : (
+                            <button
+                              onClick={() => this.handleGuiaRemision(item.idVenta)}
+                              className={cn(
+                                "inline-flex items-center justify-center gap-2",
+                                "px-3 py-2",
+                                "transition rounded",
+                                "text-gray-600 text-sm font-medium ",
+                                "bg-gray-100",
+                                "hover:bg-gray-300",
+                                "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                                "active:bg-blue-100 active:scale-[0.97]",
+                                "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                              )}
+                            >
+                              <Truck className="w-5 h-5 text-gray-600" />
+                            </button>
+                          )
+                      }
+                      <button
+                        onClick={() => this.handleAnular(item.idVenta)}
+                        className={cn(
+                          "inline-flex items-center justify-center gap-2",
+                          "px-3 py-2",
+                          "transition rounded",
+                          "transition rounded",
+                          "bg-gray-100 text-gray-600 text-sm font-medium",
+                          "hover:bg-gray-300",
+                          "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                          "active:bg-blue-100 active:scale-[0.97]",
+                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                        )}
+                      >
+                        <Trash className="w-5 h-5 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 💻 DESKTOP: Fila de tabla */}
+                <div className={cn(
+                  view == "tabla" ? "grid" : "hidden",
+                  "grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-x-3 text-sm text-gray-900 items-center"
+                )}>
+                  <div className="py-3 text-center">{item.id}</div>
+                  <div className="py-3">
+                    <div>{item.fecha}</div>
+                    <div className="text-xs text-gray-500">{formatTime(item.hora)}</div>
+                  </div>
+                  <div className="py-3">
+                    <div>{item.tipoDocumento} - {item.documento}</div>
+                    <div className="text-xs text-gray-500">{item.informacion}</div>
+                  </div>
+                  <div className="py-3">
+                    <div>{item.comprobante}</div>
+                    <div className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</div>
+                  </div>
+                  <div className="py-3">
+                    {tipo}
+                  </div>
+                  <div className="py-3">
+                    {estado}
+                  </div>
+                  <div className="py-3">
+                    {formatCurrency(item.total, item.codiso)}
+                  </div>
+                  <div className="py-3 text-center">
+                    <button
+                      onClick={() => this.handleDetalle(item.idVenta)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Eye className="w-5 h-5 text-blue-500" />
+                    </button>
+                  </div>
+                  <div className="py-3 text-center">
+                    {
+                      item.guiaRemision === 1
+                        ? (
+                          <button
+                            className={cn(
+                              "inline-flex items-center justify-center gap-2",
+                              "px-3 py-2",
+                              "transition rounded",
+                              "bg-gray-100 text-gray-600 text-sm font-medium",
+                              "hover:bg-gray-300",
+                              "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                              "active:bg-blue-100 active:scale-[0.97]",
+                              "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                            )}
+                            title="Guía generada"
+                            disabled>
+                            <Check className="w-5 h-5 text-green-500" />
+                          </button>
+                        )
+                        :
+                        (
+                          <button
+                            onClick={() => this.handleGuiaRemision(item.idVenta)}
+                            className={cn(
+                              "inline-flex items-center justify-center gap-2",
+                              "px-3 py-2",
+                              "transition rounded",
+                              "bg-gray-100 text-gray-600 text-sm font-medium",
+                              "hover:bg-gray-300",
+                              "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                              "active:bg-blue-100 active:scale-[0.97]",
+                              "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                            )}
+                          >
+                            <Truck className="w-5 h-5 text-gray-600" />
+                          </button>
+                        )
+                    }
+                  </div>
+                  <div className="py-3 text-center">
+                    <button
+                      onClick={() => this.handleAnular(item.idVenta)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Trash className="w-5 h-5 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              </React.Fragment>
+            );
+          })
+        }
+      </div >
+    );
+  }
 
   render() {
-    const { vista } = this.state;
+    const { view } = this.state;
 
     return (
       <ContainerWrapper>
@@ -529,17 +795,25 @@ class Ventas extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
               onClick={this.handleOpenElegirInterfaz}
               disabled={!this.state.create}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-blue-600 text-white text-sm font-medium rounded",
+                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+              )}
               aria-label="Crear nueva venta"
             >
               <i className="bi bi-file-plus"></i>
               Nuevo Registro
             </button>
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
-              onClick={this.loadingInit}
+              onClick={this.loadInit}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
             >
               <i className="bi bi-arrow-clockwise"></i>
               Recargar Vista
@@ -550,20 +824,30 @@ class Ventas extends CustomComponent {
           <div className="flex bg-gray-100 rounded p-1">
             <button
               onClick={() => this.handleChangeView('tabla')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'tabla'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
             >
               <i className="bi bi-list-ul"></i>
               <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
               onClick={() => this.handleChangeView('cuadricula')}
-              className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 ${vista === 'cuadricula'
-                ? 'bg-white text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-                }`}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
             >
               <i className="bi bi-grid-3x3"></i>
               <span className="hidden sm:inline">Cuadrícula</span>
@@ -573,12 +857,16 @@ class Ventas extends CustomComponent {
 
         {/* Filtros de fechas, comprobante y estado */}
         <div className="flex flex-col gap-y-4 mb-4">
-          <div>
-            <p className="text-gray-600 mt-1">
-              Puedes ver las ventas echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
-            </p>
-          </div>
+          <p className="text-gray-600 mt-1">
+            Puedes ver las ventas echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
+          </p>
+        </div>
+
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Fecha de Inicio */}
             <input
               type="date"
               value={this.state.fechaInicio}
@@ -586,6 +874,7 @@ class Ventas extends CustomComponent {
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
+            {/* Fecha Final */}
             <input
               type="date"
               value={this.state.fechaFinal}
@@ -593,6 +882,7 @@ class Ventas extends CustomComponent {
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
+            {/* Comprobante */}
             <select
               value={this.state.idComprobante}
               onChange={this.handleSelectComprobante}
@@ -606,6 +896,7 @@ class Ventas extends CustomComponent {
               ))}
             </select>
 
+            {/* Estado */}
             <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
@@ -620,334 +911,68 @@ class Ventas extends CustomComponent {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="w-full mb-4">
-          <Search
-            group={true}
-            iconLeft={<i className="bi bi-search text-gray-400"></i>}
-            ref={this.refSearch}
-            onSearch={this.searchText}
-            placeholder="Buscar por comprobante o cliente..."
-            theme="modern"
-          />
+        <div className="w-full flex gap-4 mb-4">
+          <div className="w-full">
+            <Search
+              group={true}
+              iconLeft={<i className="bi bi-search text-gray-400"></i>}
+              ref={this.refSearch}
+              onSearch={this.searchText}
+              placeholder="Buscar por comprobante o cliente..."
+              theme="modern"
+            />
+          </div>
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        {vista === 'tabla' ? (
-          /* 📊 Vista Tabla */
-          <div className="bg-white rounded-xl border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Fecha</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Comprobante</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Tipo</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-20 text-center">Estado</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-24 text-right">Total</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Detalle</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Guía</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-16 text-center">Anular</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {this.state.loading ? (
-                    <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                          <p className="text-gray-500">Cargando información...</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : isEmpty(this.state.lista) ? (
-                    <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center">
-                        <div className="text-gray-500">
-                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                          <p className="text-lg font-medium">No se encontraron ventas</p>
-                          <p className="text-sm">Intenta cambiar los filtros</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item) => {
-                      const estado =
-                        <span
-                          className={
-                            cn(
-                              "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                              item.estado === 1 ? "bg-green-100 text-green-800" :
-                                item.estado === 2 ? "bg-yellow-100 text-yellow-800" :
-                                  item.estado === 3 ? "bg-red-100 text-red-800" :
-                                    "bg-blue-100 text-blue-800"
-                            )
-                          }
-                        >
-                          {
-                            item.estado === 1 ? "COBRADO" :
-                              item.estado === 2 ? "POR COBRAR" :
-                                item.estado === 3 ? "ANULADO" :
-                                  "POR LLEVAR"
-                          }
-                        </span>
-
-                      const tipo = item.idFormaPago === CONTADO
-                        ? 'CONTADO'
-                        : item.idFormaPago === CREDITO_FIJO
-                          ? 'CRÉDITO FIJO'
-                          : item.idFormaPago === CREDITO_VARIABLE
-                            ? 'CRÉDITO VARIABLE'
-                            : 'PAGO ADELANTADO';
-
-                      return (
-                        <tr key={item.idVenta} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {item.fecha}<br />
-                            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            <div>{item.tipoDocumento} - {item.documento}</div>
-                            <div className="text-xs text-gray-500">{item.informacion}</div>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {item.comprobante}<br />
-                            <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{tipo}</td>
-                          <td className="px-6 py-4 text-center">{estado}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
-                            {formatCurrency(item.total, item.codiso)}
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <button
-                              className={`
-                              p-2 rounded-md text-sm font-medium transition
-                              text-blue-600 bg-white
-                              hover:bg-blue-50 hover:text-blue-700
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                              active:bg-blue-100 active:scale-[0.97]
-                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                             `}
-                              title="Ver detalle"
-                              onClick={() => this.handleDetalle(item.idVenta)}
-                              disabled={!this.state.detail}
-                            >
-                              <i className="fa fa-eye text-lg"></i>
-                            </button>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            {item.guiaRemision === 1 ? (
-                              <span className="p-1.5 text-green-600 bg-green-50 rounded-md" title="Guía generada">
-                                <i className="fa fa-check text-lg"></i>
-                              </span>
-                            ) : (
-                              <button
-                                className={`
-                                  block text-center
-                                  p-2 rounded-md text-sm font-medium transition
-                                  text-gray-600 bg-white
-                                  hover:bg-blue-50 hover:text-blue-700
-                                  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                                  active:bg-blue-100 active:scale-[0.97]
-                                  disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                                `}
-                                title="Generar guía"
-                                onClick={() => this.handleGuiaRemision(item.idVenta)}
-                              >
-                                <i className="fa fa-truck text-lg"></i>
-                              </button>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <button
-                              className={`
-                              p-2 rounded-md text-sm font-medium transition
-                              text-red-600 bg-white
-                              hover:bg-red-50 hover:text-red-700
-                              focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                              active:bg-red-100 active:scale-[0.98]
-                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                             `}
-                              title="Anular venta"
-                              onClick={() => this.handleCancelar(item.idVenta)}
-                              disabled={!this.state.remove}
-                            >
-                              <i className="fa fa-trash text-lg"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+        <div className={cn(
+          view === "tabla" ? "rounded border overflow-hidden" : "space-y-6",
+        )}>
+          <div className={cn(
+            view == "tabla" ? "block" : "hidden",
+            "min-w-full"
+          )}>
+            {/* Header (solo visible en desktop) */}
+            <div className={cn(
+              "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
+            )}>
+              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3">
+                <div className="py-3 text-center">#</div>
+                <div className="py-3">Fecha y Hora</div>
+                <div className="py-3">Cliente</div>
+                <div className="py-3">Comprobante</div>
+                <div className="py-3">Tipo</div>
+                <div className="py-3">Estado</div>
+                <div className="py-3">Total</div>
+                <div className="py-3 text-center">Detalle</div>
+                <div className="py-3 text-center">Guía</div>
+                <div className="py-3 text-center">Anular</div>
+              </div>
             </div>
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
           </div>
-        ) : (
-          /* 🟦 Vista Cuadrícula */
-          <div className="space-y-6">
-            {this.state.loading ? (
-              <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                <p className="text-gray-500">Cargando información...</p>
-              </div>
-            ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded-xl border">
-                <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
-                <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron ventas</p>
-                <p className="text-sm text-gray-500">Intenta cambiar los filtros</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {this.state.lista.map((item) => {
-                  const estadoClass = item.estado === 1
-                    ? 'bg-green-100 text-green-800'
-                    : item.estado === 2
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : item.estado === 3
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-blue-100 text-blue-800';
 
-                  const tipo = item.idFormaPago === CONTADO
-                    ? 'CONTADO'
-                    : item.idFormaPago === CREDITO_FIJO
-                      ? 'CRÉDITO FIJO'
-                      : item.idFormaPago === CREDITO_VARIABLE
-                        ? 'CRÉDITO VARIABLE'
-                        : 'PAGO ADELANTADO';
+          {this.renderTable()}
 
-                  return (
-                    <div
-                      key={item.idVenta}
-                      className="bg-white rounded-xl border transition group overflow-hidden"
-                    >
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <h5 className="font-semibold text-gray-900 text-sm">
-                            {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
-                          </h5>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoClass}`}>
-                            {item.estado === 1 ? 'COBRADO' : item.estado === 2 ? 'POR COBRAR' : item.estado === 3 ? 'ANULADO' : 'POR LLEVAR'}
-                          </span>
-                        </div>
-
-                        <div className="text-xs text-gray-600 mb-1">
-                          <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
-                        </div>
-
-                        <div className="text-xs text-gray-600 mb-1">
-                          <span className="font-medium">Tipo Documento:</span> {item.tipoDocumento}
-                        </div>
-
-                        <div className="text-xs text-gray-600 mb-1">
-                          <span className="font-medium">N° Documento:</span> {item.documento}
-                        </div>
-
-                        <div className="text-xs text-gray-600 mb-1">
-                          <span className="font-medium">Información:</span> {item.informacion}
-                        </div>
-
-                        <div className="text-xs text-gray-600 mb-1">
-                          <span className="font-medium">Tipo:</span> {tipo}
-                        </div>
-
-                        <div className="text-lg font-bold text-gray-900 mb-3">
-                          {formatCurrency(item.total, item.codiso)}
-                        </div>
-
-                        <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
-                          <button
-                            className={`
-                              p-2 rounded-md text-sm font-medium transition
-                              text-blue-600 bg-white
-                              hover:bg-blue-50 hover:text-blue-700
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                              active:bg-blue-100 active:scale-[0.97]
-                              disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                             `}
-                            onClick={() => this.handleDetalle(item.idVenta)}
-                            disabled={!this.state.detail}
-                            title="Ver detalle"
-                          >
-                            <i className="fa fa-eye mr-1"></i> Ver
-                          </button>
-
-                          {item.guiaRemision === 1 ? (
-                            <span
-                              className="p-2 text-green-600 bg-green-50 rounded-md text-sm font-medium"
-                              title="Guía generada">
-                              <i className="fa fa-check mr-1"></i> Lista
-                            </span>
-                          ) :
-                            (
-                              <button
-                                className={`
-                                  block text-center
-                                  p-2 rounded-md text-sm font-medium transition
-                                  text-gray-600 bg-white
-                                  hover:bg-blue-50 hover:text-blue-700
-                                  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                                  active:bg-blue-100 active:scale-[0.97]
-                                  disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                                `}
-                                title="Generar guía"
-                                onClick={() => this.handleGuiaRemision(item.idVenta)}
-                              >
-                                <i className="fa fa-truck mr-1"></i> Guía
-                              </button>
-                            )}
-
-                          <button
-                            className={`
-                            p-2 rounded-md text-sm font-medium transition
-                            text-red-600 bg-white
-                            hover:bg-red-50 hover:text-red-700
-                            focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                            active:bg-red-100 active:scale-[0.98]
-                            disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed
-                          `}
-                            onClick={() => this.handleCancelar(item.idVenta)}
-                            disabled={!this.state.remove}
-                            title="Anular"
-                          >
-                            <i className="fa fa-trash mr-1"></i> Anular
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-6 py-3 bg-white border rounded-xl border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        )}
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              cn(
+                "py-3 bg-white border-gray-200 overflow-auto",
+                view === "tabla"
+                  ? "md:px-4 border-t"
+                  : "md:px-6 border rounded"
+              )
+            }
+          />
+        </div>
 
         {/* Modal Elegir Interfaz (sin cambios) */}
         <ModalElegirInterfaz

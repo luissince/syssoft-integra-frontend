@@ -202,7 +202,7 @@ class CpeElectronicos extends CustomComponent {
           initialLoad: false,
         },
         async () => {
-          this.loadingInit();
+          this.loadInit();
           this.updateReduxState();
         },
       );
@@ -257,7 +257,7 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -409,7 +409,7 @@ class CpeElectronicos extends CustomComponent {
       const comprobantes = [...facturado, ...notaCredito, ...guiaRemision];
 
       this.setState({ comprobantes });
-      this.loadingInit();
+      this.loadInit();
     });
   };
 
@@ -793,8 +793,12 @@ class CpeElectronicos extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition"
-              onClick={this.loadingInit}
+              onClick={this.loadInit}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
             >
               <i className="bi bi-arrow-clockwise"></i>
               Recargar Vista
@@ -862,15 +866,17 @@ class CpeElectronicos extends CustomComponent {
           </div>
         </div>
 
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <p className="text-gray-600 mt-1">
+            Puedes los comprobantes electrónicos por fecha, tipo de comprobante, estado
+            SUNAT y sucursal.
+          </p>
+        </div>
+
         {/* Filtros */}
         <div className="flex flex-col gap-y-4 mb-4">
-          <div>
-            <p className="text-gray-600 mt-1">
-              Puedes los comprobantes electrónicos por fecha, tipo de comprobante, estado
-              SUNAT y sucursal.
-            </p>
-          </div>
-
+          {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <input
               type="date"

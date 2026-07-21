@@ -633,11 +633,11 @@ class ModalTransaccion extends CustomComponent {
     }
 
     const currentAmount = bancosAgregados.reduce((accumulator, item) => {
-      accumulator += item.monto ? Number(item.monto) : 0;
+      accumulator += item.monto ? parseFloat(item.monto) : 0;
       return accumulator;
     }, 0);
 
-    if (!bancosAgregados.length > 1) {
+    if (bancosAgregados.length > 1) {
       if (currentAmount >= total) {
         return (
           <>
