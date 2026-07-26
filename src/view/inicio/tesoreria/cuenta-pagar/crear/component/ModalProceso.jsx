@@ -94,10 +94,10 @@ class ModalProceso extends React.Component {
                 <Input
                   autoFocus={true}
                   label={
-                    <>
+                    <label>
                       Monto a pagar:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder={'0.00'}
                   role="float"

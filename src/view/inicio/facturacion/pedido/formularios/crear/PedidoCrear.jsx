@@ -34,7 +34,6 @@ import {
   SpinnerTransparent,
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
 import {
@@ -55,6 +54,8 @@ import Input from '@/components/Input';
 import { alertKit } from 'alert-kit';
 import { DELIVERY_PROGRAMADO, RECOGER_EN_LOCAL, RECOGER_PROGRAMADO } from '@/model/types/tipo-entrega';
 import { cn } from '@/lib/utils';
+import pdfVisualizer from 'pdf-visualizer';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -847,11 +848,10 @@ class PedidoCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesPedido(this.state.idPedido, size),
       type: 'pdf',
       showModal: true,
-      modalMessage: 'Recuperando documento...',
       onPrintDialogClose: () => {
         this.clearView();
         this.handleCloseImpresion();
@@ -932,10 +932,10 @@ class PedidoCrear extends CustomComponent {
         return (
           <div
             key={index}
-            className="d-flex justify-content-between align-items-center text-secondary"
+            className="d-flex justify-content-between align-items-center"
           >
-            <p className="m-0 text-secondary">{impuesto.nombre}:</p>
-            <p className="m-0 text-secondary">
+            <p>{impuesto.nombre}:</p>
+            <p>
               {formatCurrency(impuesto.valor, this.state.codiso)}
             </p>
           </div>
@@ -945,17 +945,17 @@ class PedidoCrear extends CustomComponent {
 
     return (
       <>
-        <div className="d-flex justify-content-between align-items-center text-secondary">
-          <p className="m-0 text-secondary">Sub Total:</p>
-          <p className="m-0 text-secondary">
+        <div className="d-flex justify-content-between align-items-center">
+          <p>Sub Total:</p>
+          <p>
             {formatCurrency(subTotal, this.state.codiso)}
           </p>
         </div>
         {impuestosGenerado()}
         <Button className="btn-success w-100" onClick={this.handleGuardar}>
           <div className="d-flex justify-content-between align-items-center py-1">
-            <p className="m-0 text-xl">Total:</p>
-            <p className="m-0 text-xl">
+            <p className="text-xl">Total:</p>
+            <p className="text-xl">
               {formatCurrency(total, this.state.codiso)}
             </p>
           </div>
@@ -1029,8 +1029,8 @@ class PedidoCrear extends CustomComponent {
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
         />
 
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100">
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full">
             {/*  */}
             <div
               className="w-100 d-flex flex-column position-relative"
@@ -1042,16 +1042,17 @@ class PedidoCrear extends CustomComponent {
                 className="d-flex align-items-center px-3"
                 style={{ borderBottom: '1px solid #cbd5e1' }}
               >
-                <div className="d-flex">
+               <div className="flex">
                   <Button className="btn btn-link" onClick={this.handleCerrar}>
-                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
+                    <ArrowLeft className="h-5 w-5" />
                   </Button>
                 </div>
 
-                <div className="py-3 d-flex align-items-center">
-                  <p className="h5 m-0">
-                    Crear Pedido <i className="fa fa-plus text-secondary"></i>{' '}
+                 <div className="py-3 flex items-center gap-2">
+                  <p className="h5">
+                    Crear Pedido
                   </p>
+                  <Plus className="h-4 w-4" />
                 </div>
               </div>
 
@@ -1170,15 +1171,10 @@ class PedidoCrear extends CustomComponent {
 
             {/*  */}
             <div
-              className="d-flex flex-column position-relative bg-white"
-              style={{
-                flex: '1 1 100%',
-                borderLeft: '1px solid #cbd5e1',
-              }}
+              className="d-flex flex-column position-relative bg-white flex-[1_1_100%] border-l border-solid border-[#cbd5e1]"
             >
               <div
-                className="d-flex justify-content-between align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
+                className="d-flex justify-content-between align-items-center px-3 border-b border-solid border-[#cbd5e1]"
               >
                 <div className="py-3">
                   <p className="h5 m-0">Resumen</p>
@@ -1198,8 +1194,7 @@ class PedidoCrear extends CustomComponent {
               </div>
 
               <div
-                className="d-flex flex-column px-3 pt-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
+                className="d-flex flex-column px-3 pt-3 border-b border-solid border-[#cbd5e1]"
               >
                 <div className="form-group">
                   <Select
@@ -1382,14 +1377,13 @@ class PedidoCrear extends CustomComponent {
               </div>
 
               <div
-                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
-                style={{ borderTop: '1px solid #e2e8f0' }}
+                className="text-right text-xl d-flex flex-column p-3 gap-3 border-t border-solid border-[#e2e8f0]"
               >
                 {this.renderTotal()}
 
-                <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 font-normal">Cantidad:</p>
-                  <p className="m-0 text-black font-normal">
+                <div className="d-flex justify-content-between align-items-center">
+                  <p>Cantidad:</p>
+                  <p>
                     {this.state.detalles.length === 1
                       ? this.state.detalles.length + ' Producto'
                       : this.state.detalles.length + ' Productos'}{' '}

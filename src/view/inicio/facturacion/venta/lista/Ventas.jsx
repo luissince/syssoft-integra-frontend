@@ -300,32 +300,31 @@ class Ventas extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listVenta(params, this.abortControllerTable.signal);
+    const { success, data, message, type } = await listVenta(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        String(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina)),
-      );
-
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   /*

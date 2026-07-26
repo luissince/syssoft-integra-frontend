@@ -31,8 +31,6 @@ import CustomComponent from '@/components/CustomComponent';
 import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import { listCotizacion } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 
 /**
@@ -87,7 +85,7 @@ class ModalCotizacion extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -130,30 +128,30 @@ class ModalCotizacion extends CustomComponent {
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
-    const response = await listCotizacion(params, this.abortController.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+    const { success, data, message, type } = await listCotizacion(params, this.abortController.signal);
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    });
   };
 
   handleOnHidden = () => {
@@ -165,25 +163,19 @@ class ModalCotizacion extends CustomComponent {
   };
 
   handleFechaInicio = (event) => {
-    this.setState(
-      {
-        fechaInicio: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaInicio: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   handleFechaFinal = (event) => {
-    this.setState(
-      {
-        fechaFinal: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaFinal: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   generateBody = () => {

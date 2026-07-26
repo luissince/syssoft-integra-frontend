@@ -1,9 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   currentDate,
   formatNumberWithZeros,
   formatTime,
@@ -43,10 +39,11 @@ import {
   setListaCotizacionPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Cotizaciones extends CustomComponent {
   /**
@@ -63,8 +60,8 @@ class Cotizaciones extends CustomComponent {
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
-      ligado: '-1',
-      estado: '-1',
+      ligado: '',
+      estado: '',
 
       buscar: '',
 
@@ -86,34 +83,29 @@ class Cotizaciones extends CustomComponent {
   }
 
   async componentDidMount() {
-    await this.loadingData();
+    await this.loadData();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadingData = async () => {
+  loadData = async () => {
+    const cotizacionLista = this.props.cotizacionLista;
     if (
-      this.props.cotizacionLista &&
-      this.props.cotizacionLista.data &&
-      this.props.cotizacionLista.paginacion
+      cotizacionLista &&
+      cotizacionLista.data &&
+      cotizacionLista.paginacion
     ) {
-      this.setState(this.props.cotizacionLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.cotizacionLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.cotizacionLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.cotizacionLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.cotizacionLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.cotizacionLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.cotizacionLista.paginacion.messagePaginacion;
+      this.setState(cotizacionLista.data);
+      this.refPaginacion.current.upperPageBound = cotizacionLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = cotizacionLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = cotizacionLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = cotizacionLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = cotizacionLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = cotizacionLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.cotizacionLista.data.buscar);
+      this.refSearch.current.initialize(cotizacionLista.data.buscar);
     } else {
       await this.loadingInit();
       this.updateReduxState();
@@ -200,38 +192,31 @@ class Cotizaciones extends CustomComponent {
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listCotizacion(
-      params,
-      this.abortControllerTable.signal,
-    );
+    const { success, data, message, type } = await listCotizacion(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
-
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleCrear = () => {
@@ -278,33 +263,48 @@ class Cotizaciones extends CustomComponent {
     });
   };
 
-  handleAnular = (id) => {
-    alertDialog(
-      'Cotización',
-      '¿Estás seguro de anular la cotización?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idCotizacion: id,
-            idUsuario: this.state.idUsuario,
-          };
-
-          alertInfo('Cotización', 'Procesando petición...');
-
-          const response = await cancelCotizacion(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Cotización', response.data, async () => {
-              await this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Cotización', response.getMessage());
-          }
-        }
+  handleAnular = async (id) => {
+    const accept = await alertKit.question({
+      title: 'Cotización',
+      message: '¿Estás seguro de anular la cotización?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idCotizacion: id,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando petición...',
+      });
+
+      const response = await cancelCotizacion(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Cotización',
+          message: response.data,
+        }, async () => {
+          await this.loadingInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cotización',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
@@ -457,7 +457,7 @@ class Cotizaciones extends CustomComponent {
               value={this.state.ligado}
               onChange={this.handleSelectLigado}
             >
-              <option value="-1">TODOS</option>
+              <option value="">- TODOS -</option>
               <option value="1">LIGADO</option>
               <option value="0">LIBRE</option>
             </Select>
@@ -472,7 +472,7 @@ class Cotizaciones extends CustomComponent {
               value={this.state.estado}
               onChange={this.handleSelectEstado}
             >
-              <option value="-1">TODOS</option>
+              <option value="">- TODOS -</option>
               <option value="1">COBRADO</option>
               <option value="0">ANULADO</option>
             </Select>
