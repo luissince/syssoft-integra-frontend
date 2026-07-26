@@ -1,3 +1,4 @@
+import { alertKit } from 'alert-kit';
 import bootstrap from '../resource/js/bootstrap';
 import Swal from '../resource/js/sweetalert';
 
@@ -1108,6 +1109,41 @@ export function getPathRoute(namePath) {
     return `/inicio/facturacion/guiaremision/detalle`;
   }
 }
+
+export const validateForm = async ({
+  title = "POS",
+  value,
+  message,
+  ref = null,
+  callback,
+}) => {
+  if (isEmpty(value) || (typeof value === "number" && !isNumeric(value))) {
+    alertKit.warning({
+      title: title,
+      message,
+      onClose: () => {
+        ref?.current?.focus();
+      }
+    }, () => {
+      callback?.();
+    });
+
+    return false;
+  }
+
+  return true;
+};
+
+export const validateMany = async (rules = [], title = "POS") => {
+  for (const rule of rules) {
+    const valid = await validateForm({
+      ...rule,
+      title: title,
+    });
+    if (!valid) return false;
+  }
+  return true;
+};
 
 export function alertInfo(title, message) {
   Swal({

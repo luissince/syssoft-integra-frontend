@@ -47,14 +47,15 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
+import { TIPO_PRODUCTO_SERVICIO } from '../../../../../../model/types/tipo-producto';
 import Input from '@/components/Input';
 import { alertKit } from 'alert-kit';
 import { DELIVERY_PROGRAMADO, RECOGER_PROGRAMADO } from '@/model/types/tipo-entrega';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PedidoEditar extends CustomComponent {
   /**
@@ -738,12 +739,6 @@ class PedidoEditar extends CustomComponent {
       alertKit.warning({
         title: 'Pedido',
         message: 'Agregar algún producto a la lista.',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
       }, () => {
         this.refProductoValue.current.focus();
       });
@@ -817,7 +812,7 @@ class PedidoEditar extends CustomComponent {
   };
 
   handleCloseImpresion = async () => {
-    this.setState({ isOpenImpresion: false }, this.close());
+    this.setState({ isOpenImpresion: false }, () => this.close());
   };
 
   //------------------------------------------------------------------------------------------
@@ -979,7 +974,6 @@ class PedidoEditar extends CustomComponent {
         <ModalImpresion
           refModal={this.refModalImpresion}
           isOpen={this.state.isOpenImpresion}
-          clear={this.clearView}
           handleClose={this.handleCloseImpresion}
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
@@ -1088,18 +1082,18 @@ class PedidoEditar extends CustomComponent {
                             height={150}
                             className="mb-2 object-contain"
                           />
+
                           {
-                            item.idTipoProducto === SERVICIO ? (
+                            item.idTipoProducto === TIPO_PRODUCTO_SERVICIO ? (
                               <p className="badge badge-success text-base">
                                 SERVICIO
                               </p>
                             ) : (
                               <p
-                                className={`${item.idTipoProducto === PRODUCTO &&
-                                  item.cantidad <= 0
-                                  ? 'badge badge-danger text-base'
-                                  : 'badge badge-success text-base'
-                                  } `}
+                                className={cn(
+                                  "badge badge-success text-base",
+                                  item.cantidad <= 0 ? 'badge-danger' : 'badge-success'
+                                )}
                               >
                                 STOCK: {formatDecimal(item.cantidad)}
                               </p>

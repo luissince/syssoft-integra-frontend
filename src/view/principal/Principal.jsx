@@ -17,6 +17,7 @@ import { projectActive, signOut } from '../../redux/principalSlice';
 import PropTypes from 'prop-types';
 import Input from '../../components/Input';
 import { images } from '../../helper';
+import Button from '@/components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -222,22 +223,31 @@ class Principal extends CustomComponent {
             razonSocial={this.state.razonSocial}
             nombreEmpresa={this.state.nombreEmpresa}
             documento={'RUC: ' + this.state.documento}
-            handleSignOut={this.handleSignOut}
           />
 
-          <div className="flex flex-col gap-3">
-            <Input
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              className="bg-transparent"
-              type="search"
-              placeholder="Filtar por nombre de sucursal"
-              ref={this.refTxtSearch}
-              onKeyUp={this.handleSearch}
-            />
+          <div className="flex flex-col">
+            <div className="mb-3">
+              <Input
+                group={true}
+                iconLeft={<i className="bi bi-search"></i>}
+                className="bg-transparent"
+                type="search"
+                placeholder="Filtar por nombre de sucursal"
+                ref={this.refTxtSearch}
+                onKeyUp={this.handleSearch}
+                buttonRight={
+                  <Button
+                    className="btn-outline-danger"
+                    title="Limpiar"
+                    onClick={this.handleSignOut}
+                  >
+                    <i className="fa fa-power-off"></i>
+                  </Button>
+                }
+              />
+            </div>
 
             <div className="flex">
-
               {
                 isEmpty(this.state.sucursales) && (
                   <div className="w-full flex justify-center">
@@ -246,7 +256,7 @@ class Principal extends CustomComponent {
                 )
               }
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {
                   this.state.sucursales.map((item, index) => (
                     <ItemCard

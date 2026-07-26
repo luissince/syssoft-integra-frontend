@@ -59,7 +59,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     if (group) {
       return (
         <>
-          {label && <label>{label}</label>}
+          {label && (
+            typeof label === "string"
+              ? <label>{label}</label>
+              : label
+          )}
           <div className="input-group">
             {iconLeft && (
               <div className="input-group-prepend">
@@ -85,7 +89,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <>
-        {label && <label>{label}</label>}
+        {label && (
+          typeof label === "string"
+            ? <label>{label}</label>
+            : label
+        )}
         <input
           ref={ref}
           type={type}

@@ -48,7 +48,8 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import Search from '../../../../../../components/Search';
-import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
+import { TIPO_PRODUCTO_SERVICIO } from '../../../../../../model/types/tipo-producto';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -725,7 +726,7 @@ class CotizacionEditar extends CustomComponent {
   };
 
   handleCloseImpresion = () => {
-    this.setState({ isOpenImpresion: false }, this.close());
+    this.setState({ isOpenImpresion: false }, () => this.close());
   };
 
   //------------------------------------------------------------------------------------------
@@ -1088,17 +1089,16 @@ class CotizacionEditar extends CustomComponent {
                             className="mb-2 object-contain"
                           />
                           {
-                            item.idTipoProducto === SERVICIO ? (
+                            item.idTipoProducto === TIPO_PRODUCTO_SERVICIO ? (
                               <p className="badge badge-success text-base">
                                 SERVICIO
                               </p>
                             ) : (
                               <p
-                                className={`${item.idTipoProducto === PRODUCTO &&
-                                  item.cantidad <= 0
-                                  ? 'badge badge-danger text-base'
-                                  : 'badge badge-success text-base'
-                                  } `}
+                                className={cn(
+                                  "badge badge-success text-base",
+                                  item.cantidad <= 0 ? 'badge-danger' : 'badge-success'
+                                )}
                               >
                                 STOCK: {formatDecimal(item.cantidad)}
                               </p>
@@ -1157,7 +1157,6 @@ class CotizacionEditar extends CustomComponent {
               >
                 <div className="form-group">
                   <Select
-                    group={false}
                     ref={this.refComprobante}
                     value={this.state.idComprobante}
                     onChange={this.handleSelectComprobante}

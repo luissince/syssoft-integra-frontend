@@ -110,26 +110,21 @@ class Compras extends CustomComponent {
    */
 
   loadingData = async () => {
+    const compraLista = this.props.compraLista;
     if (
-      this.props.compraLista &&
-      this.props.compraLista.data &&
-      this.props.compraLista.paginacion
+      compraLista &&
+      compraLista.data &&
+      compraLista.paginacion
     ) {
-      this.setState(this.props.compraLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.compraLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.compraLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.compraLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.compraLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.compraLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.compraLista.paginacion.messagePaginacion;
+      this.setState(compraLista.data);
+      this.refPaginacion.current.upperPageBound = compraLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = compraLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = compraLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = compraLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = compraLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = compraLista.paginacion.messagePaginacion;
     } else {
-      await this.loadingInit();
+      await this.loadInit();
       this.updateReduxState();
     }
   };
@@ -146,7 +141,7 @@ class Compras extends CustomComponent {
     });
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -201,7 +196,7 @@ class Compras extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),)
       );
 
       this.setState(
@@ -258,8 +253,7 @@ class Compras extends CustomComponent {
   };
 
   handleAnular = async (id) => {
-    const accept = await alertKit.question(
-      {
+    const accept = await alertKit.question({
         title: 'Compra',
         message: '¿Está seguro de anular la compra?',
         acceptButton: {
@@ -287,7 +281,7 @@ class Compras extends CustomComponent {
           title: 'Compra',
           message: response.data,
         }, async () => {
-          await this.loadingInit();
+          await this.loadInit();
         });
       }
 
@@ -322,7 +316,7 @@ class Compras extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -408,7 +402,7 @@ class Compras extends CustomComponent {
             </Button>{' '}
             <Button
               className="btn-outline-secondary"
-              onClick={this.loadingInit}
+              onClick={this.loadInit}
             >
               <i className="bi bi-arrow-clockwise"></i> Recargar Vista
             </Button>

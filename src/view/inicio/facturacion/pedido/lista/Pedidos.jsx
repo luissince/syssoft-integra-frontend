@@ -334,7 +334,7 @@ class Pedidos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="11"
+          colSpan={11}
           message="Cargando información de la tabla..."
         />
       );

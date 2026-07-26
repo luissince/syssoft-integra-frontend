@@ -1,18 +1,27 @@
-import PropTypes from 'prop-types';
-import { forwardRef } from 'react';
+import { cn } from '@/lib/utils';
+import { forwardRef, ReactNode, TextareaHTMLAttributes } from 'react';
+
+interface TextAreaProps
+  extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string | ReactNode;
+  group?: boolean;
+  iconLeft?: ReactNode;
+  buttonRight?: ReactNode;
+  className?: string;
+}
 
 /**
  *
  * @example
  * <TextArea
- *   label={"Descripción Corta:"}
+ *   label="Descripción Corta:"
  *   rows={3}
  *   ref={refDescripcionCorta}
  *   value={descripcionCorta}
  *   onChange={handleInputDescripcionCorta}
  * />
  */
-const TextArea = forwardRef(
+const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
   (
     {
       label,
@@ -21,15 +30,18 @@ const TextArea = forwardRef(
       iconLeft,
       buttonRight,
       className = 'border border-primary',
-      ...rest // aquí van autoFocus, placeholder, value, onChange, etc.
+      ...rest
     },
-    ref,
+    ref
   ) => {
     const textareaElement = (
       <textarea
         ref={ref}
         rows={rows}
-        className={`form-control border border-primary ${className}`}
+        className={cn(
+          "form-control border border-primary",
+          className,
+        )}
         {...rest}
       />
     );
@@ -37,7 +49,11 @@ const TextArea = forwardRef(
     if (group) {
       return (
         <>
-          {label && <label>{label}</label>}
+          {label && (
+            typeof label === "string"
+              ? <label>{label}</label>
+              : label
+          )}
           <div className="input-group">
             {iconLeft && (
               <div className="input-group-prepend">
@@ -46,7 +62,9 @@ const TextArea = forwardRef(
             )}
             {textareaElement}
             {buttonRight && (
-              <div className="input-group-append">{buttonRight}</div>
+              <div className="input-group-append">
+                {buttonRight}
+              </div>
             )}
           </div>
         </>
@@ -55,23 +73,17 @@ const TextArea = forwardRef(
 
     return (
       <>
-        {label && <label>{label}</label>}
+        {label && (
+          typeof label === "string"
+            ? <label>{label}</label>
+            : label
+        )}
         {textareaElement}
       </>
     );
-  },
+  }
 );
 
 TextArea.displayName = 'TextArea';
-
-TextArea.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
-  rows: PropTypes.number,
-  group: PropTypes.bool,
-  iconLeft: PropTypes.element,
-  buttonRight: PropTypes.element,
-  className: PropTypes.string,
-  // los demás props como value, placeholder, etc., son pasados por `...rest`
-};
 
 export default TextArea;

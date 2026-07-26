@@ -289,18 +289,17 @@ class OrdenCompras extends CustomComponent {
       const response = await cancelOrdenCompra(params);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Orden de Compra',
-            message: response.data,
-          },
-          async () => {
-            await this.loadingInit();
-          },
-        );
+        alertKit.success({
+          title: 'Orden de Compra',
+          message: response.data,
+        }, async () => {
+          await this.loadingInit();
+        });
       }
 
       if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
         alertKit.warning({
           title: 'Orden de Compra',
           message: response.getMessage(),
@@ -313,7 +312,7 @@ class OrdenCompras extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="10"
+          colSpan={10}
           message="Cargando información de la tabla..."
         />
       );

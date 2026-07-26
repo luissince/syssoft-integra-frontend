@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  alertDialog,
   currentDate,
   keyNumberPhone,
   keyNumberInteger,
@@ -29,11 +28,9 @@ import Title from '../../../../../components/Title';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
 import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
 import CheckBox, { Switches } from '../../../../../components/Checks';
-import { RUC } from '../../../../../model/types/tipo-documento';
 import { alertKit } from 'alert-kit';
-import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
+import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -108,8 +105,6 @@ class PersonaAgregar extends CustomComponent {
         msgLoading: responseListaTipoDocumento.getMessage(),
       });
     }
-
-    console.log(responseListaTipoDocumento.data);
 
     this.setState({
       tiposDocumentos: responseListaTipoDocumento.data,
@@ -220,7 +215,7 @@ class PersonaAgregar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
       }, () => {
-        this.refDocumentoPj.current.focus();
+        this.refDocumento.current.focus();
       })
       return;
     }
@@ -467,9 +462,9 @@ class PersonaAgregar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
@@ -491,9 +486,9 @@ class PersonaAgregar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
@@ -532,10 +527,10 @@ class PersonaAgregar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   {tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}

@@ -1,6 +1,9 @@
 {
-    "docwriter.language": "Spanish",
-    "docwriter.style": "XML",
-    "svg.preview.background": "dark-transparent",
-    "java.configuration.updateBuildConfiguration": "interactive"
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.run": "onType"
 }

@@ -10,7 +10,7 @@ import {
 import { connect } from 'react-redux';
 import {
   detailGuiaRemision,
-  documentsPdfInvoicesGuiaRemision,
+  getPdfGuiaRemision,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
@@ -243,7 +243,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   handlePrintInvoices = async (size) => {
     await pdfVisualizer.init({
-      url: documentsPdfInvoicesGuiaRemision(this.state.idGuiaRemision, size),
+      url: getPdfGuiaRemision(this.state.idGuiaRemision, size),
       title: 'Guía de Remision',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
@@ -271,7 +271,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       email: email,
     };
 
-    const documentUrl = documentsPdfInvoicesGuiaRemision(
+    const documentUrl = getPdfGuiaRemision(
       this.state.idGuiaRemision,
       'A4',
     );

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatDecimal, isEmpty, formatCurrency } from "@/helper/utils.helper";
 import { SpinnerTransparent } from "../Spinner";
 import Image from "../Image";
-import { PRODUCTO } from "@/model/types/tipo-producto";
+import { TIPO_PRODUCTO_ACTIVO_FIJO, TIPO_PRODUCTO_LOTE, TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO } from "@/model/types/tipo-producto";
 import Button from "../Button";
 
 interface ListGridProps {
@@ -77,20 +77,26 @@ const ListGrid: React.FC<ListGridProps> = ({
                 <div className="mt-auto space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-600">
-                      {item.idTipoProducto === PRODUCTO
-                        ? "Stock"
-                        : "Servicio"}
+                      {item.idTipoProducto === TIPO_PRODUCTO_NORMAL && "Stock"}
+                      {item.idTipoProducto === TIPO_PRODUCTO_SERVICIO && "Servicio"}
+                      {item.idTipoProducto === TIPO_PRODUCTO_LOTE && "Lote"}
+                      {item.idTipoProducto === TIPO_PRODUCTO_ACTIVO_FIJO && "Activo Fijo"}
                     </span>
-                    <span
-                      className={cn(
-                        "text-base font-bold",
-                        item.idTipoProducto === PRODUCTO && item.cantidad <= 0
-                          ? "text-red-600"
-                          : "text-green-500"
-                      )}
-                    >
-                      {formatDecimal(item.cantidad)}
-                    </span>
+
+                    {
+                      item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO && (
+                        <span
+                          className={cn(
+                            "text-base font-bold",
+                            item.cantidad <= 0
+                              ? "text-red-600"
+                              : "text-green-500"
+                          )}
+                        >
+                          {formatDecimal(item.cantidad)}
+                        </span>
+                      )
+                    }
                   </div>
                 </div>
 
