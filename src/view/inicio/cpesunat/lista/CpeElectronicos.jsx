@@ -21,7 +21,7 @@ import {
   anularFacturaCpeSunat,
   comboComprobante,
   comboSucursal,
-  documentsPdfInvoicesGuiaRemision,
+  getPdfGuiaRemision,
   documentsPdfInvoicesVenta,
   enviarEmail,
   facturarCpeSunat,
@@ -103,7 +103,7 @@ class CpeElectronicos extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
-      vista: 'tabla',
+      view: 'tabla',
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -137,7 +137,7 @@ class CpeElectronicos extends CustomComponent {
       this.setState({ buscar: comprobante });
     }
 
-    await this.loadingData();
+    await this.loadData();
   }
 
   componentWillUnmount() {
@@ -151,14 +151,14 @@ class CpeElectronicos extends CustomComponent {
   |
   | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
   | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | componente en consecuencia. El método loadData puede ser responsable de realizar peticiones asíncronas
   | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | recuperados. La función loadData puede ser invocada en el montaje inicial del componente para asegurarse
   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
   |
   */
 
-  loadingData = async () => {
+  loadData = async () => {
     if (
       this.props.cpeSunatLista &&
       this.props.cpeSunatLista.data &&
@@ -373,7 +373,7 @@ class CpeElectronicos extends CustomComponent {
   */
 
   handleChangeView = (value) => {
-    this.setState({ vista: value }, () => this.updateReduxState());
+    this.setState({ view: value }, () => this.updateReduxState());
   };
 
   handleInputFechaInicio = (event) => {
@@ -641,7 +641,7 @@ class CpeElectronicos extends CustomComponent {
     if (tipo === 'fac') {
       url = documentsPdfInvoicesVenta(idComprobante, size);
     } else {
-      url = documentsPdfInvoicesGuiaRemision(idComprobante, size);
+      url = getPdfGuiaRemision(idComprobante, size);
     }
 
     await pdfVisualizer.init({
@@ -765,8 +765,167 @@ class CpeElectronicos extends CustomComponent {
     }
   }
 
+  renderTable = () => {
+    const { loading, lista, view } = this.state;
+
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center py-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(lista)) {
+      return (
+        <div className={cn(
+          "text-center py-6",
+          view === "tabla" ? "" : "rounded border",
+        )}>
+          <div className="text-gray-500">
+            <i className="bi bi-box text-4xl mb-3 block"></i>
+            <p className="text-lg font-medium">No se encontraron ventas</p>
+            <p className="text-sm">Intenta cambiar los filtros</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={cn(
+        view === "tabla"
+          ? "divide-y divide-gray-200"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
+      )}>
+        {
+          lista.map((item, index) => {
+            const descripcion =
+              item.xmlDescripcion === ''
+                ? 'Por Generar Xml'
+                : limitarCadena(item.xmlDescripcion, 90, '...');
+
+            const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
+            const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "text-sm text-gray-900",
+                  view === "tabla"
+                    ? "grid grid-cols-[0.5fr_1.0fr_1.0fr_1.5fr_1.5fr_1.0fr_1.0fr_1.5fr] py-3 gap-x-3 items-center"
+                    : "flex flex-col h-full gap-3 rounded border p-3"
+                )}
+              >
+                <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
+                  {
+                    view === "tabla" && (
+                      <div className=" text-center hidden md:block">
+                        {item.id}
+                      </div>
+                    )
+                  }
+
+                  <div className={cn(
+                    view === "tabla" ? "text-center" : "",
+                  )}>
+                    <DropdownActions
+                      options={[
+                        {
+                          image: images.pdf,
+                          tooltip: 'PDF A4',
+                          label: 'PDF A4',
+                          onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
+                        },
+                        {
+                          image: images.invoice,
+                          tooltip: 'PDF Ticket 80mm',
+                          label: 'PDF Ticket 80mm',
+                          onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
+                        },
+                        {
+                          image: images.invoice,
+                          tooltip: 'PDF Ticket 58mm',
+                          label: 'PDF Ticket 58mm',
+                          onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
+                        },
+                        {
+                          image: images.xml,
+                          tooltip: 'XML',
+                          label: 'XML',
+                          onClick: () => this.handleDownloadXml(item.idComprobante),
+                        },
+                        {
+                          image: images.email,
+                          tooltip: 'Enviar por Email',
+                          label: 'Email',
+                          onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
+                        },
+                        ...(item.tipo === 'fac' && item.anulacion !== 0
+                          ? [
+                            {
+                              image: images.error,
+                              tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
+                              label: item.anulacion === 1 ? 'Com. Baja' : 'Resumen',
+                              onClick: () => {
+                                const id = item.idComprobante;
+                                const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
+                                item.anulacion === 1
+                                  ? this.handleSendComunicacionDeBaja(id, num)
+                                  : this.handleSendResumenDiario(id, num);
+                              },
+                            },
+                          ]
+                          : []),
+                      ]}
+                    />
+                  </div>
+
+                  <div>
+                    {item.fecha}<br />
+                    <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
+                  </div>
+
+                  <div>
+                    <Link
+                      to={getPathNavigation(item.tipo, item.idComprobante)}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {item.comprobante}<br />
+                      <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
+                    </Link>
+                  </div>
+
+                  <div>
+                    <div>{item.tipoDocumento} - {item.documento}</div>
+                    <div className="text-xs text-gray-500">{item.informacion}</div>
+                  </div>
+
+                  <div>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoSunatClass}`}>
+                      {estadoSunatLabel}
+                    </span>
+                  </div>
+
+                  <div>
+                    {this.renderEstado(item)}
+                  </div>
+
+                  <div>
+                    {descripcion}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }
+
   render() {
-    const { vista } = this.state;
+    const { view } = this.state;
 
     return (
       <ContainerWrapper>
@@ -805,17 +964,17 @@ class CpeElectronicos extends CustomComponent {
             </button>
           </div>
 
-          {/* Toggle vista */}
+          {/* Toggle view */}
           <div className="flex bg-gray-100 rounded p-1 gap-1">
             <button
-              onClick={() => this.handleChangeView('tabla')}
+              onClick={() => this.handleChangeView("tabla")}
               className={
                 cn(
                   "flex-1 sm:flex-none flex items-center justify-center gap-1",
                   "text-sm font-medium",
                   "px-4 py-2",
-                  "rounded-md transition",
-                  vista === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+                  "rounded-md transition ",
+                  view === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
                 )
               }
             >
@@ -823,14 +982,14 @@ class CpeElectronicos extends CustomComponent {
               <span className="hidden sm:inline">Tabla</span>
             </button>
             <button
-              onClick={() => this.handleChangeView('cuadricula')}
+              onClick={() => this.handleChangeView("cuadricula")}
               className={
                 cn(
                   "flex-1 sm:flex-none flex items-center justify-center gap-1",
-                  "px-4 py-2",
                   "text-sm font-medium",
-                  "rounded-md transition",
-                  vista === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800"
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
                 )
               }
             >
@@ -946,285 +1105,52 @@ class CpeElectronicos extends CustomComponent {
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
-        {vista === 'tabla' ? (
-          /* 📊 Vista Tabla */
-          <div className="bg-white rounded-xl border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-5">#</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Acciones</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Fecha</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">Comprobante</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Cliente</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-10">Tipo</th>
-                    <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-10">Estado SUNAT</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Observación</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {this.state.loading ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-                          <p className="text-gray-500">Cargando información...</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : isEmpty(this.state.lista) ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center">
-                        <div className="text-gray-500">
-                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                          <p className="text-lg font-medium">No se encontraron comprobantes</p>
-                          <p className="text-sm">Intenta cambiar los filtros</p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    this.state.lista.map((item, index) => {
-                      const descripcion =
-                        item.xmlDescripcion === ''
-                          ? 'Por Generar Xml'
-                          : limitarCadena(item.xmlDescripcion, 90, '...');
-
-                      const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
-                      const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-
-                      return (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm text-gray-900 text-center">{item.id}</td>
-                          <td className="px-6 py-4 text-center">
-                            <DropdownActions
-                              options={[
-                                {
-                                  image: images.pdf,
-                                  tooltip: 'PDF A4',
-                                  label: 'PDF A4',
-                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
-                                },
-                                {
-                                  image: images.invoice,
-                                  tooltip: 'PDF Ticket 80mm',
-                                  label: 'PDF Ticket 80mm',
-                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
-                                },
-                                {
-                                  image: images.invoice,
-                                  tooltip: 'PDF Ticket 58mm',
-                                  label: 'PDF Ticket 58mm',
-                                  onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
-                                },
-                                {
-                                  image: images.xml,
-                                  tooltip: 'XML',
-                                  label: 'XML',
-                                  onClick: () => this.handleDownloadXml(item.idComprobante),
-                                },
-                                {
-                                  image: images.email,
-                                  tooltip: 'Enviar por Email',
-                                  label: 'Email',
-                                  onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
-                                },
-                                ...(item.tipo === 'fac' && item.anulacion !== 0
-                                  ? [
-                                    {
-                                      image: images.error,
-                                      tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                      label: item.anulacion === 1 ? 'Com. Baja' : 'Resumen',
-                                      onClick: () => {
-                                        const id = item.idComprobante;
-                                        const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
-                                        item.anulacion === 1
-                                          ? this.handleSendComunicacionDeBaja(id, num)
-                                          : this.handleSendResumenDiario(id, num);
-                                      },
-                                    },
-                                  ]
-                                  : []),
-                              ]}
-                            />
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {item.fecha}<br />
-                            <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            <Link
-                              to={getPathNavigation(item.tipo, item.idComprobante)}
-                              className="text-blue-600 hover:underline font-medium"
-                            >
-                              {item.comprobante}<br />
-                              <span className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</span>
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            <div>{item.tipoDocumento} - {item.documento}</div>
-                            <div className="text-xs text-gray-500">{item.informacion}</div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${estadoSunatClass}`}>
-                              {estadoSunatLabel}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            {this.renderEstado(item)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {descripcion}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+        <div className={cn(
+          view === "tabla" ? "rounded border overflow-hidden mt-6" : "space-y-6",
+        )}>
+          <div className={cn(
+            view == "tabla" ? "block" : "hidden",
+            "min-w-full"
+          )}>
+            {/* Header (solo visible en desktop) */}
+            <div className={cn(
+              "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
+            )}>
+              <div className="grid grid-cols-[0.5fr_1.0fr_1.0fr_1.5fr_1.5fr_1.0fr_1.0fr_1.5fr] gap-x-3 py-3">
+                <div className="text-center">#</div>
+                <div className="text-center">Acciones</div>
+                <div>Fecha</div>
+                <div>Comprobante</div>
+                <div>Cliente</div>
+                <div className="text-center">Tipo</div>
+                <div className="text-center">Estado SUNAT</div>
+                <div>Observación</div>
+              </div>
             </div>
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
           </div>
-        ) : (
-          /* 🟦 Vista Cuadrícula */
-          <div className="space-y-6">
-            {this.state.loading ? (
-              <div className="flex justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-              </div>
-            ) : isEmpty(this.state.lista) ? (
-              <div className="text-center py-16 bg-white rounded-xl border">
-                <i className="bi bi-box text-5xl mb-4 block text-gray-400"></i>
-                <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron comprobantes</p>
-                <p className="text-sm text-gray-500">Intenta cambiar los filtros</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {this.state.lista.map((item, index) => {
-                  const descripcion =
-                    item.xmlDescripcion === ''
-                      ? 'Por Generar Xml'
-                      : limitarCadena(item.xmlDescripcion, 90, '...');
 
-                  const estadoSunatLabel = item.estado !== 3 ? 'DECLARAR' : 'DAR DE BAJA';
-                  const estadoSunatClass = item.estado !== 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+          {this.renderTable()}
 
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white rounded-xl border hover:shadow-md transition group overflow-hidden"
-                    >
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <h5 className="font-semibold text-gray-900 text-sm">
-                            {item.comprobante} {item.serie}-{formatNumberWithZeros(item.numeracion)}
-                          </h5>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${estadoSunatClass}`}>
-                            {estadoSunatLabel}
-                          </span>
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Fecha:</span> {item.fecha} {formatTime(item.hora)}
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-1">
-                          <span className="font-medium">Cliente:</span> {item.informacion}
-                          <div className="text-sm text-gray-500">{item.tipoDocumento} - {item.documento}</div>
-                        </div>
-
-                        <div className="text-sm text-gray-600 mb-3">
-                          <span className="font-medium">Observación:</span>
-                          <div className="text-sm text-gray-700 mt-1">{descripcion}</div>
-                        </div>
-
-                        <div className="pt-3 border-t border-gray-100 flex justify-between">
-                          <div className="text-sm text-gray-600 mb-2">
-                            <div className="mt-1">{this.renderEstado(item)}</div>
-                          </div>
-
-                          <DropdownActions
-                            options={[
-                              {
-                                image: images.pdf,
-                                tooltip: 'PDF A4',
-                                label: 'PDF A4',
-                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, 'A4'),
-                              },
-                              {
-                                image: images.invoice,
-                                tooltip: 'PDF 80mm',
-                                label: 'Ticket 80mm',
-                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '80mm'),
-                              },
-                              {
-                                image: images.invoice,
-                                tooltip: 'PDF 58mm',
-                                label: 'Ticket 58mm',
-                                onClick: () => this.handleOpenPrinter(item.idComprobante, item.tipo, '58mm'),
-                              },
-                              {
-                                image: images.xml,
-                                tooltip: 'XML',
-                                label: 'XML',
-                                onClick: () => this.handleDownloadXml(item.idComprobante),
-                              },
-                              {
-                                image: images.email,
-                                tooltip: 'Enviar Email',
-                                label: 'Email',
-                                onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
-                              },
-                              ...(item.tipo === 'fac' && item.anulacion !== 0
-                                ? [
-                                  {
-                                    image: images.error,
-                                    tooltip: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                    label: item.anulacion === 1 ? 'Comunicación de Baja' : 'Resumen Diario',
-                                    onClick: () => {
-                                      const id = item.idComprobante;
-                                      const num = item.serie + '-' + formatNumberWithZeros(item.numeracion);
-                                      item.anulacion === 1
-                                        ? this.handleSendComunicacionDeBaja(id, num)
-                                        : this.handleSendResumenDiario(id, num);
-                                    },
-                                  },
-                                ]
-                                : []),
-                            ]}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <Paginacion
-              ref={this.refPaginacion}
-              loading={this.state.loading}
-              data={this.state.lista}
-              totalPaginacion={this.state.totalPaginacion}
-              paginacion={this.state.paginacion}
-              fillTable={this.paginacionContext}
-              restart={this.state.restart}
-              className="md:px-2 py-3 bg-white border-t border-gray-200 overflow-auto"
-              theme="modern"
-            />
-          </div>
-        )}
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              cn(
+                "py-3 bg-white border-gray-200 overflow-auto",
+                view === "tabla"
+                  ? "md:px-4 border-t"
+                  : "md:px-6 border rounded"
+              )
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }

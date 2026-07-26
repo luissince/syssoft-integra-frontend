@@ -14,7 +14,7 @@ import {
   comboMotivoTraslado,
   comboTipoPeso,
   createGuiaRemision,
-  documentsPdfInvoicesGuiaRemision,
+  getPdfGuiaRemision,
   filtrarPersona,
   filtrarVehiculo,
   getDefaultVehiculo,
@@ -536,7 +536,7 @@ class GuiaRemisionCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = async (size) => {
-    const url = documentsPdfInvoicesGuiaRemision(
+    const url = getPdfGuiaRemision(
       this.state.idGuiaRemision,
       size,
     );
@@ -1229,9 +1229,9 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Comprobante: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refComprobante}
               value={this.state.idComprobante}
@@ -1258,9 +1258,9 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               value={
                 this.state.venta
@@ -1316,10 +1316,10 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Motivo del traslado:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refMotivoTraslado}
               value={this.state.idMotivoTraslado}
@@ -1339,10 +1339,10 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Fecha traslado:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               type="date"
               value={this.state.fechaTraslado}
@@ -1357,10 +1357,10 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Tipo Peso de Carga:{' '}
                   <i className="fa fa-asterisk text-danger small" />
-                </>
+                </label>
               }
               ref={this.refTipoPeso}
               value={this.state.idTipoPeso}
@@ -1380,10 +1380,10 @@ class GuiaRemisionCrear extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Peso de la Carga:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Ejm: 0.00, 0"
               ref={this.refPeso}
@@ -1409,10 +1409,10 @@ class GuiaRemisionCrear extends CustomComponent {
             <SearchInput
               ref={this.refVehiculo}
               label={
-                <>
+                <label>
                   Filtrar un vehículo:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               disabled={this.state.disabledPublica}
               placeholder="Filtrar por marca o número de placa..."
@@ -1445,10 +1445,10 @@ class GuiaRemisionCrear extends CustomComponent {
             <SearchInput
               ref={this.refConductor}
               label={
-                <>
+                <label>
                   Filtrar un Conductor (DNI):{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               disabled={this.state.disabledPublica}
               placeholder="Por número de documento o apellidos y nombres..."
@@ -1481,10 +1481,10 @@ class GuiaRemisionCrear extends CustomComponent {
             <SearchInput
               ref={this.refConductorPublico}
               label={
-                <>
+                <label>
                   Selecciona una Empresa (RUC):{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               disabled={this.state.disabledPrivado}
               placeholder="Por número de documento o ruc..."

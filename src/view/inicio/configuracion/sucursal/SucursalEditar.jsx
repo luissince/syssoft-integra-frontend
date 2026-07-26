@@ -515,7 +515,7 @@ class SucursalEditar extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <TextArea
-                  label={<>Horario de Atención:</>}
+                  label={<label>Horario de Atención:</label>}
                   value={this.state.horarioAtencion}
                   onChange={(event) =>
                     this.setState({ horarioAtencion: event.target.value })

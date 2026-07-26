@@ -311,7 +311,7 @@ class Cotizaciones extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="10"
+          colSpan={10}
           message="Cargando información de la tabla..."
         />
       );

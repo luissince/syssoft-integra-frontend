@@ -9,9 +9,10 @@ import {
 } from '../../../../../../../helper/utils.helper';
 import CustomComponent from '@/components/CustomComponent';
 import {
-  A_GRANEL,
-  UNIDADES,
-  VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
+  TIPO_TRATAMIENTO_PRODUCTO_UNIDADES,
+  TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO,
 } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import PropTypes from 'prop-types';
 import { filtrarProductoVenta } from '../../../../../../../network/rest/principal.network';
@@ -20,6 +21,9 @@ import ErrorResponse from '../../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../../model/types/types';
 import Search from '../../../../../../../components/Search';
 import InvoiceTicket from './InvoiceTicket';
+import { cn } from '@/lib/utils';
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
+import Image from '@/components/Image';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -87,7 +91,6 @@ class InvoiceView extends CustomComponent {
       const params = {
         tipo: 1,
         filtrar: this.state.buscar,
-        idSucursal: this.props.idSucursal,
         idAlmacen: this.props.idAlmacen,
         posicionPagina: 0,
         filasPorPagina: 1,
@@ -96,7 +99,7 @@ class InvoiceView extends CustomComponent {
       const response = await filtrarProductoVenta(params);
       if (response instanceof SuccessReponse) {
         if (!isEmpty(response.data.lists)) {
-          this.props.handleAddItem(response.data.lists[0]);
+          this.props.handleAddItem(response.data.result[0]);
         }
 
         this.setState({
@@ -215,7 +218,6 @@ class InvoiceView extends CustomComponent {
     const params = {
       tipo: tipo,
       filtrar: buscar,
-      idSucursal: this.props.idSucursal,
       idAlmacen: this.props.idAlmacen,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -233,7 +235,7 @@ class InvoiceView extends CustomComponent {
       //   totalPaginacion: totalPaginacion,
       // }));
 
-      for (const item of response.data.lists) {
+      for (const item of response.data.result) {
         this.props.handleUpdateProductos(item);
       }
 
@@ -358,16 +360,19 @@ const ItemSearch = (props) => {
         <div className="input-group">
           <div className="input-group-prepend">
             <Button
-              className={`${tipo === 1 ? 'btn-primary ' : 'btn-outline-primary'
-                } px-3`}
+              className={cn(
+                "px-3",
+                tipo === 1 ? "btn-primary" : "btn-outline-primary"
+              )}
               onClick={() => handleSelectTipo(1)}
             >
               <i className="fa fa-barcode"></i>
             </Button>
 
             <Button
-              className={`${tipo === 0 ? 'btn-primary' : 'btn-outline-primary'
-                }`}
+              className={cn(
+                tipo === 0 ? "btn-primary" : "btn-outline-primary"
+              )}
               onClick={() => handleSelectTipo(0)}
             >
               <i className="fa fa-search px-1"></i>
@@ -513,49 +518,34 @@ const ItemView = (props) => {
     cantidad,
     precio,
     medida,
-    tipo,
     preferido,
     negativo,
     imagen,
     almacen,
+    idTipoProducto,
     idTipoTratamientoProducto,
   } = props.producto;
 
   const { handleAddItem, handleStarProduct } = props;
 
-  const cssNegativo =
-    tipo !== 'PRODUCTO'
-      ? ''
-      : tipo === 'PRODUCTO' && negativo === 1
-        ? 'text-danger'
-        : 'text-success';
-  const detalleNegativo =
-    tipo !== 'PRODUCTO'
-      ? ''
-      : tipo === 'PRODUCTO' && negativo === 1
-        ? 'VENTA SIN CONTROL DE STOCK'
-        : 'VENTA CON CONTROL DE STOCK';
-
-  const tipoTratamiento =
-    idTipoTratamientoProducto === UNIDADES
-      ? 'EN UNIDADES'
-      : idTipoTratamientoProducto === VALOR_MONETARIO
-        ? 'VALOR MONETARIO'
-        : idTipoTratamientoProducto === A_GRANEL
-          ? 'A GRANEL'
-          : 'SERVICIO';
-
   return (
     <Button
-      contentClassName={`item-view ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'border border-danger' : ''
-        }`}
+      contentClassName={cn(
+        "item-view",
+        idTipoProducto === TIPO_PRODUCTO_NORMAL && cantidad <= 0 && "border border-danger",
+        idTipoProducto === TIPO_PRODUCTO_SERVICIO && cantidad <= 0 && "",
+      )}
       onClick={handleAddItem}
     >
-      <div className="position-absolute ml-1 mt-1 badge badge-danger">
-        {tipoTratamiento}
+      <div className="absolute z-10 ml-1 mt-1 badge badge-danger">
+        {idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES && "EN UNIDADES"}
+        {idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO && "VALOR MONETARIO"}
+        {idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL && "A GRANEL"}
+        {idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO && "NINGUNO"}
       </div>
+
       <div
-        className="item-view_favorite btn px-1 py-1 position-absolute"
+        className="item-view_favorite btn z-10 px-1 py-1 absolute"
         onClick={(e) => {
           e.stopPropagation();
           const data = {
@@ -565,47 +555,57 @@ const ItemView = (props) => {
           handleStarProduct(data);
         }}
       >
-        {preferido === 1 && (
-          <i className="fa fa-star text-white" style={{ fontSize: '25px' }}></i>
-        )}
-        {preferido === 0 && (
-          <i
-            className="fa fa-star-o text-white"
-            style={{ fontSize: '25px' }}
-          ></i>
-        )}
+        <i className={cn(
+          "text-white !text-2xl",
+          preferido === 1 ? "fa fa-star" : "fa fa-star-o"
+        )} />
       </div>
       <div className="item-view_describe">
         <p
-          className={`item-view_describe-title ${tipo === 'PRODUCTO' && cantidad <= 0 ? 'text-danger' : ''
-            } position-absolute`}
+          className={cn(
+            "item-view_describe-title absolute",
+            idTipoProducto === TIPO_PRODUCTO_NORMAL && cantidad <= 0 ? "text-red-500" : "text-green-600",
+            idTipoProducto === TIPO_PRODUCTO_SERVICIO && cantidad <= 0 && "",
+          )}
         >
-          {tipo === 'PRODUCTO' ? `STOCK: ${cantidad}` : `SERVICIO`}
+          {idTipoProducto === TIPO_PRODUCTO_NORMAL && `STOCK: ${cantidad}`}
+          {idTipoProducto === TIPO_PRODUCTO_SERVICIO && "SERVICIO"}
         </p>
-        <div className="item-view_describe-image">
-          <img
-            src={imagen ?? images.sale}
-            alt="Venta"
-            width={96}
-            height={96}
+
+        <div className="item-view_describe-image flex items-center justify-center">
+          <Image
+            default={images.sale}
+            src={imagen}
+            alt={nombreProducto}
+            overrideClass="w-full h-36 object-contain"
+            isFullScreen={false}
           />
         </div>
       </div>
-      <span className="text-center d-block w-100 my-1">
+
+      <span className="text-center text-sm block w-full my-1">
         <strong>{codigo}</strong>
       </span>
-      <span className="text-center d-block w-100 my-1">
+      <span className="text-center block w-full my-1 px-3">
         <strong>{nombreProducto}</strong>
       </span>
 
-      <span className={`text-center d-block w-100 my-1 text-xs ${cssNegativo}`}>
-        {detalleNegativo}
+      <span className={cn(
+        "text-center block w-full my-1 text-xs",
+        idTipoProducto !== TIPO_PRODUCTO_SERVICIO && negativo === 1 ? "text-blue-600" : "text-red-500"
+      )}>
+        {idTipoProducto === TIPO_PRODUCTO_SERVICIO
+          ? "SIN CONTROL DE STOCK"
+          : negativo === 1
+            ? "VENTA CON CONTROL DE STOCK"
+            : "VENTA SIN CONTROL DE STOCK"}
       </span>
-      <span className="text-center d-block w-100 ml-1 mr-1 mt-1 mb-3">
+      <span className="text-center block w-full mb-3">
         <span className="text-xl">{formatCurrency(precio, codiso)}</span>{' '}
-        <span className="text-sm">x {medida}</span>
+        <span className="text-sm text-gray-600">x {medida}</span>
       </span>
-      <span className="text-left d-block w-100 ml-1 mr-1 mt-1 text-sm">
+
+      <span className="text-gray-500 block w-full text-left px-3 py-1 text-sm">
         Almacen: {almacen}
       </span>
     </Button>
@@ -651,11 +651,11 @@ ItemView.propTypes = {
     cantidad: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     precio: PropTypes.number.isRequired,
     medida: PropTypes.string.isRequired,
-    tipo: PropTypes.string.isRequired,
     preferido: PropTypes.number.isRequired,
     negativo: PropTypes.number.isRequired,
     imagen: PropTypes.string,
     almacen: PropTypes.string,
+    idTipoProducto: PropTypes.string,
     idTipoTratamientoProducto: PropTypes.string,
   }),
   handleAddItem: PropTypes.func.isRequired,

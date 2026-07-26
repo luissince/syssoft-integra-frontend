@@ -272,9 +272,9 @@ class MarcaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Nombre:<i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Ingrese el nombre"
               ref={this.refNombre}

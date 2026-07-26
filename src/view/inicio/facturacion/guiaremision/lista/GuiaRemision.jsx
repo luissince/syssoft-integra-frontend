@@ -85,7 +85,7 @@ class GuiaRemision extends CustomComponent {
   */
 
   async componentDidMount() {
-    await this.loadingData();
+    await this.loadData();
   }
 
   componentWillUnmount() {
@@ -99,35 +99,30 @@ class GuiaRemision extends CustomComponent {
   |
   | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
   | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
-  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | componente en consecuencia. El método loadData puede ser responsable de realizar peticiones asíncronas
   | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
-  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | recuperados. La función loadData puede ser invocada en el montaje inicial del componente para asegurarse
   | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
   |
   */
 
-  loadingData = async () => {
+  loadData = async () => {
+    const guiaRemisionLista = this.props.guiaRemisionLista;
     if (
-      this.props.guiaRemisionLista &&
-      this.props.guiaRemisionLista.data &&
-      this.props.guiaRemisionLista.paginacion
+      guiaRemisionLista &&
+      guiaRemisionLista.data &&
+      guiaRemisionLista.paginacion
     ) {
-      this.setState(this.props.guiaRemisionLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.guiaRemisionLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.guiaRemisionLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.guiaRemisionLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.guiaRemisionLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.guiaRemisionLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.guiaRemisionLista.paginacion.messagePaginacion;
+      this.setState(guiaRemisionLista.data);
+      this.refPaginacion.current.upperPageBound = guiaRemisionLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = guiaRemisionLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = guiaRemisionLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = guiaRemisionLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = guiaRemisionLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = guiaRemisionLista.paginacion.messagePaginacion;
 
       this.refSearch.current.initialize(
-        this.props.guiaRemisionLista.data.buscar,
+        guiaRemisionLista.data.buscar,
       );
     } else {
       await this.loadInit();
@@ -410,111 +405,47 @@ class GuiaRemision extends CustomComponent {
             );
 
             return (
-              <React.Fragment key={index}>
-                {/* 📱 MOBILE: Tarjeta con labels */}
-                <div className={cn(
-                  view == "tabla" ? "hidden" : "flex bg-white rounded border flex-col h-full"
-                )}>
-                  <div className="flex flex-col gap-4 text-sm">
-                    {/* Body */}
-                    <div className="flex-1 flex flex-col px-4 pt-4 gap-3">
-                      {[
-                        { label: 'Fecha:', value: `${item.fecha} ${formatTime(item.hora)}` },
-                        { label: 'Cliente:', value: `${item.tipoDocumento} - ${item.documento}  ${item.informacion}` },
-                        { label: 'Comprobante:', value: `${item.comprobante}  ${item.serie}-${formatNumberWithZeros(item.numeracion)}` },
-                        { label: 'Motivo Traslado:', value: item.motivoTraslado },
-                        {
-                          label: 'Referencia:', value:
-                            item.idMotivoTraslado === MOTIVO_TRASLADO.VENTA
-                              ? `${item.comprobanteRef}  ${item.serieRef}-${formatNumberWithZeros(item.numeracionRef)}`
-                              : "-"
-                        },
-                        { label: 'Estado:', value: estado },
-                      ].map((field, index) => (
-                        <div key={index} className="flex items-center justify-start gap-3">
-                          <p className="font-medium text-gray-600">{field.label}</p>
-                          <p>{field.value}</p>
-                        </div>
-                      ))}
-                    </div>
+              <div
+                key={index}
+                className={cn(
+                  "text-sm text-gray-900",
+                  view === "tabla"
+                    ? "grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_1.5fr] py-3 gap-x-3 items-center"
+                    : "flex flex-col h-full gap-3 rounded border p-3"
+                )}
+              >
+                <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
 
-                    <div className="border-t border-gray-100"></div>
+                  {
+                    view === "tabla" && (
+                      <div className=" text-center hidden md:block">
+                        {item.id}
+                      </div>
+                    )
+                  }
 
-                    {/* Footer */}
-                    <div className="flex items-center flex-row justify-end flex-wrap gap-4 px-4">
-                      <button
-                        onClick={() => this.handleDetalle(item.idGuiaRemision)}
-                        className={cn(
-                          "inline-flex items-center justify-center gap-2",
-                          "px-3 py-2",
-                          "transition rounded",
-                          "bg-gray-100 text-gray-600 text-sm font-medium",
-                          "hover:bg-gray-300",
-                          "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                          "active:bg-blue-100 active:scale-[0.97]",
-                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                        )}
-                      >
-                        <Eye className="w-5 h-5 text-blue-500" />
-                      </button>
-                      <button
-                        onClick={() => this.handleEditar(item.idGuiaRemision)}
-                        className={cn(
-                          "inline-flex items-center justify-center gap-2",
-                          "px-3 py-2",
-                          "transition rounded",
-                          "bg-gray-100 text-gray-600 text-sm font-medium",
-                          "hover:bg-gray-300",
-                          "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                          "active:bg-blue-100 active:scale-[0.97]",
-                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                        )}
-                      >
-                        <Pencil className="w-5 h-5 text-yellow-500" />
-                      </button>
-                      <button
-                        onClick={() => this.handleAnular(item.idGuiaRemision)}
-                        className={cn(
-                          "inline-flex items-center justify-center gap-2",
-                          "px-3 py-2",
-                          "transition rounded",
-                          "bg-gray-100 text-gray-600 text-sm font-medium",
-                          "hover:bg-gray-300",
-                          "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                          "active:bg-blue-100 active:scale-[0.97]",
-                          "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                        )}
-                      >
-                        <Trash className="w-5 h-5 text-red-500" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 💻 DESKTOP: Fila de tabla */}
-                <div className={cn(
-                  view == "tabla" ? "grid" : "hidden",
-                  "grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-x-3 text-sm text-gray-900 items-center"
-                )}>
-                  <div className="py-3 text-center">{item.id}</div>
-                  <div className="py-3">
+                  <div>
                     {item.fecha} <br />
                     <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
                   </div>
-                  <div className="py-3">
+
+                  <div>
                     {item.tipoDocumento} - {item.documento}
                     <br />
                     {item.informacion}
                   </div>
-                  <div className="py-3">
+
+                  <div>
                     {item.comprobante}
                     <br />
                     {item.serie}-{formatNumberWithZeros(item.numeracion)}
                   </div>
-                  <div className="py-3">
+
+                  <div>
                     {item.motivoTraslado}
                   </div>
-                  <div className="py-3">
+
+                  <div>
                     {
                       item.idMotivoTraslado === MOTIVO_TRASLADO.VENTA ? (
                         <>
@@ -527,60 +458,69 @@ class GuiaRemision extends CustomComponent {
                         )
                     }
                   </div>
-                  <div className="py-3 text-center">{estado}</div>
-                  <div className="py-3 text-center">
-                    <button
-                      onClick={() => this.handleDetalle(item.idGuiaRemision)}
-                      className={cn(
-                        "inline-flex items-center justify-center gap-2",
-                        "px-3 py-2",
-                        "transition rounded",
-                        "bg-gray-100 text-gray-600 text-sm font-medium",
-                        "hover:bg-gray-300",
-                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                        "active:bg-blue-100 active:scale-[0.97]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )}
-                    >
-                      <Eye className="w-5 h-5 text-blue-500" />
-                    </button>
-                  </div>
-                  <div className="py-3 text-center">
-                    <button
-                      onClick={() => this.handleEditar(item.idGuiaRemision)}
-                      className={cn(
-                        "inline-flex items-center justify-center gap-2",
-                        "px-3 py-2",
-                        "transition rounded",
-                        "bg-gray-100 text-gray-600 text-sm font-medium",
-                        "hover:bg-gray-300",
-                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                        "active:bg-blue-100 active:scale-[0.97]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )}
-                    >
-                      <Pencil className="w-5 h-5 text-yellow-500" />
-                    </button>
-                  </div>
-                  <div className="py-3 text-center">
-                    <button
-                      onClick={() => this.handleAnular(item.idGuiaRemision)}
-                      className={cn(
-                        "inline-flex items-center justify-center gap-2",
-                        "px-3 py-2",
-                        "transition rounded",
-                        "bg-gray-100 text-gray-600 text-sm font-medium",
-                        "hover:bg-gray-300",
-                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                        "active:bg-blue-100 active:scale-[0.97]",
-                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      )}
-                    >
-                      <Trash className="w-5 h-5 text-red-500" />
-                    </button>
+                  <div className={cn(
+                    "text-center",
+                    view === "tabla" ? "text-center" : "text-left"
+                  )}>
+                    {estado}
                   </div>
                 </div>
-              </React.Fragment>
+
+                <div
+                  className={cn(
+                    "flex gap-2",
+                    view === "tabla"
+                      ? "flex-col md:flex-row justify-center"
+                      : "flex-row justify-end"
+                  )}
+                >
+                  <button
+                    onClick={() => this.handleDetalle(item.idGuiaRemision)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Eye className="w-5 h-5 text-blue-500" />
+                  </button>
+                  <button
+                    onClick={() => this.handleEditar(item.idGuiaRemision)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Pencil className="w-5 h-5 text-yellow-500" />
+                  </button>
+                  <button
+                    onClick={() => this.handleAnular(item.idGuiaRemision)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Trash className="w-5 h-5 text-red-500" />
+                  </button>
+                </div>
+              </div>
             );
           })
         }
@@ -701,22 +641,20 @@ class GuiaRemision extends CustomComponent {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="w-full flex gap-4 mb-4">
-          <div className="w-full">
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search text-gray-400"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Filtrar por comprobante o cliente..."
-              theme="modern"
-            />
-          </div>
+        <div className="w-full">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Filtrar por tipo/motivo de traslado..."
+            theme="modern"
+          />
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
         <div className={cn(
-          view === "tabla" ? "rounded border overflow-hidden" : "space-y-6",
+          view === "tabla" ? "rounded border overflow-hidden mt-6" : "space-y-6",
         )}>
           <div className={cn(
             view == "tabla" ? "block" : "hidden",
@@ -726,17 +664,15 @@ class GuiaRemision extends CustomComponent {
             <div className={cn(
               "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
             )}>
-              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-x-3">
-                <div className="py-3 text-center">#</div>
-                <div className="py-3">Fecha y Hora</div>
-                <div className="py-3">Cliente</div>
-                <div className="py-3">Comprobante</div>
-                <div className="py-3">Motivo Traslado</div>
-                <div className="py-3">Referencia</div>
-                <div className="py-3 text-center">Estado</div>
-                <div className="py-3 text-center">Detalle</div>
-                <div className="py-3 text-center">Editar</div>
-                <div className="py-3 text-center">Anular</div>
+              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_1.5fr] gap-x-3 py-3">
+                <div className="text-center">#</div>
+                <div>Fecha y Hora</div>
+                <div>Cliente</div>
+                <div>Comprobante</div>
+                <div>Motivo Traslado</div>
+                <div>Referencia</div>
+                <div className="text-center">Estado</div>
+                <div className="text-center"></div>
               </div>
             </div>
           </div>

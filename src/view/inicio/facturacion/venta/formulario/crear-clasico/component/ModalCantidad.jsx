@@ -112,10 +112,10 @@ class ModalCantidad extends Component {
                     <Column formGroup={true}>
                       <Input
                         label={
-                          <>
+                          <label>
                             Ingrese su nueva cantidad del almacen (
                             {inventario.almacen}):
-                          </>
+                          </label>
                         }
                         placeholder={'0.00'}
                         role={'float'}

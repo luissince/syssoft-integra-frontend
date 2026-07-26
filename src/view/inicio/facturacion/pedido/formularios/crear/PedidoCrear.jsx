@@ -23,7 +23,6 @@ import {
   documentsPdfInvoicesPedido,
   filtrarAlmacenProducto,
   filtrarPersona,
-  filtrarProducto,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -51,14 +50,15 @@ import Image from '../../../../../../components/Image';
 import { images } from '../../../../../../helper';
 import Search from '../../../../../../components/Search';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import { PRODUCTO, SERVICIO } from '../../../../../../model/types/tipo-producto';
+import { TIPO_PRODUCTO_SERVICIO } from '../../../../../../model/types/tipo-producto';
 import Input from '@/components/Input';
 import { alertKit } from 'alert-kit';
 import { DELIVERY_PROGRAMADO, RECOGER_EN_LOCAL, RECOGER_PROGRAMADO } from '@/model/types/tipo-entrega';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PedidoCrear extends CustomComponent {
   /**
@@ -1132,17 +1132,16 @@ class PedidoCrear extends CustomComponent {
                             className="mb-2 object-contain"
                           />
                           {
-                            item.idTipoProducto === SERVICIO ? (
+                            item.idTipoProducto === TIPO_PRODUCTO_SERVICIO ? (
                               <p className="badge badge-success text-base">
                                 SERVICIO
                               </p>
                             ) : (
                               <p
-                                className={`${item.idTipoProducto === PRODUCTO &&
-                                  item.cantidad <= 0
-                                  ? 'badge badge-danger text-base'
-                                  : 'badge badge-success text-base'
-                                  } `}
+                                className={cn(
+                                  "badge badge-success text-base",
+                                  item.cantidad <= 0 ? 'badge-danger' : 'badge-success'
+                                )}
                               >
                                 STOCK: {formatDecimal(item.cantidad)}
                               </p>
@@ -1204,7 +1203,6 @@ class PedidoCrear extends CustomComponent {
               >
                 <div className="form-group">
                   <Select
-                    group={false}
                     ref={this.refComprobante}
                     value={this.state.idComprobante}
                     onChange={this.handleSelectComprobante}
@@ -1244,7 +1242,6 @@ class PedidoCrear extends CustomComponent {
 
                 <div className="form-group">
                   <Select
-                    group={false}
                     ref={this.refTipoEntrega}
                     value={this.state.idTipoEntrega}
                     onChange={this.handleSelectTipoEntrega}

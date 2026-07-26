@@ -17,7 +17,7 @@ import TrasladoDetalle from './traslado/detalle/TrasladoDetalle.jsx';
 
 import Inventario from './inventario/Inventario.jsx';
 
-import Kardex from './kardex/Kardex.jsx';
+import Kardex from './kardex/Kardex';
 
 import Catalogos from './catalogo/lista/Catalogos.jsx';
 import CatalogoCrear from './catalogo/formularios/crear/CatalogoCrear.jsx';

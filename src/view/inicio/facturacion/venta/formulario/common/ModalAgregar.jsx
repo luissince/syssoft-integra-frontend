@@ -1,14 +1,14 @@
 import React, { Component, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import {
-  alertWarning,
   handlePasteFloat,
   isNumeric,
 } from '../../../../../../helper/utils.helper';
-import { VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
+import { TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Button from '../../../../../../components/Button';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -53,24 +53,26 @@ class ModalAgregar extends Component {
 
   handleOnSubmit = async () => {
     if (!isNumeric(this.state.cantidad)) {
-      alertWarning('Venta', 'Ingrese el valor solicitado.', () => {
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Ingrese el valor solicitado.',
+      }, () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
-    if (this.state.cantidad <= 0) {
-      alertWarning(
-        'Venta',
-        'La cantidad no puede ser menor a 0 o igual a 0.',
-        () => {
-          this.refCantidad.current.focus();
-        },
-      );
+    if (Number(this.state.cantidad) <= 0) {
+      alertKit.warning({
+        title: 'Venta',
+        message: 'La cantidad no puede ser menor a 0 o igual a 0.',
+      }, () => {
+        this.refCantidad.current.focus();
+      });
       return;
     }
 
-    if (this.state.producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (this.state.producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       const existingItem = this.props.detalleVenta.find(
         (item) => item.idProducto === this.state.producto.idProducto,
       );
@@ -79,10 +81,10 @@ class ModalAgregar extends Component {
           (item) => item.idInventario === this.state.producto.idInventario,
         );
         if (!existingInventario) {
-          alertWarning(
-            'Venta',
-            'Los productos con valor monetario se trabajan con un solo almacen y sin unidades.',
-          );
+          alertKit.warning({
+            title: 'Venta',
+            message: 'Los productos con valor monetario se trabajan con un solo almacen y sin unidades.',
+          });
           return;
         }
       }

@@ -38,7 +38,7 @@ import {
 } from '../../../../../components/Table';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
-import { SERVICIO } from '../../../../../model/types/tipo-producto';
+import { TIPO_PRODUCTO_SERVICIO } from '../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
 import GenerarTabla from './component/GenerarTabla';
 
@@ -271,7 +271,7 @@ class LogisticaAjusteCrear extends CustomComponent {
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
     const filteredProductos = productos.filter(
-      (item) => item.idTipoProducto !== SERVICIO,
+      (item) => item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO,
     );
 
     this.setState({

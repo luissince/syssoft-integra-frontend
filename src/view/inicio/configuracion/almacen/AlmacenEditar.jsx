@@ -375,10 +375,10 @@ class AlmacenEditar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Nombre del Almacén:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refNombre}
               value={this.state.nombre}
@@ -390,10 +390,10 @@ class AlmacenEditar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Tipo Almacen:
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refTipoAlmacen}
               value={this.state.idTipoAlmacen}
@@ -413,10 +413,10 @@ class AlmacenEditar extends CustomComponent {
           <Column className="col-md-12" formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Dirección:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refDireccion}
               value={this.state.direccion}
@@ -431,9 +431,9 @@ class AlmacenEditar extends CustomComponent {
             <SearchInput
               ref={this.refUbigeo}
               label={
-                <>
+                <label>
                   Ubigeo: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Filtrar productos..."
               refValue={this.refValueUbigeo}

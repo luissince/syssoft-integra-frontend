@@ -193,7 +193,7 @@ class ModalPedido extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -305,10 +305,10 @@ class ModalPedido extends CustomComponent {
                     <Input
                       group={true}
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-search"></i> Buscar por N° de
                           Pedido o Cliente:
-                        </>
+                        </label>
                       }
                       placeholder="Buscar..."
                       value={buscar}
@@ -331,9 +331,9 @@ class ModalPedido extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-calendar"></i> Fecha Inicio:
-                        </>
+                        </label>
                       }
                       type="date"
                       value={fechaInicio}
@@ -344,9 +344,9 @@ class ModalPedido extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-calendar"></i> Fecha Final:
-                        </>
+                        </label>
                       }
                       type="date"
                       value={fechaFinal}

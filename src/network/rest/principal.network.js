@@ -293,7 +293,7 @@ export function filtrarStreamProductoVenta(params) {
 }
 
 export async function listProducto(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/producto/list', {
       signal: signal,
       params: params,
@@ -326,17 +326,18 @@ export async function comboProductos(signal) {
   );
 }
 
-export async function filtrarProductoVenta(params) {
+export async function filtrarProducto(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/filtrar/venta', {
+    instancePrincipal.get('/api/producto/filter', {
       params: params,
+      signal: signal,
     }),
   );
 }
 
-export async function filtrarProducto(params, signal) {
+export async function filtrarProductoVenta(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/filter', {
+    instancePrincipal.get('/api/producto/filtrar/venta', {
       params: params,
       signal: signal,
     }),
@@ -347,15 +348,6 @@ export async function filtrarAlmacenProducto(params) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/filter/almacen', {
       params: params,
-    }),
-  );
-}
-
-export async function preferidosProducto(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/producto/preferidos', {
-      params: params,
-      signal: signal,
     }),
   );
 }
@@ -384,7 +376,7 @@ export async function updateProducto(data) {
 }
 
 export async function deleteProducto(params) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.delete(`/api/producto`, {
       params: params
     }),
@@ -1194,10 +1186,10 @@ export async function cancelGuiaRemision(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesGuiaRemision(idGuiaRemision, size) {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`;
+export function getPdfGuiaRemision(idGuiaRemision, size = "A4", outputType = "pdf") {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/guiaremision/pdf/${idGuiaRemision}/${size}`;
 }
+
 // ------------------------------------------------------------------------
 // FIN PARA GUÍA DE REMISIÓN
 // ------------------------------------------------------------------------
@@ -2169,7 +2161,7 @@ export async function sendEmailNotaCredito(params) {
 |--------------------------------------------------------------------------
 */
 export async function listKardex(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/kardex/list', {
       params: params,
       signal: signal,

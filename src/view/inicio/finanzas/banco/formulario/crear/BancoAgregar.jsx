@@ -232,10 +232,10 @@ class BancoAgregar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Nombre Banco:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refTxtNombre}
               placeholder="BCP, BBVA, etc"
@@ -250,10 +250,10 @@ class BancoAgregar extends CustomComponent {
             <Select
               group={true}
               label={
-                <>
+                <label>
                   Tipo de Cuenta:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refTipoCuenta}
               value={this.state.tipoCuenta}
@@ -274,9 +274,9 @@ class BancoAgregar extends CustomComponent {
             <Select
               group={true}
               label={
-                <>
+                <label>
                   Moneda: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refTxtMoneda}
               value={this.state.idMoneda}
@@ -296,7 +296,7 @@ class BancoAgregar extends CustomComponent {
           <Column className="col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>Número de cuenta:</>}
+              label={<label>Número de cuenta:</label>}
               placeholder="##############"
               ref={this.refTxtNumCuenta}
               value={this.state.numCuenta}
@@ -311,7 +311,7 @@ class BancoAgregar extends CustomComponent {
           <Column className="col-md-6" formGroup={true}>
             <Input
               group={true}
-              label={<>CCI:</>}
+              label={<label>CCI:</label>}
               placeholder="##############"
               ref={this.refTxtCci}
               value={this.state.cci}

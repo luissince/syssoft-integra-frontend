@@ -658,9 +658,8 @@ class EmpresaProceso extends CustomComponent {
       alertKit.success({
         title: 'Empresa',
         message: response.data,
-        onClose: () => {
-          this.props.history.goBack();
-        },
+      }, () => {
+        this.props.history.goBack();
       });
     }
 
@@ -670,11 +669,10 @@ class EmpresaProceso extends CustomComponent {
       alertKit.error({
         title: 'Empresa',
         message: response.getMessage(),
-        onClose: () => {
-          this.setState({
-            loading: false,
-          });
-        },
+      }, () => {
+        this.setState({
+          loading: false,
+        });
       });
     }
   };
@@ -722,9 +720,9 @@ class EmpresaProceso extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="10909000223"
               ref={this.refDocumento}
@@ -747,9 +745,9 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6'} formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Razón Social: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Ingrese la razón social"
               ref={this.refRazonSocial}
@@ -765,9 +763,9 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6'} formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Ingrese el nombre comercial"
               value={this.state.nombreEmpresa}
@@ -779,7 +777,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Email:</>}
+              label={<label>Email:</label>}
               placeholder="Ingrese el nombre comercial"
               value={this.state.email}
               onChange={(event) => this.setState({ email: event.target.value })}
@@ -800,10 +798,10 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6'} formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Usuario Sol(<small>Para el envío a Sunat</small>):
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Usurio secundario"
               value={this.state.usuarioSolSunat}
@@ -817,10 +815,10 @@ class EmpresaProceso extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Clave Sol(<small>Para el envío a Sunat</small>):
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="********"
               ref={this.refPasswordSol}
@@ -851,9 +849,9 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6'} formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Id Api Sunat(<small>Para el envío de guía de remisión</small>): <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Usurio Api Sunat"
               value={this.state.idApiSunat}
@@ -867,11 +865,11 @@ class EmpresaProceso extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Clave Api Sunat(
                   <small>Para el envío de guía de remisión</small>):
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="********"
               ref={this.refPasswordClave}
@@ -938,10 +936,10 @@ class EmpresaProceso extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Contraseña de tu Certificado:
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="********"
               ref={this.refPasswordClaveCertificado}
@@ -973,7 +971,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column formGroup={true}>
             <TextArea
-              label={<>Nota de Sunat:</>}
+              label={<label>Nota de Sunat:</label>}
               rows={1}
               placeholder="Ingrese la nota de Sunat"
               value={this.state.notaSunat}
@@ -1127,10 +1125,10 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Número de WhatsApp:
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="51999000999"
               value={this.state.numeroWhatsapp}
@@ -1143,10 +1141,10 @@ class EmpresaProceso extends CustomComponent {
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Título del modal WhatsApp:
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Hola, ¿podemos hacer algo?"
               value={this.state.tituloWhatsapp}
@@ -1160,7 +1158,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-12'} formGroup={true}>
             <TextArea
-              label={<>Mensaje de WhatsApp:</>}
+              label={<label>Mensaje de WhatsApp:</label>}
               rows={4}
               placeholder="Mensaje de WhatsApp que acompañará a la solicitud"
               value={this.state.mensajeWhatsapp}
@@ -1183,7 +1181,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-12'} formGroup={true}>
             <TextArea
-              label={<>Información:</>}
+              label={<label>Información:</label>}
               rows={4}
               placeholder="Ingrese un resumen de la empresa"
               value={this.state.informacion}
@@ -1197,7 +1195,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-12'} formGroup={true}>
             <TextArea
-              label={<>Acerca de Nosotros:</>}
+              label={<label>Acerca de Nosotros:</label>}
               rows={8}
               placeholder="Ingrese la información de Acerca de Nosotros"
               value={this.state.acercaNosotros}
@@ -1211,7 +1209,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <TextArea
-              label={<>Políticas de Privacidad:</>}
+              label={<label>Políticas de Privacidad:</label>}
               rows={8}
               placeholder="Ingrese su políticas de privacidad"
               value={this.state.politicasPrivacidad}
@@ -1223,7 +1221,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <TextArea
-              label={<>Terminos y Condiciones:</>}
+              label={<label>Terminos y Condiciones:</label>}
               rows={8}
               placeholder="Ingrese sus terminos y condiciones"
               value={this.state.terminosCondiciones}
@@ -1237,7 +1235,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Página Web:</>}
+              label={<label>Página Web:</label>}
               placeholder="Ingrese la url de la cuenta"
               ref={this.refPaginaWeb}
               value={this.state.paginaWeb}
@@ -1249,7 +1247,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Cuetan de YouTube:</>}
+              label={<label>Cuetan de YouTube:</label>}
               placeholder="Ingrese la url de la cuenta"
               ref={this.refYouTube}
               value={this.state.youTubePagina}
@@ -1263,7 +1261,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Cuenta de Facebook:</>}
+              label={<label>Cuenta de Facebook:</label>}
               placeholder="Ingrese la url de la cuenta"
               ref={this.refFacebook}
               value={this.state.facebookPagina}
@@ -1275,7 +1273,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Cuenta de Twitter:</>}
+              label={<label>Cuenta de Twitter:</label>}
               placeholder="Ingrese la url de la cuenta"
               ref={this.refTwitter}
               value={this.state.twitterPagina}
@@ -1289,7 +1287,7 @@ class EmpresaProceso extends CustomComponent {
         <Row>
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Cuenta de Instagram:</>}
+              label={<label>Cuenta de Instagram:</label>}
               placeholder="Ingrese la url de la cuenta"
               ref={this.refInstagram}
               value={this.state.instagramPagina}
@@ -1301,7 +1299,7 @@ class EmpresaProceso extends CustomComponent {
 
           <Column className={'col-md-6 col-12'} formGroup={true}>
             <Input
-              label={<>Cuenta de TikTok:</>}
+              label={<label>Cuenta de TikTok:</label>}
               placeholder="Ingrese la url de la cuenta"
               ref={this.refTiktok}
               value={this.state.tiktokPagina}

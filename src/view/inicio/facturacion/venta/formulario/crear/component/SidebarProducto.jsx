@@ -1,11 +1,10 @@
 import {
   handlePasteFloat,
-  isEmpty,
   keyNumberFloat,
   rounded,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
-import { UNIDADES } from '../../../../../../../model/types/tipo-tratamiento-producto';
+import { TIPO_TRATAMIENTO_PRODUCTO_UNIDADES } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import { SpinnerView } from '../../../../../../../components/Spinner';
 import Input from '../../../../../../../components/Input';
 import TextArea from '../../../../../../../components/TextArea';
@@ -127,7 +126,7 @@ const SidebarProducto = (props) => {
               </Column>
             </Row>
 
-            {producto && producto.idTipoTratamientoProducto === UNIDADES && (
+            {producto && producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES && (
               <Row>
                 <Column formGroup={true}>
                   <label>Cantidad por Almacen:</label>
