@@ -245,11 +245,11 @@ class ModalProducto extends CustomComponent {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       {' '}
                       Cantidad{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="0"
                   role={'float'}
@@ -264,11 +264,11 @@ class ModalProducto extends CustomComponent {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       {' '}
                       Unidad de Medida{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   disabled
                   value={unidadMedida}
@@ -277,10 +277,10 @@ class ModalProducto extends CustomComponent {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       {' '}
                       Costo <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   disabled
                   value={costo}

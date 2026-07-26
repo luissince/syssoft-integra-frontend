@@ -64,10 +64,10 @@ const SidebarProducto = (props) => {
                 <Input
                   autoFocus={true}
                   label={
-                    <>
+                    <label>
                       Precio:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="0.00"
                   ref={refPrecio}
@@ -95,10 +95,10 @@ const SidebarProducto = (props) => {
               <Column formGroup={true}>
                 <TextArea
                   label={
-                    <>
+                    <label>
                       Descripción:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="Ingrese los datos del producto"
                   ref={refDescripcion}

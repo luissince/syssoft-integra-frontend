@@ -99,7 +99,7 @@ const PanelDerecho: React.FC<Props> = ({
         return (
           <div
             key={index}
-            className="flex justify-between items-center text-gray-600"
+            className="flex justify-between items-center"
           >
             <p>{impuesto.nombre}:</p>
             <p>
@@ -112,7 +112,7 @@ const PanelDerecho: React.FC<Props> = ({
 
     return (
       <>
-        <div className="flex justify-between items-center text-gray-600">
+        <div className="flex justify-between items-center">
           <p>Sub Total:</p>
           <p>
             {formatCurrency(subTotal, codiso)}
@@ -200,10 +200,10 @@ const PanelDerecho: React.FC<Props> = ({
         {renderTotal()}
 
         <div className="flex justify-between items-center font-normal">
-          <p className="text-gray-500">Cantidad:</p>
+          <p>Cantidad:</p>
           <p className={
             cn(
-              isEmpty(detalles) ? "text-gray-500" : "text-red-500"
+              isEmpty(detalles) && "text-red-500"
             )
           }>
             {detalles.length === 1

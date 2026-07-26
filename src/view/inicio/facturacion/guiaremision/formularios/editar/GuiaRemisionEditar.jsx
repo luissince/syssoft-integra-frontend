@@ -1044,9 +1044,9 @@ class GuiaRemisionEditar extends CustomComponent {
                   ref={this.refVenta}
                   autoFocus={true}
                   label={
-                    <>
+                    <label>
                       Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="Ejm: B001, 1, F001..."
                   refValue={this.refFiltrarVenta}
@@ -1342,9 +1342,9 @@ class GuiaRemisionEditar extends CustomComponent {
                     group={true}
                     iconLeft={<i className="bi bi-search"></i>}
                     label={
-                      <>
+                      <label>
                         Codigo Anexo Partida: <i className="fa fa-asterisk text-danger small"></i>
-                      </>
+                      </label>
                     }
                     placeholder="Ingrese su código anexo de partida..."
                     ref={this.refCodigoAnexoPartida}
@@ -1362,10 +1362,10 @@ class GuiaRemisionEditar extends CustomComponent {
                 group={true}
                 iconLeft={<i className="bi bi-search"></i>}
                 label={
-                  <>
+                  <label>
                     Dirección Partida:{' '}
                     <i className="fa fa-asterisk text-danger small"></i>
-                  </>
+                  </label>
                 }
                 placeholder="Ingrese Dirección de partida..."
                 ref={this.refDireccionPartida}
@@ -1380,10 +1380,10 @@ class GuiaRemisionEditar extends CustomComponent {
               <SearchInput
                 ref={this.refUbigeoPartida}
                 label={
-                  <>
+                  <label>
                     Ubigeo Partida:{' '}
                     <i className="fa fa-asterisk text-danger small"></i>
-                  </>
+                  </label>
                 }
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoPartida}
@@ -1416,9 +1416,9 @@ class GuiaRemisionEditar extends CustomComponent {
                     group={true}
                     iconLeft={<i className="bi bi-search"></i>}
                     label={
-                      <>
+                      <label>
                         Codigo Anexo Llegada: <i className="fa fa-asterisk text-danger small"></i>
-                      </>
+                      </label>
                     }
                     placeholder="Ingrese su código anexo de llegada..."
                     ref={this.refCodigoAnexoLlegada}
@@ -1436,10 +1436,10 @@ class GuiaRemisionEditar extends CustomComponent {
                 group={true}
                 iconLeft={<i className="bi bi-search"></i>}
                 label={
-                  <>
+                  <label>
                     Dirección Llegada:{' '}
                     <i className="fa fa-asterisk text-danger small"></i>
-                  </>
+                  </label>
                 }
                 placeholder="Ingrese Dirección de llegada..."
                 ref={this.refDireccionLlegada}
@@ -1454,10 +1454,10 @@ class GuiaRemisionEditar extends CustomComponent {
               <SearchInput
                 ref={this.refUbigeoLlegada}
                 label={
-                  <>
+                  <label>
                     Ubigeo Llegada:{' '}
                     <i className="fa fa-asterisk text-danger small"></i>
-                  </>
+                  </label>
                 }
                 placeholder="Filtrar departamento, distrito o provincia..."
                 refValue={this.refFiltrarUbigeoLlegada}

@@ -373,10 +373,10 @@ class SucursalEditar extends CustomComponent {
                 <Input
                   autoFocus={true}
                   label={
-                    <>
+                    <label>
                       Nombre:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={this.refNombre}
                   value={this.state.nombre}
@@ -445,10 +445,10 @@ class SucursalEditar extends CustomComponent {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       Dirección:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={this.refDireccion}
                   value={this.state.direcion}
@@ -465,10 +465,10 @@ class SucursalEditar extends CustomComponent {
                 <SearchInput
                   ref={this.refUbigeo}
                   label={
-                    <>
+                    <label>
                       Ubigeo:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="Filtrar productos..."
                   refValue={this.refValueUbigeo}
@@ -490,7 +490,7 @@ class SucursalEditar extends CustomComponent {
               <Column formGroup={true}>
                 <TextArea
                   label={
-                    <>
+                    <label>
                       Url de Google Maps
                       <a
                         href="https://embed-googlemap.com/"
@@ -500,7 +500,7 @@ class SucursalEditar extends CustomComponent {
                         Puedes obtenerla en esta web
                       </a>
                       : <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   value={this.state.googleMaps}
                   onChange={(event) =>
@@ -530,10 +530,10 @@ class SucursalEditar extends CustomComponent {
               <Column className={'col-md-6 col-12'} formGroup={true}>
                 <Switches
                   label={
-                    <>
+                    <label>
                       Principal:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   id={'stPrincipal'}
                   checked={this.state.principal}
@@ -548,10 +548,10 @@ class SucursalEditar extends CustomComponent {
               <Column className={'col-md-6 col-12'} formGroup={true}>
                 <Switches
                   label={
-                    <>
+                    <label>
                       Estado:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   id={'stEstado'}
                   checked={this.state.estado}

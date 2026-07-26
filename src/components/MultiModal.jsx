@@ -694,10 +694,10 @@ class ModalPersona extends Component {
               <Column className="col-md-6 col-12" formGroup={true}>
                 <Select
                   label={
-                    <>
+                    <label>
                       Tipo Documento:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   value={idTipoDocumento}
                   ref={this.refTipoDocumento}
@@ -718,9 +718,9 @@ class ModalPersona extends Component {
                 <Input
                   group={true}
                   label={
-                    <>
+                    <label>
                       N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   role={'integer'}
                   ref={this.refDocumento}
@@ -760,10 +760,10 @@ class ModalPersona extends Component {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       {tipoDocumento && tipoDocumento.tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={this.refInformacion}
                   value={informacion}

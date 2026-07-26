@@ -522,7 +522,7 @@ export async function comboAlmacen(params, signal) {
 |--------------------------------------------------------------------------
 */
 export async function listVenta(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/factura/list', {
       signal: signal,
       params: params,
@@ -1200,7 +1200,7 @@ export function getPdfGuiaRemision(idGuiaRemision, size = "A4", outputType = "pd
 |--------------------------------------------------------------------------
 */
 export async function listCotizacion(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/cotizacion/list', {
       params: params,
       signal: signal,

@@ -36,7 +36,6 @@ import {
   SpinnerTransparent,
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
 import Select from '../../../../../../components/Select';
 import SweetAlert from '../../../../../../model/class/sweet-alert';
@@ -50,6 +49,10 @@ import SidebarConfiguration from '../../../../../../components/SidebarConfigurat
 import Search from '../../../../../../components/Search';
 import { TIPO_PRODUCTO_SERVICIO } from '../../../../../../model/types/tipo-producto';
 import { cn } from '@/lib/utils';
+import { ArrowLeft, Pencil } from 'lucide-react';
+import pdfVisualizer from 'pdf-visualizer';
+import PanelIzquierdo from '../component/PanelIzquierdo';
+import PanelDerecho from '../component/PanelDerecho';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -714,7 +717,7 @@ class CotizacionEditar extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesCotizacion(this.state.idCotizacion, size),
       type: 'pdf',
       showModal: true,
@@ -808,7 +811,7 @@ class CotizacionEditar extends CustomComponent {
 
       success();
 
-      printJS({
+      pdfVisualizer.printer({
         printable: base64,
         type: 'pdf',
         base64: true,
@@ -897,10 +900,10 @@ class CotizacionEditar extends CustomComponent {
         return (
           <div
             key={index}
-            className="d-flex justify-content-between align-items-center text-secondary"
+            className="d-flex justify-content-between align-items-center"
           >
-            <p className="m-0 text-secondary">{impuesto.nombre}:</p>
-            <p className="m-0 text-secondary">
+            <p>{impuesto.nombre}:</p>
+            <p>
               {formatCurrency(impuesto.valor, this.state.codiso)}
             </p>
           </div>
@@ -910,17 +913,17 @@ class CotizacionEditar extends CustomComponent {
 
     return (
       <>
-        <div className="d-flex justify-content-between align-items-center text-secondary">
-          <p className="m-0 text-secondary">Sub Total:</p>
-          <p className="m-0 text-secondary">
+        <div className="d-flex justify-content-between align-items-center">
+          <p>Sub Total:</p>
+          <p>
             {formatCurrency(subTotal, this.state.codiso)}
           </p>
         </div>
         {impuestosGenerado()}
         <Button className="btn-success w-100" onClick={this.handleGuardar}>
           <div className="d-flex justify-content-between align-items-center py-1">
-            <p className="m-0 text-xl">Total:</p>
-            <p className="m-0 text-xl">
+            <p className="text-xl">Total:</p>
+            <p className="text-xl">
               {formatCurrency(total, this.state.codiso)}
             </p>
           </div>
@@ -985,320 +988,53 @@ class CotizacionEditar extends CustomComponent {
           handleCloseOptions={this.handleCloseOptions}
         />
 
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100">
-            {/*  */}
-            <div
-              className="w-100 d-flex flex-column position-relative"
-              style={{
-                flex: '0 0 60%',
-              }}
-            >
-              <div
-                className="d-flex align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="d-flex">
-                  <Button className="btn btn-link" onClick={this.handleCerrar}>
-                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
-                  </Button>
-                </div>
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full">
+            {/* PANEL LEFT */}
+            <PanelIzquierdo
+              loading={this.state.loading}
+              title={
+               <>
+                <p className="h5">
+                  Editar Cótización
+                </p>
+                <Pencil className="h3 w-3" />
+                </>
+              }
 
-                <div className="py-3 d-flex align-items-center">
-                  <p className="h5 m-0">
-                    Editar Cotización{' '}
-                    <i className="fa fa-edit text-secondary"></i>{' '}
-                  </p>
-                </div>
-              </div>
+              productos={this.state.productos}
+              codiso={this.state.codiso}
 
-              <div
-                className="px-3 py-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <Search
-                  ref={this.refProducto}
-                  refInput={this.refProductoValue}
-                  group={true}
-                  iconLeft={<i className="bi bi-search"></i>}
-                  onSearch={this.handleFilterProducto}
-                  placeholder="Buscar..."
-                  buttonRight={
-                    <Button
-                      className="btn-outline-secondary"
-                      title="Limpiar"
-                      onClick={() => {
-                        this.refProducto.current.restart();
-                        this.refProductoValue.current.focus();
-                      }}
-                    >
-                      <i className="fa fa-close"></i>
-                    </Button>
-                  }
-                />
-              </div>
+              handleCerrar={this.handleCerrar}
+              handleFilterProducto={this.handleFilterProducto}
+              handleSelectItemProducto={this.handleSelectItemProducto}
+            />
 
-              <div
-                className={
-                  !isEmpty(this.state.productos)
-                    ? 'px-3 h-100 overflow-auto p-3'
-                    : 'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {this.state.loadingProducto && (
-                  <div className="position-relative w-100 h-100 text-center">
-                    <SpinnerTransparent
-                      loading={true}
-                      message={'Buscando productos...'}
-                    />
-                  </div>
-                )}
+            {/* PANEL RIGHT */}
+            <PanelDerecho
+              codiso={this.state.codiso}
+              clientes={this.state.clientes}
+              comprobantes={this.state.comprobantes}
+              detalles={this.state.detalles}
 
-                {!this.state.loadingProducto &&
-                  isEmpty(this.state.productos) && (
-                    <div className="text-center position-relative">
-                      <i className="bi bi-cart4 text-secondary text-2xl"></i>
-                      <p className="text-secondary text-lg mb-0">
-                        Use la barra de busqueda para encontrar su productos.
-                      </p>
-                    </div>
-                  )}
+              refComprobante={this.refComprobante}
+              idComprobante={this.state.idComprobante}
+              handleSelectComprobante={this.handleSelectComprobante}
 
-                <div className="d-flex justify-content-center flex-wrap gap-4">
-                  {this.state.productos.map((item, index) => (
-                    <Button
-                      key={index}
-                      className="btn-light bg-white"
-                      style={{
-                        border: '1px solid #e2e8f0',
-                        width: '16rem',
-                      }}
-                      onClick={() => this.handleSelectItemProducto(item)}
-                    >
-                      <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                        <div className="d-flex justify-content-center align-items-center flex-column mb-2">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.nombre}
-                            width={150}
-                            height={150}
-                            className="mb-2 object-contain"
-                          />
-                          {
-                            item.idTipoProducto === TIPO_PRODUCTO_SERVICIO ? (
-                              <p className="badge badge-success text-base">
-                                SERVICIO
-                              </p>
-                            ) : (
-                              <p
-                                className={cn(
-                                  "badge badge-success text-base",
-                                  item.cantidad <= 0 ? 'badge-danger' : 'badge-success'
-                                )}
-                              >
-                                STOCK: {formatDecimal(item.cantidad)}
-                              </p>
-                            )
-                          }
-                        </div>
+              refCliente={this.refCliente}
+              refClienteValue={this.refClienteValue}
+              handleClearInputCliente={this.handleClearInputCliente}
+              handleFilterCliente={this.handleFilterCliente}
+              handleSelectItemCliente={this.handleSelectItemCliente}
 
-                        <div className="d-flex justify-content-center align-items-center flex-column">
-                          <span className="text-sm">{item.codigo}</span>
-                          <p className="m-0 text-lg">{item.nombre}</p>
-                          <p className="m-0 text-xl font-weight-bold">
-                            {formatCurrency(item.precio, this.state.codiso)}{' '}
-                            <span className="text-sm">x {item.unidad}</span>
-                          </p>
-                        </div>
-                      </div>
+              handleOpenModalPersona={this.handleOpenModalPersona}
 
-                      <div className="w-100 text-left text-sm">
-                        Almacen: {item.almacen}
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
+              handleOpenOptions={this.handleOpenOptions}
+              handleOpenModalProducto={this.handleOpenModalProducto}
+              handleRemoverProducto={this.handleRemoverProducto}
 
-            {/*  */}
-            <div
-              className="d-flex flex-column position-relative bg-white"
-              style={{
-                flex: '1 1 100%',
-                borderLeft: '1px solid #cbd5e1',
-              }}
-            >
-              <div
-                className="d-flex justify-content-between align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="py-3">
-                  <p className="h5 m-0">Resumen</p>
-                </div>
-
-                <div className="d-flex justify-content-end">
-                  <Button
-                    className="btn btn-link"
-                    onClick={this.handleOpenOptions}
-                  >
-                    <i className="bi bi-three-dots-vertical text-xl text-secondary"></i>
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className="d-flex flex-column px-3 pt-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="form-group">
-                  <Select
-                    ref={this.refComprobante}
-                    value={this.state.idComprobante}
-                    onChange={this.handleSelectComprobante}
-                  >
-                    <option value="">-- Comprobantes --</option>
-                    {this.state.comprobantes.map((item, index) => (
-                      <option key={index} value={item.idComprobante}>
-                        {item.nombre + ' (' + item.serie + ')'}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <div>
-                  <SearchInput
-                    ref={this.refCliente}
-                    placeholder="Filtrar clientes..."
-                    refValue={this.refClienteValue}
-                    data={this.state.clientes}
-                    handleClearInput={this.handleClearInputCliente}
-                    handleFilter={this.handleFilterCliente}
-                    handleSelectItem={this.handleSelectItemCliente}
-                    customButton={
-                      <Button
-                        className="btn-outline-success d-flex align-items-center"
-                        onClick={this.handleOpenModalPersona}
-                      >
-                        <i className="fa fa-user-plus"></i>
-                        <div className="ml-2">Nuevo</div>
-                      </Button>
-                    }
-                    renderItem={(value) => (
-                      <>{value.documento + ' - ' + value.informacion}</>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div
-                className={
-                  isEmpty(this.state.detalles)
-                    ? 'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
-                    : 'd-flex flex-column text-center rounded h-100 overflow-auto'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {isEmpty(this.state.detalles) && (
-                  <div className="text-center">
-                    <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-lg mb-0">
-                      Aquí verás los productos que elijas en tu próxima venta
-                    </p>
-                  </div>
-                )}
-
-                {this.state.detalles.map((item, index) => (
-                  <div
-                    key={index}
-                    className="d-grid px-3 position-relative align-items-center bg-white"
-                    style={{
-                      gridTemplateColumns: '60% 20% 20%',
-                      borderBottom: '1px solid #e2e8f0',
-                    }}
-                  >
-                    {/* Primera columna (imagen y texto) */}
-                    <div className="d-flex align-items-center">
-                      <Image
-                        default={images.noImage}
-                        src={item.imagen}
-                        alt={item.nombre}
-                        width={80}
-                        height={80}
-                        className="object-contain"
-                      />
-
-                      <div className="p-3 text-left">
-                        <p className="m-0 text-sm"> {item.codigo}</p>
-                        <p className="m-0 text-base font-weight-bold text-break">
-                          {item.nombre}
-                        </p>
-                        <p className="m-0">
-                          {formatCurrency(item.precio, this.state.codiso)}{' '}
-                          <small>x {item.nombreMedida}</small>
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Segundo columna (precio total) y opciones */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="h-100 text-xml">
-                        {rounded(item.cantidad)}
-                      </div>
-                    </div>
-
-                    {/* Tercera columna (precio total) y opciones */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="h-100 text-lg">
-                        {formatCurrency(
-                          item.cantidad * item.precio,
-                          this.state.codiso,
-                        )}
-                      </div>
-
-                      <div className="d-flex align-items-end justify-content-end gap-4">
-                        <Button
-                          className="btn-link"
-                          onClick={() => this.handleOpenModalProducto(item)}
-                        >
-                          <i className="fa fa-edit text-secondary text-xl"></i>
-                        </Button>
-                        <Button
-                          className="btn-link"
-                          onClick={() =>
-                            this.handleRemoverProducto(item.idProducto)
-                          }
-                        >
-                          <i className="fa fa-trash text-secondary text-xl"></i>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div
-                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
-                style={{ borderTop: '1px solid #e2e8f0' }}
-              >
-                {this.renderTotal()}
-
-                <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 text-secondary">Cantidad:</p>
-                  <p className="m-0 text-secondary">
-                    {this.state.detalles.length === 1
-                      ? this.state.detalles.length + ' Producto'
-                      : this.state.detalles.length + ' Productos'}{' '}
-                  </p>
-                </div>
-              </div>
-            </div>
+              handleGuardar={this.handleGuardar}
+            />
           </div>
         </div>
       </PosContainerWrapper>

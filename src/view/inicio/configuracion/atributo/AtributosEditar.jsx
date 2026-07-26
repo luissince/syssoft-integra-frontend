@@ -286,9 +286,9 @@ class AtributosEditar extends CustomComponent {
             <Column formGroup={true}>
               <Input
                 label={
-                  <>
+                  <label>
                     Valor:<i className="fa fa-asterisk text-danger small"></i>
-                  </>
+                  </label>
                 }
                 placeholder="Ingrese su valor"
                 ref={this.refValor}
