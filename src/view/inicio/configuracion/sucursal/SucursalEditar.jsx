@@ -490,25 +490,27 @@ class SucursalEditar extends CustomComponent {
               <Column formGroup={true}>
                 <TextArea
                   label={
-                    <label>
-                      Url de Google Maps
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm">Url de Google Maps</span>
                       <a
                         href="https://embed-googlemap.com/"
                         target="blank"
-                        className="btn btn-link"
+                        className="text-sm underline text-blue-500 hover:text-primary hover:underline"
                       >
-                        Puedes obtenerla en esta web
+                        <span className="mr-1">Puedes obtenerla en esta web</span>
+                        <i className="fa fa-asterisk text-danger small" />
                       </a>
-                      : <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
+
+                    </div>
                   }
                   value={this.state.googleMaps}
                   onChange={(event) =>
                     this.setState({ googleMaps: event.target.value })
                   }
                   placeholder="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=Alisios 221-197, Lima 15034..."
+                  name="googleMaps"
                   rows={6}
-                ></TextArea>
+                />
               </Column>
             </Row>
 
@@ -569,6 +571,7 @@ class SucursalEditar extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <ImageUpload
+                  className="w-full flex flex-col items-center text-center gap-2"
                   label="Imagen de portada"
                   subtitle="La imagen no debe superar los 1MB(Megabytes) y debe tener un tamaño de 1024 x 629 píxeles"
                   imageUrl={this.state.imagen.url}
@@ -584,19 +587,17 @@ class SucursalEditar extends CustomComponent {
           </Column>
         </Row>
 
-        <Row>
-          <Column>
-            <Button className="btn-warning" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex gap-3">
+          <Button className="btn-warning" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>{' '}
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }
