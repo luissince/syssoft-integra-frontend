@@ -32,12 +32,12 @@ const ImageUpload = ({
         : subtitle
     )}
 
-    <div className="w-full h-72 border rounded overflow-hidden">
+    <div className="w-full h-60 border rounded overflow-hidden p-3">
       <Image
         default={defaultImage}
         src={imageUrl}
         alt={alt}
-        overrideClass="w-full h-full object-contain"
+        overrideClass="w-full h-full object-contain object-center"
         width={width}
       />
     </div>
@@ -202,7 +202,7 @@ class MultiImages extends Component {
             type="file"
             id="fileSelectImage"
             multiple
-            accept="image/png, image/jpeg, image/gif, image/webp"
+            accept=".png,.jpg,.jpeg,.gif,.webp,.ico"
             hidden
             onChange={this.changeInput}
           />

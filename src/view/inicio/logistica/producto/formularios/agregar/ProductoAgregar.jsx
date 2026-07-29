@@ -644,7 +644,7 @@ class ProductoAgregar extends CustomComponent {
         ref: this.refIdCategoria
       },
       {
-        value: costo,
+        value: ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && costo,
         message: 'Ingrese el costo.',
         ref: this.refCosto
       },
@@ -712,7 +712,7 @@ class ProductoAgregar extends CustomComponent {
         descripcionCorta: descripcionCorta,
         descripcionLarga: descripcionLarga,
         idTipoTratamientoProducto: idTipoTratamientoProducto,
-        costo: costo,
+        costo: costo || 0,
         precio: precio,
         precios: precios,
         publicar: publicar,
