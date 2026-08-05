@@ -1066,6 +1066,8 @@ class CotizacionCrear extends CustomComponent {
               }
 
               productos={this.state.productos}
+              refProducto={this.refProducto}
+              refProductoValue={this.refProductoValue}
               codiso={this.state.codiso}
 
               handleCerrar={this.handleCerrar}
