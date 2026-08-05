@@ -14,6 +14,8 @@ interface Props {
     title: React.ReactNode;
 
     productos: Array<any>;
+    refProducto: React.RefObject<Search>;
+    refProductoValue: React.RefObject<HTMLInputElement>;
     codiso: string;
 
     handleCerrar: () => void;
@@ -25,14 +27,13 @@ const PanelIzquierdo: React.FC<Props> = ({
     loading,
     title,
     productos,
+    refProducto,
+    refProductoValue,
     codiso,
     handleCerrar,
     handleFilterProducto,
     handleSelectItemProducto
 }) => {
-
-    const refProducto = React.createRef<Search>();
-    const refProductoValue = React.createRef<HTMLInputElement>();
 
     return (
         <div className="w-full flex flex-col relative flex-[0_0_60%]">
