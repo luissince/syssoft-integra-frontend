@@ -4,11 +4,9 @@ import CustomComponent from '@/components/CustomComponent';
 import {
   calculateTax,
   calculateTaxBruto,
-  formatDecimal,
   isEmpty,
   formatCurrency,
   readDataFile,
-  rounded,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import { COTIZACION } from '../../../../../../model/types/tipo-comprobante';
@@ -26,16 +24,13 @@ import {
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
-import SearchInput from '../../../../../../components/SearchInput';
 import PropTypes from 'prop-types';
 import ModalProducto from '../component/ModalProducto';
 import {
-  SpinnerTransparent,
   SpinnerView,
 } from '../../../../../../components/Spinner';
 import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
-import Select from '../../../../../../components/Select';
 import {
   clearCrearCotizacion,
   setCrearCotizacionLocal,
@@ -46,14 +41,9 @@ import {
   ModalImpresion,
   ModalPersona,
 } from '../../../../../../components/MultiModal';
-import Image from '../../../../../../components/Image';
-import { images } from '../../../../../../helper';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
-import Search from '../../../../../../components/Search';
-import { TIPO_PRODUCTO_SERVICIO } from '../../../../../../model/types/tipo-producto';
-import { cn } from '@/lib/utils';
 import { alertKit } from 'alert-kit';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import PanelIzquierdo from '../component/PanelIzquierdo';
 import PanelDerecho from '../component/PanelDerecho';
 

@@ -5,8 +5,10 @@ const instancePrincipal = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
   timeout: 50000,
   headers: {
-    Accept: 'application/json',
+    'Accept': 'application/json',
     'Content-Type': 'application/json',
+    'X-App': 'admin-react',
+    // 'X-Version': import.meta.env.VITE_APP_VERSION,
   },
 });
 

@@ -33,25 +33,27 @@ export const Switches = ({
   children,
 }) => {
   const renderSwitch = () => (
-    <div className={`custom-control custom-switch ${className}`}>
-      <input
-        type="checkbox"
-        className="custom-control-input"
-        autoFocus={autoFocus}
-        ref={refInput}
-        id={id}
-        name={name}
-        value={value}
-        checked={checked}
-        onChange={onChange}
-        onKeyUp={onKeyUp}
-        onKeyDown={onKeyDown}
-        onPaste={onPaste}
-        disabled={disabled}
-      />
-      <label className="custom-control-label" htmlFor={id}>
-        {children}
-      </label>
+    <div className="flex items-center h-10">
+      <div className={`custom-control custom-switch ${className}`}>
+        <input
+          type="checkbox"
+          className="custom-control-input"
+          autoFocus={autoFocus}
+          ref={refInput}
+          id={id}
+          name={name}
+          value={value}
+          checked={checked}
+          onChange={onChange}
+          onKeyUp={onKeyUp}
+          onKeyDown={onKeyDown}
+          onPaste={onPaste}
+          disabled={disabled}
+        />
+        <label className="custom-control-label" htmlFor={id}>
+          {children}
+        </label>
+      </div>
     </div>
   );
 

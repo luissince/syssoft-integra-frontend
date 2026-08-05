@@ -166,11 +166,7 @@ import Finanzas, {
   Transacciones,
 } from './finanzas/index.jsx';
 
-import Crm, {
-  Consultas,
-  ConsultaDetalle,
-  ConsultaEditar,
-} from './crm/index.jsx';
+import CrmRoutes from './crm/index';
 
 import {
   configEmpresa,
@@ -1234,29 +1230,9 @@ class Inicio extends React.Component {
           ----------------------------------------------------------
           */}
 
-          <Route
-            path={`${path}/crm`}
-            exact={true}
-            render={(props) => <Crm {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta`}
-            exact={true}
-            render={(props) => <Consultas {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta/detalle`}
-            exact={true}
-            render={(props) => <ConsultaDetalle {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta/editar`}
-            exact={true}
-            render={(props) => <ConsultaEditar {...props} />}
-          />
+         <Route path={`${path}/crm`}>
+            <CrmRoutes />
+          </Route>
 
           <Route component={NotFoundMain} />
         </Switch>

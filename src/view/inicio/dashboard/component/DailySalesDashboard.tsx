@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, Search, Plus, Trash2, CalendarIcon, Building2 } from 'lucide-react';
 import { currentDate, formatDate } from '@/helper/utils.helper';
-import BranchInterface from '@/model/ts/interface/branch.interface';
+import SucursalInterface from '@/model/ts/interface/sucursal.interface';
 import { comboSucursal } from '@/network/rest/principal.network';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/model/types/types';
@@ -267,7 +267,7 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
         start: currentDate(),
         end: currentDate(),
     });
-    const [branches, setBranches] = useState<BranchInterface[]>([]);
+    const [branches, setBranches] = useState<SucursalInterface[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
     const [monthlyExpenses, setMonthlyExpenses] = useState<number>(2000);
     const [salesData, setSalesData] = useState<SaleData[]>(initialSalesData);

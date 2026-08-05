@@ -3,10 +3,6 @@ import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isText,
 } from '../../../../../../helper/utils.helper';
@@ -19,13 +15,9 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import Title from '../../../../../../components/Title';
-import Button from '../../../../../../components/Button';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
 import { SpinnerView } from '../../../../../../components/Spinner';
-import Select from '../../../../../../components/Select';
-import Input from '../../../../../../components/Input';
-import { Switches } from '../../../../../../components/Checks';
+import Formulario from '../components/Formulario';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -180,62 +172,91 @@ class BancoEditar extends CustomComponent {
     |
     */
 
-  handleGuardar = () => {
+  handleGuardar = async () => {
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Banco', 'Ingrese el nombre del banco.', () => {
-        this.refTxtNombre.current.focus();
+      alertKit.warning({
+        title: 'Banco',
+        message: 'Ingrese el nombre del banco.',
+        onClose: () => {
+          this.refTxtNombre.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.tipoCuenta)) {
-      alertWarning('Banco', 'Seleccione el tipo de cuenta.', () => {
-        this.tipoCuenta.current.focus();
+      alertKit.warning({
+        title: 'Banco',
+        message: 'Seleccione el tipo de cuenta.',
+        onClose: () => {
+          this.refTipoCuenta.current.focus();
+        },
       });
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      alertWarning('Banco', 'Seleccione el tipo de moneda.', () => {
-        this.refTxtMoneda.current.focus();
+      alertKit.warning({
+        title: 'Banco',
+        message: 'Seleccione el tipo de moneda.',
+        onClose: () => {
+          this.refTxtMoneda.current.focus();
+        },
       });
       return;
     }
 
-    alertDialog('Banco', '¿Estás seguro de continuar?', async (event) => {
-      if (event) {
-        const data = {
-          nombre: this.state.nombre.trim().toUpperCase(),
-          tipoCuenta: this.state.tipoCuenta,
-          idMoneda: this.state.idMoneda.trim().toUpperCase(),
-          numCuenta: this.state.numCuenta.trim().toUpperCase(),
-          cci: this.state.cci.trim().toUpperCase(),
-          preferido: this.state.preferido,
-          vuelto: this.state.vuelto,
-          reporte: this.state.reporte,
-          compartir: this.state.compartir,
-          estado: this.state.estado,
-
-          idUsuario: this.state.idUsuario,
-          idBanco: this.state.idBanco,
-        };
-
-        alertInfo('Banco', 'Procesando información...');
-
-        const response = await updateBanco(data, this.abortController.signal);
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Banco', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          if (response.getType() === CANCELED) return;
-
-          alertWarning('Banco', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: 'Banco',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        nombre: this.state.nombre.trim().toUpperCase(),
+        tipoCuenta: this.state.tipoCuenta,
+        idMoneda: this.state.idMoneda.trim().toUpperCase(),
+        numCuenta: this.state.numCuenta.trim().toUpperCase(),
+        cci: this.state.cci.trim().toUpperCase(),
+        preferido: this.state.preferido,
+        vuelto: this.state.vuelto,
+        reporte: this.state.reporte,
+        compartir: this.state.compartir,
+        estado: this.state.estado,
+
+        idUsuario: this.state.idUsuario,
+        idBanco: this.state.idBanco,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await updateBanco(data, this.abortController.signal);
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Banco',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });        
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Banco',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   /*
@@ -268,181 +289,49 @@ class BancoEditar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column className="col-md-6" formGroup={true}>
-            <Input
-              group={true}
-              label={
-                <label>
-                  Nombre Banco:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              ref={this.refTxtNombre}
-              placeholder="BCP, BBVA, etc"
-              value={this.state.nombre}
-              onChange={(event) =>
-                this.setState({ nombre: event.target.value })
-              }
-            />
-          </Column>
+        <Formulario
+          type="editar"
 
-          <Column className="col-md-6" formGroup={true}>
-            <Select
-              group={true}
-              label={
-                <label>
-                  Tipo de Cuenta:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              ref={this.refTipoCuenta}
-              value={this.state.tipoCuenta}
-              onChange={(event) =>
-                this.setState({ tipoCuenta: event.target.value })
-              }
-            >
-              <option value="">- Seleccione -</option>
-              <option value="1">Banco</option>
-              <option value="2">Tarjeta</option>
-              <option value="3">Efectivo</option>
-            </Select>
-          </Column>
-        </Row>
+          refTxtNombre={this.refTxtNombre}
+          nombre={this.state.nombre}
+          handleChangeNombre={(event) => this.setState({ nombre: event.target.value })}
 
-        <Row>
-          <Column className="col-md-6" formGroup={true}>
-            <Select
-              group={true}
-              label={
-                <label>
-                  Moneda: <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              ref={this.refTxtMoneda}
-              value={this.state.idMoneda}
-              onChange={(event) =>
-                this.setState({ idMoneda: event.target.value })
-              }
-            >
-              <option value="">- Seleccione -</option>
-              {this.state.monedas.map((item, index) => (
-                <option key={index} value={item.idMoneda}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
-          </Column>
+          refTipoCuenta={this.refTipoCuenta}
+          tipoCuenta={this.state.tipoCuenta}
+          handleChangeTipoCuenta={(event) => this.setState({ tipoCuenta: event.target.value })}
 
-          <Column className="col-md-6" formGroup={true}>
-            <Input
-              group={true}
-              label={<label>Número de cuenta:</label>}
-              placeholder="##############"
-              ref={this.refTxtNumCuenta}
-              value={this.state.numCuenta}
-              onChange={(event) =>
-                this.setState({ numCuenta: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+          monedas={this.state.monedas}
+          refTxtMoneda={this.refTxtMoneda}
+          idMoneda={this.state.idMoneda}
+          handleChangeIdMoneda={(event) => this.setState({ idMoneda: event.target.value })}
 
-        <Row>
-          <Column className="col-md-6" formGroup={true}>
-            <Input
-              group={true}
-              label={<label>CCI:</label>}
-              placeholder="##############"
-              ref={this.refTxtCci}
-              value={this.state.cci}
-              onChange={(event) => this.setState({ cci: event.target.value })}
-            />
-          </Column>
+          refTxtNumCuenta={this.refTxtNumCuenta}
+          numCuenta={this.state.numCuenta}
+          handleChangeNumCuenta={(event) => this.setState({ numCuenta: event.target.value })}
 
-          <Column className="col-md-6" formGroup={true}>
-            <Switches
-              label={'Vuelto:'}
-              id={'vueltoChecked'}
-              checked={this.state.vuelto}
-              onChange={(value) =>
-                this.setState({ vuelto: value.target.checked })
-              }
-            >
-              {this.state.vuelto ? 'Si' : 'No'}
-            </Switches>
-          </Column>
-        </Row>
+          refTxtCci={this.refTxtCci}
+          cci={this.state.cci}
+          handleChangeCci={(event) => this.setState({ cci: event.target.value })}
 
-        <Row>
-          <Column className="col-md-6" formGroup={true}>
-            <Switches
-              label={'Estado:'}
-              id={'estadoChecked'}
-              checked={this.state.estado}
-              onChange={(value) =>
-                this.setState({ estado: value.target.checked })
-              }
-            >
-              {this.state.estado ? 'Activo' : 'Inactivo'}
-            </Switches>
-          </Column>
+          vuelto={this.state.vuelto}
+          handleChangeVuelto={(event) => this.setState({ vuelto: event.target.checked })}
 
-          <Column className="col-md-6" formGroup={true}>
-            <Switches
-              label={'Preferido:'}
-              id={'preferidoChecked'}
-              checked={this.state.preferido}
-              onChange={(value) =>
-                this.setState({ preferido: value.target.checked })
-              }
-            >
-              {this.state.preferido ? 'Si' : 'No'}
-            </Switches>
-          </Column>
-        </Row>
+          estado={this.state.estado}
+          handleChangeEstado={(event) => this.setState({ estado: event.target.checked })}
 
-        <Row>
-          <Column className="col-md-6" formGroup={true}>
-            <Switches
-              label={'Mostrar en Reporte:'}
-              id={'reporteChecked'}
-              checked={this.state.reporte}
-              onChange={(value) =>
-                this.setState({ reporte: value.target.checked })
-              }
-            >
-              {this.state.reporte ? 'Si' : 'No'}
-            </Switches>
-          </Column>
+          preferido={this.state.preferido}
+          handleChangePrefereido={(event) => this.setState({ preferido: event.target.checked })}
 
-          <Column className="col-md-6" formGroup={true}>
-            <Switches
-              label={'Compartir Cuenta:'}
-              id={'compartirChecked'}
-              checked={this.state.compartir}
-              onChange={(value) =>
-                this.setState({ compartir: value.target.checked })
-              }
-            >
-              {this.state.compartir ? 'Si' : 'No'}
-            </Switches>
-          </Column>
-        </Row>
+          reporte={this.state.reporte}
+          handleChangeReporte={(event) => this.setState({ reporte: event.target.checked })}
 
-        <Row>
-          <Column>
-            <Button className="btn-warning" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+          compartir={this.state.compartir}
+          handleChangeCompartir={(event) => this.setState({ compartir: event.target.checked })}
+
+          handleSave={this.handleGuardar}
+          handleGoBack={() => this.props.history.goBack()}
+        />
+
       </ContainerWrapper>
     );
   }

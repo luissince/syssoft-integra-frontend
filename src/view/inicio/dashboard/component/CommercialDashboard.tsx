@@ -16,7 +16,7 @@ import { CANCELED } from "@/model/types/types";
 import { alertKit } from "alert-kit";
 import { currentDate, formatDate, isEmpty, formatCurrency, rounded } from "@/helper/utils.helper";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import BranchInterface from "@/model/ts/interface/branch.interface";
+import SucursalInterface from "@/model/ts/interface/sucursal.interface";
 import DashboardInterface, { StatCardInterface } from "@/model/ts/interface/dashboard.interface";
 import ErrorResponse from "@/model/class/error-response";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -45,7 +45,7 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
         start: currentDate(),
         end: currentDate(),
     });
-    const [branches, setBranches] = useState<BranchInterface[]>([]);
+    const [branches, setBranches] = useState<SucursalInterface[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
     const [dashboardData, setDashboardData] = useState<DashboardInterface>(null);
     const [loading, setLoading] = useState(true);
