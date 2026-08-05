@@ -1260,7 +1260,7 @@ class ProductoAgregar extends CustomComponent {
                                       }
                                     />
                                   </td>
-                                  <td className="px-6 py-12 text-center">
+                                  <td className="px-6 py-12 text-center text-xs">
                                     <TextArea
                                       rows={6}
                                       placeholder="Ejemplo (100m x 200m)"
