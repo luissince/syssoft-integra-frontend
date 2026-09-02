@@ -68,7 +68,7 @@ const InvoiceDetail = (props) => {
                       </button>
                     </div>
 
-                    <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200">
+                    <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
                       <Image
                         default={images.noImage}
                         src={producto.imagen}

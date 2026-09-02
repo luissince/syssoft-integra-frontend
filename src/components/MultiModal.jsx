@@ -33,6 +33,7 @@ import SearchInput from './SearchInput';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { Capacitor } from '@capacitor/core';
+import { BsWhatsapp } from 'react-icons/bs';
 
 /**
  * Modal para mostrar del impresión.
@@ -177,7 +178,7 @@ class ModalPreImpresion extends Component {
   }
 
   handleOpen = async () => {
-    this.refPhone.current.focus();
+
   };
 
   handleOnHidden = async () => {
@@ -396,16 +397,13 @@ class ModalPersona extends Component {
 
   handleGetApiReniec = async () => {
     if (this.state.documento.length !== 8) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message:
-            'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-        },
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message:
+          'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
@@ -430,32 +428,27 @@ class ModalPersona extends Component {
     }
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: response.getMessage(),
-        },
-        () => {
-          this.setState({
-            loading: false,
-          });
-        },
+      alertKit.warning({
+        title: 'Persona',
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loading: false,
+        });
+      },
       );
     }
   };
 
   handleGetApiSunat = async () => {
     if (this.state.documento.length !== 11) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message:
-            'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-        },
-        () => {
-          this.refDocumentoPj.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message:
+          'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
@@ -476,17 +469,14 @@ class ModalPersona extends Component {
     }
 
     if (response instanceof ErrorResponse) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: response.getMessage(),
-        },
-        () => {
-          this.setState({
-            loading: false,
-          });
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: response.getMessage(),
+      }, () => {
+        this.setState({
+          loading: false,
+        });
+      });
     }
   };
 
@@ -515,16 +505,7 @@ class ModalPersona extends Component {
   };
 
   handleSelectItem = async (value) => {
-    this.refUbigeo.current.initialize(
-      value.departamento +
-      ' - ' +
-      value.provincia +
-      ' - ' +
-      value.distrito +
-      ' (' +
-      value.ubigeo +
-      ')',
-    );
+    this.refUbigeo.current.initialize(`${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`);
     this.setState({
       ubigeos: [],
       idUbigeo: value.idUbigeo,
@@ -541,28 +522,22 @@ class ModalPersona extends Component {
     );
 
     if (isEmpty(this.state.idTipoDocumento)) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: 'Seleccione el tipo de documento.',
-        },
-        () => {
-          this.refTipoDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: 'Seleccione el tipo de documento.',
+      }, () => {
+        this.refTipoDocumento.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.documento)) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: 'Ingrese el número de documento.',
-        },
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: 'Ingrese el número de documento.',
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
@@ -571,28 +546,22 @@ class ModalPersona extends Component {
       tipoDocumento.obligado === 1 &&
       tipoDocumento.longitud !== this.state.documento.length
     ) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
-        },
-        () => {
-          this.refDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: `El número de documento por ser ${tipoDocumento.nombre} tiene que tener una longitud de ${tipoDocumento.longitud} carácteres.`,
+      }, () => {
+        this.refDocumento.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.informacion)) {
-      alertKit.warning(
-        {
-          title: 'Persona',
-          message: 'Ingrese los apellidos y nombres.',
-        },
-        () => {
-          this.refInformacion.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Persona',
+        message: 'Ingrese los apellidos y nombres.',
+      }, () => {
+        this.refInformacion.current.focus();
+      });
       return;
     }
 
@@ -637,15 +606,12 @@ class ModalPersona extends Component {
       const response = await createPersona(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Persona',
-            message: response.data,
-          },
-          async () => {
-            await this.refModal.current.handleOnClose();
-          },
-        );
+        alertKit.success({
+          title: 'Persona',
+          message: response.data,
+        }, async () => {
+          await this.refModal.current.handleOnClose();
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -695,8 +661,7 @@ class ModalPersona extends Component {
                 <Select
                   label={
                     <label>
-                      Tipo Documento:{' '}
-                      <i className="fa fa-asterisk text-danger small"></i>
+                      Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
                     </label>
                   }
                   value={idTipoDocumento}
@@ -776,7 +741,7 @@ class ModalPersona extends Component {
             <Row>
               <Column className="col-md-6 col-12" formGroup={true}>
                 <Input
-                  label={'N° de Celular:'}
+                  label="N° de Celular:"
                   role={'phone'}
                   value={celular}
                   ref={this.refCelular}
@@ -787,7 +752,7 @@ class ModalPersona extends Component {
 
               <Column formGroup={true}>
                 <Input
-                  label={'E-Mail:'}
+                  label="Correo Electrónico:"
                   type="email"
                   value={email}
                   onChange={this.handleInputEmail}
@@ -799,7 +764,7 @@ class ModalPersona extends Component {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={'Dirección:'}
+                  label="Dirección:"
                   ref={this.refDireccion}
                   value={direccion}
                   onChange={this.handleInputDireccion}
@@ -812,24 +777,15 @@ class ModalPersona extends Component {
               <Column formGroup={true}>
                 <SearchInput
                   ref={this.refUbigeo}
-                  label={'Ubigeo:'}
+                  label="Ubigeo:"
                   placeholder="Escribe para iniciar a filtrar..."
                   refValue={this.refValueUbigeo}
                   data={this.state.ubigeos}
                   handleClearInput={this.handleClearInput}
                   handleFilter={this.handleFilter}
                   handleSelectItem={this.handleSelectItem}
-                  renderItem={(value) => (
-                    <>
-                      {value.departamento +
-                        ' - ' +
-                        value.provincia +
-                        ' - ' +
-                        value.distrito +
-                        ' (' +
-                        value.ubigeo +
-                        ')'}
-                    </>
+                  renderItem={(value) => (                    
+                    `${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`                  
                   )}
                 />
               </Column>
@@ -890,15 +846,12 @@ class ModalSendWhatsApp extends React.Component {
 
   handleSendWhatsapp = async () => {
     if (!validateNumberWhatsApp(this.state.phone)) {
-      alertKit.warning(
-        {
-          title: 'WhatsApp',
-          message: 'El número de teléfono no es válido.',
-        },
-        () => {
-          this.refPhone.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'WhatsApp',
+        message: 'El número de teléfono no es válido.',
+      }, () => {
+        this.refPhone.current.focus();
+      });
       return;
     }
 
@@ -930,33 +883,28 @@ class ModalSendWhatsApp extends React.Component {
         </CustomModalContentHeader>
 
         <CustomModalContentBody>
-          <h4>Enviar Mensaje WhatsApp</h4>
+          <h5 className="mb-1">Enviar Mensaje WhatsApp</h5>
 
-          <Row>
-            <Column formGroup={true}>
-              <Input
-                autoFocus={true}
-                label={'Número de teléfono (con código de país)'}
-                placeholder={'Ej: +51966750883'}
-                ref={this.refPhone}
-                value={this.state.phone}
-                onChange={this.handleInputPhone}
-                onKeyDown={keyNumberPhone}
-              />
-            </Column>
-          </Row>
+          <div className="flex flex-col gap-3">
+            <Input
+              autoFocus
+              label={'Número de teléfono (con código de país)'}
+              placeholder={'Ej: +51966750883'}
+              ref={this.refPhone}
+              value={this.state.phone}
+              onChange={this.handleInputPhone}
+              onKeyDown={keyNumberPhone}
+            />
 
-          <Row>
-            <Column formGroup={true}>
-              <Button
-                autoFocus={true}
-                className="btn-dark"
-                onClick={this.handleSendWhatsapp}
-              >
-                <img src={images.whatsapp} width={22} /> Enviar mensaje
-              </Button>
-            </Column>
-          </Row>
+            <Button
+              className="btn-dark"
+              onClick={this.handleSendWhatsapp}
+            >
+              <div className="flex items-center gap-3">
+                <BsWhatsapp /> <span>Enviar mensaje</span>
+              </div>
+            </Button>
+          </div>
         </CustomModalContentBody>
       </CustomModal>
     );

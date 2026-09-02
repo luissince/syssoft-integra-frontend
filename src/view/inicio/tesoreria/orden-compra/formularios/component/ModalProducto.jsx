@@ -59,30 +59,27 @@ class ModalProducto extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState(
-        {
-          medidas: response.data,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          // cantidad: producto.cantidad ?? 1,
-          cantidad: 1,
-          costo: producto.costo,
-          descripcion: producto.nombre,
-          imagen: producto.imagen,
-          idMedida: producto.idMedida,
-          tipoProducto: producto.tipoProducto,
-          loading: false,
-        },
-        () => {
-          if (producto.tipoProducto === 'SERVICIO') {
-            this.refCosto.current.focus();
-            this.refCosto.current.select();
-          } else {
-            this.refCantidad.current.focus();
-            this.refCantidad.current.select();
-          }
-        },
-      );
+      this.setState({
+        medidas: response.data,
+        idProducto: producto.idProducto,
+        codigo: producto.codigo,
+        // cantidad: producto.cantidad ?? 1,
+        cantidad: 1,
+        costo: producto.costo,
+        descripcion: producto.nombre,
+        imagen: producto.imagen,
+        idMedida: producto.idMedida,
+        tipoProducto: producto.tipoProducto,
+        loading: false,
+      }, () => {
+        if (producto.tipoProducto === 'SERVICIO') {
+          this.refCosto.current.focus();
+          this.refCosto.current.select();
+        } else {
+          this.refCantidad.current.focus();
+          this.refCantidad.current.select();
+        }
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -93,7 +90,7 @@ class ModalProducto extends Component {
     }
   };
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -164,8 +161,8 @@ class ModalProducto extends Component {
         title: 'Orden de Compra',
         message: 'La cantidad no puede ser menor a cero.',
       }, () => {
-          this.refCantidad.current.focus();
-        },
+        this.refCantidad.current.focus();
+      },
       );
       return;
     }
@@ -185,8 +182,8 @@ class ModalProducto extends Component {
         title: 'Orden de Compra',
         message: 'El costo no puede ser menor a cero.',
       }, () => {
-          this.refCosto.current.focus();
-        },
+        this.refCosto.current.focus();
+      },
       );
       return;
     }
@@ -196,8 +193,8 @@ class ModalProducto extends Component {
         title: 'Orden de Compra',
         message: 'Ingrese la descripción del producto.',
       }, () => {
-          this.refDescripcion.current.focus();
-        },
+        this.refDescripcion.current.focus();
+      },
       );
       return;
     }

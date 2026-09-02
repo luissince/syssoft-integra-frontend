@@ -26,8 +26,6 @@ const SidebarConfiguration = (props) => {
 
   const { refNota, nota, handleInputNota } = props;
 
-  const { refInstruccion, instruccion, handleInputInstruccion } = props;
-
   const { handleSaveOptions, handleCloseOptions } = props;
 
   return (
@@ -135,26 +133,6 @@ const SidebarConfiguration = (props) => {
                 />
               </Column>
             </Row>
-
-            {
-              refInstruccion && (
-                <Row>
-                  <Column formGroup={true}>
-                    <label>
-                      <div className='flex items-center gap-2'>
-                        <span> Instrucciones (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
-                      </div>
-                    </label>
-                    <TextArea
-                      placeholder="Ingrese las instrucciones de entrega."
-                      ref={refInstruccion}
-                      value={instruccion}
-                      onChange={handleInputInstruccion}
-                    />
-                  </Column>
-                </Row>
-              )
-            }
           </div>
 
           <div className="card-footer bg-white">

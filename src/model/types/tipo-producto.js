@@ -1,4 +1,4 @@
-import { Box, Wrench, Layers, Building2 } from 'lucide-react';
+import { Box, Wrench } from 'lucide-react';
 
 export const TIPO_PRODUCTO_NORMAL = 'TP0001';
 export const TIPO_PRODUCTO_SERVICIO = 'TP0002';

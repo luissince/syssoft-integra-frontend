@@ -1,10 +1,8 @@
 import React from 'react';
 import {
-  getNumber,
   isEmpty,
   keyNumberFloat,
   rounded,
-  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
@@ -596,29 +594,25 @@ class TrasladorCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleSave = async () => {
     if (isEmpty(this.state.detalles)) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Agregue productos en la lista para continuar.',
-        },
-        () => {
-          this.refValueProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Agregue productos en la lista para continuar.',
+      }, () => {
+        this.refValueProducto.current.focus();
+      });
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Traslado',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Traslado',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const data = {
@@ -647,18 +641,15 @@ class TrasladorCrear extends CustomComponent {
       const response = await createTraslado(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Traslado',
-            message: response.data,
-          },
-          () => {
-            this.setState(this.initial, async () => {
-              await this.loadingData();
-              this.refIdTipoTraslado.current.focus();
-            });
-          },
-        );
+        alertKit.success({
+          title: 'Traslado',
+          message: response.data,
+        }, () => {
+          this.setState(this.initial, async () => {
+            await this.loadingData();
+            this.refIdTipoTraslado.current.focus();
+          });
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -680,18 +671,17 @@ class TrasladorCrear extends CustomComponent {
   };
 
   handleClear = async () => {
-    const accept = await alertKit.question(
-      {
-        title: 'Traslado',
-        message:
-          '¿Está seguro de continuar, se va limpiar toda la información?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Traslado',
+      message:
+        '¿Está seguro de continuar, se va limpiar toda la información?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       this.setState(this.initial, async () => {
@@ -1106,13 +1096,7 @@ class TrasladorCrear extends CustomComponent {
                   data={this.state.productos}
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
-                  handleSelectItem={this.handleSelectItemProducto}
-                  // renderItem={(value) => (
-                  //   <>
-                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                  //   </>
-                  // )}
-
+                  handleSelectItem={this.handleSelectItemProducto}                
                   renderItem={(value) => (
                     <div className="d-flex align-items-center">
                       <Image
@@ -1136,9 +1120,7 @@ class TrasladorCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={
-                    'Ingrese alguna descripción para saber el motivo del ajuste:'
-                  }
+                  label={"Ingrese alguna descripción para saber el motivo del traslado:"}
                   placeholder="Ingrese una observación"
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}

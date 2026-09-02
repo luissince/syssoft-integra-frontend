@@ -2,10 +2,7 @@ import React from 'react';
 import { PosContainerWrapper } from '../../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import {
-  calculateTax,
-  calculateTaxBruto,
   isEmpty,
-  formatCurrency,
   readDataFile,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -29,23 +26,23 @@ import ModalProducto from '../component/ModalProducto';
 import {
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import printJS from 'print-js';
 import Button from '../../../../../../components/Button';
 import {
   clearCrearCotizacion,
   setCrearCotizacionLocal,
   setCrearCotizacionState,
 } from '../../../../../../redux/predeterminadoSlice';
-import SweetAlert from '../../../../../../model/class/sweet-alert';
 import {
   ModalImpresion,
   ModalPersona,
 } from '../../../../../../components/MultiModal';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import { alertKit } from 'alert-kit';
+import ProductSelectorPanel from '@/components/ProductSelectorPanel';
 import { Plus } from 'lucide-react';
-import PanelIzquierdo from '../component/PanelIzquierdo';
-import PanelDerecho from '../component/PanelDerecho';
+import pdfVisualizer from 'pdf-visualizer';
+import ProductTransactionPanel from '@/components/ProductTransactionPanel';
+import SearchInput from '@/components/SearchInput';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -62,6 +59,10 @@ class CotizacionCrear extends CustomComponent {
       // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
+
+      loadingProducto: false,
+      loadingProductoMessage: 'Cargando productos...',
+      emptyProductoMessage: 'Use la barra de busqueda para encontrar su producto.',
 
       // Atributos principales
       idCotizacion: '',
@@ -85,7 +86,6 @@ class CotizacionCrear extends CustomComponent {
 
       // Filtrar producto
       productos: [],
-      loadingProducto: false,
 
       // Filtrar cliente
       cliente: null,
@@ -113,8 +113,6 @@ class CotizacionCrear extends CustomComponent {
     };
 
     this.initial = { ...this.state };
-
-    this.alert = new SweetAlert();
 
     // Referencia principales
     this.refComprobante = React.createRef();
@@ -191,15 +189,16 @@ class CotizacionCrear extends CustomComponent {
   */
 
   loadingData = async () => {
+    const cotizacionCrear = this.props.cotizacionCrear;
     if (
-      this.props.cotizacionCrear &&
-      this.props.cotizacionCrear.state &&
-      this.props.cotizacionCrear.local
+      cotizacionCrear &&
+      cotizacionCrear.state &&
+      cotizacionCrear.local
     ) {
-      this.setState(this.props.cotizacionCrear.state, () => {
-        if (this.props.cotizacionCrear.state.cliente) {
+      this.setState(cotizacionCrear.state, () => {
+        if (cotizacionCrear.state.cliente) {
           this.handleSelectItemCliente(
-            this.props.cotizacionCrear.state.cliente,
+            cotizacionCrear.state.cliente,
           );
         }
       });
@@ -216,25 +215,22 @@ class CotizacionCrear extends CustomComponent {
       const impuesto = impuestos.find((item) => item.preferido === 1);
       const almacen = almacenes.find((item) => item.predefinido === 1);
 
-      this.setState(
-        {
-          comprobantes,
-          monedas,
-          impuestos,
-          almacenes,
+      this.setState({
+        comprobantes,
+        monedas,
+        impuestos,
+        almacenes,
 
-          idImpuesto: isEmpty(impuesto) ? '' : impuesto.idImpuesto,
-          idComprobante: isEmpty(comprobante) ? '' : comprobante.idComprobante,
-          idMoneda: isEmpty(moneda) ? '' : moneda.idMoneda,
-          codiso: isEmpty(moneda) ? '' : moneda.codiso,
-          idAlmacen: isEmpty(almacen) ? '' : almacen.idAlmacen,
+        idImpuesto: impuesto?.idImpuesto ?? '',
+        idComprobante: comprobante?.idComprobante ?? '',
+        idMoneda: moneda?.idMoneda ?? '',
+        codiso: moneda?.codiso ?? '',
+        idAlmacen: almacen?.idAlmacen ?? '',
 
-          loading: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+        loading: false,
+      }, () => {
+        this.updateReduxState();
+      });
     }
   };
 
@@ -366,7 +362,7 @@ class CotizacionCrear extends CustomComponent {
 
   handleDocumentKeyDown = (event) => {
     if (event.key === 'F1' && !this.state.isOpenProducto) {
-      this.handleGuardar();
+      this.handleRegister();
     }
 
     if (event.key === 'F2' && !this.state.isOpenProducto) {
@@ -451,15 +447,12 @@ class CotizacionCrear extends CustomComponent {
   // Filtrar productos
   //------------------------------------------------------------------------------------------
   handleClearInputProducto = () => {
-    this.setState(
-      {
-        productos: [],
-        loadingProducto: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      productos: [],
+      loadingProducto: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterProducto = async (text) => {
@@ -529,15 +522,12 @@ class CotizacionCrear extends CustomComponent {
       value.documento + ' - ' + value.informacion,
     );
 
-    this.setState(
-      {
-        cliente: value,
-        clientes: [],
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      cliente: value,
+      clientes: [],
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -647,7 +637,7 @@ class CotizacionCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos guardar
   //------------------------------------------------------------------------------------------
-  handleGuardar = async () => {
+  handleRegister = async () => {
     const {
       idComprobante,
       cliente,
@@ -754,15 +744,20 @@ class CotizacionCrear extends CustomComponent {
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Cotización',
-      '¿Está seguro de limpiar la cotización?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+    const accept = await alertKit.question({
+      title: 'Cotización',
+      message: '¿Está seguro de limpiar la cotización?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -773,8 +768,10 @@ class CotizacionCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
-      printable: documentsPdfInvoicesCotizacion(this.state.idCotizacion, size),
+    const url = documentsPdfInvoicesCotizacion(this.state.idCotizacion, size);
+
+    pdfVisualizer.printer({
+      printable: url,
       type: 'pdf',
       showModal: true,
       modalMessage: 'Recuperando documento...',
@@ -797,39 +794,52 @@ class CotizacionCrear extends CustomComponent {
       this.state;
 
     if (isEmpty(idComprobante)) {
-      this.alert.warning('Cotización', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Seleccione su comprobante.',
+      }, () => {
+        this.refComprobante.current.focus();
+      });
       return;
     }
 
     if (isEmpty(cliente)) {
-      this.alert.warning('Cotización', 'Seleccione un cliente.', () =>
-        this.refClienteValue.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Seleccione un cliente.',
+      }, () => {
+        this.refClienteValue.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idMoneda)) {
-      this.alert.warning('Cotización', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Seleccione su moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(idImpuesto)) {
-      this.alert.warning('Cotización', 'Seleccione un impuesto', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Seleccione un impuesto.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
       return;
     }
 
     if (isEmpty(detalles)) {
-      this.alert.warning(
-        'Cotización',
-        'Agregar algún producto a la lista.',
-        () => this.refProductoValue.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Agregar algún producto a la lista.',
+      }, () => {
+        this.refProductoValue.current.focus();
+      });
       return;
     }
 
@@ -847,18 +857,17 @@ class CotizacionCrear extends CustomComponent {
       detalles,
     } = this.state;
 
-    const response = await obtenerPreCotizacionPdf(
-      {
-        idComprobante: idComprobante,
-        idCliente: idPersona,
+    const response = await obtenerPreCotizacionPdf({
+      idComprobante: idComprobante,
+      idCliente: idPersona,
 
-        idMoneda: idMoneda,
-        idUsuario: idUsuario,
-        idSucursal: idSucursal,
-        nota: nota,
+      idMoneda: idMoneda,
+      idUsuario: idUsuario,
+      idSucursal: idSucursal,
+      nota: nota,
 
-        detalle: detalles,
-      },
+      detalle: detalles,
+    },
       type,
       abort.signal,
     );
@@ -868,7 +877,7 @@ class CotizacionCrear extends CustomComponent {
 
       success();
 
-      printJS({
+      pdfVisualizer.printer({
         printable: base64,
         type: 'pdf',
         base64: true,
@@ -881,7 +890,10 @@ class CotizacionCrear extends CustomComponent {
 
       error();
 
-      this.alert.warning('Cotización', response.getMessage());
+      alertKit.warning({
+        title: 'Cotización',
+        message: response.getMessage(),
+      });
     }
   };
 
@@ -890,8 +902,22 @@ class CotizacionCrear extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Procesos cerrar
+  // Procesos cerrar y limpiar
   //------------------------------------------------------------------------------------------
+
+  handleClean = async () => {
+    const accept = await alertKit.question({
+      title: 'Cotización',
+      message: '¿Está seguro de limpiar la cotización?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
+  };
+
   handleCerrar = () => {
     this.props.history.goBack();
   };
@@ -911,84 +937,6 @@ class CotizacionCrear extends CustomComponent {
   | actuales del componente para determinar lo que se mostrará.
   |
   */
-
-  renderTotal() {
-    let subTotal = 0;
-    let total = 0;
-
-    for (const item of this.state.detalles) {
-      const cantidad = item.cantidad;
-      const valor = item.precio;
-
-      const porcentaje = item.porcentajeImpuesto;
-
-      const valorActual = cantidad * valor;
-      const valorSubNeto = calculateTaxBruto(porcentaje, valorActual);
-      const valorImpuesto = calculateTax(porcentaje, valorSubNeto);
-      const valorNeto = valorSubNeto + valorImpuesto;
-
-      subTotal += valorSubNeto;
-      total += valorNeto;
-    }
-
-    const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
-        const total = item.cantidad * item.precio;
-        const subTotal = calculateTaxBruto(item.porcentajeImpuesto, total);
-        const impuestoTotal = calculateTax(item.porcentajeImpuesto, subTotal);
-
-        const existingImpuesto = acc.find(
-          (imp) => imp.idImpuesto === item.idImpuesto,
-        );
-
-        if (existingImpuesto) {
-          existingImpuesto.valor += impuestoTotal;
-        } else {
-          acc.push({
-            idImpuesto: item.idImpuesto,
-            nombre: item.nombreImpuesto,
-            valor: impuestoTotal,
-          });
-        }
-
-        return acc;
-      }, []);
-
-      return resultado.map((impuesto, index) => {
-        return (
-          <div
-            key={index}
-            className="d-flex justify-content-between align-items-center"
-          >
-            <p>{impuesto.nombre}:</p>
-            <p>
-              {formatCurrency(impuesto.valor, this.state.codiso)}
-            </p>
-          </div>
-        );
-      });
-    };
-
-    return (
-      <>
-        <div className="d-flex justify-content-between align-items-center">
-          <p>Sub Total:</p>
-          <p>
-            {formatCurrency(subTotal, this.state.codiso)}
-          </p>
-        </div>
-        {impuestosGenerado()}
-        <Button className="btn-success w-100" onClick={this.handleGuardar}>
-          <div className="d-flex justify-content-between align-items-center py-1">
-            <p className="text-xl">Total:</p>
-            <p className="text-xl">
-              {formatCurrency(total, this.state.codiso)}
-            </p>
-          </div>
-        </Button>
-      </>
-    );
-  }
 
   render() {
     return (
@@ -1053,52 +1001,77 @@ class CotizacionCrear extends CustomComponent {
         <div className="bg-white w-full h-full flex flex-col overflow-auto">
           <div className="flex w-full h-full">
             {/* PANEL LEFT */}
-            <PanelIzquierdo
-              loading={this.state.loading}
-              title={
-                <>
-                  <p className="h5">
-                    Crear Cótización
-                  </p>
-
-                  <Plus className="h3 w-3" />
-                </>
-              }
-
+            <ProductSelectorPanel
+              type="precio"
+              title="Cotización"
+              icon={<Plus className="h-4 w-4" />}
+              loadingProducto={this.state.loadingProducto}
+              loadingMessage={this.state.loadingProductoMessage}
+              emptyMessage={this.state.emptyProductoMessage}
               productos={this.state.productos}
+              codiso={this.state.codiso}
               refProducto={this.refProducto}
               refProductoValue={this.refProductoValue}
-              codiso={this.state.codiso}
-
               handleCerrar={this.handleCerrar}
               handleFilterProducto={this.handleFilterProducto}
               handleSelectItemProducto={this.handleSelectItemProducto}
             />
 
             {/* PANEL RIGHT */}
-            <PanelDerecho
-              codiso={this.state.codiso}
-              clientes={this.state.clientes}
-              comprobantes={this.state.comprobantes}
-              detalles={this.state.detalles}
+            <ProductTransactionPanel
+              type="precio"
+              emptyMessage="Aquí verás los productos que elijas en tu próxima cotización."
 
+              comprobantes={this.state.comprobantes}
               refComprobante={this.refComprobante}
               idComprobante={this.state.idComprobante}
               handleSelectComprobante={this.handleSelectComprobante}
 
-              refCliente={this.refCliente}
-              refClienteValue={this.refClienteValue}
-              handleClearInputCliente={this.handleClearInputCliente}
-              handleFilterCliente={this.handleFilterCliente}
-              handleSelectItemCliente={this.handleSelectItemCliente}
+              components={[
+                <SearchInput
+                  ref={this.refCliente}
+                  placeholder="Filtrar clientes..."
+                  refValue={this.refClienteValue}
+                  data={this.state.clientes}
+                  handleClearInput={this.handleClearInputCliente}
+                  handleFilter={this.handleFilterCliente}
+                  handleSelectItem={this.handleSelectItemCliente}
+                  customButton={
+                    <Button
+                      className="btn-outline-primary !flex items-center"
+                      onClick={this.handleOpenModalPersona}
+                    >
+                      <i className="fa fa-user-plus"></i>
+                      <div className="ml-2">Nuevo</div>
+                    </Button>
+                  }
+                  renderItem={(value) => (
+                    <>{value.documento + ' - ' + value.informacion}</>
+                  )}
+                  classNameContainer="relative group"
+                />
+              ]}
 
-              handleOpenModalPersona={this.handleOpenModalPersona}
+              detalles={this.state.detalles}
+              codiso={this.state.codiso}
 
-              handleOpenOptions={this.handleOpenOptions}
+              actions={[
+                {
+                  icon: <i className="bi bi-arrow-clockwise text-xl text-secondary" />,
+                  onClick: this.handleClean,
+                  title: "Limpiar",
+                },
+                {
+                  icon: <i className="bi bi-three-dots-vertical text-xl text-secondary" />,
+                  onClick: this.handleOpenOptions,
+                  title: "Opciones",
+                }
+              ]}
+
               handleOpenModalProducto={this.handleOpenModalProducto}
               handleRemoverProducto={this.handleRemoverProducto}
 
-              handleGuardar={this.handleGuardar}
+              handleRegister={this.handleRegister}
             />
           </div>
         </div>

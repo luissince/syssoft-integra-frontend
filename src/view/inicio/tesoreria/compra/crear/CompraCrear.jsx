@@ -14,6 +14,7 @@ import {
   comboMoneda,
   createCompra,
   documentsPdfInvoicesCompra,
+  documentsPdfInvoicesPedido,
   filtrarAlmacenProducto,
   filtrarPersona,
   forPurchaseOrdenCompra,
@@ -36,12 +37,16 @@ import {
   ModalImpresion,
   ModalPersona,
 } from '../../../../../components/MultiModal';
-import printJS from 'print-js';
 import SidebarConfiguration from '../../../../../components/SidebarConfiguration';
 import ModalOrdenCompra from './component/ModalOrdenCompra';
 import { alertKit } from 'alert-kit';
-import PanelIzquierdo from './component/PanelIzquierdo';
-import PanelDerecho from './component/PanelDerecho';
+import ProductSelectorPanel from '@/components/ProductSelectorPanel';
+import { Plus } from 'lucide-react';
+import ProductTransactionPanel from '@/components/ProductTransactionPanel';
+import Select from '@/components/Select';
+import SearchInput from '@/components/SearchInput';
+import Button from '@/components/Button';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -58,6 +63,10 @@ class CompraCrear extends CustomComponent {
       // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
+
+      loadingProducto: false,
+      loadingProductoMessage: 'Cargando productos...',
+      emptyProductoMessage: 'Use la barra de busqueda para encontrar su producto.',
 
       // Atributos principales
       idCompra: '',
@@ -372,7 +381,7 @@ class CompraCrear extends CustomComponent {
       !this.state.isOpenProducto &&
       !this.state.isOpenTerminal
     ) {
-      this.handleGuardar();
+      this.handleRegister();
     }
 
     if (
@@ -380,7 +389,7 @@ class CompraCrear extends CustomComponent {
       !this.state.isOpenProducto &&
       !this.state.isOpenTerminal
     ) {
-      this.handleLimpiar();
+      this.handleClean();
     }
   };
 
@@ -759,7 +768,7 @@ class CompraCrear extends CustomComponent {
   // Procesos guardar, limpiar y cerrar
   //------------------------------------------------------------------------------------------
 
-  handleGuardar = async () => {
+  handleRegister = async () => {
     const {
       idComprobante,
       proveedor,
@@ -831,7 +840,7 @@ class CompraCrear extends CustomComponent {
     this.handleOpenModalTerminal();
   };
 
-  handleLimpiar = async () => {
+  handleClean = async () => {
     const accept = await alertKit.question({
       title: 'Compra',
       message: '¿Está seguro de limpiar la compra?',
@@ -1010,7 +1019,7 @@ class CompraCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesCompra(this.state.idCompra, size),
       type: 'pdf',
       showModal: true,
@@ -1122,8 +1131,13 @@ class CompraCrear extends CustomComponent {
         <div className="bg-white w-full h-full flex flex-col overflow-auto">
           <div className="flex w-full h-full">
             {/* PANEL IZQUIERDO */}
-            <PanelIzquierdo
+            <ProductSelectorPanel
+              type="costo"
+              title="Orden de Compra"
+              icon={<Plus className="h-4 w-4" />}
               loadingProducto={this.state.loadingProducto}
+              loadingMessage={this.state.loadingProductoMessage}
+              emptyMessage={this.state.emptyProductoMessage}
               productos={this.state.productos}
               codiso={this.state.codiso}
               refProducto={this.refProducto}
@@ -1134,32 +1148,71 @@ class CompraCrear extends CustomComponent {
             />
 
             {/* PANEL DERECHO  */}
-            <PanelDerecho
+            <ProductTransactionPanel
+              type="costo"
+              emptyMessage="Aquí verás los productos que elijas en tu próxima compra."
+
               comprobantes={this.state.comprobantes}
               refComprobante={this.refComprobante}
               idComprobante={this.state.idComprobante}
               handleSelectComprobante={this.handleSelectComprobante}
-              handleOpenOrdenCompra={this.handleOpenOrdenCompra}
 
-              proveedores={this.state.proveedores}
-              refProveedor={this.refProveedor}
-              refProveedorValue={this.refProveedorValue}
-              handleFilterProveedor={this.handleFilterProveedor}
-              handleOpenModalProveedor={this.handleOpenModalProveedor}
-              handleClearInputProveedor={this.handleClearInputProveedor}
-              handleSelectItemProveedor={this.handleSelectItemProveedor}
+              components={[
+                <SearchInput
+                  ref={this.refProveedor}
+                  placeholder="Filtrar proveedores..."
+                  refValue={this.refProveedorValue}
+                  data={this.state.proveedores}
+                  handleClearInput={this.handleClearInputProveedor}
+                  handleFilter={this.handleFilterProveedor}
+                  handleSelectItem={this.handleSelectItemProveedor}
+                  customButton={
+                    <Button
+                      className="btn-outline-primary !flex items-center"
+                      onClick={this.handleOpenModalProveedor}
+                    >
+                      <i className="fa fa-user-plus"></i>
+                      <div className="ml-2">Nuevo</div>
+                    </Button>
+                  }
+                  renderItem={(value) => (
+                    <>{value.documento + ' - ' + value.informacion}</>
+                  )}
+                />,
+                <Select
+                  ref={this.refAlmacenDestino}
+                  value={this.state.idAlmacenDestino}
+                  onChange={this.handleSelectAlmacenDestino}
+                >
+                  <option value="">-- Almacen de destino --</option>
+                  {this.state.almacenes.map((item, index) => (
+                    <option key={index} value={item.idAlmacen}>
+                      {item.nombre}
+                    </option>
+                  ))}
+                </Select>,
+              ]}
 
-              almacenes={this.state.almacenes}
-              refAlmacenDestino={this.refAlmacenDestino}
-              idAlmacenDestino={this.state.idAlmacenDestino}
-              handleSelectAlmacenDestino={this.handleSelectAlmacenDestino}
               detalles={this.state.detalles}
               codiso={this.state.codiso}
-              handleGuardar={this.handleGuardar}
-              handleLimpiar={this.handleLimpiar}
-              handleOpenOptions={this.handleOpenOptions}
+
+              actions={[
+                {
+                  icon: <i className="bi bi-arrow-clockwise text-xl text-secondary" />,
+                  onClick: this.handleClean,
+                  title: "Limpiar",
+                },
+                {
+                  icon: <i className="bi bi-three-dots-vertical text-xl text-secondary" />,
+                  onClick: this.handleOpenOptions,
+                  title: "Opciones",
+                }
+              ]}
+
               handleOpenModalProducto={this.handleOpenModalProducto}
               handleRemoverProducto={this.handleRemoverProducto}
+
+              handleRegister={this.handleRegister}
             />
           </div>
         </div>
