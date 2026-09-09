@@ -43,6 +43,7 @@ import { Plus } from 'lucide-react';
 import pdfVisualizer from 'pdf-visualizer';
 import ProductTransactionPanel from '@/components/ProductTransactionPanel';
 import SearchInput from '@/components/SearchInput';
+import Select from '@/components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -619,19 +620,16 @@ class CotizacionCrear extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalles,
-      },
-      async () => {
-        this.updateReduxState();
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalles,
+    }, async () => {
+      this.updateReduxState();
 
-        const invoice = document.getElementById(this.idSidebarConfiguration);
-        invoice.classList.remove('toggled');
-      },
-    );
+      const invoice = document.getElementById(this.idSidebarConfiguration);
+      invoice.classList.remove('toggled');
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -976,24 +974,30 @@ class CotizacionCrear extends CustomComponent {
 
         <SidebarConfiguration
           idSidebarConfiguration={this.idSidebarConfiguration}
+
           impuestos={this.state.impuestos}
           refImpuesto={this.refImpuesto}
           idImpuesto={this.state.idImpuesto}
           handleSelectIdImpuesto={this.handleSelectIdImpuesto}
+
           monedas={this.state.monedas}
           refMoneda={this.refMoneda}
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
+
           almacenes={this.state.almacenes}
           refAlmacen={this.refAlmacen}
           idAlmacen={this.state.idAlmacen}
           handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
+
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
+
           refNota={this.refNota}
           nota={this.state.nota}
           handleInputNota={this.handleInputNota}
+
           handleSaveOptions={this.handleSaveOptions}
           handleCloseOptions={this.handleCloseOptions}
         />
@@ -1022,12 +1026,20 @@ class CotizacionCrear extends CustomComponent {
               type="precio"
               emptyMessage="Aquí verás los productos que elijas en tu próxima cotización."
 
-              comprobantes={this.state.comprobantes}
-              refComprobante={this.refComprobante}
-              idComprobante={this.state.idComprobante}
-              handleSelectComprobante={this.handleSelectComprobante}
-
               components={[
+                <Select
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}
+                  className="mb-3"
+                >
+                  <option value="">-- Comprobantes --</option>
+                  {this.state.comprobantes.map((item, index) => (
+                    <option key={index} value={item.idComprobante}>
+                      {item.nombre + ' (' + item.serie + ')'}
+                    </option>
+                  ))}
+                </Select>,
                 <SearchInput
                   ref={this.refCliente}
                   placeholder="Filtrar clientes..."

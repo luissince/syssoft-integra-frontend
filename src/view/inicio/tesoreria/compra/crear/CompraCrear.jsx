@@ -1133,7 +1133,7 @@ class CompraCrear extends CustomComponent {
             {/* PANEL IZQUIERDO */}
             <ProductSelectorPanel
               type="costo"
-              title="Orden de Compra"
+              title="Compra"
               icon={<Plus className="h-4 w-4" />}
               loadingProducto={this.state.loadingProducto}
               loadingMessage={this.state.loadingProductoMessage}
@@ -1152,12 +1152,20 @@ class CompraCrear extends CustomComponent {
               type="costo"
               emptyMessage="Aquí verás los productos que elijas en tu próxima compra."
 
-              comprobantes={this.state.comprobantes}
-              refComprobante={this.refComprobante}
-              idComprobante={this.state.idComprobante}
-              handleSelectComprobante={this.handleSelectComprobante}
-
               components={[
+                <Select
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}
+                  className="mb-3"
+                >
+                  <option value="">-- Comprobantes --</option>
+                  {this.state.comprobantes.map((item, index) => (
+                    <option key={index} value={item.idComprobante}>
+                      {item.nombre + ' (' + item.serie + ')'}
+                    </option>
+                  ))}
+                </Select>,
                 <SearchInput
                   ref={this.refProveedor}
                   placeholder="Filtrar proveedores..."

@@ -1,7 +1,7 @@
 import React from 'react';
 import { PosContainerWrapper } from '../../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
-import { isEmpty, formatCurrency } from '../../../../../../helper/utils.helper';
+import { isEmpty } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import {
   createCatalogo,
@@ -12,21 +12,19 @@ import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import PropTypes from 'prop-types';
 import {
-  SpinnerTransparent,
   SpinnerView,
 } from '../../../../../../components/Spinner';
-import Button from '../../../../../../components/Button';
 import {
   clearCrearCatalogo,
   setCrearCatalogoLocal,
   setCrearCatalogoState,
 } from '../../../../../../redux/predeterminadoSlice';
 import { ModalImpresion } from '../../../../../../components/MultiModal';
-import Image from '../../../../../../components/Image';
-import { images } from '../../../../../../helper';
-import Search from '../../../../../../components/Search';
 import Input from '../../../../../../components/Input';
 import { alertKit } from 'alert-kit';
+import ProductSelectorPanel from '@/components/ProductSelectorPanel';
+import { Plus } from 'lucide-react';
+import ProductTransactionPanel from '@/components/ProductTransactionPanel';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -44,6 +42,10 @@ class CatalogoCrear extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      loadingProducto: false,
+      loadingProductoMessage: 'Cargando productos...',
+      emptyProductoMessage: 'Use la barra de busqueda para encontrar su producto.',
+
       // Atributos principales
       idCatalogo: '',
       nombre: '',
@@ -52,7 +54,6 @@ class CatalogoCrear extends CustomComponent {
       detalles: [],
 
       // Filtrar producto
-      loadingProducto: false,
       productos: [],
 
       // Atributos libres
@@ -106,7 +107,7 @@ class CatalogoCrear extends CustomComponent {
   async componentDidMount() {
     document.addEventListener('keydown', this.handleDocumentKeyDown);
 
-    await this.loadingData();
+    await this.loadData();
   }
 
   componentWillUnmount() {
@@ -131,22 +132,18 @@ class CatalogoCrear extends CustomComponent {
   |
   */
 
-  loadingData = async () => {
-    if (
-      this.props.catalogoCrear &&
-      this.props.catalogoCrear.state &&
-      this.props.catalogoCrear.local
-    ) {
-      this.setState(this.props.catalogoCrear.state, () => { });
+  loadData = async () => {
+    const catalogoCrear = this.props.catalogoCrear;
+    if (catalogoCrear && catalogoCrear.state && catalogoCrear.local) {
+      this.setState(catalogoCrear.state, () => {
+
+      });
     } else {
-      this.setState(
-        {
-          loading: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        loading: false,
+      }, () => {
+        this.updateReduxState();
+      });
     }
   };
 
@@ -159,7 +156,7 @@ class CatalogoCrear extends CustomComponent {
     this.setState(this.initial, async () => {
       await this.refProducto.current.restart();
       await this.props.clearCrearCatalogo();
-      await this.loadingData();
+      await this.loadData();
 
       this.refProductoValue.current.focus();
 
@@ -201,11 +198,11 @@ class CatalogoCrear extends CustomComponent {
 
   handleDocumentKeyDown = (event) => {
     if (event.key === 'F1') {
-      this.handleGuardar();
+      this.handleRegister();
     }
 
     if (event.key === 'F2') {
-      this.handleLimpiar();
+      this.handleClear();
     }
   };
 
@@ -214,15 +211,12 @@ class CatalogoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputProducto = () => {
-    this.setState(
-      {
-        productos: [],
-        loadingProducto: false,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      productos: [],
+      loadingProducto: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterProducto = async (text) => {
@@ -255,34 +249,28 @@ class CatalogoCrear extends CustomComponent {
       return;
     }
 
-    this.setState(
-      {
-        detalles: [...this.state.detalles, producto],
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      detalles: [...this.state.detalles, producto],
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleRemoverProducto = (idProducto) => {
     const detalles = this.state.detalles.filter(
       (item) => item.idProducto !== idProducto,
     );
-    this.setState(
-      {
-        detalles,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      detalles,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
   // Procesos guardar
   //------------------------------------------------------------------------------------------
-  handleGuardar = async () => {
+  handleRegister = async () => {
     const { nombre, detalles, idSucursal, idUsuario } = this.state;
 
     if (isEmpty(nombre)) {
@@ -350,7 +338,7 @@ class CatalogoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos limpiar
   //------------------------------------------------------------------------------------------
-  handleLimpiar = async () => {
+  handleClear = async () => {
     const accept = await alertKit.question({
       title: 'Catálogo',
       message: '¿Estás seguro de limpiar el catálogo?',
@@ -423,248 +411,53 @@ class CatalogoCrear extends CustomComponent {
         <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
           <div className="d-flex w-100 h-100">
             {/*  */}
-            <div
-              className="w-100 d-flex flex-column position-relative"
-              style={{
-                flex: '0 0 60%',
-              }}
-            >
-              <div
-                className="d-flex align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="d-flex">
-                  <Button className="btn-link" onClick={this.handleCerrar}>
-                    <i className="bi bi-arrow-left-short text-xl text-dark"></i>
-                  </Button>
-                </div>
+            <ProductSelectorPanel
+              type="precio"
+              title="Catálogo"
+              icon={<Plus className="h-4 w-4" />}
+              loadingProducto={this.state.loadingProducto}
+              loadingMessage={this.state.loadingProductoMessage}
+              emptyMessage={this.state.emptyProductoMessage}
+              productos={this.state.productos}
+              codiso={this.state.codiso}
+              refProducto={this.refProducto}
+              refProductoValue={this.refProductoValue}
+              handleCerrar={this.handleCerrar}
+              handleFilterProducto={this.handleFilterProducto}
+              handleSelectItemProducto={this.handleSelectItemProducto}
+            />
 
-                <div className="py-3 d-flex align-items-center">
-                  <p className="h5 my-0 ml-0 mr-1">Crear catálogo</p>
-                  <i className="fa fa-plus text-secondary"></i>
-                </div>
-              </div>
+            {/* PANEL RIGHT */}
+            <ProductTransactionPanel
+              type="catalog"
+              emptyMessage="Aquí verás los productos que elijas en tu próximo catálogo."
 
-              <div
-                className="px-3 py-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <Search
-                  ref={this.refProducto}
-                  refInput={this.refProductoValue}
-                  group={true}
-                  iconLeft={<i className="bi bi-search"></i>}
-                  onSearch={this.handleFilterProducto}
-                  placeholder="Buscar..."
-                  buttonRight={
-                    <Button
-                      className="btn-outline-secondary"
-                      title="Limpiar"
-                      onClick={() => {
-                        this.refProducto.current.restart();
-                        this.refProductoValue.current.focus();
-                      }}
-                    >
-                      <i className="fa fa-close"></i>
-                    </Button>
-                  }
+              components={[
+                <Input
+                  placeholder="Ingrese el nombre del catálogo..."
+                  value={this.state.nombre}
+                  onChange={(event) => {
+                    this.setState({ nombre: event.target.value });
+                  }}
+                  ref={this.refNombre}
                 />
-              </div>
+              ]}
 
-              <div
-                className={
-                  !isEmpty(this.state.productos)
-                    ? 'px-3 h-100 overflow-auto p-3'
-                    : 'px-3 h-100 overflow-auto d-flex flex-row justify-content-center align-items-center gap-4 p-3'
+              detalles={this.state.detalles}
+              codiso={this.state.codiso}
+
+              actions={[
+                {
+                  icon: <i className="bi bi-three-dots-vertical text-xl text-secondary" />,
+                  onClick: this.handleClear,
+                  title: "Opciones",
                 }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {this.state.loadingProducto && (
-                  <div className="position-relative w-100 h-100 text-center">
-                    <SpinnerTransparent
-                      loading={true}
-                      message={'Buscando productos...'}
-                    />
-                  </div>
-                )}
+              ]}
 
-                {!this.state.loadingProducto &&
-                  isEmpty(this.state.productos) && (
-                    <div className="text-center position-relative">
-                      <i className="bi bi-list text-secondary text-2xl"></i>
-                      <p className="text-secondary text-lg mb-0">
-                        Use la barra de busqueda para encontrar su producto.
-                      </p>
-                    </div>
-                  )}
+              handleRemoverProducto={this.handleRemoverProducto}
 
-                <div className="d-flex justify-content-center flex-wrap gap-4">
-                  {this.state.productos.map((item, index) => (
-                    <Button
-                      key={index}
-                      className="btn-light bg-white"
-                      style={{
-                        border: '1px solid #e2e8f0',
-                        width: '16rem',
-                      }}
-                      onClick={() => this.handleSelectItemProducto(item)}
-                    >
-                      <div className="d-flex flex-column justify-content-center align-items-center p-3 text-center">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.nombre}
-                          width={150}
-                          height={150}
-                          className="mb-2 object-contain"
-                        />
-
-                        <div className="d-flex justify-content-center align-items-center flex-column">
-                          <p className="m-0 text-lg">{item.nombre}</p>
-                          <p className="m-0 text-xl font-weight-bold">
-                            {formatCurrency(item.precio, this.state.codiso)}{' '}
-                            <small>x {item.unidad}</small>
-                          </p>
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/*  */}
-            <div
-              className="d-flex flex-column position-relative bg-white"
-              style={{
-                flex: '1 1 100%',
-                borderLeft: '1px solid #cbd5e1',
-              }}
-            >
-              <div
-                className="d-flex justify-content-between align-items-center px-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="py-3">
-                  <p className="h5 m-0">Resumen</p>
-                </div>
-
-                <div className="d-flex justify-content-end">
-                  <Button className="btn-link" onClick={this.handleLimpiar}>
-                    <i className="bi bi-arrow-clockwise text-xl text-secondary"></i>
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                className="d-flex flex-column px-3 pt-3"
-                style={{ borderBottom: '1px solid #cbd5e1' }}
-              >
-                <div className="form-group">
-                  <Input
-                    placeholder="Ingrese el nombre del catálogo..."
-                    value={this.state.nombre}
-                    onChange={(event) => {
-                      this.setState({ nombre: event.target.value });
-                    }}
-                    ref={this.refNombre}
-                  />
-                </div>
-              </div>
-
-              <div
-                className={
-                  isEmpty(this.state.detalles)
-                    ? 'd-flex flex-column justify-content-center align-items-center p-3 text-center rounded h-100'
-                    : 'd-flex flex-column text-center rounded h-100 overflow-auto'
-                }
-                style={{
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                {isEmpty(this.state.detalles) && (
-                  <div className="text-center">
-                    <i className="fa fa-shopping-basket text-secondary text-2xl"></i>
-                    <p className="text-secondary text-lg mb-0">
-                      Aquí verás los productos que elijas para tu catálogo
-                    </p>
-                  </div>
-                )}
-
-                {this.state.detalles.map((item, index) => (
-                  <div
-                    key={index}
-                    className="d-grid px-3 position-relative align-items-center bg-white"
-                    style={{
-                      gridTemplateColumns: '80% 20%',
-                      borderBottom: '1px solid #e2e8f0',
-                    }}
-                  >
-                    {/* Primera columna (imagen y texto) */}
-                    <div className="d-flex align-items-center py-3">
-                      <Image
-                        default={images.noImage}
-                        src={item.imagen}
-                        alt={item.nombre}
-                        width={80}
-                        height={80}
-                        className="object-contain"
-                      />
-
-                      <div className="p-3 text-left">
-                        <p className="m-0 text-sm"> {item.codigo}</p>
-                        <p className="m-0 text-base font-weight-bold text-break">
-                          {item.nombre}
-                        </p>
-                        <p className="m-0">
-                          {formatCurrency(item.precio, this.state.codiso)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Segunda columna para quitar */}
-                    <div className="d-flex flex-column justify-content-end align-items-center">
-                      <div className="d-flex align-items-end justify-content-end gap-4">
-                        <Button
-                          className="btn-danger"
-                          onClick={() =>
-                            this.handleRemoverProducto(item.idProducto)
-                          }
-                        >
-                          <i className="fa fa-minus"></i>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div
-                className="text-right text-xl font-bold d-flex flex-column p-3 gap-3"
-                style={{ borderTop: '1px solid #e2e8f0' }}
-              >
-                <Button
-                  className="btn-success w-100"
-                  onClick={this.handleGuardar}
-                >
-                  <div className="d-flex justify-content-center align-items-center">
-                    <i className="fa fa-save mr-2 text-xl"></i>{' '}
-                    <p className="m-0 text-xl">Guardar</p>
-                  </div>
-                </Button>
-
-                <div className="d-flex justify-content-between align-items-center text-secondary">
-                  <p className="m-0 text-secondary">Cantidad:</p>
-                  <p className="m-0 text-secondary">
-                    {this.state.detalles.length === 1
-                      ? this.state.detalles.length + ' Producto'
-                      : this.state.detalles.length + ' Productos'}{' '}
-                  </p>
-                </div>
-              </div>
-            </div>
+              handleRegister={this.handleRegister}
+            />
           </div>
         </div>
       </PosContainerWrapper>

@@ -21,6 +21,7 @@ import {
   filtrarPersona,
   getIdPedido,
   updatePedido,
+  comboSucursal,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -68,8 +69,20 @@ class PedidoEditar extends CustomComponent {
 
       // Atributos principales
       idPedido: '',
-      idComprobante: '',
+
       idTipoPedido: TIPO_PEDIDO_ENVIO_DOMICILIO,
+      pedidoEnvio: {
+        direccion: "",
+        referencia: "",
+        idSucursal: this.props.token.project.idSucursal,
+        fechaPedido: currentDate(),
+        horaPedido: currentDate(),
+        idAgencia: 0,
+        destino: "",
+        receptor: "",
+      },
+
+      idComprobante: '',
       idMoneda: '',
       idAlmacen: '',
       idImpuesto: '',
@@ -86,10 +99,8 @@ class PedidoEditar extends CustomComponent {
       medidas: [],
       almacenes: [],
       tiposPedido: [],
+      sucursales: [],
       agencias: [],
-      fechaEntrega: currentDate(),
-      horaEntrega: '',
-      ranurasDeTiempo: getRanurasDeTiempo(),
 
       // Filtrar producto
       productos: [],
@@ -131,8 +142,14 @@ class PedidoEditar extends CustomComponent {
 
     // Filtrar tipo de entrega
     this.refTipoPedido = React.createRef();
-    this.refFechaEntrega = React.createRef();
-    this.refHoraEntrega = React.createRef();
+    this.refPedidoEnvioDireccion = React.createRef();
+    this.refPedidoEnvioReferencia = React.createRef();
+    this.refPedidoEnvioSucursal = React.createRef();
+    this.refPedidoEnvioFechaPedido = React.createRef();
+    this.refPedidoEnvioHoraPedido = React.createRef();
+    this.refPedidoEnvioIdAgencia = React.createRef();
+    this.refPedidoEnvioDestino = React.createRef();
+    this.refPedidoEnvioReceptor = React.createRef();
 
     // Referencia para el modal producto
     this.refModalProducto = React.createRef();
@@ -202,7 +219,7 @@ class PedidoEditar extends CustomComponent {
   */
 
   loadData = async (idPedido) => {
-    const [pedido, comprobantes, monedas, impuestos, almacenes, tiposPedido, agencias] =
+    const [pedido, comprobantes, monedas, impuestos, almacenes, tiposPedido, agencias, sucursales] =
       await Promise.all([
         this.fetchIdPedido(idPedido),
         this.fetchComprobante(PEDIDO),
@@ -211,9 +228,10 @@ class PedidoEditar extends CustomComponent {
         this.fetchAlmacen({ idSucursal: this.state.idSucursal }),
         this.fetchComboTipoPedido(),
         this.fetchComboAgencia(),
+        this.fetchComboSucursal(),
       ]);
 
-    const { cabecera, detalles } = pedido;
+    const { cabecera, envio, detalles } = pedido;
 
     const moneda = monedas.find((item) => item.nacional === 1);
     const almacen = almacenes.find((item) => item.predefinido === 1);
@@ -235,18 +253,19 @@ class PedidoEditar extends CustomComponent {
       almacenes,
       tiposPedido,
       agencias,
+      sucursales,
 
+      idTipoPedido: cabecera.idTipoPedido,
       idImpuesto: cabecera.idImpuesto ?? '',
       idComprobante: cabecera.idComprobante ?? '',
       idMoneda: cabecera.idMoneda ?? '',
       codiso: moneda?.codiso ?? '',
       idAlmacen: almacen?.idAlmacen ?? '',
 
+      pedidoEnvio: envio,
+
       observacion: cabecera.observacion,
       nota: cabecera.nota,
-      idTipoPedido: cabecera.idTipoPedido,
-      fechaEntrega: cabecera.fechaEntrega,
-      horaEntrega: cabecera.horaEntrega,
       detalles: detalles,
 
       loading: false,
@@ -375,6 +394,20 @@ class PedidoEditar extends CustomComponent {
     }
   }
 
+  async fetchComboSucursal() {
+    const response = await comboSucursal(this.abortController.signal);
+
+    if (response instanceof SuccessReponse) {
+      return response.data;
+    }
+
+    if (response instanceof ErrorResponse) {
+      if (response.getType() === CANCELED) return;
+
+      return [];
+    }
+  }
+
   async fetchComboAgencia() {
     const response = await comboAgencia(this.abortController.signal);
 
@@ -419,13 +452,93 @@ class PedidoEditar extends CustomComponent {
     this.setState({ idTipoPedido: event.target.value });
   };
 
-  handleFechaEntrega = (event) => {
-    this.setState({ fechaEntrega: event.target.value });
-  };
+  handleInputPedidoEnvioDireccion = (event) => {
+    const direccion = event.target.value;
 
-  handleSelectHoraEntrega = (event) => {
-    this.setState({ horaEntrega: event.target.value });
-  };
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        direccion
+      }
+    }));
+  }
+
+  handleInputPedidoEnvioReferencia = (event) => {
+    const referencia = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        referencia
+      }
+    }));
+  }
+
+  handleSelectPedidoEnvioIdSucursal = (event) => {
+    const idSucursal = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        idSucursal
+      }
+    }));
+  }
+
+  handleInputPedidoEnvioFechaPedido = (event) => {
+    const fechaPedido = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        fechaPedido
+      }
+    }));
+  }
+
+  handleSelectPedidoEnvioHoraPedido = (event) => {
+    const horaPedido = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        horaPedido
+      }
+    }));
+  }
+
+  handleSelectPedidoEnvioIdAgencia = (event) => {
+    const idAgencia = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        idAgencia
+      }
+    }));
+  }
+
+  handleInputPedidoEnvioDestino = (event) => {
+    const destino = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        destino
+      }
+    }));
+  }
+
+  handleInputPedidoEnvioReceptor = (event) => {
+    const receptor = event.target.value;
+
+    this.setState(prevState => ({
+      pedidoEnvio: {
+        ...prevState.pedidoEnvio,
+        receptor
+      }
+    }));
+  }
 
   //------------------------------------------------------------------------------------------
   // Acciones del modal producto
@@ -612,6 +725,11 @@ class PedidoEditar extends CustomComponent {
     this.setState({ idMoneda: event.target.value });
   };
 
+  handleSelectIdIdAlmacen = (event) => {
+    this.setState({ idAlmacen: event.target.value });
+  };
+
+
   handleInputObservacion = (event) => {
     this.setState({ observacion: event.target.value });
   };
@@ -619,7 +737,6 @@ class PedidoEditar extends CustomComponent {
   handleInputNota = (event) => {
     this.setState({ nota: event.target.value });
   };
-
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
@@ -657,12 +774,11 @@ class PedidoEditar extends CustomComponent {
       (item) => item.idMoneda === this.state.idMoneda,
     );
 
-    this.setState(
-      {
-        idMoneda: moneda.idMoneda,
-        codiso: moneda.codiso,
-        detalles,
-      },
+    this.setState({
+      idMoneda: moneda.idMoneda,
+      codiso: moneda.codiso,
+      detalles,
+    },
       async () => {
         const invoice = document.getElementById(this.idSidebarConfiguration);
         invoice.classList.remove('toggled');
@@ -681,8 +797,9 @@ class PedidoEditar extends CustomComponent {
       idMoneda,
       idImpuesto,
       idTipoPedido,
-      fechaEntrega,
-      horaEntrega,
+      pedidoEnvio,
+
+
       observacion,
       nota,
       detalles,
@@ -758,12 +875,14 @@ class PedidoEditar extends CustomComponent {
     if (accept) {
       const data = {
         idPedido: idPedido,
+
+        idTipoPedido: idTipoPedido,
+        pedidoEnvio: pedidoEnvio,
+
         idComprobante: idComprobante,
         idCliente: cliente.idPersona,
         idMoneda: idMoneda,
-        idTipoPedido: idTipoPedido,
-        fechaEntrega: fechaEntrega,
-        horaEntrega: horaEntrega,
+
         idSucursal: this.state.idSucursal,
         idUsuario: this.state.idUsuario,
         estado: 1,
@@ -880,6 +999,11 @@ class PedidoEditar extends CustomComponent {
           idMoneda={this.state.idMoneda}
           handleSelectIdMoneda={this.handleSelectIdMoneda}
 
+          almacenes={this.state.almacenes}
+          refAlmacen={this.refAlmacen}
+          idAlmacen={this.state.idAlmacen}
+          handleSelectIdIdAlmacen={this.handleSelectIdIdAlmacen}
+
           refObservacion={this.refObservacion}
           observacion={this.state.observacion}
           handleInputObservacion={this.handleInputObservacion}
@@ -925,12 +1049,20 @@ class PedidoEditar extends CustomComponent {
               type="precio"
               emptyMessage="Aquí verás los productos que elijas en tu próximo pedido."
 
-              comprobantes={this.state.comprobantes}
-              refComprobante={this.refComprobante}
-              idComprobante={this.state.idComprobante}
-              handleSelectComprobante={this.handleSelectComprobante}
-
               components={[
+                <Select
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}
+                  className="mb-3"
+                >
+                  <option value="">-- Comprobantes --</option>
+                  {this.state.comprobantes.map((item, index) => (
+                    <option key={index} value={item.idComprobante}>
+                      {item.nombre + ' (' + item.serie + ')'}
+                    </option>
+                  ))}
+                </Select>,
                 <SearchInput
                   ref={this.refCliente}
                   placeholder="Filtrar clientes..."
@@ -958,6 +1090,7 @@ class PedidoEditar extends CustomComponent {
                     ref={this.refTipoPedido}
                     value={this.state.idTipoPedido}
                     onChange={this.handleSelectTipoPedido}
+                    className="uppercase"
                   >
                     <option value="">-- Tipo de entrega --</option>
                     {
@@ -975,61 +1108,61 @@ class PedidoEditar extends CustomComponent {
                   <div className='w-full form-group'>
                     <Input
                       placeholder="Dirección"
-                      value={this.state.fechaEntrega}
-                      ref={this.refFechaEntrega}
-                      onChange={this.handleFechaEntrega}
+                      value={this.state.pedidoEnvio.direccion}
+                      ref={this.refPedidoEnvioDireccion}
+                      onChange={this.handleInputPedidoEnvioDireccion}
                     />
                   </div>
 
                   <div className='w-full'>
                     <Input
                       placeholder="Referencia"
-                      value={this.state.fechaEntrega}
-                      ref={this.refFechaEntrega}
-                      onChange={this.handleFechaEntrega}
+                      value={this.state.pedidoEnvio.referencia}
+                      ref={this.refPedidoEnvioReferencia}
+                      onChange={this.handleInputPedidoEnvioReferencia}
                     />
                   </div>
                 </>,
 
                 // RECOGER EN LOCAL
                 (this.state.idTipoPedido === TIPO_PEDIDO_RECOJO_LOCAL) &&
-                <Select
-
-                  value={this.state.horaEntrega}
-                  ref={this.refHoraEntrega}
-                  onChange={this.handleSelectHoraEntrega}
-                >
-                  <option value="">-- Seleccionar Local --</option>
-                  {
-                    this.state.ranurasDeTiempo.map((time, index) => (
-                      <option key={index} value={time}>
-                        {time}
-                      </option>
-                    ))
-                  }
-                </Select>,
+                <>
+                  <Select
+                    value={this.state.pedidoEnvio.idSucursal}
+                    ref={this.refPedidoEnvioSucursal}
+                    onChange={this.handleSelectPedidoEnvioIdSucursal}
+                  >
+                    <option value="">-- Seleccionar Local --</option>
+                    {
+                      this.state.sucursales.map((sucursal, index) => (
+                        <option key={index} value={sucursal.idSucursal}>
+                          {sucursal.nombre}
+                        </option>
+                      ))
+                    }
+                  </Select>
+                </>,
 
                 // ENTREGA PROGRAMADA
                 (this.state.idTipoPedido === TIPO_PEDIDO_ENTREGA_PROGRAMADA) &&
                 <>
                   <div className='flex flex-col gap-y-4'>
-
                     <div className="flex gap-4">
                       <Input
                         type="date"
-                        value={this.state.fechaEntrega}
-                        ref={this.refFechaEntrega}
-                        onChange={this.handleFechaEntrega}
+                        value={this.state.pedidoEnvio.fechaPedido}
+                        ref={this.refPedidoEnvioFechaPedido}
+                        onChange={this.handleInputPedidoEnvioFechaPedido}
                       />
 
                       <Select
-                        value={this.state.horaEntrega}
-                        ref={this.refHoraEntrega}
-                        onChange={this.handleSelectHoraEntrega}
+                        value={this.state.pedidoEnvio.horaPedido}
+                        ref={this.refPedidoEnvioHoraPedido}
+                        onChange={this.handleSelectPedidoEnvioHoraPedido}
                       >
                         <option value="">-- Seleccionar Hora --</option>
                         {
-                          this.state.ranurasDeTiempo.map((time, index) => (
+                          getRanurasDeTiempo().map((time, index) => (
                             <option key={index} value={time}>
                               {time}
                             </option>
@@ -1040,16 +1173,16 @@ class PedidoEditar extends CustomComponent {
 
                     <Input
                       placeholder="Dirección"
-                      value={this.state.fechaEntrega}
-                      ref={this.refFechaEntrega}
-                      onChange={this.handleFechaEntrega}
+                      value={this.state.pedidoEnvio.direccion}
+                      ref={this.refPedidoEnvioDireccion}
+                      onChange={this.handleInputPedidoEnvioDireccion}
                     />
 
                     <Input
                       placeholder="Referencia"
-                      value={this.state.fechaEntrega}
-                      ref={this.refFechaEntrega}
-                      onChange={this.handleFechaEntrega}
+                      value={this.state.pedidoEnvio.referencia}
+                      ref={this.refPedidoEnvioReferencia}
+                      onChange={this.handleInputPedidoEnvioReferencia}
                     />
                   </div>
                 </>,
@@ -1059,9 +1192,9 @@ class PedidoEditar extends CustomComponent {
                 <>
                   <div className='flex flex-col justify-between gap-y-4'>
                     <Select
-                      value={this.state.horaEntrega}
-                      ref={this.refHoraEntrega}
-                      onChange={this.handleSelectHoraEntrega}
+                      value={this.state.pedidoEnvio.idAgencia}
+                      ref={this.refPedidoEnvioIdAgencia}
+                      onChange={this.handleSelectPedidoEnvioIdAgencia}
                     >
                       <option value="">-- Seleccionar Agencia --</option>
                       {
@@ -1075,16 +1208,16 @@ class PedidoEditar extends CustomComponent {
 
                     <Input
                       placeholder="Destino"
-                      value={this.state.fechaEntrega}
-                      ref={this.refFechaEntrega}
-                      onChange={this.handleFechaEntrega}
+                      value={this.state.pedidoEnvio.destino}
+                      ref={this.refPedidoEnvioDestino}
+                      onChange={this.handleInputPedidoEnvioDestino}
                     />
 
                     <Input
                       placeholder="Persona que recibe"
-                      value={this.state.fechaEntrega}
-                      ref={this.refFechaEntrega}
-                      onChange={this.handleFechaEntrega}
+                      value={this.state.pedidoEnvio.receptor}
+                      ref={this.refPedidoEnvioReceptor}
+                      onChange={this.handleInputPedidoEnvioReceptor}
                     />
                   </div>
                 </>

@@ -41,6 +41,7 @@ import { Pencil } from 'lucide-react';
 import ProductTransactionPanel from '@/components/ProductTransactionPanel';
 import SearchInput from '@/components/SearchInput';
 import Button from "@/components/Button";
+import Select from '@/components/Select';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
@@ -849,12 +850,20 @@ class OrdenCompraEditar extends CustomComponent {
               type="costo"
               emptyMessage="Aquí verás los productos que elijas en tu próximo pedido"
 
-              comprobantes={this.state.comprobantes}
-              refComprobante={this.refComprobante}
-              idComprobante={this.state.idComprobante}
-              handleSelectComprobante={this.handleSelectComprobante}
-
               components={[
+                <Select
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}
+                  className="mb-3"
+                >
+                  <option value="">-- Comprobantes --</option>
+                  {this.state.comprobantes.map((item, index) => (
+                    <option key={index} value={item.idComprobante}>
+                      {item.nombre + ' (' + item.serie + ')'}
+                    </option>
+                  ))}
+                </Select>,
                 <SearchInput
                   ref={this.refProveedor}
                   placeholder="Filtrar proveedores..."

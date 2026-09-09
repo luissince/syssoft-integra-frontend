@@ -9,13 +9,8 @@ import { Pencil, Trash } from "lucide-react";
 import React from "react";
 
 interface Props {
-    type: "costo" | "precio";
+    type: "costo" | "precio" | "catalog";
     emptyMessage: string;
-
-    comprobantes: Array<any>;
-    refComprobante: React.RefObject<any>;
-    idComprobante: string;
-    handleSelectComprobante: () => void;
 
     components?: Array<React.ReactNode>;
 
@@ -24,7 +19,7 @@ interface Props {
 
     actions?: HeaderAction[],
 
-    handleOpenModalProducto: (item: any, tipo: string) => void;
+    handleOpenModalProducto?: (item: any, tipo: string) => void;
     handleRemoverProducto: (idProducto: string) => void;
 
     handleRegister: () => void;
@@ -33,11 +28,6 @@ interface Props {
 const ProductTransactionPanel: React.FC<Props> = ({
     type,
     emptyMessage = "Aquí verás los productos que elijas en tu próximo pedido",
-
-    comprobantes,
-    refComprobante,
-    idComprobante,
-    handleSelectComprobante,
 
     components,
 
@@ -114,18 +104,29 @@ const ProductTransactionPanel: React.FC<Props> = ({
 
         return (
             <>
-                <div className="flex justify-between items-center">
-                    <p>Sub Total:</p>
-                    <p>
-                        {formatCurrency(subTotal, codiso)}
-                    </p>
-                </div>
-                {impuestosGenerado()}
+                {
+                    type !== "catalog" && (
+                        <>
+                            <div className="flex justify-between items-center">
+                                <p>Sub Total:</p>
+                                <p>
+                                    {formatCurrency(subTotal, codiso)}
+                                </p>
+                            </div>
+                            {impuestosGenerado()}
+                        </>
+                    )
+                }
+
                 <Button className="btn-success w-full" onClick={handleRegister}>
                     <div className="flex justify-between items-center py-1">
                         <p className="text-xl">Registrar(F1)</p>
                         <p className="text-xl">
-                            {formatCurrency(total, codiso)}
+                            {
+                                type !== "catalog" && (
+                                    formatCurrency(total, codiso)
+                                )
+                            }
                         </p>
                     </div>
                 </Button>
@@ -143,20 +144,6 @@ const ProductTransactionPanel: React.FC<Props> = ({
 
             {/* Filtros */}
             <div className="flex flex-col p-3 border-b border-solid border-[#cbd5e1]" >
-                <Select
-                    ref={refComprobante}
-                    value={idComprobante}
-                    onChange={handleSelectComprobante}
-                    className="mb-3"
-                >
-                    <option value="">-- Comprobantes --</option>
-                    {comprobantes.map((item, index) => (
-                        <option key={index} value={item.idComprobante}>
-                            {item.nombre + ' (' + item.serie + ')'}
-                        </option>
-                    ))}
-                </Select>
-
                 {components.map((component, index) => {
                     return (
                         <React.Fragment key={index}>
@@ -233,13 +220,17 @@ const ProductTransactionPanel: React.FC<Props> = ({
                                 </div>
 
                                 <div className="flex gap-4">
-                                    <Button
-                                        className="btn-link"
-                                        onClick={() => handleOpenModalProducto(item, "edit")}
-                                        title="Editar producto"
-                                    >
-                                        <Pencil className="w-5 h-5 text-yellow-500" />
-                                    </Button>
+                                    {
+                                        handleOpenModalProducto && (
+                                            <Button
+                                                className="btn-link"
+                                                onClick={() => handleOpenModalProducto(item, "edit")}
+                                                title="Editar producto"
+                                            >
+                                                <Pencil className="w-5 h-5 text-yellow-500" />
+                                            </Button>
+                                        )
+                                    }
 
                                     <Button
                                         className="btn-link"

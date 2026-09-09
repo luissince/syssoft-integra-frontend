@@ -41,6 +41,7 @@ import { Pencil } from 'lucide-react';
 import { alertKit } from 'alert-kit';
 import ProductTransactionPanel from '@/components/ProductTransactionPanel';
 import SearchInput from '@/components/SearchInput';
+import Select from '@/components/Select';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -946,18 +947,25 @@ class CotizacionEditar extends CustomComponent {
               handleSelectItemProducto={this.handleSelectItemProducto}
             />
 
-
             {/* PANEL RIGHT */}
             <ProductTransactionPanel
               type="precio"
               emptyMessage="Aquí verás los productos que elijas en tu próxima cotización."
 
-              comprobantes={this.state.comprobantes}
-              refComprobante={this.refComprobante}
-              idComprobante={this.state.idComprobante}
-              handleSelectComprobante={this.handleSelectComprobante}
-
               components={[
+                <Select
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}
+                  className="mb-3"
+                >
+                  <option value="">-- Comprobantes --</option>
+                  {this.state.comprobantes.map((item, index) => (
+                    <option key={index} value={item.idComprobante}>
+                      {item.nombre + ' (' + item.serie + ')'}
+                    </option>
+                  ))}
+                </Select>,
                 <SearchInput
                   ref={this.refCliente}
                   placeholder="Filtrar clientes..."

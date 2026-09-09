@@ -934,6 +934,7 @@ label {
   display: inline-block;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
+  line-height: 1.25rem;
 }
 
 button {

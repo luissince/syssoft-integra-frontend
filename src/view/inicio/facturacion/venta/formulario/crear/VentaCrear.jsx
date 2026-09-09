@@ -761,7 +761,7 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES 
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES
       || producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO) {
       const detalles = this.addItemDetalle(producto, null, null);
       this.setState({ detalleVenta: detalles }, () => {
@@ -1982,10 +1982,9 @@ class VentaCrear extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
-          const body = response.getBody().map(
-            (item) =>
-              `<tr>
+        if (Array.isArray(response.getBody())) {
+          const body = response.getBody().map((item) =>
+            `<tr>
                   <td>
                     ${item.codigo}
                     <br />
@@ -1994,8 +1993,8 @@ class VentaCrear extends CustomComponent {
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                item.cantidadActual - item.cantidadReal,
-              )}</td>
+              item.cantidadActual - item.cantidadReal,
+            )}</td>
                 </tr>`,
           );
 
@@ -2099,7 +2098,7 @@ class VentaCrear extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
+        if (Array.isArray(response.getBody())) {
           const body = response.getBody().map((item) =>
             `<tr>
                   <td>
@@ -2115,25 +2114,29 @@ class VentaCrear extends CustomComponent {
                 </tr>`,
           );
 
-          this.alert.html(
-            'Venta',
-            `<div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`,
-          );
+          const html = `
+            <div class="d-flex flex-column align-items-center">
+              <h5>Productos con cantidades faltantes</h5>
+              <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad a Vender</th>
+                        <th>Cantidad de Inventario</th>
+                        <th>Cantidad Faltante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  ${body}
+                </tbody>
+              </table>
+            </div>`;
+
+          alertKit.html({
+            title: 'Venta',
+            bodyInnerHTML: html
+          });
+
         } else {
           alertKit.warning({
             title: 'Venta',
