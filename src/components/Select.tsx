@@ -71,7 +71,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   group = false,
   iconLeft,
   buttonRight,
-  className = 'border border-primary',
+  className,
   children,
   ...rest
 },

@@ -35,10 +35,13 @@ import {
   TIPO_PRODUCTO_SERVICIO,
 } from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
-import PanelIzquierdo from './component/PanelIzquierdo';
-import PanelDerecho from './component/PanelDerecho';
 import pdfVisualizer from 'pdf-visualizer';
-
+import ProductSelectorPanel from '@/components/ProductSelectorPanel';
+import { Pencil } from 'lucide-react';
+import ProductTransactionPanel from '@/components/ProductTransactionPanel';
+import SearchInput from '@/components/SearchInput';
+import Button from "@/components/Button";
+import Select from '@/components/Select';
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
@@ -54,6 +57,10 @@ class OrdenCompraEditar extends CustomComponent {
       // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
+
+      loadingProducto: false,
+      loadingProductoMessage: 'Cargando productos...',
+      emptyProductoMessage: 'Use la barra de busqueda para encontrar su producto.',
 
       // Atributos principales
       idOrdenCompra: '',
@@ -355,7 +362,7 @@ class OrdenCompraEditar extends CustomComponent {
       !this.state.isOpenProveedor &&
       !this.state.isOpenImpresion
     ) {
-      this.handleGuardar();
+      this.handleRegister();
     }
   };
 
@@ -601,7 +608,7 @@ class OrdenCompraEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Procesos guardar
   //------------------------------------------------------------------------------------------
-  handleGuardar = async () => {
+  handleRegister = async () => {
     const {
       idOrdenCompra,
       idComprobante,
@@ -822,8 +829,13 @@ class OrdenCompraEditar extends CustomComponent {
         <div className="bg-white w-full h-full flex flex-col overflow-auto">
           <div className="flex w-full h-full">
             {/* PANEL IZQUIERDO */}
-            <PanelIzquierdo
+            <ProductSelectorPanel
+              type="costo"
+              title="Orden de Compra"
+              icon={<Pencil className="h-4 w-4" />}
               loadingProducto={this.state.loadingProducto}
+              loadingMessage={this.state.loadingProductoMessage}
+              emptyMessage={this.state.emptyProductoMessage}
               productos={this.state.productos}
               codiso={this.state.codiso}
               refProducto={this.refProducto}
@@ -834,26 +846,63 @@ class OrdenCompraEditar extends CustomComponent {
             />
 
             {/* PANEL DERECHO  */}
-            <PanelDerecho
-              comprobantes={this.state.comprobantes}
-              refComprobante={this.refComprobante}
-              idComprobante={this.state.idComprobante}
-              handleSelectComprobante={this.handleSelectComprobante}
+            <ProductTransactionPanel
+              type="costo"
+              emptyMessage="Aquí verás los productos que elijas en tu próximo pedido"
 
-              proveedores={this.state.proveedores}
-              refProveedor={this.refProveedor}
-              refProveedorValue={this.refProveedorValue}
-              handleFilterProveedor={this.handleFilterProveedor}
-              handleOpenModalProveedor={this.handleOpenModalProveedor}
-              handleClearInputProveedor={this.handleClearInputProveedor}
-              handleSelectItemProveedor={this.handleSelectItemProveedor}
+              components={[
+                <Select
+                  ref={this.refComprobante}
+                  value={this.state.idComprobante}
+                  onChange={this.handleSelectComprobante}
+                  className="mb-3"
+                >
+                  <option value="">-- Comprobantes --</option>
+                  {this.state.comprobantes.map((item, index) => (
+                    <option key={index} value={item.idComprobante}>
+                      {item.nombre + ' (' + item.serie + ')'}
+                    </option>
+                  ))}
+                </Select>,
+                <SearchInput
+                  ref={this.refProveedor}
+                  placeholder="Filtrar proveedores..."
+                  refValue={this.refProveedorValue}
+                  data={this.state.proveedores}
+                  handleClearInput={this.handleClearInputProveedor}
+                  handleFilter={this.handleFilterProveedor}
+                  handleSelectItem={this.handleSelectItemProveedor}
+                  customButton={
+                    <Button
+                      className="btn-outline-primary !flex items-center"
+                      onClick={this.handleOpenModalProveedor}
+                    >
+                      <i className="fa fa-user-plus"></i>
+                      <div className="ml-2">Nuevo</div>
+                    </Button>
+                  }
+                  renderItem={(value) => (
+                    <>{value.documento + ' - ' + value.informacion}</>
+                  )}
+                  classNameContainer="relative group"
+                />
+              ]}
 
               detalles={this.state.detalles}
               codiso={this.state.codiso}
-              handleGuardar={this.handleGuardar}
-              handleOpenOptions={this.handleOpenOptions}
+
+              actions={[
+                {
+                  icon: <i className="bi bi-three-dots-vertical text-xl text-secondary" />,
+                  onClick: this.handleOpenOptions,
+                  title: "Opciones",
+                }
+              ]}
+
               handleOpenModalProducto={this.handleOpenModalProducto}
               handleRemoverProducto={this.handleRemoverProducto}
+
+              handleRegister={this.handleRegister}
             />
           </div>
         </div>

@@ -1055,6 +1055,10 @@ function calculateEAN13CheckDigit(code) {
   return remainder === 0 ? 0 : 10 - remainder;
 }
 
+/**
+ * Función para obtener las ranuras de tiempo
+ * @returns 
+ */
 export function getRanurasDeTiempo() {
   const ranurasDeTiempo = []
   for (let hour = 7; hour <= 23; hour++) {

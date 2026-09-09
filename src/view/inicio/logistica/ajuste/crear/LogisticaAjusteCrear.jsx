@@ -304,41 +304,32 @@ class LogisticaAjusteCrear extends CustomComponent {
 
   handleSiguiente = () => {
     if (isEmpty(this.state.idTipoAjuste)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Seleccione el tipo de ajuste.',
-        },
-        () => {
-          this.refIdTipoAjuste.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Seleccione el tipo de ajuste.',
+      }, () => {
+        this.refIdTipoAjuste.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idMotivoAjuste)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Seleccione el motivo del ajuste.',
-        },
-        () => {
-          this.refIdMotivoAjuste.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Seleccione el motivo del ajuste.',
+      }, () => {
+        this.refIdMotivoAjuste.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Seleccione el almacen.',
-        },
-        () => {
-          this.refIdAlmacen.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Seleccione el almacen.',
+      }, () => {
+        this.refIdAlmacen.current.focus();
+      });
       return;
     }
 
@@ -401,15 +392,12 @@ class LogisticaAjusteCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleSave = async () => {
     if (isEmpty(this.state.detalles)) {
-      alertKit.warning(
-        {
-          title: 'Ajuste',
-          message: 'Agregue productos en la lista para continuar.',
-        },
-        () => {
-          this.refValueProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Ajuste',
+        message: 'Agregue productos en la lista para continuar.',
+      }, () => {
+        this.refValueProducto.current.focus();
+      });
       return;
     }
 
@@ -443,15 +431,12 @@ class LogisticaAjusteCrear extends CustomComponent {
       const response = await createAjuste(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Ajuste',
-            message: response.data,
-          },
-          () => {
-            this.clearView();
-          },
-        );
+        alertKit.success({
+          title: 'Ajuste',
+          message: response.data,
+        }, () => {
+          this.clearView();
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -472,16 +457,22 @@ class LogisticaAjusteCrear extends CustomComponent {
     });
   };
 
-  handleClear = () => {
-    alertDialog(
-      'Ajuste',
-      '¿Está seguro de continuar, se va limpiar toda la información?',
-      async (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+  handleClear = async () => {
+    const accept = await alertKit.question({
+      title: 'Ajuste',
+      message: '¿Está seguro de continuar, se va limpiar toda la información?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   /*
@@ -674,13 +665,7 @@ class LogisticaAjusteCrear extends CustomComponent {
                   data={this.state.productos}
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
-                  handleSelectItem={this.handleSelectItemProducto}
-                  // renderItem={(value) => (
-                  //   <>
-                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                  //   </>
-                  // )}
-
+                  handleSelectItem={this.handleSelectItemProducto}              
                   renderItem={(value) => (
                     <div className="d-flex align-items-center">
                       <Image
@@ -705,9 +690,7 @@ class LogisticaAjusteCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={
-                    ' Ingrese alguna descripción para saber el motivo del ajuste:'
-                  }
+                  label={"Ingrese alguna descripción para saber el motivo del ajuste:"}
                   placeholder="Ingrese una observación"
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}

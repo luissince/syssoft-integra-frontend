@@ -67,7 +67,6 @@ import ModalCotizacion from '../common/ModalCotizacion';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import ModalAgregar from '../common/ModalAgregar';
-import printJS from 'print-js';
 import ButtonsOpciones from './component/ButtonsOpciones';
 import ModalPrecios from './component/ModalPrecios';
 import ModalCantidad from './component/ModalCantidad';
@@ -90,6 +89,7 @@ import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { usePrivilegios } from '@/hooks/use-privilegios';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -1722,7 +1722,7 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesVenta(this.state.idVenta, size),
       type: 'pdf',
       showModal: true,
@@ -1814,7 +1814,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
       success();
 
-      printJS({
+      pdfVisualizer.printer({
         printable: base64,
         type: 'pdf',
         base64: true,

@@ -69,7 +69,7 @@ class ErrorResponse {
     return this.status;
   }
 
-  getBody(): string {
+  getBody(): any {
     return this.body;
   }
 }

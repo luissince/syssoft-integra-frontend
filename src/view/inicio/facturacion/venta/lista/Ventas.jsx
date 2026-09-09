@@ -14,7 +14,7 @@ import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import PropTypes from 'prop-types';
 import {
-  cancelVenta,
+  anularVenta,
   comboComprobante,
   listVenta,
 } from '../../../../../network/rest/principal.network';
@@ -145,7 +145,7 @@ class Ventas extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   async componentDidMount() {
-    await this.loadingData();
+    await this.loadData();
   }
 
   /**
@@ -169,7 +169,7 @@ class Ventas extends CustomComponent {
   |
   */
 
-  loadingData = async () => {
+  loadData = async () => {
     const ventaLista = this.props.ventaLista;
     if (
       ventaLista &&
@@ -246,7 +246,7 @@ class Ventas extends CustomComponent {
     if (text.trim().length === 0) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -266,22 +266,10 @@ class Ventas extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      case 2:
-        this.fillTable(2);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion = 0) => {
     this.setState({
       loading: true,
       lista: [],
@@ -290,7 +278,7 @@ class Ventas extends CustomComponent {
 
     const params = {
       opcion,
-      buscar: buscar.trim(),
+      buscar: this.state.buscar,
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idComprobante: this.state.idComprobante,
@@ -392,7 +380,7 @@ class Ventas extends CustomComponent {
     });
   };
 
-  async handleAnular(idVenta) {
+  handleAnular = async (idVenta) => {
     if (!this.state.remove) {
       alertKit.warning({
         title: 'Venta',
@@ -422,7 +410,7 @@ class Ventas extends CustomComponent {
         message: 'Procesando información...',
       });
 
-      const response = await cancelVenta(params);
+      const response = await anularVenta(params);
 
       if (response instanceof SuccessReponse) {
         alertKit.success({
@@ -550,8 +538,7 @@ class Ventas extends CustomComponent {
               </span>
             );
 
-            const tipo = item.idFormaPago === CONTADO
-              ? 'CONTADO' : 'CREDITO';
+            const tipo = item.idFormaPago === CONTADO ? 'CONTADO' : 'CREDITO';
 
             return (
               <div

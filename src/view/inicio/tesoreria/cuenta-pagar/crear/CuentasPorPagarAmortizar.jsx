@@ -42,7 +42,6 @@ import ModalProceso from './component/ModalProceso';
 import pdfVisualizer from 'pdf-visualizer';
 import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
-import printJS from 'print-js';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 
@@ -395,7 +394,7 @@ class CuentasPorPagarAmbonar extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfAccountPayableCompra(
         this.state.idPlazo,
         this.state.idCompra,

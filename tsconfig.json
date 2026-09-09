@@ -13,9 +13,8 @@
     "allowJs": true,             // permite .js y .jsx
     "checkJs": true,            // analiza .js pero no lanza errores
     "strict": false,             // puedes poner true si ya migraste bastante
-    "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],

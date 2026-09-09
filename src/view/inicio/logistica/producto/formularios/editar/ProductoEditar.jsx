@@ -195,7 +195,7 @@ class ProductoEditar extends CustomComponent {
       idMarca: producto.idMarca,
       descripcionCorta: producto.descripcionCorta,
       descripcionLarga: producto.descripcionLarga,
-      idTipoTratamiento: producto.idTipoTratamientoProducto,
+      idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
       precio: String(producto.precio),
       costo: String(producto.costo),
       publicar: producto.publicar === 1 ? true : false,
@@ -871,6 +871,8 @@ class ProductoEditar extends CustomComponent {
       preferido,
       estado
     } = this.state;
+
+    console.log(idTipoTratamientoProducto);
 
     return (
       <ContainerWrapper>

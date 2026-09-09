@@ -9,38 +9,26 @@ import {
   formatCurrency,
   rounded,
 } from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import {
   detailPedido,
   documentsPdfInvoicesPedido,
   documentsPdfListsPedido,
 } from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { alertKit } from 'alert-kit';
+import { cn } from '@/lib/utils';
+import { ESTADO_PEDIDO, pedidoEstadoMap } from '@/model/types/pedido';
+import { TIPO_PEDIDO_ENTREGA_PROGRAMADA, TIPO_PEDIDO_ENVIO_DOMICILIO, TIPO_PEDIDO_ENVIO_POR_AGENCIA, TIPO_PEDIDO_RECOJO_LOCAL } from '@/model/types/tipo-pedido';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PedidoDetalle extends CustomComponent {
   constructor(props) {
@@ -51,31 +39,8 @@ class PedidoDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idPedido: '',
-      fechaHora: '',
-
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
-
-      comprobante: '',
-      serieNumeracion: '',
-
-      estado: '',
-
-      observacion: '',
-      notas: '',
-
-      idTipoEntrega: '',
-      tipoEntrega: '',
-
-      fechaEntrega: '',
-      horaEntrega: '',
-
-      codiso: '',
-      total: 0,
-
+      cabecera: null,
+      envio: null,
       detalles: [],
     };
 
@@ -126,80 +91,28 @@ class PedidoDetalle extends CustomComponent {
   */
 
   async loadingData(idPedido) {
-    const response = await detailPedido(
+    const { success, data, message, type } = await detailPedido(
       idPedido,
       this.abortControllerView.signal,
     );
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: 'Pedido',
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.close();
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const pedido = response.data;
-
-    const {
-      fecha,
-      hora,
-
-      comprobante,
-      serie,
-      numeracion,
-
-      documento,
-      informacion,
-      telefono,
-      celular,
-      email,
-      direccion,
-
-      estado,
-      observacion,
-      nota,
-      idTipoEntrega,
-      tipoEntrega,
-      fechaEntrega,
-      horaEntrega,
-      codiso,
-    } = pedido.cabecera;
-
-    const monto = pedido.detalles.reduce(
-      (accumlate, item) => accumlate + item.precio * item.cantidad,
-      0,
-    );
-
     this.setState({
       idPedido: idPedido,
-      fechaHora: fecha + ' ' + formatTime(hora),
-
-      comprobante: comprobante,
-      serieNumeracion: serie + '-' + formatNumberWithZeros(numeracion),
-
-      proveedor: documento + ' - ' + informacion,
-      telefono: telefono,
-      celular: celular,
-      email: email,
-      direccion: direccion,
-
-      estado: estado,
-      observacion: observacion,
-      notas: nota,
-      idTipoEntrega,
-      tipoEntrega,
-      fechaEntrega: fechaEntrega ?? '',
-      horaEntrega: horaEntrega ?? '',
-      codiso: codiso,
-      total: monto,
-
-      detalles: pedido.detalles,
+      cabecera: data.cabecera,
+      envio: data.envio,
+      detalles: data.detalles,
       loading: false,
     });
   }
@@ -262,48 +175,210 @@ class PedidoDetalle extends CustomComponent {
   |
    */
 
-  getStatusColor = (estado) => {
-    switch (estado) {
-      case "pending":
-        return "bg-yellow-500";
-      case "preparing":
-        return "bg-blue-500";
-      case "ready":
-        return "bg-green-500";
-      case "delivered":
-        return "bg-gray-500";
-      case "cancelled":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
+  renderCabecera() {
+    const { loading, cabecera, envio, detalles } = this.state;
 
-  getStatusText = (estado) => {
-    switch (estado) {
-      case "pending":
-        return "Pendiente";
-      case "preparing":
-        return "Preparando";
-      case "ready":
-        return "Listo";
-      case "delivered":
-        return "Entregado";
-      case "cancelled":
-        return "Anulado";
-      default:
-        return estado;
-    }
-  };
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+        <div className="flex gap-3">
+          <div className="divide-y divide-gray-100">
+            {[
+              {
+                label: 'Fecha y Hora', value: () => {
+                  return cabecera.fecha + ' ' + formatTime(cabecera.hora);
+                }
+              },
+              {
+                label: 'Comprobante', value: () => {
+                  return cabecera.comprobante + '  ' + cabecera.serie + '-' + formatNumberWithZeros(cabecera.numeracion);
+                }
+              },
+              {
+                label: 'Cliente', value: () => {
+                  return cabecera.documento + ' - ' + cabecera.informacion;
+                }
+              },
+              { label: 'N° de celular', value: () => cabecera.celular },
+              { label: 'Correo electrónico', value: () => cabecera.email },
+
+              {
+                label: 'Estado', value: () => {
+                  return (
+                    <span className={cn(
+                      "inline-flex items-center rounded-full",
+                      "text-xs font-medium",
+                      "px-2.5 py-0.5",
+                      cabecera.estado === ESTADO_PEDIDO.CANCELADO.id && "bg-red-100 text-red-800",
+                      cabecera.estado === ESTADO_PEDIDO.PENDIENTE.id && "bg-orange-100 text-orange-800",
+                      cabecera.estado === ESTADO_PEDIDO.PREPARANDO.id && "bg-yellow-100 text-yellow-800",
+                      cabecera.estado === ESTADO_PEDIDO.LISTO.id && "bg-emerald-100 text-emerald-800",
+                      cabecera.estado === ESTADO_PEDIDO.ENTREGADO.id && "bg-sky-100 text-sky-800",
+                    )}>
+                      {cabecera && pedidoEstadoMap[cabecera.estado].nombre}
+                    </span>
+                  );
+                }
+              },
+
+              { label: 'Observación', value: () => cabecera.observacion },
+              { label: 'Nota', value: () => cabecera.nota },
+
+              { label: 'Usuario', value: () => cabecera.usuario },
+
+              {
+                label: 'Total', value: () => {
+                  const monto = detalles.reduce(
+                    (accumlate, item) => accumlate + item.precio * item.cantidad,
+                    0,
+                  );
+
+                  return formatCurrency(monto, cabecera.codiso)
+                }
+              },
+            ].map((item, i) => (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+                <p>{item.label}</p>
+                <p className="md:col-span-3 font-bold">{item.value()}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="divide-y divide-gray-100">
+            {[
+              { label: 'Tipo Entrega', value: () => cabecera.tipoPedido },
+
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENVIO_DOMICILIO && {
+                label: 'Dirección',
+                value: () => envio.direccion
+              },
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENVIO_DOMICILIO && {
+                label: 'Referencia',
+                value: () => envio.referencia
+              },
+
+              cabecera.idTipoPedido === TIPO_PEDIDO_RECOJO_LOCAL && {
+                label: 'Sucursal',
+                value: () => envio.sucursal
+              },
+              cabecera.idTipoPedido === TIPO_PEDIDO_RECOJO_LOCAL && {
+                label: 'Dirección Sucursal',
+                value: () => envio.direccionSucursal
+              },
+
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENTREGA_PROGRAMADA && {
+                label: 'Fecha y Hora', value: () => {
+                  return envio.fechaPedido + ' ' + formatTime(envio.horaPedido);
+                }
+              },
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENTREGA_PROGRAMADA && {
+                label: 'Dirección',
+                value: () => envio.direccion
+              },
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENTREGA_PROGRAMADA && {
+                label: 'Referencia',
+                value: () => envio.referencia
+              },
+
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENVIO_POR_AGENCIA && {
+                label: 'Agencia',
+                value: () => envio.agencia
+              },
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENVIO_POR_AGENCIA && {
+                label: 'Destino',
+                value: () => envio.destino
+              },
+              cabecera.idTipoPedido === TIPO_PEDIDO_ENVIO_POR_AGENCIA && {
+                label: 'Receptor',
+                value: () => envio.receptor
+              },
+            ].filter(Boolean)
+              .map((item, i) => (
+                <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+                  <p>{item.label}</p>
+                  <p className="md:col-span-3 font-bold">{item.value()}</p>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderDetalles() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Detalles</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4">#</th>
+                <th className="p-4">Imagen</th>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Precio</th>
+                <th className="p-4">Categoría</th>
+                <th className="p-4 text-right">Impuesto</th>
+                <th className="p-4 text-right">Cantidad</th>
+                <th className="p-4 text-right">Medida</th>
+                <th className="p-4 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                detalles.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="p-4">{item.id}</td>
+                    <td className="p-4 text-center">
+                      <Image
+                        default={images.noImage}
+                        src={item.imagen}
+                        alt={item.producto}
+                        width={80}
+                        className="mx-auto rounded border border-gray-200"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+                      <p className="text-black uppercase">{item.producto}</p>
+                    </td>
+                    <td className="p-4">{item.categoria}</td>
+                    <td className="p-4 text-right">{rounded(item.cantidad)}</td>
+                    <td className="p-4 text-right">{item.medida}</td>
+                    <td className="p-4 text-right">{item.impuesto}</td>
+                    <td className="p-4 text-right">
+                      {formatCurrency(item.precio, cabecera.codiso)}
+                    </td>
+                    <td className="p-4 font-medium text-right">
+                      {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   renderTotal() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalles) {
+    for (const item of detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
-
       const impuesto = item.porcentaje;
 
       const valorActual = cantidad * valor;
@@ -316,7 +391,7 @@ class PedidoDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
+      const resultado = detalles.reduce((acc, item) => {
         const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -338,45 +413,56 @@ class PedidoDetalle extends CustomComponent {
         return acc;
       }, []);
 
-      return resultado.map((impuesto, index) => {
-        return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">
-              {impuesto.nombre} :
-            </TableHead>
-            <TableHead className="text-right mb-2">
-              {formatCurrency(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
-        );
-      });
+      return resultado.map((impuesto, index) => (
+        <tr key={index}>
+          <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
+            {formatCurrency(impuesto.valor, cabecera.codiso)}
+          </td>
+        </tr>
+      ));
     };
+
     return (
-      <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
-            {formatCurrency(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
-        {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
-            {formatCurrency(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
-      </>
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-start-9 lg:col-span-4">
+          <div className="bg-white overflow-hidden">
+            <table className="w-full text-right">
+              <tbody>
+                <tr>
+                  <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-medium text-right">
+                    {formatCurrency(subTotal, cabecera.codiso)}
+                  </td>
+                </tr>
+                {impuestosGenerado()}
+                <tr>
+                  <td colSpan={2} className="py-2">
+                    <div className="border-t border-gray-200"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-bold text-right text-lg">
+                    {formatCurrency(total, cabecera.codiso)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     );
   }
 
   render() {
+    const { loading, msgLoading } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
         <Title
@@ -385,234 +471,45 @@ class PedidoDetalle extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintList.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> Lista
-            </Button>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column
-            className="col-lg-6 col-md-6 col-sm-12 col-12"
-            formGroup={true}
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
           >
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.fechaHora}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Proveedor
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.proveedor}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Telefono
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.telefono}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Celular
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.celular}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Email
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.email}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Dirección
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.direccion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Tipo Entrega
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.tipoEntrega}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
+            <i className="fa fa-print"></i> A4
+          </button>
 
-          <Column
-            className="col-lg-6 col-md-6 col-sm-12 col-12"
-            formGroup={true}
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
           >
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Comprobante
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.comprobante}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Serie - Numeración
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.serieNumeracion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Estado
-                    </TableHead>
-                    <TableHead className={`border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal text-white ${this.getStatusColor(this.state.estado)}`}>
-                      {this.getStatusText(this.state.estado)}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Observación
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.observacion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Nota
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.notas}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Total
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {formatCurrency(this.state.total, this.state.codiso)}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+            <i className="fa fa-print"></i> 80MM
+          </button>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader className="table-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Impuesto %</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Medida</TableHead>
-                    <TableHead>Importe</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.state.detalles.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell className="text-center">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.producto}
-                          width={100}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {item.codigo}
-                        <br />
-                        {item.producto}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(item.precio, this.state.codiso)}
-                      </TableCell>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
 
-                      <TableCell>{item.categoria}</TableCell>
-                      <TableCell className="text-right">
-                        {item.impuesto}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {rounded(item.cantidad)}
-                      </TableCell>
-                      <TableCell>{item.medida}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(
-                          item.cantidad * item.precio,
-                          this.state.codiso,
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintList.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> Lista
+          </button>
+        </div>
 
-        <Row>
-          <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table classNameContent="w-100">
-              <TableHeader>{this.renderTotal()}</TableHeader>
-            </Table>
-          </Column>
-        </Row>
+        {/* Cabecera */}
+        {this.renderCabecera()}
+
+        {/* Detalles */}
+        {this.renderDetalles()}
+
+        {/* Totales (flotante a la derecha en desktop) */}
+        {this.renderTotal()}
       </ContainerWrapper>
     );
   }

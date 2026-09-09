@@ -156,7 +156,7 @@ class GuiaRemision extends CustomComponent {
     if (text.trim().length === 0) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -176,22 +176,10 @@ class GuiaRemision extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      case 2:
-        this.fillTable(2);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion = 0) => {
     this.setState({
       loading: true,
       lista: [],
@@ -200,7 +188,7 @@ class GuiaRemision extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: this.state.buscar,
       idSucursal: this.state.idSucursal,
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
