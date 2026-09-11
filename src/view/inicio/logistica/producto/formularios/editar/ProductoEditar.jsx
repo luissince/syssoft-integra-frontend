@@ -8,7 +8,6 @@ import {
   isEmpty,
   isNumeric,
   isText,
-  keyNumberFloat,
   validateMany,
   validateNumericInputs,
 } from '../../../../../../helper/utils.helper';
@@ -19,7 +18,7 @@ import {
   getIdProducto,
   updateProducto,
   comboMarca,
-  comboAtributo,
+  comboAtributoTipos,
 } from '../../../../../../network/rest/principal.network';
 import PropTypes from 'prop-types';
 import SuccessReponse from '../../../../../../model/class/response';
@@ -28,31 +27,16 @@ import { CANCELED } from '../../../../../../model/types/types';
 import { connect } from 'react-redux';
 import DetalleImagen from '../component/DetalleImagen';
 import {
-  TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
-  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
-  TIPO_TRATAMIENTO_PRODUCTO_UNIDADES,
-  TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
 } from '../../../../../../model/types/tipo-tratamiento-producto';
 import Title from '../../../../../../components/Title';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import {
-  TIPO_ATRIBUTO_COLOR,
-  TIPO_ATRIBUTO_SABOR,
-  TIPO_ATRIBUTO_TALLA,
-} from '../../../../../../model/types/tipo-atributo';
-import {
   TIPO_PRODUCTO_NORMAL,
-  TIPO_PRODUCTO_SERVICIO,
-  productTypeOptions
+  TIPO_PRODUCTO_SERVICIO
 } from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
-import RadioButton from '@/components/RadioButton';
-import Input from '@/components/Input';
-import { FaAsterisk } from 'react-icons/fa';
-import Button from '@/components/Button';
-import Select, { SelectActive } from '@/components/Select';
-import TextArea from '@/components/TextArea';
-import ItemImage from '../component/ItemImagen';
+import DetalleInformacion from '../component/DetalleInformacion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -92,10 +76,6 @@ class ProductoEditar extends CustomComponent {
       detalles: [],
       imagenes: [],
 
-      coloresSeleccionados: [],
-      tallasSeleccionadas: [],
-      saboresSeleccionados: [],
-
       imagen: {
         url: images.noImage,
       },
@@ -109,9 +89,10 @@ class ProductoEditar extends CustomComponent {
       medidas: [],
       categorias: [],
       marcas: [],
-      colores: [],
-      tallas: [],
-      sabores: [],
+
+      // Atributos
+      atributos: [],
+      atributosSeleccionados: [],
 
       // Id principales
       idUsuario: this.props.token.userToken.idUsuario,
@@ -170,16 +151,23 @@ class ProductoEditar extends CustomComponent {
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
   loadData = async (idProducto) => {
-    const [medidas, categorias, marcas, colores, tallas, sabores, producto] =
+    const [medidas, categorias, marcas, atributos, producto] =
       await Promise.all([
         this.fetchComboMedida(),
         this.fetchComboCategoria(),
         this.fetchComboMarca(),
-        this.fetchComboColor(TIPO_ATRIBUTO_COLOR),
-        this.fetchComboColor(TIPO_ATRIBUTO_TALLA),
-        this.fetchComboColor(TIPO_ATRIBUTO_SABOR),
+        this.fetchTiposAtributos(),
         this.fetchProducto(idProducto),
       ]);
+
+
+    if (!producto) {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'No se encontró el producto.',
+      });
+      return;
+    }
 
     await this.setStateAsync({
       idProducto: idProducto,
@@ -206,16 +194,14 @@ class ProductoEditar extends CustomComponent {
       precios: producto.precios,
       detalles: producto.detalles,
       imagenes: producto.imagenes,
-      coloresSeleccionados: producto.colores,
-      tallasSeleccionadas: producto.tallas,
-      saboresSeleccionados: producto.sabores,
 
       medidas,
       categorias,
       marcas,
-      colores,
-      tallas,
-      sabores,
+
+      atributos,
+      atributosSeleccionados: producto.atributos,
+
       imagen: producto.imagen ?? {
         url: images.noImage,
       },
@@ -234,7 +220,7 @@ class ProductoEditar extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      return [];
+      return null;
     }
   }
 
@@ -294,11 +280,8 @@ class ProductoEditar extends CustomComponent {
     }
   }
 
-  async fetchComboColor(id) {
-    const params = {
-      idTipoAtributo: id,
-    };
-    const response = await comboAtributo(params, this.abortController.signal);
+  async fetchTiposAtributos() {
+    const response = await comboAtributoTipos(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -505,65 +488,31 @@ class ProductoEditar extends CustomComponent {
     this.setState({ imagenes: newImgs });
   };
 
-  handleSelectColores = (color) => {
-    const coloresSeleccionados = this.state.coloresSeleccionados;
+  handleSelectAtributo = (atributo) => {
+    this.setState((prevState) => {
+      const existe = prevState.atributosSeleccionados.some(
+        (item) => item.idAtributo === atributo.idAtributo
+      );
 
-    if (
-      coloresSeleccionados.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      this.setState({
-        coloresSeleccionados: coloresSeleccionados.filter(
-          (item) => item.idAtributo !== color.idAtributo,
-        )
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresSeleccionados: [...prevState.coloresSeleccionados, color],
-      }));
-    }
+      if (existe) {
+        return {
+          atributosSeleccionados:
+            prevState.atributosSeleccionados.filter(
+              (item) => item.idAtributo !== atributo.idAtributo
+            )
+        };
+      }
+      return {
+        atributosSeleccionados: [
+          ...prevState.atributosSeleccionados,
+          atributo
+        ]
+      };
+    },()=>{
+          console.log(this.state.atributosSeleccionados);
+
+    });
   };
-
-  handleSelectTallas = (talla) => {
-    const tallasSeleccionadas = this.state.tallasSeleccionadas;
-    if (
-      tallasSeleccionadas.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      this.setState({
-        tallasSeleccionadas: tallasSeleccionadas.filter(
-          (item) => item.idAtributo !== talla.idAtributo,
-        ),
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasSeleccionadas: [...prevState.tallasSeleccionadas, talla],
-      }));
-    }
-  };
-
-  handleSelectSabores = (sabor) => {
-    const saboresSeleccionados = this.state.saboresSeleccionados;
-
-    if (
-      saboresSeleccionados.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      this.setState({
-        saboresSeleccionados: saboresSeleccionados.filter(
-          (item) => item.idAtributo !== sabor.idAtributo,
-        ),
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresSeleccionados: [...prevState.saboresSeleccionados, sabor],
-      }));
-    }
-  };
-
 
   //------------------------------------------------------------------------------------------
   // Detalle general
@@ -600,7 +549,7 @@ class ProductoEditar extends CustomComponent {
       });
       return;
     }
-    
+
     this.setState({
       imagen: {
         ...imageSend,
@@ -664,10 +613,10 @@ class ProductoEditar extends CustomComponent {
       detalles,
       descripcionCorta,
       descripcionLarga,
+
       imagenes,
-      coloresSeleccionados,
-      tallasSeleccionadas,
-      saboresSeleccionados,
+
+      atributosSeleccionados,
 
       publicar,
       negativo,
@@ -780,9 +729,8 @@ class ProductoEditar extends CustomComponent {
 
         detalles: detalles,
         imagenes: imagenes,
-        colores: coloresSeleccionados,
-        tallas: tallasSeleccionadas,
-        sabores: saboresSeleccionados,
+
+        atributos: atributosSeleccionados,
 
         imagen: imagen,
 
@@ -853,17 +801,13 @@ class ProductoEditar extends CustomComponent {
       detalles,
       imagenes,
 
-      coloresSeleccionados,
-      tallasSeleccionadas,
-      saboresSeleccionados,
-
       precios,
       medidas,
       categorias,
       marcas,
-      colores,
-      tallas,
-      sabores,
+
+      atributos,
+      atributosSeleccionados,
 
       imagen,
       publicar,
@@ -871,8 +815,6 @@ class ProductoEditar extends CustomComponent {
       preferido,
       estado
     } = this.state;
-
-    console.log(idTipoTratamientoProducto);
 
     return (
       <ContainerWrapper>
@@ -889,612 +831,109 @@ class ProductoEditar extends CustomComponent {
 
         <div className="flex flex-col md:flex-row gap-3">
           {/* Parte de los datos */}
-          <div className="w-full md:w-3/5 flex flex-col gap-3">
+          <DetalleInformacion
+            idTipoProducto={idTipoProducto}
+            handleOptionTipoProducto={this.handleOptionTipoProducto}
 
-            {/* Seleccion de tipo de producto */}
-            <div className="flex flex-row flex-wrap gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">1</span> TIPO DE PRODUCTO
-              </h6>
+            refNombre={this.refNombre}
+            nombre={nombre}
+            handleInputNombre={this.handleInputNombre}
 
-              <p>
-                Selecciona el tipo de producto que deseas crear, esto te ayudará a organizar mejor tu catálogo.
-              </p>
+            refCodigo={this.refCodigo}
+            codigo={codigo}
+            handleInputCodigo={this.handleInputCodigo}
 
-              {
-                productTypeOptions.map((item, index) => (
-                  <RadioButton
-                    key={`tipo-producto-${index}`}
-                    className="form-check-inline"
-                    id={item.value}
-                    value={item.value}
-                    name="ckTipoProducto"
-                    checked={idTipoProducto === item.value}
-                    onChange={this.handleOptionTipoProducto}
-                  >
-                    {item.label}
-                  </RadioButton>
+            refSku={this.refSku}
+            sku={sku}
+            handleInputSku={this.handleInputSku}
 
-                ))
-              }
-            </div>
+            refCodigoBarras={this.refCodigoBarras}
+            codigoBarras={codigoBarras}
+            handleInputCodigoBarras={this.handleInputCodigoBarras}
+            handleChangeCodigoBarras={this.handleChangeCodigoBarras}
 
-            {/* Información general */}
-            <div className="flex flex-col gap-3">
+            refIdMarca={this.refIdMarca}
+            idMarca={idMarca}
+            marcas={marcas}
+            handleSelectIdMarca={this.handleSelectIdMarca}
 
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">1</span> INFORMACIÓN GENERAL
-              </h6>
+            refIdMedida={this.refIdMedida}
+            idMedida={idMedida}
+            medidas={medidas}
+            handleSelectIdMedida={this.handleSelectIdMedida}
 
-              <p>
-                Información básica del producto, servicio, combo o activo que deseas registrar.
-              </p>
+            refIdCategoria={this.refIdCategoria}
+            idCategoria={idCategoria}
+            categorias={categorias}
+            handleSelectIdCategoria={this.handleSelectIdCategoria}
 
-              {/* Nombre del producto */}
-              <div className="flex flex-col gap-2">
-                <Input
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p>Nombre del Producto:</p>  <FaAsterisk className="text-red-500" size={8} />
-                    </div>
-                  }
-                  className={`${nombre ? '' : 'is-invalid'}`}
-                  placeholder="Dijite un nombre..."
-                  ref={this.refNombre}
-                  value={nombre}
-                  onChange={this.handleInputNombre}
-                />
-              </div>
+            idTipoTratamiento={idTipoTratamientoProducto}
+            handleOptionTipoTratamiento={this.handleOptionTipoTratamiento}
 
-              {/* Código y SKU */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full flex flex-col gap-2">
-                  <Input
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Código:</p>  <FaAsterisk className="text-red-500" size={8} />
-                      </div>
-                    }
-                    className={`${codigo ? '' : 'is-invalid'}`}
-                    placeholder="Ejemplo: CAS002 ..."
-                    ref={this.refCodigo}
-                    value={codigo}
-                    onChange={this.handleInputCodigo}
-                  />
+            refCosto={this.refCosto}
+            costo={costo}
+            handleInputCosto={this.handleInputCosto}
 
-                </div>
+            refPrecio={this.refPrecio}
+            precio={precio}
+            handleInputPrecio={this.handleInputPrecio}
 
-                <div className="w-full flex flex-col gap-2">
-                  <Input
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>SKU:</p>
-                      </div>
-                    }
-                    placeholder="Ejemplo: CAM-NIKE-001 ..."
-                    ref={this.refSku}
-                    value={sku}
-                    onChange={this.handleInputSku}
-                  />
-                </div>
-              </div>
+            refPrecios={this.refPrecios}
+            precios={precios}
+            handleAddPrecios={this.handleAddPrecios}
+            handleRemovePrecios={this.handleRemovePrecios}
+            handleInputNombrePrecios={this.handleInputNombrePrecios}
+            handleInputPrecioPrecios={this.handleInputPrecioPrecios}
 
-              {/* Código de Barras y Marca */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full flex flex-col gap-2">
-                  <Input
-                    group
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Código de Barras:</p>
-                      </div>
-                    }
-                    placeholder="Ejemplo: 1234567890123 ..."
-                    ref={this.refCodigoBarras}
-                    value={codigoBarras}
-                    onChange={this.handleInputCodigoBarras}
-                    buttonRight={
-                      <Button
-                        className="btn-outline-secondary"
-                        title="Generar Código de Barras"
-                        onClick={this.handleChangeCodigoBarras}
-                      >
-                        <i className="bi-arrow-clockwise"></i>
-                      </Button>
-                    }
-                  />
-                </div>
+            refDescripcionCorta={this.refDescripcionCorta}
+            descripcionCorta={descripcionCorta}
+            handleInputDescripcionCorta={this.handleInputDescripcionCorta}
 
-                <div className="w-full flex flex-col gap-2">
-                  <Select
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Marca:</p>
-                      </div>
-                    }
-                    ref={this.refIdMarca}
-                    value={idMarca}
-                    onChange={this.handleSelectIdMarca}
-                  >
-                    <option value="">-- Selecciona --</option>
-                    {marcas.map((item, index) => (
-                      <option key={index} value={item.idMarca}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
+            refDescripcionLarga={this.refDescripcionLarga}
+            descripcionLarga={descripcionLarga}
+            handleInputDescripcionLarga={this.handleInputDescripcionLarga}
 
-              {/* Unidad de medida y Categoria */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="w-full flex flex-col gap-2">
-                  <Select
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Unidad de Medida:</p> <FaAsterisk className="text-red-500" size={8} />
-                      </div>
-                    }
-                    className={`${idMedida ? '' : 'is-invalid'}`}
-                    ref={this.refIdMedida}
-                    value={idMedida}
-                    onChange={this.handleSelectIdMedida}
-                  >
-                    <option value="">-- Selecciona --</option>
-                    {medidas.map((item, index) => (
-                      <option key={index} value={item.idMedida}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
+            refDetalles={this.refDetalles}
+            detalles={detalles}
+            handleAddDetalles={this.handleAddDetalles}
+            handleRemoveDetalles={this.handleRemoveDetalles}
+            handleInputNombreDetalles={this.handleInputNombreDetalles}
+            handleInputValorDetalles={this.handleInputValorDetalles}
 
-                <div className="w-full flex flex-col gap-2">
-                  <Select
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Categoría:</p> <FaAsterisk className="text-red-500" size={8} />
-                      </div>
-                    }
-                    className={`form-control ${idCategoria ? '' : 'is-invalid'}`}
-                    ref={this.refIdCategoria}
-                    value={idCategoria}
-                    onChange={this.handleSelectIdCategoria}
-                  >
-                    <option value="">-- Selecciona --</option>
-                    {categorias.map((item, index) => (
-                      <option key={index} value={item.idCategoria}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
-            </div>
+            imagenes={imagenes}
+            handleSelectImagenes={this.handleSelectImagenes}
+            handleRemoveImagenes={this.handleRemoveImagenes}
 
-            {/* Forma de venta */}
-            {
-              [TIPO_PRODUCTO_NORMAL].includes(idTipoProducto) && (
-                <div className="flex flex-col gap-3">
-                  <h6 className="flex items-center gap-2">
-                    <span className="badge badge-primary">2</span> FORMA DE VENTA
-                  </h6>
-
-                  <p>
-                    Indica si va ser tratado como unidades, valor monetario o
-                    granel(peso).
-                  </p>
-
-                  <div>
-                    <RadioButton
-                      className="form-check-inline"
-                      id={TIPO_TRATAMIENTO_PRODUCTO_UNIDADES}
-                      value={TIPO_TRATAMIENTO_PRODUCTO_UNIDADES}
-                      name="ckTipoTratamiento"
-                      checked={idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES}
-                      onChange={this.handleOptionTipoTratamiento}
-                    >
-                      Unidades
-                    </RadioButton>
-
-                    <RadioButton
-                      className="form-check-inline"
-                      id={TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO}
-                      value={TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO}
-                      name="ckTipoTratamiento"
-                      checked={idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO}
-                      onChange={this.handleOptionTipoTratamiento}
-                    >
-                      Valor monetario
-                    </RadioButton>
-
-                    <RadioButton
-                      className="form-check-inline"
-                      id={TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL}
-                      value={TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL}
-                      name="ckTipoTratamiento"
-                      checked={idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL}
-                      onChange={this.handleOptionTipoTratamiento}
-                    >
-                      A Granel
-                    </RadioButton>
-                  </div>
-                </div>
-              )
-            }
-
-
-            {/* Costo */}
-            {
-              ![TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && (
-                <div className="flex flex-col gap-3">
-                  <h6 className="flex items-center gap-2">
-                    <span className="badge badge-primary">3</span> COSTO
-                  </h6>
-
-                  <p>Indica el valor de costo de compra de tu producto.</p>
-
-                  <div className="flex flex-col gap-2">
-                    <Input
-                      label={
-                        <div className="flex items-center gap-1">
-                          <p>Costo Inicial:</p> <FaAsterisk className="text-red-500" size={8} />
-                        </div>
-                      }
-                      className={`${costo ? '' : 'is-invalid'}`}
-                      placeholder="S/ 0.00"
-                      ref={this.refCosto}
-                      value={costo}
-                      onChange={this.handleInputCosto}
-                      onKeyDown={keyNumberFloat}
-                    />
-                  </div>
-                </div>
-              )
-            }
-
-            {/* Precio */}
-            {
-              <div className="flex flex-col gap-3">
-                <h6 className="flex items-center gap-2">
-                  <span className="badge badge-primary">4</span> PRECIO
-                </h6>
-
-                <p>Indica el valor de venta de tu producto.</p>
-
-                <div className="flex flex-col gap-2">
-                  <Input
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Precio Base:</p> <FaAsterisk className="text-red-500" size={8} />
-                      </div>
-                    }
-                    className={`${precio ? '' : 'is-invalid'}`}
-                    placeholder=" S/ 0.00"
-                    ref={this.refPrecio}
-                    value={precio}
-                    onChange={this.handleInputPrecio}
-                    onKeyDown={keyNumberFloat}
-                  />
-                </div>
-
-                <div>
-                  {
-                    precios.length !== 0 && (
-                      <div className="bg-white rounded border overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table ref={this.refPrecios} className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {
-                                precios.map((item, index) => {
-                                  return (
-                                    <tr key={index}>
-                                      <td className="px-6 py-12 text-center">{item.id}</td>
-                                      <td className="px-6 py-12 text-center">
-                                        <Input
-                                          placeholder="Ingrese el nombre del precio..."
-                                          value={item.nombre}
-                                          onChange={(event) =>
-                                            this.handleInputNombrePrecios(event, item.id)
-                                          }
-                                        />
-                                      </td>
-                                      <td className="px-6 py-12 text-center">
-                                        <Input
-                                          placeholder="0.00"
-                                          value={item.precio}
-                                          onChange={(event) =>
-                                            this.handleInputPrecioPrecios(event, item.id)
-                                          }
-                                          onKeyDown={keyNumberFloat}
-                                        />
-                                      </td>
-                                      <td className="px-6 py-12 text-center">
-                                        <Button
-                                          className="btn-danger"
-                                          onClick={() => this.handleRemovePrecios(item.id)}
-                                        >
-                                          <i className="fa fa-remove"></i>
-                                        </Button>
-                                      </td>
-                                    </tr>
-                                  );
-                                })
-                              }
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )
-                  }
-                </div>
-
-                <div>
-                  <Button className="text-success" onClick={this.handleAddPrecios}>
-                    <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
-                  </Button>
-                </div>
-              </div>
-            }
-
-            {/* Descripción */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">6</span> DESCRIPCIÓN
-              </h6>
-
-              <p>Agregar un resumen del producto</p>
-
-              <div className="flex flex-col gap-2">
-                <TextArea
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p>Descripción Corta:</p>
-                    </div>
-                  }
-                  rows={3}
-                  ref={this.refDescripcionCorta}
-                  value={descripcionCorta}
-                  onChange={this.handleInputDescripcionCorta}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <TextArea
-                  label={
-                    <div className="flex items-center gap-1">
-                      <p>Descripción Larga:</p>
-                    </div>
-                  }
-                  rows={6}
-                  ref={this.refDescripcionLarga}
-                  value={descripcionLarga}
-                  onChange={this.handleInputDescripcionLarga}
-                />
-              </div>
-            </div>
-
-            {/* Detalles */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">7</span> DETALLES O
-                CARACTERISTICAS
-              </h6>
-
-              <p>Agregar la lista de caracteristicas</p>
-
-              <div>
-                {
-                  detalles.length !== 0 && (
-                    <div className="bg-white rounded border overflow-hidden mt-3">
-                      <div className="overflow-x-auto">
-                        <table ref={this.refDetalles} className="min-w-full divide-y divide-gray-200">
-                          <thead>
-                            <tr>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Nombre</th>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Valor</th>
-                              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {detalles.map((item, index) => {
-                              return (
-                                <tr key={index}>
-                                  <td className="px-6 py-12 text-center">{item.id}</td>
-                                  <td className="px-6 py-12 text-center">
-                                    <Input
-                                      placeholder="Ejemplo (Medida)"
-                                      value={item.nombre}
-                                      onChange={(event) =>
-                                        this.handleInputNombreDetalles(event, item.id)
-                                      }
-                                    />
-                                  </td>
-                                  <td className="px-6 py-12 text-center">
-                                    <TextArea
-                                      rows={1}
-                                      placeholder="Ejemplo (100m x 200m)"
-                                      value={item.valor}
-                                      onChange={(event) =>
-                                        this.handleInputValorDetalles(event, item.id)
-                                      }
-                                    />
-                                  </td>
-                                  <td className="px-6 py-12 text-center">
-                                    <Button
-                                      className="btn-danger"
-                                      onClick={() => this.handleRemoveDetalles(item.id)}
-                                    >
-                                      <i className="fa fa-remove"></i>
-                                    </Button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )
-                }
-              </div>
-
-              <div>
-                <Button className="text-success" onClick={this.handleAddDetalles}>
-                  <i className="fa fa-plus-circle"></i> Agregar Detalles
-                </Button>
-              </div>
-            </div>
-
-            {/* Imagenes */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">8</span> IMAGENES
-              </h6>
-
-              <p>
-                Agregar las imagenes que sean mas atractivas para el usuario.
-                <b className="text-danger">
-                  Las imagenes no debe superar los 500 KB.
-                </b>
-              </p>
-              <p>
-                Las imágenes deben tener un tamaño de <b>800 x 800 píxeles</b> para
-                que se visualicen correctamente en la página web (formato
-                recomendado *.webp).
-              </p>
-
-              <div>
-                <ItemImage
-                  imagenes={imagenes}
-                  handleSelectImagenes={this.handleSelectImagenes}
-                  handleRemoveImagenes={this.handleRemoveImagenes}
-                />
-              </div>
-            </div>
-
-            {/* Colores */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">9</span> COLORES
-              </h6>
-
-              <p>
-                Agregar los tipos de colores
-              </p>
-
-              <div className="d-flex flex-wrap gap-3">
-                {colores.map((item, index) => {
-                  const active = coloresSeleccionados.some(
-                    (select) => select.idAtributo === item.idAtributo,
-                  );
-                  return (
-                    <SelectActive
-                      key={index}
-                      id={item.idAtributo}
-                      name={item.nombre}
-                      active={active}
-                      background={item.hexadecimal}
-                      handleSelect={this.handleSelectColores}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Tallas */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">9</span> TALLAS
-              </h6>
-
-              <p>
-                Agregar los tipos de talla
-              </p>
-
-              <div className="d-flex flex-wrap gap-3">
-                {tallas.map((item, index) => {
-                  const active = tallasSeleccionadas.some(
-                    (select) => select.idAtributo === item.idAtributo,
-                  );
-                  return (
-                    <SelectActive
-                      key={index}
-                      id={item.idAtributo}
-                      name={item.nombre}
-                      active={active}
-                      handleSelect={this.handleSelectTallas}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Sabores */}
-            <div className="flex flex-col gap-3">
-              <h6 className="flex items-center gap-2">
-                <span className="badge badge-primary">9</span> SABORES
-              </h6>
-
-              <p>
-                Agregar los sabores
-              </p>
-
-              <div className="d-flex flex-wrap gap-3">
-                {sabores.map((item, index) => {
-                  const active = saboresSeleccionados.some(
-                    (select) => select.idAtributo === item.idAtributo,
-                  );
-                  return (
-                    <SelectActive
-                      key={index}
-                      id={item.idAtributo}
-                      name={item.nombre}
-                      active={active}
-                      handleSelect={this.handleSelectSabores}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+            atributos={atributos}
+            atributosSeleccionados={atributosSeleccionados}
+            handleSelectAtributo={this.handleSelectAtributo}
+          />
 
           {/* Parte de la imagen */}
-          <div className="w-full md:w-2/5 flex flex-col gap-3">
-            <DetalleImagen
-              idTipoProducto={idTipoProducto}
+          <DetalleImagen
+            idTipoProducto={idTipoProducto}
 
-              imagen={imagen}
-              handleInputImagen={this.handleInputImagen}
-              handleRemoveImagen={this.handleRemoveImagen}
+            imagen={imagen}
+            handleInputImagen={this.handleInputImagen}
+            handleRemoveImagen={this.handleRemoveImagen}
 
-              nombre={nombre}
-              precio={precio}
+            nombre={nombre}
+            precio={precio}
 
-              publicar={publicar}
-              handleSelectPublico={this.handleSelectPublico}
+            publicar={publicar}
+            handleSelectPublico={this.handleSelectPublico}
 
-              negativo={negativo}
-              handleSelectNegativo={this.handleSelectNegativo}
+            negativo={negativo}
+            handleSelectNegativo={this.handleSelectNegativo}
 
-              preferido={preferido}
-              handleSelectPreferido={this.handleSelectPreferido}
+            preferido={preferido}
+            handleSelectPreferido={this.handleSelectPreferido}
 
-              estado={estado}
-              handleSelectEstado={this.handleSelectEstado}
+            estado={estado}
+            handleSelectEstado={this.handleSelectEstado}
 
-              handleRegistrar={this.handleRegistrar}
-            />
-          </div>
+            handleRegistrar={this.handleRegistrar}
+          />
         </div>
       </ContainerWrapper>
     );

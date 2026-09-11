@@ -24,7 +24,7 @@ const DetalleImagen = (props) => {
   const { handleRegistrar, handleCerrar } = props;
 
   return (
-    <>
+    <div className="w-full md:w-2/5 flex flex-col gap-3">
       <div
         className="flex items-center justify-center"
       >
@@ -119,7 +119,7 @@ const DetalleImagen = (props) => {
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

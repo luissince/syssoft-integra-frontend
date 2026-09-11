@@ -1941,6 +1941,14 @@ export async function comboAtributo(params, signal) {
   );
 }
 
+export async function comboAtributoTipos(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/atributo/combo/tipos', {
+      signal: signal,
+    }),
+  );
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA ATRIBUTO
 // ------------------------------------------------------------------------

@@ -186,24 +186,22 @@ class MarcaEditar extends CustomComponent {
       alertKit.warning({
         title: 'Marca',
         message: 'Ingrese el nombre de la marca',
-        callback: () => {
-          this.refNombre.current.focus();
-        },
+      }, () => {
+        this.refNombre.current.focus();
       });
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Marca',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Marca',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const data = {

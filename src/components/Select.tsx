@@ -38,18 +38,23 @@ export const SelectActive = ({
         "btn",
         "border border-secondary",
         "relative px-4 py-2",
-        isActive ? "bg-primary text-white": "bg-white text-secondary"
+        isActive ? "bg-primary text-white" : "bg-white text-secondary"
       )}
       onClick={handleSelectActive}
     >
-      <span
-        className="btn absolute p-2"
-        style={{
-          left: '0',
-          bottom: '0',
-          backgroundColor: background,
-        }}
-      />
+      {
+        background && (
+          <span
+            className="btn absolute p-2"
+            style={{
+              left: '0',
+              bottom: '0',
+              backgroundColor: background,
+            }}
+          />
+        )
+      }
+
       {name}
     </span>
   );
