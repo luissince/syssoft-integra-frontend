@@ -1,0 +1,30 @@
+# deploy/config.yml
+
+# branchs:
+  # test
+  # production
+  # canary
+
+repositories: syssoftintegra/front-end
+
+clients:
+
+  sysintegra:
+    service: sysintegra-services
+    deploy: test
+
+  leatsac:
+    service: leatsac-services
+    deploy: production
+
+  ferreteria-rym:
+    service: ferreteria-services
+    deploy: production
+
+  dracoly:
+    service: dracoly-services
+    deploy: production
+
+  importmuneli:
+    service: importmuneli-services
+    deploy: canary
