@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   establecerPreferidoProducto,
-  preferidosProducto,
+  filtrarProductoVenta,
 } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
 
@@ -14,9 +14,9 @@ export const starProduct = createAsyncThunk(
       idProducto: data.producto.idProducto,
     });
 
-    const response = await preferidosProducto(data.params);
+    const response = await filtrarProductoVenta(data.params);
     if (response instanceof SuccessReponse) {
-      return response.data;
+      return response.data.result;
     }
 
     throw new Error('Hubo un error al obtener los productos preferidos');

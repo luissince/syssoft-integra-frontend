@@ -33,7 +33,7 @@ import TextArea from '../../../../../components/TextArea';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
-import printJS from 'print-js';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -501,7 +501,8 @@ class CobroCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesCobro(this.state.idCobro, size),
       type: 'pdf',
       showModal: true,

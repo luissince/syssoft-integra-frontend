@@ -29,8 +29,6 @@ import {
 } from '../../../../../../helper/utils.helper';
 import CustomComponent from '@/components/CustomComponent';
 import { listVenta } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import Input from '../../../../../../components/Input';
 import Button from '../../../../../../components/Button';
@@ -135,30 +133,30 @@ class ModalVenta extends CustomComponent {
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
-    const response = await listVenta(params, this.abortController.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+    const { success, data, message, type } = await listVenta(params, this.abortController.signal);
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    });
   };
 
   handleOnHidden = () => {
@@ -198,7 +196,7 @@ class ModalVenta extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -302,10 +300,10 @@ class ModalVenta extends CustomComponent {
                     <Input
                       group={true}
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-search"></i> Buscar por N° de
                           Venta o Cliente:
-                        </>
+                        </label>
                       }
                       placeholder="Buscar..."
                       value={buscar}
@@ -328,9 +326,9 @@ class ModalVenta extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-calendar"></i> Fecha Inicio:
-                        </>
+                        </label>
                       }
                       type="date"
                       value={fechaInicio}
@@ -341,9 +339,9 @@ class ModalVenta extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-calendar"></i> Fecha Final:
-                        </>
+                        </label>
                       }
                       type="date"
                       value={fechaFinal}

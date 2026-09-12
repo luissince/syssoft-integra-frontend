@@ -12,41 +12,27 @@ import {
   formatCurrency,
   rounded,
 } from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import {
   detailCotizacion,
   documentsPdfInvoicesCotizacion,
   documentsPdfListsCotizacion,
 } from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Button from '../../../../../components/Button';
 import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import { connect } from 'react-redux';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CotizacionDetalle extends CustomComponent {
   constructor(props) {
@@ -57,25 +43,7 @@ class CotizacionDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idCotizacion: '',
-      fechaHora: '',
-
-      cliente: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
-
-      comprobante: '',
-      serieNumeracion: '',
-
-      estado: '',
-
-      observacion: '',
-      notas: '',
-
-      codiso: '',
-      total: 0,
-
+      cabecera: null,
       detalles: [],
       ventas: [],
       vendidos: [],
@@ -133,81 +101,32 @@ class CotizacionDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(id) {
+  async loadingData(idCotizacion) {
     const params = {
-      idCotizacion: id,
+      idCotizacion: idCotizacion,
     };
 
-    const response = await detailCotizacion(
+    const { success, data, message, type } = await detailCotizacion(
       params,
       this.abortControllerView.signal,
     );
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
-      alertWarning('Cotización', response.getMessage(), () => {
+      alertWarning('Cotización', message, () => {
         this.close();
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const cotizacion = response.data;
-
-    const {
-      fecha,
-      hora,
-
-      comprobante,
-      serie,
-      numeracion,
-
-      documento,
-      informacion,
-      telefono,
-      celular,
-      email,
-      direccion,
-
-      estado,
-      observacion,
-      nota,
-      codiso,
-    } = cotizacion.cabecera;
-
-    const monto = cotizacion.detalles.reduce(
-      (accumlate, item) => accumlate + item.precio * item.cantidad,
-      0,
-    );
-
     this.setState({
-      idCotizacion: id,
-      fechaHora: fecha + ' ' + formatTime(hora),
+      idCotizacion: idCotizacion,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
+      ventas: data.ventas,
+      vendidos: data.vendidos,
 
-      comprobante: comprobante,
-      serieNumeracion: serie + '-' + formatNumberWithZeros(numeracion),
-
-      cliente: documento + ' - ' + informacion,
-      telefono: telefono,
-      celular: celular,
-      email: email,
-      direccion: direccion,
-
-      estado:
-        estado === 1 ? (
-          <span className="text-success">ACTIVO</span>
-        ) : (
-          <span className="text-danger">ANULADO</span>
-        ),
-      observacion: observacion,
-      notas: nota,
-      codiso: codiso,
-      total: monto,
-
-      detalles: cotizacion.detalles,
-      ventas: cotizacion.ventas,
-      vendidos: cotizacion.vendidos,
       loading: false,
     });
   }
@@ -264,7 +183,7 @@ class CotizacionDetalle extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
     const { email } = this.props.token.project;
@@ -329,14 +248,176 @@ class CotizacionDetalle extends CustomComponent {
   |
    */
 
+  renderCabecera() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+        <div className="divide-y divide-gray-100">
+          {[
+            {
+              label: 'Fecha y Hora', value: () => {
+                return cabecera.fecha + ' ' + formatTime(cabecera.hora);
+              }
+            },
+            {
+              label: 'Comprobante', value: () => {
+                return cabecera.comprobante + '  ' + cabecera.serie + '-' + formatNumberWithZeros(cabecera.numeracion);
+              }
+            },
+            {
+              label: 'Cliente', value: () => {
+                return cabecera.documento + ' - ' + cabecera.informacion;
+              }
+            },
+            { label: 'N° de celular', value: () => cabecera.celular },
+            { label: 'Correo electrónico', value: () => cabecera.email },
+
+            {
+              label: 'Estado', value: () => {
+                return (
+                  <span className={cn(
+                    "inline-flex items-center rounded-full",
+                    "text-xs font-medium",
+                    "px-2.5 py-0.5",
+                    cabecera.estado === 0 && "bg-red-100 text-red-800",
+                    cabecera.estado === 1 && "bg-emerald-100 text-emerald-800",
+                  )}>
+                    {cabecera.estado === 1 ? "ACTIVO" : "ANULADO"}
+                  </span>
+                );
+              }
+            },
+
+            { label: 'Observación', value: () => cabecera.observacion },
+            { label: 'Nota', value: () => cabecera.nota },
+
+            { label: 'Usuario', value: () => cabecera.usuario },
+
+            {
+              label: 'Total', value: () => {
+                const monto = detalles.reduce(
+                  (accumlate, item) => accumlate + item.precio * item.cantidad,
+                  0,
+                );
+
+                return formatCurrency(monto, cabecera.codiso)
+              }
+            },
+          ].map((item, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+              <p>{item.label}</p>
+              <p className="md:col-span-3 font-bold">{item.value()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  renderDetalles() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Detalles</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4">#</th>
+                <th className="p-4">Imagen</th>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Precio</th>
+                <th className="p-4">Categoría</th>
+                <th className="p-4 text-right">Impuesto</th>
+                <th className="p-4 text-right">Cantidad</th>
+                <th className="p-4 text-right">Medida</th>
+                <th className="p-4 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                detalles.map((item, index) => {
+                  const vendido = this.state.vendidos.find(
+                    (vendido) => vendido.idProducto === item.idProducto,
+                  );
+
+                  return (
+                    <React.Fragment key={index}>
+                      <tr className="hover:bg-gray-50">
+                        <td className="p-4">{item.id}</td>
+                        <td className="p-4 text-center">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            width={80}
+                            className="mx-auto rounded border border-gray-200"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+                          <p className="text-black uppercase">{item.producto}</p>
+                        </td>
+                        <td className="p-4">{item.categoria}</td>
+                        <td className="p-4 text-right">{rounded(item.cantidad)}</td>
+                        <td className="p-4 text-right">{item.medida}</td>
+                        <td className="p-4 text-right">{item.impuesto}</td>
+                        <td className="p-4 text-right">
+                          {formatCurrency(item.precio, cabecera.codiso)}
+                        </td>
+                        <td className="p-4 font-medium text-right">
+                          {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td className="p-3 text-right">Registrados</td>
+                        <td className="p-3 text-right">Faltantes</td>
+                        <td colSpan={2}></td>
+                      </tr>
+
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td className="p-4 text-right">
+                          {vendido ? rounded(vendido.cantidad) : rounded(0)}
+                        </td>
+                        <td className="p-4 text-right">
+                          {vendido
+                            ? rounded(item.cantidad - vendido.cantidad)
+                            : rounded(item.cantidad)}
+                        </td>
+                        <td colSpan={2}></td>
+                      </tr>
+                    </React.Fragment>
+                  );
+                })
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   renderTotal() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalles) {
+    for (const item of detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
-
       const impuesto = item.porcentaje;
 
       const valorActual = cantidad * valor;
@@ -349,7 +430,7 @@ class CotizacionDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
+      const resultado = detalles.reduce((acc, item) => {
         const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -371,45 +452,153 @@ class CotizacionDetalle extends CustomComponent {
         return acc;
       }, []);
 
-      return resultado.map((impuesto, index) => {
-        return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">
-              {impuesto.nombre} :
-            </TableHead>
-            <TableHead className="text-right mb-2">
-              {formatCurrency(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
-        );
-      });
+      return resultado.map((impuesto, index) => (
+        <tr key={index}>
+          <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
+            {formatCurrency(impuesto.valor, cabecera.codiso)}
+          </td>
+        </tr>
+      ));
     };
+
     return (
-      <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
-            {formatCurrency(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
-        {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
-            {formatCurrency(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
-      </>
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-start-9 lg:col-span-4">
+          <div className="bg-white overflow-hidden">
+            <table className="w-full text-right">
+              <tbody>
+                <tr>
+                  <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-medium text-right">
+                    {formatCurrency(subTotal, cabecera.codiso)}
+                  </td>
+                </tr>
+                {impuestosGenerado()}
+                <tr>
+                  <td colSpan={2} className="py-2">
+                    <div className="border-t border-gray-200"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-bold text-right text-lg">
+                    {formatCurrency(total, cabecera.codiso)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderAsociadas() {
+    const { loading, ventas } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Ventas Asociadas</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4 text-center">#</th>
+                <th className="p-4">Fecha y Hora</th>
+                <th className="p-4">Comprobante</th>
+                <th className="p-4">Estado</th>
+                <th className="p-4">Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                isEmpty(ventas) ? (
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-gray-500">
+                      No hay datos para mostrar.
+                    </td>
+                  </tr>
+                ) :
+                  (
+                    ventas.map((item, index) => (
+                      <React.Fragment key={index}>
+                        {/* Transacción principal */}
+                        <tr className="bg-green-50">
+                          <td className="p-3 text-center font-medium text-gray-800">{item.id}</td>
+                          <td className="p-3">
+                            <p className="font-medium">{item.fecha}</p>
+                            <p className="text-sm text-gray-600">{formatTime(item.hora)}</p>
+                          </td>
+                          <td className="p-3 text-gray-800">
+                            <Link
+                              className="btn-link"
+                              to={getPathNavigation('venta', item.idVenta)}
+                            >
+                              {item.comprobante} <br /> {item.serie}-
+                              {formatNumberWithZeros(item.numeracion)}
+                            </Link>
+                          </td>
+                          <td className="p-3 text-gray-800">
+                            <span className={cn(
+                              "inline-flex items-center rounded-full",
+                              "text-xs font-medium",
+                              "px-2.5 py-0.5",
+                              item.estado === 1 && "bg-green-100 text-green-800",
+                              item.estado === 2 && "bg-yellow-100 text-yellow-800",
+                              item.estado === 3 && "bg-red-100 text-red-800",
+                              item.estado === 4 && "bg-blue-100 text-blue-800",
+                            )}>
+                              {item.estado === 1 && "COBRADO"}
+                              {item.estado === 2 && "POR COBRAR"}
+                              {item.estado === 3 && "ANULADO"}
+                              {item.estado === 4 && "POR LLEVAR"}
+                            </span>
+                          </td>
+                          <td className="p-3 text-gray-800">
+                            {formatCurrency(item.total, item.codiso)}
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    ))
+                  )
+              }
+            </tbody>
+            {
+              ventas.length > 0 && (
+                <tfoot>
+                  <tr>
+                    <th className="text-left"></th>
+                    <th className="text-left"></th>
+                    <th className="text-left"></th>
+                    <th className="text-left">Suma Total:</th>
+                    <th id="total" className="text-center">
+                      {formatCurrency(
+                        ventas.reduce(
+                          (acumulador, item) => (acumulador += item.total),
+                          0,
+                        ))}
+                    </th>
+                  </tr>
+                </tfoot>
+              )
+            }
+          </table>
+        </div>
+      </div>
     );
   }
 
   render() {
+    const { loading, msgLoading, cabecera, isOpenSendWhatsapp } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
         <Title
@@ -420,363 +609,61 @@ class CotizacionDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           refModal={this.refModalSendWhatsApp}
-          isOpen={this.state.isOpenSendWhatsapp}
-          phone={this.state.celular}
+          isOpen={isOpenSendWhatsapp}
+          phone={cabecera && cabecera.celular || ""}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintList.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> Lista
-            </Button>{' '}
-            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
-              <i className="fa fa-whatsapp"></i> Whatsapp
-            </Button>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column
-            className="col-lg-6 col-md-6 col-sm-12 col-12"
-            formGroup={true}
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
           >
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.fechaHora}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Cliente
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.cliente}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Telefono
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.telefono}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Celular
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.celular}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Email
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.email}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Dirección
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.direccion}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
+            <i className="fa fa-print"></i> A4
+          </button>
 
-          <Column
-            className="col-lg-6 col-md-6 col-sm-12 col-12"
-            formGroup={true}
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
           >
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Comprobante
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.comprobante}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Serie - Numeración
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.serieNumeracion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Estado
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.estado}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Observación
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.observacion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Nota
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.notas}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Total
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {formatCurrency(this.state.total, this.state.codiso)}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+            <i className="fa fa-print"></i> 80MM
+          </button>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader className="table-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Precio</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Impuesto %</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Medida</TableHead>
-                    <TableHead>Importe</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.state.detalles.map((item, index) => {
-                    const vendido = this.state.vendidos.find(
-                      (vendido) => vendido.idProducto === item.idProducto,
-                    );
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
 
-                    return (
-                      <React.Fragment key={index}>
-                        <TableRow key={index}>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell className="text-center">
-                            <Image
-                              default={images.noImage}
-                              src={item.imagen}
-                              alt={item.producto}
-                              width={100}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {item.codigo}
-                            <br />
-                            {item.producto}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(item.precio, this.state.codiso)}
-                          </TableCell>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintList.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> Lista
+          </button>
 
-                          <TableCell>{item.categoria}</TableCell>
-                          <TableCell className="text-right">
-                            {item.impuesto}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {rounded(item.cantidad)}
-                          </TableCell>
-                          <TableCell>{item.medida}</TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency(
-                              item.cantidad * item.precio,
-                              this.state.codiso,
-                            )}
-                          </TableCell>
-                        </TableRow>
+          <button
+            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handleOpenSendWhatsapp}
+          >
+            <i className="fa fa-whatsapp"></i> Whatsapp
+          </button>
+        </div>
 
-                        <TableRow>
-                          <TableHead></TableHead>
-                          <TableHead></TableHead>
-                          <TableHead></TableHead>
-                          <TableHead></TableHead>
-                          <TableHead></TableHead>
-                          <TableHead className="text-right">
-                            Registrados
-                          </TableHead>
-                          <TableHead className="text-right">
-                            Faltantes
-                          </TableHead>
-                          <TableHead></TableHead>
-                          <TableHead></TableHead>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                          <TableCell className="text-right">
-                            {vendido ? rounded(vendido.cantidad) : rounded(0)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {vendido
-                              ? rounded(item.cantidad - vendido.cantidad)
-                              : rounded(item.cantidad)}
-                          </TableCell>
-                          <TableCell></TableCell>
-                          <TableCell></TableCell>
-                        </TableRow>
-                      </React.Fragment>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Cabecera */}
+        {this.renderCabecera()}
 
-        <Row>
-          <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table classNameContent="w-100">
-              <TableHeader>{this.renderTotal()}</TableHeader>
-            </Table>
-          </Column>
-        </Row>
+        {/* Detalles */}
+        {this.renderDetalles()}
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Ventas Asociadas</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader className="table-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Comprobante</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-center">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isEmpty(this.state.ventas) && (
-                    <TableRow>
-                      <td className="text-center" colSpan="5">
-                        ¡No hay ventas asociadas!
-                      </td>
-                    </TableRow>
-                  )}
+        {/* Totales */}
+        {this.renderTotal()}
 
-                  {this.state.ventas.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell>
-                        {item.fecha} <br /> {formatTime(item.hora)}{' '}
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          className="btn-link"
-                          to={getPathNavigation('venta', item.idVenta)}
-                        >
-                          {item.comprobante} <br /> {item.serie}-
-                          {formatNumberWithZeros(item.numeracion)}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <React.Fragment>
-                          {item.estado === 1 && (
-                            <span className="text-success">COBRADO</span>
-                          )}
-                          {item.estado === 2 && (
-                            <span className="text-warning">POR COBRAR</span>
-                          )}
-                          {item.estado === 3 && (
-                            <span className="text-danger">ANULADO</span>
-                          )}
-                          {item.estado !== 1 &&
-                            item.estado !== 2 &&
-                            item.estado !== 3 && (
-                              <span className="text-primary">POR LLEVAR</span>
-                            )}
-                        </React.Fragment>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {' '}
-                        {formatCurrency(item.total, item.codiso)}{' '}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                {this.state.ventas.length > 0 && (
-                  <tfoot>
-                    <tr>
-                      <th className="text-left"></th>
-                      <th className="text-left"></th>
-                      <th className="text-left"></th>
-                      <th className="text-left">Suma Total:</th>
-                      <th id="total" className="text-center">
-                        {formatCurrency(
-                          this.state.ventas.reduce(
-                            (acumulador, item) => (acumulador += item.total),
-                            0,
-                          ),
-                          this.state.codiso,
-                        )}
-                      </th>
-                    </tr>
-                  </tfoot>
-                )}
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Ventas Asociadas */}
+        {this.renderAsociadas()}
       </ContainerWrapper>
     );
   }

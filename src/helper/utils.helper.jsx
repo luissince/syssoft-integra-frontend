@@ -1,3 +1,4 @@
+import { alertKit } from 'alert-kit';
 import bootstrap from '../resource/js/bootstrap';
 import Swal from '../resource/js/sweetalert';
 
@@ -51,7 +52,7 @@ export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
 /**
  * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
  * @param {File} file - Archivo seleccionado
- * @returns {Promise<{ base64: string, mimeType: string, extension: string, width: number, height: number, size: number } | false>} Un objeto que contiene la representación en base64 del archivo, su tipo mime, su extensión, ancho, altura y tamaño; o false si no se selecciona ningún archivo.
+ * @returns {Promise<{ base64: string, mimeType: string, extension: string, width: number, height: number, size: number, sizeBytes: number } | false>} Un objeto que contiene la representación en base64 del archivo, su tipo mime, su extensión, ancho, altura, tamaño y tamaño en bytes; o false si no se selecciona ningún archivo.
  */
 export async function imageBase64(file) {
   if (!file) {
@@ -65,8 +66,17 @@ export async function imageBase64(file) {
   const base64 = read.replace(/^data:.+;base64,/, '');
   const extension = getExtension(name);
   const { width, height } = await imageSizeData(read);
-  const size = Number(rounded(file.size / 1024));
-  return { base64, mimeType, extension, width, height, size };
+  const size = Math.round(file.size / 1024);
+  const sizeBytes = file.size
+  return {
+    base64,
+    mimeType,
+    extension,
+    width,
+    height,
+    size,
+    sizeBytes
+  };
 }
 
 /**
@@ -1045,6 +1055,10 @@ function calculateEAN13CheckDigit(code) {
   return remainder === 0 ? 0 : 10 - remainder;
 }
 
+/**
+ * Función para obtener las ranuras de tiempo
+ * @returns 
+ */
 export function getRanurasDeTiempo() {
   const ranurasDeTiempo = []
   for (let hour = 7; hour <= 23; hour++) {
@@ -1108,6 +1122,41 @@ export function getPathRoute(namePath) {
     return `/inicio/facturacion/guiaremision/detalle`;
   }
 }
+
+export const validateForm = async ({
+  title = "POS",
+  value,
+  message,
+  ref = null,
+  callback,
+}) => {
+  if (isEmpty(value) || (typeof value === "number" && !isNumeric(value))) {
+    alertKit.warning({
+      title: title,
+      message,
+      onClose: () => {
+        ref?.current?.focus();
+      }
+    }, () => {
+      callback?.();
+    });
+
+    return false;
+  }
+
+  return true;
+};
+
+export const validateMany = async (rules = [], title = "POS") => {
+  for (const rule of rules) {
+    const valid = await validateForm({
+      ...rule,
+      title: title,
+    });
+    if (!valid) return false;
+  }
+  return true;
+};
 
 export function alertInfo(title, message) {
   Swal({

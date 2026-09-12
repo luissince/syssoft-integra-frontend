@@ -4,7 +4,7 @@ import Button from './Button';
 
 interface TitlePosProps {
   title: string;
-  subTitle: string;
+  subTitle?: string;
   icon?: JSX.Element;
   handleGoBack?: () => void;
 }
@@ -18,7 +18,7 @@ const TitlePos = ({ title, subTitle, icon, handleGoBack }: TitlePosProps) => {
         </button>
 
         <div className="flex items-center justify-center gap-x-1">
-          <h5>{title}</h5> <small className="text-gray-500">{subTitle} {icon}</small>
+          <h5>{title}</h5> <small className="text-gray-500">{subTitle}</small> {icon}
         </div>
       </div>
     </div>
@@ -27,13 +27,13 @@ const TitlePos = ({ title, subTitle, icon, handleGoBack }: TitlePosProps) => {
 
 export { TitlePos };
 
-interface HeaderAction {
+export interface HeaderAction {
   icon: JSX.Element;
   onClick: () => void;
   title?: string; // opcional: tooltip o descripción
 }
 
-interface HeaderActionsProps {
+export interface HeaderActionsProps {
   title: string;
   actions?: HeaderAction[];
   className?: string;

@@ -2,10 +2,10 @@ import { images } from '../../../../../../../helper';
 import { formatCurrency } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import {
-  A_GRANEL,
-  SERVICIO,
-  UNIDADES,
-  VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
+  TIPO_TRATAMIENTO_PRODUCTO_UNIDADES,
+  TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO
 } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import Button from '../../../../../../../components/Button';
 import Image from '../../../../../../../components/Image';
@@ -37,12 +37,12 @@ const InvoiceDetail = (props) => {
       <div className="h-100">
         {detalleVenta.map((producto, index) => {
           const cantidad =
-            producto.idTipoTratamientoProducto === SERVICIO
+            producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
               ? producto.cantidad
               : producto.inventarios.reduce(
-                  (acc, current) => acc + current.cantidad,
-                  0,
-                );
+                (acc, current) => acc + current.cantidad,
+                0,
+              );
 
           return (
             <div
@@ -54,28 +54,28 @@ const InvoiceDetail = (props) => {
                   <div className="d-flex justify-content-between align-items-center py-1 px-3">
                     <div className="invoice-item_add-item-options">
                       <button
-                        className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button mr-1"
+                        className="btn !flex items-center justify-center h-full invoice-item_add-item-options_button mr-1"
                         onClick={() => handleEdit(producto)}
                       >
-                        <i className="fa fa-edit text-warning text-xl"></i>
+                        <i className="fa fa-edit text-warning !text-xl"></i>
                       </button>
 
                       <button
-                        className="btn d-flex justify-content-center align-items-center h-100 invoice-item_add-item-options_button"
+                        className="btn !flex items-center justify-center h-full invoice-item_add-item-options_button"
                         onClick={() => handleRemove(producto)}
                       >
-                        <i className="fa fa-trash text-danger text-xl"></i>
+                        <i className="fa fa-trash text-danger !text-xl"></i>
                       </button>
                     </div>
 
-                    <Image
-                      default={images.noImage}
-                      src={producto.imagen}
-                      alt={producto.nombreProducto}
-                      width={80}
-                      height={80}
-                      className="object-contain"
-                    />
+                    <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
+                      <Image
+                        default={images.noImage}
+                        src={producto.imagen}
+                        alt={producto.nombreProducto}
+                        overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                      />
+                    </div>
 
                     <div className="invoice-item_add-item-describe d-flex flex-column text-break text-truncate text-nowrap">
                       <div className="invoice-item_add-item-describe-title text-truncate text-base">
@@ -85,13 +85,11 @@ const InvoiceDetail = (props) => {
                       </div>
 
                       <div className="invoice-item_add-item-describe-price d-flex align-items-center text-break text-truncate text-nowrap text-base">
-                        {producto.idTipoTratamientoProducto ===
-                          VALOR_MONETARIO && (
+                        {producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO && (
                           <>{formatCurrency(producto.precio, codiso)}</>
                         )}
 
-                        {producto.idTipoTratamientoProducto !==
-                          VALOR_MONETARIO && (
+                        {producto.idTipoTratamientoProducto !== TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO && (
                           <>
                             {formatCurrency(producto.precio, codiso)}{' '}
                             <span className="text-xs ml-1">
@@ -102,24 +100,24 @@ const InvoiceDetail = (props) => {
                       </div>
                     </div>
 
-                    <div className="invoice-item_add-item-quantity-container d-none d-sm-flex flex-column  align-items-center justify-content-center">
-                      {producto.idTipoTratamientoProducto === SERVICIO && (
+                    <div className="invoice-item_add-item-quantity-container  flex flex-col items-center justify-center">
+                      {producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO && (
                         <div
                           key={index}
-                          className="d-flex flex-column align-items-center"
+                          className="flex flex-col items-center"
                         >
-                          <div className="d-flex"></div>
+                          <div className="flex"></div>
                         </div>
                       )}
 
-                      {(producto.idTipoTratamientoProducto === UNIDADES ||
-                        producto.idTipoTratamientoProducto === A_GRANEL) &&
+                      {(producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES ||
+                        producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) &&
                         producto.inventarios.map((item, index) => (
                           <div
                             key={index}
-                            className="d-flex flex-column align-items-center"
+                            className="flex flex-col items-center"
                           >
-                            <div>
+                            <div className="mb-2">
                               <span className="text-secondary">
                                 {item.almacen}
                               </span>
@@ -149,11 +147,11 @@ const InvoiceDetail = (props) => {
                           </div>
                         ))}
 
-                      {producto.idTipoTratamientoProducto === VALOR_MONETARIO &&
+                      {producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO &&
                         producto.inventarios.map((item, index) => (
                           <div
                             key={index}
-                            className="d-flex flex-column align-items-center"
+                            className="flex flex-col items-center"
                           >
                             <div>
                               <span className="text-secondary">
@@ -165,7 +163,7 @@ const InvoiceDetail = (props) => {
                     </div>
 
                     <div className="invoice-item_add-item-total">
-                      <div className="h-100 d-flex justify-content-end align-items-center text-base">
+                      <div className="h-full flex justify-end items-center text-base">
                         {formatCurrency(producto.precio * cantidad, codiso)}
                       </div>
                     </div>

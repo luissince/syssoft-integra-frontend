@@ -113,7 +113,7 @@ class Notications extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="4"
+          colSpan={4}
           message={'Cargando información de la tabla...'}
         />
       );

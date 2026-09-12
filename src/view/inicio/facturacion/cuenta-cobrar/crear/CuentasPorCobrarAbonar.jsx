@@ -26,7 +26,6 @@ import {
 } from '../../../../../model/types/forma-pago';
 import React from 'react';
 import ModalProceso from './component/ModalProceso';
-import printJS from 'print-js';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
@@ -302,7 +301,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
     const { email } = this.props.token.project;
@@ -384,7 +383,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
     _,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { idVenta, cuota, idUsuario, monto } = this.state;
 
@@ -475,7 +474,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfAccountReceivableVenta(
         this.state.idCuota,
         this.state.idVenta,
@@ -626,9 +625,8 @@ class CuentasPorCobrarAbonar extends CustomComponent {
             <TableCell>{cuota.fecha}</TableCell>
             <TableCell>{'CUOTA ' + cuota.cuota}</TableCell>
             <TableCell
-              className={`${
-                cuota.estado === 0 ? 'text-danger' : 'text-success'
-              }`}
+              className={`${cuota.estado === 0 ? 'text-danger' : 'text-success'
+                }`}
             >
               {cuota.estado === 0 ? 'Por Cobrar' : 'Cobrado'}
             </TableCell>
@@ -787,7 +785,7 @@ class CuentasPorCobrarAbonar extends CustomComponent {
           importeTotal={this.state.monto}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={() => { }}
         />
 
         <ModalImpresion

@@ -59,30 +59,27 @@ class ModalProducto extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState(
-        {
-          medidas: response.data,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          // cantidad: producto.cantidad ?? 1,
-          cantidad: 1,
-          precio: producto.precio,
-          descripcion: producto.nombre,
-          imagen: producto.imagen,
-          idMedida: producto.idMedida,
-          tipoProducto: producto.tipoProducto,
-          loading: false,
-        },
-        () => {
-          if (producto.tipoProducto === 'SERVICIO') {
-            this.refPrecio.current.focus();
-            this.refPrecio.current.select();
-          } else {
-            this.refCantidad.current.focus();
-            this.refCantidad.current.select();
-          }
-        },
-      );
+      this.setState({
+        medidas: response.data,
+        idProducto: producto.idProducto,
+        codigo: producto.codigo,
+        // cantidad: producto.cantidad ?? 1,
+        cantidad: 1,
+        precio: producto.precio,
+        descripcion: producto.nombre,
+        imagen: producto.imagen,
+        idMedida: producto.idMedida,
+        tipoProducto: producto.tipoProducto,
+        loading: false,
+      }, () => {
+        if (producto.tipoProducto === 'SERVICIO') {
+          this.refPrecio.current.focus();
+          this.refPrecio.current.select();
+        } else {
+          this.refCantidad.current.focus();
+          this.refCantidad.current.select();
+        }
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -93,7 +90,7 @@ class ModalProducto extends Component {
     }
   };
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {

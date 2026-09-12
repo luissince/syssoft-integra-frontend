@@ -1,9 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   currentDate,
   formatNumberWithZeros,
   formatTime,
@@ -13,40 +9,29 @@ import {
 import CustomComponent from '@/components/CustomComponent';
 import {
   listPedido,
-  cancelPedido,
+  anularPedido,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
 import Paginacion from '../../../../../components/Paginacion';
-import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
-import Input from '../../../../../components/Input';
-import Select from '../../../../../components/Select';
 import PropTypes from 'prop-types';
 import {
   setListaPedidoData,
   setListaPedidoPaginacion,
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
+import { alertKit } from 'alert-kit';
+import { cn } from '@/lib/utils';
+import { Eye, Pencil, Trash } from 'lucide-react';
+import { ESTADO_PEDIDO, pedidoEstadoMap } from '@/model/types/pedido';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Pedidos extends CustomComponent {
   /**
@@ -63,15 +48,18 @@ class Pedidos extends CustomComponent {
 
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
-      estado: "",
+      ligado: '',
+      estado: '',
 
-      buscar: "",
+      buscar: '',
 
       opcion: 0,
       paginacion: 0,
       totalPaginacion: 0,
       filasPorPagina: 10,
-      messageTable: "Cargando información...",
+      messageTable: 'Cargando información...',
+
+      view: 'tabla',
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -84,6 +72,19 @@ class Pedidos extends CustomComponent {
     this.abortControllerTable = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
   async componentDidMount() {
     await this.loadingData();
   }
@@ -92,29 +93,38 @@ class Pedidos extends CustomComponent {
     this.abortControllerTable.abort();
   }
 
-  loadingData = async () => {
-    if (
-      this.props.pedidoLista &&
-      this.props.pedidoLista.data &&
-      this.props.pedidoLista.paginacion
-    ) {
-      this.setState(this.props.pedidoLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.pedidoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.pedidoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.pedidoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.pedidoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.pedidoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.pedidoLista.paginacion.messagePaginacion;
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
-      this.refSearch.current.initialize(this.props.pedidoLista.data.buscar);
+  loadingData = async () => {
+    const pedidoLista = this.props.pedidoLista;
+    if (
+      pedidoLista &&
+      pedidoLista.data &&
+      pedidoLista.paginacion
+    ) {
+      this.setState(pedidoLista.data);
+      this.refPaginacion.current.upperPageBound = pedidoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = pedidoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = pedidoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = pedidoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = pedidoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = pedidoLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(pedidoLista.data.buscar);
     } else {
-      await this.loadingInit();
+      await this.loadInit();
       this.updateReduxState();
     }
   };
@@ -131,7 +141,7 @@ class Pedidos extends CustomComponent {
     });
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -145,7 +155,7 @@ class Pedidos extends CustomComponent {
     if (text.trim().length === 0) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -165,22 +175,10 @@ class Pedidos extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      case 2:
-        this.fillTable(2);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion = 0) => {
     this.setState({
       loading: true,
       lista: [],
@@ -189,44 +187,60 @@ class Pedidos extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: this.state.buscar,
       idSucursal: this.state.idSucursal,
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
+      ligado: this.state.ligado,
       estado: this.state.estado,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listPedido(params, this.abortControllerTable.signal);
+    const { success, data, message, type } = await listPedido(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
-
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    }, () => {
+      this.updateReduxState();
+    });
+  };
+
+  /*
+ |--------------------------------------------------------------------------
+ | Método de eventos
+ |--------------------------------------------------------------------------
+ |
+ | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+ | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+ | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+ | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+ | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+ | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+ | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+ | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+ |
+ */
+
+  handleChangeView = (value) => {
+    this.setState({ view: value }, () => this.updateReduxState());
   };
 
   handleCrear = () => {
@@ -261,295 +275,452 @@ class Pedidos extends CustomComponent {
     });
   };
 
+  handleSelectLigado = (event) => {
+    this.setState({ ligado: event.target.value }, async () => {
+      await this.searchOpciones();
+    });
+  };
+
   handleSelectEstado = (event) => {
     this.setState({ estado: event.target.value }, () => {
       this.searchOpciones();
     });
   };
 
-  handleAnular = (id) => {
-    alertDialog(
-      'Pedido',
-      '¿Estás seguro de anular el pedido?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idPedido: id,
-            idUsuario: this.state.idUsuario,
-          };
-
-          alertInfo('Pedido', 'Procesando petición...');
-
-          const response = await cancelPedido(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Pedido', response.data, async () => {
-              await this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Pedido', response.getMessage());
-          }
-        }
+  handleAnular = async (id) => {
+    const accept = await alertKit.question({
+      title: 'Pedido',
+      message: '¿Estás seguro de anular el pedido?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
-  };
-
-  getStatusColor = (estado) => {
-    switch (estado) {
-      case "pending":
-        return "bg-yellow-500";
-      case "preparing":
-        return "bg-blue-500";
-      case "ready":
-        return "bg-green-500";
-      case "delivered":
-        return "bg-gray-500";
-      case "cancelled":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
-  getStatusText = (estado) => {
-    switch (estado) {
-      case "pending":
-        return "Pendiente";
-      case "preparing":
-        return "Preparando";
-      case "ready":
-        return "Listo";
-      case "delivered":
-        return "Entregado";
-      case "cancelled":
-        return "Anulado";
-      default:
-        return estado;
-    }
-  };
-
-  generateBody() {
-    if (this.state.loading) {
-      return (
-        <SpinnerTable
-          colSpan="11"
-          message="Cargando información de la tabla..."
-        />
-      );
-    }
-
-    if (isEmpty(this.state.lista)) {
-      return (
-        <TableRow>
-          <TableCell className="text-center" colSpan="11">
-            ¡No hay datos registrados!
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return this.state.lista.map((item, index) => {
-      return (
-        <TableRow key={index}>
-          <TableCell className={`text-center`}>{item.id}</TableCell>
-          <TableCell>
-            {item.fecha}
-            <br />
-            {formatTime(item.hora)}
-          </TableCell>
-          <TableCell>
-            {item.tipoDocumento} - {item.documento}
-            <br />
-            {item.informacion}
-          </TableCell>
-          <TableCell>
-            {item.comprobante}
-            <br />
-            {item.serie}-{formatNumberWithZeros(item.numeracion)}
-          </TableCell>
-          <TableCell>
-            {item.tipoEntrega}
-          </TableCell>
-          <TableCell className={`${this.getStatusColor(item.estado)} text-center text-white`}>
-            {this.getStatusText(item.estado)}
-          </TableCell>
-          <TableCell className="text-center">
-            <span
-              className={
-                item.ligado == 0
-                  ? 'badge badge-secondary'
-                  : 'badge badge-success'
-              }
-            >
-              {item.ligado}
-            </span>
-          </TableCell>
-          <TableCell className="text-center">
-            {formatCurrency(item.total, item.codiso)}{' '}
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-info btn-sm"
-              title="Detalle"
-              onClick={() => this.handleDetalle(item.idPedido)}
-            >
-              <i className="fa fa-eye"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-warning btn-sm"
-              title="Editar"
-              onClick={() => this.handleEditar(item.idPedido)}
-            >
-              <i className="fa fa-edit"></i>
-            </Button>
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
-              title="Anular"
-              onClick={() => this.handleAnular(item.idPedido)}
-            >
-              <i className="fa fa-remove"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
-      );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const params = {
+        idPedido: id,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando petición...',
+      });
+
+
+      const response = await anularPedido(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Pedido',
+          message: response.data,
+        }, async () => {
+          await this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: 'Pedido',
+          message: response.getMessage(),
+        });
+      }
+    }
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
+  renderTable = () => {
+    const { loading, lista, view } = this.state;
+
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center py-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
+      );
+    }
+
+    if (isEmpty(lista)) {
+      return (
+        <div className={cn(
+          "text-center py-6",
+          view === "tabla" ? "" : "rounded border",
+        )}>
+          <div className="text-gray-500">
+            <i className="bi bi-box text-4xl mb-3 block"></i>
+            <p className="text-lg font-medium">No se encontraron ventas</p>
+            <p className="text-sm">Intenta cambiar los filtros</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={cn(
+        view === "tabla"
+          ? "divide-y divide-gray-200"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
+      )}>
+        {
+          lista.map((item, index) => {           
+            const estado = (
+              <span className={cn(
+                "inline-flex items-center rounded-full",
+                "text-xs font-medium",
+                "px-2.5 py-0.5",
+                item.estado === ESTADO_PEDIDO.CANCELADO.id && "bg-red-100 text-red-800",
+                item.estado === ESTADO_PEDIDO.PENDIENTE.id && "bg-orange-100 text-orange-800",
+                item.estado === ESTADO_PEDIDO.PREPARANDO.id && "bg-yellow-100 text-yellow-800",
+                item.estado === ESTADO_PEDIDO.LISTO.id && "bg-emerald-100 text-emerald-800",
+                item.estado === ESTADO_PEDIDO.ENTREGADO.id && "bg-sky-100 text-sky-800",
+              )}>
+                {pedidoEstadoMap[item.estado].nombre}
+              </span>
+            );
+
+            const ligado = (
+              <span className={cn(
+                "inline-flex items-center rounded-full",
+                "text-xs font-medium",
+                "px-2.5 py-0.5",
+                item.ligado === 1 && "bg-blue-100 text-blue-800",
+                item.ligado === 0 && "bg-gray-100 text-gray-800",
+              )}>
+                {`LIGADO A ${item.ligado} ${item.ligadol === 1 ? "VENTA": "VENTAS"}`}
+              </span>
+            )
+
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "text-sm text-gray-900",
+                  view === "tabla"
+                    ? "grid grid-cols-[0.5fr_1fr_1.5fr_1.3fr_1.3fr_0.8fr_0.9fr_0.9fr_1.8fr] py-3 gap-x-3 items-center"
+                    : "flex flex-col h-full gap-3 rounded border p-3"
+                )}
+              >
+                <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
+                  {
+                    view === "tabla" && (
+                      <div className=" text-center hidden md:block">
+                        {item.id}
+                      </div>
+                    )
+                  }
+
+                  <div>
+                    <div>{item.fecha}</div>
+                    <div className="text-xs text-gray-500">{formatTime(item.hora)}</div>
+                  </div>
+
+                  <div>
+                    <div>{item.tipoDocumento} - {item.documento}</div>
+                    <div className="text-xs text-gray-500">{item.informacion}</div>
+                  </div>
+
+                  <div>
+                    <div>{item.comprobante}</div>
+                    <div className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</div>
+                  </div>
+
+                  <div>
+                    {item.tipoPedido}
+                  </div>
+
+                  <div className={cn(
+                    "text-center",
+                    view === "tabla" ? "text-center" : "text-left"
+                  )}>
+                    {estado}
+                  </div>
+
+                  <div className={cn(
+                    "text-center",
+                    view === "tabla" ? "text-center" : "text-left"
+                  )}>
+                    {ligado}
+                  </div>
+
+                  <div className="text-right">
+                    {formatCurrency(item.total, item.codiso)}
+                  </div>
+                </div>
+
+                <div
+                  className={cn(
+                    "flex gap-2",
+                    view === "tabla"
+                      ? "flex-col md:flex-row justify-center"
+                      : "flex-row justify-end"
+                  )}
+                >
+                  <button
+                    onClick={() => this.handleDetalle(item.idPedido)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Eye className="w-5 h-5 text-blue-500" />
+                  </button>
+
+                  <button
+                    onClick={() => this.handleEditar(item.idPedido)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Pencil className="w-5 h-5 text-yellow-500" />
+                  </button>
+
+                  <button
+                    onClick={() => this.handleAnular(item.idPedido)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Trash className="w-5 h-5 text-red-500" />
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div >
+    );
   }
 
   render() {
+    const { view } = this.state;
+
     return (
       <ContainerWrapper>
+        {/* Encabezado */}
         <Title
           title="Pedido"
           subTitle="LISTA"
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-outline-info" onClick={this.handleCrear}>
-              <i className="bi bi-file-plus"></i> Crear Pedido
-            </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadingInit}
+        {/* Acciones principales + Toggle vista */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={this.handleCrear}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-blue-600 text-white text-sm font-medium rounded",
+                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+              )}
+              aria-label="Crear nueva venta"
             >
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
+              <i className="bi bi-file-plus"></i>
+              Nuevo Registro
+            </button>
+            <button
+              onClick={this.loadInit}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+              Recargar Vista
+            </button>
+          </div>
 
-        <Row>
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Input
-              label={'Fecha de Inicio:'}
+          {/* Toggle vista */}
+          <div className="flex bg-gray-100 rounded p-1">
+            <button
+              onClick={() => this.handleChangeView('tabla')}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-list-ul"></i>
+              <span className="hidden sm:inline">Tabla</span>
+            </button>
+            <button
+              onClick={() => this.handleChangeView('cuadricula')}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-grid-3x3"></i>
+              <span className="hidden sm:inline">Cuadrícula</span>
+            </button>
+          </div>
+        </div>
+
+
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <p className="text-gray-600 mt-1">
+            Puedes ver las pedidos echas con diferentes filtros, por ejemplo: fechas de emisión, comprobante y estado.
+          </p>
+        </div>
+
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          {/* Filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Fecha de Inicio */}
+            <input
               type="date"
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInico}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </Column>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Input
-              label={'Fecha de Final:'}
+            {/* Fecha Final */}
+            <input
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-          </Column>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <Select
-              label={'Estados:'}
+            {/* Ligado */}
+            <select
+              value={this.state.ligado}
+              onChange={this.handleSelectLigado}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">- TODOS -</option>
+              <option value="1">LIGADO</option>
+              <option value="0">LIBRE</option>
+            </select>
+
+
+            {/* Estado */}
+            <select
               value={this.state.estado}
               onChange={this.handleSelectEstado}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">TODOS</option>
+              <option value="">- TODOS -</option>
               <option value="pending">PENDIENTE</option>
               <option value="preparing">PREPARANDO</option>
               <option value="ready">LISTO</option>
               <option value="delivered">ENTREGADO</option>
               <option value="cancelled">CANCELADO</option>
-            </Select>
-          </Column>
-        </Row>
+            </select>
+          </div>
+        </div>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar..."
-            />
-          </Column>
-        </Row>
+        {/* Barra de búsqueda */}
+        <div className="w-full">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Buscar por código o nombre..."
+            theme="modern"
+          />
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className={'table-bordered'}>
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">
-                      #
-                    </TableHead>
-                    <TableHead width="10%">Fecha</TableHead>
-                    <TableHead width="20%">Cliente</TableHead>
-                    <TableHead width="15%">Comprobante</TableHead>
-                    <TableHead width="10%">Tipo Entrega</TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Estado
-                    </TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Ligado
-                    </TableHead>
-                    <TableHead width="10%" className="text-center">
-                      Total
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Detalle
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Editar
-                    </TableHead>
-                    <TableHead width="5%" className="text-center">
-                      Anular
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Render condicional: Tabla o Cuadrícula */}
+        <div className={cn(
+          view === "tabla" ? "rounded border overflow-hidden mt-6" : "space-y-6",
+        )}>
+          <div className={cn(
+            view == "tabla" ? "block" : "hidden",
+            "min-w-full"
+          )}>
+            {/* Header (solo visible en desktop) */}
+            <div className={cn(
+              "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
+            )}>
+              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.3fr_1.3fr_0.8fr_0.9fr_0.9fr_1.8fr] gap-x-3 py-3">
+                <div className="text-center">#</div>
+                <div>Fecha y Hora</div>
+                <div>Cliente</div>
+                <div>Comprobante</div>
+                <div>Tipo Entrega</div>
+                <div className="text-center">Estado</div>
+                <div className="text-center">Ligado</div>
+                <div className="text-right">Total</div>
+                <div className="text-center"></div>
+              </div>
+            </div>
+          </div>
 
-        <Paginacion
-          ref={this.refPaginacion}
-          loading={this.state.loading}
-          data={this.state.lista}
-          totalPaginacion={this.state.totalPaginacion}
-          paginacion={this.state.paginacion}
-          fillTable={this.paginacionContext}
-          restart={this.state.restart}
-        />
+          {this.renderTable()}
+
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              cn(
+                "py-3 bg-white border-gray-200 overflow-auto",
+                view === "tabla"
+                  ? "md:px-4 border-t"
+                  : "md:px-6 border rounded"
+              )
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }

@@ -20,7 +20,6 @@ import {
   comboComprobante,
   comboMoneda,
   filtrarPersona,
-  preferidosProducto,
   obtenerListaPrecioProducto,
   comboTipoDocumento,
   comboAlmacen,
@@ -40,10 +39,10 @@ import CustomComponent from '@/components/CustomComponent';
 import { VENTA } from '../../../../../../model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
 import {
-  A_GRANEL,
-  SERVICIO,
-  UNIDADES,
-  VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_UNIDADES,
+  TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { CONTADO } from '../../../../../../model/types/forma-pago';
 import ModalProdcutos from '../common/ModalProductos';
@@ -68,7 +67,6 @@ import ModalCotizacion from '../common/ModalCotizacion';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import SidebarConfiguration from '../../../../../../components/SidebarConfiguration';
 import ModalAgregar from '../common/ModalAgregar';
-import printJS from 'print-js';
 import ButtonsOpciones from './component/ButtonsOpciones';
 import ModalPrecios from './component/ModalPrecios';
 import ModalCantidad from './component/ModalCantidad';
@@ -91,6 +89,7 @@ import Image from '../../../../../../components/Image';
 import ModalPedido from '../common/ModalPedido';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { usePrivilegios } from '@/hooks/use-privilegios';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -384,8 +383,11 @@ class VentaCrearEscritorio extends CustomComponent {
       });
 
       const productos = await this.fetchProductoPreferidos({
-        idSucursal: this.state.idSucursal,
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        tipo: 2,
+        filtrar: "",
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
+        posicionPagina: 0,
+        filasPorPagina: 100,
       });
       this.props.setProductosFavoritos(productos);
       this.redCodigoBarras.current.focus();
@@ -476,13 +478,13 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   async fetchProductoPreferidos(params) {
-    const response = await preferidosProducto(
+    const response = await filtrarProductoVenta(
       params,
       this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
-      return response.data;
+      return response.data.result;
     }
 
     if (response instanceof ErrorResponse) {
@@ -560,8 +562,11 @@ class VentaCrearEscritorio extends CustomComponent {
 
   async reloadProductoPreferidos(callback = function () { }) {
     const productos = await this.fetchProductoPreferidos({
-      idSucursal: this.state.idSucursal,
+      tipo: 2,
+      filtrar: "",
       idAlmacen: this.state.idAlmacen,
+      posicionPagina: 0,
+      filasPorPagina: 100,
     });
     this.props.setProductosFavoritos(productos);
     await this.setStateAsync({ productos: productos });
@@ -572,7 +577,7 @@ class VentaCrearEscritorio extends CustomComponent {
     this.setState((prevState) => ({
       importeTotal: prevState.detalleVenta.reduce((accumulator, item) => {
         const cantidad =
-          item.idTipoTratamientoProducto === SERVICIO
+          item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
             ? item.cantidad
             : item.inventarios.reduce(
               (acc, current) => acc + current.cantidad,
@@ -622,7 +627,7 @@ class VentaCrearEscritorio extends CustomComponent {
     });
 
     // Lógica principal basada en el tipo de tratamiento del producto
-    if (producto.idTipoTratamientoProducto === UNIDADES) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES) {
       if (!existingItem) {
         const newAmount = cantidad
           ? Number(producto.cantidad)
@@ -641,7 +646,7 @@ class VentaCrearEscritorio extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       if (!existingItem) {
         const newItem = createNewItem(Number(precio));
         newItem.inventarios = [createInventory(1)];
@@ -652,7 +657,7 @@ class VentaCrearEscritorio extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
       if (!existingItem) {
         const newItem = createNewItem(Number(producto.precio));
         newItem.inventarios = [createInventory(Number(cantidad))];
@@ -667,7 +672,7 @@ class VentaCrearEscritorio extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO) {
       if (!existingItem) {
         const newItem = createNewItem(
           precio ? Number(precio) : Number(producto.precio),
@@ -686,7 +691,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     const subTotal = detalleVenta.reduce((accumulator, item) => {
       const cantidad =
-        item.idTipoTratamientoProducto === SERVICIO
+        item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
           ? item.cantidad
           : item.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -711,7 +716,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
         if (impuesto) {
           const cantidad =
-            item.idTipoTratamientoProducto === SERVICIO
+            item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
               ? item.cantidad
               : item.inventarios.reduce(
                 (acc, current) => acc + current.cantidad,
@@ -757,7 +762,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
     const total = detalleVenta.reduce((accumulator, item) => {
       const cantidad =
-        item.idTipoTratamientoProducto === SERVICIO
+        item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
           ? item.cantidad
           : item.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -852,8 +857,8 @@ class VentaCrearEscritorio extends CustomComponent {
     }
 
     if (
-      producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === SERVICIO
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES ||
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
     ) {
       const detalles = this.addItemDetalle(producto, null, null);
 
@@ -863,7 +868,7 @@ class VentaCrearEscritorio extends CustomComponent {
       });
     }
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       this.handleOpenAgregar(
         'Ingrese el valor monetario (S/, $ u otro) del producto o el total.',
         'Monto:',
@@ -871,7 +876,7 @@ class VentaCrearEscritorio extends CustomComponent {
       );
     }
 
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
       this.handleOpenAgregar(
         'Ingrese el peso del producto (KM, GM u otro).',
         'Peso:',
@@ -914,7 +919,6 @@ class VentaCrearEscritorio extends CustomComponent {
       const params = {
         tipo: 1,
         filtrar: this.state.codigoBarras,
-        idSucursal: this.state.idSucursal,
         idAlmacen: this.state.idAlmacen,
         posicionPagina: 0,
         filasPorPagina: 1,
@@ -923,7 +927,7 @@ class VentaCrearEscritorio extends CustomComponent {
       const response = await filtrarProductoVenta(params);
       if (response instanceof SuccessReponse) {
         if (!isEmpty(response.data.lists)) {
-          this.handleAddItem(response.data.lists[0]);
+          this.handleAddItem(response.data.result[0]);
         }
 
         this.setState({
@@ -1115,8 +1119,8 @@ class VentaCrearEscritorio extends CustomComponent {
                     <td>${formatDecimal(item.cantidadActual)}</td>
                     <td>${formatDecimal(item.cantidadReal)}</td>
                     <td>${formatDecimal(
-                      item.cantidadActual - item.cantidadReal,
-                    )}</td>
+                    item.cantidadActual - item.cantidadReal,
+                  )}</td>
                 </tr>`,
               );
 
@@ -1218,8 +1222,8 @@ class VentaCrearEscritorio extends CustomComponent {
                     <td>${formatDecimal(item.cantidadActual)}</td>
                     <td>${formatDecimal(item.cantidadReal)}</td>
                     <td>${formatDecimal(
-                      item.cantidadActual - item.cantidadReal,
-                    )}</td>
+                    item.cantidadActual - item.cantidadReal,
+                  )}</td>
                 </tr>`,
               );
 
@@ -1300,11 +1304,11 @@ class VentaCrearEscritorio extends CustomComponent {
   handleSaveAgregar = async (producto, cantidad) => {
     let detalles = structuredClone(this.state.detalleVenta);
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       detalles = this.addItemDetalle(producto, parseFloat(cantidad), null);
     }
 
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
       detalles = this.addItemDetalle(producto, null, parseFloat(cantidad));
     }
 
@@ -1334,7 +1338,7 @@ class VentaCrearEscritorio extends CustomComponent {
   handleSavePrecios = (producto, precio) => {
     if (
       producto.precio !== precio &&
-      producto.idTipoTratamientoProducto === VALOR_MONETARIO
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO
     ) {
       this.alert.warning(
         'Venta',
@@ -1478,7 +1482,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([TIPO_TRATAMIENTO_PRODUCTO_UNIDADES, TIPO_TRATAMIENTO_PRODUCTO_NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1487,7 +1491,7 @@ class VentaCrearEscritorio extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
           return this.addItemDetalle(
             producto,
             producto.cantidad * producto.precio,
@@ -1496,7 +1500,7 @@ class VentaCrearEscritorio extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1576,7 +1580,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([TIPO_TRATAMIENTO_PRODUCTO_UNIDADES, TIPO_TRATAMIENTO_PRODUCTO_NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1585,7 +1589,7 @@ class VentaCrearEscritorio extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
           return this.addItemDetalle(
             producto,
             producto.cantidad * producto.precio,
@@ -1594,7 +1598,7 @@ class VentaCrearEscritorio extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1659,7 +1663,7 @@ class VentaCrearEscritorio extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([TIPO_TRATAMIENTO_PRODUCTO_UNIDADES, TIPO_TRATAMIENTO_PRODUCTO_NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1668,7 +1672,7 @@ class VentaCrearEscritorio extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
           return this.addItemDetalle(
             producto,
             producto.cantidad * producto.precio,
@@ -1677,7 +1681,7 @@ class VentaCrearEscritorio extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
           return this.addItemDetalle(
             producto,
             null,
@@ -1718,7 +1722,7 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesVenta(this.state.idVenta, size),
       type: 'pdf',
       showModal: true,
@@ -1810,7 +1814,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
       success();
 
-      printJS({
+      pdfVisualizer.printer({
         printable: base64,
         type: 'pdf',
         base64: true,
@@ -2258,7 +2262,7 @@ class VentaCrearEscritorio extends CustomComponent {
     const { detalleVenta, codiso } = this.state;
     return detalleVenta.map((producto, key) => {
       const cantidad =
-        producto.idTipoTratamientoProducto === SERVICIO
+        producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
           ? producto.cantidad
           : producto.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -2285,12 +2289,12 @@ class VentaCrearEscritorio extends CustomComponent {
             />
           </TableCell>
           <TableCell className="text-center">
-            {producto.idTipoTratamientoProducto === SERVICIO && (
+            {producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO && (
               <p>{rounded(producto.cantidad)}</p>
             )}
 
-            {(producto.idTipoTratamientoProducto === UNIDADES ||
-              producto.idTipoTratamientoProducto === A_GRANEL) &&
+            {(producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES ||
+              producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) &&
               producto.inventarios.map((item, index) => (
                 <div
                   key={index}
@@ -2304,7 +2308,7 @@ class VentaCrearEscritorio extends CustomComponent {
                 </div>
               ))}
 
-            {producto.idTipoTratamientoProducto === VALOR_MONETARIO &&
+            {producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO &&
               producto.inventarios.map((item, index) => (
                 <div key={index}>
                   <span>{item.almacen}</span>
@@ -2494,19 +2498,22 @@ class VentaCrearEscritorio extends CustomComponent {
               }}
             >
               <div className="mb-3 pl-3 pt-3 pr-3 pb-0">
-                <div className="d-flex w-100">
-                  <div className="d-flex align-items-center mr-1">
-                    <img src={images.barcode} width={22} className="mr-1" />
-                    <label className="m-0"> CTRL+D</label>
+                <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    <img src={images.barcode} width={22} />
+                    <p>CTRL+D</p>
                   </div>
 
-                  <Input
-                    ref={this.redCodigoBarras}
-                    value={this.state.codigoBarras}
-                    onChange={this.handleInputCodigoBarras}
-                    onKeyDown={this.handleOnKeyDownCodigoBarras}
-                    placeholder="Ingrese el código de barras o clave alterna... "
-                  />
+                  <div className="flex-1">
+                    <Input
+                      className='w-full'
+                      ref={this.redCodigoBarras}
+                      value={this.state.codigoBarras}
+                      onChange={this.handleInputCodigoBarras}
+                      onKeyDown={this.handleOnKeyDownCodigoBarras}
+                      placeholder="Ingrese el código de barras o clave alterna... "
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -2600,7 +2607,7 @@ class VentaCrearEscritorio extends CustomComponent {
               <div>
                 <Button
                   className={
-                    'btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3 rounded-0'
+                    'btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3 !rounded-none'
                   }
                   onClick={this.handleOpenSale}
                 >
@@ -2612,8 +2619,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.recibo} width={22} />
                   </div>
                   <Select
@@ -2633,8 +2640,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.options} width={22} />
                   </div>
                   <Select
@@ -2656,8 +2663,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.search_color} width={22} />
                   </div>
                   <div className="invoice-client w-100">
@@ -2710,8 +2717,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.client} width={22} />
                   </div>
                   <Input
@@ -2728,8 +2735,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.phone} width={22} />
                   </div>
                   <Input
@@ -2743,8 +2750,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.email} width={22} />
                   </div>
                   <Input
@@ -2757,8 +2764,8 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               <div className="p-2">
-                <div className="d-flex align-items-center">
-                  <div className="mr-1">
+                <div className="flex items-center gap-3">
+                  <div>
                     <img src={images.directory} width={22} />
                   </div>
                   <Input

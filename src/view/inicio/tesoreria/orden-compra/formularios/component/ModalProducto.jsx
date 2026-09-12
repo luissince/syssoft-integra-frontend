@@ -6,7 +6,6 @@ import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import {
-  alertWarning,
   handlePasteFloat,
   isEmpty,
   isNumeric,
@@ -17,6 +16,7 @@ import { comboMedida } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -59,30 +59,27 @@ class ModalProducto extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState(
-        {
-          medidas: response.data,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          // cantidad: producto.cantidad ?? 1,
-          cantidad: 1,
-          costo: producto.costo,
-          descripcion: producto.nombre,
-          imagen: producto.imagen,
-          idMedida: producto.idMedida,
-          tipoProducto: producto.tipoProducto,
-          loading: false,
-        },
-        () => {
-          if (producto.tipoProducto === 'SERVICIO') {
-            this.refCosto.current.focus();
-            this.refCosto.current.select();
-          } else {
-            this.refCantidad.current.focus();
-            this.refCantidad.current.select();
-          }
-        },
-      );
+      this.setState({
+        medidas: response.data,
+        idProducto: producto.idProducto,
+        codigo: producto.codigo,
+        // cantidad: producto.cantidad ?? 1,
+        cantidad: 1,
+        costo: producto.costo,
+        descripcion: producto.nombre,
+        imagen: producto.imagen,
+        idMedida: producto.idMedida,
+        tipoProducto: producto.tipoProducto,
+        loading: false,
+      }, () => {
+        if (producto.tipoProducto === 'SERVICIO') {
+          this.refCosto.current.focus();
+          this.refCosto.current.select();
+        } else {
+          this.refCantidad.current.focus();
+          this.refCantidad.current.select();
+        }
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -93,7 +90,7 @@ class ModalProducto extends Component {
     }
   };
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -150,54 +147,63 @@ class ModalProducto extends Component {
     const { detalles, idImpuesto, impuestos } = this.props;
 
     if (!isNumeric(cantidad)) {
-      alertWarning('Orden de Compra', 'Ingrese la cantidad.', () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese la cantidad.',
+      }, () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
     if (parseFloat(cantidad) <= 0) {
-      alertWarning(
-        'Orden de Compra',
-        'La cantidad no puede ser menor a cero.',
-        () => {
-          this.refCantidad.current.focus();
-        },
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'La cantidad no puede ser menor a cero.',
+      }, () => {
+        this.refCantidad.current.focus();
+      },
       );
       return;
     }
 
     if (!isNumeric(costo)) {
-      alertWarning('Orden de Compra', 'Ingrese el costo.', () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese el costo.',
+      }, () => {
         this.refCosto.current.focus();
       });
       return;
     }
 
     if (parseFloat(costo) <= 0) {
-      alertWarning(
-        'Orden de Compra',
-        'El costo no puede ser menor a cero.',
-        () => {
-          this.refCosto.current.focus();
-        },
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'El costo no puede ser menor a cero.',
+      }, () => {
+        this.refCosto.current.focus();
+      },
       );
       return;
     }
 
     if (isEmpty(descripcion)) {
-      alertWarning(
-        'Orden de Compra',
-        'Ingrese la descripción del producto.',
-        () => {
-          this.refDescripcion.current.focus();
-        },
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese la descripción del producto.',
+      }, () => {
+        this.refDescripcion.current.focus();
+      },
       );
       return;
     }
 
     if (isEmpty(idMedida)) {
-      alertWarning('Orden de Compra', 'Ingrese la unidad de medida', () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: 'Ingrese la unidad de medida',
+      }, () => {
         this.refMedida.current.focus();
       });
       return;

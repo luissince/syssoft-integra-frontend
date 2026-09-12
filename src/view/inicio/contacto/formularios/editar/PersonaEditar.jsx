@@ -31,15 +31,13 @@ import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
 import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
 import CheckBox, { Switches } from '../../../../../components/Checks';
-import { RUC } from '../../../../../model/types/tipo-documento';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PersonaEditar extends CustomComponent {
   constructor(props) {
@@ -231,7 +229,7 @@ class PersonaEditar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número dni debe tener 8 caracteres.",
       }, () => {
-        this.refNumeroDocumento.current.focus();
+        this.refDocumento.current.focus();
       })
       return;
     }
@@ -276,7 +274,7 @@ class PersonaEditar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
       }, () => {
-        this.refNumeroDocumento.current.focus();
+        this.refDocumento.current.focus();
       });
       return;
     }
@@ -524,9 +522,9 @@ class PersonaEditar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
@@ -548,9 +546,9 @@ class PersonaEditar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   N° de documento ({documento.length}):  <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
@@ -589,10 +587,10 @@ class PersonaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   {tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}

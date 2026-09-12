@@ -5,8 +5,10 @@ const instancePrincipal = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
   timeout: 50000,
   headers: {
-    Accept: 'application/json',
+    'Accept': 'application/json',
     'Content-Type': 'application/json',
+    'X-App': 'admin-react',
+    // 'X-Version': import.meta.env.VITE_APP_VERSION,
   },
 });
 
@@ -293,7 +295,7 @@ export function filtrarStreamProductoVenta(params) {
 }
 
 export async function listProducto(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/producto/list', {
       signal: signal,
       params: params,
@@ -326,17 +328,18 @@ export async function comboProductos(signal) {
   );
 }
 
-export async function filtrarProductoVenta(params) {
+export async function filtrarProducto(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/filtrar/venta', {
+    instancePrincipal.get('/api/producto/filter', {
       params: params,
+      signal: signal,
     }),
   );
 }
 
-export async function filtrarProducto(params, signal) {
+export async function filtrarProductoVenta(params, signal = null) {
   return await Resolve.create(
-    instancePrincipal.get('/api/producto/filter', {
+    instancePrincipal.get('/api/producto/filtrar/venta', {
       params: params,
       signal: signal,
     }),
@@ -347,15 +350,6 @@ export async function filtrarAlmacenProducto(params) {
   return await Resolve.create(
     instancePrincipal.get('/api/producto/filter/almacen', {
       params: params,
-    }),
-  );
-}
-
-export async function preferidosProducto(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/producto/preferidos', {
-      params: params,
-      signal: signal,
     }),
   );
 }
@@ -384,7 +378,7 @@ export async function updateProducto(data) {
 }
 
 export async function deleteProducto(params) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.delete(`/api/producto`, {
       params: params
     }),
@@ -530,7 +524,7 @@ export async function comboAlmacen(params, signal) {
 |--------------------------------------------------------------------------
 */
 export async function listVenta(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/factura/list', {
       signal: signal,
       params: params,
@@ -552,7 +546,7 @@ export async function createVenta(data) {
 }
 
 export async function detailVenta(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/factura/detail', {
       signal: signal,
       params: params,
@@ -569,7 +563,7 @@ export async function detailOnlyVentaVenta(params, signal) {
   );
 }
 
-export async function cancelVenta(params) {
+export async function anularVenta(params) {
   return await Resolve.create(
     instancePrincipal.delete('/api/factura/cancel', {
       params: params,
@@ -887,7 +881,7 @@ export async function listTraslado(params, signal) {
 }
 
 export async function detailTraslado(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/traslado/detail', {
       params: params,
       signal: signal,
@@ -1018,18 +1012,35 @@ export async function comboTipoAlmacen(signal) {
 
 /*
 |--------------------------------------------------------------------------
-| ENDPOINTS DE TIPO ENTREGA
+| ENDPOINTS DE TIPO AGENCIA
 |--------------------------------------------------------------------------
 */
-export async function comboTipoEntrega(signal) {
+export async function comboAgencia(signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/tipo/entrega/combo', {
+    instancePrincipal.get('/api/agencia/combo', {
       signal: signal,
     }),
   );
 }
 // ------------------------------------------------------------------------
-// FIN PARA TIPO ENTREGA
+// FIN PARA TIPO AGENCIA
+// ------------------------------------------------------------------------
+
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE TIPO PEDIDO
+|--------------------------------------------------------------------------
+*/
+export async function comboTipoPedido(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/tipo/pedido/combo', {
+      signal: signal,
+    }),
+  );
+}
+// ------------------------------------------------------------------------
+// FIN PARA TIPO PEDIDO
 // ------------------------------------------------------------------------
 
 /*
@@ -1038,7 +1049,7 @@ export async function comboTipoEntrega(signal) {
 |--------------------------------------------------------------------------
 */
 export async function listCompra(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/compra/list', {
       params: params,
       signal: signal,
@@ -1194,10 +1205,10 @@ export async function cancelGuiaRemision(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesGuiaRemision(idGuiaRemision, size) {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/guiaremision/documents/pdf/invoices/${idGuiaRemision}/${size}`;
+export function getPdfGuiaRemision(idGuiaRemision, size = "A4", outputType = "pdf") {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/guiaremision/pdf/${idGuiaRemision}/${size}`;
 }
+
 // ------------------------------------------------------------------------
 // FIN PARA GUÍA DE REMISIÓN
 // ------------------------------------------------------------------------
@@ -1208,7 +1219,7 @@ export function documentsPdfInvoicesGuiaRemision(idGuiaRemision, size) {
 |--------------------------------------------------------------------------
 */
 export async function listCotizacion(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/cotizacion/list', {
       params: params,
       signal: signal,
@@ -1226,7 +1237,7 @@ export async function idCotizacion(params, signal) {
 }
 
 export async function detailCotizacion(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/cotizacion/detail', {
       params: params,
       signal: signal,
@@ -1259,7 +1270,7 @@ export async function updateCotizacion(data, signal) {
   );
 }
 
-export async function cancelCotizacion(params, signal) {
+export async function anularCotizacion(params, signal) {
   return await Resolve.create(
     instancePrincipal.delete('/api/cotizacion/cancel', {
       params: params,
@@ -1273,7 +1284,7 @@ export function documentsPdfInvoicesCotizacion(idCotizacion, size) {
     }/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`;
 }
 
-export function documentsPdfListsCotizacion(idCotizacion) {
+export function documentsPdfListsCotizacion(idCotizacion, size) {
   return `${import.meta.env.VITE_APP_BACK_END
     }/api/cotizacion/documents/pdf/lists/${idCotizacion}`;
 }
@@ -1287,7 +1298,7 @@ export function documentsPdfListsCotizacion(idCotizacion) {
 |--------------------------------------------------------------------------
 */
 export async function listOrdenCompra(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/ordencompra/list', {
       params: params,
       signal: signal,
@@ -1366,7 +1377,7 @@ export function documentsPdfListsOrdenCompra(idOrdenCompra) {
 |--------------------------------------------------------------------------
 */
 export async function listPedido(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/pedido/list', {
       params: params,
       signal: signal,
@@ -1376,14 +1387,14 @@ export async function listPedido(params, signal) {
 
 export async function getIdPedido(idPedido, signal) {
   return await Resolve.create(
-    instancePrincipal.get(`/api/pedido/id/${idPedido}`, {
+    instancePrincipal.get(`/api/pedido/${idPedido}`, {
       signal: signal,
     }),
   );
 }
 
 export async function detailPedido(idPedido, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get(`/api/pedido/detail/${idPedido}`, {
       signal: signal,
     }),
@@ -1415,7 +1426,7 @@ export async function updatePedido(data, signal) {
   );
 }
 
-export async function cancelPedido(params, signal) {
+export async function anularPedido(params, signal) {
   return await Resolve.create(
     instancePrincipal.delete('/api/pedido/cancel', {
       params: params,
@@ -1426,12 +1437,12 @@ export async function cancelPedido(params, signal) {
 
 export function documentsPdfInvoicesPedido(idOrdenCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/pedido/documents/pdf/invoices/${idOrdenCompra}/${size}`;
+    }/api/pedido/pdf/document/${idOrdenCompra}/${size}`;
 }
 
-export function documentsPdfListsPedido(idOrdenCompra) {
+export function documentsPdfListsPedido(idOrdenCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/pedido/documents/pdf/lists/${idOrdenCompra}`;
+    }/api/pedido/pdf/preview/${idOrdenCompra}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA PEDIDO
@@ -1930,6 +1941,14 @@ export async function comboAtributo(params, signal) {
   );
 }
 
+export async function comboAtributoTipos(signal) {
+  return await Resolve.create(
+    instancePrincipal.get('/api/atributo/combo/tipos', {
+      signal: signal,
+    }),
+  );
+}
+
 // ------------------------------------------------------------------------
 // FIN PARA ATRIBUTO
 // ------------------------------------------------------------------------
@@ -2169,7 +2188,7 @@ export async function sendEmailNotaCredito(params) {
 |--------------------------------------------------------------------------
 */
 export async function listKardex(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/kardex/list', {
       params: params,
       signal: signal,

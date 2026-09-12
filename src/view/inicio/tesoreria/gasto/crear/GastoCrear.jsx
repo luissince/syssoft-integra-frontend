@@ -33,7 +33,7 @@ import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
-import printJS from 'print-js';
+import pdfVisualizer from 'pdf-visualizer';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -502,7 +502,7 @@ class GastoCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    printJS({
+    pdfVisualizer.printer({ 
       printable: documentsPdfInvoicesGasto(this.state.idGasto, size),
       type: 'pdf',
       showModal: true,

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { RESPOSE, REQUEST, ERROR, CANCELED } from '../types/types';
 
 interface HttpErrorResponse {
@@ -5,6 +6,7 @@ interface HttpErrorResponse {
     data: any;
     status: number;
   };
+  code?: string;
   request?: any;
   message?: string;
 }
@@ -42,7 +44,11 @@ class ErrorResponse {
       if (error.message === 'canceled') {
         this.type = CANCELED;
         this.message = 'Se canceló la solicitud al servidor.';
-      } else {
+      } if (axios.isCancel(error) || error.code === "ERR_CANCELED") {
+        this.type = CANCELED;
+        this.message = 'Se canceló la solicitud al servidor.';
+      }
+      else {
         this.type = ERROR;
         this.message =
           error.message ||
@@ -63,7 +69,7 @@ class ErrorResponse {
     return this.status;
   }
 
-  getBody(): string {
+  getBody(): any {
     return this.body;
   }
 }

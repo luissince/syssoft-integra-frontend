@@ -1,11 +1,7 @@
 import React from 'react';
 import {
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isText,
   isEmpty,
-  alertDialog,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
@@ -31,6 +27,7 @@ import {
   TIPO_ATRIBUTO_COLOR,
   TIPO_ATRIBUTO_TALLA,
 } from '../../../../model/types/tipo-atributo';
+import { alertKit } from 'alert-kit';
 
 class AtributosEditar extends CustomComponent {
   constructor(props) {
@@ -149,14 +146,20 @@ class AtributosEditar extends CustomComponent {
 
   handleGuardar = async () => {
     if (isEmpty(this.state.idTipoAtributo)) {
-      alertWarning('Atributo', 'Selecciona el tipo de atributo.', () => {
+      alertKit.warning({
+        title: 'Atributo',
+        message: 'Selecciona el tipo de atributo.',
+      }, () => {
         this.refTipoAtributo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Atributo', 'Ingrese el nombre de la color', () => {
+      alertKit.warning({
+        title: 'Atributo',
+        message: 'Ingrese el nombre de la color',
+      }, () => {
         this.refNombre.current.focus();
       });
       return;
@@ -166,7 +169,10 @@ class AtributosEditar extends CustomComponent {
       this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR &&
       isEmpty(this.state.hexadecimal)
     ) {
-      alertWarning('Atributo', 'Ingrese su color', () => {
+      alertKit.warning({
+        title: 'Atributo',
+        message: 'Ingrese su color',
+      }, () => {
         this.refHexadecimal.current.focus();
       });
       return;
@@ -176,39 +182,60 @@ class AtributosEditar extends CustomComponent {
       this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA &&
       isEmpty(this.state.valor)
     ) {
-      alertWarning('Atributo', 'Ingrese su valor', () => {
+      alertKit.warning({
+        title: 'Atributo',
+        message: 'Ingrese su valor',
+      }, () => {
         this.refValor.current.focus();
       });
       return;
     }
 
-    alertDialog('Atributo', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          idAtributo: this.state.idAtributo,
-          idTipoAtributo: this.state.idTipoAtributo,
-          nombre: this.state.nombre,
-          hexadecimal: this.state.hexadecimal,
-          valor: this.state.valor,
-          estado: this.state.estado,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Atributo', 'Procesando información...');
-
-        const response = await updateAtributo(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Atributo', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Atributo', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: 'Atributo',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        idAtributo: this.state.idAtributo,
+        idTipoAtributo: this.state.idTipoAtributo,
+        nombre: this.state.nombre,
+        hexadecimal: this.state.hexadecimal,
+        valor: this.state.valor,
+        estado: this.state.estado,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await updateAtributo(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Atributo',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: 'Atributo',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {
@@ -226,107 +253,97 @@ class AtributosEditar extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Select
-              label={
-                <>
-                  Tipo Atributo:
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              ref={this.refTipoAtributo}
-              value={this.state.idTipoAtributo}
-              onChange={this.handleSelectTipoAtributo}
-              disabled
-            >
-              <option value="">-- Seleccione un tipo de atributo --</option>
-              {this.state.tipoAtributos.map((item, index) => (
-                <option key={index} value={item.idTipoAtributo}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
-          </Column>
-        </Row>
+        <div className="flex flex-col mb-3">
+          <Select
+            label={
+              <div className="flex items-center gap-1 mb-2">
+                <span className="text-sm">Tipo Atributo:</span> <i className="fa fa-asterisk text-danger small"></i>
+              </div>
+            }
+            ref={this.refTipoAtributo}
+            value={this.state.idTipoAtributo}
+            onChange={this.handleSelectTipoAtributo}
+          >
+            <option value="">-- Seleccione un tipo de atributo --</option>
+            {this.state.tipoAtributos.map((item, index) => (
+              <option key={index} value={item.idTipoAtributo}>
+                {item.nombre}
+              </option>
+            ))}
+          </Select>
+        </div>
 
-        <Row>
-          <Column formGroup={true}>
-            <Input
-              label={
-                <>
-                  Nombre:<i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Ingrese el nombre"
-              ref={this.refNombre}
-              value={this.state.nombre}
-              onChange={this.handleInputNombre}
-            />
-          </Column>
-        </Row>
+        <div className="flex flex-col mb-3">
+          <Input
+            label={
+              <div className="flex items-center gap-1 mb-2">
+                <span className="text-sm">Nombre:</span> <i className="fa fa-asterisk text-danger small"></i>
+              </div>
+            }
+            placeholder="Ingrese el nombre"
+            ref={this.refNombre}
+            value={this.state.nombre}
+            onChange={this.handleInputNombre}
+          />
+        </div>
 
         {this.state.idTipoAtributo === TIPO_ATRIBUTO_COLOR && (
-          <Row>
-            <Column formGroup={true}>
-              <Input
-                label={'Color'}
-                type="color"
-                placeholder="Ingrese su color"
-                ref={this.refHexadecimal}
-                value={this.state.hexadecimal}
-                onChange={this.handleInputHexacimal}
-              />
-            </Column>
-          </Row>
+          <div className="flex flex-col mb-3">
+            <Input
+              label={
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-sm">Color:</span> <i className="fa fa-asterisk text-danger small"></i>
+                </div>
+              }
+              type="color"
+              placeholder="Ingrese su color"
+              ref={this.refHexadecimal}
+              value={this.state.hexadecimal}
+              onChange={this.handleInputHexacimal}
+            />
+          </div>
         )}
 
         {this.state.idTipoAtributo === TIPO_ATRIBUTO_TALLA && (
-          <Row>
-            <Column formGroup={true}>
-              <Input
-                label={
-                  <>
-                    Valor:<i className="fa fa-asterisk text-danger small"></i>
-                  </>
-                }
-                placeholder="Ingrese su valor"
-                ref={this.refValor}
-                value={this.state.valor}
-                onChange={this.handleInputValor}
-              />
-            </Column>
-          </Row>
+          <div className="flex flex-col mb-3">
+            <Input
+              label={
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-sm">Valor:</span> <i className="fa fa-asterisk text-danger small"></i>
+                </div>
+              }
+              placeholder="Ingrese su valor"
+              ref={this.refValor}
+              value={this.state.valor}
+              onChange={this.handleInputValor}
+            />
+          </div>
         )}
 
-        <Row>
-          <Column formGroup={true}>
-            <Switches
-              id="customSwitchEstado"
-              checked={this.state.estado}
-              onChange={this.handleSelectEstado}
-            >
-              {this.state.estado ? 'Activo' : 'Inactivo'}
-            </Switches>
-          </Column>
-        </Row>
+        <div className="flex flex-col">
+          <Switches
+            id="customSwitchEstado"
+            checked={this.state.estado}
+            onChange={this.handleSelectEstado}
+          >
+            {this.state.estado ? 'Activo' : 'Inactivo'}
+          </Switches>
+        </div>
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-warning"
-              onClick={() => this.handleGuardar()}
-            >
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex flex-col md:flex-row gap-3">
+          <Button
+            className="btn-warning"
+            onClick={() => this.handleGuardar()}
+          >
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }

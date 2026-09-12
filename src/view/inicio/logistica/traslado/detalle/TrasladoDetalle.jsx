@@ -5,30 +5,16 @@ import {
 } from '../../../../../helper/utils.helper';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
 import { detailTraslado, getPdfTraslado } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import { connect } from 'react-redux';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableBody,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
 import { images } from '../../../../../helper';
 import Image from '../../../../../components/Image';
-import Button from '../../../../../components/Button';
 import pdfVisualizer from 'pdf-visualizer';
 import { cn } from '@/lib/utils';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -49,7 +35,7 @@ class TrasladoDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idTraslado: '',
-      cabecera: {},
+      cabecera: null,
       detalles: [],
 
       idSucursal: this.props.token.project.idSucursal,
@@ -101,38 +87,39 @@ class TrasladoDetalle extends CustomComponent {
   |
   */
 
-  async loadDataId(id) {
-    const [traslado] = await Promise.all([this.fetchDetalleTraslado(id)]);
-
-    this.setState({
-      idTraslado: id,
-
-      cabecera: traslado.cabecera,
-      detalles: traslado.detalles,
-      loading: false,
-    });
-  }
-
-  async fetchDetalleTraslado(id) {
+  async loadDataId(idTraslado) {
     const params = {
-      idTraslado: id,
-    };
+      idTraslado: idTraslado
+    }
 
-    const responde = await detailTraslado(
+    const { success, data, message, type } = await detailTraslado(
       params,
       this.abortControllerView.signal,
     );
 
-    if (responde instanceof SuccessReponse) {
-      return responde.data;
+    if (!success) {
+      if (type === CANCELED) return;
+
+      alertKit.warning({
+        title: 'Traslado',
+        message: message,
+      }, () => {
+        this.close();
+      });
+      return;
     }
 
-    if (responde instanceof ErrorResponse) {
-      if (responde.getType() === CANCELED) return;
-
-      return null;
-    }
+    this.setState({
+      idTraslado: idTraslado,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
+      loading: false,
+    });
   }
+
+  close = () => {
+    this.props.history.goBack();
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -187,6 +174,117 @@ class TrasladoDetalle extends CustomComponent {
   |
   */
 
+  renderCabecera() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+        <div className="divide-y divide-gray-100">
+          {[
+            {
+              label: 'Fecha y Hora', value: () => {
+                return cabecera.fecha + ' ' + formatTime(cabecera.hora);
+              }
+            },
+            {
+              label: 'Tipo Traslado', value: () => {
+                return cabecera.tipo
+              }
+            },
+            {
+              label: 'Motivo', value: () => {
+                return cabecera.motivo;
+              }
+            },
+            { label: 'Sucursal de Origen', value: () => cabecera.sucursalOrigen },
+            { label: 'Almacen de Origen', value: () => cabecera.almacenOrigen },
+
+            { label: 'Sucursal de Destino', value: () => cabecera.sucursalDestino },
+            { label: 'Almacen de Destino', value: () => cabecera.almacenDestino },
+
+            {
+              label: 'Estado', value: () => {
+                return (
+                  <span className={cn(
+                    "inline-flex items-center rounded-full",
+                    "text-xs font-medium",
+                    "px-2.5 py-0.5",
+                    cabecera.estado === 0 && "bg-red-100 text-red-800",
+                    cabecera.estado === 1 && "bg-green-100 text-green-800",
+                  )}>
+                    {cabecera.estado === 1 ? 'ACTIVO' : 'ANULADO'}
+                  </span>
+                );
+              }
+            },
+
+            { label: 'Observación', value: () => cabecera.observacion },
+
+          ].map((item, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+              <p>{item.label}</p>
+              <p className="md:col-span-3 font-bold">{item.value()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  renderDetalles() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Detalles</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 text-left text-gray-600 text-sm">
+              <tr>
+                <th className="p-4 text-center">#</th>
+                <th className="p-4 text-center">Imagen</th>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Categoría</th>
+                <th className="p-4">Cantidad</th>
+                <th className="p-4">Medida</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                detalles.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="p-4 text-center">{item.id}</td>
+                    <td className="p-4 text-center">
+                      <Image
+                        default={images.noImage}
+                        src={item.imagen}
+                        alt={item.producto}
+                        width={80}
+                        className="mx-auto rounded border border-gray-200"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+                      <p className="text-black uppercase">{item.producto}</p>
+                    </td>
+                    <td className="p-4">{item.categoria}</td>
+                    <td className="p-4">{rounded(item.cantidad)}</td>
+                    <td className="p-4">{item.medida}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const {
       cabecera,
@@ -200,167 +298,41 @@ class TrasladoDetalle extends CustomComponent {
           message={this.state.msgLoading}
         />
 
+        {/* Titulo */}
         <Title
           title="Traslado"
           subTitle="DETALLE"
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintPdf.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintPdf.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintPdf.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>
-          </Column>
-        </Row>
 
-        <Row>
-          <Column formGroup={true}>
-            <TableResponsive>
-              <Table width="100%">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha y Hora
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.fecha} ${formatTime(cabecera.hora)}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Tipo de traslado
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.tipo}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Motivo
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.motivo}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Sucursal de Origen
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.sucursalOrigen}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Almacen de Origen
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.almacenOrigen}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Sucursal de Destino
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.sucursalDestino}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Almacen de Destino
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.almacenDestino}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Observación
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {cabecera && `${cabecera.observacion}`}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Estado
-                    </TableHead>
-                    <TableHead
-                      className={cn(
-                        'table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal',
-                        cabecera && `${cabecera.estado === 1 ? 'text-success' : 'text-danger'}`,
-                      )}
-                    >
-                      {cabecera && `${cabecera.estado === 1 ? 'ACTIVO' : 'ANULADO'}`}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintPdf.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> A4
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintPdf.bind(this, '80mm')}
+          >
+            <i className="fa fa-print"></i> 80MM
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintPdf.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className="table table-light table-striped">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Unidad</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detalles.map((item, index) => {
-                    return (
-                      <TableRow key={index}>
-                        <TableCell className="text-center">{item.id}</TableCell>
-                        <TableCell className="text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.producto}
-                            width={100}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {item.codigo}
-                          <br />
-                          {item.producto}
-                        </TableCell>
-                        <TableCell>{item.categoria}</TableCell>
-                        <TableCell>{rounded(item.cantidad)}</TableCell>
-                        <TableCell>{item.unidad}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Cabecera */}
+        {this.renderCabecera()}
+
+        {/* Detalles */}
+        {this.renderDetalles()}
       </ContainerWrapper>
     );
   }

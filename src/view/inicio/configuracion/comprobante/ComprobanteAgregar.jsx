@@ -199,10 +199,10 @@ class ComporbanteAgregar extends CustomComponent {
             <Select
               group={true}
               label={
-                <>
+                <label>
                   Tipo de Comprobante:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className="form-control"
               id="estado"
@@ -226,9 +226,9 @@ class ComporbanteAgregar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Nombre: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Ingresar el nombre del comprobante"
               ref={this.refNombre}
@@ -244,9 +244,9 @@ class ComporbanteAgregar extends CustomComponent {
           <Column className="col-md-6" formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Serie: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder={'B001, F001'}
               ref={this.refSerie}
@@ -258,10 +258,10 @@ class ComporbanteAgregar extends CustomComponent {
           <Column className="col-md-6" formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   Numeración:
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder={'1, 2, 3'}
               ref={this.refNumeracion}
@@ -277,7 +277,7 @@ class ComporbanteAgregar extends CustomComponent {
         <Row>
           <Column className="col-md-6" formGroup={true}>
             <Input
-              label={<>Caracteres a Usar:</>}
+              label={<label>Caracteres a Usar:</label>}
               placeholder={'0, 8, 11'}
               ref={this.refNumeroCampo}
               value={this.state.numeroCampo}
@@ -398,7 +398,7 @@ class ComporbanteAgregar extends CustomComponent {
         <Row>
           <Column className={'col-md-6'} formGroup={true}>
             <Input
-              label={<> Nombre de Impresión:</>}
+              label={<label> Nombre de Impresión:</label>}
               placeholder="Ejm: Boleta Electrónica, Factura Electrónica..."
               value={this.state.impresion}
               onChange={(event) =>
@@ -409,7 +409,7 @@ class ComporbanteAgregar extends CustomComponent {
 
           <Column className={'col-md-6'} formGroup={true}>
             <Input
-              label={<> Código:</>}
+              label={<label> Código:</label>}
               placeholder="01, 06"
               value={this.state.codigo}
               onChange={(event) =>

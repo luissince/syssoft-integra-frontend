@@ -185,29 +185,16 @@ class Perfiles extends CustomComponent {
           headerTitle: 'SysSoft Integra',
           title: 'Perfil',
           message: response.data,
-          buttons: [
-            {
-              html: "<i class='fa fa-check'></i> Aceptar",
-              primary: true,
-              class: ['btn', 'btn-outline-primary'],
-              onClick: () => this.loadInit(),
-            },
-          ],
-        });
+        }, () => { this.loadInit() });
       }
 
       if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
         alertKit.warning({
           headerTitle: 'SysSoft Integra',
           title: 'Perfil',
           message: response.getMessage(),
-          buttons: [
-            {
-              html: "<i class='fa fa-check'></i> Aceptar",
-              primary: true,
-              class: ['btn', 'btn-outline-primary'],
-            },
-          ],
         });
       }
     }
@@ -217,7 +204,7 @@ class Perfiles extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="6"
+          colSpan={6}
           message="Cargando información de la tabla..."
         />
       );

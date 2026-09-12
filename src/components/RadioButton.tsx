@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 
 /**
@@ -15,7 +14,14 @@ import { forwardRef } from 'react';
  *   <i className="bi bi-person"></i> Persona Natural
  * </RadioButton>
  */
-const RadioButton = forwardRef(
+
+interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  id: string;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+const RadioButton = forwardRef<HTMLInputElement, RadioButtonProps>(
   (
     {
       id,
@@ -43,12 +49,5 @@ const RadioButton = forwardRef(
     );
   },
 );
-
-RadioButton.propTypes = {
-  id: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  children: PropTypes.node,
-  // Los demás props como autoFocus, value, checked, etc., van por ...rest
-};
 
 export default RadioButton;

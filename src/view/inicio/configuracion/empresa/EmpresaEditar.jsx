@@ -501,11 +501,11 @@ class EmpresaProceso extends CustomComponent {
     }
 
 
-    if (imageSend.size > 50) {
+    if (imageSend.size > 200) {
       alertKit.warning({
         title: 'Icono',
         message:
-          'El icono ' + file.name + ' no debe superar los 50KB(Kilobytes).',
+          'El icono ' + file.name + ' no debe superar los 200KB(Kilobytes).',
       });
       return;
     }
@@ -658,9 +658,8 @@ class EmpresaProceso extends CustomComponent {
       alertKit.success({
         title: 'Empresa',
         message: response.data,
-        onClose: () => {
-          this.props.history.goBack();
-        },
+      }, () => {
+        this.props.history.goBack();
       });
     }
 
@@ -670,11 +669,10 @@ class EmpresaProceso extends CustomComponent {
       alertKit.error({
         title: 'Empresa',
         message: response.getMessage(),
-        onClose: () => {
-          this.setState({
-            loading: false,
-          });
-        },
+      }, () => {
+        this.setState({
+          loading: false,
+        });
       });
     }
   };
@@ -709,400 +707,406 @@ class EmpresaProceso extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        {/* ===================== 1 ======================= */}
-        <Row>
-          <Column className="col-12" formGroup={true}>
+        <div className="flex flex-col gap-3">
+          {/* ===================== 1 ======================= */}
+          <div>
             <h6>
-              <span className="badge badge-primary">1</span> Información General
+              <p className="badge badge-primary">1</p> Información General
             </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              group={true}
-              label={
-                <>
-                  Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="10909000223"
-              ref={this.refDocumento}
-              value={this.state.documento}
-              onChange={(event) =>
-                this.setState({ documento: event.target.value })
-              }
-              onKeyDown={keyNumberInteger}
-              buttonRight={
-                <Button
-                  className="btn-outline-secondary"
-                  onClick={() => this.handleGetApiSunat()}
-                >
-                  <img src={images.sunat} alt="Sunat" width="12" />
-                </Button>
-              }
-            />
-          </Column>
+            <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label={
-                <>
-                  Razón Social: <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Ingrese la razón social"
-              ref={this.refRazonSocial}
-              value={this.state.razonSocial}
-              onChange={(event) =>
-                this.setState({ razonSocial: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    group={true}
+                    label={
+                      <label>
+                        Ruc ({this.state.documento.length}): <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="10909000223"
+                    ref={this.refDocumento}
+                    value={this.state.documento}
+                    onChange={(event) =>
+                      this.setState({ documento: event.target.value })
+                    }
+                    onKeyDown={keyNumberInteger}
+                    buttonRight={
+                      <Button
+                        className="btn-outline-secondary"
+                        onClick={() => this.handleGetApiSunat()}
+                      >
+                        <img src={images.sunat} alt="Sunat" width="12" />
+                      </Button>
+                    }
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label={
-                <>
-                  Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Ingrese el nombre comercial"
-              value={this.state.nombreEmpresa}
-              onChange={(event) =>
-                this.setState({ nombreEmpresa: event.target.value })
-              }
-            />
-          </Column>
+                <div className="w-full">
+                  <Input
+                    label={
+                      <label>
+                        Razón Social: <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="Ingrese la razón social"
+                    ref={this.refRazonSocial}
+                    value={this.state.razonSocial}
+                    onChange={(event) =>
+                      this.setState({ razonSocial: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Email:</>}
-              placeholder="Ingrese el nombre comercial"
-              value={this.state.email}
-              onChange={(event) => this.setState({ email: event.target.value })}
-            />
-          </Column>
-        </Row>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={
+                      <label>
+                        Nombre Comercial: <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="Ingrese el nombre comercial"
+                    value={this.state.nombreEmpresa}
+                    onChange={(event) =>
+                      this.setState({ nombreEmpresa: event.target.value })
+                    }
+                  />
+                </div>
 
-        {/* ===================== 2 ======================= */}
-        <Row>
-          <Column className="col-12" formGroup={true}>
+                <div className="w-full">
+                  <Input
+                    label={<label>Email:</label>}
+                    placeholder="Ingrese el nombre comercial"
+                    value={this.state.email}
+                    onChange={(event) => this.setState({ email: event.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================== 2 ======================= */}
+          <div>
             <h6>
-              <span className="badge badge-primary">2</span> Credenciales para
+              <p className="badge badge-primary">2</p> Credenciales para
               envio de comprobantes electrónicos a SUNAT
             </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label={
-                <>
-                  Usuario Sol(<small>Para el envío a Sunat</small>):
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Usurio secundario"
-              value={this.state.usuarioSolSunat}
-              onChange={(event) =>
-                this.setState({ usuarioSolSunat: event.target.value })
-              }
-            />
-          </Column>
+            <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              group={true}
-              label={
-                <>
-                  Clave Sol(<small>Para el envío a Sunat</small>):
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="********"
-              ref={this.refPasswordSol}
-              value={this.state.claveSolSunat}
-              onChange={(event) =>
-                this.setState({ claveSolSunat: event.target.value })
-              }
-              type={this.state.refPasswordSol ? 'text' : 'password'}
-              buttonRight={
-                <Button
-                  className="btn-outline-secondary"
-                  onClick={this.handleLookPasswordSol}
-                >
-                  <i
-                    className={
-                      this.state.refPasswordSol
-                        ? 'fa fa-eye'
-                        : 'fa fa-eye-slash'
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={
+                      <label>
+                        Usuario Sol(<small>Para el envío a Sunat</small>):
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
                     }
-                  ></i>
-                </Button>
-              }
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label={
-                <>
-                  Id Api Sunat(<small>Para el envío de guía de remisión</small>): <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Usurio Api Sunat"
-              value={this.state.idApiSunat}
-              onChange={(event) =>
-                this.setState({ idApiSunat: event.target.value })
-              }
-            />
-          </Column>
-
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              group={true}
-              label={
-                <>
-                  Clave Api Sunat(
-                  <small>Para el envío de guía de remisión</small>):
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="********"
-              ref={this.refPasswordClave}
-              value={this.state.claveApiSunat}
-              onChange={(event) =>
-                this.setState({ claveApiSunat: event.target.value })
-              }
-              type={this.state.lookPasswordClave ? 'text' : 'password'}
-              buttonRight={
-                <Button
-                  className="btn-outline-secondary"
-                  onClick={this.handleLookPasswordApiSunat}
-                >
-                  <i
-                    className={
-                      this.state.lookPasswordClave
-                        ? 'fa fa-eye'
-                        : 'fa fa-eye-slash'
+                    placeholder="Usurio secundario"
+                    value={this.state.usuarioSolSunat}
+                    onChange={(event) =>
+                      this.setState({ usuarioSolSunat: event.target.value })
                     }
-                  ></i>
-                </Button>
-              }
-            />
-          </Column>
-        </Row>
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label="Fecha de inicio del certificado digital:"
-              defaultValue={this.state.certificadoInicio}
-              readOnly
-            />
-          </Column>
-
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label="Fecha de vencimiento del certificado digital:"
-              defaultValue={this.state.certificadoExpiracion}
-              readOnly
-            />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column formGroup={true}>
-            <label>Seleccionar Archivo (.p12, .pfx u otros):</label>
-            <input
-              type="file"
-              id="fileCertificado"
-              accept=".p12,.pfx"
-              className="display-none"
-              onChange={this.handleFileCertificado}
-            />
-            <label
-              htmlFor={'fileCertificado'}
-              className="form-control cursor-pointer"
-            >
-              {this.state.certificado?.nombre || "Seleccione un archivo"}
-            </label>
-          </Column>
-
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              group={true}
-              label={
-                <>
-                  Contraseña de tu Certificado:
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="********"
-              ref={this.refPasswordClaveCertificado}
-              value={this.state.claveCertificado}
-              onChange={(event) =>
-                this.setState({ claveCertificado: event.target.value })
-              }
-              type={
-                this.state.lookPasswordClaveCertificado ? 'text' : 'password'
-              }
-              buttonRight={
-                <Button
-                  className="btn-outline-secondary"
-                  onClick={this.handleLookPasswordCertificado}
-                >
-                  <i
-                    className={
-                      this.state.lookPasswordClaveCertificado
-                        ? 'fa fa-eye'
-                        : 'fa fa-eye-slash'
+                <div className="w-full">
+                  <Input
+                    group={true}
+                    label={
+                      <label>
+                        Clave Sol(<small>Para el envío a Sunat</small>):
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
                     }
-                  ></i>
-                </Button>
-              }
-            />
-          </Column>
-        </Row>
+                    placeholder="********"
+                    ref={this.refPasswordSol}
+                    value={this.state.claveSolSunat}
+                    onChange={(event) =>
+                      this.setState({ claveSolSunat: event.target.value })
+                    }
+                    type={this.state.refPasswordSol ? 'text' : 'password'}
+                    buttonRight={
+                      <Button
+                        className="btn-outline-secondary"
+                        onClick={this.handleLookPasswordSol}
+                      >
+                        <i
+                          className={
+                            this.state.refPasswordSol
+                              ? 'fa fa-eye'
+                              : 'fa fa-eye-slash'
+                          }
+                        ></i>
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
 
-        <Row>
-          <Column formGroup={true}>
-            <TextArea
-              label={<>Nota de Sunat:</>}
-              rows={1}
-              placeholder="Ingrese la nota de Sunat"
-              value={this.state.notaSunat}
-              onChange={(event) =>
-                this.setState({ notaSunat: event.target.value })
-              }
-            />
-          </Column>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={
+                      <label>
+                        Id Api Sunat(<small>Para el envío de guía de remisión</small>): <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="Usurio Api Sunat"
+                    value={this.state.idApiSunat}
+                    onChange={(event) =>
+                      this.setState({ idApiSunat: event.target.value })
+                    }
+                  />
+                </div>
 
-          <Column className={'col-md-6'} formGroup={true}>
-            <Input
-              label="Tipo de envío a Sunat:"
-              defaultValue={this.state.tipoEnvio ? "Producción" : "Test"}
-              readOnly
-            />
-          </Column>
-        </Row>
+                <div className="w-full">
+                  <Input
+                    group={true}
+                    label={
+                      <label>
+                        Clave Api Sunat(
+                        <small>Para el envío de guía de remisión</small>):
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="********"
+                    ref={this.refPasswordClave}
+                    value={this.state.claveApiSunat}
+                    onChange={(event) =>
+                      this.setState({ claveApiSunat: event.target.value })
+                    }
+                    type={this.state.lookPasswordClave ? 'text' : 'password'}
+                    buttonRight={
+                      <Button
+                        className="btn-outline-secondary"
+                        onClick={this.handleLookPasswordApiSunat}
+                      >
+                        <i
+                          className={
+                            this.state.lookPasswordClave
+                              ? 'fa fa-eye'
+                              : 'fa fa-eye-slash'
+                          }
+                        ></i>
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
 
-        {/* ===================== 3 ======================= */}
-        <Row>
-          <Column className="col-12" formGroup={true}>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label="Fecha de inicio del certificado digital:"
+                    defaultValue={this.state.certificadoInicio}
+                    readOnly
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Input
+                    label="Fecha de vencimiento del certificado digital:"
+                    defaultValue={this.state.certificadoExpiracion}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <label>Seleccionar Archivo (.p12, .pfx u otros):</label>
+                  <input
+                    type="file"
+                    id="fileCertificado"
+                    accept=".p12,.pfx"
+                    className="display-none"
+                    onChange={this.handleFileCertificado}
+                  />
+                  <label
+                    htmlFor={'fileCertificado'}
+                    className="form-control cursor-pointer"
+                  >
+                    {this.state.certificado?.nombre || "Seleccione un archivo"}
+                  </label>
+                </div>
+
+                <div className="w-full">
+                  <Input
+                    group={true}
+                    label={
+                      <label>
+                        Contraseña de tu Certificado:
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="********"
+                    ref={this.refPasswordClaveCertificado}
+                    value={this.state.claveCertificado}
+                    onChange={(event) =>
+                      this.setState({ claveCertificado: event.target.value })
+                    }
+                    type={
+                      this.state.lookPasswordClaveCertificado ? 'text' : 'password'
+                    }
+                    buttonRight={
+                      <Button
+                        className="btn-outline-secondary"
+                        onClick={this.handleLookPasswordCertificado}
+                      >
+                        <i
+                          className={
+                            this.state.lookPasswordClaveCertificado
+                              ? 'fa fa-eye'
+                              : 'fa fa-eye-slash'
+                          }
+                        ></i>
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <TextArea
+                    label={<label>Nota de Sunat:</label>}
+                    rows={1}
+                    placeholder="Ingrese la nota de Sunat"
+                    value={this.state.notaSunat}
+                    onChange={(event) =>
+                      this.setState({ notaSunat: event.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Input
+                    label="Tipo de envío a Sunat:"
+                    defaultValue={this.state.tipoEnvio ? "Producción" : "Test"}
+                    readOnly
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================== 3 ======================= */}
+          <div>
             <h6>
-              <span className="badge badge-primary">3</span> Imagens para uso en
+              <p className="badge badge-primary">3</p> Imagens para uso en
               la página web y reportes
             </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-4 col-12'} formGroup={true}>
-            <ImageUpload
-              className="w-full flex flex-col items-center text-center gap-2"
-              label={
-                <p className="font-bold text-base">Logo reporte</p>
-              }
-              subtitle={
-                <div>
-                  <p>Para mostrar en los reportes.</p>
-                  <span className="text-red-500 text-sm">
-                    La imagen no debe superar los 500KB(Kilobytes).
-                  </span>
-                </div>
-              }
-              imageUrl={this.state.logo.url}
-              defaultImage={images.noImage}
-              alt="Logo reporte"
-              inputId="fileLogo"
-              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              onChange={this.handleFileLogo}
-              onClear={this.handleClearLogo}
-              onDownload={() => this.handleDownload(this.state.logo.url)}
-            />
-          </Column>
+            <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-4 col-12'} formGroup={true}>
-            <ImageUpload
-              className="w-full flex flex-col items-center text-center gap-2"
-              label={
-                <p className="font-bold text-base">Logo pagina web</p>
-              }
-              subtitle={
-                <div>
-                  <p> Para mostrar en la página web</p>
-                  <span className="text-red-500 text-sm">
-                    La imagen no debe superar los 500KB(Kilobytes).
-                  </span>
-                </div>
-              }
-              imageUrl={this.state.image.url}
-              defaultImage={images.noImage}
-              alt="Logo pagina web"
-              inputId="fileImage"
-              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              onChange={this.handleFileImage}
-              onClear={this.handleClearImage}
-              onDownload={() => this.handleDownload(this.state.image.url)}
-            />
-          </Column>
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="w-full md:w-1/3">
+                <ImageUpload
+                  className="w-full flex flex-col items-center text-center gap-2"
+                  label={
+                    <p className="font-bold text-base">Logo reporte</p>
+                  }
+                  subtitle={
+                    <div>
+                      <p>Para mostrar en los reportes.</p>
+                      <span className="text-red-500 text-sm">
+                        La imagen no debe superar los 500KB(Kilobytes).
+                      </span>
+                    </div>
+                  }
+                  imageUrl={this.state.logo.url}
+                  defaultImage={images.imagen}
+                  alt="Logo reporte"
+                  inputId="fileLogo"
+                  accept=".png,.jpg,.jpeg,.gif,.webp,.ico"
+                  onChange={this.handleFileLogo}
+                  onClear={this.handleClearLogo}
+                  onDownload={() => this.handleDownload(this.state.logo.url)}
+                />
+              </div>
 
-          <Column className={'col-md-4 col-12'} formGroup={true}>
-            <ImageUpload
-              className="w-full flex flex-col items-center text-center gap-2"
-              label={
-                <p className="font-bold text-base">Icono</p>
-              }
-              subtitle={
-                <div>
-                  <p> Para mostrar como favicon de la página web.</p>
-                  <span className="text-red-500 text-sm">
-                    La imagen no debe superar los 50KB(Kilobytes).
-                  </span>
-                </div>
-              }
-              imageUrl={this.state.icon.url}
-              defaultImage={images.noImage}
-              alt="Icono de la empresa"
-              inputId="fileIcon"
-              accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-              onChange={this.handleFileIcon}
-              onClear={this.handleClearIcono}
-              onDownload={() => this.handleDownload(this.state.icon.url)}
-            />
-          </Column>
-        </Row>
+              <div className="w-full md:w-1/3">
+                <ImageUpload
+                  className="w-full flex flex-col items-center text-center gap-2"
+                  label={
+                    <p className="font-bold text-base">Logo pagina web</p>
+                  }
+                  subtitle={
+                    <div>
+                      <p> Para mostrar en la página web</p>
+                      <span className="text-red-500 text-sm">
+                        La imagen no debe superar los 500KB(Kilobytes).
+                      </span>
+                    </div>
+                  }
+                  imageUrl={this.state.image.url}
+                  defaultImage={images.imagen}
+                  alt="Logo pagina web"
+                  inputId="fileImage"
+                  accept=".png,.jpg,.jpeg,.gif,.webp,.ico"
+                  onChange={this.handleFileImage}
+                  onClear={this.handleClearImage}
+                  onDownload={() => this.handleDownload(this.state.image.url)}
+                />
+              </div>
 
-        {/* ===================== 4 ======================= */}
-        <Row>
-          <Column className="col-12" formGroup={true}>
+              <div className="w-full md:w-1/3">
+                <ImageUpload
+                  className="w-full flex flex-col items-center text-center gap-2"
+                  label={
+                    <p className="font-bold text-base">Icono</p>
+                  }
+                  subtitle={
+                    <div>
+                      <p> Para mostrar como favicon de la página web.</p>
+                      <span className="text-red-500 text-sm">
+                        La imagen no debe superar los 200KB(Kilobytes).
+                      </span>
+                    </div>
+                  }
+                  imageUrl={this.state.icon.url}
+                  defaultImage={images.imagen}
+                  alt="Icono de la empresa"
+                  inputId="fileIcon"
+                  accept=".png,.jpg,.jpeg,.gif,.webp,.ico"
+                  onChange={this.handleFileIcon}
+                  onClear={this.handleClearIcono}
+                  onDownload={() => this.handleDownload(this.state.icon.url)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ===================== 4 ======================= */}
+          <div>
             <h6>
-              <span className="badge badge-primary">4</span> Imagenes para el
+              <p className="badge badge-primary">4</p> Imagenes para el
               banner de la página web
             </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
 
-          <Column className="col-12" formGroup={true}>
-            <label>
-              Agregar las imagenes para el banner.{' '}
-              <b className="text-danger">
-                Las imagenes no debe superar los 1MB(Megabyte).
-              </b>
-            </label>
-            <label>
-              Las imágenes deben tener un tamaño de <b>1440 x 800 píxeles</b>{' '}
-              para que se visualicen correctamente en la página web (formato
-              recomendado *.webp).
-            </label>
-          </Column>
+            <div className="dropdown-divider"></div>
 
-          <Column className="col-12" formGroup={true}>
+            <div>
+              <label>
+                Agregar las imagenes para el banner.
+                <b className="text-danger">
+                  Las imagenes no debe superar los 1MB(Megabyte).
+                </b>
+              </label>
+              <label>
+                Las imágenes deben tener un tamaño de <b>1440 x 800 píxeles</b>{' '}
+                para que se visualicen correctamente en la página web (formato
+                recomendado *.webp).
+              </label>
+            </div>
+
             <MultiImages
               maxSizeKB={1024}
               width={1440}
@@ -1111,221 +1115,221 @@ class EmpresaProceso extends CustomComponent {
               handleSelectImages={this.handleSelectBanners}
               handleRemoveImages={this.handleRemoveBanners}
             />
-          </Column>
-        </Row>
+          </div>
 
-        {/* ===================== 5 ======================= */}
-        <Row>
-          <Column className="col-12" formGroup={true}>
+          {/* ===================== 5 ======================= */}
+          <div>
             <h6>
-              <span className="badge badge-primary">5</span> Datos para
+              <p className="badge badge-primary">5</p> Datos para
               comunicación con la platadorma Whatsapp
             </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={
-                <>
-                  Número de WhatsApp:
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="51999000999"
-              value={this.state.numeroWhatsapp}
-              onChange={(event) =>
-                this.setState({ numeroWhatsapp: event.target.value })
-              }
-            />
-          </Column>
+            <div className="dropdown-divider"></div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={
-                <>
-                  Título del modal WhatsApp:
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </>
-              }
-              placeholder="Hola, ¿podemos hacer algo?"
-              value={this.state.tituloWhatsapp}
-              onChange={(event) =>
-                this.setState({ tituloWhatsapp: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={
+                      <label>
+                        Número de WhatsApp:
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="51999000999"
+                    value={this.state.numeroWhatsapp}
+                    onChange={(event) =>
+                      this.setState({ numeroWhatsapp: event.target.value })
+                    }
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-12'} formGroup={true}>
-            <TextArea
-              label={<>Mensaje de WhatsApp:</>}
-              rows={4}
-              placeholder="Mensaje de WhatsApp que acompañará a la solicitud"
-              value={this.state.mensajeWhatsapp}
-              onChange={(event) =>
-                this.setState({ mensajeWhatsapp: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+                <div className="w-full">
+                  <Input
+                    label={
+                      <label>
+                        Título del modal WhatsApp:
+                        <i className="fa fa-asterisk text-danger small"></i>
+                      </label>
+                    }
+                    placeholder="Hola, ¿podemos hacer algo?"
+                    value={this.state.tituloWhatsapp}
+                    onChange={(event) =>
+                      this.setState({ tituloWhatsapp: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-        {/* ===================== 6 ======================= */}
-        <Row>
-          <Column className="col-12" formGroup={true}>
+              <div className="w-full">
+                <TextArea
+                  label={<label>Mensaje de WhatsApp:</label>}
+                  rows={4}
+                  placeholder="Mensaje de WhatsApp que acompañará a la solicitud"
+                  value={this.state.mensajeWhatsapp}
+                  onChange={(event) =>
+                    this.setState({ mensajeWhatsapp: event.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ===================== 6 ======================= */}
+          <div>
             <h6>
-              <span className="badge badge-primary">6</span> Información para
+              <p className="badge badge-primary">6</p> Información para
               mostrar en la pagina web
             </h6>
-          </Column>
-          <div className="dropdown-divider"></div>
 
-          <Column className={'col-12'} formGroup={true}>
-            <TextArea
-              label={<>Información:</>}
-              rows={4}
-              placeholder="Ingrese un resumen de la empresa"
-              value={this.state.informacion}
-              onChange={(event) =>
-                this.setState({ informacion: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+            <div className="dropdown-divider"></div>
 
-        <Row>
-          <Column className={'col-12'} formGroup={true}>
-            <TextArea
-              label={<>Acerca de Nosotros:</>}
-              rows={8}
-              placeholder="Ingrese la información de Acerca de Nosotros"
-              value={this.state.acercaNosotros}
-              onChange={(event) =>
-                this.setState({ acercaNosotros: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <TextArea
+                    label={<label>Información:</label>}
+                    rows={8}
+                    placeholder="Ingrese un resumen de la empresa"
+                    value={this.state.informacion}
+                    onChange={(event) =>
+                      this.setState({ informacion: event.target.value })
+                    }
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <TextArea
-              label={<>Políticas de Privacidad:</>}
-              rows={8}
-              placeholder="Ingrese su políticas de privacidad"
-              value={this.state.politicasPrivacidad}
-              onChange={(event) =>
-                this.setState({ politicasPrivacidad: event.target.value })
-              }
-            />
-          </Column>
+                <div className="w-full">
+                  <TextArea
+                    label={<label>Acerca de Nosotros:</label>}
+                    rows={8}
+                    placeholder="Ingrese la información de Acerca de Nosotros"
+                    value={this.state.acercaNosotros}
+                    onChange={(event) =>
+                      this.setState({ acercaNosotros: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <TextArea
-              label={<>Terminos y Condiciones:</>}
-              rows={8}
-              placeholder="Ingrese sus terminos y condiciones"
-              value={this.state.terminosCondiciones}
-              onChange={(event) =>
-                this.setState({ terminosCondiciones: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <TextArea
+                    label={<label>Políticas de Privacidad:</label>}
+                    rows={8}
+                    placeholder="Ingrese su políticas de privacidad"
+                    value={this.state.politicasPrivacidad}
+                    onChange={(event) =>
+                      this.setState({ politicasPrivacidad: event.target.value })
+                    }
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Página Web:</>}
-              placeholder="Ingrese la url de la cuenta"
-              ref={this.refPaginaWeb}
-              value={this.state.paginaWeb}
-              onChange={(event) =>
-                this.setState({ paginaWeb: event.target.value })
-              }
-            />
-          </Column>
+                <div className="w-full">
+                  <TextArea
+                    label={<label>Terminos y Condiciones:</label>}
+                    rows={8}
+                    placeholder="Ingrese sus terminos y condiciones"
+                    value={this.state.terminosCondiciones}
+                    onChange={(event) =>
+                      this.setState({ terminosCondiciones: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Cuetan de YouTube:</>}
-              placeholder="Ingrese la url de la cuenta"
-              ref={this.refYouTube}
-              value={this.state.youTubePagina}
-              onChange={(event) =>
-                this.setState({ youTubePagina: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={<label>Página Web:</label>}
+                    placeholder="Ingrese la url de la cuenta"
+                    ref={this.refPaginaWeb}
+                    value={this.state.paginaWeb}
+                    onChange={(event) =>
+                      this.setState({ paginaWeb: event.target.value })
+                    }
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Cuenta de Facebook:</>}
-              placeholder="Ingrese la url de la cuenta"
-              ref={this.refFacebook}
-              value={this.state.facebookPagina}
-              onChange={(event) =>
-                this.setState({ facebookPagina: event.target.value })
-              }
-            />
-          </Column>
+                <div className="w-full">
+                  <Input
+                    label={<label>Cuetan de YouTube:</label>}
+                    placeholder="Ingrese la url de la cuenta"
+                    ref={this.refYouTube}
+                    value={this.state.youTubePagina}
+                    onChange={(event) =>
+                      this.setState({ youTubePagina: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Cuenta de Twitter:</>}
-              placeholder="Ingrese la url de la cuenta"
-              ref={this.refTwitter}
-              value={this.state.twitterPagina}
-              onChange={(event) =>
-                this.setState({ twitterPagina: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={<label>Cuenta de Facebook:</label>}
+                    placeholder="Ingrese la url de la cuenta"
+                    ref={this.refFacebook}
+                    value={this.state.facebookPagina}
+                    onChange={(event) =>
+                      this.setState({ facebookPagina: event.target.value })
+                    }
+                  />
+                </div>
 
-        <Row>
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Cuenta de Instagram:</>}
-              placeholder="Ingrese la url de la cuenta"
-              ref={this.refInstagram}
-              value={this.state.instagramPagina}
-              onChange={(event) =>
-                this.setState({ instagramPagina: event.target.value })
-              }
-            />
-          </Column>
+                <div className="w-full">
+                  <Input
+                    label={<label>Cuenta de Twitter:</label>}
+                    placeholder="Ingrese la url de la cuenta"
+                    ref={this.refTwitter}
+                    value={this.state.twitterPagina}
+                    onChange={(event) =>
+                      this.setState({ twitterPagina: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
 
-          <Column className={'col-md-6 col-12'} formGroup={true}>
-            <Input
-              label={<>Cuenta de TikTok:</>}
-              placeholder="Ingrese la url de la cuenta"
-              ref={this.refTiktok}
-              value={this.state.tiktokPagina}
-              onChange={(event) =>
-                this.setState({ tiktokPagina: event.target.value })
-              }
-            />
-          </Column>
-        </Row>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={<label>Cuenta de Instagram:</label>}
+                    placeholder="Ingrese la url de la cuenta"
+                    ref={this.refInstagram}
+                    value={this.state.instagramPagina}
+                    onChange={(event) =>
+                      this.setState({ instagramPagina: event.target.value })
+                    }
+                  />
+                </div>
 
-        {/* ===================== Botones ===================== */}
-        <Row>
-          <Column formGroup={true}>
+                <div className="w-full">
+                  <Input
+                    label={<label>Cuenta de TikTok:</label>}
+                    placeholder="Ingrese la url de la cuenta"
+                    ref={this.refTiktok}
+                    value={this.state.tiktokPagina}
+                    onChange={(event) =>
+                      this.setState({ tiktokPagina: event.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================== Botones ===================== */}
+          <div className="flex gap-3">
             <Button className="btn-warning" onClick={this.handleGuardar}>
               <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
+            </Button>
             <Button
               className="btn-danger"
               onClick={() => this.props.history.goBack()}
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </Column>
-        </Row>
+          </div>
+        </div>
       </ContainerWrapper>
     );
   }

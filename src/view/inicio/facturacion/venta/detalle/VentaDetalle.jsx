@@ -6,6 +6,7 @@ import {
   formatTime,
   isText,
   isEmpty,
+  formatNumberWithZeros,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
@@ -13,14 +14,10 @@ import {
   detailVenta,
   documentsPdfInvoicesVenta,
 } from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '@/components/CustomComponent';
 import {
   CONTADO,
-  CREDITO_FIJO,
-  CREDITO_VARIABLE,
 } from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -33,6 +30,7 @@ import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
 import ModalPrinter from './component/ModalPrinter';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -54,26 +52,13 @@ class VentaDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idVenta: '',
-      comprobante: '',
-      cliente: '',
-      celular: '',
-      email: '',
-      fecha: '',
-      formaPago: '',
-      estado: '',
-      codiso: '',
-      simbolo: '',
-      total: 0,
-      usuario: '',
-      observacion: '',
-      nota: '',
-
-      isOpenModalPrinter: false,
-
-      isOpenSendWhatsapp: false,
-
+      cabecera: {},
       detalles: [],
       transaccion: [],
+
+      isOpenModalPrinter: false,
+      isOpenSendWhatsapp: false,
+
     };
 
     // Referencia para el modal enviar WhatsApp
@@ -125,90 +110,30 @@ class VentaDetalle extends CustomComponent {
   |
   */
 
-  async loadingData(id) {
+  async loadingData(idVenta) {
     const params = {
-      idVenta: id,
+      idVenta: idVenta,
     };
 
-    const response = await detailVenta(params, this.abortControllerView.signal);
+    const { success, data, message, type } = await detailVenta(params, this.abortControllerView.signal);
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: 'Venta',
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.close();
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const venta = response.data;
-
-    const {
-      comprobante,
-      serie,
-      numeracion,
-      documento,
-      informacion,
-      celular,
-      email,
-      fecha,
-      hora,
-      idFormaPago,
-      estado,
-      simbolo,
-      codiso,
-      usuario,
-      observacion,
-      nota,
-    } = venta.cabecera;
-
-    const monto = venta.detalles.reduce(
-      (accumlate, item) => accumlate + item.precio * item.cantidad,
-      0,
-    );
-
-    const nuevoEstado =
-      estado === 1 ? (
-        <span className="text-success">COBRADO</span>
-      ) : estado === 2 ? (
-        <span className="text-warning">POR COBRAR</span>
-      ) : estado === 3 ? (
-        <span className="text-danger">ANULADO</span>
-      ) : (
-        <span className="text-primary">POR LLEVAR</span>
-      );
-
-    const tipo =
-      idFormaPago === CONTADO
-        ? 'CONTADO'
-        : idFormaPago === CREDITO_FIJO
-          ? 'CREDITO FIJO'
-          : idFormaPago === CREDITO_VARIABLE
-            ? 'CRÉDITO VARIABLE'
-            : 'PAGO ADELTANDO';
-
     this.setState({
-      idVenta: id,
-      comprobante: comprobante + '  ' + serie + '-' + numeracion,
-      cliente: documento + ' - ' + informacion,
-      celular: celular,
-      email: email,
-      fecha: fecha + ' ' + formatTime(hora),
-      formaPago: tipo,
-      estado: nuevoEstado,
-      simbolo: simbolo,
-      codiso: codiso,
-      usuario: usuario,
-      observacion: observacion,
-      nota: nota,
-      total: rounded(monto),
-
-      detalles: venta.detalles,
-      transaccion: venta.transaccion,
+      idVenta: idVenta,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
+      transaccion: data.transaccion,
 
       loading: false,
     });
@@ -341,42 +266,155 @@ class VentaDetalle extends CustomComponent {
   |
   */
 
+  renderCabecera() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+        <div className="divide-y divide-gray-100">
+          {[
+            {
+              label: 'Fecha y Hora', value: () => {
+                return cabecera.fecha + ' ' + formatTime(cabecera.hora);
+              }
+            },
+            {
+              label: 'Comprobante', value: () => {
+                return cabecera.comprobante + '  ' + cabecera.serie + '-' + formatNumberWithZeros(cabecera.numeracion);
+              }
+            },
+            {
+              label: 'Cliente', value: () => {
+                return cabecera.documento + ' - ' + cabecera.informacion;
+              }
+            },
+            { label: 'N° de celular', value: () => cabecera.celular },
+            { label: 'Correo electrónico', value: () => cabecera.email },
+
+            {
+              label: 'Forma de Pago', value: () => {
+                return cabecera.idFormaPago === CONTADO ? 'CONTADO' : 'CREDITO'
+              }
+            },
+            {
+              label: 'Estado', value: () => {
+                return (
+                  <span className={cn(
+                    "inline-flex items-center rounded-full",
+                    "text-xs font-medium",
+                    "px-2.5 py-0.5",
+                    cabecera.estado === 1 && "bg-green-100 text-green-800",
+                    cabecera.estado === 2 && "bg-yellow-100 text-yellow-800",
+                    cabecera.estado === 3 && "bg-red-100 text-red-800",
+                    cabecera.estado === 4 && "bg-blue-100 text-blue-800",
+                  )}>
+                    {cabecera.estado === 1 && "COBRADO"}
+                    {cabecera.estado === 2 && "POR COBRAR"}
+                    {cabecera.estado === 3 && "ANULADO"}
+                    {cabecera.estado === 4 && "POR LLEVAR"}
+                  </span>
+                );
+              }
+            },
+
+            { label: 'Observación', value: () => cabecera.observacion },
+            { label: 'Nota', value: () => cabecera.nota },
+
+            { label: 'Usuario', value: () => cabecera.usuario },
+
+            {
+              label: 'Total', value: () => {
+                const monto = detalles.reduce(
+                  (accumlate, item) => accumlate + item.precio * item.cantidad,
+                  0,
+                )
+                return formatCurrency(monto, cabecera.codiso)
+              }
+            },
+          ].map((item, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+              <p>{item.label}</p>
+              <p className="md:col-span-3 font-bold">{item.value()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   renderDetalles() {
-    return this.state.detalles.map((item, index) => (
-      <tr key={index} className="hover:bg-gray-50">
-        <td className="p-4 text-gray-700">{item.id}</td>
-        <td className="p-4 text-center">
-          <Image
-            default={images.noImage}
-            src={item.imagen}
-            alt={item.producto}
-            width={80}
-            className="mx-auto rounded border border-gray-200"
-          />
-        </td>
-        <td className="p-4 text-gray-700">
-          <div className="font-mono text-sm text-gray-500">{item.codigo}</div>
-          <div>{item.producto}</div>
-        </td>
-        <td className="p-4 text-gray-700">{item.medida}</td>
-        <td className="p-4 text-gray-700">{item.categoria}</td>
-        <td className="p-4 text-gray-700 text-right">{rounded(item.cantidad)}</td>
-        <td className="p-4 text-gray-700 text-right">{item.impuesto}</td>
-        <td className="p-4 text-gray-700 text-right">
-          {formatCurrency(item.precio, this.state.codiso)}
-        </td>
-        <td className="p-4 text-gray-900 font-medium text-right">
-          {formatCurrency(item.cantidad * item.precio, this.state.codiso)}
-        </td>
-      </tr>
-    ));
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Detalles</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4">#</th>
+                <th className="p-4">Imagen</th>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Categoría</th>
+                <th className="p-4 text-right">Cantidad</th>
+                <th className="p-4 text-right">Medida</th>
+                <th className="p-4 text-right">Impuesto</th>
+                <th className="p-4 text-right">Precio</th>
+                <th className="p-4 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                detalles.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="p-4">{item.id}</td>
+                    <td className="p-4 text-center">
+                      <Image
+                        default={images.noImage}
+                        src={item.imagen}
+                        alt={item.producto}
+                        width={80}
+                        className="mx-auto rounded border border-gray-200"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+                      <p className="text-black uppercase">{item.producto}</p>
+                    </td>
+                    <td className="p-4">{item.categoria}</td>
+                    <td className="p-4 text-right">{rounded(item.cantidad)}</td>
+                    <td className="p-4 text-right">{item.medida}</td>
+                    <td className="p-4 text-right">{item.impuesto}</td>
+                    <td className="p-4 text-right">
+                      {formatCurrency(item.precio, cabecera.codiso)}
+                    </td>
+                    <td className="p-4 font-medium text-right">
+                      {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 
   renderTotal() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalles) {
+    for (const item of detalles) {
       const cantidad = item.cantidad;
       const valor = item.precio;
       const impuesto = item.porcentaje;
@@ -391,7 +429,7 @@ class VentaDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
+      const resultado = detalles.reduce((acc, item) => {
         const total = item.cantidad * item.precio;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -417,37 +455,50 @@ class VentaDetalle extends CustomComponent {
         <tr key={index}>
           <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
           <td className="p-2 text-gray-900 font-medium text-right">
-            {formatCurrency(impuesto.valor, this.state.codiso)}
+            {formatCurrency(impuesto.valor, cabecera.codiso)}
           </td>
         </tr>
       ));
     };
 
     return (
-      <>
-        <tr>
-          <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
-          <td className="p-2 text-gray-900 font-medium text-right">
-            {formatCurrency(subTotal, this.state.codiso)}
-          </td>
-        </tr>
-        {impuestosGenerado()}
-        <tr>
-          <td colSpan={2} className="py-2">
-            <div className="border-t border-gray-200"></div>
-          </td>
-        </tr>
-        <tr>
-          <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
-          <td className="p-2 text-gray-900 font-bold text-right text-lg">
-            {formatCurrency(total, this.state.codiso)}
-          </td>
-        </tr>
-      </>
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-start-9 lg:col-span-4">
+          <div className="bg-white overflow-hidden">
+            <table className="w-full text-right">
+              <tbody>
+                <tr>
+                  <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-medium text-right">
+                    {formatCurrency(subTotal, cabecera.codiso)}
+                  </td>
+                </tr>
+                {impuestosGenerado()}
+                <tr>
+                  <td colSpan={2} className="py-2">
+                    <div className="border-t border-gray-200"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-bold text-right text-lg">
+                    {formatCurrency(total, cabecera.codiso)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     );
   }
+
   renderTransaciones() {
-    if (isEmpty(this.state.transaccion)) {
+    const { loading, cabecera, transaccion } = this.state;
+
+    if (loading) return null;
+
+    if (isEmpty(transaccion)) {
       return (
         <tr>
           <td colSpan={5} className="p-6 text-center text-gray-500">
@@ -457,60 +508,86 @@ class VentaDetalle extends CustomComponent {
       );
     }
 
-    return this.state.transaccion.map((item, index) => (
-      <React.Fragment key={index}>
-        {/* Transacción principal */}
-        <tr className="bg-green-50">
-          <td className="p-3 font-medium text-gray-800">{index + 1}</td>
-          <td className="p-3">
-            <div className="font-medium">{item.fecha}</div>
-            <div className="text-sm text-gray-600">{formatTime(item.hora)}</div>
-          </td>
-          <td className="p-3 text-gray-800">{item.concepto}</td>
-          <td className="p-3 text-gray-800">{item.nota}</td>
-          <td className="p-3 text-gray-800">{item.usuario}</td>
-        </tr>
+    return (
+      <div className="bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Transacciones</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4 text-center">#</th>
+                <th className="p-4">Fecha y Hora</th>
+                <th className="p-4">Concepto</th>
+                <th className="p-4">Nota</th>
+                <th className="p-4">Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                transaccion.map((item, index) => (
+                  <React.Fragment key={index}>
+                    {/* Transacción principal */}
+                    <tr className="bg-green-200">
+                      <td className="p-3 text-center font-medium text-gray-800">{index + 1}</td>
+                      <td className="p-3">
+                        <p className="font-medium">{item.fecha}</p>
+                        <p className="text-sm text-gray-600">{formatTime(item.hora)}</p>
+                      </td>
+                      <td className="p-3 text-gray-800">{item.concepto}</td>
+                      <td className="p-3 text-gray-800">{item.nota}</td>
+                      <td className="p-3 text-gray-800">{item.usuario}</td>
+                    </tr>
 
-        {/* Encabezado de detalles */}
-        <tr className="bg-gray-50 text-sm text-gray-600">
-          <td className="p-2 text-center">#</td>
-          <td className="p-2">Banco</td>
-          <td className="p-2">Monto</td>
-          <td colSpan={2} className="p-2">Observación</td>
-        </tr>
+                    {/* Encabezado de detalles */}
+                    <tr className="text-sm text-gray-600">
+                      <td className="p-3"></td>
+                      <td className="p-3">Banco</td>
+                      <td className="p-3">Monto</td>
+                      <td colSpan={2} className="p-2">Observación</td>
+                    </tr>
 
-        {/* Detalles de la transacción */}
-        {item.detalles.map((detalle, idx) => (
-          <tr key={idx} className="hover:bg-gray-50">
-            <td className="p-3 text-center text-gray-600">{idx + 1}</td>
-            <td className="p-3 text-gray-700">{detalle.nombre}</td>
-            <td className="p-3 text-gray-900 font-medium">
-              {formatCurrency(detalle.monto, this.state.codiso)}
-            </td>
-            <td colSpan={2} className="p-3 text-gray-700">
-              {detalle.observacion}
-            </td>
-          </tr>
-        ))}
+                    {/* Detalles de la transacción */}
+                    {item.detalles.map((detalle, idx) => (
+                      <tr key={idx}>
+                        <td className="p-3 text-gray-600"></td>
+                        <td className="p-3 text-gray-700">{detalle.nombre}</td>
+                        <td className="p-3 text-gray-900 font-medium">
+                          {formatCurrency(detalle.monto, cabecera.codiso)}
+                        </td>
+                        <td colSpan={2} className="p-3 text-gray-700">
+                          {detalle.observacion}
+                        </td>
+                      </tr>
+                    ))}
 
-        {/* Separador visual */}
-        <tr>
-          <td colSpan={5} className="py-3">
-            <div className="border-t border-gray-200"></div>
-          </td>
-        </tr>
-      </React.Fragment>
-    ));
+                    {/* Separador visual */}
+                    <tr>
+                      <td colSpan={5} className="py-3">
+                        <div className="border-t border-gray-200"></div>
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+
   }
 
   render() {
+    const { loading, msgLoading, idVenta, isOpenSendWhatsapp, isOpenModalPrinter, cabecera, detalles } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
+        {/* Titulo */}
         <Title
           title="Venta"
           subTitle="DETALLE"
@@ -519,16 +596,16 @@ class VentaDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           refModal={this.refModalSendWhatsApp}
-          isOpen={this.state.isOpenSendWhatsapp}
-          phone={this.state.celular}
+          isOpen={isOpenSendWhatsapp}
+          phone={cabecera && cabecera.celular || ""}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
         />
 
         <ModalPrinter
-          isOpen={this.state.isOpenModalPrinter}
+          isOpen={isOpenModalPrinter}
           handleClose={this.handleCloseModalPrinter}
-          idVenta={this.state.idVenta}
+          idVenta={idVenta}
         />
 
         {/* Acciones */}
@@ -566,96 +643,24 @@ class VentaDetalle extends CustomComponent {
           }
 
           <button
-            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 flex items-center gap-2"
+            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-gray-50 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
             <i className="fa fa-whatsapp"></i> WhatsApp
           </button>
         </div>
 
-        {/* Resumen de la venta */}
-        <div className="mb-8 bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
-          <div className="divide-y divide-gray-100">
-            {[
-              { label: 'Comprobante', value: this.state.comprobante },
-              { label: 'Cliente', value: this.state.cliente },
-              { label: 'N° de celular', value: this.state.celular },
-              { label: 'Correo electrónico', value: this.state.email },
-              { label: 'Fecha', value: this.state.fecha },
-              { label: 'Observación', value: this.state.observacion },
-              { label: 'Nota', value: this.state.nota },
-              { label: 'Forma de Pago', value: this.state.formaPago },
-              { label: 'Estado', value: this.state.estado },
-              { label: 'Usuario', value: this.state.usuario },
-              { label: 'Total', value: formatCurrency(this.state.total, this.state.codiso) },
-            ].map((item, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
-                <div className="font-medium text-gray-600">{item.label}</div>
-                <div className="md:col-span-3 text-gray-900">{item.value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Cabecera */}
+        {this.renderCabecera()}
 
         {/* Detalles de productos */}
-        <div className="mb-8 bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800">Detalles</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 text-left text-gray-600 text-sm">
-                <tr>
-                  <th className="p-4">#</th>
-                  <th className="p-4">Imagen</th>
-                  <th className="p-4">Producto</th>
-                  <th className="p-4">Unidad</th>
-                  <th className="p-4">Categoría</th>
-                  <th className="p-4 text-right">Cantidad</th>
-                  <th className="p-4 text-right">Impuesto</th>
-                  <th className="p-4 text-right">Precio</th>
-                  <th className="p-4 text-right">Monto</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {this.renderDetalles()}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {this.renderDetalles()}
 
         {/* Totales (flotante a la derecha en desktop) */}
-        <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-start-9 lg:col-span-4">
-            <div className="bg-white  overflow-hidden">
-              <table className="w-full text-right">
-                <tbody>
-                  {this.renderTotal()}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        {this.renderTotal()}
 
         {/* Transacciones */}
-        <div className="bg-white overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800">Transacciones</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 text-left text-gray-600 text-sm">
-                <tr>
-                  <th className="p-4">#</th>
-                  <th className="p-4">Fecha y Hora</th>
-                  <th className="p-4">Concepto</th>
-                  <th className="p-4">Nota</th>
-                  <th className="p-4">Usuario</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {this.renderTransaciones()}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {this.renderTransaciones()}
       </ContainerWrapper>
     );
   }

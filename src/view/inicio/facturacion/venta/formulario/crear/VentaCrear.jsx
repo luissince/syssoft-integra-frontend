@@ -15,7 +15,6 @@ import {
   comboImpuesto,
   comboMoneda,
   filtrarPersona,
-  preferidosProducto,
   obtenerListaPrecioProducto,
   comboTipoDocumento,
   comboAlmacen,
@@ -25,6 +24,7 @@ import {
   obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
   forSalePedido,
+  filtrarProductoVenta,
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -34,10 +34,10 @@ import SidebarCliente from './component/SidebarCliente';
 import { VENTA } from '../../../../../../model/types/tipo-comprobante';
 import PropTypes from 'prop-types';
 import {
-  A_GRANEL,
-  SERVICIO,
-  UNIDADES,
-  VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_UNIDADES,
+  TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import {
@@ -334,8 +334,11 @@ class VentaCrear extends CustomComponent {
       });
 
       const productos = await this.fetchProductoPreferidos({
-        idSucursal: this.state.idSucursal,
-        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
+        tipo: 2,
+        filtrar: "",
+        idAlmacen: almacenFilter ? almacenFilter.idAlmacen : "",
+        posicionPagina: 0,
+        filasPorPagina: 100,
       });
       this.props.setProductosFavoritos(productos);
       await this.setStateAsync({ productos: productos, loading: false });
@@ -422,13 +425,13 @@ class VentaCrear extends CustomComponent {
   }
 
   async fetchProductoPreferidos(params) {
-    const response = await preferidosProducto(
+    const response = await filtrarProductoVenta(
       params,
       this.abortControllerView.signal,
     );
 
     if (response instanceof SuccessReponse) {
-      return response.data;
+      return response.data.result;
     }
 
     if (response instanceof ErrorResponse) {
@@ -506,8 +509,11 @@ class VentaCrear extends CustomComponent {
 
   async reloadProductoPreferidos() {
     const productos = await this.fetchProductoPreferidos({
-      idSucursal: this.state.idSucursal,
+      tipo: 2,
+      filtrar: "",
       idAlmacen: this.state.idAlmacen,
+      posicionPagina: 0,
+      filasPorPagina: 100,
     });
     this.props.setProductosFavoritos(productos);
     await this.setStateAsync({ productos: productos });
@@ -549,7 +555,7 @@ class VentaCrear extends CustomComponent {
     });
 
     // Lógica principal basada en el tipo de tratamiento del producto
-    if (producto.idTipoTratamientoProducto === UNIDADES) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES) {
       if (!existingItem) {
         const newAmount = cantidad
           ? Number(producto.cantidad)
@@ -568,7 +574,7 @@ class VentaCrear extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       if (!existingItem) {
         const newItem = createNewItem(Number(precio));
         newItem.inventarios = [createInventory(1)];
@@ -579,7 +585,7 @@ class VentaCrear extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
       if (!existingItem) {
         const newItem = createNewItem(Number(producto.precio));
         newItem.inventarios = [createInventory(Number(cantidad))];
@@ -594,7 +600,7 @@ class VentaCrear extends CustomComponent {
       }
     }
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO) {
       if (!existingItem) {
         const newItem = createNewItem(
           precio ? Number(precio) : Number(producto.precio),
@@ -611,7 +617,7 @@ class VentaCrear extends CustomComponent {
   importeTotal = () => {
     return this.state.detalleVenta.reduce((accumulator, item) => {
       const cantidad =
-        item.idTipoTratamientoProducto === SERVICIO
+        item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
           ? item.cantidad
           : item.inventarios.reduce(
             (acc, current) => acc + current.cantidad,
@@ -695,8 +701,11 @@ class VentaCrear extends CustomComponent {
     // Despachar la acción para manejar el cambio en Redux
     this.props.starProduct({
       params: {
-        idSucursal: this.state.idSucursal,
+        tipo: 2,
+        filtrar: "",
         idAlmacen: this.state.idAlmacen,
+        posicionPagina: 0,
+        filasPorPagina: 100,
       },
       producto: producto,
     });
@@ -752,14 +761,15 @@ class VentaCrear extends CustomComponent {
       return;
     }
 
-    if (producto.idTipoTratamientoProducto === UNIDADES || producto.idTipoTratamientoProducto === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES
+      || producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO) {
       const detalles = this.addItemDetalle(producto, null, null);
       this.setState({ detalleVenta: detalles }, () => {
         this.updateReduxState();
       });
     }
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       this.handleOpenAgregar(
         'Ingrese el valor monetario (S/, $ u otro) del producto o el total.',
         'Monto:',
@@ -767,7 +777,7 @@ class VentaCrear extends CustomComponent {
       );
     }
 
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
       this.handleOpenAgregar(
         'Ingrese el peso del producto (KM, GM u otro).',
         'Peso:',
@@ -805,11 +815,11 @@ class VentaCrear extends CustomComponent {
   handleSaveAgregar = async (producto, cantidad) => {
     let detalles = structuredClone(this.state.detalleVenta);
 
-    if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
       detalles = this.addItemDetalle(producto, parseFloat(cantidad), null);
     }
 
-    if (producto.idTipoTratamientoProducto === A_GRANEL) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
       detalles = this.addItemDetalle(producto, null, parseFloat(cantidad));
     }
 
@@ -1153,11 +1163,11 @@ class VentaCrear extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([TIPO_TRATAMIENTO_PRODUCTO_UNIDADES, TIPO_TRATAMIENTO_PRODUCTO_NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(producto, null, producto.cantidad);
         }
 
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
           return this.addItemDetalle(
             producto,
             producto.cantidad * producto.precio,
@@ -1165,7 +1175,7 @@ class VentaCrear extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
           return this.addItemDetalle(producto, null, producto.cantidad);
         }
 
@@ -1238,11 +1248,11 @@ class VentaCrear extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([TIPO_TRATAMIENTO_PRODUCTO_UNIDADES, TIPO_TRATAMIENTO_PRODUCTO_NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(producto, null, producto.cantidad);
         }
 
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
           return this.addItemDetalle(
             producto,
             producto.cantidad * producto.precio,
@@ -1250,7 +1260,7 @@ class VentaCrear extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
           return this.addItemDetalle(producto, null, producto.cantidad);
         }
 
@@ -1311,11 +1321,11 @@ class VentaCrear extends CustomComponent {
       this.handleSelectItemCliente(response.data.cliente);
 
       const detalles = response.data.productos.flatMap((producto, index) => {
-        if ([UNIDADES, SERVICIO].includes(producto.idTipoTratamientoProducto)) {
+        if ([TIPO_TRATAMIENTO_PRODUCTO_UNIDADES, TIPO_TRATAMIENTO_PRODUCTO_NINGUNO].includes(producto.idTipoTratamientoProducto)) {
           return this.addItemDetalle(producto, null, producto.cantidad);
         }
 
-        if (producto.idTipoTratamientoProducto === VALOR_MONETARIO) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO) {
           return this.addItemDetalle(
             producto,
             producto.cantidad * producto.precio,
@@ -1323,7 +1333,7 @@ class VentaCrear extends CustomComponent {
           );
         }
 
-        if (producto.idTipoTratamientoProducto === A_GRANEL) {
+        if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL) {
           return this.addItemDetalle(producto, null, producto.cantidad);
         }
 
@@ -1588,7 +1598,7 @@ class VentaCrear extends CustomComponent {
   handleMinusProducto = async (producto, idInventario) => {
     const detalles = structuredClone(this.state.detalleVenta);
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO) {
       let remove = false;
 
       for (const item of detalles) {
@@ -1611,8 +1621,8 @@ class VentaCrear extends CustomComponent {
     }
 
     if (
-      producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === A_GRANEL
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES ||
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL
     ) {
       let remove = false;
 
@@ -1663,7 +1673,7 @@ class VentaCrear extends CustomComponent {
   handlePlusProducto = async (producto, idInventario) => {
     const detalles = structuredClone(this.state.detalleVenta);
 
-    if (producto.idTipoTratamientoProducto === SERVICIO) {
+    if (producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO) {
       for (const item of detalles) {
         if (item.idProducto === producto.idProducto) {
           item.cantidad = parseFloat(item.cantidad) + 1;
@@ -1675,8 +1685,8 @@ class VentaCrear extends CustomComponent {
     }
 
     if (
-      producto.idTipoTratamientoProducto === UNIDADES ||
-      producto.idTipoTratamientoProducto === A_GRANEL
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES ||
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL
     ) {
       for (const item of detalles) {
         if (item.idProducto === producto.idProducto) {
@@ -1765,7 +1775,7 @@ class VentaCrear extends CustomComponent {
 
     if (
       producto.precio !== Number(precioProducto) &&
-      producto.idTipoTratamientoProducto === VALOR_MONETARIO
+      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO
     ) {
       alertKit.warning({
         title: 'Venta',
@@ -1972,10 +1982,9 @@ class VentaCrear extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
-          const body = response.getBody().map(
-            (item) =>
-              `<tr>
+        if (Array.isArray(response.getBody())) {
+          const body = response.getBody().map((item) =>
+            `<tr>
                   <td>
                     ${item.codigo}
                     <br />
@@ -1984,8 +1993,8 @@ class VentaCrear extends CustomComponent {
                   <td>${formatDecimal(item.cantidadActual)}</td>
                   <td>${formatDecimal(item.cantidadReal)}</td>
                   <td>${formatDecimal(
-                    item.cantidadActual - item.cantidadReal,
-                  )}</td>
+              item.cantidadActual - item.cantidadReal,
+            )}</td>
                 </tr>`,
           );
 
@@ -2089,7 +2098,7 @@ class VentaCrear extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
+        if (Array.isArray(response.getBody())) {
           const body = response.getBody().map((item) =>
             `<tr>
                   <td>
@@ -2105,25 +2114,29 @@ class VentaCrear extends CustomComponent {
                 </tr>`,
           );
 
-          this.alert.html(
-            'Venta',
-            `<div class="d-flex flex-column align-items-center">
-                    <h5>Productos con cantidades faltantes</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad a Vender</th>
-                                <th>Cantidad de Inventario</th>
-                                <th>Cantidad Faltante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${body}
-                        </tbody>
-                    </table>
-                </div>`,
-          );
+          const html = `
+            <div class="d-flex flex-column align-items-center">
+              <h5>Productos con cantidades faltantes</h5>
+              <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad a Vender</th>
+                        <th>Cantidad de Inventario</th>
+                        <th>Cantidad Faltante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  ${body}
+                </tbody>
+              </table>
+            </div>`;
+
+          alertKit.html({
+            title: 'Venta',
+            bodyInnerHTML: html
+          });
+
         } else {
           alertKit.warning({
             title: 'Venta',

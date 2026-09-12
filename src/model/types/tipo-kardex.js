@@ -1,0 +1,2 @@
+export const TIPO_KARDEX_INGRESO = 'TK0001';
+export const TIPO_KARDEX_SALIDA = 'TK0002';
