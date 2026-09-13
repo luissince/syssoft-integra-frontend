@@ -791,10 +791,11 @@ class CompraCrear extends CustomComponent {
       {
         value: isEmpty(detalles),
         message: "Agregar algún producto a la lista.",
+        
         ref: this.refProductoValue,
       },
     ], "Compra");
-    console.log(this.state.detalles);
+
     if (!valid) return;
 
     this.handleOpenModalTerminal();

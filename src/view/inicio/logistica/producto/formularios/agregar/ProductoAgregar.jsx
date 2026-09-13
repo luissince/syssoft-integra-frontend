@@ -212,17 +212,26 @@ class ProductoAgregar extends CustomComponent {
   }
 
   async fetchComboMarca() {
-    const response = await comboMarca(this.abortController.signal);
+    const {
+      success: successMarca,
+      message: messageMarca,
+      type: typeMarca,
+      data: dataMarca
+    } = await comboMarca(this.abortController.signal);
 
-    if (response instanceof SuccessReponse) {
-      return response.data;
+    if (!successMarca) {
+      if (typeMarca === CANCELED) return;
+
+      this.setState({
+        message: messageMarca
+      })
+
+      this.peticion = false;
+      this.abortController = null;
+      return;
     }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
+    return dataMarca;
   }
 
 
@@ -827,10 +836,10 @@ class ProductoAgregar extends CustomComponent {
               </div>
 
               {/* Código de Barras y Marca */}
+              {
+                ![TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
+                  <div className="flex flex-col md:flex-row gap-3">
 
-              <div className="flex flex-col md:flex-row gap-3">
-                {
-                  ![TIPO_PRODUCTO_ACTIVO_FIJO].includes(idTipoProducto) && (
                     <div className="w-full flex flex-col gap-2">
                       <Input
                         group
@@ -854,29 +863,29 @@ class ProductoAgregar extends CustomComponent {
                         }
                       />
                     </div>
-                  )
-                }
 
-                <div className="w-full flex flex-col gap-2">
-                  <Select
-                    label={
-                      <div className="flex items-center gap-1">
-                        <p>Marca:</p>
-                      </div>
-                    }
-                    ref={this.refIdMarca}
-                    value={idMarca}
-                    onChange={this.handleSelectIdMarca}
-                  >
-                    <option value="">-- Selecciona --</option>
-                    {marcas.map((item, index) => (
-                      <option key={index} value={item.idMarca}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
+                    <div className="w-full flex flex-col gap-2">
+                      <Select
+                        label={
+                          <div className="flex items-center gap-1">
+                            <p>Marca:</p>
+                          </div>
+                        }
+                        ref={this.refIdMarca}
+                        value={idMarca}
+                        onChange={this.handleSelectIdMarca}
+                      >
+                        <option value="">-- Selecciona --</option>
+                        {marcas.map((item, index) => (
+                          <option key={index} value={item.idMarca}>
+                            {item.nombre}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                )
+              }
 
               {/* Unidad de medida y Categoria */}
               <div className="flex flex-col md:flex-row gap-3">

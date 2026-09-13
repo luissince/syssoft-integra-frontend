@@ -9,6 +9,8 @@ import RepProductos from './RepProductos';
 // import RepProveedores from './RepProveedores';
 import RepCpeSunat from './RepCpeSunat';
 import RepInventario from './RepInventario';
+import RepActivo from './RepActivo';
+import RepDepreciacion from './RepDepreciacion';
 
 export {
   RepFinanciero,
@@ -19,6 +21,8 @@ export {
   // RepProveedores,
   RepCpeSunat,
   RepInventario,
+  RepActivo,
+  RepDepreciacion,
 };
 
 /**

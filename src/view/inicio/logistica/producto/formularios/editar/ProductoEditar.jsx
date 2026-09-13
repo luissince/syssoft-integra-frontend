@@ -44,6 +44,7 @@ import RadioButton from '@/components/RadioButton';
 import Select from '@/components/Select';
 import { DIGITOS_DECRECIENTES, LINEA_RECTA, SUMA_DE_DIGITOS } from '@/model/types/metodo-depreciacion';
 import { FaAsterisk } from 'react-icons/fa';
+import response from '@/model/class/response';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -244,17 +245,26 @@ class ProductoEditar extends CustomComponent {
   }
 
   async fetchComboMarca() {
-    const response = await comboMarca(this.abortController.signal);
+    const {
+      success: successMarca,
+      message: messageMarca,
+      type: typeMarca,
+      data: dataMarca
+    } = await comboMarca(this.abortController.signal);
 
-    if (response instanceof SuccessReponse) {
-      return response.data;
+    if (!successMarca) {
+      if (typeMarca === CANCELED) return;
+
+      this.setState({
+        message: messageMarca
+      })
+
+      this.peticion = false;
+      this.abortController = null;
+      return;
     }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
+    return dataMarca;
   }
 
   /*

@@ -22,7 +22,7 @@ import {
 import { images } from '@/helper';
 import Image from '@/components/Image';
 import { alertKit } from 'alert-kit';
-import { comboAtributo, comboUbicacion } from '@/network/rest/principal.network';
+import { comboAtributo, comboMarca, comboUbicacion } from '@/network/rest/principal.network';
 import { CANCELED } from '@/constants/requestStatus';
 import Select from '@/components/Select';
 import { cn } from '@/lib/utils';
@@ -98,10 +98,30 @@ class ModalProducto extends Component {
 
   loadDatos = async (producto, type) => {
     this.abortController = new AbortController();
-
     // const { success: successColores, message: messageColores, type: typeColores, data: dataColores } = await comboAtributo(TIPO_ATRIBUTO_COLOR, this.abortController.signal);
     // const { success: successTallas, message: messageTallas, type: typeTallas, data: dataTallas } = await comboAtributo(TIPO_ATRIBUTO_TALLA, this.abortController.signal);
     // const { success: successSabores, message: messageSabores, type: typeSabores, data: dataSabores } = await comboAtributo(TIPO_ATRIBUTO_SABOR, this.abortController.signal);
+    const {
+      success: successMarca,
+      message: messageMarca,
+      type: typeMarca,
+      data: dataMarca
+    } = await comboMarca(this.abortController.signal);
+
+    if (!successMarca) {
+      if (typeMarca === CANCELED) return;
+
+      this.setState({
+        message: messageMarca
+      })
+
+      this.peticion = false;
+      this.abortController = null;
+      return;
+    }
+
+    const marcas = dataMarca;
+
     const {
       success: successUbicacion,
       message: messageUbicacion,
@@ -174,6 +194,7 @@ class ModalProducto extends Component {
         idTipoProducto: producto.idTipoProducto,
         idMetodoDepreciacion: producto.idMetodoDepreciacion,
         inventarioDetalles: producto.inventarioDetalles,
+        marcas: marcas,
         ubicaciones: ubicaciones,
         atributos,
         tiposAtributo,
@@ -193,6 +214,7 @@ class ModalProducto extends Component {
           ...this.state.inventarioDetalles,
           this.loadDetalleInventarioPorDefecto(producto.idTipoProducto),
         ],
+        marcas: marcas,
         ubicaciones: ubicaciones,
         atributos,
         tiposAtributo,
@@ -599,10 +621,13 @@ class ModalProducto extends Component {
         return;
       }
 
-      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.serie))) {
+      if (inventarioDetalles.some((item) =>
+        item.porDefecto !== true &&
+        (!item.serie || !/^[^-]+-[^-]+$/.test(item.serie.trim()))
+      )) {
         alertKit.warning({
           title: "Compra",
-          message: "Hay detalle(s) sin serie.",
+          message: "La serie debe tener el formato texto-numero, por ejemplo: SR-0001.",
         }, () => {
           validateNumericInputs(this.refInventarioDetalles);
         });
@@ -832,7 +857,7 @@ class ModalProducto extends Component {
 
     if (item.porDefecto) return;
 
-    const { ubicaciones } = this.state;
+    const { ubicaciones, marcas } = this.state;
     return (
       <>
         <div className="w-full flex flex-row gap-3">
@@ -940,6 +965,29 @@ class ModalProducto extends Component {
               }
             />
           </div>
+          <div className="w-full flex flex-col gap-3">
+            <Select
+              label={
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-700">Marca:</p>
+                </div>
+              }
+              tabIndex={2}
+              value={item.idMarca}
+              onChange={(e) =>
+                this.updateDetalleField(item.id, "idMarca", e.target.value)
+              }
+            >
+              <option value="">-- Seleccione --</option>
+              {
+                marcas.map((marca, idx) => (
+                  <option key={idx} value={marca.idMarca}>
+                    {marca.nombre}
+                  </option>
+                ))
+              }
+            </Select>
+          </div>
         </div>
 
         <div className="w-full flex flex-row gap-3">
@@ -947,7 +995,7 @@ class ModalProducto extends Component {
             <Input
               label={
                 <div className="flex items-center gap-1">
-                  <p className="text-gray-700">Serie:</p> <FaAsterisk className="text-red-500" size={8} />
+                  <p className="text-gray-700">Serie - Numero:</p> <FaAsterisk className="text-red-500" size={8} />
                 </div>
               }
               placeholder="Por ejemplo: SR-0001"

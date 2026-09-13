@@ -280,6 +280,14 @@ export async function createDepreciacionKardex(body: Record<string, any>, signal
   );
 }
 
+export async function reporteDepreciacion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/kardex/depreciacion/reporte', body, {
+      signal: signal,
+    }),
+  );
+}
+
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE NOTA DE CRÉDITO

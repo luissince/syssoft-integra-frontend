@@ -1875,7 +1875,7 @@ export async function removeMarca(params) {
 }
 
 export async function comboMarca(signal) {
-  return await Resolve.resolve(
+  return await Resolve.safe(
     instancePrincipal.get('/api/marca/combo', {
       signal: signal,
     }),

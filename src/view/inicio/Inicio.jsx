@@ -160,6 +160,8 @@ import Reporte, {
   RepProductos,
   RepCpeSunat,
   RepInventario,
+  RepActivo,
+  RepDepreciacion,
 } from './reporte/index';
 
 import CpeSunat, { CpeElectronicos, CpeConsultar } from './cpesunat/index';
@@ -1236,6 +1238,14 @@ class Inicio extends React.Component {
 
           <Route path={`${path}/reportes/repinventario`}>
             <RepInventario />
+          </Route>
+
+          <Route path={`${path}/reportes/repactivo`}>
+            <RepActivo />
+          </Route>
+
+          <Route path={`${path}/reportes/repdepreciacion`}>
+            <RepDepreciacion />
           </Route>
 
           {/* 
