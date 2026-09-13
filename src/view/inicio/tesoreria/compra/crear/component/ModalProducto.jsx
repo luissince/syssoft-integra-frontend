@@ -621,13 +621,10 @@ class ModalProducto extends Component {
         return;
       }
 
-      if (inventarioDetalles.some((item) =>
-        item.porDefecto !== true &&
-        (!item.serie || !/^[^-]+-[^-]+$/.test(item.serie.trim()))
-      )) {
+      if (inventarioDetalles.some((item) => item.porDefecto !== true && isEmpty(item.serie))) {
         alertKit.warning({
           title: "Compra",
-          message: "La serie debe tener el formato texto-numero, por ejemplo: SR-0001.",
+          message: "Hay detalle(s) sin serie.",
         }, () => {
           validateNumericInputs(this.refInventarioDetalles);
         });
@@ -991,20 +988,38 @@ class ModalProducto extends Component {
         </div>
 
         <div className="w-full flex flex-row gap-3">
-          <div className="w-full flex flex-col gap-3">
-            <Input
-              label={
-                <div className="flex items-center gap-1">
-                  <p className="text-gray-700">Serie - Numero:</p> <FaAsterisk className="text-red-500" size={8} />
-                </div>
-              }
-              placeholder="Por ejemplo: SR-0001"
-              tabIndex={2}
-              value={item.serie}
-              onChange={(e) =>
-                this.updateDetalleField(item.id, "serie", e.target.value)
-              }
-            />
+          <div className="w-full flex flex-row gap-3">
+            <div className="w-full flex flex-col gap-3">
+              <Input
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700">Serie:</p> <FaAsterisk className="text-red-500" size={8} />
+                  </div>
+                }
+                placeholder="SR54G8"
+                tabIndex={2}
+                value={item.serie}
+                onChange={(e) =>
+                  this.updateDetalleField(item.id, "serie", e.target.value)
+                }
+              />
+            </div>
+            <div className="w-full flex flex-col gap-3">
+              <Input
+                label={
+                  <div className="flex items-center gap-1">
+                    <p className="text-gray-700">Numero:</p>
+                  </div>
+                }
+                placeholder="0001"
+                tabIndex={2}
+                value={item.numero}
+                onChange={(e) =>
+                  this.updateDetalleField(item.id, "numero", e.target.value)
+                }
+              />
+            </div>
+
           </div>
           <div className="w-full flex flex-col gap-3">
             <Input

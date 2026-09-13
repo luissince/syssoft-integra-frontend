@@ -11,6 +11,7 @@ export interface ProductFilterInterface {
   imagen: string | null
   nombre: string
   correlativo: string | null
+  serie: string | null
   precio: number
   sku: string
   tipoProducto: string

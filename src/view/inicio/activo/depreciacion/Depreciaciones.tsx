@@ -169,8 +169,9 @@ const Depreciaciones = () => {
     }, []);
 
     useEffect(() => {
-        // if (!state.producto || !state.idAlmacen) return;
         if (!state.idAlmacen) return;
+
+        if (state.opcion === 2 && !state.producto?.idProducto) return;
 
         fetchDetail();
 
@@ -211,9 +212,11 @@ const Depreciaciones = () => {
         dispatch(setActivoDepreciacionState({
             opcion: 0,
             producto: null,
+            correlativo: "",
             productos: [],
             lista: [],
-            paginacion: 1
+            paginacion: 1,
+            loading: false
         }));
     };
 
@@ -224,13 +227,12 @@ const Depreciaciones = () => {
         }));
 
         if (isEmpty(text)) {
-            dispatch(setActivoDepreciacionState({
-                productos: []
-            }));
+            handleClearInputProducto();
             return;
         }
 
         const params = {
+            opcion: 1,
             filtrar: text
         };
 
@@ -305,7 +307,7 @@ const Depreciaciones = () => {
         return state.lista.map((item, index) => (
             <tr key={index}>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.correlativo}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{item.serie}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{item.serie}<br/>{item.numero}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.fechaAdquisicion ? format(item.fechaAdquisicion, "dd-MM-yyyy") : "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.fechaDepreciacion ? format(item.fechaDepreciacion, "dd-MM-yyyy") : "N/A"}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{item.cantidad}</td>
@@ -380,6 +382,7 @@ const Depreciaciones = () => {
                                         }
                                         <p className="text-xs font-bold">{value.codigo}</p>
                                         <p className="text-sm">{value.nombre}</p>
+                                        <p className="text-xs text-gray-500">{value.serie}</p>
                                     </div>
                                 </div>
                             )}
@@ -475,7 +478,7 @@ const Depreciaciones = () => {
                                     Correlativo
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
-                                    Serie
+                                    Serie/Numero
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
                                     Fecha Adquisición

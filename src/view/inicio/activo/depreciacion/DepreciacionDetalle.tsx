@@ -203,6 +203,8 @@ const DepreciacionDetalle = () => {
                 title: 'Depreciación',
                 message: data,
             });
+
+            await loadData();
         }
     }
 

@@ -27,6 +27,7 @@ enum estadoInventario {
 type ActivoDepreciacion = {
   idProducto: string;
   serie: string;
+  numero: string;
   correlativo: string;
   fechaAdquisicion: string;
   fechaIngreso: string;
@@ -35,18 +36,18 @@ type ActivoDepreciacion = {
   vidaUtil: number;
   costoFijo: number;
   valorInicio: number;
-  enero: string;
-  febrero: string,
-  marzo: string,
-  abril: string,
-  mayo: string,
-  junio: string,
-  julio: string,
-  agosto: string,
-  septiembre: string,
-  octubre: string,
-  noviembre: string,
-  diciembre: string,
+  enero: number;
+  febrero: number,
+  marzo: number,
+  abril: number,
+  mayo: number,
+  junio: number,
+  julio: number,
+  agosto: number,
+  septiembre: number,
+  octubre: number,
+  noviembre: number,
+  diciembre: number,
   depreciacion: number,
   depreciacionAcumulada: number,
   valorLibros: number
@@ -129,7 +130,7 @@ const ReporteDepreciacion = () => {
   }
 
   useEffect(() => {
-    loadAll();
+    loadInventarioActivo();
 
     return () => {
       abortDashboardRef.current?.abort();
@@ -221,38 +222,47 @@ const ReporteDepreciacion = () => {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-100">
                   <tr>
-                    <th className="w-[20%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TA</th>
-                    <th className="w-[20%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ADQUISIC</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">INGRESO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">FECHA DE USO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TD</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SERIE</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CODIGO INVENTARIO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DOLARES</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOLES</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">VALOR NETO EN LIBROS</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">%</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DIAS</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DEPRECIACION ACUMULADA</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DEPRECIACION DEL EJERCICIO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ENERO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">FEBRERO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MARZO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ABRIL</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MAYO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">JUNIO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">JULIO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AGOSTO</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SEPTIEMBRE</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">OCTUBRE</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NOVIEMBRE</th>
-                    <th className="w-[10%] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DICIEMBRE</th>
+                    <th rowSpan={3} className="w-[20%] text-center text-xs font-medium text-gray-500 uppercase border">TA</th>
+                    <th colSpan={3} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FECHA</th>
+                    <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">TD</th>
+                    <th colSpan={2} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DOCUMENTO</th>
+                    <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">CODIGO INVENTARIO</th>
+                    <th colSpan={2} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">COSTO HISTÓRICO</th>
+                    <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase">VALOR NETO EN LIBROS</th>
+                    <th colSpan={16} className="text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION</th>
+                  </tr>
+                  <tr>
+                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">%</th>
+                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DIAS</th>
+                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION ACUMULADA</th>
+                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION DEL EJERCICIO</th>
+                    <th colSpan={12} className="text-center text-xs font-medium text-gray-500 uppercase border">MESES</th>
+                  </tr>
+                  <tr>
+                    <th className="w-[20%] text-center text-xs font-medium text-gray-500 uppercase border">ADQUISIC</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">INGRESO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FECHA DE USO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SERIE</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">N°</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DOLARES</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SOLES</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">ENERO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FEBRERO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">MARZO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">ABRIL</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">MAYO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">JUNIO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">JULIO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">AGOSTO</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SEPTIEMBRE</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">OCTUBRE</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">NOVIEMBRE</th>
+                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DICIEMBRE</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 border">
                   {
                     isEmpty(activoDepreciacion) ? (
                       <tr>
@@ -296,12 +306,12 @@ const ReporteDepreciacion = () => {
                             </td>
                             <td className="px-6 py-4 font-medium text-gray-900">
                               <div className="text-sm text-gray-500">
-                                {inventario.serie.split('-')[0]}
+                                {inventario.serie}
                               </div>
                             </td>
                             <td className="px-6 py-4 font-medium text-gray-900">
                               <div className="text-sm text-gray-500">
-                                {inventario.serie.split('-')[1]}
+                                {inventario.numero ? inventario.numero : 'NA'}
                               </div>
                             </td>
                             <td className="px-6 py-4 font-medium text-gray-900">
@@ -409,6 +419,61 @@ const ReporteDepreciacion = () => {
                     )
                   }
                 </tbody>
+                <tfoot className="bg-gray-100">
+                  <tr>
+                    <td colSpan={8} className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">Totales</td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"></td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.costoFijo, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.valorLibros, 0))}
+                    </td>
+                    <td colSpan={2} className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"></td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacionAcumulada, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacion, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"> 
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.enero, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.febrero, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.marzo, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.abril, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.mayo, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.junio, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.julio, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.agosto, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.septiembre, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.octubre, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.noviembre, 0))}
+                    </td>
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.diciembre, 0))}
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>
