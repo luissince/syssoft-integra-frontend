@@ -360,6 +360,14 @@ export async function updateGestion(body: Record<string, any>, signal: AbortSign
   );
 }
 
+export async function reporteAsignacion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/activo-gestion/reporte', body, {
+      signal: signal,
+    }),
+  );
+}
+
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE AREA

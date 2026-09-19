@@ -6,7 +6,6 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import DatePickerPopover from "@/components/DatePickerPopover";
 import { optionsSucursal } from '@/network/rest/api-client';
 import { format } from 'date-fns';
 import { alertKit } from 'alert-kit';
@@ -27,7 +26,7 @@ enum estadoInventario {
 type ActivoDepreciacion = {
   idProducto: string;
   serie: string;
-  numero: string;
+  numeracion: string;
   correlativo: string;
   fechaAdquisicion: string;
   fechaIngreso: string;
@@ -64,6 +63,11 @@ const ReporteDepreciacion = () => {
 
   const [fechaInicial, setFechaInicial] = useState(new Date());
   const [fechaFinal, setFechaFinal] = useState(new Date());
+  const anioActual = new Date().getFullYear();
+  const opcionesAnio = Array.from(
+    { length: anioActual + 50 - 1900 + 1 },
+    (_, index) => 1900 + index,
+  );
 
   const [activoDepreciacion, setActivoDepreciacion] = useState<ActivoDepreciacion[]>([]);
   const [sucursales, setSucursales] = useState<Array<BranchInterface>>([]);
@@ -138,12 +142,12 @@ const ReporteDepreciacion = () => {
   }, [fechaInicial, fechaFinal]);
 
 
-  const handleFechaInicial = (date: Date) => {
-    setFechaInicial(date);
+  const handleAnioInicial = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFechaInicial(new Date(Number(event.target.value), 0, 1));
   };
 
-  const handleFechaFinal = (date: Date) => {
-    setFechaFinal(date);
+  const handleAnioFinal = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFechaFinal(new Date(Number(event.target.value), 11, 31));
   };
 
   const handleSucursalChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -182,14 +186,49 @@ const ReporteDepreciacion = () => {
 
           <div className="flex">
             <p className="text-gray-600 mt-1">
-              Análisis del estado de inventario y rendimiento de productos
+              Análisis de Depreciación de Activos Fijos, mostrando la información de los activos fijos y su depreciación acumulada y del ejercicio, así como el valor neto en libros.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <DatePickerPopover value={fechaInicial} onChange={handleFechaInicial} />
+            {/* <DatePickerPopover value={fechaInicial} onChange={handleFechaInicial} />
 
-            <DatePickerPopover value={fechaFinal} onChange={handleFechaFinal} />
+            <DatePickerPopover value={fechaFinal} onChange={handleFechaFinal} /> */}
+            <div>
+              <a className="px-4 text-sm font-medium text-gray-700">
+                AÑO INICIAL:
+              </a>
+              <select
+                value={fechaInicial.getFullYear()}
+                onChange={handleAnioInicial}
+                aria-label="Año inicial"
+                className="px-4 py-2 border border-gray-300 text-sm rounded"
+              >
+                {opcionesAnio.map((anio) => (
+                  <option key={anio} value={anio}>
+                    {anio}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <a className="px-4 text-sm font-medium text-gray-700">
+                AÑO FINAL:
+              </a>
+              <select
+                value={fechaFinal.getFullYear()}
+                onChange={handleAnioFinal}
+                aria-label="Año final"
+                className="px-4 py-2 border border-gray-300 text-sm rounded"
+              >
+                {opcionesAnio.map((anio) => (
+                  <option key={anio} value={anio}>
+                    {anio}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <select
               value={idSucursal}
@@ -311,7 +350,7 @@ const ReporteDepreciacion = () => {
                             </td>
                             <td className="px-6 py-4 font-medium text-gray-900">
                               <div className="text-sm text-gray-500">
-                                {inventario.numero ? inventario.numero : 'NA'}
+                                {inventario.numeracion ? inventario.numeracion : 'NA'}
                               </div>
                             </td>
                             <td className="px-6 py-4 font-medium text-gray-900">
@@ -436,7 +475,7 @@ const ReporteDepreciacion = () => {
                     <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
                       {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacion, 0))}
                     </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"> 
+                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
                       {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.enero, 0))}
                     </td>
                     <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">

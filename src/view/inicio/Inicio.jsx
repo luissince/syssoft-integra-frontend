@@ -160,7 +160,7 @@ import Reporte, {
   RepProductos,
   RepCpeSunat,
   RepInventario,
-  RepActivo,
+  RepGestion,
   RepDepreciacion,
 } from './reporte/index';
 
@@ -1240,8 +1240,8 @@ class Inicio extends React.Component {
             <RepInventario />
           </Route>
 
-          <Route path={`${path}/reportes/repactivo`}>
-            <RepActivo />
+          <Route path={`${path}/reportes/repgestion`}>
+            <RepGestion />
           </Route>
 
           <Route path={`${path}/reportes/repdepreciacion`}>

@@ -281,7 +281,7 @@ const Depreciaciones = () => {
     const handleGoDetail = (item: KardexListDepreciacionInterface) => {
         history.push({
             pathname: `${history.location.pathname}/detalle`,
-            state: { idProducto: item.idProducto, idAlmacen: state.idAlmacen, serie: item.serie, correlativo: item.correlativo }
+            state: { idProducto: item.idProducto, idAlmacen: state.idAlmacen, serie: item.serie, correlativo: item.correlativo, idInventarioActivo: item.idInventarioActivo }
         });
     };
 

@@ -34,11 +34,12 @@ const DepreciacionDetalle = () => {
         idProducto: string;
         idAlmacen: string;
         serie: string;
+        idInventarioActivo: string;
     }>();
 
     const history = useHistory();
 
-    const { idProducto, idAlmacen, serie } = location.state || {};
+    const { idProducto, idAlmacen, serie, idInventarioActivo } = location.state || {};
 
     // =============================
     // STATE
@@ -87,7 +88,8 @@ const DepreciacionDetalle = () => {
         const body = {
             idProducto,
             idAlmacen,
-            serie
+            serie,
+            idInventarioActivo
         };
 
         const { success, data, message } =

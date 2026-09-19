@@ -1004,21 +1004,6 @@ class ModalProducto extends Component {
                 }
               />
             </div>
-            <div className="w-full flex flex-col gap-3">
-              <Input
-                label={
-                  <div className="flex items-center gap-1">
-                    <p className="text-gray-700">Numero:</p>
-                  </div>
-                }
-                placeholder="0001"
-                tabIndex={2}
-                value={item.numero}
-                onChange={(e) =>
-                  this.updateDetalleField(item.id, "numero", e.target.value)
-                }
-              />
-            </div>
 
           </div>
           <div className="w-full flex flex-col gap-3">
