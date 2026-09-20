@@ -42,6 +42,8 @@ class PedidoDetalle extends CustomComponent {
       cabecera: null,
       envio: null,
       detalles: [],
+      ventas: [],
+      vendidos: [],
     };
 
     this.abortControllerView = new AbortController();
@@ -113,6 +115,9 @@ class PedidoDetalle extends CustomComponent {
       cabecera: data.cabecera,
       envio: data.envio,
       detalles: data.detalles,
+      ventas: data.ventas,
+      vendidos: data.vendidos,
+
       loading: false,
     });
   }
@@ -332,34 +337,40 @@ class PedidoDetalle extends CustomComponent {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {
-                detalles.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="p-4">{item.id}</td>
-                    <td className="p-4 text-center">
-                      <Image
-                        default={images.noImage}
-                        src={item.imagen}
-                        alt={item.producto}
-                        width={80}
-                        className="mx-auto rounded border border-gray-200"
-                      />
-                    </td>
-                    <td className="p-4">
-                      <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
-                      <p className="text-black uppercase">{item.producto}</p>
-                    </td>
-                    <td className="p-4">{item.categoria}</td>
-                    <td className="p-4 text-right">{rounded(item.cantidad)}</td>
-                    <td className="p-4 text-right">{item.medida}</td>
-                    <td className="p-4 text-right">{item.impuesto}</td>
-                    <td className="p-4 text-right">
-                      {formatCurrency(item.precio, cabecera.codiso)}
-                    </td>
-                    <td className="p-4 font-medium text-right">
-                      {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
-                    </td>
-                  </tr>
-                ))
+                detalles.map((item, index) => {
+                  const vendido = this.state.vendidos.find(
+                    (vendido) => vendido.idProducto === item.idProducto,
+                  );
+
+                  return (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="p-4">{item.id}</td>
+                      <td className="p-4 text-center">
+                        <Image
+                          default={images.noImage}
+                          src={item.imagen}
+                          alt={item.producto}
+                          width={80}
+                          className="mx-auto rounded border border-gray-200"
+                        />
+                      </td>
+                      <td className="p-4">
+                        <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+                        <p className="text-black uppercase">{item.producto}</p>
+                      </td>
+                      <td className="p-4">{item.categoria}</td>
+                      <td className="p-4 text-right">{rounded(item.cantidad)}</td>
+                      <td className="p-4 text-right">{item.medida}</td>
+                      <td className="p-4 text-right">{item.impuesto}</td>
+                      <td className="p-4 text-right">
+                        {formatCurrency(item.precio, cabecera.codiso)}
+                      </td>
+                      <td className="p-4 font-medium text-right">
+                        {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
+                      </td>
+                    </tr>
+                  );
+                })
               }
             </tbody>
           </table>

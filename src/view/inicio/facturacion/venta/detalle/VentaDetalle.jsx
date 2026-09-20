@@ -361,8 +361,7 @@ class VentaDetalle extends CustomComponent {
                 <th className="p-4">Imagen</th>
                 <th className="p-4">Producto</th>
                 <th className="p-4">Categoría</th>
-                <th className="p-4 text-right">Cantidad</th>
-                <th className="p-4 text-right">Medida</th>
+                <th className="p-4 text-left">Cantidad</th>
                 <th className="p-4 text-right">Impuesto</th>
                 <th className="p-4 text-right">Precio</th>
                 <th className="p-4 text-right">Monto</th>
@@ -386,9 +385,8 @@ class VentaDetalle extends CustomComponent {
                       <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
                       <p className="text-black uppercase">{item.producto}</p>
                     </td>
-                    <td className="p-4">{item.categoria}</td>
-                    <td className="p-4 text-right">{rounded(item.cantidad)}</td>
-                    <td className="p-4 text-right">{item.medida}</td>
+                    <td className="p-4 text-right">{rounded(item.cantidad)} x <small>{item.medida}</small></td>
+                    <td className="p-4">{item.categoria}</td>                   
                     <td className="p-4 text-right">{item.impuesto}</td>
                     <td className="p-4 text-right">
                       {formatCurrency(item.precio, cabecera.codiso)}

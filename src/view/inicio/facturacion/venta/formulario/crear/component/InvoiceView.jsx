@@ -118,21 +118,6 @@ class InvoiceView extends CustomComponent {
         });
         this.refProducto.current.focus();
       }
-
-      // const params = {
-      //   tipo: 1,
-      //   filtrar: this.state.producto,
-      //   idSucursal: this.props.idSucursal,
-      //   idAlmacen: this.props.idAlmacen,
-      // };
-
-      // const result = await this.fetchFiltrarVenta(params);
-
-      // if (!isEmpty(result)) {
-      //   this.handleAddItem(result[0])
-      // }
-
-      // this.setState({ loading: false, producto: '' });
     }
   };
 
@@ -164,55 +149,8 @@ class InvoiceView extends CustomComponent {
   };
 
   fillTable = async (tipo, buscar) => {
-    // this.setState({
-    //   loading: true,
-    // });
-
-    // const searchParams = new URLSearchParams();
-    // searchParams.append("tipo", tipo);
-    // searchParams.append("filtrar", buscar);
-    // searchParams.append("idSucursal", this.props.idSucursal);
-    // searchParams.append("idAlmacen", this.props.idAlmacen);
-    // searchParams.append("posicionPagina", (this.state.paginacion - 1) * this.state.filasPorPagina);
-    // searchParams.append("filasPorPagina", this.state.filasPorPagina);
-
-    // this.eventSource = new EventSource(filtrarStreamProductoVenta(searchParams.toString()));
-
-    // this.eventSource.onmessage = (event) => {
-    //   const data = JSON.parse(event.data);
-    //   if (data === "__END__") {
-    //     this.setState({
-    //       loading: false,
-    //     });
-
-    //     this.eventSource.close()
-    //     return
-    //   }
-
-    //   if (typeof data === 'object') {
-    //     this.props.handleUpdateProductos(data);
-    //   }
-
-    //   if (typeof data === 'number') {
-    //     const totalPaginacion = parseInt(
-    //       Math.ceil(parseFloat(data) / this.state.filasPorPagina),
-    //     );
-
-    //     this.setState({
-    //       totalPaginacion: totalPaginacion,
-    //     });
-    //   }
-    // };
-
-    // this.eventSource.onerror = () => {
-    //   this.setState({
-    //     loading: false,
-    //   });
-    // };
-
     this.setState({
       loading: true,
-      // productos: []
     });
 
     const params = {
@@ -228,12 +166,6 @@ class InvoiceView extends CustomComponent {
       const totalPaginacion = parseInt(
         String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)),
       );
-
-      // this.setState(prevState => ({
-      //   loading: false,
-      //   productos: [...prevState.productos, ...response.data.lists],
-      //   totalPaginacion: totalPaginacion,
-      // }));
 
       for (const item of response.data.result) {
         this.props.handleUpdateProductos(item);
@@ -266,7 +198,6 @@ class InvoiceView extends CustomComponent {
 
     const {
       nombreComporbante,
-      handleOpenPreImpresion,
       handleOpenVenta,
       handleOpenCotizacion,
       handleOpenPedido,
@@ -280,7 +211,6 @@ class InvoiceView extends CustomComponent {
         <div className="flex md:hidden border-b border-solid border-[#e1e7ee] bg-white">
           <InvoiceTicket
             nombreComporbante={nombreComporbante}
-            handleOpenPreImpresion={handleOpenPreImpresion}
             handleOpenVenta={handleOpenVenta}
             handleOpenCotizacion={handleOpenCotizacion}
             handleOpenPedido={handleOpenPedido}
@@ -595,11 +525,11 @@ const ItemView = (props) => {
 
       <span className={cn(
         "text-center block w-full my-1 text-xs",
-        idTipoProducto !== TIPO_PRODUCTO_SERVICIO && negativo === 1 ? "text-blue-600" : "text-red-500"
+        idTipoProducto !== TIPO_PRODUCTO_SERVICIO && negativo === 0 ? "text-blue-600" : "text-red-500"
       )}>
         {idTipoProducto === TIPO_PRODUCTO_SERVICIO
           ? "SIN CONTROL DE STOCK"
-          : negativo === 1
+          : negativo === 0
             ? "VENTA CON CONTROL DE STOCK"
             : "VENTA SIN CONTROL DE STOCK"}
       </span>
@@ -627,7 +557,6 @@ InvoiceView.propTypes = {
   handleStarProduct: PropTypes.func.isRequired,
 
   nombreComporbante: PropTypes.string,
-  handleOpenPreImpresion: PropTypes.func,
   handleOpenVenta: PropTypes.func,
   handleOpenCotizacion: PropTypes.func,
   handleOpenPedido: PropTypes.func,

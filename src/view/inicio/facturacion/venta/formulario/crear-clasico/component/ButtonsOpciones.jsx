@@ -7,7 +7,6 @@ const ButtonsOpciones = ({
   handleOpenPrecios,
   handleOpenCantidad,
   handleOpenDatos,
-  handleOpenImpresion,
   handleClearSale,
   handleOpenPedido,
   handleOpenVenta,

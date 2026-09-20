@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 const InvoiceTicket = (props) => {
   const { nombreComporbante } = props;
   const {
-    handleOpenPreImpresion,
     handleOpenVenta,
     handleOpenCotizacion,
     handleOpenPedido,
@@ -17,16 +16,7 @@ const InvoiceTicket = (props) => {
       <div>
         <p className="h5 m-0">{nombreComporbante}</p>
       </div>
-      <div className="flex">
-        {/* <span>
-          <Button
-            className="btn-link rounded-circle h-100"
-            onClick={handleOpenPreImpresion}
-          >
-            <img src={images.print} alt="Imprimir" />
-          </Button>
-        </span> */}
-
+      <div className="flex">   
         <span>
           <Button
             className="btn-link rounded-circle h-100"
@@ -69,7 +59,6 @@ const InvoiceTicket = (props) => {
 
 InvoiceTicket.propTypes = {
   nombreComporbante: PropTypes.string,
-  handleOpenPreImpresion: PropTypes.func,
   handleOpenVenta: PropTypes.func,
   handleOpenCotizacion: PropTypes.func,
   handleOpenPedido: PropTypes.func,

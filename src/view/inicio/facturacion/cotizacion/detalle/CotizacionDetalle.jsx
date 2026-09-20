@@ -337,7 +337,6 @@ class CotizacionDetalle extends CustomComponent {
                 <th className="p-4">Categoría</th>
                 <th className="p-4 text-right">Impuesto</th>
                 <th className="p-4 text-right">Cantidad</th>
-                <th className="p-4 text-right">Medida</th>
                 <th className="p-4 text-right">Monto</th>
               </tr>
             </thead>
@@ -365,13 +364,12 @@ class CotizacionDetalle extends CustomComponent {
                           <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
                           <p className="text-black uppercase">{item.producto}</p>
                         </td>
-                        <td className="p-4">{item.categoria}</td>
-                        <td className="p-4 text-right">{rounded(item.cantidad)}</td>
-                        <td className="p-4 text-right">{item.medida}</td>
-                        <td className="p-4 text-right">{item.impuesto}</td>
-                        <td className="p-4 text-right">
-                          {formatCurrency(item.precio, cabecera.codiso)}
+                        <td className="p-4 text-left">
+                          {formatCurrency(item.precio, cabecera.codiso)} x <small>{item.medida}</small>
                         </td>
+                        <td className="p-4">{item.categoria}</td>
+                        <td className="p-4 text-right">{item.impuesto}</td>
+                        <td className="p-4 text-right">{rounded(item.cantidad)}</td>
                         <td className="p-4 font-medium text-right">
                           {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
                         </td>
@@ -526,13 +524,13 @@ class CotizacionDetalle extends CustomComponent {
                     ventas.map((item, index) => (
                       <React.Fragment key={index}>
                         {/* Transacción principal */}
-                        <tr className="bg-green-50">
-                          <td className="p-3 text-center font-medium text-gray-800">{item.id}</td>
-                          <td className="p-3">
+                        <tr>
+                          <td className="p-4 text-center font-medium text-gray-800">{item.id}</td>
+                          <td className="p-4">
                             <p className="font-medium">{item.fecha}</p>
                             <p className="text-sm text-gray-600">{formatTime(item.hora)}</p>
                           </td>
-                          <td className="p-3 text-gray-800">
+                          <td className="p-4 text-gray-800">
                             <Link
                               className="btn-link"
                               to={getPathNavigation('venta', item.idVenta)}
@@ -541,7 +539,7 @@ class CotizacionDetalle extends CustomComponent {
                               {formatNumberWithZeros(item.numeracion)}
                             </Link>
                           </td>
-                          <td className="p-3 text-gray-800">
+                          <td className="p-4 text-gray-800">
                             <span className={cn(
                               "inline-flex items-center rounded-full",
                               "text-xs font-medium",
@@ -557,7 +555,7 @@ class CotizacionDetalle extends CustomComponent {
                               {item.estado === 4 && "POR LLEVAR"}
                             </span>
                           </td>
-                          <td className="p-3 text-gray-800">
+                          <td className="p-4 text-gray-800 text-right">
                             {formatCurrency(item.total, item.codiso)}
                           </td>
                         </tr>
@@ -568,13 +566,13 @@ class CotizacionDetalle extends CustomComponent {
             </tbody>
             {
               ventas.length > 0 && (
-                <tfoot>
+                <tfoot className="bg-gray-100 text-sm">
                   <tr>
-                    <th className="text-left"></th>
-                    <th className="text-left"></th>
-                    <th className="text-left"></th>
-                    <th className="text-left">Suma Total:</th>
-                    <th id="total" className="text-center">
+                    <th className="p-4 text-left"></th>
+                    <th className="p-4 text-left"></th>
+                    <th className="p-4 text-left"></th>
+                    <th className="p-4 text-left">Suma Total:</th>
+                    <th id="total" className="p-4 text-right">
                       {formatCurrency(
                         ventas.reduce(
                           (acumulador, item) => (acumulador += item.total),

@@ -30,7 +30,8 @@ class ModalProducto extends Component {
       imagen: null,
       costo: '',
       cantidad: '',
-      tipoProducto: '',
+      idTipoProducto: '',
+      medida: '',
     };
 
     this.initial = { ...this.state };
@@ -49,7 +50,9 @@ class ModalProducto extends Component {
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
-        tipoProducto: producto.tipoProducto,
+        idTipoProducto: producto.idTipoProducto,
+        medida: producto.medida,
+
         loading: false,
       });
     } else {
@@ -60,7 +63,8 @@ class ModalProducto extends Component {
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
-        tipoProducto: producto.tipoProducto,
+        idTipoProducto: producto.idTipoProducto,
+        medida: producto.medida,
 
         loading: false,
       });
@@ -85,7 +89,7 @@ class ModalProducto extends Component {
   };
 
   handleOnSubmit = async () => {
-    const { idProducto, codigo, nombre, imagen, cantidad, costo } =
+    const { idProducto, codigo, nombre, imagen, cantidad, costo , medida } =
       this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
@@ -153,6 +157,7 @@ class ModalProducto extends Component {
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
+        medida: medida,
       };
       nuevoDetalles.push(data);
     }
