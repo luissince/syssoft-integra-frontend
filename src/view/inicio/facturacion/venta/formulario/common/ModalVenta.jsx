@@ -40,6 +40,7 @@ import Button from '../../../../../../components/Button';
 class ModalVenta extends CustomComponent {
   constructor(props) {
     super(props);
+
     this.state = {
       loading: false,
       buscar: '',
@@ -54,7 +55,10 @@ class ModalVenta extends CustomComponent {
       fechaFinal: currentDate(),
     };
 
-    this.abortController = new AbortController();
+    this.initial = { ...this.state };
+
+    this.peticion = false;
+    this.abortController = null;
   }
 
   loadInit = async () => {
@@ -74,8 +78,8 @@ class ModalVenta extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(1, text.trim());
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -85,7 +89,7 @@ class ModalVenta extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   };
 
@@ -95,27 +99,14 @@ class ModalVenta extends CustomComponent {
   };
 
   handlPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, '');
-        break;
-      case 2:
-        this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
   fillTable = async (
-    opcion,
-    buscar = '',
-    fechaInicio = '',
-    fechaFinal = '',
+    opcion
   ) => {
+    this.abortController = new AbortController();
+
     this.setState({
       loading: true,
       lista: [],
@@ -124,9 +115,9 @@ class ModalVenta extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
-      fechaInicio: fechaInicio,
-      fechaFinal: fechaFinal,
+      buscar: this.state.buscar,
+      fechaInicio: this.state.fechaInicio,
+      fechaFinal: this.state.fechaFinal,
       idComprobante: '',
       estado: '0',
       idSucursal: this.props.idSucursal,
@@ -138,6 +129,9 @@ class ModalVenta extends CustomComponent {
 
     if (!success) {
       if (type === CANCELED) return;
+
+      this.peticion = true;
+      this.abortController = null;
 
       this.setState({
         loading: false,
@@ -152,6 +146,9 @@ class ModalVenta extends CustomComponent {
       String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
     );
 
+    this.peticion = true;
+    this.abortController = null;
+
     this.setState({
       loading: false,
       lista: data.result,
@@ -160,7 +157,14 @@ class ModalVenta extends CustomComponent {
   };
 
   handleOnHidden = () => {
-    this.setState({ lista: [] });
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
+    this.setState(this.initial);
+    this.peticion = false;
   };
 
   handleInputBuscar = (event) => {
@@ -168,25 +172,19 @@ class ModalVenta extends CustomComponent {
   };
 
   handleFechaInicio = (event) => {
-    this.setState(
-      {
-        fechaInicio: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaInicio: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   handleFechaFinal = (event) => {
-    this.setState(
-      {
-        fechaFinal: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaFinal: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   generateBody = () => {

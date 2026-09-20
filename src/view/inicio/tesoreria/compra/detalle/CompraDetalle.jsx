@@ -266,13 +266,12 @@ class CompraDetalle extends CustomComponent {
             />
           </TableCell>
           <TableCell>{item.producto}</TableCell>
-          <TableCell className="text-right">
-            {formatCurrency(item.costo, this.state.codiso)}
+          <TableCell className="left">
+            {formatCurrency(item.costo, this.state.codiso)} x <small>{item.medida}</small>
           </TableCell>
           <TableCell>{item.categoria}</TableCell>
           <TableCell className="text-right">{item.impuesto}</TableCell>
           <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-          <TableCell>{item.medida}</TableCell>
           <TableCell className="text-right">
             {formatCurrency(item.cantidad * item.costo, this.state.codiso)}
           </TableCell>
@@ -593,7 +592,6 @@ class CompraDetalle extends CustomComponent {
                     <TableHead>Categoría</TableHead>
                     <TableHead>Impuesto %</TableHead>
                     <TableHead>Cantidad</TableHead>
-                    <TableHead>Medida</TableHead>
                     <TableHead>Importe</TableHead>
                   </TableRow>
                 </TableHeader>

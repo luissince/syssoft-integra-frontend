@@ -381,7 +381,7 @@ class Pedidos extends CustomComponent {
           : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
       )}>
         {
-          lista.map((item, index) => {           
+          lista.map((item, index) => {
             const estado = (
               <span className={cn(
                 "inline-flex items-center rounded-full",
@@ -398,16 +398,25 @@ class Pedidos extends CustomComponent {
             );
 
             const ligado = (
-              <span className={cn(
-                "inline-flex items-center rounded-full",
-                "text-xs font-medium",
-                "px-2.5 py-0.5",
-                item.ligado === 1 && "bg-blue-100 text-blue-800",
-                item.ligado === 0 && "bg-gray-100 text-gray-800",
-              )}>
-                {`LIGADO A ${item.ligado} ${item.ligadol === 1 ? "VENTA": "VENTAS"}`}
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full",
+                  "text-xs font-medium",
+                  "px-2.5 py-0.5",
+
+                  item.ligado === 0 && "bg-gray-100 text-gray-800",
+                  item.ligado === 1 && "bg-blue-100 text-blue-800",
+                  item.ligado === 2 && "bg-green-100 text-green-800",
+                )}
+              >
+                {item.ligado === 0 && "SIN VENTA"}
+
+                {item.ligado === 1 &&
+                  `FALTA VENDER (${item.cantidadCotizada - item.cantidadVendida})`}
+
+                {item.ligado === 2 && "COMPLETADO"}
               </span>
-            )
+            );
 
             return (
               <div

@@ -202,7 +202,7 @@ const ProductTransactionPanel: React.FC<Props> = ({
                                         {item.nombre}
                                     </p>
                                     <p>
-                                        {formatCurrency(type === "costo" ? item.costo : item.precio, codiso)}
+                                        {formatCurrency(type === "costo" ? item.costo : item.precio, codiso)} x <small>{item.medida}</small>
                                     </p>
                                 </div>
                             </div>

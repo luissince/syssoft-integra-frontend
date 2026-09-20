@@ -47,6 +47,7 @@ import Select from '@/components/Select';
 import SearchInput from '@/components/SearchInput';
 import Button from '@/components/Button';
 import pdfVisualizer from 'pdf-visualizer';
+import { TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -498,7 +499,7 @@ class CompraCrear extends CustomComponent {
     const productos = await this.fetchFiltrarProductos(params);
 
     const filteredProductos = productos.filter(
-      (item) => item.tipoProducto !== 'SERVICIO',
+      (item) => item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO,
     );
 
     this.setState({

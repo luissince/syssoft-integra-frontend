@@ -556,7 +556,7 @@ export async function detailVenta(params, signal) {
 
 export async function detailOnlyVentaVenta(params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/factura/detail/venta', {
+    instancePrincipal.get('/api/factura/for-sale', {
       signal: signal,
       params: params,
     }),
@@ -1279,14 +1279,14 @@ export async function anularCotizacion(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesCotizacion(idCotizacion, size) {
+export function documentsPdfInvoicesCotizacion(idCotizacion ,size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/cotizacion/documents/pdf/invoices/${idCotizacion}/${size}`;
+    }/api/cotizacion/pdf/document/${idCotizacion}/${size}`;
 }
 
 export function documentsPdfListsCotizacion(idCotizacion, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/cotizacion/documents/pdf/lists/${idCotizacion}`;
+    }/api/cotizacion/pdf/preview/${idCotizacion}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA COTIZACION
@@ -1387,7 +1387,7 @@ export async function listPedido(params, signal) {
 
 export async function getIdPedido(idPedido, signal) {
   return await Resolve.create(
-    instancePrincipal.get(`/api/pedido/${idPedido}`, {
+    instancePrincipal.get(`/api/pedido/id/${idPedido}`, {
       signal: signal,
     }),
   );
@@ -1401,9 +1401,9 @@ export async function detailPedido(idPedido, signal) {
   );
 }
 
-export async function forSalePedido(params, signal) {
+export async function forSalePedido(idPedido, params, signal) {
   return await Resolve.create(
-    instancePrincipal.get('/api/pedido/for-sale', {
+    instancePrincipal.get(`/api/pedido/for-sale/${idPedido}`, {
       params: params,
       signal: signal,
     }),
