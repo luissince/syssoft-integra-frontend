@@ -4,7 +4,6 @@ import {
   formatDecimal,
   isEmpty,
   isNumeric,
-  readDataFile,
   text,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -21,7 +20,6 @@ import {
   forSaleCotizacion,
   detailOnlyVentaVenta,
   createVenta,
-  obtenerPreVentaPdf,
   documentsPdfInvoicesVenta,
   forSalePedido,
   filtrarProductoVenta,
@@ -53,7 +51,6 @@ import {
 } from '../../../../../../redux/predeterminadoSlice';
 import {
   ModalImpresion,
-  ModalPreImpresion,
 } from '../../../../../../components/MultiModal';
 import ModalAgregar from '../common/ModalAgregar';
 import ModalCotizacion from '../common/ModalCotizacion';
@@ -111,9 +108,6 @@ class VentaCrear extends CustomComponent {
 
       // Atributos del modal impresión
       isOpenImpresion: false,
-
-      // Atributos del modal pre impresión
-      isOpenPreImpresion: false,
 
       // Atributos del modal cotización
       isOpenCotizacion: false,
@@ -551,7 +545,7 @@ class VentaCrear extends CustomComponent {
       precio: pre,
       medida: producto.medida,
       idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-      tipo: producto.tipo,
+      idTipoProducto: producto.idTipoProducto,
     });
 
     // Lógica principal basada en el tipo de tratamiento del producto
@@ -989,133 +983,6 @@ class VentaCrear extends CustomComponent {
   }
 
   //------------------------------------------------------------------------------------------
-  // Opciones de pre impresión
-  //------------------------------------------------------------------------------------------
-
-  handleOpenPreImpresion = () => {
-    const { idComprobante, cliente, idMoneda, idImpuesto, detalleVenta } =
-      this.state;
-
-    if (isEmpty(idComprobante)) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione su comprobante.',
-        primaryButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-      }, () => {
-        this.refComprobante.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(cliente)) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione un cliente.',
-        primaryButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-      }, () => {
-        this.refValueCliente.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(idMoneda)) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione su moneda.',
-        primaryButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-      }, () => {
-        this.refMoneda.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(idImpuesto)) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'Seleccione el impuesto',
-        primaryButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-      }, () => {
-        this.refImpuesto.current.focus();
-      });
-      return;
-    }
-
-    if (isEmpty(detalleVenta)) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'Agregar algún producto a la lista.',
-      });
-      return;
-    }
-
-    this.setState({ isOpenPreImpresion: true });
-  };
-
-  handleProcessPreImpresion = async (type, abort, success, error) => {
-    const {
-      idComprobante,
-      cliente,
-      idMoneda,
-      idUsuario,
-      idSucursal,
-      observacion,
-      nota,
-      detalleVenta,
-    } = this.state;
-
-    const response = await obtenerPreVentaPdf({
-      idComprobante: idComprobante,
-      idCliente: cliente.idPersona,
-      idMoneda: idMoneda,
-      idUsuario: idUsuario,
-      idSucursal: idSucursal,
-      observacion: observacion,
-      nota: nota,
-      detalle: detalleVenta,
-    },
-      type,
-      abort.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      const base64 = await readDataFile(response.data);
-
-      success();
-
-      pdfVisualizer.printer({
-        printable: base64,
-        type: 'pdf',
-        base64: true,
-        onPrintDialogClose: () => {
-          this.handleClosePreImpresion();
-        },
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      error();
-      alertKit.warning({
-        title: 'Venta',
-        message: response.getMessage(),
-      });
-    }
-  };
-
-  handleClosePreImpresion = () => {
-    this.setState({ isOpenPreImpresion: false });
-  };
-
-  //------------------------------------------------------------------------------------------
   // Opciones de cotización
   //------------------------------------------------------------------------------------------
 
@@ -1229,6 +1096,7 @@ class VentaCrear extends CustomComponent {
     };
 
     const response = await forSalePedido(
+      pedido.idPedido,
       params,
       this.abortControllerPedido.signal,
     );
@@ -2195,7 +2063,6 @@ class VentaCrear extends CustomComponent {
           handleStarProduct={this.handleStarProduct}
 
           nombreComporbante={this.state.nombreComporbante}
-          handleOpenPreImpresion={this.handleOpenPreImpresion}
           handleOpenVenta={this.handleOpenVenta}
           handleOpenCotizacion={this.handleOpenCotizacion}
           handleOpenPedido={this.handleOpenPedido}
@@ -2262,12 +2129,6 @@ class VentaCrear extends CustomComponent {
           handlePrinterA4={this.handlePrinterImpresion.bind(this, 'A4')}
           handlePrinter80MM={this.handlePrinterImpresion.bind(this, '80mm')}
           handlePrinter58MM={this.handlePrinterImpresion.bind(this, '58mm')}
-        />
-
-        <ModalPreImpresion
-          isOpen={this.state.isOpenPreImpresion}
-          handleClose={this.handleClosePreImpresion}
-          handleProcess={this.handleProcessPreImpresion}
         />
 
         <ModalPrinter

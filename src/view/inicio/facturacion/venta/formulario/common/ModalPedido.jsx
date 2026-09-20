@@ -31,8 +31,6 @@ import CustomComponent from '@/components/CustomComponent';
 import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import { listPedido } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 
 /**
@@ -42,6 +40,7 @@ import { CANCELED } from '../../../../../../model/types/types';
 class ModalPedido extends CustomComponent {
   constructor(props) {
     super(props);
+
     this.state = {
       loading: false,
       buscar: '',
@@ -56,7 +55,10 @@ class ModalPedido extends CustomComponent {
       fechaFinal: currentDate(),
     };
 
-    this.abortController = new AbortController();
+    this.initial = { ...this.state };
+
+    this.peticion = false;
+    this.abortController = null;
   }
 
   handleOnOpen = async () => {
@@ -76,8 +78,8 @@ class ModalPedido extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(1, text.trim());
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -87,7 +89,7 @@ class ModalPedido extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -97,22 +99,12 @@ class ModalPedido extends CustomComponent {
   };
 
   handlPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      case 2:
-        this.fillTable(2);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion) => {
+    this.abortController = new AbortController();
+
     this.setState({
       loading: true,
       lista: [],
@@ -121,43 +113,55 @@ class ModalPedido extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: this.state.buscar,
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idSucursal: this.props.idSucursal,
-      ligado: -1,
+      ligado: "",
       estado: 1,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
-    const response = await listPedido(params, this.abortController.signal);
+    const { success, data, message, type } = await listPedido(params, this.abortController.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+    if (!success) {
+      if (type === CANCELED) return;
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+      this.peticion = true;
+      this.abortController = null;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.peticion = true;
+    this.abortController = null;
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    });
   };
 
   handleOnHidden = () => {
-    this.setState({ lista: [] });
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
+    this.setState(this.initial);
+    this.peticion = false;
   };
 
   handleInputBuscar = (event) => {
@@ -165,25 +169,19 @@ class ModalPedido extends CustomComponent {
   };
 
   handleFechaInicio = (event) => {
-    this.setState(
-      {
-        fechaInicio: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaInicio: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   handleFechaFinal = (event) => {
-    this.setState(
-      {
-        fechaFinal: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaFinal: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   generateBody = () => {
@@ -236,16 +234,36 @@ class ModalPedido extends CustomComponent {
             <br />
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-center">
+            <span className={cn(
+              "inline-flex items-center rounded-full",
+              "text-xs font-medium",
+              "px-2.5 py-0.5",
+              item.estado === 1 && "bg-green-100 text-green-800",
+              item.estado === 0 && "bg-red-100 text-red-800",
+            )}>
+              {item.estado === 1 && "ACTIVO"}
+              {item.estado === 0 && "ANULADO"}
+            </span>
+          </TableCell>
           <TableCell className="text-center">
             <span
-              className={
-                item.ligado == 0
-                  ? 'badge badge-secondary'
-                  : 'badge badge-success'
-              }
+              className={cn(
+                "inline-flex items-center rounded-full",
+                "text-xs font-medium",
+                "px-2.5 py-0.5",
+
+                item.ligado === 0 && "bg-gray-100 text-gray-800",
+                item.ligado === 1 && "bg-blue-100 text-blue-800",
+                item.ligado === 2 && "bg-green-100 text-green-800",
+              )}
             >
-              {item.ligado}
+              {item.ligado === 0 && "SIN VENTA"}
+
+              {item.ligado === 1 &&
+                `FALTA VENDER (${item.cantidadCotizada - item.cantidadVendida})`}
+
+              {item.ligado === 2 && "COMPLETADO"}
             </span>
           </TableCell>
           <TableCell className="text-center">
@@ -361,20 +379,14 @@ class ModalPedido extends CustomComponent {
                       <Table className="table-bordered">
                         <TableHeader>
                           <TableRow>
-                            <TableHead width="5%" className="text-center">
-                              #
-                            </TableHead>
+                            <TableHead width="5%" className="text-center">#</TableHead>
                             <TableHead width="10%">Fecha</TableHead>
                             <TableHead width="15%">Comprobante</TableHead>
                             <TableHead width="15%">Cliente</TableHead>
-                            <TableHead width="5%">Estado</TableHead>
-                            <TableHead width="5%">Ligado</TableHead>
-                            <TableHead width="10%" className="text-center">
-                              Total
-                            </TableHead>
-                            <TableHead width="5%" className="text-center">
-                              Seleccionar
-                            </TableHead>
+                            <TableHead width="5%" className="text-center">Estado</TableHead>
+                            <TableHead width="10%" className="text-center">Ligado</TableHead>
+                            <TableHead width="10%" className="text-center">Total</TableHead>
+                            <TableHead width="5%" className="text-center">Seleccionar</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>{this.generateBody()}</TableBody>

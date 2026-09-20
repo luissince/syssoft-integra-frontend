@@ -17,6 +17,7 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import { alertKit } from 'alert-kit';
+import { TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -28,6 +29,8 @@ class ModalProducto extends Component {
 
     this.state = {
       loading: true,
+      message: 'Cargando datos...',
+
       idProducto: '',
       codigo: '',
       cantidad: '',
@@ -35,10 +38,13 @@ class ModalProducto extends Component {
       descripcion: '',
       imagen: null,
       idMedida: '',
-      tipoProducto: '',
+      medida: '',
+      idTipoProducto: '',
 
       medidas: [],
     };
+
+    this.initial = { ...this.state };
 
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
@@ -69,10 +75,11 @@ class ModalProducto extends Component {
         descripcion: producto.nombre,
         imagen: producto.imagen,
         idMedida: producto.idMedida,
-        tipoProducto: producto.tipoProducto,
+        medida: producto.medida,
+        idTipoProducto: producto.idTipoProducto,
         loading: false,
       }, () => {
-        if (producto.tipoProducto === 'SERVICIO') {
+        if (producto.idTipoProducto === TIPO_PRODUCTO_SERVICIO) {
           this.refCosto.current.focus();
           this.refCosto.current.select();
         } else {
@@ -99,20 +106,7 @@ class ModalProducto extends Component {
       }
     }
 
-    this.setState({
-      loading: true,
-      idProducto: '',
-      codigo: '',
-      cantidad: '',
-      costo: '',
-      descripcion: '',
-      imagen: null,
-      idMedida: '',
-      tipoProducto: '',
-
-      medidas: [],
-    });
-
+    this.setState(this.initial);
     this.peticion = false;
   };
 
@@ -139,7 +133,7 @@ class ModalProducto extends Component {
       descripcion,
       imagen,
       cantidad,
-      tipoProducto,
+      idTipoProducto,
       costo,
       idMedida,
     } = this.state;
@@ -220,7 +214,7 @@ class ModalProducto extends Component {
     const medida = this.state.medidas.find((item) => item.idMedida == idMedida);
 
     if (existeDetalle) {
-      if (tipoProducto === 'SERVICIO') {
+      if (idTipoProducto === TIPO_PRODUCTO_SERVICIO) {
         existeDetalle.costo = Number(costo);
       } else {
         existeDetalle.cantidad = Number(cantidad);
@@ -229,7 +223,7 @@ class ModalProducto extends Component {
 
       existeDetalle.nombre = descripcion;
       existeDetalle.idMedida = medida.idMedida;
-      existeDetalle.nombreMedida = medida.nombre;
+      existeDetalle.medida = medida.nombre;
     } else {
       const data = {
         id: detalles.length + 1,
@@ -239,8 +233,10 @@ class ModalProducto extends Component {
         imagen: imagen,
         cantidad: Number(cantidad),
         costo: Number(costo),
+
         idMedida: medida.idMedida,
-        nombreMedida: medida.nombre,
+        medida: medida.nombre,
+
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
@@ -256,8 +252,16 @@ class ModalProducto extends Component {
   };
 
   render() {
-    const { loading, cantidad, costo, descripcion, idMedida, tipoProducto } =
-      this.state;
+    const {
+      loading,
+      message,
+
+      cantidad,
+      costo,
+      descripcion,
+      idMedida,
+      idTipoProducto
+    } = this.state;
 
     const { isOpen, onClose } = this.props;
 
@@ -273,13 +277,16 @@ class ModalProducto extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView loading={loading} message={'Cargando datos...'} />
+            <SpinnerView
+              loading={loading}
+              message={message}
+            />
 
             <Row>
               <Column formGroup={true}>
                 <Input
                   label={'Cantidad:'}
-                  disabled={tipoProducto === 'SERVICIO'}
+                  disabled={idTipoProducto === TIPO_PRODUCTO_SERVICIO}
                   placeholder={'0.00'}
                   role={'float'}
                   ref={this.refCantidad}
@@ -334,17 +341,19 @@ class ModalProducto extends Component {
           </>
         }
         footer={
-          <>
-            <Button type="submit" className="btn-primary">
+          <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+            <Button
+              type="submit"
+              className="btn-primary w-full md:w-auto">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
-              className="btn-danger"
+              className="btn-danger w-full md:w-auto"
               onClick={async () => await this.refModal.current.handleOnClose()}
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </>
+          </div>
         }
       />
     );
