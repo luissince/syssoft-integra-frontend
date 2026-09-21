@@ -1,27 +1,19 @@
 import ContainerWrapper from '@/components/ui/container-wrapper';
 import { SpinnerView } from '@/components/Spinner';
 import Title from '@/components/Title';
-import {
-  Package,
-  AlertTriangle,
-} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { optionsSucursal } from '@/network/rest/api-client';
 import { format } from 'date-fns';
 import { alertKit } from 'alert-kit';
 import { CANCELED } from '@/constants/requestStatus';
 import { cn } from '@/lib/utils';
 import BranchInterface from '@/model/ts/interface/branch';
-import { formatCurrency, isEmpty, rounded } from '@/helper/utils.helper';
+import { formatCurrency, guId, isEmpty } from '@/helper/utils.helper';
 import { useAppSelector } from '@/redux/hooks';
 import { useHistory } from "react-router-dom";
-import { reporteDepreciacion } from "@/network/rest/api-client";
-
-enum estadoInventario {
-  DISPONIBLE = "disponible",
-  VENDIDO = "vendido",
-  ASIGNADO = "asignado"
-}
+import { reporteDepreciacion, excelDepreciacion, optionsSucursal } from "@/network/rest/api-client";
+import { FaFileExcel } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
+import { downloadFileAsync } from '@/redux/downloadSlice';
 
 type ActivoDepreciacion = {
   idProducto: string;
@@ -53,6 +45,8 @@ type ActivoDepreciacion = {
 }
 
 const ReporteDepreciacion = () => {
+  const dispatch = useDispatch();
+
   const token = useAppSelector((state) => state.principal);
 
   const history = useHistory();
@@ -82,7 +76,7 @@ const ReporteDepreciacion = () => {
     abortDashboardRef.current = new AbortController();
 
     const body = {
-      fechaInicio: format(fechaInicial, "yyyy-MM-dd"),
+      fechaInicial: format(fechaInicial, "yyyy-MM-dd"),
       fechaFinal: format(fechaFinal, "yyyy-MM-dd"),
     }
     const { success, data, message, type } = await reporteDepreciacion(
@@ -142,11 +136,29 @@ const ReporteDepreciacion = () => {
   }, [fechaInicial, fechaFinal]);
 
 
-  const handleAnioInicial = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleExportExcel = async () => {
+    const id = guId();
+    const buffer = await excelDepreciacion({
+      idSucursal: idSucursal,
+      fechaInicial: format(fechaInicial, "yyyy-MM-dd"),
+      fechaFinal: format(fechaFinal, "yyyy-MM-dd"),
+    })
+
+    dispatch(
+      downloadFileAsync({
+        id: id,
+        isFile: true,
+        name: 'depreciacion.xlsx',
+        content: buffer.data,
+      })
+    );
+  }
+
+  const handleFechaInicial = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setFechaInicial(new Date(Number(event.target.value), 0, 1));
   };
 
-  const handleAnioFinal = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleFechaFinal = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setFechaFinal(new Date(Number(event.target.value), 11, 31));
   };
 
@@ -167,69 +179,81 @@ const ReporteDepreciacion = () => {
         handleGoBack={() => history.goBack()}
       />
 
-      <div className="space-y-3">
-        {/* Controles */}
-        <div className="mb-6 flex flex-col gap-4">
-          <div className="flex flex-wrap gap-3">
-            <button
-              disabled={loading}
-              className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded",
-                loading ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              )}
-              onClick={loadInventarioActivo}
+      {/* Controles */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <button
+          disabled={loading}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded",
+            loading ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          )}
+          onClick={loadInventarioActivo}
+        >
+          <i className={`bi bi-arrow-clockwise ${loading ? 'animate-spin' : ''}`}></i>
+          {loading ? 'Recargando...' : 'Recargar Vista'}
+        </button>
+
+        <button
+          type="button"
+          disabled={loading}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded",
+            loading ? 'bg-green-300 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'
+          )}
+          onClick={handleExportExcel}
+        >
+          <FaFileExcel className="w-4 h-4" /> Exportar a Excel
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-y-4 mb-4">
+        <p className="text-gray-600 mt-1">
+          Análisis de Depreciación de Activos Fijos, mostrando la información de los activos fijos y su depreciación acumulada y del ejercicio, así como el valor neto en libros.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-y-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Año Inicial:
+            </label>
+            <select
+              value={fechaInicial.getFullYear()}
+              onChange={handleFechaInicial}
+              aria-label="Año inicial"
+              className="px-4 py-2 border border-gray-300 text-sm rounded"
             >
-              <i className={`bi bi-arrow-clockwise ${loading ? 'animate-spin' : ''}`}></i>
-              {loading ? 'Recargando...' : 'Recargar Vista'}
-            </button>
+              {opcionesAnio.map((anio) => (
+                <option key={anio} value={anio}>
+                  {anio}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="flex">
-            <p className="text-gray-600 mt-1">
-              Análisis de Depreciación de Activos Fijos, mostrando la información de los activos fijos y su depreciación acumulada y del ejercicio, así como el valor neto en libros.
-            </p>
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Año Final:
+            </label>
+            <select
+              value={fechaFinal.getFullYear()}
+              onChange={handleFechaFinal}
+              aria-label="Año final"
+              className="px-4 py-2 border border-gray-300 text-sm rounded"
+            >
+              {opcionesAnio.map((anio) => (
+                <option key={anio} value={anio}>
+                  {anio}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* <DatePickerPopover value={fechaInicial} onChange={handleFechaInicial} />
-
-            <DatePickerPopover value={fechaFinal} onChange={handleFechaFinal} /> */}
-            <div>
-              <a className="px-4 text-sm font-medium text-gray-700">
-                AÑO INICIAL:
-              </a>
-              <select
-                value={fechaInicial.getFullYear()}
-                onChange={handleAnioInicial}
-                aria-label="Año inicial"
-                className="px-4 py-2 border border-gray-300 text-sm rounded"
-              >
-                {opcionesAnio.map((anio) => (
-                  <option key={anio} value={anio}>
-                    {anio}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <a className="px-4 text-sm font-medium text-gray-700">
-                AÑO FINAL:
-              </a>
-              <select
-                value={fechaFinal.getFullYear()}
-                onChange={handleAnioFinal}
-                aria-label="Año final"
-                className="px-4 py-2 border border-gray-300 text-sm rounded"
-              >
-                {opcionesAnio.map((anio) => (
-                  <option key={anio} value={anio}>
-                    {anio}
-                  </option>
-                ))}
-              </select>
-            </div>
-
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Sucursales:
+            </label>
             <select
               value={idSucursal}
               onChange={handleSucursalChange}
@@ -242,7 +266,12 @@ const ReporteDepreciacion = () => {
                 </option>
               ))}
             </select>
+          </div>
 
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Almacenes:
+            </label>
             <select
               value={idAlmacen}
               onChange={(e) => {
@@ -255,270 +284,269 @@ const ReporteDepreciacion = () => {
             </select>
           </div>
         </div>
+      </div>
 
-        {/* 1. PRODUCTOS PARA PEDIR - ¿Qué se está vendiendo? */}
-        <div>
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th rowSpan={3} className="w-[20%] text-center text-xs font-medium text-gray-500 uppercase border">TA</th>
-                    <th colSpan={3} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FECHA</th>
-                    <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">TD</th>
-                    <th colSpan={2} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DOCUMENTO</th>
-                    <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">CODIGO INVENTARIO</th>
-                    <th colSpan={2} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">COSTO HISTÓRICO</th>
-                    <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase">VALOR NETO EN LIBROS</th>
-                    <th colSpan={16} className="text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION</th>
-                  </tr>
-                  <tr>
-                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">%</th>
-                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DIAS</th>
-                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION ACUMULADA</th>
-                    <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION DEL EJERCICIO</th>
-                    <th colSpan={12} className="text-center text-xs font-medium text-gray-500 uppercase border">MESES</th>
-                  </tr>
-                  <tr>
-                    <th className="w-[20%] text-center text-xs font-medium text-gray-500 uppercase border">ADQUISIC</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">INGRESO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FECHA DE USO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SERIE</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">N°</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DOLARES</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SOLES</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">ENERO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FEBRERO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">MARZO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">ABRIL</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">MAYO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">JUNIO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">JULIO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">AGOSTO</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SEPTIEMBRE</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">OCTUBRE</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">NOVIEMBRE</th>
-                    <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DICIEMBRE</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 border">
-                  {
-                    isEmpty(activoDepreciacion) ? (
-                      <tr>
-                        <td colSpan={27} className="px-6 py-12 text-center">
-                          <div className="text-gray-500">
-                            <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                            <p className="text-lg font-medium">
-                              No se encontraron productos
-                            </p>
-                            <p className="text-sm">No hay registros para pedir</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      activoDepreciacion.map((inventario, idx) => (
-                        <React.Fragment key={idx}>
-                          {/* FILA PRINCIPAL (igual que antes) */}
-                          <tr className="hover:bg-gray-50">
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.correlativo.substring(0, 2)}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-500">
-                                {format(new Date(inventario.fechaAdquisicion), 'dd/MM/yyyy')}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {format(new Date(inventario.fechaIngreso), 'dd/MM/yyyy')}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.serie}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.numeracion ? inventario.numeracion : 'NA'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.correlativo}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.costoFijo}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.valorLibros}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {100 / inventario.vidaUtil}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.dias}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.depreciacionAcumulada}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.depreciacion}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.enero}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.febrero}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.marzo}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.abril}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.mayo}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.junio}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.julio}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.agosto}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.septiembre}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.octubre}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.noviembre}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-900">
-                              <div className="text-sm text-gray-500">
-                                {inventario.diciembre}
-                              </div>
-                            </td>
-                          </tr>
-                        </React.Fragment>
-                      ))
-                    )
-                  }
-                </tbody>
-                <tfoot className="bg-gray-100">
-                  <tr>
-                    <td colSpan={8} className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">Totales</td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"></td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.costoFijo, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.valorLibros, 0))}
-                    </td>
-                    <td colSpan={2} className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"></td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacionAcumulada, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacion, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.enero, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.febrero, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.marzo, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.abril, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.mayo, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.junio, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.julio, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.agosto, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.septiembre, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.octubre, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.noviembre, 0))}
-                    </td>
-                    <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
-                      {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.diciembre, 0))}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+      {/* 1. PRODUCTOS PARA PEDIR - ¿Qué se está vendiendo? */}
+      <div>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th rowSpan={3} className="w-[20%] text-center text-xs font-medium text-gray-500 uppercase border">TA</th>
+                  <th colSpan={3} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FECHA</th>
+                  <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">TD</th>
+                  <th colSpan={2} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DOCUMENTO</th>
+                  <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">CODIGO INVENTARIO</th>
+                  <th colSpan={2} rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">COSTO HISTÓRICO</th>
+                  <th rowSpan={3} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase">VALOR NETO EN LIBROS</th>
+                  <th colSpan={16} className="text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION</th>
+                </tr>
+                <tr>
+                  <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">%</th>
+                  <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DIAS</th>
+                  <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION ACUMULADA</th>
+                  <th rowSpan={2} className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DEPRECIACION DEL EJERCICIO</th>
+                  <th colSpan={12} className="text-center text-xs font-medium text-gray-500 uppercase border">MESES</th>
+                </tr>
+                <tr>
+                  <th className="w-[20%] text-center text-xs font-medium text-gray-500 uppercase border">ADQUISIC</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">INGRESO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FECHA DE USO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SERIE</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">N°</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DOLARES</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SOLES</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">ENERO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">FEBRERO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">MARZO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">ABRIL</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">MAYO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">JUNIO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">JULIO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">AGOSTO</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">SEPTIEMBRE</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">OCTUBRE</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">NOVIEMBRE</th>
+                  <th className="w-[10%] text-center text-xs font-medium text-gray-500 uppercase border">DICIEMBRE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 border">
+                {
+                  isEmpty(activoDepreciacion) ? (
+                    <tr>
+                      <td colSpan={27} className="px-6 py-12 text-center">
+                        <div className="text-gray-500">
+                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+                          <p className="text-lg font-medium">
+                            No se encontraron productos
+                          </p>
+                          <p className="text-sm">No hay registros para pedir</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    activoDepreciacion.map((inventario, idx) => (
+                      <React.Fragment key={idx}>
+                        {/* FILA PRINCIPAL (igual que antes) */}
+                        <tr className="hover:bg-gray-50">
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.correlativo.substring(0, 2)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-500">
+                              {format(new Date(inventario.fechaAdquisicion), 'dd/MM/yyyy')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {format(new Date(inventario.fechaIngreso), 'dd/MM/yyyy')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.serie}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.numeracion ? inventario.numeracion : 'NA'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.correlativo}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.costoFijo}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.valorLibros}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {100 / inventario.vidaUtil}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.dias}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.depreciacionAcumulada}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.depreciacion}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.enero}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.febrero}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.marzo}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.abril}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.mayo}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.junio}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.julio}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.agosto}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.septiembre}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.octubre}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.noviembre}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-gray-900">
+                            <div className="text-sm text-gray-500">
+                              {inventario.diciembre}
+                            </div>
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    ))
+                  )
+                }
+              </tbody>
+              <tfoot className="bg-gray-100">
+                <tr>
+                  <td colSpan={8} className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">Totales</td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"></td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.costoFijo, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.valorLibros, 0))}
+                  </td>
+                  <td colSpan={2} className="px-6 py-3 text-center text-sm font-bold text-gray-500 border"></td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacionAcumulada, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.depreciacion, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.enero, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.febrero, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.marzo, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.abril, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.mayo, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.junio, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.julio, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.agosto, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.septiembre, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.octubre, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.noviembre, 0))}
+                  </td>
+                  <td className="px-6 py-3 text-center text-sm font-bold text-gray-500 border">
+                    {formatCurrency(activoDepreciacion.reduce((acc, item) => acc + item.diciembre, 0))}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </div>
       </div>
-
     </ContainerWrapper >
   );
 }

@@ -288,6 +288,16 @@ export async function reporteDepreciacion(body: Record<string, any>, signal: Abo
   );
 }
 
+export async function excelDepreciacion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
+  return await Resolve.safe<string>(
+    apiClient.post('/api/kardex/depreciacion/excel', body, {
+      signal: signal,
+      responseType: 'blob',
+    }),
+  );
+}
+
+
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE NOTA DE CRÉDITO

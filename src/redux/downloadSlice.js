@@ -2,6 +2,19 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getUrlFileExtension, isEmpty, sleep } from '../helper/utils.helper';
 
 // Definimos el thunk asíncrono para manejar las descargas
+
+/**
+ * Thunk para descargar un archivo.
+ *
+ * @param {Object} params - Parámetros de descarga.
+ * @param {string} params.id - Identificador del archivo o recurso.
+ * @param {string} params.url - URL desde donde se descargará el archivo.
+ * @param {string} params.name - Nombre con el que se guardará el archivo.
+ * @param {boolean} params.isFile - Indica si el contenido corresponde a un archivo.
+ * @param {*} params.content - Contenido del archivo, cuando corresponda.
+ *
+ * @returns {Promise<*>} Resultado de la descarga o rechazo mediante `rejectWithValue`.
+ */
 export const downloadFileAsync = createAsyncThunk(
   'downloads/downloadFile',
   async ({ id, url, name, isFile, content }, { dispatch, rejectWithValue }) => {
