@@ -17,6 +17,7 @@ const WebCrm = () => {
 
     const [idSucursal, setIdSucursal] = useState("");
     const [idAlmacen, setIdAlmacen] = useState("");
+    const [url, setUrl] = useState("");
 
     const [sucursales, setSucursales] = useState<any[]>([]);
     const [almacenes, setAlmacenes] = useState<any[]>([]);
@@ -53,6 +54,7 @@ const WebCrm = () => {
         }
     }, [idSucursal]);
 
+
     const loadInit = async () => {
         const web = await loadIdWeb();
 
@@ -69,6 +71,8 @@ const WebCrm = () => {
             if (sucursal) {
                 setIdSucursal(web.idSucursal);
             }
+
+            setUrl(web.url);
         }
     };
 
@@ -168,6 +172,10 @@ const WebCrm = () => {
         setIdAlmacen(event.target.value);
     };
 
+    const handleInputUrl = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUrl(event.target.value);
+    };
+
     const handleSave = async () => {
         if (!idSucursal) {
             alertKit.warning({
@@ -181,6 +189,14 @@ const WebCrm = () => {
             alertKit.warning({
                 title: "Web CRM",
                 message: "Seleccione un almacén"
+            });
+            return;
+        }
+
+        if (!url) {
+            alertKit.warning({
+                title: "Web CRM",
+                message: "Ingrese la URL"
             });
             return;
         }
@@ -204,6 +220,7 @@ const WebCrm = () => {
             const body = {
                 idSucursal,
                 idAlmacen,
+                url,
                 idUsuario: token.userToken.idUsuario,
             }
 
@@ -276,6 +293,16 @@ const WebCrm = () => {
                             </option>
                         ))}
                     </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2  gap-4">
+                    <input
+                        type="text"
+                        placeholder="URL"
+                        value={url}
+                        onChange={handleInputUrl}
+                        className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
                 </div>
 
                 {/* ===================== Botones ===================== */}
