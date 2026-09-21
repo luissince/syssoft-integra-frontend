@@ -284,9 +284,9 @@ class RepCompras extends CustomComponent {
   };
 
   handleDownloadExcel = async () => {
-    const id = guId();
-    const url = documentsExcelCompra();
-    this.props.downloadFileAsync({ id, url });
+    // const id = guId();
+    // const url = documentsExcelCompra();
+    // this.props.downloadFileAsync({ id, url });
   };
 
   /*

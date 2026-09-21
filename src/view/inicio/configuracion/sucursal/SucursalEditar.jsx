@@ -220,10 +220,10 @@ class SucursalEditar extends CustomComponent {
   };
 
   handleDownload(url) {
-    if (isEmpty(url)) return;
+    // if (isEmpty(url)) return;
 
-    const id = guId();
-    this.props.downloadFileAsync({ id, url });
+    // const id = guId();
+    // this.props.downloadFileAsync({ id, url });
   }
 
   //------------------------------------------------------------------------------------------

@@ -13,7 +13,7 @@ import { ProfileOptionsInterface } from '@/model/ts/interface/profile';
 import { SaleFilterAllInterface, SaleGetIdInterface } from '@/model/ts/interface/sale';
 import { AuthenticateInterface, UserGetInterface, UserResponseInterface } from '@/model/ts/interface/user';
 import { WarehouseOptionsInterface } from '@/model/ts/interface/warehouse';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
@@ -39,6 +39,38 @@ apiClient.interceptors.response.use((response) => {
 
   return response;
 });
+
+export async function downloadProgress(
+  request: AxiosRequestConfig,
+  signal: AbortSignal,
+  onProgress?: (progress: {
+    progress?: number;
+    received: number;
+    total: number;
+  }) => void
+) {
+
+  const response = await apiClient.request({
+    ...request,
+
+    signal,
+    responseType: 'blob',
+
+    onDownloadProgress: (event) => {
+      const total = event.total ?? 0;
+
+      onProgress?.({
+        progress: total
+          ? Math.round((event.loaded / total) * 100)
+          : undefined,
+        received: event.loaded,
+        total,
+      });
+    },
+  });
+
+  return response;
+}
 
 export async function initDashboard(params: Record<string, any>, signal: AbortSignal): Promise<ResolveResponse<DashboardInterface>> {
   return await Resolve.safe<DashboardInterface>(
@@ -288,15 +320,13 @@ export async function reporteDepreciacion(body: Record<string, any>, signal: Abo
   );
 }
 
-export async function excelDepreciacion(body: Record<string, any>, signal: AbortSignal = null): Promise<ResolveResponse<any>> {
-  return await Resolve.safe<string>(
-    apiClient.post('/api/kardex/depreciacion/excel', body, {
-      signal: signal,
-      responseType: 'blob',
-    }),
-  );
+export function excelDepreciacion(data: Record<string, any>) {
+  return {
+    method: 'POST',
+    url: '/api/kardex/depreciacion/excel',
+    data,
+  }
 }
-
 
 /*
 |--------------------------------------------------------------------------

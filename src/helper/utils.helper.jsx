@@ -1086,3 +1086,63 @@ export const validateMany = async (rules = [], title = "POS") => {
   }
   return true;
 };
+
+export const saveBlob = (blob, fileName) => {
+  const blobUrl = window.URL.createObjectURL(blob);
+
+  try {
+    const link = document.createElement('a');
+
+    link.href = blobUrl;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } finally {
+    window.URL.revokeObjectURL(blobUrl);
+  }
+};
+
+export const getFileNameFromContentDisposition = (contentDisposition) => {
+  if (!contentDisposition) {
+    return null;
+  }
+
+  // RFC 5987: filename*=UTF-8''nombre%20archivo.xlsx
+  const filenameStar = contentDisposition.match(
+    /filename\*\s*=\s*(?:UTF-8'')?([^;]+)/i
+  );
+
+  if (filenameStar?.[1]) {
+    try {
+      return decodeURIComponent(
+        filenameStar[1].trim().replace(/^["']|["']$/g, '')
+      );
+    } catch {
+      return filenameStar[1]
+        .trim()
+        .replace(/^["']|["']$/g, '');
+    }
+  }
+
+  // Formato tradicional: filename="reporte.xlsx"
+  const filename = contentDisposition.match(
+    /filename\s*=\s*"([^"]+)"/i
+  );
+
+  if (filename?.[1]) {
+    return filename[1];
+  }
+
+  // filename=reporte.xlsx
+  const filenameUnquoted = contentDisposition.match(
+    /filename\s*=\s*([^;]+)/i
+  );
+
+  if (filenameUnquoted?.[1]) {
+    return filenameUnquoted[1].trim().replace(/^["']|["']$/g, '');
+  }
+
+  return null;
+};

@@ -120,9 +120,9 @@ class RepProveedores extends CustomComponent {
   };
 
   handleDownloadExcel = async () => {
-    const id = guId();
-    const url = documentsExcelPersonaProveedor();
-    this.props.downloadFileAsync({ id, url });
+    // const id = guId();
+    // const url = documentsExcelPersonaProveedor();
+    // this.props.downloadFileAsync({ id, url });
   };
 
   /*

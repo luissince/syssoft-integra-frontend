@@ -751,9 +751,9 @@ class CpeElectronicos extends CustomComponent {
   };
 
   handleDownloadXml = (idComprobante) => {
-    const id = guId();
-    const url = obtenerXmlSunat(idComprobante);
-    this.props.downloadFileAsync({ id, url });
+    // const id = guId();
+    // const url = obtenerXmlSunat(idComprobante);
+    // this.props.downloadFileAsync({ id, url });
   };
 
   handleSendEmail = async (idComprobante, tipo) => {

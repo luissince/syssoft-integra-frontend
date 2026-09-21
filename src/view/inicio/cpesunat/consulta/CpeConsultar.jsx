@@ -305,14 +305,14 @@ class CpeElectronicos extends React.Component {
               title: 'Consultar Comprobante',
               message: 'Resultado: Código ' + result.code + ' ' + result.message,
             }, () => {
-              const id = guId();
-              this.props.downloadFileAsync({
-                id,
-                url: '',
-                name: result.fileName + '.xml',
-                isFile: true,
-                content: result.xml,
-              });
+              // const id = guId();
+              // this.props.downloadFileAsync({
+              //   id,
+              //   url: '',
+              //   name: result.fileName + '.xml',
+              //   isFile: true,
+              //   content: result.xml,
+              // });
               this.setState({ codigo: result.code, respuesta: result.message });
             });
 

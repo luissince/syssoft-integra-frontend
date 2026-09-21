@@ -114,9 +114,9 @@ class RepClientes extends CustomComponent {
   };
 
   handleDownloadExcel = async () => {
-    const id = guId();
-    const url = documentsExcelPersonaCliente();
-    this.props.downloadFileAsync({ id, url });
+    // const id = guId();
+    // const url = documentsExcelPersonaCliente();
+    // this.props.downloadFileAsync({ id, url });
   };
 
   /*

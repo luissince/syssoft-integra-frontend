@@ -305,9 +305,9 @@ class RepVentas extends CustomComponent {
   };
 
   handleDownloadExcel = async () => {
-    const id = guId();
-    const url = documentsExcelVenta();
-    this.props.downloadFileAsync({ id, url });
+    // const id = guId();
+    // const url = documentsExcelVenta();
+    // this.props.downloadFileAsync({ id, url });
   };
 
   /*

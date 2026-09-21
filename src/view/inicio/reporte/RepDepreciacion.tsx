@@ -137,19 +137,14 @@ const ReporteDepreciacion = () => {
 
 
   const handleExportExcel = async () => {
-    const id = guId();
-    const buffer = await excelDepreciacion({
-      idSucursal: idSucursal,
-      fechaInicial: format(fechaInicial, "yyyy-MM-dd"),
-      fechaFinal: format(fechaFinal, "yyyy-MM-dd"),
-    })
-
     dispatch(
       downloadFileAsync({
-        id: id,
-        isFile: true,
-        name: 'depreciacion.xlsx',
-        content: buffer.data,
+        id: guId(),
+        request: excelDepreciacion({
+          idSucursal,
+          fechaInicial: format(fechaInicial, 'yyyy-MM-dd'),
+          fechaFinal: format(fechaFinal, 'yyyy-MM-dd'),
+        }),
       })
     );
   }
