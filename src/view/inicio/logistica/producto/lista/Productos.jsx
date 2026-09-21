@@ -552,9 +552,17 @@ class Productos extends CustomComponent {
                       "px-3 py-2",
                       "transition rounded",
                       "bg-gray-100 text-gray-600 text-sm font-medium",
+                      
                       "hover:bg-gray-300",
                       "focus:outline focus:ring-2 focus:ring-gray-400",
                       "active:bg-blue-100 active:scale-[0.97]",
+
+                      "disabled:text-gray-400",
+                      "disabled:bg-gray-100",
+                      "disabled:hover:bg-gray-100",
+                      "disabled:cursor-not-allowed",
+                      "disabled:opacity-60",
+                      "disabled:active:scale-100",
                     )}
                   >
                     <Share2 className="w-5 h-5" />
