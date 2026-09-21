@@ -23,7 +23,7 @@ import {
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
-import { Pencil, Trash } from 'lucide-react';
+import { Pencil, Share2, Trash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { productTypeOptions, productTypeMap } from '@/model/types/tipo-producto';
 
@@ -345,6 +345,17 @@ class Productos extends CustomComponent {
     }
   };
 
+  handleCompartir = async (item) => {
+    const url = item.url;
+
+    await navigator.clipboard.writeText(url);
+
+    alertKit.success({
+      title: 'Producto',
+      message: 'Copiado al portapapeles',
+    });
+  };
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderizado
@@ -419,7 +430,7 @@ class Productos extends CustomComponent {
                 className={cn(
                   "text-sm text-gray-900",
                   view === "tabla"
-                    ? "grid grid-cols-[0.5fr_1fr_1fr_2fr_1.3fr_1.1fr_1.1fr_0.7fr_1.4fr] py-3 gap-x-3 items-center"
+                    ? "grid grid-cols-[0.5fr_1fr_1fr_2fr_1.3fr_0.9fr_0.9fr_0.7fr_1.7fr] py-3 gap-x-3 items-center"
                     : "flex flex-col h-full gap-3 rounded border p-3"
                 )}
               >
@@ -530,6 +541,23 @@ class Productos extends CustomComponent {
                     )}
                   >
                     <Trash className="w-5 h-5 text-red-500" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => this.handleCompartir(item)}
+                    disabled={!item.url}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline focus:ring-2 focus:ring-gray-400",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                    )}
+                  >
+                    <Share2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -701,7 +729,7 @@ class Productos extends CustomComponent {
             <div className={cn(
               "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
             )}>
-              <div className="grid grid-cols-[0.5fr_1fr_1fr_2fr_1.3fr_1.1fr_1.1fr_0.7fr_1.4fr] gap-x-3 py-3">
+              <div className="grid grid-cols-[0.5fr_1fr_1fr_2fr_1.3fr_0.9fr_0.9fr_0.7fr_1.7fr] gap-x-3 py-3">
                 <div className="text-center">#</div>
                 <div className="text-center">Tipo</div>
                 <div className="text-center">Imagen</div>
