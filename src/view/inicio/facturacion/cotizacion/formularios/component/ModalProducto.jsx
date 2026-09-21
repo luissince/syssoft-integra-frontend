@@ -18,6 +18,8 @@ import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import { TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
+import Image from '@/components/Image';
+import { images } from '@/helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -254,6 +256,8 @@ class ModalProducto extends Component {
       loading,
       message,
 
+      codigo,
+      imagen,
       cantidad,
       precio,
       descripcion,
@@ -280,35 +284,53 @@ class ModalProducto extends Component {
               message={message}
             />
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={'Cantidad:'}
-                  disabled={idTipoProducto === TIPO_PRODUCTO_SERVICIO}
-                  placeholder={'0.00'}
-                  role={'float'}
-                  ref={this.refCantidad}
-                  value={cantidad}
-                  onChange={this.handleInputCantidad}
-                  onPaste={handlePasteFloat}
+            <div className="flex flex-col md:flex-row items-center gap-3 mb-3">
+              <div>
+                <Image
+                  default={images.noImage}
+                  src={imagen}
+                  alt={descripcion}
+                  width={100}
+                  height={100}
+                  className="object-contain rounded"
                 />
-              </Column>
+              </div>
 
-              <Column formGroup={true}>
-                <Input
-                  label={'Precio:'}
-                  placeholder={'0.00'}
-                  role={'float'}
-                  ref={this.refPrecio}
-                  value={precio}
-                  onChange={this.handleInputPrecio}
-                  onPaste={handlePasteFloat}
-                />
-              </Column>
-            </Row>
+              <div className="flex flex-col text-center md:text-left">
+                <p className="text-sm">{codigo}</p>
+                <p className="text-base">{descripcion}</p>
+              </div>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={'Cantidad:'}
+                    disabled={idTipoProducto === TIPO_PRODUCTO_SERVICIO}
+                    placeholder={'0.00'}
+                    role={'float'}
+                    ref={this.refCantidad}
+                    value={cantidad}
+                    onChange={this.handleInputCantidad}
+                    onPaste={handlePasteFloat}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Input
+                    label={'Precio:'}
+                    placeholder={'0.00'}
+                    role={'float'}
+                    ref={this.refPrecio}
+                    value={precio}
+                    onChange={this.handleInputPrecio}
+                    onPaste={handlePasteFloat}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
                 <Input
                   label={'Descripción:'}
                   placeholder={'Datos del producto...'}
@@ -316,11 +338,9 @@ class ModalProducto extends Component {
                   value={descripcion}
                   onChange={this.handleInputDescripcion}
                 />
-              </Column>
-            </Row>
+              </div>
 
-            <Row>
-              <Column formGroup={true}>
+              <div className="w-full">
                 <Select
                   label={'Unidad de Medida:'}
                   ref={this.refMedida}
@@ -334,8 +354,8 @@ class ModalProducto extends Component {
                     </option>
                   ))}
                 </Select>
-              </Column>
-            </Row>
+              </div>
+            </div>
           </>
         }
         footer={
