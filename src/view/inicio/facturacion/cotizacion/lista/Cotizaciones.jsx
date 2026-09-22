@@ -440,6 +440,7 @@ class Cotizaciones extends CustomComponent {
                 )}
               </span>
             );
+            
             return (
               <div
                 key={index}

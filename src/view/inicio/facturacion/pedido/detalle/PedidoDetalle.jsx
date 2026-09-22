@@ -211,18 +211,19 @@ class PedidoDetalle extends CustomComponent {
 
               {
                 label: 'Estado', value: () => {
-                  return (
-                    <span className={cn(
-                      "inline-flex items-center rounded-full",
-                      "text-xs font-medium",
-                      "px-2.5 py-0.5",
-                      cabecera.estado === ESTADO_PEDIDO.CANCELADO.id && "bg-red-100 text-red-800",
-                      cabecera.estado === ESTADO_PEDIDO.PENDIENTE.id && "bg-orange-100 text-orange-800",
-                      cabecera.estado === ESTADO_PEDIDO.PREPARANDO.id && "bg-yellow-100 text-yellow-800",
-                      cabecera.estado === ESTADO_PEDIDO.LISTO.id && "bg-emerald-100 text-emerald-800",
-                      cabecera.estado === ESTADO_PEDIDO.ENTREGADO.id && "bg-sky-100 text-sky-800",
-                    )}>
-                      {cabecera && pedidoEstadoMap[cabecera.estado].nombre}
+                  return (                   
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1",
+                        "font-medium",
+                        cabecera.estado === ESTADO_PEDIDO.CANCELADO.id && "text-red-700",
+                        cabecera.estado === ESTADO_PEDIDO.PENDIENTE.id && "text-orange-700",
+                        cabecera.estado === ESTADO_PEDIDO.PREPARANDO.id && "text-yellow-700",
+                        cabecera.estado === ESTADO_PEDIDO.LISTO.id && "text-emerald-700",
+                        cabecera.estado === ESTADO_PEDIDO.ENTREGADO.id && "text-sky-700",
+                      )}
+                    >
+                      {pedidoEstadoMap[cabecera.estado].nombre}
                     </span>
                   );
                 }

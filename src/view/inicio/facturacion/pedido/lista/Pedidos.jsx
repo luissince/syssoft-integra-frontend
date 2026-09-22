@@ -26,7 +26,7 @@ import {
 import React from 'react';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
-import { Eye, Pencil, Trash } from 'lucide-react';
+import { CircleCheck, Clock, Eye, Pencil, ShoppingCart, Trash } from 'lucide-react';
 import { ESTADO_PEDIDO, pedidoEstadoMap } from '@/model/types/pedido';
 
 /**
@@ -383,16 +383,17 @@ class Pedidos extends CustomComponent {
         {
           lista.map((item, index) => {
             const estado = (
-              <span className={cn(
-                "inline-flex items-center rounded-full",
-                "text-xs font-medium",
-                "px-2.5 py-0.5",
-                item.estado === ESTADO_PEDIDO.CANCELADO.id && "bg-red-100 text-red-800",
-                item.estado === ESTADO_PEDIDO.PENDIENTE.id && "bg-orange-100 text-orange-800",
-                item.estado === ESTADO_PEDIDO.PREPARANDO.id && "bg-yellow-100 text-yellow-800",
-                item.estado === ESTADO_PEDIDO.LISTO.id && "bg-emerald-100 text-emerald-800",
-                item.estado === ESTADO_PEDIDO.ENTREGADO.id && "bg-sky-100 text-sky-800",
-              )}>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1",
+                  "font-medium",
+                  item.estado === ESTADO_PEDIDO.CANCELADO.id && "text-red-700",
+                  item.estado === ESTADO_PEDIDO.PENDIENTE.id && "text-orange-700",
+                  item.estado === ESTADO_PEDIDO.PREPARANDO.id && "text-yellow-700",
+                  item.estado === ESTADO_PEDIDO.LISTO.id && "text-emerald-700",
+                  item.estado === ESTADO_PEDIDO.ENTREGADO.id && "text-sky-700",
+                )}
+              >
                 {pedidoEstadoMap[item.estado].nombre}
               </span>
             );
@@ -400,21 +401,36 @@ class Pedidos extends CustomComponent {
             const ligado = (
               <span
                 className={cn(
-                  "inline-flex items-center rounded-full",
-                  "text-xs font-medium",
+                  "inline-flex items-center gap-1",
+                  "rounded-full",
+                  "text-sm font-medium",
                   "px-2.5 py-0.5",
 
-                  item.ligado === 0 && "bg-gray-100 text-gray-800",
-                  item.ligado === 1 && "bg-blue-100 text-blue-800",
-                  item.ligado === 2 && "bg-green-100 text-green-800",
+                  item.ligado === 0 && "bg-red-100 text-red-700",
+                  item.ligado === 1 && "bg-blue-100 text-blue-700",
+                  item.ligado === 2 && "bg-green-100 text-green-700",
                 )}
               >
-                {item.ligado === 0 && "SIN VENTA"}
+                {item.ligado === 0 && (
+                  <>
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    Sin venta
+                  </>
+                )}
 
-                {item.ligado === 1 &&
-                  `FALTA VENDER (${item.cantidadCotizada - item.cantidadVendida})`}
+                {item.ligado === 1 && (
+                  <>
+                    <Clock className="w-3.5 h-3.5" />
+                    Falta ({item.cantidadCotizada - item.cantidadVendida})
+                  </>
+                )}
 
-                {item.ligado === 2 && "COMPLETADO"}
+                {item.ligado === 2 && (
+                  <>
+                    <CircleCheck className="w-3.5 h-3.5" />
+                    Completado
+                  </>
+                )}
               </span>
             );
 

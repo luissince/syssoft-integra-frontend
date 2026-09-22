@@ -32,6 +32,8 @@ import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import { listPedido } from '../../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../../model/types/types';
+import { cn } from '@/lib/utils';
+import { CircleCheck, CircleX, Clock, ShoppingCart } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -235,35 +237,60 @@ class ModalPedido extends CustomComponent {
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
           <TableCell className="text-center">
-            <span className={cn(
-              "inline-flex items-center rounded-full",
-              "text-xs font-medium",
-              "px-2.5 py-0.5",
-              item.estado === 1 && "bg-green-100 text-green-800",
-              item.estado === 0 && "bg-red-100 text-red-800",
-            )}>
-              {item.estado === 1 && "ACTIVO"}
-              {item.estado === 0 && "ANULADO"}
+            <span
+              className={cn(
+                "inline-flex items-center gap-1",
+                "font-medium",
+                item.estado === 1 && "text-green-700",
+                item.estado === 0 && "text-red-700",
+              )}
+            >
+              {item.estado === 1 ? (
+                <>
+                  <CircleCheck className="w-4 h-4" />
+                  Activo
+                </>
+              ) : (
+                <>
+                  <CircleX className="w-4 h-4" />
+                  Anulado
+                </>
+              )}
             </span>
           </TableCell>
           <TableCell className="text-center">
             <span
               className={cn(
-                "inline-flex items-center rounded-full",
-                "text-xs font-medium",
+                "inline-flex items-center gap-1",
+                "rounded-full",
+                "text-sm font-medium",
                 "px-2.5 py-0.5",
 
-                item.ligado === 0 && "bg-gray-100 text-gray-800",
-                item.ligado === 1 && "bg-blue-100 text-blue-800",
-                item.ligado === 2 && "bg-green-100 text-green-800",
+                item.ligado === 0 && "bg-red-100 text-red-700",
+                item.ligado === 1 && "bg-blue-100 text-blue-700",
+                item.ligado === 2 && "bg-green-100 text-green-700",
               )}
             >
-              {item.ligado === 0 && "SIN VENTA"}
+              {item.ligado === 0 && (
+                <>
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  Sin venta
+                </>
+              )}
 
-              {item.ligado === 1 &&
-                `FALTA VENDER (${item.cantidadCotizada - item.cantidadVendida})`}
+              {item.ligado === 1 && (
+                <>
+                  <Clock className="w-3.5 h-3.5" />
+                  Falta ({item.cantidadCotizada - item.cantidadVendida})
+                </>
+              )}
 
-              {item.ligado === 2 && "COMPLETADO"}
+              {item.ligado === 2 && (
+                <>
+                  <CircleCheck className="w-3.5 h-3.5" />
+                  Completado
+                </>
+              )}
             </span>
           </TableCell>
           <TableCell className="text-center">
