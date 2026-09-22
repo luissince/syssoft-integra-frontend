@@ -49,6 +49,7 @@ import { MODALIDAD_TRASLADO } from '@/model/types/modalidad-traslado';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
 import pdfVisualizer from 'pdf-visualizer';
 import { Badge } from '@/components/ui/badge';
+import Form from '../components/Form';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -416,6 +417,38 @@ class GuiaRemisionEditar extends CustomComponent {
         });
       }
     });
+  };
+
+  handleSelectMotivoTraslado = (event) => {
+    this.setState({ idMotivoTraslado: event.target.value });
+  };
+
+  handleInputFechaTraslado = (event) => {
+    this.setState({ fechaTraslado: event.target.value });
+  };
+
+  handleSelectTipoPeso = (event) => {
+    this.setState({ idTipoPeso: event.target.value });
+  };
+
+  handleInputPeso = (event) => {
+    this.setState({ peso: event.target.value });
+  };
+
+  handleInputCodigoAnexoPartida = (event) => {
+    this.setState({ codigoAnexoPartida: event.target.value });
+  };
+
+  handleInputDireccionPartida = (event) => {
+    this.setState({ direccionPartida: event.target.value });
+  };
+
+  handleInputCodigoAnexoLlegada = (event) => {
+    this.setState({ codigoAnexoLlegada: event.target.value });
+  };
+
+  handleInputDireccionLlegada = (event) => {
+    this.setState({ direccionLlegada: event.target.value });
   };
 
   //------------------------------------------------------------------------------------------
@@ -1025,491 +1058,93 @@ class GuiaRemisionEditar extends CustomComponent {
           </div>
         </div>
 
-        {/* Seleccione la venta */}
-        <h6>
-          <span className="badge badge-primary">1</span> Venta y Guía
-        </h6>
 
-        <div className="dropdown-divider"></div>
+        <Form
+          idMotivoTraslado={this.state.idMotivoTraslado}
 
-        <Row>
-          <Column>
-            {
-              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA ?
-                <div className="mb-3">
-                  <Badge variant="outline" className="text-sm bg-primary text-white">Ligado a un traslado</Badge>
-                </div>
-                :
-                <SearchInput
-                  ref={this.refVenta}
-                  autoFocus={true}
-                  label={
-                    <label>
-                      Filtrar Venta: <i className="fa fa-asterisk text-danger small"></i>
-                    </label>
-                  }
-                  placeholder="Ejm: B001, 1, F001..."
-                  refValue={this.refFiltrarVenta}
-                  data={this.state.ventas}
-                  handleClearInput={this.handleClearInputVenta}
-                  handleFilter={this.handleFilterVenta}
-                  handleSelectItem={this.handleSelectItemVenta}
-                  renderItem={(value) => (
-                    <>
-                      <span>
-                        {value.nombreComprobante} {value.serie}-{value.numeracion}
-                      </span>
-                      {' / '}
-                      <span>{value.informacion}</span>
-                    </>
-                  )}
-                />
-            }
+          refFiltrarVenta={this.refFiltrarVenta}
+          refVenta={this.refVenta}
+          ventas={this.state.ventas}
+          handleClearInputVenta={this.handleClearInputVenta}
+          handleFilterVenta={this.handleFilterVenta}
+          handleSelectItemVenta={this.handleSelectItemVenta}
 
-          </Column>
-        </Row>
+          venta={this.state.venta}
 
-        {/* Sección de los datos del cliente */}
-        <h6>
-          <span className="badge badge-primary">2</span> Cliente
-        </h6>
+          idModalidadTraslado={this.state.idModalidadTraslado}
+          handleInputModalidadTraslado={this.handleInputModalidadTraslado}
 
-        <div className="dropdown-divider"></div>
+          refMotivoTraslado={this.refMotivoTraslado}
+          motivoTraslado={this.state.motivoTraslado}
+          handleSelectMotivoTraslado={this.handleSelectMotivoTraslado}
 
-        <Row>
-          <Column formGroup={true}>
-            <Input
-              label={
-                <label>
-                  Selecciona un Cliente: <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              value={
-                this.state.venta
-                  ? `${this.state.venta.documento} - ${this.state.venta.informacion}`
-                  : ''
-              }
-              disabled
-            />
-          </Column>
-        </Row>
+          fechaTraslado={this.state.fechaTraslado}
+          handleInputFechaTraslado={this.handleInputFechaTraslado}
 
-        {/* Sección para modalidad traslado */}
-        <h6>
-          <span className="badge badge-primary">3</span> Modalidad de Traslado
-        </h6>
+          refTipoPeso={this.refTipoPeso}
+          idTipoPeso={this.state.idTipoPeso}
+          tipoPeso={this.state.tipoPeso}
+          handleSelectTipoPeso={this.handleSelectTipoPeso}
 
-        <div className="dropdown-divider"></div>
+          refPeso={this.refPeso}
+          peso={this.state.peso}
+          handleInputPeso={this.handleInputPeso}
 
-        <Row>
-          <Column formGroup={true}>
-            <RadioButton
-              id={MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO}
-              value={MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO}
-              name={'ckModalidadTraslado'}
-              checked={this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO}
-              onChange={this.handleInputModalidadTraslado}
-            >
-              Público
-            </RadioButton>
-          </Column>
+          refVehiculo={this.refVehiculo}
+          disabledPublica={this.state.disabledPublica}
+          refFiltrarVehiculo={this.refFiltrarVehiculo}
+          vehiculos={this.state.vehiculos}
+          handleClearInputVehiculo={this.handleClearInputVehiculo}
+          handleFilterVehiculo={this.handleFilterVehiculo}
+          handleSelectItemVehiculo={this.handleSelectItemVehiculo}
 
-          <Column formGroup={true}>
-            <RadioButton
-              id={MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO}
-              value={MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO}
-              name={'ckModalidadTraslado'}
-              checked={this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO}
-              onChange={this.handleInputModalidadTraslado}
-            >
-              Privado
-            </RadioButton>
-          </Column>
-        </Row>
+          refConductor={this.refConductor}
+          refFiltrarConductor={this.refFiltrarConductor}
+          conductores={this.state.conductores}
+          handleClearInputConductor={this.handleClearInputConductor}
+          handleFilterConductor={this.handleFilterConductor}
+          handleSelectItemConductor={this.handleSelectItemConductor}
 
-        {/* Sección para datos del traslado */}
-        <h6>
-          <span className="badge badge-primary">4</span> Datos del Traslado
-        </h6>
+          refConductorPublico={this.refConductorPublico}
+          disabledPrivado={this.state.disabledPrivado}
+          refFiltrarConductorPublico={this.refFiltrarConductorPublico}
+          conductoresPublico={this.state.conductoresPublico}
+          handleClearInputConductorPublico={this.handleClearInputConductorPublico}
+          handleFilterConductorPublico={this.handleFilterConductorPublico}
+          handleSelectItemConductorPublico={this.handleSelectItemConductorPublico}
 
-        <div className="dropdown-divider"></div>
+          refCodigoAnexoPartida={this.refCodigoAnexoPartida}
+          codigoAnexoPartida={this.state.codigoAnexoPartida}
+          handleInputCodigoAnexoPartida={this.handleInputCodigoAnexoPartida}
 
-        <Row>
-          <Column className="col-md-6 col-12" formGroup={true}>
-            <Select
-              label={
-                <label>
-                  Motivo del traslado:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              ref={this.refMotivoTraslado}
-              value={this.state.idMotivoTraslado}
-              onChange={(event) => {
-                this.setState({ idMotivoTraslado: event.target.value });
-              }}
-            >
-              <option value="0">-- Seleccione comprobante --</option>
-              {this.state.motivoTraslado.map((item, index) => (
-                <option key={index} value={item.idMotivoTraslado}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
-          </Column>
+          refDireccionPartida={this.refDireccionPartida}
+          direccionPartida={this.state.direccionPartida}
+          handleInputDireccionPartida={this.handleInputDireccionPartida}
 
-          <Column className="col-md-6 col-12" formGroup={true}>
-            <Input
-              label={
-                <label>
-                  Fecha traslado:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              type="date"
-              value={this.state.fechaTraslado}
-              onChange={async (event) => {
-                this.setState({ fechaTraslado: event.target.value });
-              }}
-            />
-          </Column>
-        </Row>
+          refUbigeoPartida={this.refUbigeoPartida}
+          refFiltrarUbigeoPartida={this.refFiltrarUbigeoPartida}
+          ubigeosPartida={this.state.ubigeosPartida}
+          handleClearInputaUbigeoPartido={this.handleClearInputaUbigeoPartido}
+          handleFilterUbigeoPartido={this.handleFilterUbigeoPartido}
+          handleSelectItemUbigeoPartido={this.handleSelectItemUbigeoPartido}
 
-        <Row>
-          <Column className="col-md-6 col-12" formGroup={true}>
-            <Select
-              label={
-                <label>
-                  Tipo Peso de Carga:{' '}
-                  <i className="fa fa-asterisk text-danger small" />
-                </label>
-              }
-              ref={this.refTipoPeso}
-              value={this.state.idTipoPeso}
-              onChange={(event) => {
-                this.setState({ idTipoPeso: event.target.value });
-              }}
-            >
-              <option value="0">-- Seleccione --</option>
-              {this.state.tipoPeso.map((item, index) => (
-                <option key={index} value={item.idTipoPeso}>
-                  {item.nombre}
-                </option>
-              ))}
-            </Select>
-          </Column>
+          refCodigoAnexoLlegada={this.refCodigoAnexoLlegada}
+          codigoAnexoLlegada={this.state.codigoAnexoLlegada}
+          handleInputCodigoAnexoLlegada={this.handleInputCodigoAnexoLlegada}
 
-          <Column className="col-md-6 col-12" formGroup={true}>
-            <Input
-              label={
-                <label>
-                  Peso de la Carga:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              placeholder="Ejm: 0.00, 0"
-              ref={this.refPeso}
-              value={this.state.peso}
-              onChange={(event) => {
-                this.setState({ peso: event.target.value });
-              }}
-              onKeyDown={keyNumberFloat}
-            />
-          </Column>
-        </Row>
+          refDireccionLlegada={this.refDireccionLlegada}
+          direccionLlegada={this.state.direccionLlegada}
+          handleInputDireccionLlegada={this.handleInputDireccionLlegada}
 
-        {/* Sección de datos del vehículo */}
-        <h6>
-          <span className="badge badge-primary">5</span> Datos del Transporte
-          Privado
-        </h6>
+          refUbigeoLlegada={this.refUbigeoLlegada}
+          refFiltrarUbigeoLlegada={this.refFiltrarUbigeoLlegada}
+          ubigeosLlegada={this.state.ubigeosLlegada}
+          handleClearInputaUbigeoLlegada={this.handleClearInputaUbigeoLlegada}
+          handleFilterUbigeoLlegada={this.handleFilterUbigeoLlegada}
+          handleSelectItemUbigeoLlegada={this.handleSelectItemUbigeoLlegada}
 
-        <div className="dropdown-divider"></div>
-
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refVehiculo}
-              label={
-                <label>
-                  Filtrar un vehículo:{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              disabled={this.state.disabledPublica}
-              placeholder="Filtrar por marca o número de placa..."
-              refValue={this.refFiltrarVehiculo}
-              data={this.state.vehiculos}
-              handleClearInput={this.handleClearInputVehiculo}
-              handleFilter={this.handleFilterVehiculo}
-              handleSelectItem={this.handleSelectItemVehiculo}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.marca}-{value.numeroPlaca}
-                  </span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
-
-        {/* Sección de datos del conductor */}
-        <h6>
-          <span className="badge badge-primary">6</span> Datos del Conductor
-          Privado
-        </h6>
-
-        <div className="dropdown-divider"></div>
-
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refConductor}
-              label={
-                <label>
-                  Filtrar un Conductor (DNI):{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              disabled={this.state.disabledPublica}
-              placeholder="Por número de documento o apellidos y nombres..."
-              refValue={this.refFiltrarConductor}
-              data={this.state.conductores}
-              handleClearInput={this.handleClearInputConductor}
-              handleFilter={this.handleFilterConductor}
-              handleSelectItem={this.handleSelectItemConductor}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.documento}, {value.informacion}
-                  </span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
-
-        <h6>
-          <span className="badge badge-primary">7</span> Datos de la Empresa a
-          Transportar - Pública
-        </h6>
-
-        <div className="dropdown-divider"></div>
-
-        <Row>
-          <Column>
-            <SearchInput
-              ref={this.refConductorPublico}
-              label={
-                <label>
-                  Selecciona una Empresa (RUC):{' '}
-                  <i className="fa fa-asterisk text-danger small"></i>
-                </label>
-              }
-              disabled={this.state.disabledPrivado}
-              placeholder="Por número de documento o ruc..."
-              refValue={this.refFiltrarConductorPublico}
-              data={this.state.conductoresPublico}
-              handleClearInput={this.handleClearInputConductorPublico}
-              handleFilter={this.handleFilterConductorPublico}
-              handleSelectItem={this.handleSelectItemConductorPublico}
-              renderItem={(value) => (
-                <>
-                  <span>
-                    {value.documento}, {value.informacion}
-                  </span>
-                </>
-              )}
-            />
-          </Column>
-        </Row>
-
-        <div className="dropdown-divider"></div>
-
-        <Row>
-          <Column className="col-md-6 col-12">
-            <h6>
-              <span className="badge badge-primary">8</span> Punto de partida
-            </h6>
-
-            <div className="dropdown-divider"></div>
-
-            {
-              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA && (
-                <div className="form-group">
-                  <Input
-                    group={true}
-                    iconLeft={<i className="bi bi-search"></i>}
-                    label={
-                      <label>
-                        Codigo Anexo Partida: <i className="fa fa-asterisk text-danger small"></i>
-                      </label>
-                    }
-                    placeholder="Ingrese su código anexo de partida..."
-                    ref={this.refCodigoAnexoPartida}
-                    value={this.state.codigoAnexoPartida}
-                    onChange={(event) => {
-                      this.setState({ codigoAnexoPartida: event.target.value });
-                    }}
-                  />
-                </div>
-              )
-            }
-
-            <div className="form-group">
-              <Input
-                group={true}
-                iconLeft={<i className="bi bi-search"></i>}
-                label={
-                  <label>
-                    Dirección Partida:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                }
-                placeholder="Ingrese Dirección de partida..."
-                ref={this.refDireccionPartida}
-                value={this.state.direccionPartida}
-                onChange={(event) => {
-                  this.setState({ direccionPartida: event.target.value });
-                }}
-              />
-            </div>
-
-            <div className="form-group">
-              <SearchInput
-                ref={this.refUbigeoPartida}
-                label={
-                  <label>
-                    Ubigeo Partida:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                }
-                placeholder="Filtrar departamento, distrito o provincia..."
-                refValue={this.refFiltrarUbigeoPartida}
-                data={this.state.ubigeosPartida}
-                handleClearInput={this.handleClearInputaUbigeoPartido}
-                handleFilter={this.handleFilterUbigeoPartido}
-                handleSelectItem={this.handleSelectItemUbigeoPartido}
-                renderItem={(value) => (
-                  <>
-                    {value.departamento} -{value.provincia} -{value.distrito}(
-                    {value.ubigeo})
-                  </>
-                )}
-                renderIconLeft={<i className="bi bi-search"></i>}
-              />
-            </div>
-          </Column>
-
-          <Column className="col-md-6 col-12">
-            <h6>
-              <span className="badge badge-primary">9</span> Punto de llegada
-            </h6>
-
-            <div className="dropdown-divider"></div>
-
-            {
-              this.state.idMotivoTraslado === MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA && (
-                <div className="form-group">
-                  <Input
-                    group={true}
-                    iconLeft={<i className="bi bi-search"></i>}
-                    label={
-                      <label>
-                        Codigo Anexo Llegada: <i className="fa fa-asterisk text-danger small"></i>
-                      </label>
-                    }
-                    placeholder="Ingrese su código anexo de llegada..."
-                    ref={this.refCodigoAnexoLlegada}
-                    value={this.state.codigoAnexoLlegada}
-                    onChange={(event) => {
-                      this.setState({ codigoAnexoLlegada: event.target.value });
-                    }}
-                  />
-                </div>
-              )
-            }
-
-            <div className="form-group">
-              <Input
-                group={true}
-                iconLeft={<i className="bi bi-search"></i>}
-                label={
-                  <label>
-                    Dirección Llegada:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                }
-                placeholder="Ingrese Dirección de llegada..."
-                ref={this.refDireccionLlegada}
-                value={this.state.direccionLlegada}
-                onChange={(event) => {
-                  this.setState({ direccionLlegada: event.target.value });
-                }}
-              />
-            </div>
-
-            <div className="form-group">
-              <SearchInput
-                ref={this.refUbigeoLlegada}
-                label={
-                  <label>
-                    Ubigeo Llegada:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>
-                  </label>
-                }
-                placeholder="Filtrar departamento, distrito o provincia..."
-                refValue={this.refFiltrarUbigeoLlegada}
-                data={this.state.ubigeosLlegada}
-                handleClearInput={this.handleClearInputaUbigeoLlegada}
-                handleFilter={this.handleFilterUbigeoLlegada}
-                handleSelectItem={this.handleSelectItemUbigeoLlegada}
-                renderItem={(value) => (
-                  <>
-                    {value.departamento} -{value.provincia} -{value.distrito}(
-                    {value.ubigeo})
-                  </>
-                )}
-                renderIconLeft={<i className="bi bi-search"></i>}
-              />
-            </div>
-          </Column>
-        </Row>
-
-        <h6>
-          <span className="badge badge-primary">10</span> Detalle de Guía de
-          Remisión
-        </h6>
-
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className="table-bordered">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="10%">Código</TableHead>
-                    <TableHead width="35%">Descripción</TableHead>
-                    <TableHead width="15%">Und/Medida</TableHead>
-                    <TableHead width="15%">Cantidad</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.state.detalles.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="text-center">{++index}</TableCell>
-                      <TableCell>{item.codigo}</TableCell>
-                      <TableCell>{item.producto}</TableCell>
-                      <TableCell>{item.medida}</TableCell>
-                      <TableCell>{item.cantidad}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          detalles={this.state.detalles}
+        />
       </ContainerWrapper>
     );
   }

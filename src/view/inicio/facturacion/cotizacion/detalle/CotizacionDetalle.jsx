@@ -29,6 +29,7 @@ import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { cn } from '@/lib/utils';
+import { CircleCheck, CircleX } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -278,15 +279,26 @@ class CotizacionDetalle extends CustomComponent {
 
             {
               label: 'Estado', value: () => {
-                return (
-                  <span className={cn(
-                    "inline-flex items-center rounded-full",
-                    "text-xs font-medium",
-                    "px-2.5 py-0.5",
-                    cabecera.estado === 0 && "bg-red-100 text-red-800",
-                    cabecera.estado === 1 && "bg-emerald-100 text-emerald-800",
-                  )}>
-                    {cabecera.estado === 1 ? "ACTIVO" : "ANULADO"}
+                return (                  
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1",
+                      "font-medium",
+                      cabecera.estado === 1 && "text-green-700",
+                      cabecera.estado === 0 && "text-red-700",
+                    )}
+                  >
+                    {cabecera.estado === 1 ? (
+                      <>
+                        <CircleCheck className="w-4 h-4" />
+                        Activo
+                      </>
+                    ) : (
+                      <>
+                        <CircleX className="w-4 h-4" />
+                        Anulado
+                      </>
+                    )}
                   </span>
                 );
               }
