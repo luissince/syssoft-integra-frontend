@@ -79,7 +79,7 @@ class PedidoCrear extends CustomComponent {
         referencia: "",
         idSucursal: this.props.token.project.idSucursal,
         fechaPedido: currentDate(),
-        horaPedido: currentDate(),
+        horaPedido: null,
         idAgencia: 0,
         destino: "",
         receptor: "",
