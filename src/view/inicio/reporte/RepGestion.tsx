@@ -1,22 +1,21 @@
 import ContainerWrapper from '@/components/ui/container-wrapper';
 import { SpinnerView } from '@/components/Spinner';
 import Title from '@/components/Title';
-import {
-  Package,
-  AlertTriangle,
-} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import DatePickerPopover from "@/components/DatePickerPopover";
-import { optionsSucursal, reporteAsignacion } from '@/network/rest/api-client';
+import { excelAsignacion, optionsSucursal, reporteAsignacion } from '@/network/rest/api-client';
 import { format } from 'date-fns';
 import { alertKit } from 'alert-kit';
 import { CANCELED } from '@/constants/requestStatus';
 import { cn } from '@/lib/utils';
 import BranchInterface from '@/model/ts/interface/branch';
 import Search from '@/components/Search';
-import { formatCurrency, isEmpty, rounded } from '@/helper/utils.helper';
+import { guId, isEmpty } from '@/helper/utils.helper';
 import { useAppSelector } from '@/redux/hooks';
 import { useHistory } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { downloadFileAsync } from '@/redux/downloadSlice';
+import { FaFileExcel } from 'react-icons/fa';
 
 enum estadoInventario {
   DISPONIBLE = "disponible",
@@ -45,6 +44,8 @@ type ActivoAsignacion = {
 }
 
 const ReporteGestion = () => {
+  const dispatch = useDispatch();
+
   const token = useAppSelector((state) => state.principal);
 
   const history = useHistory();
@@ -146,6 +147,18 @@ const ReporteGestion = () => {
     setBuscar(text.trim().toLowerCase());
   };
 
+  const handleExportExcel = async () => {
+    dispatch(
+      downloadFileAsync({
+        id: guId(),
+        request: excelAsignacion({
+          fechaInicio: format(fechaInicial, 'yyyy-MM-dd'),
+          fechaFinal: format(fechaFinal, 'yyyy-MM-dd'),
+        }),
+      })
+    );
+  }
+
   const activosFiltrados = activoAsignacion.filter((activo) => {
     const coincideBusqueda = !buscar || [
       activo.documento,
@@ -175,35 +188,60 @@ const ReporteGestion = () => {
         handleGoBack={() => history.goBack()}
       />
 
-      <div className="space-y-3">
-        {/* Controles */}
-        <div className="mb-6 flex flex-col gap-4">
-          <div className="flex flex-wrap gap-3">
-            <button
-              disabled={loading}
-              className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded",
-                loading ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              )}
-              onClick={LoadInventarioGestion}
-            >
-              <i className={`bi bi-arrow-clockwise ${loading ? 'animate-spin' : ''}`}></i>
-              {loading ? 'Recargando...' : 'Recargar Vista'}
-            </button>
-          </div>
+      {/* Controles */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <button
+          disabled={loading}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded",
+            loading ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          )}
+          onClick={LoadInventarioGestion}
+        >
+          <i className={`bi bi-arrow-clockwise ${loading ? 'animate-spin' : ''}`}></i>
+          {loading ? 'Recargando...' : 'Recargar Vista'}
+        </button>
 
-          <div className="flex">
-            <p className="text-gray-600 mt-1">
-              Aquí puedes filtrar los registros de asignación de activos fijos por fecha, sucursal y almacén. Utiliza los controles para seleccionar el rango de fechas y las opciones deseadas.
-            </p>
-          </div>
+        <button
+          type="button"
+          disabled={loading}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded",
+            loading ? 'bg-green-300 text-gray-400 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'
+          )}
+          onClick={handleExportExcel}
+        >
+          <FaFileExcel className="w-4 h-4" /> Exportar a Excel
+        </button>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="flex flex-col gap-y-4 mb-4">
+        <p className="text-gray-600 mt-1">
+          Aquí puedes filtrar los registros de asignación de activos fijos por fecha, sucursal y almacén. Utiliza los controles para seleccionar el rango de fechas y las opciones deseadas.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-y-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Fecha Inicial:
+            </label>
             <DatePickerPopover value={fechaInicial} onChange={handleFechaInicial} />
+          </div>
 
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Fecha Final:
+            </label>
             <DatePickerPopover value={fechaFinal} onChange={handleFechaFinal} />
+          </div>
 
-
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Sucursales:
+            </label>
             <select
               value={idSucursal}
               onChange={handleSucursalChange}
@@ -216,7 +254,12 @@ const ReporteGestion = () => {
                 </option>
               ))}
             </select>
+          </div>
 
+          <div className="w-full flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700 m-0">
+              Almacenes:
+            </label>
             <select
               value={idAlmacen}
               onChange={(event) => setIdAlmacen(event.target.value)}
@@ -226,87 +269,87 @@ const ReporteGestion = () => {
             </select>
           </div>
         </div>
-        <div className="flex flex-row gap-4 mb-4">
-          {/* Barra de búsqueda */}
-          <div className="w-1/2">
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search text-gray-400"></i>}
-              onSearch={searchText}
-              placeholder="Buscar por comprobante o cliente..."
-              theme="modern"
-            />
-          </div>
+      </div>
 
-          <select
-            value={estadoSeleccionado}
-            onChange={(event) => setEstadoSeleccionado(event.target.value)}
-            aria-label="Filtrar por estado"
-            className="px-4 py-2 border border-gray-300 text-sm rounded"
-          >
-            <option value="">TODOS LOS ESTADOS</option>
-            <option value={estadoInventario.ASIGNADO}>ASIGNADO</option>
-            <option value={estadoInventario.DISPONIBLE}>DISPONIBLE</option>
-          </select>
+      <div className="flex flex-row gap-4 mb-4">
+        {/* Barra de búsqueda */}
+        <div className="w-1/2">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            onSearch={searchText}
+            placeholder="Buscar por comprobante o cliente..."
+            theme="modern"
+          />
         </div>
 
-        {/* 1. PRODUCTOS PARA PEDIR - ¿Qué se está vendiendo? */}
-        <div>
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100">
+        <select
+          value={estadoSeleccionado}
+          onChange={(event) => setEstadoSeleccionado(event.target.value)}
+          aria-label="Filtrar por estado"
+          className="px-4 py-2 border border-gray-300 text-sm rounded"
+        >
+          <option value="">TODOS LOS ESTADOS</option>
+          <option value={estadoInventario.ASIGNADO}>ASIGNADO</option>
+          <option value={estadoInventario.DISPONIBLE}>DISPONIBLE</option>
+        </select>
+      </div>
+
+      {/* 1. PRODUCTOS PARA PEDIR - ¿Qué se está vendiendo? */}
+      <div>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">N°</th>
+                  <th className="w-[20%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">DNI/RUC</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Persona</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Cel. / Tel.</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Email</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Producto</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Serie</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Correlativo</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Marca</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Estado</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Ubicación</th>
+                  <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Fecha</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 border">
+                {isEmpty(activosFiltrados) ? (
                   <tr>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">N°</th>
-                    <th className="w-[20%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">DNI/RUC</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Persona</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Cel. / Tel.</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Email</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Producto</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Serie</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Correlativo</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Marca</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Estado</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Ubicación</th>
-                    <th className="w-[10%] py-3 text-center text-xs font-medium text-gray-500 uppercase border">Fecha</th>
+                    <td colSpan={12} className="px-6 py-12 text-center">
+                      <div className="text-gray-500">
+                        <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
+                        <p className="text-lg font-medium">No se encontraron registros</p>
+                        <p className="text-sm">No hay asignaciones para mostrar</p>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 border">
-                  {isEmpty(activosFiltrados) ? (
-                    <tr>
-                      <td colSpan={12} className="px-6 py-12 text-center">
-                        <div className="text-gray-500">
-                          <i className="bi bi-box text-4xl mb-3 block text-gray-400"></i>
-                          <p className="text-lg font-medium">No se encontraron registros</p>
-                          <p className="text-sm">No hay asignaciones para mostrar</p>
-                        </div>
-                      </td>
+                ) : (
+                  activosFiltrados.map((activo, idx) => (
+                    <tr key={`${activo.idDocumentoActivo}-${idx}`} className="hover:bg-gray-50">
+                      <td className="px-6 py-4"><div className="text-sm">{idx + 1}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.tipoDocumento}<br />{activo.documento}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.persona}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.celular}<br />{activo.telefono}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.email}</div></td>
+                      <td className="px-6 py-4"><div className="text-xs text-gray-700">{activo.codigo}</div><div className="text-sm text-gray-700">{activo.producto}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.serie}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.correlativo}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.marca ?? 'N/A'}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.estado}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.ubicacion}</div></td>
+                      <td className="px-6 py-4"><div className="text-sm text-gray-700">{format(new Date(activo.fecha), 'dd/MM/yyyy')}</div></td>
                     </tr>
-                  ) : (
-                    activosFiltrados.map((activo, idx) => (
-                      <tr key={`${activo.idDocumentoActivo}-${idx}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4"><div className="text-sm">{idx + 1}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.tipoDocumento}<br />{activo.documento}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.persona}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.celular}<br />{activo.telefono}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.email}</div></td>
-                        <td className="px-6 py-4"><div className="text-xs text-gray-700">{activo.codigo}</div><div className="text-sm text-gray-700">{activo.producto}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.serie}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.correlativo}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.marca ?? 'N/A'}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.estado}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{activo.ubicacion}</div></td>
-                        <td className="px-6 py-4"><div className="text-sm text-gray-700">{format(new Date(activo.fecha), 'dd/MM/yyyy')}</div></td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-
     </ContainerWrapper >
   );
 }

@@ -408,6 +408,14 @@ export async function reporteAsignacion(body: Record<string, any>, signal: Abort
   );
 }
 
+export function excelAsignacion(data: Record<string, any>) {
+  return {
+    method: 'POST',
+    url: '/api/activo-gestion/excel',
+    data,
+  }
+}
+
 /*
 |--------------------------------------------------------------------------
 | ENDPOINTS DE AREA

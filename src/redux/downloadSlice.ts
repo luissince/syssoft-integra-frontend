@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getFileNameFromContentDisposition, saveBlob } from '../helper/utils.helper';
 import { DownloadSlice } from '@/model/ts/interface/download';
 import { downloadProgress } from '@/network/rest/api-client';
+import axios from 'axios';
 
 // Definimos el thunk asíncrono para manejar las descargas
 
@@ -50,9 +51,25 @@ export const downloadFileAsync = createAsyncThunk(
         success: true,
       };
     } catch (error) {
+
+      let message = error.message || 'Error descargando archivo';
+
+      if (!axios.isAxiosError(error)) {
+        message = 'Error desconocido';
+      } else {
+        const data = error.response?.data;
+        if (data instanceof Blob) {
+          message = await data.text();
+        } else if (typeof data === 'string') {
+          message = data;
+        } else if (data && typeof data === 'object') {
+          message = data.message ?? error.message;
+        }
+      }
+
       return rejectWithValue({
         id,
-        error: error.message ?? 'Error descargando archivo',
+        error: message,
       });
     }
   }
