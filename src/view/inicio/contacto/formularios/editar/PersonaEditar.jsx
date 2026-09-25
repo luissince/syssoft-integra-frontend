@@ -211,7 +211,7 @@ class PersonaEditar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
-  handleInputClave = () => {
+  handleInputClave = (event) => {
     this.setState({ clave: event.target.value });
   };
 

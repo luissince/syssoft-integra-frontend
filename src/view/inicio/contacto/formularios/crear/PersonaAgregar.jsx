@@ -152,7 +152,7 @@ class PersonaAgregar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
-  handleInputClave = () => {
+  handleInputClave = (event) => {
     this.setState({ clave: event.target.value });
   };
 
@@ -242,8 +242,8 @@ class PersonaAgregar extends CustomComponent {
 
     this.setState({
       documento: convertNullText(data.ruc),
-      informacionPj: convertNullText(data.razonSocial),
-      direccionPj: convertNullText(data.direccion),
+      informacion: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
       loading: false,
     });
   };

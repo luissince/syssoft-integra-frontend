@@ -475,8 +475,8 @@ class ModalPersona extends Component {
 
     this.setState({
       documento: convertNullText(data.ruc),
-      informacionPj: convertNullText(data.razonSocial),
-      direccionPj: convertNullText(data.direccion),
+      informacion: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
       loading: false,
     });
   };
