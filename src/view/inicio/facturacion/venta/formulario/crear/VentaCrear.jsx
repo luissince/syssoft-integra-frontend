@@ -38,10 +38,7 @@ import {
   TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { SpinnerView } from '../../../../../../components/Spinner';
-import {
-  getDni,
-  getRuc,
-} from '../../../../../../network/rest/apisperu.network';
+import { getDni, getRuc } from '../../../../../../network/rest/api-client';
 import {
   clearCrearVenta,
   setCrearVentaLocal,
@@ -1306,31 +1303,32 @@ class VentaCrear extends CustomComponent {
       msgLoading: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(this.state.numeroDocumento);
+    const { success, data, message, type } = await getDni(this.state.numeroDocumento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        numeroDocumento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
-        loadingCliente: false,
-      });
-    }
+    if (!success) {
+      if (type === CANCELED) return;
 
-    if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Venta',
-        message: response.getMessage(),
+        title: "Persona",
+        message: message,
       }, () => {
         this.setState({
-          loadingCliente: false,
+          loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      numeroDocumento: convertNullText(data.dni),
+      informacion:
+        convertNullText(data.apellidoPaterno) +
+        ' ' +
+        convertNullText(data.apellidoMaterno) +
+        ' ' +
+        convertNullText(data.nombres),
+      loadingCliente: false,
+    });
   };
 
   handleGetApiSunat = async () => {
@@ -1353,27 +1351,28 @@ class VentaCrear extends CustomComponent {
       msgLoading: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.numeroDocumento);
+    const { success, data, message, type } = await getRuc(this.state.numeroDocumento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        numeroDocumento: convertNullText(response.data.ruc),
-        informacion: convertNullText(response.data.razonSocial),
-        direccion: convertNullText(response.data.direccion),
-        loadingCliente: false,
-      });
-    }
+    if (!success) {
+      if (type === CANCELED) return;
 
-    if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Venta',
-        message: response.getMessage(),
+        title: "Persona",
+        message: message,
       }, () => {
         this.setState({
-          loadingCliente: false,
+          loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      numeroDocumento: convertNullText(data.ruc),
+      informacion: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
+      loadingCliente: false,
+    });
   };
 
   handleSaveCliente = () => {

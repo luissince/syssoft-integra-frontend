@@ -19,12 +19,10 @@ import {
 import SuccessReponse from '../../../../model/class/response';
 import ErrorResponse from '../../../../model/class/error-response';
 import { CANCELED } from '../../../../model/types/types';
-import { getRuc } from '../../../../network/rest/apisperu.network';
+import { getRuc } from '../../../../network/rest/api-client';
 import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../components/Title';
 import { SpinnerView } from '../../../../components/Spinner';
-import Row from '../../../../components/Row';
-import Column from '../../../../components/Column';
 import { ImageUpload, MultiImages } from '../../../../components/Image';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
@@ -293,29 +291,27 @@ class EmpresaProceso extends CustomComponent {
       msgLoading: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.documento);
+    const { success, data, message, type } = await getRuc(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.ruc),
-        razonSocial: convertNullText(response.data.razonSocial),
-        loading: false,
+    if (!success) {
+      if (type === CANCELED) return;
+
+      alertKit.warning({
+        title: "Configuración",
+        message: message,
+      }, () => {
+        this.setState({
+          loading: false,
+        });
       });
+      return;
     }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      alertKit.error({
-        title: 'Empresa',
-        message: response.getMessage(),
-        onClose: () => {
-          this.setState({
-            loading: false,
-          });
-        },
-      });
-    }
+    this.setState({
+      documento: convertNullText(data.ruc),
+      razonSocial: convertNullText(data.razonSocial),
+      loading: false,
+    });
   }
 
   handleLookPasswordEmail = () => {
