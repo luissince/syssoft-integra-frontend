@@ -44,10 +44,7 @@ import {
 } from '../../../../../../model/types/tipo-tratamiento-producto';
 import { CONTADO } from '../../../../../../model/types/forma-pago';
 import ModalProdcutos from '../common/ModalProductos';
-import {
-  getDni,
-  getRuc,
-} from '../../../../../../network/rest/apisperu.network';
+import { getDni, getRuc } from '../../../../../../network/rest/api-client';
 import { images } from '../../../../../../helper';
 import Input from '../../../../../../components/Input';
 import Select from '../../../../../../components/Select';
@@ -1819,13 +1816,12 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleGetApiReniec = async () => {
     if (this.state.numeroDocumento.length !== 8) {
-      this.alert.warning(
-        'Venta',
-        'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Para iniciar la busqueda en número dni debe tener 8 caracteres.',
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1836,64 +1832,63 @@ class VentaCrearEscritorio extends CustomComponent {
       msgLoadingCliente: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(
+    const { success, data, message, type } = await getDni(
       this.state.numeroDocumento,
       this.abortControllerCliente.signal,
     );
 
-    if (response instanceof SuccessReponse) {
-      this.setState(
-        {
-          numeroDocumento: convertNullText(response.data.dni),
-          informacion:
-            convertNullText(response.data.apellidoPaterno) +
-            ' ' +
-            convertNullText(response.data.apellidoMaterno) +
-            ' ' +
-            convertNullText(response.data.nombres),
-          loadingCliente: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
-    }
+    if (!success) {
+      if (type === CANCELED) {
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) {
-        this.setState(
-          {
+        alertKit.warning({
+          title: "Persona",
+          message: message,
+        }, () => {
+          this.setState({
             loadingCliente: false,
-          },
-          () => {
-            this.updateReduxState();
-          },
-        );
+          });
+          this.updateReduxState();
+        });
+
         return;
       }
 
-      this.alert.warning('Venta', response.getMessage(), () => {
-        this.setState(
-          {
-            loadingCliente: false,
-          },
-          () => {
-            this.updateReduxState();
-          },
-        );
+      alertKit.warning({
+        title: "Persona",
+        message: message,
+      }, () => {
+        this.setState({
+          loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
+        });
       });
+
+      return;
     }
+
+    this.setState({
+      numeroDocumento: convertNullText(data.dni),
+      informacion:
+        convertNullText(data.apellidoPaterno) +
+        ' ' +
+        convertNullText(data.apellidoMaterno) +
+        ' ' +
+        convertNullText(data.nombres),
+      loadingCliente: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleGetApiSunat = async () => {
     if (this.state.numeroDocumento.length !== 11) {
-      this.alert.warning(
-        'Venta',
-        'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
-        () => {
-          this.refNumeroDocumento.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Para iniciar la busqueda en número ruc debe tener 11 caracteres.',
+      }, () => {
+        this.refNumeroDocumento.current.focus();
+      });
       return;
     }
 
@@ -1904,44 +1899,41 @@ class VentaCrearEscritorio extends CustomComponent {
       msgLoadingCliente: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(
+    const { success, data, message, type } = await getRuc(
       this.state.numeroDocumento,
       this.abortControllerCliente.signal,
     );
 
-    if (response instanceof SuccessReponse) {
-      this.setState(
-        {
-          numeroDocumento: convertNullText(response.data.ruc),
-          informacion: convertNullText(response.data.razonSocial),
-          direccion: convertNullText(response.data.direccion),
-          loadingCliente: false,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) {
+    if (!success) {
+      if (type === CANCELED) {
         this.setState({
           loadingCliente: false,
         });
         return;
       }
 
-      this.alert.warning('Venta', response.getMessage(), () => {
-        this.setState(
-          {
-            loadingCliente: false,
-          },
-          () => {
-            this.updateReduxState();
-          },
-        );
+      alertKit.warning({
+        title: "Persona",
+        message: message,
+      }, () => {
+        this.setState({
+          loadingCliente: false,
+        }, () => {
+          this.updateReduxState();
+        });
       });
+
+      return;
     }
+
+    this.setState({
+      numeroDocumento: convertNullText(data.ruc),
+      informacion: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
+      loadingCliente: false,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -2077,23 +2069,33 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleSaveOptions = () => {
     if (isEmpty(this.state.idImpuesto)) {
-      this.alert.warning('Venta', 'Seleccione un impuesto.', () =>
-        this.refImpuesto.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un impuesto.',
+      }, () => {
+        this.refImpuesto.current.focus();
+      });
+
       return;
     }
 
     if (isEmpty(this.state.idMoneda)) {
-      this.alert.warning('Venta', 'Seleccione una moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione una moneda.',
+      }, () => {
+        this.refMoneda.current.focus();
+      });
       return;
     }
 
     if (isEmpty(this.state.idAlmacen)) {
-      this.alert.warning('Venta', 'Seleccione un almacen.', () =>
-        this.refAlmacen.current.focus(),
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Seleccione un almacen.',
+      }, () => {
+        this.refAlmacen.current.focus();
+      });
       return;
     }
 

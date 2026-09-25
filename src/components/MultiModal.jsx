@@ -24,7 +24,7 @@ import {
   keyNumberPhone,
   validateNumberWhatsApp,
 } from '../helper/utils.helper';
-import { getDni, getRuc } from '../network/rest/apisperu.network';
+import { getDni, getRuc } from '../network/rest/api-client';
 import Row from './Row';
 import Column from './Column';
 import Select from './Select';
@@ -412,32 +412,32 @@ class ModalPersona extends Component {
       msgLoading: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(this.state.documento);
+    const { success, data, message, type } = await getDni(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
-        loading: false,
-      });
-    }
+    if (!success) {
+      if (type === CANCELED) return;
 
-    if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Persona',
-        message: response.getMessage(),
+        title: "Persona",
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
-      },
-      );
+      });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.dni),
+      informacion:
+        convertNullText(data.apellidoPaterno) +
+        ' ' +
+        convertNullText(data.apellidoMaterno) +
+        ' ' +
+        convertNullText(data.nombres),
+      loading: false,
+    });
   };
 
   handleGetApiSunat = async () => {
@@ -457,27 +457,28 @@ class ModalPersona extends Component {
       msgLoading: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.documento);
+    const { success, data, message, type } = await getRuc(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.ruc),
-        informacionPj: convertNullText(response.data.razonSocial),
-        direccionPj: convertNullText(response.data.direccion),
-        loading: false,
-      });
-    }
+    if (!success) {
+      if (type === CANCELED) return;
 
-    if (response instanceof ErrorResponse) {
       alertKit.warning({
-        title: 'Persona',
-        message: response.getMessage(),
+        title: "Persona",
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.ruc),
+      informacionPj: convertNullText(data.razonSocial),
+      direccionPj: convertNullText(data.direccion),
+      loading: false,
+    });
   };
 
   handleFilter = async (value) => {
@@ -784,8 +785,8 @@ class ModalPersona extends Component {
                   handleClearInput={this.handleClearInput}
                   handleFilter={this.handleFilter}
                   handleSelectItem={this.handleSelectItem}
-                  renderItem={(value) => (                    
-                    `${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`                  
+                  renderItem={(value) => (
+                    `${value.departamento} - ${value.provincia} - ${value.distrito} (${value.ubigeo})`
                   )}
                 />
               </Column>

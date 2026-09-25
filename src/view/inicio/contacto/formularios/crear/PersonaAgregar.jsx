@@ -17,7 +17,7 @@ import {
   getUbigeo,
   comboTipoDocumento,
 } from '../../../../../network/rest/principal.network';
-import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
+import { getDni, getRuc } from '../../../../../network/rest/api-client';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../../components/SearchInput';
@@ -180,33 +180,32 @@ class PersonaAgregar extends CustomComponent {
       msgLoading: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(this.state.documento);
+    const { success, data, message, type } = await getDni(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
-        loading: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Persona",
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.dni),
+      informacion:
+        convertNullText(data.apellidoPaterno) +
+        ' ' +
+        convertNullText(data.apellidoMaterno) +
+        ' ' +
+        convertNullText(data.nombres),
+      loading: false,
+    });
   };
 
   handleGetApiSunat = async () => {
@@ -225,29 +224,28 @@ class PersonaAgregar extends CustomComponent {
       msgLoading: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.documento);
+    const { success, data, message, type } = await getRuc(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.ruc),
-        informacionPj: convertNullText(response.data.razonSocial),
-        direccionPj: convertNullText(response.data.direccion),
-        loading: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Persona",
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.ruc),
+      informacionPj: convertNullText(data.razonSocial),
+      direccionPj: convertNullText(data.direccion),
+      loading: false,
+    });
   };
 
   handleFilterUbigeo = async (text) => {
