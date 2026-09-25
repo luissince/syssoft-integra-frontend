@@ -242,7 +242,6 @@ jobs:
           cat > .env <<EOL
 
           VITE_APP_BACK_END="${{secrets.VITE_APP_BACK_END}}"
-          VITE_APP_APIS_PERU="${{secrets.VITE_APP_APIS_PERU}}"
           VITE_APP_ENV="${{vars.VITE_APP_ENV}}"
           VITE_APP_NAME="${{vars.VITE_APP_NAME}}"
 

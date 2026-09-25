@@ -5,7 +5,8 @@ import AlmacenInterface from '@/model/ts/interface/AlmacenInterface';
 import SucursalInterface from '@/model/ts/interface/sucursal.interface';
 import DashboardInterface from '@/model/ts/interface/dashboard.interface';
 import axios from 'axios';
-import WebInterface from '@/model/ts/interface/WebInterface';
+import WebInterface from '@/model/ts/interface/web.interface';
+import { DniInterface, RucInterface } from '@/model/ts/interface/dniruc.interface';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
@@ -63,6 +64,22 @@ export async function processWeb(body, signal: AbortSignal): Promise<ResolveResp
 export async function getIdWeb(signal: AbortSignal): Promise<ResolveResponse<WebInterface>> {
   return await Resolve.safe(
     apiClient.get(`/api/web`, {
+      signal
+    }),
+  );
+}
+
+export async function getDni(documento: string, signal: AbortSignal = null): Promise<ResolveResponse<DniInterface>> {
+  return await Resolve.safe(
+    apiClient.get(`/api/dniruc/dni/${documento}`, {
+      signal
+    }),
+  );
+}
+
+export async function getRuc(documento: string, signal: AbortSignal = null): Promise<ResolveResponse<RucInterface>> {
+  return await Resolve.safe(
+    apiClient.get(`/api/dniruc/ruc/${documento}`, {
       signal
     }),
   );
