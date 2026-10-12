@@ -1,12 +1,8 @@
 import {
   formatCurrency,
   formatTime,
-  alertDialog,
   isEmpty,
   formatNumberWithZeros,
-  alertWarning,
-  alertSuccess,
-  alertInfo,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import Paginacion from '../../../../../components/Paginacion';
@@ -35,10 +31,11 @@ import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import { SpinnerTable } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class Cobros extends CustomComponent {
   /**
@@ -212,35 +209,46 @@ class Cobros extends CustomComponent {
     });
   };
 
-  handleAnular = (idCobro) => {
-    alertDialog(
-      'Ingreso',
-      '¿Está seguro de que desea eliminar el Ingreso? Esta operación no se puede deshacer.',
-      async (value) => {
-        if (value) {
-          const params = {
-            idCobro: idCobro,
-            idUsuario: this.state.idUsuario,
-          };
-
-          alertInfo('Ingreso', 'Procesando información...');
-
-          const response = await cancelCobro(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Ingreso', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Ingreso', response.getMessage());
-          }
-        }
+  handleAnular = async (idCobro) => {
+    const accept = await alertKit.question({
+      title: 'Ingreso',
+      message: '¿Está seguro de que desea anular el ingreso? Esta operación no se puede deshacer.',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idCobro: idCobro,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({ message: 'Procesando información...' });
+
+      const response = await cancelCobro(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Ingreso',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Ingreso',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   /*
@@ -310,7 +318,7 @@ class Cobros extends CustomComponent {
             <Button
               className="btn-outline-info btn-sm"
               onClick={() => this.handleDetalle(item.idCobro)}
-              // disabled={!this.state.view}
+            // disabled={!this.state.view}
             >
               <i className="fa fa-eye"></i>
             </Button>
@@ -319,7 +327,7 @@ class Cobros extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleAnular(item.idCobro)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="fa fa-remove"></i>
             </Button>

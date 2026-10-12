@@ -56,8 +56,6 @@ import Facturacion, {
   NotaCredito,
   NotaCreditoProceso,
   NotaCreditoDetalle,
-  CuentasPorCobrar,
-  CuentasPorCobrarAbonar,
   Pedidos,
   PedidoCrear,
   PedidoEditar,
@@ -90,8 +88,6 @@ import Tesoreria, {
   Compras,
   CompraCrear,
   CompraDetalle,
-  CuentasPorPagar,
-  CuentasPorPagarAmortizar,
   OrdenCompras,
   OrdenCompraCrear,
   OrdenCompraEditar,
@@ -654,17 +650,6 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/facturacion/cuentacobrar`}
-            exact={true}
-            render={(props) => <CuentasPorCobrar {...props} />}
-          />
-          <Route
-            path={`${path}/facturacion/cuentacobrar/detalle`}
-            exact={true}
-            render={(props) => <CuentasPorCobrarAbonar {...props} />}
-          />
-
-          <Route
             path={`${path}/facturacion/pedidos`}
             exact={true}
             render={(props) => <Pedidos {...props} />}
@@ -823,17 +808,6 @@ class Inicio extends React.Component {
             path={`${path}/tesoreria/compras/detalle`}
             exact={true}
             render={(props) => <CompraDetalle {...props} />}
-          />
-
-          <Route
-            path={`${path}/tesoreria/cuentapagar`}
-            exact={true}
-            render={(props) => <CuentasPorPagar {...props} />}
-          />
-          <Route
-            path={`${path}/tesoreria/cuentapagar/detalle`}
-            exact={true}
-            render={(props) => <CuentasPorPagarAmortizar {...props} />}
           />
 
           <Route

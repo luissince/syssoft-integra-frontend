@@ -36,6 +36,7 @@ import React from 'react';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -260,7 +261,7 @@ class GuiaRemisionDetalle extends CustomComponent {
 
   handleProcessSendWhatsapp = async (
     phone,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
     const { email } = this.props.token.project;
@@ -504,15 +505,16 @@ class GuiaRemisionDetalle extends CustomComponent {
                     Estado:
                   </TableHead>
                   <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.estado === 1 ? (
-                      <span className="text-success font-weight-bold">
-                        ACTIVO
-                      </span>
-                    ) : (
-                      <span className="text-danger font-weight-bold">
-                        ANULADO
-                      </span>
-                    )}
+                    <span className={cn(
+                      "inline-flex items-center rounded-full",
+                      "text-xs font-medium",
+                      "px-2.5 py-0.5",
+                      this.state.estado === 1 && "bg-green-100 text-green-800",
+                      this.state.estado === 3 && "bg-red-100 text-red-800",
+                    )}>
+                      {this.state.estado === 1 && "ACTIVO"}
+                      {this.state.estado === 3 && "ANULADO"}
+                    </span>
                   </TableHead>
                 </TableRow>
               </TableHeader>

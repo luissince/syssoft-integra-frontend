@@ -31,7 +31,6 @@ class ModalProducto extends Component {
       costo: '',
       cantidad: '',
       idTipoProducto: '',
-      medida: '',
     };
 
     this.initial = { ...this.state };
@@ -42,6 +41,7 @@ class ModalProducto extends Component {
   }
 
   loadDatos = async (producto, type) => {
+    console.log(producto)
     if (type === 'edit') {
       this.setState({
         idProducto: producto.idProducto,
@@ -51,7 +51,6 @@ class ModalProducto extends Component {
         nombre: producto.nombre,
         imagen: producto.imagen,
         idTipoProducto: producto.idTipoProducto,
-        medida: producto.medida,
 
         loading: false,
       });
@@ -64,7 +63,6 @@ class ModalProducto extends Component {
         nombre: producto.nombre,
         imagen: producto.imagen,
         idTipoProducto: producto.idTipoProducto,
-        medida: producto.medida,
 
         loading: false,
       });
@@ -89,7 +87,7 @@ class ModalProducto extends Component {
   };
 
   handleOnSubmit = async () => {
-    const { idProducto, codigo, nombre, imagen, cantidad, costo , medida } =
+    const { idProducto, codigo, nombre, imagen, cantidad, costo } =
       this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
@@ -157,7 +155,6 @@ class ModalProducto extends Component {
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
-        medida: medida,
       };
       nuevoDetalles.push(data);
     }

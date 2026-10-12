@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import {
   formatCurrency,
+  getNumber,
   isEmpty,
 } from '../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -10,24 +11,10 @@ import {
   listBancos,
 } from '../../../../../network/rest/principal.network';
 import ErrorResponse from '../../../../../model/class/error-response';
-import SuccessReponse from '../../../../../model/class/response';
 import { CANCELED } from '../../../../../model/types/types';
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
-import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import {
   setListaBancoData,
@@ -35,6 +22,10 @@ import {
 } from '../../../../../redux/predeterminadoSlice';
 import React from 'react';
 import { alertKit } from 'alert-kit';
+import { cn } from '@/lib/utils';
+import { FaLowVision, FaRetweet } from 'react-icons/fa';
+import { Eye, Pencil, Trash } from 'lucide-react';
+import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -60,6 +51,12 @@ class Bancos extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+
+      resumen: [],
+      monedas: [],
+      monedaSeleccionada: this.props.moneda.codiso ?? '',
+
+      view: 'tabla',
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -108,28 +105,19 @@ class Bancos extends CustomComponent {
     */
 
   loadingData = async () => {
-    if (
-      this.props.bancoLista &&
-      this.props.bancoLista.data &&
-      this.props.bancoLista.paginacion
-    ) {
-      this.setState(this.props.bancoLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.bancoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.bancoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.bancoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.bancoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.bancoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.bancoLista.paginacion.messagePaginacion;
+    const { bancoLista, bancoListaDetalle } = this.props;
+    if (bancoLista && bancoLista.data && bancoLista.paginacion) {
+      this.setState(bancoLista.data);
+      this.refPaginacion.current.upperPageBound = bancoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = bancoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = bancoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = bancoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = bancoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = bancoLista.paginacion.messagePaginacion;
 
-      this.refSearch.current.initialize(this.props.bancoLista.data.buscar);
+      this.refSearch.current.initialize(bancoLista.data.buscar);
     } else {
-      await this.loadingInit();
+      await this.loadInit();
       this.updateReduxState();
     }
   };
@@ -146,7 +134,7 @@ class Bancos extends CustomComponent {
     });
   }
 
-  loadingInit = async () => {
+  loadInit = async () => {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
@@ -160,7 +148,7 @@ class Bancos extends CustomComponent {
     if (text.trim().length === 0) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -170,62 +158,52 @@ class Bancos extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion)
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion) => {
     this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
     });
 
-    const data = {
+    const params = {
       opcion: opcion,
-      buscar: buscar.trim(),
+      buscar: this.state.buscar.trim(),
       idSucursal: this.state.idSucursal,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listBancos(data, this.abortControllerTable.signal);
+    const { success, data, message, type } = await listBancos(params, this.abortControllerTable.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
-
-      this.setState(
-        {
-          loading: false,
-          lista: response.data.result,
-          totalPaginacion: totalPaginacion,
-        },
-        () => {
-          this.updateReduxState();
-        },
-      );
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),)
+    );
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+
+      resumen: data.resumen,
+      monedas: data.monedas,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   /*
@@ -243,6 +221,10 @@ class Bancos extends CustomComponent {
     | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
     |
     */
+
+  handleChangeView = (value) => {
+    this.setState({ view: value }, () => this.updateReduxState());
+  };
 
   handleCrear = () => {
     this.props.history.push({
@@ -294,7 +276,7 @@ class Bancos extends CustomComponent {
         title: 'Banco',
         message: response.data,
       }, () => {
-        this.loadingInit();
+        this.loadInit();
       });
     }
   };
@@ -315,83 +297,182 @@ class Bancos extends CustomComponent {
     |
     */
 
-  generateBody() {
-    if (this.state.loading) {
+
+  renderTable = () => {
+    const { loading, lista, view } = this.state;
+
+    if (loading) {
       return (
-        <SpinnerTable
-          colSpan={11}
-          message={'Cargando información de la tabla...'}
-        />
+        <div className="flex flex-col items-center py-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
+          <p className="text-gray-500">Cargando información...</p>
+        </div>
       );
     }
 
-    if (isEmpty(this.state.lista)) {
+    if (isEmpty(lista)) {
       return (
-        <TableRow className="text-center">
-          <TableCell colSpan="11">¡No hay datos registrados!</TableCell>
-        </TableRow>
+        <div className={cn(
+          "text-center py-6",
+          view === "tabla" ? "" : "rounded border",
+        )}>
+          <div className="text-gray-500">
+            <i className="bi bi-box text-4xl mb-3 block"></i>
+            <p className="text-lg font-medium">No se encontraron ventas</p>
+            <p className="text-sm">Intenta cambiar los filtros</p>
+          </div>
+        </div>
       );
     }
 
-    return this.state.lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">ACTIVO</span>
-        ) : (
-          <span className="text-warning">INACTIVO</span>
-        );
+    return (
+      <div className={cn(
+        view === "tabla"
+          ? "divide-y divide-gray-200"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
+      )}>
+        {
+          lista.map((item, index) => {
+            const estado = (
+              <span className={cn(
+                "inline-flex items-center rounded-full",
+                "text-xs font-medium",
+                "px-2.5 py-0.5",
+                item.estado === 1 && "bg-green-100 text-green-800",
+                item.estado === 0 && "bg-red-100 text-red-800",
+              )}>
+                {item.estado === 1 && "ACTIVO"}
+                {item.estado === 0 && "INACTIVO"}
+              </span>
+            );
 
-      const compartir = item.compartir === 1 ? <i className="fa fa-retweet text-green-500"></i> : <i className="fa fa-low-vision"></i>;
+            const compartir = item.compartir === 1 ? <FaRetweet className="w-5 h-5" /> : <FaLowVision className="w-5 h-5" />;
 
-      return (
-        <TableRow key={index}>
-          <TableCell className="text-center">{item.id}</TableCell>
-          <TableCell>{item.nombre}</TableCell>
-          <TableCell>{item.tipoCuenta.toUpperCase()}</TableCell>
-          <TableCell>{item.moneda}</TableCell>
-          <TableCell>{item.numCuenta}</TableCell>
-          <TableCell className="text-center">{compartir}</TableCell>
-          <TableCell className="text-center">{item.estado}</TableCell>
-          <TableCell
-            className={`text-right ${item.saldo >= 0 ? 'text-success' : 'text-danger'}`}
-          >
-            {formatCurrency(item.saldo, item.codiso)}
-          </TableCell>
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-info btn-sm"
-              onClick={() => this.handleDetalle(item.idBanco)}
-            // disabled={!this.state.view}
-            >
-              <i className="fa fa-eye"></i>
-            </Button>
-          </TableCell>
+            return (
+              <div key={index}>
+                <div
+                  className={cn(
+                    "text-sm text-gray-900",
+                    view === "tabla"
+                      ? "grid grid-cols-[0.5fr_1fr_1.0fr_1.0fr_1.5fr_1.0fr_1.0fr_1.0fr_2.0fr] py-3 gap-x-3 items-center"
+                      : "flex flex-col h-full gap-3 rounded border p-3"
+                  )}
+                >
+                  <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
+                    {
+                      view === "tabla" && (
+                        <div className=" text-center hidden md:block">
+                          {item.id}
+                        </div>
+                      )
+                    }
 
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-warning btn-sm"
-              onClick={() => this.handleEditar(item.idBanco)}
-            // disabled={!this.state.edit}
-            >
-              <i className="bi bi-pencil"></i>
-            </Button>
-          </TableCell>
+                    <div>
+                      <p>{item.nombre}</p>
+                    </div>
 
-          <TableCell className="text-center">
-            <Button
-              className="btn-outline-danger btn-sm"
-              onClick={() => this.handleBorrar(item.idBanco)}
-            // disabled={!this.state.remove}
-            >
-              <i className="bi bi-trash"></i>
-            </Button>
-          </TableCell>
-        </TableRow>
-      );
-    });
+                    <div>
+                      <p>{item.tipoCuenta.toUpperCase()}</p>
+                    </div>
+
+                    <div>
+                      <p className="font-mono text-sm text-gray-500">{item.moneda}</p>
+                    </div>
+
+                    <div>
+                      <p className="font-mono text-sm text-gray-500">{item.numeroCuenta}</p>
+                    </div>
+
+                    <div className={cn(
+                      "text-center",
+                      view === "tabla" ? "text-center" : "text-left"
+                    )}>
+                      {compartir}
+                    </div>
+
+                    <div className={cn(
+                      "text-center",
+                      view === "tabla" ? "text-center" : "text-left"
+                    )}>
+                      {estado}
+                    </div>
+
+                    <div className={cn(
+                      "text-right font-bold text-base",
+                      item.saldo >= 0 ? 'text-green-600' : 'text-red-600'
+                    )}>
+                      {formatCurrency(item.saldo, item.codiso)}
+                    </div>
+                  </div>
+
+                  <div
+                    className={cn(
+                      "flex gap-2",
+                      view === "tabla"
+                        ? "flex-col md:flex-row justify-center"
+                        : "flex-row justify-end"
+                    )}
+                  >
+                    <button
+                      onClick={() => this.handleDetalle(item.idBanco)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Eye className="w-5 h-5 text-blue-500" />
+                    </button>
+
+                    <button
+                      onClick={() => this.handleEditar(item.idBanco)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Pencil className="w-5 h-5 text-yellow-500" />
+                    </button>
+
+                    <button
+                      onClick={() => this.handleBorrar(item.idBanco)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Trash className="w-5 h-5 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div >
+    );
   }
 
   render() {
+    const { view } = this.state;
+
     return (
       <ContainerWrapper>
         <Title
@@ -400,72 +481,290 @@ class Bancos extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-outline-info"
+        {/* Acciones principales + Toggle vista */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            <button
               onClick={this.handleCrear}
-            // disabled={!this.state.add}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-blue-600 text-white text-sm font-medium rounded",
+                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
+              )}
+              aria-label="Crear nueva venta"
             >
-              <i className="bi bi-file-plus"></i> Nuevo Registro
-            </Button>{' '}
-            <Button
-              className="btn-outline-secondary"
-              onClick={this.loadingInit}
+              <i className="bi bi-file-plus"></i>
+              Nuevo Registro
+            </button>
+            <button
+              onClick={this.loadInit}
+              className={cn(
+                "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
+                "bg-gray-200 text-gray-700 text-sm font-medium rounded",
+                "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
+              )}
             >
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
+              <i className="bi bi-arrow-clockwise"></i>
+              Recargar Vista
+            </button>
+          </div>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Buscar por nombre..."
-            />
-          </Column>
-        </Row>
+          {/* Toggle vista */}
+          <div className="flex bg-gray-100 rounded p-1">
+            <button
+              onClick={() => this.handleChangeView('tabla')}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "tabla" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-list-ul"></i>
+              <span className="hidden sm:inline">Tabla</span>
+            </button>
+            <button
+              onClick={() => this.handleChangeView('cuadricula')}
+              className={
+                cn(
+                  "flex-1 sm:flex-none flex items-center justify-center gap-1",
+                  "text-sm font-medium",
+                  "px-4 py-2",
+                  "rounded-md transition ",
+                  view === "cuadricula" ? "bg-white text-blue-600" : "text-gray-600 hover:text-gray-800",
+                )
+              }
+            >
+              <i className="bi bi-grid-3x3"></i>
+              <span className="hidden sm:inline">Cuadrícula</span>
+            </button>
+          </div>
+        </div>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <Table className={'table-bordered'}>
-                <TableHeader className="thead-light">
-                  <TableRow>
-                    <TableHead width="5%" className="text-center">#</TableHead>
-                    <TableHead width="10%">Nombre</TableHead>
-                    <TableHead width="15%">Tipo Cuenta</TableHead>
-                    <TableHead width="10%">Moneda</TableHead>
-                    <TableHead width="20%">Número Cuenta</TableHead>
-                    <TableHead width="10%" className="text-center">Compartir</TableHead>
-                    <TableHead width="10%" className="text-center">Estado</TableHead>
-                    <TableHead width="10%" className="text-center">Saldo</TableHead>
-                    <TableHead width="5%" className="text-center">Detalle</TableHead>
-                    <TableHead width="5%" className="text-center">Editar</TableHead>
-                    <TableHead width="5%" className="text-center">Eliminar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.generateBody()}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          <p className="text-gray-600 mt-1">
+            Controla los movimientos de dinero con tus cuentas de banco, efectivo y tarjetas de crédito.
+          </p>
+        </div>
 
-        <Paginacion
-          ref={this.refPaginacion}
-          loading={this.state.loading}
-          data={this.state.lista}
-          totalPaginacion={this.state.totalPaginacion}
-          paginacion={this.state.paginacion}
-          fillTable={this.paginacionContext}
-          restart={this.state.restart}
-        />
+        {/* Monedas */}
+        <div className="w-full flex items-center gap-2 overflow-x-auto mb-3">
+
+          {this.state.monedas.map(moneda => (
+
+            <button
+              key={moneda.idMoneda}
+              onClick={() =>
+                this.setState({
+                  monedaSeleccionada: moneda.codiso
+                })
+              }
+              className={cn(
+                "px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2",
+                this.state.monedaSeleccionada === moneda.codiso ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
+              )}
+            >
+              {moneda.nombre}
+              <span className="ml-2 text-xs text-gray-400">
+                {moneda.codiso}
+              </span>
+            </button>
+          ))}
+        </div>
+
+
+        {/* Resumen */}
+        <div className="flex flex-col lg:flex-row gap-3 mb-4">
+
+          {(() => {
+
+            const resumenMoneda = this.state.resumen.filter(
+              item => item.codiso === this.state.monedaSeleccionada
+            );
+
+            const moneda = this.state.monedas.find(
+              item => item.codiso === this.state.monedaSeleccionada
+            );
+
+            const codiso = moneda?.codiso || "PEN";
+
+            const ingresos = resumenMoneda.reduce(
+              (acum, item) =>
+                acum + Number(item.ingresos || 0),
+              0
+            );
+
+            const gastos = resumenMoneda.reduce(
+              (acum, item) =>
+                acum + Number(item.gastos || 0),
+              0
+            );
+
+            const saldo = ingresos - gastos;
+
+            return (
+              <>
+
+                {/* Gráfico */}
+                <div className="w-full lg:w-3/4">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    <div className="mb-3">
+                      <h5 className="text-lg font-semibold text-gray-800">
+                        Ingresos vs Gastos
+                      </h5>
+                      <p className="text-sm text-gray-500">
+                        Evolución mensual · {moneda?.nombre || codiso}
+                      </p>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart data={resumenMoneda}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="nombreMes"
+                          interval={0}
+                        />
+                        <YAxis />
+                        <Tooltip
+                          formatter={(value) =>
+                            formatCurrency(getNumber(value), codiso)
+                          }
+                        />
+                        <Legend />
+                        <Bar
+                          dataKey="ingresos"
+                          name="Ingresos"
+                          fill="#16a34a"
+                          radius={[6, 6, 0, 0]}
+                        />
+                        <Bar
+                          dataKey="gastos"
+                          name="Gastos"
+                          fill="#dc2626"
+                          radius={[6, 6, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                {/* Resumen */}
+                <div className="w-full lg:w-1/4">
+                  <div className="bg-white border border-gray-200 rounded-xl p-5 h-full">
+                    <div className="mb-6">
+                      <h5 className="text-lg font-semibold text-gray-800">
+                        Resumen
+                      </h5>
+                      <p className="text-sm text-gray-500">
+                        {moneda?.nombre || codiso}
+                      </p>
+                    </div>
+
+                    {/* Ingresos */}
+                    <div className="mb-5">
+                      <p className="text-sm text-gray-500">
+                        Ingresos
+                      </p>
+                      <h4 className="text-2xl font-bold text-green-600 mt-1">
+                        {formatCurrency(ingresos, codiso)}
+                      </h4>
+                    </div>
+
+                    {/* Gastos */}
+                    <div className="mb-5">
+                      <p className="text-sm text-gray-500">
+                        Egresos
+                      </p>
+                      <h4 className="text-2xl font-bold text-red-600 mt-1">
+                        {formatCurrency(gastos, codiso)}
+                      </h4>
+                    </div>
+
+                    {/* Saldo */}
+                    <div className="pt-5 border-t border-gray-200">
+                      <p className="text-sm text-gray-500">
+                        Saldo Actual
+                      </p>
+                      <h4
+                        className={cn(
+                          "text-2xl font-bold mt-1",
+                          saldo >= 0 ? "text-blue-600" : "text-red-600"
+                        )}
+                      >
+                        {formatCurrency(saldo, codiso)}
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+
+        {/* Barra de búsqueda */}
+        <div className="w-full">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Buscar por código o nombre..."
+            theme="modern"
+          />
+        </div>
+
+        {/* Render condicional: Tabla o Cuadrícula */}
+        <div className={cn(
+          view === "tabla" ? "rounded border overflow-hidden mt-6" : "space-y-6",
+        )}>
+          <div className={cn(
+            view == "tabla" ? "block" : "hidden",
+            "min-w-full"
+          )}>
+            {/* Header (solo visible en desktop) */}
+            <div className={cn(
+              "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
+            )}>
+              <div className="grid grid-cols-[0.5fr_1fr_1.0fr_1.0fr_1.5fr_1.0fr_1.0fr_1.0fr_2.0fr] gap-x-3 py-3">
+                <div className="text-center">#</div>
+                <div>Nombre</div>
+                <div>Tipo Cuenta</div>
+                <div>Moneda</div>
+                <div>Número Cuenta</div>
+                <div className="text-center">Compartir</div>
+                <div className="text-center">Estado</div>
+                <div className="text-center">Saldo</div>
+                <div className="text-center"></div>
+              </div>
+            </div>
+          </div>
+
+          {this.renderTable()}
+
+          {/* ✅ Paginación única */}
+          <Paginacion
+            ref={this.refPaginacion}
+            loading={this.state.loading}
+            data={this.state.lista}
+            totalPaginacion={this.state.totalPaginacion}
+            paginacion={this.state.paginacion}
+            fillTable={this.paginacionContext}
+            restart={this.state.restart}
+            theme="modern"
+            className={
+              cn(
+                "py-3 bg-white border-gray-200 overflow-auto",
+                view === "tabla"
+                  ? "md:px-4 border-t"
+                  : "md:px-6 border rounded"
+              )
+            }
+          />
+        </div>
       </ContainerWrapper>
     );
   }
@@ -495,6 +794,7 @@ Bancos.propTypes = {
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    moneda: state.predeterminado.moneda,
     bancoLista: state.predeterminado.bancoLista,
   };
 };

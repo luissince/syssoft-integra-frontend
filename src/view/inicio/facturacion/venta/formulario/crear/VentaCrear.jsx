@@ -18,7 +18,7 @@ import {
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
-  detailOnlyVentaVenta,
+  forSaleVenta,
   createVenta,
   documentsPdfInvoicesVenta,
   forSalePedido,
@@ -1177,7 +1177,7 @@ class VentaCrear extends CustomComponent {
       idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailOnlyVentaVenta(
+    const response = await forSaleVenta(
       params,
       this.abortControllerVenta.signal,
     );
@@ -1831,6 +1831,7 @@ class VentaCrear extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
+        idPlazo: null,
         notaTransacion,
         bancosAgregados: metodoPagosLista,
       };
@@ -1899,9 +1900,7 @@ class VentaCrear extends CustomComponent {
 
   handleProcessCredito = async (
     idFormaPago,
-    numeroCuotas,
-    frecuenciaPago,
-    importeTotal,
+    idPlazo,
     notaTransacion,
     callback = async function () { },
   ) => {
@@ -1945,10 +1944,8 @@ class VentaCrear extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
-        numeroCuotas: numeroCuotas,
-        frecuenciaPago: frecuenciaPago,
+        idPlazo: idPlazo,
         notaTransacion,
-        importeTotal: importeTotal,
       };
 
       await callback();

@@ -343,18 +343,6 @@ export function getCurrentYear() {
   return today.getFullYear();
 }
 
-export function getFirstDayOfTheMonth() {
-  const date = new Date();
-  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  return parseFormatDate(firstDay);
-}
-
-export function getLastDayOfTheMonth() {
-  const date = new Date();
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  return parseFormatDate(lastDay);
-}
-
 function parseFormatDate(date) {
   const year = date.getFullYear();
   const month = padZeroes(date.getMonth() + 1);
@@ -1158,6 +1146,30 @@ export const validateMany = async (rules = [], title = "POS") => {
   return true;
 };
 
+export const startOfDay = (date = new Date()) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+export const endOfDay = (date = new Date()) => {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+};
+
+export const startOfMonth = (date = new Date()) => {
+  const d = new Date(date);
+  d.setDate(1);
+  return startOfDay(d);
+};
+
+export const endOfMonth = (date = new Date()) => {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + 1, 0);
+  return endOfDay(d);
+};
+
 export function alertInfo(title, message) {
   Swal({
     title: title,
@@ -1168,20 +1180,6 @@ export function alertInfo(title, message) {
     showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
-  });
-}
-
-export function alertHTML(title, html, callback = function () { }) {
-  Swal({
-    html: html,
-    showConfirmButton: false,
-    showCancelButton: true,
-    cancelButtonText: 'Cerrar',
-    cancelButtonColor: '#dc3545',
-    allowOutsideClick: false,
-    showCloseButton: true,
-  }).then((event) => {
-    callback(event);
   });
 }
 

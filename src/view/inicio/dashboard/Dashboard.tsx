@@ -17,50 +17,41 @@ interface Props {
 }
 
 const Dashboard = ({ token, moneda }: Props) => {
-
-  const [activeTab, setActiveTab] = useState("comercial");
-
-
-  // if (loading) {
-  //   return (
-  //     <ContainerWrapper>
-  //       <DashboardSkeleton />
-  //     </ContainerWrapper>
-  //   );
-  // }
+  const [activeTab, setActiveTab] = useState("diario");
 
   return (
     <ContainerWrapper>
-      <Tabs defaultValue="comercial" value={activeTab} onValueChange={setActiveTab}>
+      {/* <Tabs defaultValue="comercial" value={activeTab} onValueChange={setActiveTab}> */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Selecciona la vista que deseas visualizar</p>
+            <p className="text-gray-600 mt-1">Muestra un resumen de los datos de tus ventas</p>
           </div>
-          <TabsList className="bg-gray-100 p-1 rounded-lg">
+
+          {/* <TabsList className="bg-gray-100 p-1 rounded-lg">
             <TabsTrigger
-              value="comercial"
-              className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >   
-              Comercial
-            </TabsTrigger>
-            <TabsTrigger    
               value="diario"
               className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               Ventas Diarias
             </TabsTrigger>
-          </TabsList>
+            <TabsTrigger
+              value="comercial"
+              className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              Comercial
+            </TabsTrigger>
+          </TabsList> */}
         </div>
 
-        <TabsContent value="comercial">
-          <CommercialDashboard token={token} moneda={moneda} />
-        </TabsContent>
+        {/* <TabsContent value="diario">
+          <DailySalesDashboard token={token} moneda={moneda} />
+        </TabsContent> */}
 
-        <TabsContent value="diario">
-          <DailySalesDashboard token={token} moneda={moneda}/>
-        </TabsContent>
-      </Tabs>
+        {/* <TabsContent value="comercial"> */}
+          <CommercialDashboard token={token} moneda={moneda} />
+        {/* </TabsContent> */}
+      {/* </Tabs> */}
 
     </ContainerWrapper>
   );

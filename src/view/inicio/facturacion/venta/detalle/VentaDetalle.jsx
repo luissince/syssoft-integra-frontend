@@ -11,19 +11,20 @@ import {
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../../components/Container';
 import {
+  createAccountsReceivableVenta,
   detailVenta,
   documentsPdfInvoicesVenta,
 } from '../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '@/components/CustomComponent';
 import {
-  CONTADO,
+  FORMA_PAGO_CREDITO,
 } from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
+import { ModalPago, ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { alertKit } from 'alert-kit';
@@ -31,6 +32,8 @@ import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
 import ModalPrinter from './component/ModalPrinter';
 import { cn } from '@/lib/utils';
+import ModalTransaccion from '@/components/ModalTransaccion';
+import { Plus } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,14 +54,24 @@ class VentaDetalle extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      // Atributos principales
       idVenta: '',
-      cabecera: {},
+      cabecera: null,
       detalles: [],
       transaccion: [],
+      monto: 0,
 
+      // Atributos del modal pago
+      isOpenModalPago: false,
+      isOpenModalTerminal: false,
+
+      // Atributos del modal printer
       isOpenModalPrinter: false,
       isOpenSendWhatsapp: false,
 
+      // Id principales
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
     };
 
     // Referencia para el modal enviar WhatsApp
@@ -88,7 +101,7 @@ class VentaDetalle extends CustomComponent {
     if (isText(idVenta)) {
       await this.loadingData(idVenta);
     } else {
-      this.close();
+      this.goBackView();
     }
   }
 
@@ -115,33 +128,25 @@ class VentaDetalle extends CustomComponent {
       idVenta: idVenta,
     };
 
-    const { success, data, message, type } = await detailVenta(params, this.abortControllerView.signal);
+    const { success, data } = await detailVenta(params, this.abortControllerView.signal);
 
     if (!success) {
-      if (type === CANCELED) return;
-
-      alertKit.warning({
-        title: 'Venta',
-        message: message,
-      }, () => {
-        this.close();
-      });
+      this.goBackView();
       return;
     }
-
     this.setState({
       idVenta: idVenta,
       cabecera: data.cabecera,
       detalles: data.detalles,
-      transaccion: data.transaccion,
+      transacciones: data.transacciones,
 
       loading: false,
     });
   }
 
-  close = () => {
+  goBackView = () => {
     this.props.history.goBack();
-  };
+  }
 
   /*
   |--------------------------------------------------------------------------
@@ -162,7 +167,6 @@ class VentaDetalle extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Eventos para impresión
   //------------------------------------------------------------------------------------------
-
   handlePrintInvoices = async (size) => {
     const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
 
@@ -243,11 +247,82 @@ class VentaDetalle extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
-  // Modal de enviar email
+  // Funciones del modal pago
   //------------------------------------------------------------------------------------------
 
-  handleSendEmail = async () => {
-    // await sendEmail(this.state.idVenta);
+  handleOpenModalPago = async () => {
+    this.setState({ isOpenModalPago: true });
+  };
+
+  handleCloseModalPago = async () => {
+    this.setState({ isOpenModalPago: false });
+  };
+
+  handleProcessModalPago = async (monto) => {
+    this.setState({
+      monto: monto,
+    }, () => {
+      this.handleOpenModalTerminal();
+    });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Funciones del modal terminal
+  //------------------------------------------------------------------------------------------
+
+  handleOpenModalTerminal = () => {
+    this.setState({ isOpenModalTerminal: true });
+  };
+
+  handleProccesoModalTerminal = async (_, metodoPagosLista, notaTransacion, callback) => {
+    const { idVenta, idSucursal, idUsuario, monto } = this.state;
+
+    const accept = await alertKit.question({
+      title: 'Cuenta por Pagar',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
+
+    if (accept) {
+      const body = {
+        idVenta,
+        idSucursal,
+        idUsuario,
+        monto,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback?.();
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const { success, data, message, type } = await createAccountsReceivableVenta(body);
+
+      if (!success) {
+        if (type === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cuenta por Pagar',
+          message: message,
+        });
+        return;
+      }
+
+      alertKit.success({
+        title: 'Cuenta por Pagar',
+        message: data,
+      }, () => {
+        this.handleCloseModalTerminal();
+      });
+    }
+  }
+
+  handleCloseModalTerminal = async () => {
+    this.setState({ isOpenModalTerminal: false });
   };
 
   /*
@@ -267,7 +342,7 @@ class VentaDetalle extends CustomComponent {
   */
 
   renderCabecera() {
-    const { loading, cabecera, detalles } = this.state;
+    const { loading, cabecera, detalles, transacciones } = this.state;
 
     if (loading) return null;
 
@@ -294,11 +369,8 @@ class VentaDetalle extends CustomComponent {
             { label: 'N° de celular', value: () => cabecera.celular },
             { label: 'Correo electrónico', value: () => cabecera.email },
 
-            {
-              label: 'Forma de Pago', value: () => {
-                return cabecera.idFormaPago === CONTADO ? 'CONTADO' : 'CREDITO'
-              }
-            },
+            { label: 'Tipo', value: () => cabecera.formaPago },
+
             {
               label: 'Estado', value: () => {
                 return (
@@ -324,6 +396,43 @@ class VentaDetalle extends CustomComponent {
             { label: 'Nota', value: () => cabecera.nota },
 
             { label: 'Usuario', value: () => cabecera.usuario },
+
+            {
+              label: 'Cobrado', value: () => {
+                const monto = transacciones.reduce(
+                  (total, item) =>
+                    total +
+                    item.detalles.reduce(
+                      (subtotal, detalle) => subtotal + Number(detalle.monto || 0),
+                      0
+                    ),
+                  0
+                );
+
+                return <span className="text-green-600">{formatCurrency(monto, cabecera.codiso)}</span>
+              }
+            },
+
+            {
+              label: 'Restante', value: () => {
+                const total = detalles.reduce(
+                  (accumlate, item) => accumlate + item.precio * item.cantidad,
+                  0,
+                );
+
+                const pagado = transacciones.reduce(
+                  (total, item) =>
+                    total +
+                    item.detalles.reduce(
+                      (subtotal, detalle) => subtotal + Number(detalle.monto || 0),
+                      0
+                    ),
+                  0
+                );
+
+                return <span className="text-red-600">{formatCurrency(total - pagado, cabecera.codiso)}</span>
+              }
+            },
 
             {
               label: 'Total', value: () => {
@@ -360,11 +469,11 @@ class VentaDetalle extends CustomComponent {
                 <th className="p-4">#</th>
                 <th className="p-4">Imagen</th>
                 <th className="p-4">Producto</th>
+                <th className="p-4">Precio</th>
                 <th className="p-4">Categoría</th>
-                <th className="p-4 text-left">Cantidad</th>
                 <th className="p-4 text-right">Impuesto</th>
-                <th className="p-4 text-right">Precio</th>
-                <th className="p-4 text-right">Monto</th>
+                <th className="p-4 text-right">Cantidad</th>
+                <th className="p-4 text-right">Importe</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -385,12 +494,12 @@ class VentaDetalle extends CustomComponent {
                       <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
                       <p className="text-black uppercase">{item.producto}</p>
                     </td>
-                    <td className="p-4 text-right">{rounded(item.cantidad)} x <small>{item.medida}</small></td>
-                    <td className="p-4">{item.categoria}</td>                   
-                    <td className="p-4 text-right">{item.impuesto}</td>
                     <td className="p-4 text-right">
-                      {formatCurrency(item.precio, cabecera.codiso)}
+                      {formatCurrency(item.precio, cabecera.codiso)} x <small>{item.medida}</small>
                     </td>
+                    <td className="p-4">{item.categoria}</td>
+                    <td className="p-4 text-right">{item.impuesto}</td>
+                    <td className="p-4 text-right">{rounded(item.cantidad)}</td>
                     <td className="p-4 font-medium text-right">
                       {formatCurrency(item.cantidad * item.precio, cabecera.codiso)}
                     </td>
@@ -492,20 +601,9 @@ class VentaDetalle extends CustomComponent {
   }
 
   renderTransaciones() {
-    const { loading, cabecera, transaccion } = this.state;
+    const { loading, cabecera, transacciones } = this.state;
 
     if (loading) return null;
-
-    if (isEmpty(transaccion)) {
-      return (
-        <tr>
-          <td colSpan={5} className="p-6 text-center text-gray-500">
-            No hay transacciones para mostrar.
-          </td>
-        </tr>
-      );
-    }
-
     return (
       <div className="bg-white overflow-hidden">
         <h2 className="text-lg font-semibold mb-3">Transacciones</h2>
@@ -522,7 +620,17 @@ class VentaDetalle extends CustomComponent {
             </thead>
             <tbody>
               {
-                transaccion.map((item, index) => (
+                isEmpty(transacciones) && (
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-gray-500">
+                      No hay transacciones para mostrar.
+                    </td>
+                  </tr>
+                )
+              }
+
+              {
+                !isEmpty(transacciones) && transacciones.map((item, index) => (
                   <React.Fragment key={index}>
                     {/* Transacción principal */}
                     <tr className="bg-green-200">
@@ -568,6 +676,24 @@ class VentaDetalle extends CustomComponent {
                 ))
               }
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={5} className="p-6 text-right">
+                  <p className="text-gray-800 font-bold text-right text-lg">Total: {
+                    formatCurrency(transacciones.reduce(
+                      (total, item) =>
+                        total +
+                        item.detalles.reduce(
+                          (subtotal, detalle) => subtotal + Number(detalle.monto || 0),
+                          0
+                        ),
+                      0
+                    ), cabecera.codiso)
+                  }
+                  </p>
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
@@ -576,7 +702,7 @@ class VentaDetalle extends CustomComponent {
   }
 
   render() {
-    const { loading, msgLoading, idVenta, isOpenSendWhatsapp, isOpenModalPrinter, cabecera, detalles } = this.state;
+    const { loading, msgLoading, idVenta, isOpenSendWhatsapp, isOpenModalPrinter, cabecera } = this.state;
 
     return (
       <ContainerWrapper>
@@ -589,7 +715,30 @@ class VentaDetalle extends CustomComponent {
         <Title
           title="Venta"
           subTitle="DETALLE"
-          handleGoBack={() => this.close()}
+          handleGoBack={this.goBackView}
+        />
+
+        <ModalTransaccion
+          tipo="Compra"
+          title="Completar Compra"
+          isOpen={this.state.isOpenModalTerminal}
+          idSucursal={this.state.idSucursal}
+          codiso={cabecera?.codiso ?? ''}
+          disabledCredito={true}
+          importeTotal={this.state.monto}
+          onClose={this.handleCloseModalTerminal}
+          handleProcessContado={this.handleProccesoModalTerminal}
+          handleProcessCredito={null}
+        />
+
+        <ModalPago
+          title="Pago"
+          isOpen={this.state.isOpenModalPago}
+          onClose={this.handleCloseModalPago}
+          codiso={cabecera?.codiso ?? ''}
+          detalles={this.state.detalles}
+          transacciones={this.state.transacciones}
+          onProcess={this.handleProcessModalPago}
         />
 
         <ModalSendWhatsApp
@@ -611,7 +760,7 @@ class VentaDetalle extends CustomComponent {
           {
             Capacitor.isNativePlatform() ? (
               <button
-                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
                 onClick={this.handleOpenModalPrinter}
               >
                 <i className="fa fa-print"></i> Imprimir
@@ -619,29 +768,42 @@ class VentaDetalle extends CustomComponent {
             ) : (
               <>
                 <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
                   onClick={this.handlePrintInvoices.bind(this, 'A4')}
                 >
                   <i className="fa fa-print"></i> A4
                 </button>
                 <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
                   onClick={this.handlePrintInvoices.bind(this, '80mm')}
                 >
                   <i className="fa fa-print"></i> 80MM
                 </button>
                 <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
                   onClick={this.handlePrintInvoices.bind(this, '58mm')}
                 >
                   <i className="fa fa-print"></i> 58MM
                 </button>
+
+                {
+                  cabecera && (
+                    cabecera.idFormaPago === FORMA_PAGO_CREDITO && (
+                      <button
+                        className="px-4 py-2 bg-red-600 border border-red-300 text-sm font-medium rounded-lg text-white hover:bg-red-500 flex items-center gap-2"
+                        onClick={() => this.handleOpenModalPago()}
+                      >
+                        <Plus className="w-5 h-5" /> Agregar pago
+                      </button>
+                    )
+                  )
+                }
               </>
             )
           }
 
           <button
-            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-gray-50 flex items-center gap-2"
+            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-green-500 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
             <i className="fa fa-whatsapp"></i> WhatsApp

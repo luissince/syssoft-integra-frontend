@@ -386,9 +386,10 @@ class GuiaRemision extends CustomComponent {
                 "text-xs font-medium",
                 "px-2.5 py-0.5",
                 item.estado === 1 && "bg-green-100 text-green-800",
-                item.estado === 0 && "bg-red-100 text-red-800",
+                item.estado === 3 && "bg-red-100 text-red-800",
               )}>
-                {item.estado === 1 ? "ACTIVO" : "ANULADO"}
+                {item.estado === 1 && "ACTIVO"}
+                {item.estado === 3 && "ANULADO"}
               </span>
             );
 
@@ -623,7 +624,7 @@ class GuiaRemision extends CustomComponent {
             >
               <option value="-1">TODOS</option>
               <option value="1">ACTIVO</option>
-              <option value="3">ANULADO</option>
+              <option value="0">ANULADO</option>
             </select>
           </div>
         </div>

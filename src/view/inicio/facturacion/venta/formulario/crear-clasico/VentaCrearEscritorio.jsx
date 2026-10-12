@@ -23,7 +23,7 @@ import {
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
-  detailOnlyVentaVenta,
+  forSaleVenta,
   comboImpuesto,
   filtrarProductoVenta,
   createVenta,
@@ -42,7 +42,7 @@ import {
   TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
   TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
-import { CONTADO } from '../../../../../../model/types/forma-pago';
+import { FORMA_PAGO_CONTADO } from '../../../../../../model/types/forma-pago';
 import ModalProdcutos from '../common/ModalProductos';
 import { getDni, getRuc } from '../../../../../../network/rest/api-client';
 import { images } from '../../../../../../helper';
@@ -157,7 +157,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Atributos del modal cobro
       loadingModal: false,
-      formaPago: CONTADO,
+      formaPago: FORMA_PAGO_CONTADO,
 
       // Filtrar cliente
       nuevoCliente: null,
@@ -1102,6 +1102,7 @@ class VentaCrearEscritorio extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
+        idPlazo: null,
         notaTransacion,
         bancosAgregados: metodoPagosLista,
       };
@@ -1119,7 +1120,16 @@ class VentaCrearEscritorio extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
+        const data = response.getBody();
+
+        if (typeof data === "string") {
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          });
+        }
+
+        if (data instanceof Array) {
           const body = response.getBody().map(
             (item) =>
               `<tr>
@@ -1158,11 +1168,6 @@ class VentaCrearEscritorio extends CustomComponent {
             title: 'Venta',
             bodyInnerHTML: html,
           });
-        } else {
-          alertKit.warning({
-            title: 'Venta',
-            message: response.getMessage(),
-          });
         }
       }
     }
@@ -1170,9 +1175,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
   handleProcessCredito = async (
     idFormaPago,
-    numeroCuotas,
-    frecuenciaPago,
-    importeTotal,
+    idPlazo,
     notaTransacion,
     callback = async function () { },
   ) => {
@@ -1189,6 +1192,7 @@ class VentaCrearEscritorio extends CustomComponent {
       nota,
       detalleVenta,
     } = this.state;
+
 
     const accept = await alertKit.question({
       title: 'Venta',
@@ -1216,10 +1220,8 @@ class VentaCrearEscritorio extends CustomComponent {
         nuevoCliente: nuevoCliente,
         idCotizacion: (cotizacion && cotizacion.idCotizacion) || null,
         detalleVenta: detalleVenta,
-        numeroCuotas: numeroCuotas,
-        frecuenciaPago: frecuenciaPago,
+        idPlazo: idPlazo,
         notaTransacion,
-        importeTotal: importeTotal,
       };
 
       await callback();
@@ -1235,7 +1237,16 @@ class VentaCrearEscritorio extends CustomComponent {
       }
 
       if (response instanceof ErrorResponse) {
-        if (response.getBody() !== '') {
+        const data = response.getBody();
+
+        if (typeof data === "string") {
+          alertKit.warning({
+            title: "Venta",
+            message: response.getMessage(),
+          });
+        }
+
+        if (data instanceof Array) {
           const body = response.getBody().map(
             (item) =>
               `<tr>
@@ -1273,12 +1284,6 @@ class VentaCrearEscritorio extends CustomComponent {
           alertKit.html({
             title: 'Venta',
             bodyInnerHTML: html,
-          });
-
-        } else {
-          alertKit.warning({
-            title: 'Venta',
-            message: response.getMessage(),
           });
         }
       }
@@ -1696,7 +1701,7 @@ class VentaCrearEscritorio extends CustomComponent {
       idAlmacen: this.state.idAlmacen,
     };
 
-    const response = await detailOnlyVentaVenta(
+    const response = await forSaleVenta(
       params,
       this.abortControllerVenta.signal,
     );
@@ -1768,8 +1773,10 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
+    const url = documentsPdfInvoicesVenta(this.state.idVenta, size);
+
     pdfVisualizer.printer({
-      printable: documentsPdfInvoicesVenta(this.state.idVenta, size),
+      printable: url,
       type: 'pdf',
       showModal: true,
       modalMessage: 'Recuperando documento...',
@@ -2292,7 +2299,6 @@ class VentaCrearEscritorio extends CustomComponent {
   }
 
   render() {
-
     const tipoEntidad = this.state.tiposDocumentos.find((item) => item.idTipoDocumento === this.state.idTipoDocumento)?.tipoEntidad;
 
     return (
@@ -2529,23 +2535,20 @@ class VentaCrearEscritorio extends CustomComponent {
               <SpinnerView
                 loading={this.state.loadingCliente}
                 message={this.state.msgLoadingCliente}
-                body={
-                  <>
-                    <div className="mt-2">
-                      <Button
-                        className="btn-danger"
-                        onClick={() => {
-                          if (this.abortControllerCliente) {
-                            this.abortControllerCliente.abort();
-                          }
-                        }}
-                      >
-                        Cancelar petición <i className="fa fa-close"></i>
-                      </Button>
-                    </div>
-                  </>
-                }
-              />
+              >
+                <div className="mt-2">
+                  <Button
+                    className="btn-danger"
+                    onClick={() => {
+                      if (this.abortControllerCliente) {
+                        this.abortControllerCliente.abort();
+                      }
+                    }}
+                  >
+                    Cancelar petición <i className="fa fa-close"></i>
+                  </Button>
+                </div>
+              </SpinnerView>
 
               <div>
                 <Button
