@@ -142,7 +142,7 @@ class Atributos extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -180,18 +180,17 @@ class Atributos extends CustomComponent {
     });
   };
 
-  handleDelete = async (id) => {
-    const accept = await alertKit.question(
-      {
-        title: 'Color',
-        message: '¿Estás seguro de eliminar la Color?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+  handleAnular = async (id) => {
+    const accept = await alertKit.question({
+      title: 'Atributo',
+      message: '¿Estás seguro de eliminar el Atributo?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const params = {
@@ -205,20 +204,18 @@ class Atributos extends CustomComponent {
       const response = await removeAtributo(params);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Color',
-            message: response.data,
-          },
-          () => {
-            this.loadInit();
-          },
-        );
+        alertKit.success({
+          title: 'Atributo',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
       }
 
       if (response instanceof ErrorResponse) {
+
         alertKit.warning({
-          title: 'Color',
+          title: 'Atributo',
           message: response.getMessage(),
         });
       }
@@ -229,7 +226,7 @@ class Atributos extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );
@@ -285,7 +282,7 @@ class Atributos extends CustomComponent {
           <TableCell className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
-              onClick={() => this.handleDelete(item.idAtributo)}
+              onClick={() => this.handleAnular(item.idAtributo)}
             // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>

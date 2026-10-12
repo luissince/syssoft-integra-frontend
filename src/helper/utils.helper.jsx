@@ -1,3 +1,4 @@
+import { alertKit } from 'alert-kit';
 import bootstrap from '../resource/js/bootstrap';
 import Swal from '../resource/js/sweetalert';
 
@@ -51,7 +52,7 @@ export function getStatePrivilegio(list, idMenu, idSubMenu, idPrivilegio) {
 /**
  * Lee un archivo de imagen y devuelve su representación en base64, su extensión y dimensiones.
  * @param {File} file - Archivo seleccionado
- * @returns {Promise<{ base64: string, mimeType: string, extension: string, width: number, height: number, size: number } | false>} Un objeto que contiene la representación en base64 del archivo, su tipo mime, su extensión, ancho, altura y tamaño; o false si no se selecciona ningún archivo.
+ * @returns {Promise<{ base64: string, mimeType: string, extension: string, width: number, height: number, size: number, sizeBytes: number } | false>} Un objeto que contiene la representación en base64 del archivo, su tipo mime, su extensión, ancho, altura, tamaño y tamaño en bytes; o false si no se selecciona ningún archivo.
  */
 export async function imageBase64(file) {
   if (!file) {
@@ -65,8 +66,17 @@ export async function imageBase64(file) {
   const base64 = read.replace(/^data:.+;base64,/, '');
   const extension = getExtension(name);
   const { width, height } = await imageSizeData(read);
-  const size = Number(rounded(file.size / 1024));
-  return { base64, mimeType, extension, width, height, size };
+  const size = Math.round(file.size / 1024);
+  const sizeBytes = file.size
+  return {
+    base64,
+    mimeType,
+    extension,
+    width,
+    height,
+    size,
+    sizeBytes
+  };
 }
 
 /**
@@ -331,18 +341,6 @@ export function getCurrentMonth() {
 export function getCurrentYear() {
   const today = new Date();
   return today.getFullYear();
-}
-
-export function getFirstDayOfTheMonth() {
-  const date = new Date();
-  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  return parseFormatDate(firstDay);
-}
-
-export function getLastDayOfTheMonth() {
-  const date = new Date();
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  return parseFormatDate(lastDay);
 }
 
 function parseFormatDate(date) {
@@ -1045,6 +1043,10 @@ function calculateEAN13CheckDigit(code) {
   return remainder === 0 ? 0 : 10 - remainder;
 }
 
+/**
+ * Función para obtener las ranuras de tiempo
+ * @returns 
+ */
 export function getRanurasDeTiempo() {
   const ranurasDeTiempo = []
   for (let hour = 7; hour <= 23; hour++) {
@@ -1109,6 +1111,65 @@ export function getPathRoute(namePath) {
   }
 }
 
+export const validateForm = async ({
+  title = "POS",
+  value,
+  message,
+  ref = null,
+  callback,
+}) => {
+  if (isEmpty(value) || (typeof value === "number" && !isNumeric(value))) {
+    alertKit.warning({
+      title: title,
+      message,
+      onClose: () => {
+        ref?.current?.focus();
+      }
+    }, () => {
+      callback?.();
+    });
+
+    return false;
+  }
+
+  return true;
+};
+
+export const validateMany = async (rules = [], title = "POS") => {
+  for (const rule of rules) {
+    const valid = await validateForm({
+      ...rule,
+      title: title,
+    });
+    if (!valid) return false;
+  }
+  return true;
+};
+
+export const startOfDay = (date = new Date()) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+export const endOfDay = (date = new Date()) => {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+};
+
+export const startOfMonth = (date = new Date()) => {
+  const d = new Date(date);
+  d.setDate(1);
+  return startOfDay(d);
+};
+
+export const endOfMonth = (date = new Date()) => {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + 1, 0);
+  return endOfDay(d);
+};
+
 export function alertInfo(title, message) {
   Swal({
     title: title,
@@ -1119,20 +1180,6 @@ export function alertInfo(title, message) {
     showConfirmButton: false,
     allowOutsideClick: false,
     allowEscapeKey: false,
-  });
-}
-
-export function alertHTML(title, html, callback = function () { }) {
-  Swal({
-    html: html,
-    showConfirmButton: false,
-    showCancelButton: true,
-    cancelButtonText: 'Cerrar',
-    cancelButtonColor: '#dc3545',
-    allowOutsideClick: false,
-    showCloseButton: true,
-  }).then((event) => {
-    callback(event);
   });
 }
 

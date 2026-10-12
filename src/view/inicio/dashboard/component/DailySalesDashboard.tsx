@@ -1,17 +1,15 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, Search, Plus, Trash2, CalendarIcon, Building2 } from 'lucide-react';
-import { currentDate, formatDate } from '@/helper/utils.helper';
-import BranchInterface from '@/model/ts/interface/branch.interface';
+import { TrendingUp, TrendingDown, DollarSign, Settings, AlertCircle, Search, Plus, Trash2 } from 'lucide-react';
+import { currentDate } from '@/helper/utils.helper';
+import SucursalInterface from '@/model/ts/interface/sucursal.interface';
 import { comboSucursal } from '@/network/rest/principal.network';
 import ErrorResponse from '@/model/class/error-response';
 import { CANCELED } from '@/model/types/types';
 import { alertKit } from 'alert-kit';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
+import { DatePicker } from '@/components/DatePicker';
 
 // Datos de prueba
 const initialSalesData: {
@@ -264,10 +262,10 @@ const CustomRangeAnalysis: React.FC<CustomRangeAnalysisProps> = ({ salesData, da
 
 const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
     const [dateRange, setDateRange] = useState({
-        start: currentDate(),
-        end: currentDate(),
+        start: new Date(),
+        end: new Date(),
     });
-    const [branches, setBranches] = useState<BranchInterface[]>([]);
+    const [branches, setBranches] = useState<SucursalInterface[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
     const [monthlyExpenses, setMonthlyExpenses] = useState<number>(2000);
     const [salesData, setSalesData] = useState<SaleData[]>(initialSalesData);
@@ -310,14 +308,13 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
 
     const handleSelectStart = (selectedDate: Date) => {
         if (selectedDate) {
-            console.log(selectedDate, format(selectedDate, "yyyy-MM-dd"));
-            setDateRange((prev) => ({ ...prev, start: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, start: selectedDate }));
         }
     };
 
     const handleSelectEnd = (selectedDate: Date) => {
         if (selectedDate) {
-            setDateRange((prev) => ({ ...prev, end: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, end: selectedDate }));
         }
     };
 
@@ -427,43 +424,20 @@ const DailySalesDashboard: React.FC<Props> = ({ token, moneda }) => {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div className="w-full flex items-center space-x-4">
-
                     <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.start ? formatDate(dateRange.start) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.start)}
-                                    onSelect={handleSelectStart}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <DatePicker
+                            value={dateRange.start}
+                            onChange={handleSelectEnd}
+                            placeholder="Hasta"
+                        />
                     </div>
 
                     <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.end ? formatDate(dateRange.end) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.end)}
-                                    onSelect={handleSelectEnd}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <DatePicker
+                            value={dateRange.end}
+                            onChange={handleSelectEnd}
+                            placeholder="Hasta"
+                        />
                     </div>
                 </div>
 

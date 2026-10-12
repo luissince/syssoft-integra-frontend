@@ -32,13 +32,15 @@ const ImageUpload = ({
         : subtitle
     )}
 
-    <Image
-      default={defaultImage}
-      src={imageUrl}
-      alt={alt}
-      className="img-fluid border rounded"
-      width={width}
-    />
+    <div className="w-full h-60 border rounded overflow-hidden p-3">
+      <Image
+        default={defaultImage}
+        src={imageUrl}
+        alt={alt}
+        overrideClass="w-full h-full object-contain object-center"
+        width={width}
+      />
+    </div>
 
     <div className="flex gap-3">
       <input
@@ -175,7 +177,7 @@ class MultiImages extends Component {
                   style={{ height: '120px', maxWidth: '100%' }}
                 />
                 <div
-                  className="position-absolute"
+                  className="absolute"
                   style={{ top: '0', left: '0' }}
                 >
                   <Button
@@ -200,12 +202,12 @@ class MultiImages extends Component {
             type="file"
             id="fileSelectImage"
             multiple
-            accept="image/png, image/jpeg, image/gif, image/webp"
+            accept=".png,.jpg,.jpeg,.gif,.webp,.ico"
             hidden
             onChange={this.changeInput}
           />
           <label htmlFor="fileSelectImage">
-            <div className="d-flex flex-column justify-content-center align-items-center cursor-pointer m-0 gap-3-5">
+            <div className="flex flex-col justify-center items-center cursor-pointer m-0 gap-3-5">
               <img
                 src={images.imagen}
                 style={{ height: '120px', maxWidth: '100%' }}

@@ -1,10 +1,6 @@
 import React from 'react';
 import {
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
-  alertDialog,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import SuccessReponse from '../../../../model/class/response';
@@ -14,6 +10,7 @@ import { addMedida } from '../../../../network/rest/principal.network';
 import PropTypes from 'prop-types';
 import Title from '../../../../components/Title';
 import Button from '../../../../components/Button';
+import { alertKit } from 'alert-kit';
 
 class MedidaAgregar extends React.Component {
   constructor(props) {
@@ -50,44 +47,68 @@ class MedidaAgregar extends React.Component {
 
   handleGuardar = async () => {
     if (isEmpty(this.state.codigo)) {
-      alertWarning('Medida', 'Ingrese el codigo de la medida', () => {
+      alertKit.warning({
+        title: 'Medida',
+        message: 'Ingrese el codigo de la medida',
+      }, () => {
         this.refCodigo.current.focus();
       });
       return;
     }
 
     if (isEmpty(this.state.nombre)) {
-      alertWarning('Medida', 'Ingrese el nombre de la medida', () => {
+      alertKit.warning({
+        title: 'Medida',
+        message: 'Ingrese el nombre de la medida',
+      }, () => {
         this.refNombre.current.focus();
       });
       return;
     }
 
-    alertDialog('Categoría', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          codigo: this.state.codigo,
-          nombre: this.state.nombre,
-          descripcion: this.state.descripcion,
-          estado: this.state.estado,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Categoria', 'Procesando información...');
-
-        const response = await addMedida(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Categoria', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Categoria', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: 'Medida',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        codigo: this.state.codigo,
+        nombre: this.state.nombre,
+        descripcion: this.state.descripcion,
+        estado: this.state.estado,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await addMedida(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Categoria',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: 'Categoria',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   render() {

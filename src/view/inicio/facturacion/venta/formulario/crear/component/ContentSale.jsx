@@ -21,7 +21,6 @@ const ContentSale = ({
     handleStarProduct,
 
     nombreComporbante,
-    handleOpenPreImpresion,
     handleOpenVenta,
     handleOpenCotizacion,
     handleOpenPedido,
@@ -68,7 +67,6 @@ const ContentSale = ({
                     handleStarProduct={handleStarProduct}
 
                     nombreComporbante={nombreComporbante}
-                    handleOpenPreImpresion={handleOpenPreImpresion}
                     handleOpenVenta={handleOpenVenta}
                     handleOpenCotizacion={handleOpenCotizacion}
                     handleOpenPedido={handleOpenPedido}
@@ -88,7 +86,6 @@ const ContentSale = ({
                 <div className="hidden md:flex">
                     <InvoiceTicket
                         nombreComporbante={nombreComporbante}
-                        handleOpenPreImpresion={handleOpenPreImpresion}
                         handleOpenVenta={handleOpenVenta}
                         handleOpenCotizacion={handleOpenCotizacion}
                         handleOpenPedido={handleOpenPedido}

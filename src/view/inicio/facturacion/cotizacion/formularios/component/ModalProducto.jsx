@@ -6,7 +6,6 @@ import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
 import Row from '../../../../../../components/Row';
 import {
-  alertWarning,
   handlePasteFloat,
   isEmpty,
   isNumeric,
@@ -17,6 +16,10 @@ import { comboMedida } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
+import { TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
+import { alertKit } from 'alert-kit';
+import Image from '@/components/Image';
+import { images } from '@/helper';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -28,6 +31,8 @@ class ModalProducto extends Component {
 
     this.state = {
       loading: true,
+      message: 'Cargando datos...',
+
       idProducto: '',
       codigo: '',
       cantidad: '',
@@ -35,10 +40,13 @@ class ModalProducto extends Component {
       descripcion: '',
       imagen: null,
       idMedida: '',
-      tipoProducto: '',
+      medida: '',
+      idTipoProducto: '',
 
       medidas: [],
     };
+
+    this.initial = { ...this.state };
 
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
@@ -59,30 +67,28 @@ class ModalProducto extends Component {
       this.peticion = true;
       this.abortController = null;
 
-      this.setState(
-        {
-          medidas: response.data,
-          idProducto: producto.idProducto,
-          codigo: producto.codigo,
-          // cantidad: producto.cantidad ?? 1,
-          cantidad: 1,
-          precio: producto.precio,
-          descripcion: producto.nombre,
-          imagen: producto.imagen,
-          idMedida: producto.idMedida,
-          tipoProducto: producto.tipoProducto,
-          loading: false,
-        },
-        () => {
-          if (producto.tipoProducto === 'SERVICIO') {
-            this.refPrecio.current.focus();
-            this.refPrecio.current.select();
-          } else {
-            this.refCantidad.current.focus();
-            this.refCantidad.current.select();
-          }
-        },
-      );
+      this.setState({
+        medidas: response.data,
+        idProducto: producto.idProducto,
+        codigo: producto.codigo,
+        // cantidad: producto.cantidad ?? 1,
+        cantidad: 1,
+        precio: producto.precio,
+        descripcion: producto.nombre,
+        imagen: producto.imagen,
+        idMedida: producto.idMedida,
+        medida: producto.medida,
+        idTipoProducto: producto.idTipoProducto,
+        loading: false,
+      }, () => {
+        if (producto.idTipoProducto === TIPO_PRODUCTO_SERVICIO) {
+          this.refPrecio.current.focus();
+          this.refPrecio.current.select();
+        } else {
+          this.refCantidad.current.focus();
+          this.refCantidad.current.select();
+        }
+      });
     }
 
     if (response instanceof ErrorResponse) {
@@ -93,7 +99,7 @@ class ModalProducto extends Component {
     }
   };
 
-  handleOnOpen = () => {};
+  handleOnOpen = () => { };
 
   handleOnHidden = async () => {
     if (!this.peticion) {
@@ -102,20 +108,7 @@ class ModalProducto extends Component {
       }
     }
 
-    this.setState({
-      loading: true,
-      idProducto: '',
-      codigo: '',
-      cantidad: '',
-      precio: '',
-      descripcion: '',
-      imagen: null,
-      idMedida: '',
-      tipoProducto: '',
-
-      medidas: [],
-    });
-
+    this.setState(this.initial);
     this.peticion = false;
   };
 
@@ -142,7 +135,7 @@ class ModalProducto extends Component {
       descripcion,
       cantidad,
       imagen,
-      tipoProducto,
+      idTipoProducto,
       precio,
       idMedida,
     } = this.state;
@@ -150,46 +143,61 @@ class ModalProducto extends Component {
     const { detalles, idImpuesto, impuestos } = this.props;
 
     if (!isNumeric(cantidad)) {
-      alertWarning('Cotización', 'Ingrese la cantidad.', () => {
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Ingrese la cantidad.',
+      }, () => {
         this.refCantidad.current.focus();
       });
       return;
     }
 
     if (parseFloat(cantidad) <= 0) {
-      alertWarning(
-        'Cotización',
-        'La cantidad no puede ser menor a cero.',
-        () => {
-          this.refCantidad.current.focus();
-        },
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'La cantidad no puede ser menor a cero.',
+      }, () => {
+        this.refCantidad.current.focus();
+      },
       );
       return;
     }
 
     if (!isNumeric(precio)) {
-      alertWarning('Cotización', 'Ingrese el precio.', () => {
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Ingrese el precio.',
+      }, () => {
         this.refPrecio.current.focus();
       });
       return;
     }
 
     if (parseFloat(precio) <= 0) {
-      alertWarning('Cotización', 'El precio no puede ser menor a cero.', () => {
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'El precio no puede ser menor a cero.',
+      }, () => {
         this.refPrecio.current.focus();
       });
       return;
     }
 
     if (isEmpty(descripcion)) {
-      alertWarning('Cotización', 'Ingrese la descripción del producto.', () => {
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Ingrese la descripción del producto.',
+      }, () => {
         this.refDescripcion.current.focus();
       });
       return;
     }
 
     if (isEmpty(idMedida)) {
-      alertWarning('Cotización', 'Ingrese la unidad de medida', () => {
+      alertKit.warning({
+        title: 'Cotización',
+        message: 'Ingrese la unidad de medida',
+      }, () => {
         this.refMedida.current.focus();
       });
       return;
@@ -206,7 +214,7 @@ class ModalProducto extends Component {
     const medida = this.state.medidas.find((item) => item.idMedida == idMedida);
 
     if (existeDetalle) {
-      if (tipoProducto === 'SERVICIO') {
+      if (idTipoProducto === TIPO_PRODUCTO_SERVICIO) {
         existeDetalle.precio = Number(precio);
       } else {
         existeDetalle.cantidad = Number(cantidad);
@@ -215,18 +223,20 @@ class ModalProducto extends Component {
 
       existeDetalle.nombre = descripcion;
       existeDetalle.idMedida = medida.idMedida;
-      existeDetalle.nombreMedida = medida.nombre;
+      existeDetalle.medida = medida.nombre;
     } else {
       const data = {
         id: detalles.length + 1,
         idProducto: idProducto,
         codigo: codigo,
         nombre: descripcion,
+        imagen: imagen,
         cantidad: Number(cantidad),
         precio: Number(precio),
+
         idMedida: medida.idMedida,
-        nombreMedida: medida.nombre,
-        imagen: imagen,
+        medida: medida.nombre,
+
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
@@ -242,8 +252,18 @@ class ModalProducto extends Component {
   };
 
   render() {
-    const { loading, cantidad, precio, descripcion, idMedida, tipoProducto } =
-      this.state;
+    const {
+      loading,
+      message,
+
+      codigo,
+      imagen,
+      cantidad,
+      precio,
+      descripcion,
+      idMedida,
+      idTipoProducto
+    } = this.state;
 
     const { isOpen, onClose } = this.props;
 
@@ -259,37 +279,58 @@ class ModalProducto extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView loading={loading} message={'Cargando datos...'} />
+            <SpinnerView
+              loading={loading}
+              message={message}
+            />
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  label={'Cantidad:'}
-                  disabled={tipoProducto === 'SERVICIO'}
-                  placeholder={'0.00'}
-                  role={'float'}
-                  ref={this.refCantidad}
-                  value={cantidad}
-                  onChange={this.handleInputCantidad}
-                  onPaste={handlePasteFloat}
+            <div className="flex flex-col md:flex-row items-center gap-3 mb-3">
+              <div>
+                <Image
+                  default={images.noImage}
+                  src={imagen}
+                  alt={descripcion}
+                  width={100}
+                  height={100}
+                  className="object-contain rounded"
                 />
-              </Column>
+              </div>
 
-              <Column formGroup={true}>
-                <Input
-                  label={'Precio:'}
-                  placeholder={'0.00'}
-                  role={'float'}
-                  ref={this.refPrecio}
-                  value={precio}
-                  onChange={this.handleInputPrecio}
-                  onPaste={handlePasteFloat}
-                />
-              </Column>
-            </Row>
+              <div className="flex flex-col text-center md:text-left">
+                <p className="text-sm">{codigo}</p>
+                <p className="text-base">{descripcion}</p>
+              </div>
+            </div>
 
-            <Row>
-              <Column formGroup={true}>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full">
+                  <Input
+                    label={'Cantidad:'}
+                    disabled={idTipoProducto === TIPO_PRODUCTO_SERVICIO}
+                    placeholder={'0.00'}
+                    role={'float'}
+                    ref={this.refCantidad}
+                    value={cantidad}
+                    onChange={this.handleInputCantidad}
+                    onPaste={handlePasteFloat}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <Input
+                    label={'Precio:'}
+                    placeholder={'0.00'}
+                    role={'float'}
+                    ref={this.refPrecio}
+                    value={precio}
+                    onChange={this.handleInputPrecio}
+                    onPaste={handlePasteFloat}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
                 <Input
                   label={'Descripción:'}
                   placeholder={'Datos del producto...'}
@@ -297,11 +338,9 @@ class ModalProducto extends Component {
                   value={descripcion}
                   onChange={this.handleInputDescripcion}
                 />
-              </Column>
-            </Row>
+              </div>
 
-            <Row>
-              <Column formGroup={true}>
+              <div className="w-full">
                 <Select
                   label={'Unidad de Medida:'}
                   ref={this.refMedida}
@@ -315,22 +354,24 @@ class ModalProducto extends Component {
                     </option>
                   ))}
                 </Select>
-              </Column>
-            </Row>
+              </div>
+            </div>
           </>
         }
         footer={
-          <>
-            <Button type="submit" className="btn-primary">
+          <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+            <Button
+              type="submit"
+              className="btn-primary w-full md:w-auto">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
-              className="btn-danger"
+              className="btn-danger w-full md:w-auto"
               onClick={async () => await this.refModal.current.handleOnClose()}
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </>
+          </div>
         }
       />
     );

@@ -371,7 +371,7 @@ class Transacciones extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message={'Cargando información de la tabla...'}
         />
       );

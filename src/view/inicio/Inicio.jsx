@@ -56,8 +56,6 @@ import Facturacion, {
   NotaCredito,
   NotaCreditoProceso,
   NotaCreditoDetalle,
-  CuentasPorCobrar,
-  CuentasPorCobrarAbonar,
   Pedidos,
   PedidoCrear,
   PedidoEditar,
@@ -90,8 +88,6 @@ import Tesoreria, {
   Compras,
   CompraCrear,
   CompraDetalle,
-  CuentasPorPagar,
-  CuentasPorPagarAmortizar,
   OrdenCompras,
   OrdenCompraCrear,
   OrdenCompraEditar,
@@ -166,11 +162,7 @@ import Finanzas, {
   Transacciones,
 } from './finanzas/index.jsx';
 
-import Crm, {
-  Consultas,
-  ConsultaDetalle,
-  ConsultaEditar,
-} from './crm/index.jsx';
+import CrmRoutes from './crm/index';
 
 import {
   configEmpresa,
@@ -658,17 +650,6 @@ class Inicio extends React.Component {
           />
 
           <Route
-            path={`${path}/facturacion/cuentacobrar`}
-            exact={true}
-            render={(props) => <CuentasPorCobrar {...props} />}
-          />
-          <Route
-            path={`${path}/facturacion/cuentacobrar/detalle`}
-            exact={true}
-            render={(props) => <CuentasPorCobrarAbonar {...props} />}
-          />
-
-          <Route
             path={`${path}/facturacion/pedidos`}
             exact={true}
             render={(props) => <Pedidos {...props} />}
@@ -827,17 +808,6 @@ class Inicio extends React.Component {
             path={`${path}/tesoreria/compras/detalle`}
             exact={true}
             render={(props) => <CompraDetalle {...props} />}
-          />
-
-          <Route
-            path={`${path}/tesoreria/cuentapagar`}
-            exact={true}
-            render={(props) => <CuentasPorPagar {...props} />}
-          />
-          <Route
-            path={`${path}/tesoreria/cuentapagar/detalle`}
-            exact={true}
-            render={(props) => <CuentasPorPagarAmortizar {...props} />}
           />
 
           <Route
@@ -1234,29 +1204,9 @@ class Inicio extends React.Component {
           ----------------------------------------------------------
           */}
 
-          <Route
-            path={`${path}/crm`}
-            exact={true}
-            render={(props) => <Crm {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta`}
-            exact={true}
-            render={(props) => <Consultas {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta/detalle`}
-            exact={true}
-            render={(props) => <ConsultaDetalle {...props} />}
-          />
-
-          <Route
-            path={`${path}/crm/consulta/editar`}
-            exact={true}
-            render={(props) => <ConsultaEditar {...props} />}
-          />
+         <Route path={`${path}/crm`}>
+            <CrmRoutes />
+          </Route>
 
           <Route component={NotFoundMain} />
         </Switch>

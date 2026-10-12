@@ -21,9 +21,10 @@ import {
   TableRow,
 } from '../../../../../../components/Table';
 import {
-  A_GRANEL,
-  UNIDADES,
-  VALOR_MONETARIO,
+  TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL,
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
+  TIPO_TRATAMIENTO_PRODUCTO_UNIDADES,
+  TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO,
 } from '../../../../../../model/types/tipo-tratamiento-producto';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
@@ -41,6 +42,8 @@ import CustomModal, {
   CustomModalContentSubHeader,
 } from '../../../../../../components/CustomModal';
 import { SpinnerTable } from '../../../../../../components/Spinner';
+import { TIPO_PRODUCTO_NORMAL, TIPO_PRODUCTO_SERVICIO } from '@/model/types/tipo-producto';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -190,7 +193,6 @@ class ModalProductos extends CustomComponent {
     const params = {
       tipo: opcion,
       filtrar: buscar.trim(),
-      idSucursal: this.props.idSucursal,
       idAlmacen: this.props.idAlmacen,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
@@ -203,12 +205,12 @@ class ModalProductos extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),)
       );
 
       this.setState({
         loading: false,
-        lista: response.data.lists,
+        lista: response.data.result,
         totalPaginacion: totalPaginacion,
       });
     }
@@ -314,7 +316,7 @@ class ModalProductos extends CustomComponent {
     if (loading && !show) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );
@@ -331,57 +333,21 @@ class ModalProductos extends CustomComponent {
     }
 
     return lista.map((item, index) => {
-      const tipo = function () {
-        if (item.tipo === 'PRODUCTO') {
-          return (
-            <>
-              <span>
-                Producto <i className="bi bi-basket"></i>
-              </span>
-              <br />
-              <span>{item.venta}</span>
-            </>
-          );
-        }
-
-        if (item.tipo === 'SERVICIO') {
-          return (
-            <>
-              <span>
-                Servicio <i className="bi bi-person-workspace"></i>{' '}
-              </span>
-              <br />
-              <span>{item.venta}</span>
-            </>
-          );
-        }
-
-        return (
-          <>
-            <span>
-              Combo <i className="bi bi-fill"></i>{' '}
-            </span>
-            <br />
-            <span>{item.venta}</span>
-          </>
-        );
-      };
-
-      const tipoTratamiento =
-        item.idTipoTratamientoProducto === UNIDADES
-          ? 'EN UNIDADES'
-          : item.idTipoTratamientoProducto === VALOR_MONETARIO
-            ? 'VALOR MONETARIO'
-            : item.idTipoTratamientoProducto === A_GRANEL
-              ? 'A GRANEL'
-              : 'SERVICIO';
-
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id || ++index}</TableCell>
           <TableCell>
-            {tipo()}
-            {tipoTratamiento}
+            <div>
+              {item.idTipoProducto === TIPO_PRODUCTO_NORMAL && `STOCK`}
+              {item.idTipoProducto === TIPO_PRODUCTO_SERVICIO && "SERVICIO"}
+            </div>
+
+            <div>
+              {item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_UNIDADES && "EN UNIDADES"}
+              {item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO && "VALOR MONETARIO"}
+              {item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_A_GRANEL && "A GRANEL"}
+              {item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO && "NINGUNO"}
+            </div>
           </TableCell>
           <TableCell>
             {item.codigo}
@@ -397,21 +363,22 @@ class ModalProductos extends CustomComponent {
           <TableCell>{item.medida}</TableCell>
           <TableCell>{item.categoria}</TableCell>
           <TableCell
-            className={`${
-              item.tipo === 'PRODUCTO' && item.cantidad <= 0
+            className={cn(
+              item.idTipoProducto === TIPO_PRODUCTO_NORMAL && item.cantidad <= 0
                 ? 'text-danger'
                 : 'text-success'
-            }`}
+            )}
           >
-            {item.tipo === 'PRODUCTO' ? (
+            {item.idTipoProducto === TIPO_PRODUCTO_NORMAL ? (
               <>
                 {item.almacen}
                 <br />
                 STOCK: {rounded(item.cantidad)}
               </>
-            ) : (
-              'SERVICIO'
-            )}
+            ) :
+              (
+                'SERVICIO'
+              )}
           </TableCell>
           <TableCell className="text-center">
             <Image
@@ -480,10 +447,10 @@ class ModalProductos extends CustomComponent {
               <Column className="col-md-4 col-12" formGroup={true}>
                 <Select
                   label={
-                    <>
+                    <label>
                       Almacen:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={refAlmacen}
                   value={idAlmacen}

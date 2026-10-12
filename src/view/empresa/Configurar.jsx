@@ -14,7 +14,7 @@ import { saveEmpresa } from '../../network/rest/principal.network';
 import SuccessReponse from '../../model/class/response';
 import ErrorResponse from '../../model/class/error-response';
 import { CANCELED } from '../../model/types/types';
-import { getRuc } from '../../network/rest/apisperu.network';
+import { getRuc } from '../../network/rest/api-client';
 import CustomComponent from '@/components/CustomComponent';
 import { configSave } from '../../redux/principalSlice';
 import Button from '../../components/Button';
@@ -124,24 +124,28 @@ class Configurar extends CustomComponent {
       return;
     }
 
-    const response = await getRuc(this.state.documento);
+    const { success, data, message, type } = await getRuc(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      await this.setStateAsync({
-        documento: convertNullText(response.data.ruc),
-        razonSocial: convertNullText(response.data.razonSocial),
-        direccion: convertNullText(response.data.direccion),
-        loading: false,
+    if (!success) {
+      if (type === CANCELED) return;
+
+      alertKit.warning({
+        title: "Configuración",
+        message: message,
+      }, () => {
+        this.setState({
+          loading: false,
+        });
       });
+      return;
     }
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      await this.setStateAsync({
-        loading: false,
-      });
-    }
+    await this.setStateAsync({
+      documento: convertNullText(data.ruc),
+      razonSocial: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
+      loading: false,
+    });
   }
 
   async onEventSave() {

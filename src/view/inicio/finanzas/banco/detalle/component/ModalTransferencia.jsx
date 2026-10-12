@@ -197,10 +197,10 @@ class ModalTransferencia extends Component {
                 <Select
                   autoFocus={true}
                   label={
-                    <>
+                    <label>
                       Nombre Almacen:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   className="form-control"
                   ref={this.refIdAlmacen}
@@ -221,10 +221,10 @@ class ModalTransferencia extends Component {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       Cantidad Inicial:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="0"
                   role={'float'}
@@ -237,10 +237,10 @@ class ModalTransferencia extends Component {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       Cantidad Máxima:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="0"
                   role={'float'}
@@ -253,10 +253,10 @@ class ModalTransferencia extends Component {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       Cantidad Mínima:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="0"
                   role={'float'}

@@ -28,6 +28,7 @@ import {
 } from '@/helper/utils.helper';
 import { images } from '@/helper';
 import Image from '@/components/Image';
+import { CANCELED } from '@/model/types/types';
 
 /**
  * Componente que representa una funcionalidad específica.

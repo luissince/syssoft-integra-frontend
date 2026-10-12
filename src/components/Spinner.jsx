@@ -71,7 +71,7 @@ const SpinnerTransparent = ({
 };
 
 SpinnerTable.propTypes = {
-  colSpan: PropTypes.string.isRequired,
+  colSpan: PropTypes.number.isRequired,
   message: PropTypes.string.isRequired,
 };
 

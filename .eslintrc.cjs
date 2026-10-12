@@ -1,34 +1,67 @@
-// .eslintrc.cjs
 module.exports = {
-    root: true,
-    env: {
-      browser: true,
-      es2021: true,
+  root: true,
+
+  env: {
+    browser: true,
+    es2021: true,
+  },
+
+  parser: '@typescript-eslint/parser',
+
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
+
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+
+  settings: {
+    react: {
+      version: 'detect',
     },
-    extends: [
-      'eslint:recommended',
-      'plugin:react/recommended',
-      'plugin:react/jsx-runtime',
-      'plugin:react-hooks/recommended',
-      'prettier',
-    ],
-    parserOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    },
-    settings: {
-      react: {
-        version: 'detect',
+  },
+
+  plugins: [
+    'react-refresh',
+    '@typescript-eslint',
+  ],
+
+  ignorePatterns: [
+    'dist',
+    '.eslintrc.cjs',
+  ],
+
+  rules: {
+
+    // Detecta variables, funciones, imports no usados
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
       },
-    },
-    plugins: ['react-refresh'],
-    ignorePatterns: ['dist', '.eslintrc.cjs'],
-    rules: {
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'no-unused-vars': 'warn',
-      'no-console': 'warn',
-      'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off', // útil si usas JSX con React 17+
-    },
-  }
-  
+    ],
+
+    // evita que la regla antigua choque
+    'no-unused-vars': 'off',
+
+    'no-console': 'warn',
+
+    'react-refresh/only-export-components': [
+      'warn',
+      { allowConstantExport: true },
+    ],
+
+    'react/prop-types': 'off',
+
+    'react/react-in-jsx-scope': 'off',
+  },
+}

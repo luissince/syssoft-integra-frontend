@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../components/Button';
-import Column from '../../../../../../components/Column';
 import { CustomModalForm } from '../../../../../../components/CustomModal';
 import Input from '../../../../../../components/Input';
-import Row from '../../../../../../components/Row';
 import { SpinnerView } from '../../../../../../components/Spinner';
 import {
   handlePasteFloat,
@@ -32,7 +30,7 @@ class ModalProducto extends Component {
       imagen: null,
       costo: '',
       cantidad: '',
-      tipoProducto: '',
+      idTipoProducto: '',
     };
 
     this.initial = { ...this.state };
@@ -43,6 +41,7 @@ class ModalProducto extends Component {
   }
 
   loadDatos = async (producto, type) => {
+    console.log(producto)
     if (type === 'edit') {
       this.setState({
         idProducto: producto.idProducto,
@@ -51,7 +50,8 @@ class ModalProducto extends Component {
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
-        tipoProducto: producto.tipoProducto,
+        idTipoProducto: producto.idTipoProducto,
+
         loading: false,
       });
     } else {
@@ -62,7 +62,7 @@ class ModalProducto extends Component {
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
-        tipoProducto: producto.tipoProducto,
+        idTipoProducto: producto.idTipoProducto,
 
         loading: false,
       });
@@ -170,6 +170,7 @@ class ModalProducto extends Component {
       loading,
       message,
 
+      codigo,
       nombre,
       imagen,
       cantidad,
@@ -190,24 +191,31 @@ class ModalProducto extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView loading={loading} message={message} />
+            <SpinnerView
+              loading={loading}
+              message={message}
+            />
 
-            <Row>
-              <Column formGroup={true}>
-                <h6>{nombre}</h6>
+            <div className="flex items-center gap-3 mb-3">
+              <div>
                 <Image
                   default={images.noImage}
                   src={imagen}
                   alt={nombre}
                   width={100}
                   height={100}
-                  className="object-contain"
+                  className="object-contain rounded"
                 />
-              </Column>
-            </Row>
+              </div>
 
-            <Row>
-              <Column formGroup={true}>
+              <div className="flex flex-col">
+                <p className="text-sm">{codigo}</p>
+                <p className="text-base">{nombre}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="w-full">
                 <Input
                   label={'Costo:'}
                   placeholder={'0.00'}
@@ -217,9 +225,9 @@ class ModalProducto extends Component {
                   onChange={this.handleInputCosto}
                   onPaste={handlePasteFloat}
                 />
-              </Column>
+              </div>
 
-              <Column formGroup={true}>
+              <div className="w-full">
                 <Input
                   autoFocus={true}
                   label={'Cantidad:'}
@@ -230,22 +238,24 @@ class ModalProducto extends Component {
                   onChange={this.handleInputCantidad}
                   onPaste={handlePasteFloat}
                 />
-              </Column>
-            </Row>
+              </div>
+            </div>
           </>
         }
         footer={
-          <>
-            <Button type="submit" className="btn-primary">
+          <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+            <Button
+              type="submit"
+              className="btn-primary w-full md:w-auto">
               <i className="fa fa-plus"></i> Agregar
             </Button>
             <Button
-              className="btn-danger"
+              className="btn-danger w-full md:w-auto"
               onClick={async () => await this.refModal.current.handleOnClose()}
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </>
+          </div>
         }
       />
     );

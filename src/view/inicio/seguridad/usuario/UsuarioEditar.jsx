@@ -2,10 +2,6 @@ import React from 'react';
 import {
   keyNumberPhone,
   keyNumberInteger,
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isText,
 } from '../../../../helper/utils.helper';
@@ -34,13 +30,14 @@ import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
 import Input from '../../../../components/Input';
 import { Switches } from '../../../../components/Checks';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class UsuarioEditar extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -157,9 +154,12 @@ class UsuarioEditar extends CustomComponent {
     }
   }
 
-  handleGuardar() {
+  async handleGuardar() {
     if (isEmpty(this.state.dni)) {
-      alertWarning('Usuario', 'Ingrese el numero de DNI.', () => {
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Ingrese el numero de DNI.',
+      }, () => {
         this.onFocusTab('datos-tab', 'datos');
         this.refDni.current.focus();
       });
@@ -167,7 +167,10 @@ class UsuarioEditar extends CustomComponent {
     }
 
     if (isEmpty(this.state.nombres)) {
-      alertWarning('Usuario', 'Ingrese los nombres.', () => {
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Ingrese los nombres.',
+      }, () => {
         this.onFocusTab('datos-tab', 'datos');
         this.refNombres.current.focus();
       });
@@ -175,7 +178,10 @@ class UsuarioEditar extends CustomComponent {
     }
 
     if (isEmpty(this.state.apellidos)) {
-      alertWarning('Usuario', 'Ingrese los apellidos.', () => {
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Ingrese los apellidos.',
+      }, () => {
         this.onFocusTab('datos-tab', 'datos');
         this.refApellidos.current.focus();
       });
@@ -183,7 +189,10 @@ class UsuarioEditar extends CustomComponent {
     }
 
     if (isEmpty(this.state.genero)) {
-      alertWarning('Usuario', 'Seleccione el genero.', () => {
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Seleccione el genero.',
+      }, () => {
         this.onFocusTab('datos-tab', 'datos');
         this.refGenero.current.focus();
       });
@@ -191,7 +200,10 @@ class UsuarioEditar extends CustomComponent {
     }
 
     if (isEmpty(this.state.direccion)) {
-      alertWarning('Usuario', 'Ingrese la dirección.', () => {
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Ingrese la dirección.',
+      }, () => {
         this.onFocusTab('datos-tab', 'datos');
         this.refDireccion.current.focus();
       });
@@ -199,54 +211,67 @@ class UsuarioEditar extends CustomComponent {
     }
 
     if (isEmpty(this.state.activeLogin && this.state.usuario)) {
-      alertWarning(
-        'Usuario',
-        'Ingrese su usuario para el inicio de sesión.',
-        () => {
-          this.onFocusTab('login-tab', 'login');
-          this.refUsuario.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Ingrese su usuario para el inicio de sesión.',
+      }, () => {
+        this.onFocusTab('login-tab', 'login');
+        this.refUsuario.current.focus();
+      });
       return;
     }
 
-    alertDialog('Usuario', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          //datos
-          nombres: this.state.nombres.trim(),
-          apellidos: this.state.apellidos.trim(),
-          dni: this.state.dni.toString().trim(),
-          genero: this.state.genero,
-          direccion: this.state.direccion.trim(),
-          telefono: this.state.telefono.toString().trim(),
-          email: this.state.email.trim(),
-          //login
-          idPerfil: this.state.idPerfil.trim(),
-          representante: this.state.representante,
-          estado: this.state.estado,
-          activeLogin: this.state.activeLogin,
-          usuario: this.state.usuario.trim(),
-
-          //idUsuario
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Usuario', 'Procesando información...');
-
-        const response = await updateUsuario(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Usuario', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Usuario', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: 'Usuario',
+      message: '¿Está seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
     });
+
+    if (accept) {
+      const data = {
+        //datos
+        nombres: this.state.nombres.trim(),
+        apellidos: this.state.apellidos.trim(),
+        dni: this.state.dni.toString().trim(),
+        genero: this.state.genero,
+        direccion: this.state.direccion.trim(),
+        telefono: this.state.telefono.toString().trim(),
+        email: this.state.email.trim(),
+        //login
+        idPerfil: this.state.idPerfil.trim(),
+        representante: this.state.representante,
+        estado: this.state.estado,
+        activeLogin: this.state.activeLogin,
+        usuario: this.state.usuario.trim(),
+
+        //idUsuario
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await updateUsuario(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Usuario',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+
+        alertKit.warning({
+          title: 'Usuario',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   onFocusTab(idTab, idContent) {
@@ -293,28 +318,19 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column formGroup={true}>
                     <Input
-                      group={true}
                       label={
-                        <>
-                          Dni:{' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Dni: <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       placeholder="Ingrese el numero de DNI"
                       ref={this.refDni}
                       value={this.state.dni}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            dni: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            dni: event.target.value,
-                            messageWarning: 'Ingrese el numero de DNI',
-                          });
-                        }
+                        this.setState({
+                          dni: event.target.value,
+                          messageWarning: 'Ingrese el numero de DNI',
+                        });
                       }}
                       onKeyDown={keyNumberInteger}
                     />
@@ -324,56 +340,36 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
-                      group={true}
                       label={
-                        <>
-                          Nombre(s){' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Nombre(s) <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       placeholder="Ingrese el nombre"
                       ref={this.refNombres}
                       value={this.state.nombres}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            nombres: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            nombres: event.target.value,
-                            messageWarning: 'Ingrese los nombres',
-                          });
-                        }
+                        this.setState({
+                          nombres: event.target.value,
+                        });
                       }}
                     />
                   </Column>
 
                   <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
-                      group={true}
                       label={
-                        <>
-                          Apellidos{' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Apellidos <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       placeholder="ingrese apellidos del usuario"
                       ref={this.refApellidos}
                       value={this.state.apellidos}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            apellidos: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            apellidos: event.target.value,
-                            messageWarning: 'Ingrese los apellidos',
-                          });
-                        }
+                        this.setState({
+                          apellidos: event.target.value,
+                        });
                       }}
                     />
                   </Column>
@@ -382,28 +378,18 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column formGroup>
                     <Select
-                      group={true}
                       label={
-                        <>
-                          Genero{' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Genero <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       id="genero"
                       value={this.state.genero}
                       ref={this.refGenero}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            genero: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            genero: event.target.value,
-                            messageWarning: 'Seleccione el genero.',
-                          });
-                        }
+                        this.setState({
+                          genero: event.target.value,
+                        });
                       }}
                     >
                       <option value="">-- Seleccione --</option>
@@ -416,28 +402,18 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column formGroup>
                     <Input
-                      group={true}
                       label={
-                        <>
-                          Dirección{' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Dirección <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       placeholder="Ingrese la dirección"
                       ref={this.refDireccion}
                       value={this.state.direccion}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            direccion: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            direccion: event.target.value,
-                            messageWarning: 'Ingrese la dirección',
-                          });
-                        }
+                        this.setState({
+                          direccion: event.target.value,
+                        });
                       }}
                     />
                   </Column>
@@ -446,28 +422,19 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
-                      group={true}
                       label={
-                        <>
-                          Telefono o celular{' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Telefono o celular <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       placeholder="Ingrese el N° de telefono"
                       ref={this.refTelefono}
                       value={this.state.telefono}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            telefono: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            telefono: event.target.value,
-                            messageWarning: 'Ingrese el N° de telefono',
-                          });
-                        }
+                        this.setState({
+                          telefono: event.target.value,
+                          messageWarning: 'Ingrese el N° de telefono',
+                        });
                       }}
                       onKeyDown={keyNumberPhone}
                     />
@@ -475,29 +442,19 @@ class UsuarioEditar extends CustomComponent {
 
                   <Column className="col-md-6 col-12" formGroup={true}>
                     <Input
-                      group={true}
                       type="email"
                       label={
-                        <>
-                          Correo Electrónico{' '}
-                          <i className="fa fa-asterisk text-danger small"></i>
-                        </>
+                        <label>
+                          Correo Electrónico <i className="fa fa-asterisk text-danger small"></i>
+                        </label>
                       }
                       placeholder="Ingrese el email"
                       ref={this.refEmail}
                       value={this.state.email}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            email: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            email: event.target.value,
-                            messageWarning: 'Ingrese el email',
-                          });
-                        }
+                        this.setState({
+                          email: event.target.value,
+                        });
                       }}
                     />
                   </Column>
@@ -508,9 +465,8 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column formGroup={true}>
                     <Select
-                      group={true}
                       id="perfil"
-                      label={<>Perfi</>}
+                      label={<label>Perfi</label>}
                       ref={this.refPerfil}
                       value={this.state.idPerfil}
                       onChange={(event) =>
@@ -530,23 +486,15 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column className="col-md-6 col-12" formGroup={true}>
                     <Select
-                      group={true}
                       id="representante"
-                      label={<>Representante</>}
+                      label={<label>Representante</label>}
                       value={this.state.representante}
                       ref={this.refRepresentante}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            representante: event.target.value,
-                            messageWarning: '',
-                          });
-                        } else {
-                          this.setState({
-                            representante: event.target.value,
-                            messageWarning: 'Seleccione si es representante',
-                          });
-                        }
+                        this.setState({
+                          representante: event.target.value,
+                          messageWarning: 'Seleccione si es representante',
+                        });
                       }}
                     >
                       <option value="">-- seleccione --</option>
@@ -557,9 +505,8 @@ class UsuarioEditar extends CustomComponent {
 
                   <Column className="col-md-6 col-12" formGroup={true}>
                     <Select
-                      group={true}
                       id="estado"
-                      label={<>Estado</>}
+                      label={<label>Estado</label>}
                       value={this.state.estado}
                       onChange={(event) =>
                         this.setState({ estado: event.target.value })
@@ -589,21 +536,14 @@ class UsuarioEditar extends CustomComponent {
                 <Row>
                   <Column formGroup={true}>
                     <Input
-                      group
                       label="Usuario"
                       id="usuario"
                       value={this.state.usuario}
                       ref={this.refUsuario}
                       onChange={(event) => {
-                        if (event.target.value.trim().length > 0) {
-                          this.setState({
-                            usuario: event.target.value,
-                          });
-                        } else {
-                          this.setState({
-                            usuario: event.target.value,
-                          });
-                        }
+                        this.setState({
+                          usuario: event.target.value,
+                        });
                       }}
                       placeholder="Ingrese el usuario"
                       disabled={!this.state.activeLogin}

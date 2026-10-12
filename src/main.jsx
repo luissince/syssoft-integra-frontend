@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { Provider } from 'react-redux';
-import store from './redux/store.js';
+import store from './redux/store';
 import './index.css';
 import './resource/css/bootstrap.css';
 import './resource/css/sweetalert.css';
@@ -12,7 +12,6 @@ import './resource/css/footerbar.css';
 
 import './resource/js/bootstrap.js';
 import '../node_modules/bootstrap-icons/font/bootstrap-icons.css';
-import './network/rest/apisperu.network.js';
 import './network/rest/principal.network.js';
 import AlertKit from 'alert-kit';
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  alertDialog,
   currentDate,
   keyNumberPhone,
   keyNumberInteger,
@@ -18,7 +17,7 @@ import {
   getUbigeo,
   comboTipoDocumento,
 } from '../../../../../network/rest/principal.network';
-import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
+import { getDni, getRuc } from '../../../../../network/rest/api-client';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../../components/SearchInput';
@@ -29,11 +28,9 @@ import Title from '../../../../../components/Title';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
 import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
 import CheckBox, { Switches } from '../../../../../components/Checks';
-import { RUC } from '../../../../../model/types/tipo-documento';
 import { alertKit } from 'alert-kit';
-import { JURIDICA, NATURAL } from '@/model/types/tipo-entidad';
+import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -109,8 +106,6 @@ class PersonaAgregar extends CustomComponent {
       });
     }
 
-    console.log(responseListaTipoDocumento.data);
-
     this.setState({
       tiposDocumentos: responseListaTipoDocumento.data,
       loading: false,
@@ -157,7 +152,7 @@ class PersonaAgregar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
-  handleInputClave = () => {
+  handleInputClave = (event) => {
     this.setState({ clave: event.target.value });
   };
 
@@ -185,33 +180,32 @@ class PersonaAgregar extends CustomComponent {
       msgLoading: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(this.state.documento);
+    const { success, data, message, type } = await getDni(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
-        loading: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Persona",
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.dni),
+      informacion:
+        convertNullText(data.apellidoPaterno) +
+        ' ' +
+        convertNullText(data.apellidoMaterno) +
+        ' ' +
+        convertNullText(data.nombres),
+      loading: false,
+    });
   };
 
   handleGetApiSunat = async () => {
@@ -220,7 +214,7 @@ class PersonaAgregar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
       }, () => {
-        this.refDocumentoPj.current.focus();
+        this.refDocumento.current.focus();
       })
       return;
     }
@@ -230,29 +224,28 @@ class PersonaAgregar extends CustomComponent {
       msgLoading: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.documento);
+    const { success, data, message, type } = await getRuc(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.ruc),
-        informacionPj: convertNullText(response.data.razonSocial),
-        direccionPj: convertNullText(response.data.direccion),
-        loading: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Persona",
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.ruc),
+      informacion: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
+      loading: false,
+    });
   };
 
   handleFilterUbigeo = async (text) => {
@@ -467,9 +460,9 @@ class PersonaAgregar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
@@ -491,9 +484,9 @@ class PersonaAgregar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   N° de documento ({documento.length}): <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
@@ -532,10 +525,10 @@ class PersonaAgregar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   {tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}

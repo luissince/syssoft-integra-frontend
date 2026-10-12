@@ -8,6 +8,7 @@ import {
   isEmpty,
   isNumeric,
   isText,
+  validateMany,
   validateNumericInputs,
 } from '../../../../../../helper/utils.helper';
 import {
@@ -17,39 +18,25 @@ import {
   getIdProducto,
   updateProducto,
   comboMarca,
-  comboAtributo,
+  comboAtributoTipos,
 } from '../../../../../../network/rest/principal.network';
 import PropTypes from 'prop-types';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import { connect } from 'react-redux';
-import Producto from '../component/Producto';
-import Servicio from '../component/Servicio';
-import Combo from '../component/Combo';
 import DetalleImagen from '../component/DetalleImagen';
 import {
-  SERVICIO,
-  UNIDADES,
+  TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
 } from '../../../../../../model/types/tipo-tratamiento-producto';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
 import Title from '../../../../../../components/Title';
 import { SpinnerView } from '../../../../../../components/Spinner';
-import ModalProducto from '../component/ModalProducto';
 import {
-  TIPO_ATRIBUTO_COLOR,
-  TIPO_ATRIBUTO_SABOR,
-  TIPO_ATRIBUTO_TALLA,
-} from '../../../../../../model/types/tipo-atributo';
-import {
-  TabContent,
-  TabHead,
-  TabHeader,
-  TabPane,
-} from '../../../../../../components/Tab';
-import { COMBO, PRODUCTO } from '../../../../../../model/types/tipo-producto';
+  TIPO_PRODUCTO_NORMAL,
+  TIPO_PRODUCTO_SERVICIO
+} from '../../../../../../model/types/tipo-producto';
 import { alertKit } from 'alert-kit';
+import DetalleInformacion from '../component/DetalleInformacion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -67,160 +54,63 @@ class ProductoEditar extends CustomComponent {
       loading: true,
       msgLoading: 'Cargando datos...',
 
-      idTipoProducto: PRODUCTO,
+      idTipoProducto: TIPO_PRODUCTO_NORMAL,
       idProducto: '',
+
+      nombre: "",
+      codigo: "",
+      sku: "",
+      codigoBarras: generateEAN13Code(),
+      idMarca: "",
+      idMedida: "",
+      idCategoria: "",
+
+      idTipoTratamientoProducto: TIPO_TRATAMIENTO_PRODUCTO_NINGUNO,
+      costo: "",
+      precio: "",
+
+      descripcionCorta: "",
+      descripcionLarga: "",
+
+      precios: [],
+      detalles: [],
+      imagenes: [],
+
       imagen: {
         url: images.noImage,
       },
-
-      activeTabProducto: true,
-      activeTabServicio: false,
-      activeTabCombo: false,
 
       publicar: false,
       negativo: false,
       preferido: false,
       estado: true,
 
-      // producto
-      nombreProducto: '',
-      codigoProducto: '',
-      skuProducto: '',
-      codigoBarrasProducto: '',
-      codigoSunatProducto: '0',
-
-      idMedidaProducto: '',
-      idCategoriaProducto: '',
-      idMarcaProducto: '',
-
-      idTipoTratamientoProducto: UNIDADES,
-
-      precioProducto: '',
-      costoProducto: '',
-
-      precios: [],
-
-      descripcionCortaProducto: '',
-      descripcionLargaProducto: '',
-
-      detallesProducto: [],
-      imagenesProducto: [],
-      coloresProducto: [],
-      tallasProducto: [],
-      saboresProducto: [],
-
-      // servicio
-      nombreServicio: '',
-      codigoServicio: '',
-      skuServicio: '',
-      codigoBarrasServicio: '',
-      codigoSunatServicio: '0',
-
-      idMedidaServicio: '',
-      idCategoriaServicio: '',
-      idMarcaServicio: '',
-
-      precioServicio: '',
-
-      descripcionCortaServicio: '',
-      descripcionLargaServicio: '',
-
-      detallesServicio: [],
-      imagenesServicio: [],
-      coloresServicio: [],
-      tallasServicio: [],
-      saboresServicio: [],
-
-      // combo
-      nombreCombo: '',
-      codigoCombo: '',
-      skuCombo: '',
-      codigoBarrasCombo: '',
-      codigoSunatCombo: '0',
-
-      idMedidaCombo: '',
-      idCategoriaCombo: '',
-      idMarcaCombo: '',
-      combos: [],
-
-      precioCombo: '',
-
-      descripcionCortaCombo: '',
-      descripcionLargaCombo: '',
-
-      detallesCombo: [],
-      imagenesCombo: [],
-      coloresCombo: [],
-      tallasCombo: [],
-      saboresCombo: [],
-
-      // Atributos del modal inventario
-      isOpenProducto: false,
-
       // Lista de datos
       medidas: [],
       categorias: [],
       marcas: [],
-      colores: [],
-      tallas: [],
-      sabores: [],
+
+      // Atributos
+      atributos: [],
+      atributosSeleccionados: [],
 
       // Id principales
       idUsuario: this.props.token.userToken.idUsuario,
     };
 
-    // producto
-    this.refNombreProducto = React.createRef();
-    this.refCodigoProducto = React.createRef();
-    this.refSkuProducto = React.createRef();
-    this.refCodigoBarrasProducto = React.createRef();
-    this.refCodigoSunatProducto = React.createRef();
-
-    this.refIdMedidaProducto = React.createRef();
-    this.refIdCategoriaProducto = React.createRef();
-    this.refIdMarcaProducto = React.createRef();
-    this.refDescripcionCortaProducto = React.createRef();
-    this.refDescripcionLargaProducto = React.createRef();
-
-    this.refCostoProducto = React.createRef();
-    this.refPrecioProducto = React.createRef();
-    this.refPreciosProducto = React.createRef();
-
-    this.refDetallesProducto = React.createRef();
-
-    // servicio
-    this.refNombreServicio = React.createRef();
-    this.refCodigoServicio = React.createRef();
-    this.refSkuServicio = React.createRef();
-    this.refCodigoBarrasServicio = React.createRef();
-    this.refCodigoSunatServicio = React.createRef();
-
-    this.refIdMedidaServicio = React.createRef();
-    this.refIdCategoriaServicio = React.createRef();
-    this.refIdMarcaServicio = React.createRef();
-    this.refDescripcionCortaServicio = React.createRef();
-    this.refDescripcionLargaServicio = React.createRef();
-
-    this.refPrecioServicio = React.createRef();
-
-    this.refDetallesServicio = React.createRef();
-
-    // Combo
-    this.refNombreCombo = React.createRef();
-    this.refCodigoCombo = React.createRef();
-    this.refSkuCombo = React.createRef();
-    this.refCodigoBarrasCombo = React.createRef();
-    this.refCodigoSunatCombo = React.createRef();
-
-    this.refIdMedidaCombo = React.createRef();
-    this.refIdCategoriaCombo = React.createRef();
-    this.refIdMarcaCombo = React.createRef();
-    this.refDescripcionCortaCombo = React.createRef();
-    this.refDescripcionLargaCombo = React.createRef();
-
-    this.refPrecioCombo = React.createRef();
-
-    this.refDetallesCombo = React.createRef();
+    this.refNombre = React.createRef();
+    this.refCodigo = React.createRef();
+    this.refSku = React.createRef();
+    this.refCodigoBarras = React.createRef();
+    this.refIdMarca = React.createRef();
+    this.refIdMedida = React.createRef();
+    this.refIdCategoria = React.createRef();
+    this.refCosto = React.createRef();
+    this.refPrecio = React.createRef();
+    this.refPrecios = React.createRef();
+    this.refDescripcionCorta = React.createRef();
+    this.refDescripcionLarga = React.createRef();
+    this.refDetalles = React.createRef();
 
     this.abortController = new AbortController();
   }
@@ -233,9 +123,9 @@ class ProductoEditar extends CustomComponent {
     const idproducto = new URLSearchParams(url).get('idProducto');
 
     if (isText(idproducto)) {
-      this.loadingData(idproducto);
+      this.loadData(idproducto);
     } else {
-      this.props.history.goBack();
+      this.handleGoBack()
     }
   }
 
@@ -260,117 +150,62 @@ class ProductoEditar extends CustomComponent {
   /**
    * @description Método que se ejecuta después de que el componente se haya montado en el DOM.
    */
-  loadingData = async (idProducto) => {
-    const [medidas, categorias, marcas, colores, tallas, sabores, producto] =
+  loadData = async (idProducto) => {
+    const [medidas, categorias, marcas, atributos, producto] =
       await Promise.all([
         this.fetchComboMedida(),
         this.fetchComboCategoria(),
         this.fetchComboMarca(),
-        this.fetchComboColor(TIPO_ATRIBUTO_COLOR),
-        this.fetchComboColor(TIPO_ATRIBUTO_TALLA),
-        this.fetchComboColor(TIPO_ATRIBUTO_SABOR),
+        this.fetchTiposAtributos(),
         this.fetchProducto(idProducto),
       ]);
 
-    if (producto.idTipoProducto === PRODUCTO) {
-      await this.setStateAsync({
-        activeTabProducto: true,
-        activeTabServicio: false,
-        activeTabCombo: false,
 
-        idTipoProducto: producto.idTipoProducto,
-        nombreProducto: producto.nombre,
-        codigoProducto: producto.codigo,
-        skuProducto: producto.sku,
-        codigoBarrasProducto: producto.codigoBarras,
-        codigoSunatProducto: producto.idCodigoSunat,
-        idMedidaProducto: producto.idMedida,
-        idCategoriaProducto: producto.idCategoria,
-        idMarcaProducto: producto.idMarca,
-        descripcionCortaProducto: producto.descripcionCorta,
-        descripcionLargaProducto: producto.descripcionLarga,
-        idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
-        precioProducto: String(producto.precio),
-        costoProducto: String(producto.costo),
-        publicar: producto.publicar === 1 ? true : false,
-        negativo: producto.negativo === 1 ? true : false,
-        preferido: producto.preferido === 1 ? true : false,
-        estado: producto.estado === 1 ? true : false,
-        precios: producto.precios,
-        detallesProducto: producto.detalles,
-        imagenesProducto: producto.imagenes,
-        coloresProducto: producto.colores,
-        tallasProducto: producto.tallas,
-        saboresProducto: producto.sabores,
+    if (!producto) {
+      alertKit.warning({
+        title: 'Producto',
+        message: 'No se encontró el producto.',
       });
-    } else if (producto.idTipoProducto === SERVICIO) {
-      await this.setStateAsync({
-        activeTabProducto: false,
-        activeTabServicio: true,
-        activeTabCombo: false,
-
-        idTipoProducto: producto.idTipoProducto,
-        nombreServicio: producto.nombre,
-        codigoServicio: producto.codigo,
-        skuServicio: producto.sku,
-        codigoBarrasServicio: producto.codigoBarras,
-        codigoSunatServicio: producto.idCodigoSunat,
-        idMedidaServicio: producto.idMedida,
-        idCategoriaServicio: producto.idCategoria,
-        idMarcaServicio: producto.idMarca,
-        descripcionCortaServicio: producto.descripcionCorta,
-        descripcionLargaServicio: producto.descripcionLarga,
-        precioServicio: String(producto.precio),
-        publicar: producto.publicar === 1 ? true : false,
-        negativo: producto.negativo === 1 ? true : false,
-        preferido: producto.preferido === 1 ? true : false,
-        estado: producto.estado === 1 ? true : false,
-        detallesServicio: producto.detalles,
-        imagenesServicio: producto.imagenes,
-        coloresServicio: producto.colores,
-        tallasProducto: producto.tallas,
-        saboresProducto: producto.sabores,
-      });
-    } else {
-      await this.setStateAsync({
-        activeTabProducto: false,
-        activeTabServicio: false,
-        activeTabCombo: true,
-
-        idTipoProducto: producto.idTipoProducto,
-        nombreCombo: producto.nombre,
-        codigoCombo: producto.codigo,
-        skuCombo: producto.sku,
-        codigoBarrasCombo: producto.codigoBarras,
-        codigoSunatCombo: producto.idCodigoSunat,
-        idMedidaCombo: producto.idMedida,
-        idCategoriaCombo: producto.idCategoria,
-        idMarcaCombo: producto.idMarca,
-        descripcionCortaCombo: producto.descripcionCorta,
-        descripcionLargaCombo: producto.descripcionLarga,
-        precioCombo: String(producto.precio),
-        publicar: producto.publicar === 1 ? true : false,
-        preferido: producto.preferido === 1 ? true : false,
-        estado: producto.estado === 1 ? true : false,
-        detallesCombo: producto.detalles,
-        imagenesCombo: producto.imagenes,
-        coloresCombo: producto.colores,
-        tallasProducto: producto.tallas,
-        saboresProducto: producto.sabores,
-      });
+      return;
     }
 
     await this.setStateAsync({
+      idProducto: idProducto,
+
+      idTipoProducto: producto.idTipoProducto,
+      nombre: producto.nombre,
+      codigo: producto.codigo,
+      sku: producto.sku,
+      codigoBarras: producto.codigoBarras,
+      codigoSunat: producto.idCodigoSunat,
+      idMedida: producto.idMedida,
+      idCategoria: producto.idCategoria,
+      idMarca: producto.idMarca,
+      descripcionCorta: producto.descripcionCorta,
+      descripcionLarga: producto.descripcionLarga,
+      idTipoTratamientoProducto: producto.idTipoTratamientoProducto,
+      precio: String(producto.precio),
+      costo: String(producto.costo),
+      publicar: producto.publicar === 1 ? true : false,
+      negativo: producto.negativo === 1 ? true : false,
+      preferido: producto.preferido === 1 ? true : false,
+      estado: producto.estado === 1 ? true : false,
+
+      precios: producto.precios,
+      detalles: producto.detalles,
+      imagenes: producto.imagenes,
+
       medidas,
       categorias,
       marcas,
-      colores,
-      tallas,
-      sabores,
+
+      atributos,
+      atributosSeleccionados: producto.atributos,
+
       imagen: producto.imagen ?? {
         url: images.noImage,
       },
-      idProducto: idProducto,
+
       loading: false,
     });
   };
@@ -385,7 +220,7 @@ class ProductoEditar extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      return [];
+      return null;
     }
   }
 
@@ -445,11 +280,8 @@ class ProductoEditar extends CustomComponent {
     }
   }
 
-  async fetchComboColor(id) {
-    const params = {
-      idTipoAtributo: id,
-    };
-    const response = await comboAtributo(params, this.abortController.signal);
+  async fetchTiposAtributos() {
+    const response = await comboAtributoTipos(this.abortController.signal);
 
     if (response instanceof SuccessReponse) {
       return response.data;
@@ -462,146 +294,100 @@ class ProductoEditar extends CustomComponent {
     }
   }
   /*
-    |--------------------------------------------------------------------------
-    | Método de eventos
-    |--------------------------------------------------------------------------
-    |
-    | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
-    | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
-    | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
-    | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
-    | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
-    | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
-    | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
-    | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
-    |
-    */
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
 
-  //------------------------------------------------------------------------------------------
-  // Acciones del modal producto
-  //------------------------------------------------------------------------------------------
-  handleOpenModalProducto = () => {
-    this.setState({ isOpenProducto: true });
-  };
-
-  handleCloseProducto = async () => {
-    this.setState({ isOpenProducto: false });
-  };
-
-  handleAddProducto = async (item, callback = async function () { }) => {
-    this.setState((prevState) => ({
-      combos: [...prevState.combos, item],
-    }));
-
-    await callback();
-  };
-
-  handleRemoveProducto = (idProducto) => {
-    this.setState((prevState) => ({
-      combos: prevState.combos.filter((item) => item.idProducto !== idProducto),
-    }));
-  };
-
-  handleInputCantidadCombos = (event, idProducto) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      combos: prevState.combos.map((item) =>
-        item.idProducto === idProducto
-          ? { ...item, cantidad: value ? parseFloat(value) : '' }
-          : item,
-      ),
-    }));
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Producto
-  //------------------------------------------------------------------------------------------
-
-  handleInputNombreProducto = (event) => {
+  handleOptionTipoProducto = (event) => {
     this.setState({
-      nombreProducto: event.target.value,
+      idTipoProducto: event.target.value,
+    });
+  }
+
+  handleInputNombre = (event) => {
+    this.setState({
+      nombre: event.target.value,
+    });
+  }
+
+  handleInputCodigo = (event) => {
+    this.setState({
+      codigo: event.target.value,
+    });
+  }
+
+  handleInputSku = (event) => {
+    this.setState({
+      sku: event.target.value,
+    });
+  }
+
+  handleInputCodigoBarras = (event) => {
+    this.setState({
+      codigoBarras: event.target.value,
+    });
+  }
+
+  handleChangeCodigoBarras = () => {
+    this.setState({
+      codigoBarras: generateEAN13Code(),
     });
   };
 
-  handleInputCodigoProducto = (event) => {
+  handleSelectIdMarca = (event) => {
     this.setState({
-      codigoProducto: event.target.value,
+      idMarca: event.target.value,
     });
-  };
+  }
 
-  handleInputSkuProducto = (event) => {
+  handleSelectIdMedida = (event) => {
     this.setState({
-      skuProducto: event.target.value,
+      idMedida: event.target.value,
     });
-  };
+  }
 
-  handleInputCodigoBarrasProducto = (event) => {
+  handleSelectIdCategoria = (event) => {
     this.setState({
-      codigoBarrasProducto: event.target.value,
+      idCategoria: event.target.value,
     });
-  };
+  }
 
-  handleGenerateCodigoBarrasProducto = () => {
-    this.setState({
-      codigoBarrasProducto: generateEAN13Code(),
-    });
-  };
-
-  handleSelectCodigoSunatProducto = (event) => {
-    this.setState({
-      codigoSunatProducto: event.target.value,
-    });
-  };
-
-  handleSelectIdMedidaProducto = (event) => {
-    this.setState({
-      idMedidaProducto: event.target.value,
-    });
-  };
-
-  handleSelectIdCategoriaProducto = (event) => {
-    this.setState({
-      idCategoriaProducto: event.target.value,
-    });
-  };
-
-  handleSelectIdMarcaProducto = (event) => {
-    this.setState({
-      idMarcaProducto: event.target.value,
-    });
-  };
-
-  handleInputDescripcionCortaProducto = (event) => {
-    this.setState({
-      descripcionCortaProducto: event.target.value,
-    });
-  };
-
-  handleInputDescripcionLargaProducto = (event) => {
-    this.setState({
-      descripcionLargaProducto: event.target.value,
-    });
-  };
-
-  handleOptionTipoTratamientoProducto = (event) => {
+  handleOptionTipoTratamiento = (event) => {
     this.setState({
       idTipoTratamientoProducto: event.target.value,
     });
-  };
+  }
 
-  handleInputCostoProducto = (event) => {
+  handleOptionMetodoDepreciacion = (event) => {
     this.setState({
-      costoProducto: event.target.value,
+      idMetodoDepreciacion: event.target.value,
     });
-  };
+  }
 
-  handleInputPrecioProducto = (event) => {
+  handleInputCosto = (event) => {
     this.setState({
-      precioProducto: event.target.value,
+      costo: event.target.value,
     });
-  };
+  }
 
-  handleInputNombrePreciosProducto = (event, id) => {
+  handleInputPrecio = (event) => {
+    this.setState({
+      precio: event.target.value,
+    });
+  }
+
+  handleInputNombrePrecios = (event, id) => {
     const { value } = event.target;
     this.setState((prevState) => ({
       precios: prevState.precios.map((item) =>
@@ -610,7 +396,7 @@ class ProductoEditar extends CustomComponent {
     }));
   };
 
-  handleInputPrecioPreciosProducto = (event, id) => {
+  handleInputPrecioPrecios = (event, id) => {
     const { value } = event.target;
     this.setState((prevState) => ({
       precios: prevState.precios.map((item) =>
@@ -619,7 +405,7 @@ class ProductoEditar extends CustomComponent {
     }));
   };
 
-  handleAddPreciosProducto = () => {
+  handleAddPrecios = () => {
     const data = {
       id: this.state.precios.length + 1,
       nombre: '',
@@ -631,7 +417,7 @@ class ProductoEditar extends CustomComponent {
     }));
   };
 
-  handleRemovePreciosProducto = (id) => {
+  handleRemovePrecios = (id) => {
     const precios = this.state.precios
       .filter((item) => item.id !== id)
       .map((item, index) => ({
@@ -641,471 +427,91 @@ class ProductoEditar extends CustomComponent {
     this.setState({ precios });
   };
 
-  handleInputNombreDetallesProducto = (event, id) => {
+  handleInputDescripcionCorta = (event) => {
+    this.setState({
+      descripcionCorta: event.target.value,
+    });
+  };
+
+  handleInputDescripcionLarga = (event) => {
+    this.setState({
+      descripcionLarga: event.target.value,
+    });
+  };
+
+
+  handleInputNombreDetalles = (event, id) => {
     const { value } = event.target;
     this.setState((prevState) => ({
-      detallesProducto: prevState.detallesProducto.map((item) =>
+      detalles: prevState.detalles.map((item) =>
         item.id === id ? { ...item, nombre: value } : item,
       ),
     }));
   };
 
-  handleInputValorDetallesProducto = (event, id) => {
+  handleInputValorDetalles = (event, id) => {
     const { value } = event.target;
     this.setState((prevState) => ({
-      detallesProducto: prevState.detallesProducto.map((item) =>
+      detalles: prevState.detalles.map((item) =>
         item.id === id ? { ...item, valor: value } : item,
       ),
     }));
   };
 
-  handleAddDetallesProducto = () => {
-    const data = {
-      id: this.state.detallesProducto.length + 1,
-      nombre: '',
-      valor: '',
-    };
-
-    this.setState((prevState) => ({
-      detallesProducto: [...prevState.detallesProducto, data],
-    }));
-  };
-
-  handleRemoveDetallesProducto = (id) => {
-    const detallesProducto = this.state.detallesProducto
+  handleRemoveDetalles = (id) => {
+    const detalles = this.state.detalles
       .filter((item) => item.id !== id)
       .map((item, index) => ({
         ...item,
         id: index + 1,
       }));
-    this.setState({ detallesProducto });
+    this.setState({ detalles });
   };
 
-  handleSelectImagenesProducto = (newImgsState) => {
-    this.setState({ imagenesProducto: newImgsState });
-  };
-
-  handleRemoveImagenesProducto = (newImgs) => {
-    this.setState({ imagenesProducto: newImgs });
-  };
-
-  handleSelectColoresProducto = (color) => {
-    if (
-      this.state.coloresProducto.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      const coloresProducto = this.state.coloresProducto.filter(
-        (item) => item.idAtributo !== color.idAtributo,
-      );
-      this.setState({
-        coloresProducto: coloresProducto,
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresProducto: [...prevState.coloresProducto, color],
-      }));
-    }
-  };
-
-  handleSelectTallasProducto = (talla) => {
-    if (
-      this.state.tallasProducto.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      const tallasProducto = this.state.tallasProducto.filter(
-        (item) => item.idAtributo !== talla.idAtributo,
-      );
-      this.setState({
-        tallasProducto: tallasProducto,
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasProducto: [...prevState.tallasProducto, talla],
-      }));
-    }
-  };
-
-  handleSelectSaboresProducto = (sabor) => {
-    if (
-      this.state.saboresProducto.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      const saboresProducto = this.state.saboresProducto.filter(
-        (item) => item.idAtributo !== sabor.idAtributo,
-      );
-      this.setState({
-        saboresProducto: saboresProducto,
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresProducto: [...prevState.saboresProducto, sabor],
-      }));
-    }
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Servicio
-  //------------------------------------------------------------------------------------------
-
-  handleInputNombreServicio = (event) => {
-    this.setState({
-      nombreServicio: event.target.value,
-    });
-  };
-
-  handleInputCodigoServicio = (event) => {
-    this.setState({
-      codigoServicio: event.target.value,
-    });
-  };
-
-  handleInputSkuServicio = (event) => {
-    this.setState({
-      skuServicio: event.target.value,
-    });
-  };
-
-  handleInputCodigoBarrasServicio = (event) => {
-    this.setState({
-      codigoBarrasServicio: event.target.value,
-    });
-  };
-
-  handleGenerateCodigoBarrasServicio = () => {
-    this.setState({
-      codigoBarrasServicio: generateEAN13Code(),
-    });
-  };
-
-  handleSelectCodigoSunatServicio = (event) => {
-    this.setState({
-      codigoSunatServicio: event.target.value,
-    });
-  };
-
-  handleSelectIdMedidaServicio = (event) => {
-    this.setState({
-      idMedidaServicio: event.target.value,
-    });
-  };
-
-  handleSelectIdMarcaServicio = (event) => {
-    this.setState({
-      idMarcaServicio: event.target.value,
-    });
-  };
-
-  handleSelectIdCategoriaServicio = (event) => {
-    this.setState({
-      idCategoriaServicio: event.target.value,
-    });
-  };
-
-  handleInpuDescripcionCortaServicio = (event) => {
-    this.setState({
-      descripcionCortaServicio: event.target.value,
-    });
-  };
-
-  handleInpuDescripcionLargaServicio = (event) => {
-    this.setState({
-      descripcionLargaServicio: event.target.value,
-    });
-  };
-
-  handleInpuPrecioServicio = (event) => {
-    this.setState({
-      precioServicio: event.target.value,
-    });
-  };
-
-  handleInputNombreDetallesServicio = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesServicio: prevState.detallesServicio.map((item) =>
-        item.id === id ? { ...item, nombre: value } : item,
-      ),
-    }));
-  };
-
-  handleInputValorDetallesServicio = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesServicio: prevState.detallesServicio.map((item) =>
-        item.id === id ? { ...item, valor: value } : item,
-      ),
-    }));
-  };
-
-  handleAddDetallesServicio = () => {
+  handleAddDetalles = () => {
     const data = {
-      id: this.state.detallesServicio.length + 1,
+      id: this.state.detalles.length + 1,
       nombre: '',
       valor: '',
     };
 
     this.setState((prevState) => ({
-      detallesServicio: [...prevState.detallesServicio, data],
+      detalles: [...prevState.detalles, data],
     }));
   };
 
-  handleRemoveDetallesServicio = (id) => {
-    const detallesServicio = this.state.detallesServicio
-      .filter((item) => item.id !== id)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1,
-      }));
-    this.setState({ detallesServicio });
+  handleSelectImagenes = (newImgsState) => {
+    this.setState({ imagenes: newImgsState });
   };
 
-  handleSelectImagenesServicio = (newImgsState) => {
-    this.setState({ imagenesServicio: newImgsState });
+  handleRemoveImagenes = (newImgs) => {
+    this.setState({ imagenes: newImgs });
   };
 
-  handleRemoveImagenesServicio = (newImgs) => {
-    this.setState({ imagenesServicio: newImgs });
-  };
-
-  handleSelectColoresServicio = (color) => {
-    if (
-      this.state.coloresServicio.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      const coloresServicio = this.state.coloresServicio.filter(
-        (item) => item.idAtributo !== color.idAtributo,
+  handleSelectAtributo = (atributo) => {
+    this.setState((prevState) => {
+      const existe = prevState.atributosSeleccionados.some(
+        (item) => item.idAtributo === atributo.idAtributo
       );
-      this.setState({
-        coloresServicio: coloresServicio,
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresServicio: [...prevState.coloresServicio, color],
-      }));
-    }
-  };
 
-  handleSelectTallasServicio = (talla) => {
-    if (
-      this.state.tallasServicio.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      const tallasServicio = this.state.tallasServicio.filter(
-        (item) => item.idAtributo !== talla.idAtributo,
-      );
-      this.setState({
-        tallasServicio: tallasServicio,
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasServicio: [...prevState.tallasServicio, talla],
-      }));
-    }
-  };
+      if (existe) {
+        return {
+          atributosSeleccionados:
+            prevState.atributosSeleccionados.filter(
+              (item) => item.idAtributo !== atributo.idAtributo
+            )
+        };
+      }
+      return {
+        atributosSeleccionados: [
+          ...prevState.atributosSeleccionados,
+          atributo
+        ]
+      };
+    },()=>{
+          console.log(this.state.atributosSeleccionados);
 
-  handleSelectSaboresServicio = (sabor) => {
-    if (
-      this.state.saboresServicio.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      const saboresServicio = this.state.saboresServicio.filter(
-        (item) => item.idAtributo !== sabor.idAtributo,
-      );
-      this.setState({
-        saboresServicio: saboresServicio,
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresServicio: [...prevState.saboresServicio, sabor],
-      }));
-    }
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Combo
-  //------------------------------------------------------------------------------------------
-
-  handleInputNombreCombo = (event) => {
-    this.setState({
-      nombreCombo: event.target.value,
     });
-  };
-
-  handleInputCodigoCombo = (event) => {
-    this.setState({
-      codigoCombo: event.target.value,
-    });
-  };
-
-  handleInputSkuCombo = (event) => {
-    this.setState({
-      skuCombo: event.target.value,
-    });
-  };
-
-  handleInputCodigoBarrasCombo = (event) => {
-    this.setState({
-      codigoBarrasCombo: event.target.value,
-    });
-  };
-
-  handleGenerateCodigoBarrasCombo = () => {
-    this.setState({
-      codigoBarrasCombo: generateEAN13Code(),
-    });
-  };
-
-  handleSelectCodigoSunatCombo = (event) => {
-    this.setState({
-      codigoSunatCombo: event.target.value,
-    });
-  };
-
-  handleSelectIdMedidaCombo = (event) => {
-    this.setState({
-      idMedidaCombo: event.target.value,
-    });
-  };
-
-  handleSelectIdCategoriaCombo = (event) => {
-    this.setState({
-      idCategoriaCombo: event.target.value,
-    });
-  };
-
-  handleSelectIdMarcaCombo = (event) => {
-    this.setState({
-      idMarcaCombo: event.target.value,
-    });
-  };
-
-  handleInputDescripcionCortaCombo = (event) => {
-    this.setState({
-      descripcionCortaCombo: event.target.value,
-    });
-  };
-
-  handleInputDescripcionLargaCombo = (event) => {
-    this.setState({
-      descripcionLargaCombo: event.target.value,
-    });
-  };
-
-  handleInputPrecioCombo = (event) => {
-    this.setState({
-      precioCombo: event.target.value,
-    });
-  };
-
-  handleInputNombreDetallesCombo = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesCombo: prevState.detallesCombo.map((item) =>
-        item.id === id ? { ...item, nombre: value } : item,
-      ),
-    }));
-  };
-
-  handleInputValorDetallesCombo = (event, id) => {
-    const { value } = event.target;
-    this.setState((prevState) => ({
-      detallesCombo: prevState.detallesCombo.map((item) =>
-        item.id === id ? { ...item, valor: value } : item,
-      ),
-    }));
-  };
-
-  handleAddDetallesCombo = () => {
-    const data = {
-      id: this.state.detallesCombo.length + 1,
-      nombre: '',
-      valor: '',
-    };
-
-    this.setState((prevState) => ({
-      detallesCombo: [...prevState.detallesCombo, data],
-    }));
-  };
-
-  handleRemoveDetallesCombo = (id) => {
-    const detallesCombo = this.state.detallesCombo
-      .filter((item) => item.id !== id)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1,
-      }));
-    this.setState({ detallesCombo });
-  };
-
-  handleSelectImagenesCombo = (newImgsState) => {
-    this.setState({ imagenesCombo: newImgsState });
-  };
-
-  handleRemoveImagenesCombo = (newImgs) => {
-    this.setState({ imagenesCombo: newImgs });
-  };
-
-  handleSelectColoresCombo = (color) => {
-    if (
-      this.state.coloresCombo.some(
-        (item) => item.idAtributo === color.idAtributo,
-      )
-    ) {
-      const coloresCombo = this.state.coloresCombo.filter(
-        (item) => item.idAtributo !== color.idAtributo,
-      );
-      this.setState({
-        coloresCombo: coloresCombo,
-      });
-    } else {
-      this.setState((prevState) => ({
-        coloresCombo: [...prevState.coloresCombo, color],
-      }));
-    }
-  };
-
-  handleSelectTallasCombo = (talla) => {
-    if (
-      this.state.tallasCombo.some(
-        (item) => item.idAtributo === talla.idAtributo,
-      )
-    ) {
-      const tallasCombo = this.state.tallasCombo.filter(
-        (item) => item.idAtributo !== talla.idAtributo,
-      );
-      this.setState({
-        tallasCombo: tallasCombo,
-      });
-    } else {
-      this.setState((prevState) => ({
-        tallasCombo: [...prevState.tallasCombo, talla],
-      }));
-    }
-  };
-
-  handleSelectSaboresCombo = (sabor) => {
-    if (
-      this.state.saboresCombo.some(
-        (item) => item.idAtributo === sabor.idAtributo,
-      )
-    ) {
-      const saboresCombo = this.state.saboresCombo.filter(
-        (item) => item.idAtributo !== sabor.idAtributo,
-      );
-      this.setState({
-        saboresCombo: saboresCombo,
-      });
-    } else {
-      this.setState((prevState) => ({
-        saboresCombo: [...prevState.saboresCombo, sabor],
-      }));
-    }
   };
 
   //------------------------------------------------------------------------------------------
@@ -1143,6 +549,7 @@ class ProductoEditar extends CustomComponent {
       });
       return;
     }
+
     this.setState({
       imagen: {
         ...imageSend,
@@ -1167,7 +574,6 @@ class ProductoEditar extends CustomComponent {
     });
   };
 
-
   handleSelectEstado = (event) => {
     this.setState({
       estado: event.target.checked,
@@ -1189,132 +595,104 @@ class ProductoEditar extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Registrar
   //------------------------------------------------------------------------------------------
-  handleSaveProducto = async () => {
-    if (isEmpty(this.state.nombreProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el nombre del producto.',
-        },
-        () => {
-          this.refNombreProducto.current.focus();
-        },
-      );
-      return;
-    }
+  handleRegistrar = async () => {
+    const {
+      idProducto,
+      idTipoProducto,
+      nombre,
+      codigo,
+      sku,
+      codigoBarras,
+      idMedida,
+      idCategoria,
+      idMarca,
+      idTipoTratamientoProducto,
+      precio,
+      costo,
+      precios,
+      detalles,
+      descripcionCorta,
+      descripcionLarga,
 
-    if (isEmpty(this.state.codigoProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el código del producto.',
-        },
-        () => {
-          this.refCodigoProducto.current.focus();
-        },
-      );
-      return;
-    }
+      imagenes,
 
-    if (isEmpty(this.state.idMedidaProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Seleccione la medida.',
-        },
-        () => {
-          this.refIdMedidaProducto.current.focus();
-        },
-      );
-      return;
-    }
+      atributosSeleccionados,
 
-    if (isEmpty(this.state.idCategoriaProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Seleccione la categoría.',
-        },
-        () => {
-          this.refIdCategoriaProducto.current.focus();
-        },
-      );
-      return;
-    }
+      publicar,
+      negativo,
+      preferido,
+      estado,
+      imagen,
+      idUsuario,
+    } = this.state;
 
-    if (!isNumeric(this.state.precioProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el precio.',
-        },
-        () => {
-          this.refPrecioProducto.current.focus();
-        },
-      );
-      return;
-    }
+    const valid = await validateMany([
+      {
+        value: nombre,
+        message: 'Ingrese el nombre del producto.',
+        ref: this.refNombre
+      },
+      {
+        value: codigo,
+        message: 'Ingrese el código del producto.',
+        ref: this.refCodigo
+      },
+      {
+        value: idMedida,
+        message: 'Seleccione la medida.',
+        ref: this.refIdMedida
+      },
+      {
+        value: idCategoria,
+        message: 'Seleccione la categoría.',
+        ref: this.refIdCategoria
+      },
+      {
+        value: costo,
+        message: 'Ingrese el costo.',
+        ref: this.refCosto
+      },
+      {
+        value: [TIPO_PRODUCTO_SERVICIO].includes(idTipoProducto) && precio,
+        message: 'Ingrese el precio.',
+        ref: this.refPrecio
+      },
+      {
+        value: parseFloat(this.state.precio) <= parseFloat(this.state.costo),
+        message: 'El costo no debe ser mayor o igual al precio.',
+        ref: this.refCosto
+      },
+      {
+        value: this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0,
+        message: 'Hay precios sin nombre..',
+        callback: () => {
+          validateNumericInputs(this.refPrecios, 'string');
+        }
+      },
+      {
+        value: this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0,
+        message: 'Hay precios sin valor.',
+        callback: () => {
+          validateNumericInputs(this.refPrecios);
+        }
+      },
+      {
+        value: this.state.detalles.filter((item) => isEmpty(item.nombre)).length !== 0,
+        message: 'Hay detalle sin nombre..',
+        callback: () => {
+          validateNumericInputs(this.refDetalles, 'string');
+        }
+      },
+      {
+        value: this.state.detalles.filter((item) => isEmpty(item.valor)).length !== 0,
+        message: 'Hay detalle sin valor.',
+        callback: () => {
+          validateNumericInputs(this.refDetalles);
+        }
+      }
+    ], "Producto");
 
-    if (!isNumeric(this.state.costoProducto)) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Ingrese el costo.',
-        },
-        () => {
-          this.refCostoProducto.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (
-      parseFloat(this.state.precioProducto) <=
-      parseFloat(this.state.costoProducto)
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'El costo no debe ser mayor o igual al precio.',
-        },
-        () => {
-          this.refCostoProducto.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (
-      this.state.detallesProducto.filter((item) => isEmpty(item.nombre))
-        .length !== 0
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Hay detalle sin nombre..',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesProducto, 'string');
-        },
-      );
-      return;
-    }
-
-    if (
-      this.state.detallesProducto.filter((item) => isEmpty(item.valor))
-        .length !== 0
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto',
-          message: 'Hay detalle sin valor.',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesProducto);
-        },
-      );
-      return;
-    }
+    if (!valid) return;
 
     const accept = await alertKit.question({
       title: 'Producto',
@@ -1329,48 +707,44 @@ class ProductoEditar extends CustomComponent {
       });
 
       const data = {
-        idProducto: this.state.idProducto,
-        nombre: this.state.nombreProducto,
-        codigo: this.state.codigoProducto,
-        sku: this.state.skuProducto,
-        codigoBarras: this.state.codigoBarrasProducto,
-        idCodigoSunat: this.state.codigoSunatProducto,
-        idMedida: this.state.idMedidaProducto,
-        idCategoria: this.state.idCategoriaProducto,
-        idMarca: this.state.idMarcaProducto,
-        descripcionCorta: this.state.descripcionCortaProducto,
-        descripcionLarga: this.state.descripcionLargaProducto,
-        idTipoTratamientoProducto: this.state.idTipoTratamientoProducto,
-        costo: this.state.costoProducto,
-        precio: this.state.precioProducto,
-        precios: this.state.precios,
-        publicar: this.state.publicar,
-        negativo: this.state.negativo,
-        preferido: this.state.preferido,
-        estado: this.state.estado,
+        idProducto: idProducto,
+        idTipoProducto: idTipoProducto,
+        nombre: nombre,
+        codigo: codigo,
+        sku: sku,
+        codigoBarras: codigoBarras,
+        idMedida: idMedida,
+        idCategoria: idCategoria,
+        idMarca: idMarca,
+        descripcionCorta: descripcionCorta,
+        descripcionLarga: descripcionLarga,
+        idTipoTratamientoProducto: idTipoTratamientoProducto,
+        costo: costo,
+        precio: precio,
+        precios: precios,
+        publicar: publicar,
+        negativo: negativo,
+        preferido: preferido,
+        estado: estado,
 
-        detalles: this.state.detallesProducto,
-        imagenes: this.state.imagenesProducto,
-        colores: this.state.coloresProducto,
-        tallas: this.state.tallasProducto,
-        sabores: this.state.saboresProducto,
+        detalles: detalles,
+        imagenes: imagenes,
 
-        imagen: this.state.imagen,
+        atributos: atributosSeleccionados,
 
-        idUsuario: this.state.idUsuario,
+        imagen: imagen,
+
+        idUsuario: idUsuario,
       };
 
       const response = await updateProducto(data);
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Producto',
-            message: response.data,
-          },
-          () => {
-            this.props.history.goBack();
-          },
-        );
+        alertKit.success({
+          title: 'Producto',
+          message: response.data,
+        }, () => {
+          this.handleGoBack();
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -1382,354 +756,7 @@ class ProductoEditar extends CustomComponent {
     }
   };
 
-  handleSaveServicio = async () => {
-    if (isEmpty(this.state.nombreServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el nombre del servicio.',
-        },
-        () => {
-          this.refNombreServicio.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.codigoServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el código del servicio.',
-        },
-        () => {
-          this.refCodigoServicio.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idMedidaServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Seleccione la medida.',
-        },
-        () => {
-          this.refIdMedidaServicio.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idCategoriaServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Seleccione la categoría.',
-        },
-        () => {
-          this.refIdCategoriaServicio.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (!isNumeric(this.state.precioServicio)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el precio.',
-        },
-        () => {
-          this.refPrecioServicio.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (
-      this.state.detallesServicio.filter((item) => isEmpty(item.nombre))
-        .length !== 0
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Hay detalle sin nombre..',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesServicio, 'string');
-        },
-      );
-      return;
-    }
-
-    if (
-      this.state.detallesServicio.filter((item) => isEmpty(item.valor))
-        .length !== 0
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Hay detalle sin valor.',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesServicio);
-        },
-      );
-      return;
-    }
-
-    const accept = await alertKit.question(
-      {
-        title: 'Producto - Servicio',
-        message: '¿Estás seguro de continuar?',
-        acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
-        cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
-      });
-
-    if (accept) {
-      alertKit.loading({
-        message: 'Procesando información...',
-      });
-
-      const data = {
-        idProducto: this.state.idProducto,
-        nombre: this.state.nombreServicio,
-        codigo: this.state.codigoServicio,
-        sku: this.state.skuServicio,
-        codigoBarras: this.state.codigoBarrasServicio,
-        idCodigoSunat: this.state.codigoSunatServicio,
-        idMedida: this.state.idMedidaServicio,
-        idCategoria: this.state.idCategoriaServicio,
-        idMarca: this.state.idMarcaServicio,
-        descripcionCorta: this.state.descripcionCortaServicio,
-        descripcionLarga: this.state.descripcionLargaServicio,
-        idTipoTratamientoProducto: SERVICIO,
-        costo: 0,
-        precio: this.state.precioServicio,
-        precios: [],
-        publicar: this.state.publicar,
-        negativo: false,
-        preferido: this.state.preferido,
-        estado: this.state.estado,
-
-        detalles: this.state.detallesServicio,
-        imagenes: this.state.imagenesServicio,
-        colores: this.state.coloresServicio,
-        tallas: this.state.tallasServicio,
-        sabores: this.state.saboresServicio,
-
-        imagen: this.state.imagen,
-
-        idUsuario: this.state.idUsuario,
-      };
-
-      const response = await updateProducto(data);
-      if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Producto - Servicio',
-            message: response.getMessage(),
-          },
-          () => {
-            this.props.history.goBack();
-          },
-        );
-      }
-
-      if (response instanceof ErrorResponse) {
-        alertKit.warning({
-          title: 'Producto - Servicio',
-          message: response.getMessage(),
-        });
-      }
-    }
-  };
-
-  handleSaveCombo = async () => {
-    if (isEmpty(this.state.nombreCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Ingrese el nombre del combo.',
-        },
-        () => {
-          this.refNombreCombo.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.codigoCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Servicio',
-          message: 'Ingrese el código del combo.',
-        },
-        () => {
-          this.refCodigoCombo.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idMedidaCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Seleccione la medida.',
-        },
-        () => {
-          this.refIdMedidaCombo.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (isEmpty(this.state.idCategoriaCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Seleccione la categoría.',
-        },
-        () => {
-          this.refIdCategoriaCombo.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (!isNumeric(this.state.precioCombo)) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Ingrese el precio.',
-        },
-        () => {
-          this.refPrecioCombo.current.focus();
-        },
-      );
-      return;
-    }
-
-    if (
-      this.state.detallesCombo.filter((item) => isEmpty(item.nombre)).length !==
-      0
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Hay detalle sin nombre..',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesCombo, 'string');
-        },
-      );
-      return;
-    }
-
-    if (
-      this.state.detallesCombo.filter((item) => isEmpty(item.valor)).length !==
-      0
-    ) {
-      alertKit.warning(
-        {
-          title: 'Producto - Combo',
-          message: 'Hay detalle sin valor.',
-        },
-        () => {
-          validateNumericInputs(this.refDetallesCombo);
-        },
-      );
-      return;
-    }
-
-    const accept = await alertKit.question({
-      title: 'Producto - Combo',
-      message: '¿Estás seguro de continuar?',
-    });
-
-    if (accept) {
-      alertKit.loading({
-        message: 'Procesando información...',
-      });
-
-      const data = {
-        idProducto: this.state.idProducto,
-        nombre: this.state.nombreCombo,
-        codigo: this.state.codigoCombo,
-        sku: this.state.skuCombo,
-        codigoBarras: this.state.codigoBarrasCombo,
-        idCodigoSunat: this.state.codigoSunatCombo,
-        idMedida: this.state.idMedidaCombo,
-        idCategoria: this.state.idCategoriaCombo,
-        idMarca: this.state.idMarcaCombo,
-        descripcionCorta: this.state.descripcionCortaCombo,
-        descripcionLarga: this.state.descripcionLargaCombo,
-        idTipoTratamientoProducto: UNIDADES,
-        costo: 0,
-        precio: this.state.precioCombo,
-        precios: [],
-        combos: [],
-        inventarios: [],
-        publicar: this.state.publicar,
-        negativo: false,
-        preferido: this.state.preferido,
-        estado: this.state.estado,
-
-        detalles: this.state.detallesCombo,
-        imagenes: this.state.imagenesCombo,
-        colores: this.state.coloresCombo,
-        tallas: this.state.tallasCombo,
-        sabores: this.state.saboresCombo,
-
-        imagen: this.state.imagen,
-
-        idUsuario: this.state.idUsuario,
-      };
-
-      const response = await updateProducto(data);
-
-      if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Producto - Combo',
-            message: response.getMessage(),
-          },
-          () => {
-            this.props.history.goBack();
-          },
-        );
-      }
-
-      if (response instanceof ErrorResponse) {
-        alertKit.warning({
-          title: 'Producto - Combo',
-          message: response.getMessage(),
-        });
-      }
-    }
-  };
-
-  handleRegistrar = () => {
-    if (this.state.idTipoProducto === PRODUCTO) {
-      this.handleSaveProducto();
-      return;
-    }
-
-    if (this.state.idTipoProducto === SERVICIO) {
-      this.handleSaveServicio();
-      return;
-    }
-
-    if (this.state.idTipoProducto === COMBO) {
-      this.handleSaveCombo();
-      return;
-    }
-  };
-
-  handleCerrar = () => {
+  handleGoBack = () => {
     this.props.history.goBack();
   };
 
@@ -1750,452 +777,164 @@ class ProductoEditar extends CustomComponent {
     */
 
   render() {
-    const { loading, msgLoading } = this.state;
-
-    const { idTipoProducto } = this.state;
-
     const {
-      nombreProducto,
-      codigoProducto,
-      skuProducto,
-      codigoBarrasProducto,
-      codigoSunatProducto,
-    } = this.state;
+      loading,
+      msgLoading,
 
-    const {
-      idMedidaProducto,
-      idCategoriaProducto,
-      idMarcaProducto,
-      descripcionCortaProducto,
-      descripcionLargaProducto,
-    } = this.state;
+      idTipoProducto,
 
-    const { idTipoTratamientoProducto } = this.state;
+      nombre,
+      codigo,
+      sku,
+      codigoBarras,
+      idMarca,
+      idMedida,
+      idCategoria,
 
-    const { precioProducto, costoProducto, precios } = this.state;
+      idTipoTratamientoProducto,
 
-    const {
-      nombreServicio,
-      codigoServicio,
-      skuServicio,
-      codigoBarrasServicio,
-      codigoSunatServicio,
-    } = this.state;
+      costo,
+      precio,
 
-    const {
-      idMedidaServicio,
-      idCategoriaServicio,
-      idMarcaServicio,
-      descripcionCortaServicio,
-      descripcionLargaServicio,
-    } = this.state;
+      descripcionCorta,
+      descripcionLarga,
+      detalles,
+      imagenes,
 
-    const { precioServicio } = this.state;
-
-    const {
-      nombreCombo,
-      codigoCombo,
-      skuCombo,
-      codigoBarrasCombo,
-      codigoSunatCombo,
-    } = this.state;
-
-    const {
-      idMedidaCombo,
-      idCategoriaCombo,
-      idMarcaCombo,
-      descripcionCortaCombo,
-      descripcionLargaCombo,
-    } = this.state;
-
-    const { precioCombo, combos } = this.state;
-
-    const {
+      precios,
       medidas,
       categorias,
       marcas,
+
+      atributos,
+      atributosSeleccionados,
+
+      imagen,
       publicar,
       negativo,
       preferido,
-      estado,
+      estado
     } = this.state;
-
-    const { imagen } = this.state;
-
-    const { detallesProducto, detallesServicio, detallesCombo } = this.state;
-
-    const { imagenesProducto, imagenesServicio, imagenesCombo } = this.state;
-
-    const { colores, coloresProducto, coloresServicio, coloresCombo } =
-      this.state;
-
-    const { tallas, tallasProducto, tallasServicio, tallasCombo } = this.state;
-
-    const { sabores, saboresProducto, saboresServicio, saboresCombo } =
-      this.state;
-
-    const nombre =
-      idTipoProducto === PRODUCTO
-        ? nombreProducto
-        : idTipoProducto === SERVICIO
-          ? nombreServicio
-          : nombreCombo;
-
-    const precio =
-      idTipoProducto === PRODUCTO
-        ? precioProducto
-        : idTipoProducto === SERVICIO
-          ? precioServicio
-          : precioCombo;
 
     return (
       <ContainerWrapper>
-        <ModalProducto
-          isOpen={this.state.isOpenProducto}
-          onClose={this.handleCloseProducto}
-          combos={this.state.combos}
-          handleAddProducto={this.handleAddProducto}
-        />
-
-        <SpinnerView loading={loading} message={msgLoading} />
+        <SpinnerView
+          loading={loading}
+          message={msgLoading} />
 
         <Title
           title="Producto"
           subTitle="EDITAR"
           icon={<i className="fa fa-edit"></i>}
-          handleGoBack={() => this.props.history.goBack()}
+          handleGoBack={this.handleGoBack}
         />
 
-        <Row>
-          <Column className="col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
-            <Row>
-              <Column className="col-lg-12 col-md-12 col-sm-12 col-12">
-                <TabHeader
-                  onTabChange={(activeTab) => {
-                    if (activeTab === 'producto-tab') {
-                      this.setState({ idTipoProducto: PRODUCTO });
-                    } else if (activeTab === 'servicio-tab') {
-                      this.setState({ idTipoProducto: SERVICIO });
-                    } else if (activeTab === 'combo-tab') {
-                      this.setState({ idTipoProducto: COMBO });
-                    }
-                  }}
-                >
-                  <TabHead
-                    id="producto"
-                    isActive={this.state.activeTabProducto}
-                  >
-                    <i className="bi bi-info-circle"></i> Producto
-                  </TabHead>
+        <div className="flex flex-col md:flex-row gap-3">
+          {/* Parte de los datos */}
+          <DetalleInformacion
+            idTipoProducto={idTipoProducto}
+            handleOptionTipoProducto={this.handleOptionTipoProducto}
 
-                  <TabHead
-                    id="servicio"
-                    isActive={this.state.activeTabServicio}
-                  >
-                    <i className="bi bi-card-checklist"></i> Servicio
-                  </TabHead>
+            refNombre={this.refNombre}
+            nombre={nombre}
+            handleInputNombre={this.handleInputNombre}
 
-                  <TabHead id="combo" isActive={this.state.activeTabCombo}>
-                    <i className="bi bi-border-all"></i> Combo
-                  </TabHead>
-                </TabHeader>
+            refCodigo={this.refCodigo}
+            codigo={codigo}
+            handleInputCodigo={this.handleInputCodigo}
 
-                <TabContent>
-                  <TabPane
-                    id="producto"
-                    isActive={this.state.activeTabProducto}
-                  >
-                    <Producto
-                      nombre={nombreProducto}
-                      refNombre={this.refNombreProducto}
-                      handleSelectNombre={this.handleInputNombreProducto}
-                      codigo={codigoProducto}
-                      refCodigo={this.refCodigoProducto}
-                      handleInputCodigo={this.handleInputCodigoProducto}
-                      sku={skuProducto}
-                      refSku={this.refSkuProducto}
-                      handleInputSku={this.handleInputSkuProducto}
-                      codigoBarras={codigoBarrasProducto}
-                      refCodigoBarras={this.refCodigoBarrasProducto}
-                      handleInputCodigoBarras={
-                        this.handleInputCodigoBarrasProducto
-                      }
-                      handleGenerateCodigoBarras={
-                        this.handleGenerateCodigoBarrasProducto
-                      }
-                      codigoSunat={codigoSunatProducto}
-                      refCodigoSunat={this.refCodigoSunatProducto}
-                      handleSelectCodigoSunat={
-                        this.handleSelectCodigoSunatProducto
-                      }
-                      idMedida={idMedidaProducto}
-                      refIdMedida={this.refIdMedidaProducto}
-                      handleSelectIdMedida={this.handleSelectIdMedidaProducto}
-                      medidas={medidas}
-                      idCategoria={idCategoriaProducto}
-                      refIdCategoria={this.refIdCategoriaProducto}
-                      handleSelectIdCategoria={
-                        this.handleSelectIdCategoriaProducto
-                      }
-                      categorias={categorias}
-                      idMarca={idMarcaProducto}
-                      refIdMarca={this.refIdMarcaProducto}
-                      handleSelectIdMarca={this.handleSelectIdMarcaProducto}
-                      marcas={marcas}
-                      descripcionCorta={descripcionCortaProducto}
-                      refDescripcionCorta={this.refDescripcionCortaProducto}
-                      handleInputDescripcionCorta={
-                        this.handleInputDescripcionCortaProducto
-                      }
-                      descripcionLarga={descripcionLargaProducto}
-                      refDescripcionLarga={this.refDescripcionLargaProducto}
-                      handleInputDescripcionLarga={
-                        this.handleInputDescripcionLargaProducto
-                      }
-                      idTipoTratamientoProducto={idTipoTratamientoProducto}
-                      handleOptionTipoTratamientoProducto={
-                        this.handleOptionTipoTratamientoProducto
-                      }
-                      costo={costoProducto}
-                      refCosto={this.refCostoProducto}
-                      handleInputCosto={this.handleInputCostoProducto}
-                      precio={precioProducto}
-                      refPrecio={this.refPrecioProducto}
-                      handleInputPrecio={this.handleInputPrecioProducto}
-                      precios={precios}
-                      refPrecios={this.refPreciosProducto}
-                      handleInputNombrePrecios={
-                        this.handleInputNombrePreciosProducto
-                      }
-                      handleInputPrecioPrecios={
-                        this.handleInputPrecioPreciosProducto
-                      }
-                      handleAddPrecios={this.handleAddPreciosProducto}
-                      handleRemovePrecios={this.handleRemovePreciosProducto}
-                      activarInventario={false}
-                      inventarios={[]}
-                      handleOpenModalInventario={() => { }}
-                      handleRemoveItemInventario={() => { }}
-                      detalles={detallesProducto}
-                      refDetalles={this.refDetallesProducto}
-                      handleInputNombreDetalles={
-                        this.handleInputNombreDetallesProducto
-                      }
-                      handleInputValorDetalles={
-                        this.handleInputValorDetallesProducto
-                      }
-                      handleAddDetalles={this.handleAddDetallesProducto}
-                      handleRemoveDetalles={this.handleRemoveDetallesProducto}
-                      imagenes={imagenesProducto}
-                      handleSelectImagenes={this.handleSelectImagenesProducto}
-                      handleRemoveImagenes={this.handleRemoveImagenesProducto}
-                      colores={colores}
-                      coloresSeleccionados={coloresProducto}
-                      handleSelectColores={this.handleSelectColoresProducto}
-                      tallas={tallas}
-                      tallasSeleccionados={tallasProducto}
-                      handleSelectTallas={this.handleSelectTallasProducto}
-                      sabores={sabores}
-                      saboresSeleccionados={saboresProducto}
-                      handleSelectSabores={this.handleSelectSaboresProducto}
-                    />
-                  </TabPane>
+            refSku={this.refSku}
+            sku={sku}
+            handleInputSku={this.handleInputSku}
 
-                  <TabPane
-                    id="servicio"
-                    isActive={this.state.activeTabServicio}
-                  >
-                    <Servicio
-                      nombre={nombreServicio}
-                      refNombre={this.refNombreServicio}
-                      handleSelectNombre={this.handleInputNombreServicio}
-                      codigo={codigoServicio}
-                      refCodigo={this.refCodigoServicio}
-                      handleInputCodigo={this.handleInputCodigoServicio}
-                      sku={skuServicio}
-                      refSku={this.refSkuServicio}
-                      handleInputSku={this.handleInputSkuServicio}
-                      codigoBarras={codigoBarrasServicio}
-                      refCodigoBarras={this.refCodigoBarrasServicio}
-                      handleInputCodigoBarras={
-                        this.handleInputCodigoBarrasServicio
-                      }
-                      handleGenerateCodigoBarras={
-                        this.handleGenerateCodigoBarrasServicio
-                      }
-                      codigoSunat={codigoSunatServicio}
-                      refCodigoSunat={this.refCodigoSunatServicio}
-                      handleSelectCodigoSunat={
-                        this.handleSelectCodigoSunatServicio
-                      }
-                      idMedida={idMedidaServicio}
-                      refIdMedida={this.refIdMedidaServicio}
-                      handleSelectIdMedida={this.handleSelectIdMedidaServicio}
-                      medidas={medidas}
-                      idCategoria={idCategoriaServicio}
-                      refIdCategoria={this.refIdCategoriaServicio}
-                      handleSelectIdCategoria={
-                        this.handleSelectIdCategoriaServicio
-                      }
-                      categorias={categorias}
-                      idMarca={idMarcaServicio}
-                      refIdMarca={this.refIdMarcaServicio}
-                      handleSelectIdMarca={this.handleSelectIdMarcaServicio}
-                      marcas={marcas}
-                      descripcionCorta={descripcionCortaServicio}
-                      refDescripcionCorta={this.refDescripcionCortaServicio}
-                      handleInputDescripcionCorta={
-                        this.handleInpuDescripcionCortaServicio
-                      }
-                      descripcionLarga={descripcionLargaServicio}
-                      refDescripcionLarga={this.refDescripcionLargaServicio}
-                      handleInputDescripcionLarga={
-                        this.handleInpuDescripcionLargaServicio
-                      }
-                      precio={precioServicio}
-                      refPrecio={this.refPrecioServicio}
-                      handleInputPrecio={this.handleInpuPrecioServicio}
-                      detalles={detallesServicio}
-                      refDetalles={this.refDetallesServicio}
-                      handleInputNombreDetalles={
-                        this.handleInputNombreDetallesServicio
-                      }
-                      handleInputValorDetalles={
-                        this.handleInputValorDetallesServicio
-                      }
-                      handleAddDetalles={this.handleAddDetallesServicio}
-                      handleRemoveDetalles={this.handleRemoveDetallesServicio}
-                      imagenes={imagenesServicio}
-                      handleSelectImagenes={this.handleSelectImagenesServicio}
-                      handleRemoveImagenes={this.handleRemoveImagenesServicio}
-                      colores={colores}
-                      coloresSeleccionados={coloresServicio}
-                      handleSelectColores={this.handleSelectColoresServicio}
-                      tallas={tallas}
-                      tallasSeleccionados={tallasServicio}
-                      handleSelectTallas={this.handleSelectTallasServicio}
-                      sabores={sabores}
-                      saboresSeleccionados={saboresServicio}
-                      handleSelectSabores={this.handleSelectSaboresServicio}
-                    />
-                  </TabPane>
+            refCodigoBarras={this.refCodigoBarras}
+            codigoBarras={codigoBarras}
+            handleInputCodigoBarras={this.handleInputCodigoBarras}
+            handleChangeCodigoBarras={this.handleChangeCodigoBarras}
 
-                  <TabPane id="combo" isActive={this.state.activeTabCombo}>
-                    <Combo
-                      nombre={nombreCombo}
-                      refNombre={this.refNombreCombo}
-                      handleSelectNombre={this.handleInputNombreCombo}
-                      codigo={codigoCombo}
-                      refCodigo={this.refCodigoCombo}
-                      handleInputCodigo={this.handleInputCodigoCombo}
-                      sku={skuCombo}
-                      refSku={this.refSkuCombo}
-                      handleInputSku={this.handleInputSkuCombo}
-                      codigoBarras={codigoBarrasCombo}
-                      refCodigoBarras={this.refCodigoBarrasCombo}
-                      handleInputCodigoBarras={
-                        this.handleInputCodigoBarrasCombo
-                      }
-                      handleGenerateCodigoBarras={
-                        this.handleGenerateCodigoBarrasCombo
-                      }
-                      codigoSunat={codigoSunatCombo}
-                      refCodigoSunat={this.refCodigoSunatCombo}
-                      handleSelectCodigoSunat={
-                        this.handleSelectCodigoSunatCombo
-                      }
-                      idMedida={idMedidaCombo}
-                      refIdMedida={this.refIdMedidaCombo}
-                      handleSelectIdMedida={this.handleSelectIdMedidaCombo}
-                      medidas={medidas}
-                      idCategoria={idCategoriaCombo}
-                      refIdCategoria={this.refIdCategoriaCombo}
-                      handleSelectIdCategoria={
-                        this.handleSelectIdCategoriaCombo
-                      }
-                      categorias={categorias}
-                      idMarca={idMarcaCombo}
-                      refIdMarca={this.refIdMarcaCombo}
-                      handleSelectIdMarca={this.handleSelectIdMarcaCombo}
-                      marcas={marcas}
-                      descripcionCorta={descripcionCortaCombo}
-                      refDescripcionCorta={this.refDescripcionCortaCombo}
-                      handleInputDescripcionCorta={
-                        this.handleInputDescripcionCortaCombo
-                      }
-                      descripcionLarga={descripcionLargaCombo}
-                      refDescripcionLarga={this.refDescripcionLargaCombo}
-                      handleInputDescripcionLarga={
-                        this.handleInputDescripcionLargaCombo
-                      }
-                      precio={precioCombo}
-                      refPrecio={this.refPrecioCombo}
-                      handleInputPrecio={this.handleInputPrecioCombo}
-                      combos={combos}
-                      handleOpenModalProducto={this.handleOpenModalProducto}
-                      handleInputCantidadCombos={this.handleInputCantidadCombos}
-                      handleRemoveItemCombo={this.handleRemoveProducto}
-                      activarInventario={false}
-                      inventarios={[]}
-                      handleAddItemInventario={() => { }}
-                      handleRemoveItemInventario={() => { }}
-                      detalles={detallesCombo}
-                      refDetalles={this.refDetallesCombo}
-                      handleInputNombreDetalles={
-                        this.handleInputNombreDetallesCombo
-                      }
-                      handleInputValorDetalles={
-                        this.handleInputValorDetallesCombo
-                      }
-                      handleAddDetalles={this.handleAddDetallesCombo}
-                      handleRemoveDetalles={this.handleRemoveDetallesCombo}
-                      imagenes={imagenesCombo}
-                      handleSelectImagenes={this.handleSelectImagenesCombo}
-                      handleRemoveImagenes={this.handleRemoveImagenesCombo}
-                      colores={colores}
-                      coloresSeleccionados={coloresCombo}
-                      handleSelectColores={this.handleSelectColoresCombo}
-                      tallas={tallas}
-                      tallasSeleccionados={tallasCombo}
-                      handleSelectTallas={this.handleSelectTallasCombo}
-                      sabores={sabores}
-                      saboresSeleccionados={saboresCombo}
-                      handleSelectSabores={this.handleSelectSaboresCombo}
-                    />
-                  </TabPane>
-                </TabContent>
-              </Column>
-            </Row>
-          </Column>
+            refIdMarca={this.refIdMarca}
+            idMarca={idMarca}
+            marcas={marcas}
+            handleSelectIdMarca={this.handleSelectIdMarca}
 
-          <Column className="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12">
-            <DetalleImagen
-              idTipoProducto={idTipoProducto}
+            refIdMedida={this.refIdMedida}
+            idMedida={idMedida}
+            medidas={medidas}
+            handleSelectIdMedida={this.handleSelectIdMedida}
 
-              imagen={imagen}
-              handleInputImagen={this.handleInputImagen}
-              handleRemoveImagen={this.handleRemoveImagen}
+            refIdCategoria={this.refIdCategoria}
+            idCategoria={idCategoria}
+            categorias={categorias}
+            handleSelectIdCategoria={this.handleSelectIdCategoria}
 
-              nombre={nombre}
-              precio={precio}
+            idTipoTratamiento={idTipoTratamientoProducto}
+            handleOptionTipoTratamiento={this.handleOptionTipoTratamiento}
 
-              publicar={publicar}
-              handleSelectPublico={this.handleSelectPublico}
+            refCosto={this.refCosto}
+            costo={costo}
+            handleInputCosto={this.handleInputCosto}
 
-              negativo={negativo}
-              handleSelectNegativo={this.handleSelectNegativo}
+            refPrecio={this.refPrecio}
+            precio={precio}
+            handleInputPrecio={this.handleInputPrecio}
 
-              preferido={preferido}
-              handleSelectPreferido={this.handleSelectPreferido}
+            refPrecios={this.refPrecios}
+            precios={precios}
+            handleAddPrecios={this.handleAddPrecios}
+            handleRemovePrecios={this.handleRemovePrecios}
+            handleInputNombrePrecios={this.handleInputNombrePrecios}
+            handleInputPrecioPrecios={this.handleInputPrecioPrecios}
 
-              estado={estado}
-              handleSelectEstado={this.handleSelectEstado}
-              handleRegistrar={this.handleRegistrar}
+            refDescripcionCorta={this.refDescripcionCorta}
+            descripcionCorta={descripcionCorta}
+            handleInputDescripcionCorta={this.handleInputDescripcionCorta}
 
-              handleCerrar={this.handleCerrar}
-            />
-          </Column>
-        </Row>
+            refDescripcionLarga={this.refDescripcionLarga}
+            descripcionLarga={descripcionLarga}
+            handleInputDescripcionLarga={this.handleInputDescripcionLarga}
+
+            refDetalles={this.refDetalles}
+            detalles={detalles}
+            handleAddDetalles={this.handleAddDetalles}
+            handleRemoveDetalles={this.handleRemoveDetalles}
+            handleInputNombreDetalles={this.handleInputNombreDetalles}
+            handleInputValorDetalles={this.handleInputValorDetalles}
+
+            imagenes={imagenes}
+            handleSelectImagenes={this.handleSelectImagenes}
+            handleRemoveImagenes={this.handleRemoveImagenes}
+
+            atributos={atributos}
+            atributosSeleccionados={atributosSeleccionados}
+            handleSelectAtributo={this.handleSelectAtributo}
+          />
+
+          {/* Parte de la imagen */}
+          <DetalleImagen
+            idTipoProducto={idTipoProducto}
+
+            imagen={imagen}
+            handleInputImagen={this.handleInputImagen}
+            handleRemoveImagen={this.handleRemoveImagen}
+
+            nombre={nombre}
+            precio={precio}
+
+            publicar={publicar}
+            handleSelectPublico={this.handleSelectPublico}
+
+            negativo={negativo}
+            handleSelectNegativo={this.handleSelectNegativo}
+
+            preferido={preferido}
+            handleSelectPreferido={this.handleSelectPreferido}
+
+            estado={estado}
+            handleSelectEstado={this.handleSelectEstado}
+
+            handleRegistrar={this.handleRegistrar}
+          />
+        </div>
       </ContainerWrapper>
     );
   }

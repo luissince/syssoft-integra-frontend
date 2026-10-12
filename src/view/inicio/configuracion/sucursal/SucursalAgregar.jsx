@@ -286,10 +286,10 @@ class SucursalAgregar extends CustomComponent {
                 <Input
                   autoFocus={true}
                   label={
-                    <>
+                    <label>
                       Nombre:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={this.refNombre}
                   value={this.state.nombre}
@@ -358,9 +358,9 @@ class SucursalAgregar extends CustomComponent {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       Dirección: <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={this.refDireccion}
                   value={this.state.direcion}
@@ -377,10 +377,10 @@ class SucursalAgregar extends CustomComponent {
                 <SearchInput
                   ref={this.refUbigeo}
                   label={
-                    <>
+                    <label>
                       Ubigeo:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder="Filtrar productos..."
                   refValue={this.refValueUbigeo}
@@ -402,32 +402,34 @@ class SucursalAgregar extends CustomComponent {
               <Column formGroup={true}>
                 <TextArea
                   label={
-                    <>
-                      Url de Google Maps
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm">Url de Google Maps</span>
                       <a
                         href="https://embed-googlemap.com/"
                         target="blank"
-                        className="btn btn-link"
+                        className="text-sm underline text-blue-500 hover:text-primary hover:underline"
                       >
-                        Puedes obtenerla en esta web
+                        <span className="mr-1">Puedes obtenerla en esta web</span>
+                        <i className="fa fa-asterisk text-danger small" />
                       </a>
-                      : <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+
+                    </div>
                   }
                   value={this.state.googleMaps}
                   onChange={(event) =>
                     this.setState({ googleMaps: event.target.value })
                   }
                   placeholder="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=Alisios 221-197, Lima 15034..."
+                  name="googleMaps"
                   rows={6}
-                ></TextArea>
+                />
               </Column>
             </Row>
 
             <Row>
               <Column formGroup={true}>
                 <TextArea
-                  label={<>Horario de Atención:</>}
+                  label={<label>Horario de Atención:</label>}
                   value={this.state.horarioAtencion}
                   onChange={(event) =>
                     this.setState({ horarioAtencion: event.target.value })
@@ -442,10 +444,10 @@ class SucursalAgregar extends CustomComponent {
               <Column className={'col-md-6 col-12'} formGroup={true}>
                 <Switches
                   label={
-                    <>
+                    <label>
                       Principal:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   id={'stPrincipal'}
                   checked={this.state.principal}
@@ -460,10 +462,10 @@ class SucursalAgregar extends CustomComponent {
               <Column className={'col-md-6 col-12'} formGroup={true}>
                 <Switches
                   label={
-                    <>
+                    <label>
                       Estado:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   id={'stEstado'}
                   checked={this.state.estado}
@@ -481,6 +483,7 @@ class SucursalAgregar extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <ImageUpload
+                  className="w-full flex flex-col items-center text-center gap-2"
                   label="Imagen de portada"
                   subtitle="La imagen no debe superar los 1MB(Megabytes) y debe tener un tamaño de 1024 x 629 píxeles"
                   imageUrl={this.state.imagen.url}
@@ -496,19 +499,17 @@ class SucursalAgregar extends CustomComponent {
           </Column>
         </Row>
 
-        <Row>
-          <Column>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button
-              className="btn-outline-danger"
-              onClick={() => this.props.history.goBack()}
-            >
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex gap-3">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button
+            className="btn-outline-danger"
+            onClick={() => this.props.history.goBack()}
+          >
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }

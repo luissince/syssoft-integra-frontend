@@ -97,9 +97,9 @@ class ConceptoAgregar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Nombre: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               value={this.state.nombre}
               ref={this.refNombre}
@@ -116,10 +116,10 @@ class ConceptoAgregar extends CustomComponent {
             <Select
               group={true}
               label={
-                <>
+                <label>
                   Tipo de Concepto:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               value={this.state.idTipoConcepto}
               ref={this.refIdTipoConcepto}

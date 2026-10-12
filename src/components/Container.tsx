@@ -46,9 +46,6 @@ const PosContainerWrapper = forwardRef<HTMLDivElement, PosContainerWrapperProps>
 
 interface ContainerMenuProps {
     url: string;
-    project: any;
-    userToken: any;
-    rutaLogo: string;
     title: string;
     subMenus: any[];
 }

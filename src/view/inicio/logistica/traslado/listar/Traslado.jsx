@@ -29,6 +29,7 @@ import {
 import { alertKit } from 'alert-kit';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
 import { cn } from '@/lib/utils';
+import { Eye, Trash, Truck } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -65,10 +66,10 @@ class Traslado extends CustomComponent {
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
 
+      view: "tabla",
+
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
-
-      view: "tabla",
     };
 
     this.refPaginacion = React.createRef();
@@ -78,35 +79,58 @@ class Traslado extends CustomComponent {
     this.abortControllerTable = new AbortController();
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de cliclo de vida
+  |--------------------------------------------------------------------------
+  |
+  | El ciclo de vida de un componente en React consta de varios métodos que se ejecutan en diferentes momentos durante la vida útil
+  | del componente. Estos métodos proporcionan puntos de entrada para realizar acciones específicas en cada etapa del ciclo de vida,
+  | como inicializar el estado, montar el componente, actualizar el estado y desmontar el componente. Estos métodos permiten a los
+  | desarrolladores controlar y realizar acciones específicas en respuesta a eventos de ciclo de vida, como la creación, actualización
+  | o eliminación del componente. Entender y utilizar el ciclo de vida de React es fundamental para implementar correctamente la lógica
+  | de la aplicación y optimizar el rendimiento del componente.
+  |
+  */
+
   async componentDidMount() {
-    await this.loadingData();
+    await this.loadData();
   }
 
   componentWillUnmount() {
     this.abortControllerTable.abort();
   }
 
-  loadingData = async () => {
-    if (
-      this.props.trasladoLista &&
-      this.props.trasladoLista.data &&
-      this.props.trasladoLista.paginacion
-    ) {
-      this.setState(this.props.trasladoLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.trasladoLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.trasladoLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.trasladoLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.trasladoLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.trasladoLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.trasladoLista.paginacion.messagePaginacion;
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
-      this.refSearch.current.initialize(this.props.trasladoLista.data.buscar);
+  loadData = async () => {
+    const trasladoLista = this.props.trasladoLista;
+    if (
+      trasladoLista &&
+      trasladoLista.data &&
+      trasladoLista.paginacion
+    ) {
+      this.setState(trasladoLista.data);
+      this.refPaginacion.current.upperPageBound = trasladoLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = trasladoLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = trasladoLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = trasladoLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = trasladoLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = trasladoLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(trasladoLista.data.buscar);
     } else {
       const [tipoTraslado, sucursales] = await Promise.all([
         this.fetchComboTipoTraslado(),
@@ -278,6 +302,22 @@ class Traslado extends CustomComponent {
     }
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de eventos
+  |--------------------------------------------------------------------------
+  |
+  | El método handle es una convención utilizada para denominar funciones que manejan eventos específicos
+  | en los componentes de React. Estas funciones se utilizan comúnmente para realizar tareas o actualizaciones
+  | en el estado del componente cuando ocurre un evento determinado, como hacer clic en un botón, cambiar el valor
+  | de un campo de entrada, o cualquier otra interacción del usuario. Los métodos handle suelen recibir el evento
+  | como parámetro y se encargan de realizar las operaciones necesarias en función de la lógica de la aplicación.
+  | Por ejemplo, un método handle para un evento de clic puede actualizar el estado del componente o llamar a
+  | otra función específica de la lógica de negocio. La convención de nombres handle suele combinarse con un prefijo
+  | que describe el tipo de evento que maneja, como handleInputChange, handleClick, handleSubmission, entre otros. 
+  |
+  */
+
   handleChangeView(value) {
     this.setState({ view: value }, () => this.updateReduxState());
   };
@@ -325,12 +365,11 @@ class Traslado extends CustomComponent {
       state: {
         idTraslado: idTraslado,
         idMotivoTraslado: MOTIVO_TRASLADO.TRASLADO_ENTRE_ESTABLECIMIENTO_MISMA_EMPRESA,
-
       }
     });
   };
 
-  handleCancelar = async (idTraslado) => {
+  handleAnular = async (idTraslado) => {
     const accept = await alertKit.question({
       title: 'Traslado',
       message: '¿Estás seguro de anular el traslado?',
@@ -375,6 +414,22 @@ class Traslado extends CustomComponent {
 
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Método de renderización
+  |--------------------------------------------------------------------------
+  |
+  | El método render() es esencial en los componentes de React y se encarga de determinar
+  | qué debe mostrarse en la interfaz de usuario basado en el estado y las propiedades actuales
+  | del componente. Este método devuelve un elemento React que describe lo que debe renderizarse
+  | en la interfaz de usuario. La salida del método render() puede incluir otros componentes
+  | de React, elementos HTML o una combinación de ambos. Es importante que el método render()
+  | sea una función pura, es decir, no debe modificar el estado del componente ni interactuar
+  | directamente con el DOM. En su lugar, debe basarse únicamente en los props y el estado
+  | actuales del componente para determinar lo que se mostrará.
+  |
+  */
+
   renderTable = () => {
     const { loading, lista, view } = this.state;
 
@@ -389,7 +444,10 @@ class Traslado extends CustomComponent {
 
     if (isEmpty(lista)) {
       return (
-        <div className="text-center py-3">
+        <div className={cn(
+          "text-center py-6",
+          view === "tabla" ? "" : "rounded border",
+        )}>
           <div className="text-gray-500">
             <i className="bi bi-box text-4xl mb-3 block"></i>
             <p className="text-lg font-medium">No se encontraron ventas</p>
@@ -407,118 +465,124 @@ class Traslado extends CustomComponent {
       )}>
         {
           lista.map((item, index) => {
-            const estado = item.estado === 1 ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">ACTIVO</span>
-            ) : (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">ANULADO</span>
+            const estado = (
+              <span className={cn(
+                "inline-flex items-center rounded-full",
+                "text-xs font-medium",
+                "px-2.5 py-0.5",
+                item.estado === 1 && "bg-green-100 text-green-800",
+                item.estado === 0 && "bg-red-100 text-red-800",
+              )}>
+                {item.estado === 1 ? "ACTIVO" : "ANULADO"}
+              </span>
             );
 
             return (
-              <React.Fragment key={index}>
-                {/* 📱 MOBILE: Tarjeta con labels */}
-                <div className={cn(
-                  view == "tabla" ? "hidden" : "flex bg-white rounded border flex-col h-full"
-                )}>
-                  <div className="flex flex-col gap-2 p-4 text-sm">
-                    {/* Body */}
-                    <div className="flex-1 flex flex-col gap-3">
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Fecha:</p>
-                        <p>{item.fecha} {formatTime(item.hora)}</p>
+              <div
+                key={index}
+                className={cn(
+                  "text-sm text-gray-900",
+                  view === "tabla"
+                    ? "grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_1.8fr] py-3 gap-x-3 items-center"
+                    : "flex flex-col h-full gap-3 rounded border p-3"
+                )}
+              >
+                <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
+                  {
+                    view === "tabla" && (
+                      <div className=" text-center hidden md:block">
+                        {item.id}
                       </div>
+                    )
+                  }
 
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Tipo:</p>
-                        <p>{item.tipo}</p>
-                      </div>
-
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Motivo:</p>
-                        <p>{item.motivo}</p>
-                      </div>
-
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Origen:</p>
-                        <p>{item.almacenOrigen}</p>
-                      </div>
-
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Destino:</p>
-                        <p>{item.almacenDestino}</p>
-                      </div>
-
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Observación:</p>
-                        <p className="col-span-1">{item.observacion}</p>
-                      </div>
-
-                      <div className="flex items-center justify-start gap-3">
-                        <p className="font-medium text-gray-600">Estado:</p>
-                        <p>{estado}</p>
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex items-center flex-col justify-between gap-2 pt-3 border-t border-gray-100">
-                      <div>
-                        <button
-                          onClick={() => this.handleDetalle(item.idTraslado)}
-                          className="flex-1 p-2 text-blue-500 hover:text-blue-700"
-                        >
-                          <i className="bi bi-eye text-lg"></i>
-                        </button>
-                        <button
-                          onClick={() => this.handleGuiaRemision(item.idTraslado)}
-                          className="flex-1 p-2 text-gray-500 hover:text-gray-700"
-                        >
-                          <i className="fa fa-truck text-lg"></i>
-                        </button>
-                        <button
-                          onClick={() => this.handleCancelar(item.idTraslado)}
-                          className="flex-1 p-2 text-red-500 hover:text-red-700"
-                        >
-                          <i className="bi bi-trash text-lg"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 💻 DESKTOP: Fila de tabla */}
-                <div className={cn(
-                  view == "tabla" ? "grid" : "hidden",
-                  "grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3 text-sm text-gray-900 items-center"
-                )}>
-                  <div className="py-3 text-center">{item.id}</div>
-                  <div className="py-3">
+                  <div>
                     {item.fecha} <br />
                     <span className="text-xs text-gray-500">{formatTime(item.hora)}</span>
                   </div>
-                  <div className="py-3">
+
+                  <div>
                     {item.tipo} <br />
                     <span className="text-xs text-gray-500">{item.motivo}</span>
                   </div>
-                  <div className="py-3">{item.almacenOrigen}</div>
-                  <div className="py-3">{item.almacenDestino}</div>
-                  <div className="py-3 truncate">{item.observacion}</div>
-                  <div className="py-3 justify-self-center">{estado}</div>
-                  <div className="py-3 text-center">
-                    <button onClick={() => this.handleDetalle(item.idTraslado)} className="text-blue-500 hover:text-blue-700">
-                      <i className="bi bi-eye"></i>
-                    </button>
+
+                  <div>
+                    {item.almacenOrigen}
                   </div>
-                  <div className="py-3 text-center">
-                    <button onClick={() => this.handleGuiaRemision(item.idTraslado)} className="text-gray-500 hover:text-gray-700">
-                      <i className="fa fa-truck"></i>
-                    </button>
+
+                  <div>
+                    {item.almacenDestino}
                   </div>
-                  <div className="py-3 text-center">
-                    <button onClick={() => this.handleCancelar(item.idTraslado)} className="text-red-500 hover:text-red-700">
-                      <i className="bi bi-trash"></i>
-                    </button>
+
+                  <div className="py-3">
+                    {item.observacion}
+                  </div>
+
+                  <div className={cn(
+                    "text-center",
+                    view === "tabla" ? "text-center" : "text-left"
+                  )}>
+                    {estado}
                   </div>
                 </div>
-              </React.Fragment>
+
+                <div
+                  className={cn(
+                    "flex gap-2",
+                    view === "tabla"
+                      ? "flex-col md:flex-row justify-center"
+                      : "flex-row justify-end"
+                  )}
+                >
+                  <button
+                    onClick={() => this.handleDetalle(item.idTraslado)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Eye className="w-5 h-5 text-blue-500" />
+                  </button>
+
+                  <button
+                    onClick={() => this.handleGuiaRemision(item.idTraslado)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Truck className="w-5 h-5 text-gray-600" />
+                  </button>
+
+                  <button
+                    onClick={() => this.handleAnular(item.idTraslado)}
+                    className={cn(
+                      "inline-flex items-center justify-center gap-2",
+                      "px-3 py-2",
+                      "transition rounded",
+                      "bg-gray-100 text-gray-600 text-sm font-medium",
+                      "hover:bg-gray-300",
+                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                      "active:bg-blue-100 active:scale-[0.97]",
+                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <Trash className="w-5 h-5 text-red-500" />
+                  </button>
+                </div>
+              </div>
             );
           })
         }
@@ -556,24 +620,24 @@ class Traslado extends CustomComponent {
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             <button
+              onClick={this.handleAgregar}
               className={cn(
                 "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
                 "bg-blue-600 text-white text-sm font-medium rounded",
                 "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition",
               )}
-              onClick={this.handleAgregar}
               aria-label="Crear nueva venta"
             >
               <i className="bi bi-file-plus"></i>
               Nuevo Registro
             </button>
             <button
+              onClick={this.loadInit}
               className={cn(
                 "w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2",
                 "bg-gray-200 text-gray-700 text-sm font-medium rounded",
                 "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition",
               )}
-              onClick={this.loadInit}
             >
               <i className="bi bi-arrow-clockwise"></i>
               Recargar Vista
@@ -628,9 +692,9 @@ class Traslado extends CustomComponent {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Tipo Traslado */}
             <select
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={this.state.idTipoTraslado}
               onChange={this.handleSelectTipoTraslado}
+              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="0">-- Selecciona --</option>
               {
@@ -661,23 +725,20 @@ class Traslado extends CustomComponent {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="w-full flex gap-4 mb-4">
-          <div className="w-full">
-            <Search
-              group={true}
-              iconLeft={<i className="bi bi-search text-gray-400"></i>}
-              ref={this.refSearch}
-              onSearch={this.searchText}
-              placeholder="Filtrar..."
-              theme="modern"
-            />
-          </div>
+        <div className="w-full">
+          <Search
+            group={true}
+            iconLeft={<i className="bi bi-search text-gray-400"></i>}
+            ref={this.refSearch}
+            onSearch={this.searchText}
+            placeholder="Filtrar por tipo/motivo de traslado..."
+            theme="modern"
+          />
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}
         <div className={cn(
-          view === "tabla" ? "rounded border overflow-hidden" : "space-y-6",
-          "bg-white"
+          view === "tabla" ? "rounded border overflow-hidden mt-6" : "space-y-6",
         )}>
           <div className={cn(
             view == "tabla" ? "block" : "hidden",
@@ -687,17 +748,15 @@ class Traslado extends CustomComponent {
             <div className={cn(
               "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
             )}>
-              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_0.6fr_0.6fr_0.6fr] gap-x-3">
-                <div className="py-3 text-center">#</div>
-                <div className="py-3">Fecha y Hora</div>
-                <div className="py-3">Tipo / Motivo</div>
-                <div className="py-3">Almacén Origen</div>
-                <div className="py-3">Almacén Destino</div>
-                <div className="py-3">Observación</div>
-                <div className="py-3 text-center">Estado</div>
-                <div className="py-3 text-center">Detalle</div>
-                <div className="py-3 text-center">Guía</div>
-                <div className="py-3 text-center">Anular</div>
+              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.5fr_1.5fr_0.8fr_1.8fr] gap-x-3 py-3">
+                <div className="text-center">#</div>
+                <div>Fecha y Hora</div>
+                <div>Tipo / Motivo</div>
+                <div>Almacén Origen</div>
+                <div>Almacén Destino</div>
+                <div>Observación</div>
+                <div className="text-center">Estado</div>
+                <div className="text-center"></div>
               </div>
             </div>
           </div>
@@ -715,9 +774,12 @@ class Traslado extends CustomComponent {
             restart={this.state.restart}
             theme="modern"
             className={
-              view === "tabla"
-                ? "md:px-4 py-3 bg-white border-t border-gray-200 overflow-auto"
-                : "md:px-6 py-3 bg-white border rounded border-gray-200 overflow-auto"
+              cn(
+                "py-3 bg-white border-gray-200 overflow-auto",
+                view === "tabla"
+                  ? "md:px-4 border-t"
+                  : "md:px-6 border rounded"
+              )
             }
           />
         </div>

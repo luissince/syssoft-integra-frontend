@@ -10,33 +10,26 @@ import {
   formatCurrency,
   rounded,
 } from '../../../../../helper/utils.helper';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
-import { CANCELED } from '../../../../../model/types/types';
 import {
+  createAccountsPayableCompra,
   detailCompra,
   documentsPdfInvoicesCompra,
 } from '../../../../../network/rest/principal.network';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
-import Button from '../../../../../components/Button';
 import React from 'react';
 import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { cn } from '@/lib/utils';
+import { FORMA_PAGO_CREDITO } from '@/model/types/forma-pago';
+import { Plus, Printer } from 'lucide-react';
+import ModalTransaccion from '@/components/ModalTransaccion';
+import { ModalPago } from '@/components/MultiModal';
+import { connect } from 'react-redux';
+import { alertKit } from 'alert-kit';
+import { CANCELED } from '@/model/types/types';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,34 +44,24 @@ class CompraDetalle extends CustomComponent {
     super(props);
 
     this.state = {
+      // Atributos de carga
       loading: true,
       msgLoading: 'Cargando datos...',
 
+      // Atributos principales
       idCompra: '',
-      fechaHora: '',
-
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
-
-      almacen: '',
-
-      comprobante: '',
-      serieNumeracion: '',
-
-      tipo: '',
-      estado: '',
-
-      observacion: '',
-      notas: '',
-
-      codiso: '',
-      total: 0,
-
+      cabecera: null,
       detalles: [],
-      transaccion: [],
+      transacciones: [],
+      monto: 0,
+
+      // Atributos del modal pago
+      isOpenModalPago: false,
+      isOpenModalTerminal: false,
+
+      // Id principales
+      idSucursal: this.props.token.project.idSucursal,
+      idUsuario: this.props.token.userToken.idUsuario,
     };
 
     this.abortControllerView = new AbortController();
@@ -105,7 +88,7 @@ class CompraDetalle extends CustomComponent {
     if (isText(idCompra)) {
       this.loadingData(idCompra);
     } else {
-      this.props.history.goBack();
+      this.goBackView();
     }
   }
 
@@ -117,98 +100,44 @@ class CompraDetalle extends CustomComponent {
     }
   }
 
-  async loadingData(id) {
-    const [compra] = await Promise.all([this.fetchDetailCompra(id)]);
+  /*
+  |--------------------------------------------------------------------------
+  | Métodos de acción
+  |--------------------------------------------------------------------------
+  |
+  | Carga los datos iniciales necesarios para inicializar el componente. Este método se utiliza típicamente
+  | para obtener datos desde un servicio externo, como una API o una base de datos, y actualizar el estado del
+  | componente en consecuencia. El método loadingData puede ser responsable de realizar peticiones asíncronas
+  | para obtener los datos iniciales y luego actualizar el estado del componente una vez que los datos han sido
+  | recuperados. La función loadingData puede ser invocada en el montaje inicial del componente para asegurarse
+  | de que los datos requeridos estén disponibles antes de renderizar el componente en la interfaz de usuario.
+  |
+  */
 
-    if (!compra) {
-      this.props.history.goBack();
+  async loadingData(idCompra) {
+    const params = {
+      idCompra: idCompra,
+    };
+
+    const { success, data } = await detailCompra(params, this.abortControllerView.signal);
+
+    if (!success) {
+      this.goBackView();
       return;
     }
 
-    const {
-      fecha,
-      hora,
-
-      comprobante,
-      serie,
-      numeracion,
-
-      documento,
-      informacion,
-      telefono,
-      celular,
-      email,
-      direccion,
-
-      almacen,
-
-      tipo,
-      estado,
-      observacion,
-      nota,
-      codiso,
-    } = compra.cabecera;
-
-    const monto = compra.detalles.reduce(
-      (accumlate, item) => accumlate + item.costo * item.cantidad,
-      0,
-    );
-
     this.setState({
-      idCompra: id,
-      fechaHora: fecha + ' ' + formatTime(hora),
-
-      comprobante: comprobante,
-      serieNumeracion: serie + '-' + formatNumberWithZeros(numeracion),
-
-      proveedor: documento + ' - ' + informacion,
-      telefono: telefono,
-      celular: celular,
-      email: email,
-      direccion: direccion,
-
-      almacen: almacen,
-
-      tipo: tipo,
-      estado:
-        estado === 1 ? (
-          <span className="text-success">PAGADO</span>
-        ) : estado === 2 ? (
-          <span className="text-warning">POR PAGAR</span>
-        ) : (
-          <span className="text-danger">ANULADO</span>
-        ),
-      observacion: observacion,
-      notas: nota,
-      codiso: codiso,
-      total: monto,
-
-      detalles: compra.detalles,
-      transaccion: compra.transaccion,
+      idCompra: idCompra,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
+      transacciones: data.transacciones,
 
       loading: false,
     });
   }
 
-  async fetchDetailCompra(id) {
-    const params = {
-      idCompra: id,
-    };
-
-    const response = await detailCompra(
-      params,
-      this.abortControllerView.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return false;
-    }
+  goBackView = () => {
+    this.props.history.goBack();
   }
 
   /*
@@ -227,13 +156,97 @@ class CompraDetalle extends CustomComponent {
   |
   */
 
+  //------------------------------------------------------------------------------------------
+  // Funcione de impresión
+  //------------------------------------------------------------------------------------------
   handlePrintInvoices = async (size) => {
+    const url = documentsPdfInvoicesCompra(this.state.idCompra, size);
+
     await pdfVisualizer.init({
-      url: documentsPdfInvoicesCompra(this.state.idCompra, size),
+      url: url,
       title: 'Compra',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
     });
+  };
+
+  //------------------------------------------------------------------------------------------
+  // Funciones del modal pago
+  //------------------------------------------------------------------------------------------
+
+  handleOpenModalPago = async () => {
+    this.setState({ isOpenModalPago: true });
+  };
+
+  handleCloseModalPago = async () => {
+    this.setState({ isOpenModalPago: false });
+  };
+
+  handleProcessModalPago = async (monto) => {
+    this.setState({
+      monto: monto,
+    }, () => {
+      this.handleOpenModalTerminal();
+    });
+  }
+
+  //------------------------------------------------------------------------------------------
+  // Funciones del modal terminal
+  //------------------------------------------------------------------------------------------
+
+  handleOpenModalTerminal = () => {
+    this.setState({ isOpenModalTerminal: true });
+  };
+
+  handleProccesoModalTerminal = async (_, metodoPagosLista, notaTransacion, callback) => {
+    const { idCompra, idSucursal, idUsuario, monto } = this.state;
+
+    const accept = await alertKit.question({
+      title: 'Cuenta por Pagar',
+      message: '¿Estás seguro de continuar?',
+      acceptButton: { html: "<i class='fa fa-check'></i> Aceptar" },
+      cancelButton: { html: "<i class='fa fa-close'></i> Cancelar" },
+    });
+
+    if (accept) {
+      const body = {
+        idCompra,
+        idSucursal,
+        idUsuario,
+        monto,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback?.();
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const { success, data, message, type } = await createAccountsPayableCompra(body);
+
+      if (!success) {
+        if (type === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Cuenta por Pagar',
+          message: message,
+        });
+        return;
+      }
+
+      alertKit.success({
+        title: 'Cuenta por Pagar',
+        message: data,
+      }, () => {
+        this.handleCloseModalTerminal();
+      });
+    }
+  }
+
+  handleCloseModalTerminal = async () => {
+    this.setState({ isOpenModalTerminal: false });
   };
 
   /*
@@ -252,43 +265,193 @@ class CompraDetalle extends CustomComponent {
   |
   */
 
+  renderCabecera() {
+    const { loading, cabecera, detalles, transacciones } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+        <div className="divide-y divide-gray-100">
+          {[
+            {
+              label: 'Fecha y Hora', value: () => {
+                return cabecera.fecha + ' ' + formatTime(cabecera.hora);
+              }
+            },
+            {
+              label: 'Comprobante', value: () => {
+                return cabecera.comprobante + '  ' + cabecera.serie + '-' + formatNumberWithZeros(cabecera.numeracion);
+              }
+            },
+            {
+              label: 'Cliente', value: () => {
+                return cabecera.documento + ' - ' + cabecera.informacion;
+              }
+            },
+            { label: 'N° de celular', value: () => cabecera.celular },
+            { label: 'Correo electrónico', value: () => cabecera.email },
+
+
+            { label: 'Tipo', value: () => cabecera.formaPago },
+
+            {
+              label: 'Estado', value: () => {
+                return (
+                  <span className={cn(
+                    "inline-flex items-center rounded-full",
+                    "text-xs font-medium",
+                    "px-2.5 py-0.5",
+                    cabecera.estado === 1 && "bg-green-100 text-green-800",
+                    cabecera.estado === 2 && "bg-yellow-100 text-yellow-800",
+                    cabecera.estado === 3 && "bg-red-100 text-red-800",
+                  )}>
+                    {cabecera.estado === 1 && "PAGADO"}
+                    {cabecera.estado === 2 && "POR PAGAR"}
+                    {cabecera.estado === 3 && "ANULADO"}
+                  </span>
+                );
+              }
+            },
+
+            { label: 'Observación', value: () => cabecera.observacion },
+            { label: 'Nota', value: () => cabecera.nota },
+
+            { label: 'Usuario', value: () => cabecera.usuario },
+
+            {
+              label: 'Pagado', value: () => {
+                const monto = transacciones.reduce(
+                  (total, item) =>
+                    total +
+                    item.detalles.reduce(
+                      (subtotal, detalle) => subtotal + Number(detalle.monto || 0),
+                      0
+                    ),
+                  0
+                );
+
+                return <span className="text-green-600">{formatCurrency(monto, cabecera.codiso)}</span>
+              }
+            },
+
+            {
+              label: 'Restante', value: () => {
+                const total = detalles.reduce(
+                  (accumlate, item) => accumlate + item.costo * item.cantidad,
+                  0,
+                );
+
+                const pagado = transacciones.reduce(
+                  (total, item) =>
+                    total +
+                    item.detalles.reduce(
+                      (subtotal, detalle) => subtotal + Number(detalle.monto || 0),
+                      0
+                    ),
+                  0
+                );
+
+                return <span className="text-red-600">{formatCurrency(total - pagado, cabecera.codiso)}</span>
+              }
+            },
+
+            {
+              label: 'Total', value: () => {
+                const monto = detalles.reduce(
+                  (accumlate, item) => accumlate + item.costo * item.cantidad,
+                  0,
+                );
+
+                return formatCurrency(monto, cabecera.codiso)
+              }
+            },
+          ].map((item, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+              <p>{item.label}</p>
+              <p className="md:col-span-3 font-bold">{item.value()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   renderDetalles() {
-    return this.state.detalles.map((item, index) => (
-      <React.Fragment key={index}>
-        <TableRow>
-          <TableCell>{item.id}</TableCell>
-          <TableCell className="text-center">
-            <Image
-              default={images.noImage}
-              src={item.imagen}
-              alt={item.producto}
-              width={100}
-            />
-          </TableCell>
-          <TableCell>{item.producto}</TableCell>
-          <TableCell className="text-right">
-            {formatCurrency(item.costo, this.state.codiso)}
-          </TableCell>
-          <TableCell>{item.categoria}</TableCell>
-          <TableCell className="text-right">{item.impuesto}</TableCell>
-          <TableCell className="text-right">{rounded(item.cantidad)}</TableCell>
-          <TableCell>{item.medida}</TableCell>
-          <TableCell className="text-right">
-            {formatCurrency(item.cantidad * item.costo, this.state.codiso)}
-          </TableCell>
-        </TableRow>
-      </React.Fragment>
-    ));
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Detalles</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4">#</th>
+                <th className="p-4">Imagen</th>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Costo</th>
+                <th className="p-4">Categoría</th>
+                <th className="p-4 text-right">Impuesto</th>
+                <th className="p-4 text-right">Cantidad</th>
+                <th className="p-4 text-right">Importe</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                detalles.map((item, index) => {
+                  return (
+                    <React.Fragment key={index}>
+                      <tr className="hover:bg-gray-50">
+                        <td className="p-4">{item.id}</td>
+                        <td className="p-4 text-center">
+                          <Image
+                            default={images.noImage}
+                            src={item.imagen}
+                            alt={item.producto}
+                            width={80}
+                            className="mx-auto rounded border border-gray-200"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
+                          <p className="text-black uppercase">{item.producto}</p>
+                        </td>
+                        <td className="p-4 text-left">
+                          {formatCurrency(item.costo, cabecera.codiso)} x <small>{item.medida}</small>
+                        </td>
+                        <td className="p-4">{item.categoria}</td>
+                        <td className="p-4 text-right">{item.impuesto}</td>
+                        <td className="p-4 text-right">{rounded(item.cantidad)}</td>
+                        <td className="p-4 font-medium text-right">
+                          {formatCurrency(item.cantidad * item.costo, cabecera.codiso)}
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  );
+                })
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 
   renderTotal() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
     let subTotal = 0;
     let total = 0;
 
-    for (const item of this.state.detalles) {
+    for (const item of detalles) {
       const cantidad = item.cantidad;
       const valor = item.costo;
-
       const impuesto = item.porcentaje;
 
       const valorActual = cantidad * valor;
@@ -301,7 +464,7 @@ class CompraDetalle extends CustomComponent {
     }
 
     const impuestosGenerado = () => {
-      const resultado = this.state.detalles.reduce((acc, item) => {
+      const resultado = detalles.reduce((acc, item) => {
         const total = item.cantidad * item.costo;
         const subTotal = calculateTaxBruto(item.porcentaje, total);
         const impuestoTotal = calculateTax(item.porcentaje, subTotal);
@@ -323,314 +486,236 @@ class CompraDetalle extends CustomComponent {
         return acc;
       }, []);
 
-      return resultado.map((impuesto, index) => {
-        return (
-          <TableRow key={index}>
-            <TableHead className="text-right mb-2">
-              {impuesto.nombre} :
-            </TableHead>
-            <TableHead className="text-right mb-2">
-              {formatCurrency(impuesto.valor, this.state.codiso)}
-            </TableHead>
-          </TableRow>
-        );
-      });
+      return resultado.map((impuesto, index) => (
+        <tr key={index}>
+          <th className="p-2 text-gray-600 text-right">{impuesto.nombre}:</th>
+          <td className="p-2 text-gray-900 font-medium text-right">
+            {formatCurrency(impuesto.valor, cabecera.codiso)}
+          </td>
+        </tr>
+      ));
     };
+
     return (
-      <>
-        <TableRow>
-          <TableHead className="text-right mb-2">SUB TOTAL :</TableHead>
-          <TableHead className="text-right mb-2">
-            {formatCurrency(subTotal, this.state.codiso)}
-          </TableHead>
-        </TableRow>
-        {impuestosGenerado()}
-        <TableRow className="border-bottom"></TableRow>
-        <TableRow>
-          <TableHead className="text-right h5">TOTAL :</TableHead>
-          <TableHead className="text-right h5">
-            {formatCurrency(total, this.state.codiso)}
-          </TableHead>
-        </TableRow>
-      </>
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-start-9 lg:col-span-4">
+          <div className="bg-white overflow-hidden">
+            <table className="w-full text-right">
+              <tbody>
+                <tr>
+                  <th className="p-2 text-gray-600 text-right">SUB TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-medium text-right">
+                    {formatCurrency(subTotal, cabecera.codiso)}
+                  </td>
+                </tr>
+                {impuestosGenerado()}
+                <tr>
+                  <td colSpan={2} className="py-2">
+                    <div className="border-t border-gray-200"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <th className="p-2 text-gray-800 font-bold text-right text-lg">TOTAL:</th>
+                  <td className="p-2 text-gray-900 font-bold text-right text-lg">
+                    {formatCurrency(total, cabecera.codiso)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     );
   }
 
   renderTransaciones() {
-    if (isEmpty(this.state.transaccion)) {
-      return (
-        <TableRow>
-          <TableCell colSpan="6" className="text-center">
-            No hay transacciones para mostrar.
-          </TableCell>
-        </TableRow>
-      );
-    }
+    const { loading, cabecera, transacciones } = this.state;
 
-    return this.state.transaccion.map((item, index) => {
-      return (
-        <React.Fragment key={index}>
-          <TableRow className="table-success">
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>
-              <span>{item.fecha}</span>
-              <br />
-              <span>{formatTime(item.hora)}</span>
-            </TableCell>
-            <TableCell>{item.concepto}</TableCell>
-            <TableCell>{item.nota}</TableCell>
-            <TableCell>{item.usuario}</TableCell>
-          </TableRow>
+    if (loading) return null;
 
-          <TableRow>
-            <TableCell className="text-center">#</TableCell>
-            <TableCell>Banco</TableCell>
-            <TableCell>Monto</TableCell>
-            <TableCell colSpan={2}>Observación</TableCell>
-          </TableRow>
-          {item.detalles.map((detalle, index) => {
-            return (
-              <TableRow key={index}>
-                <TableCell className="text-center">{index + 1}</TableCell>
-                <TableCell>{detalle.nombre}</TableCell>
-                <TableCell>
-                  {formatCurrency(detalle.monto, this.state.codiso)}
-                </TableCell>
-                <TableCell colSpan={2}>{detalle.observacion}</TableCell>
-              </TableRow>
-            );
-          })}
-          <TableRow>
-            <TableCell colSpan="6">
-              <hr />
-            </TableCell>
-          </TableRow>
-        </React.Fragment>
-      );
-    });
+    return (
+      <div className="bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Transacciones</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4 text-center">#</th>
+                <th className="p-4">Fecha y Hora</th>
+                <th className="p-4">Concepto</th>
+                <th className="p-4">Nota</th>
+                <th className="p-4">Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                isEmpty(transacciones) && (
+                  <tr>
+                    <td colSpan={5} className="p-6 text-center text-gray-500">
+                      No hay transacciones para mostrar.
+                    </td>
+                  </tr>
+                )
+              }
+
+              {
+                !isEmpty(transacciones) && transacciones.map((item, index) => (
+                  <React.Fragment key={index}>
+                    {/* Transacción principal */}
+                    <tr className="bg-green-200">
+                      <td className="p-3 text-center font-medium text-gray-800">{index + 1}</td>
+                      <td className="p-3">
+                        <p className="font-medium">{item.fecha}</p>
+                        <p className="text-sm text-gray-600">{formatTime(item.hora)}</p>
+                      </td>
+                      <td className="p-3 text-gray-800">{item.concepto}</td>
+                      <td className="p-3 text-gray-800">{item.nota}</td>
+                      <td className="p-3 text-gray-800">{item.usuario}</td>
+                    </tr>
+
+                    {/* Encabezado de detalles */}
+                    <tr className="text-sm text-gray-600">
+                      <td className="p-3"></td>
+                      <td className="p-3">Banco</td>
+                      <td className="p-3">Monto</td>
+                      <td colSpan={2} className="p-2">Observación</td>
+                    </tr>
+
+                    {/* Detalles de la transacción */}
+                    {item.detalles.map((detalle, idx) => (
+                      <tr key={idx}>
+                        <td className="p-3 text-gray-600"></td>
+                        <td className="p-3 text-gray-700">{detalle.nombre}</td>
+                        <td className="p-3 text-gray-900 font-medium">
+                          {formatCurrency(detalle.monto, cabecera.codiso)}
+                        </td>
+                        <td colSpan={2} className="p-3 text-gray-700">
+                          {detalle.observacion}
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* Separador visual */}
+                    <tr>
+                      <td colSpan={5} className="py-3">
+                        <div className="border-t border-gray-200"></div>
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                ))
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={5} className="p-6 text-right">
+                  <p className="text-gray-800 font-bold text-right text-lg">Total: {
+                    formatCurrency(transacciones.reduce(
+                      (total, item) =>
+                        total +
+                        item.detalles.reduce(
+                          (subtotal, detalle) => subtotal + Number(detalle.monto || 0),
+                          0
+                        ),
+                      0
+                    ), cabecera.codiso)
+                  }
+                  </p>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    );
   }
 
   render() {
+    const { loading, msgLoading, cabecera } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
         <Title
           title="Compra"
           subTitle="DETALLE"
-          handleGoBack={() => this.props.history.goBack()}
+          handleGoBack={this.goBackView}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>
-          </Column>
-        </Row>
+        <ModalTransaccion
+          tipo="Compra"
+          title="Completar Compra"
+          isOpen={this.state.isOpenModalTerminal}
+          idSucursal={this.state.idSucursal}
+          codiso={cabecera?.codiso ?? ''}
+          disabledCredito={true}
+          importeTotal={this.state.monto}
+          onClose={this.handleCloseModalTerminal}
+          handleProcessContado={this.handleProccesoModalTerminal}
+          handleProcessCredito={null}
+        />
 
-        <Row>
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-12">
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Fecha Compra
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.fechaHora}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Proveedor
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.proveedor}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Telefono
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.telefono}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Celular
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.celular}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Email
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.email}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Dirección
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.direccion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Almacen
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.almacen}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
+        <ModalPago
+          title="Pago"
+          isOpen={this.state.isOpenModalPago}
+          onClose={this.handleCloseModalPago}
+          codiso={cabecera?.codiso ?? ''}
+          detalles={this.state.detalles}
+          transacciones={this.state.transacciones}
+          onProcess={this.handleProcessModalPago}
+        />
 
-          <Column className="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-            <TableResponsive>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Comprobante
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.comprobante}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Serie - Numeración
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.serieNumeracion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Tipo
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.tipo}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Estado
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.estado}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Observación
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.observacion}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Notas
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {this.state.notas}
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                      Total
-                    </TableHead>
-                    <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                      {formatCurrency(this.state.total, this.state.codiso)}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Acciones */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
+          >
+            <Printer className="w-4 h-4" /> A4
+          </button>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className={'table-light'}>
-                <TableHeader className="thead-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Costo</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Impuesto %</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Medida</TableHead>
-                    <TableHead>Importe</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderDetalles()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
+          >
+            <Printer className="w-4 h-4" /> 80MM
+          </button>
 
-        <Row>
-          <Column className="col-lg-9 col-md-9 col-sm-12 col-xs-12"></Column>
-          <Column className="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-            <Table classNameContent="w-100">
-              <TableHeader>{this.renderTotal()}</TableHeader>
-            </Table>
-          </Column>
-        </Row>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <Printer className="w-4 h-4" /> 58MM
+          </button>
 
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Transacciones</TableTitle>
-              <Table className={'table-light'}>
-                <TableHeader className="thead-dark">
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Fecha y Hora</TableHead>
-                    <TableHead>Concepto</TableHead>
-                    <TableHead>Nota</TableHead>
-                    <TableHead>Usuario</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>{this.renderTransaciones()}</TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+          {
+            cabecera && (
+              cabecera.idFormaPago === FORMA_PAGO_CREDITO && (
+                <button
+                  className="px-4 py-2 bg-red-600 border border-red-300 text-sm font-medium rounded-lg text-white hover:bg-red-500 flex items-center gap-2"
+                  onClick={() => this.handleOpenModalPago()}
+                >
+                  <Plus className="w-5 h-5" /> Agregar pago
+                </button>
+              )
+            )
+          }
+        </div>
+
+        {/* Cabecera */}
+        {this.renderCabecera()}
+
+        {/* Detalles */}
+        {this.renderDetalles()}
+
+        {/* Totales */}
+        {this.renderTotal()}
+
+        {/* Transacciones */}
+        {this.renderTransaciones()}
       </ContainerWrapper>
     );
   }
@@ -645,4 +730,24 @@ CompraDetalle.propTypes = {
   }),
 };
 
-export default CompraDetalle;
+/**
+ *
+ * Método encargado de traer la información de redux
+ */
+const mapStateToProps = (state) => {
+  return {
+    token: state.principal
+  };
+};
+
+/**
+ *
+ * Método encargado de conectar con redux y exportar la clase
+ */
+
+const ConnectedCompraDetalle = connect(
+  mapStateToProps,
+  null,
+)(CompraDetalle);
+
+export default ConnectedCompraDetalle;

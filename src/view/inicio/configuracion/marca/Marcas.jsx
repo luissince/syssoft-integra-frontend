@@ -1,8 +1,4 @@
 import {
-  alertDialog,
-  alertSuccess,
-  alertWarning,
-  alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -31,6 +27,7 @@ import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 import { images } from '../../../../helper';
 import Image from '../../../../components/Image';
+import { alertKit } from 'alert-kit';
 
 class Marcas extends CustomComponent {
   constructor(props) {
@@ -98,51 +95,30 @@ class Marcas extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
   fillTable = async (opcion, buscar = '') => {
-    /**
-     * Restablecer las variables para la busqueda
-     */
     this.setState({
       loading: true,
       lista: [],
       messageTable: 'Cargando información...',
     });
 
-    /**
-     * Parametros para iniciar la consulta
-     */
     const params = {
       opcion: opcion,
-      buscar: buscar.trim().toUpperCase(),
+      buscar: this.state.buscar,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    /**
-     * Peticion http
-     */
     const response = await listMarca(params, this.abortControllerTable.signal);
 
-    /**
-     * Si la respuesta fue existosa
-     */
     if (response instanceof SuccessReponse) {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),)
       );
 
       this.setState({
@@ -152,9 +128,6 @@ class Marcas extends CustomComponent {
       });
     }
 
-    /**
-     * Si la respuesta fallo o fue cancelada
-     */
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
@@ -180,39 +153,52 @@ class Marcas extends CustomComponent {
     });
   };
 
-  handleDelete = (id) => {
-    alertDialog(
-      'Marca',
-      '¿Estás seguro de eliminar la Marca?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idMarca: id,
-          };
-
-          alertInfo('Marca', 'Se esta procesando la petición...');
-
-          const response = await removeMarca(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Marca', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Marca', response.getMessage());
-          }
-        }
+  handleDelete = async (id) => {
+    const accept = await alertKit.question({
+      title: 'Marca',
+      message: '¿Estás seguro de eliminar la Marca?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idMarca: id,
+      };
+
+      alertKit.loading({ message: 'Se esta procesando la petición...' });
+
+      const response = await removeMarca(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Marca',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Marca',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );
@@ -255,7 +241,7 @@ class Marcas extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idMarca)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -264,7 +250,7 @@ class Marcas extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idMarca)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

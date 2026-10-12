@@ -1,0 +1,470 @@
+import React from 'react';
+import '../resource/css/searchbar.css';
+import { isEmpty } from '../helper/utils.helper';
+import Input from './Input';
+import Button from './Button';
+import { cn } from '@/lib/utils';
+import { IoIosClose } from 'react-icons/io';
+
+type Props = {
+  /** @type {import('tailwindcss').Config} */
+  classNameContainer?: string;
+  disabled?: boolean;
+  debounceTime?: number;
+
+  autoFocus?: boolean;
+  label?: React.ReactNode;
+  data: Array<any>;
+  placeholder: string;
+  refValue: React.RefObject<HTMLInputElement>;
+
+  handleFilter: (text: string) => void;
+  handleSelectItem: (value: any) => void;
+  handleClearInput: () => void;
+  handleSetValue?: (value: any) => void;
+
+  renderItem?: (value: any) => React.ReactNode;
+  renderIconLeft?: React.ReactNode;
+  renderIconRight?: React.ReactNode;
+
+  customButton?: React.ReactNode;
+  theme?: 'classic' | 'modern';
+}
+
+interface State {
+  searchTerm: string;
+  highlightedIndex: number;
+  isDropdownActive: boolean;
+}
+
+/**
+ * Componente que representa una funcionalidad específica.
+ *
+ * @component
+ * @param {Object} props - The component accepts text and onClick as props
+ * @extends React.Component
+ *
+ * @returns {JSX.Element} The rendered search input component.
+ */
+class SearchInput extends React.Component<Props, State> {
+
+  private refContentResult: React.RefObject<HTMLUListElement>;
+  private debounceTime: number;
+  private debouncedSearch: any;
+  private selectItem: boolean;
+
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      searchTerm: '',
+      highlightedIndex: -1,
+      isDropdownActive: false,
+    };
+
+    this.refContentResult = React.createRef();
+
+    this.debounceTime = this.props.debounceTime || 250;
+    this.debouncedSearch = this.debounce(
+      this.props.handleFilter,
+      this.debounceTime,
+    );
+    this.selectItem = false;
+  }
+
+  componentDidMount() {
+    window.addEventListener('click', this.handleWindowClick);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this.handleWindowClick);
+  }
+
+  debounce = (func: any, delay: number) => {
+    let timeoutId: any;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  initialize = (data: any, select: boolean = true) => {
+    this.setState({ searchTerm: data });
+    this.selectItem = select;
+  };
+
+  restart = async () => {
+    this.setState({
+      searchTerm: '',
+      highlightedIndex: -1,
+    }, () => {
+      this.selectItem = false;
+      this.props.refValue.current.focus();
+    });
+  };
+
+  handleWindowClick = (event: any) => {
+    const target = event.target as HTMLElement;
+
+    const parent = this.refContentResult.current;
+    if (parent == null) return;
+
+    const click = target.parentElement.parentElement;
+    if (click == null) return;
+
+    if (parent.isEqualNode(click)) return;
+
+    this.props.handleClearInput();
+    this.setState({ highlightedIndex: -1 });
+  };
+
+  handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const { data } = this.props;
+    const { highlightedIndex } = this.state;
+
+    if (isEmpty(data)) {
+      return;
+    }
+
+    if (event.key === "Tab") {
+      this.props.handleClearInput();
+      this.setState({ isDropdownActive: false, highlightedIndex: -1 });
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.setState((prevState) => ({
+        isDropdownActive: true,
+        highlightedIndex: Math.min(
+          prevState.highlightedIndex + 1,
+          data.length - 1,
+        ),
+      }), () => this.scrollToHighlighted(),
+      );
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.setState((prevState) => ({
+        highlightedIndex: Math.max(prevState.highlightedIndex - 1, -1),
+      }),
+        () => this.scrollToHighlighted(),
+      );
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (highlightedIndex !== -1) {
+        this.props.handleSelectItem(data[highlightedIndex]);
+        this.setState({ highlightedIndex: -1 });
+      }
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.props.handleClearInput();
+      this.setState({ highlightedIndex: -1 });
+    }
+  };
+
+  handleBlur = (event) => {
+    const dropdown = this.refContentResult.current;
+
+    // nuevo elemento enfocado
+    const nextFocus = event.relatedTarget;
+
+    // si el foco se fue hacia dentro del dropdown, no cerrar
+    if (dropdown && dropdown.contains(nextFocus)) {
+      return;
+    }
+
+    // cerrar normalmente
+    this.setState({
+      isDropdownActive: false,
+      highlightedIndex: -1,
+    });
+  };
+
+  scrollToHighlighted = () => {
+    const { highlightedIndex } = this.state;
+    const container = this.refContentResult.current;
+
+    if (!container) {
+      return;
+    }
+
+    if (highlightedIndex === -1) {
+      return;
+    }
+
+    const highlightedElement = container.children[highlightedIndex] as HTMLElement;
+
+    if (!highlightedElement) {
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const elementRect = highlightedElement.getBoundingClientRect();
+
+    if (elementRect.bottom > containerRect.bottom) {
+      container.scrollTop =
+        highlightedElement.offsetTop +
+        highlightedElement.clientHeight -
+        container.clientHeight;
+    } else if (elementRect.top < containerRect.top) {
+      container.scrollTop = highlightedElement.offsetTop;
+    }
+  };
+
+  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = this.selectItem ? '' : event.target.value;
+    this.setState({ searchTerm: value });
+    if (this.props.handleSetValue) {
+      this.props.handleSetValue(value);
+    }
+    this.selectItem = false;
+    this.debouncedSearch(value);
+  };
+
+  handleFocus = () => {
+    if (!this.props.refValue) {
+      return;
+    }
+
+    const input = this.props.refValue.current;
+    if (input) {
+      const length = input.value.length;
+      input.setSelectionRange(length, length);
+    }
+  };
+
+  handleMouseDown = () => {
+    if (!this.props.refValue) {
+      return;
+    }
+
+    const input = this.props.refValue.current;
+    if (input) {
+      const length = input.value.length;
+      setTimeout(() => {
+        input.setSelectionRange(length, length);
+      }, 0);
+    }
+  };
+
+  render() {
+    const { theme = 'classic' } = this.props;
+
+    const { classNameContainer, disabled } = this.props;
+
+    const { autoFocus, label, data, placeholder, refValue } = this.props;
+
+    const { handleSelectItem, handleClearInput } = this.props;
+
+    const { renderItem, renderIconLeft, renderIconRight } = this.props;
+
+    const { customButton } = this.props;
+
+    const { searchTerm, highlightedIndex } = this.state;
+
+    if (theme === 'classic') {
+
+      return (
+        <div
+          className={cn(
+            classNameContainer ? classNameContainer : 'mb-3 relative group',
+          )}
+        >
+          <Input
+            autoFocus={autoFocus}
+            group={true}
+            label={label}
+            iconLeft={renderIconLeft}
+            placeholder={placeholder}
+            ref={refValue}
+            value={searchTerm}
+            onChange={this.handleInputChange}
+            onKeyDown={this.handleKeyDown}
+            disabled={disabled}
+            buttonRight={
+              <>
+                {customButton}
+
+                <Button
+                  className="btn-outline-secondary"
+                  onClick={() => {
+                    handleClearInput();
+                    this.restart();
+                  }}
+                  disabled={disabled}
+                >
+                  {renderIconRight || <i className="fa fa-close"></i>}
+                </Button>
+              </>
+            }
+          />
+          {!isEmpty(data) && (
+            <ul
+              className={cn(
+                "w-full h-[200px]",
+                "flex flex-col",
+                "pl-0 mb-0 mt-2",
+                "bg-white",
+                "overflow-hidden overflow-y-auto",
+                "absolute z-[100]",
+                "rounded border border-primary",
+                "shadow-[rgba(0,0,0,0.1)_0px_0px_0px_1px,rgba(0,0,0,0.1)_0px_4px_11px]",
+
+                "group-focus-within:border-[#80bdff]",
+                "group-focus-within:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]"
+              )}
+              ref={this.refContentResult}
+            // tabIndex="-1"
+            // onKeyDown={this.handleKeyDown}
+            >
+              {data.map((value, index) => (
+                <button
+                  key={index}
+                  tabIndex={-1}
+                  className={cn(
+                    "relative flex py-3 px-4 w-full text-sm text-left border-b border-gray-200 hover:bg-gray-50",
+                    index === highlightedIndex && 'text-white bg-primary',
+                  )}
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // ✅ no roba foco
+                    this.handleMouseDown(); // mantiene caret
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleSelectItem(value);
+                  }}
+                >
+                  {renderItem(value)}
+                </button>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={cn(
+          classNameContainer ? classNameContainer : 'mb-3',
+        )}
+      >
+        {label}
+
+        <div className="relative group">
+          <div className="relative">
+            {/* Icono búsqueda */}
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              {renderIconLeft}
+            </div>
+
+            {/* Input */}
+            <input
+              type="text"
+              autoFocus={autoFocus}
+              className="w-full pl-10 pr-20 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder={placeholder}
+              ref={refValue}
+              value={searchTerm}
+              onChange={this.handleInputChange}
+              onKeyDown={this.handleKeyDown}
+              onBlur={this.handleBlur}
+              disabled={disabled}
+            />
+
+            {/* Contenedor botones */}
+            <div className="absolute inset-y-0 right-0 flex h-full">
+
+              {customButton && (
+                <div className="flex items-center px-2 border-l border-gray-300">
+                  {customButton}
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  handleClearInput();
+                  this.restart();
+                }}
+                disabled={disabled}
+                className="flex items-center justify-center px-2 h-full border-l border-gray-300 hover:bg-gray-100"
+              >
+                <IoIosClose className="h-5 w-5 " />
+              </button>
+
+            </div>
+          </div>
+
+          {/* DROPDOWN */}
+          {
+            !isEmpty(data) && (
+              <ul
+                ref={this.refContentResult}
+                className={cn(
+                  "w-full h-[200px]",
+                  "flex flex-col",
+                  "pl-0 mb-0 mt-2",
+                  "bg-white",
+                  "overflow-hidden overflow-y-auto",
+                  "absolute z-[100]",
+                  "rounded border border-primary",
+                  "shadow-[rgba(0,0,0,0.1)_0px_0px_0px_1px,rgba(0,0,0,0.1)_0px_4px_11px]",
+
+                  "group-focus-within:border-blue-500",
+                  "group-focus-within:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]"
+                )}
+                onMouseDown={(e) => {
+                  // ✅ evita que el input pierda foco
+                  e.preventDefault();
+
+                  // ✅ mantiene el cursor al final
+                  this.handleMouseDown();
+                }}
+              >
+                {
+                  data.map((value, index) => (
+                    <button
+                      key={index}
+                      tabIndex={-1}
+                      className={cn(
+                        "relative flex py-3 px-4 w-full text-sm text-left",
+                        "border-b border-gray-200 last:border-b-0",
+
+                        // 🔥 control total de estados
+                        "focus:outline-none focus:bg-transparent",
+
+                        // hover solo si NO está seleccionado
+                        index !== highlightedIndex && "hover:bg-gray-50",
+
+                        // seleccionado manda
+                        index === highlightedIndex && "!bg-blue-500 !text-white"
+                      )}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // ✅ no roba foco
+                        this.handleMouseDown(); // mantiene caret
+                      }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSelectItem(value);
+                      }}
+                    >
+                      {renderItem(value)}
+                    </button>
+                  ))
+                }
+              </ul>
+            )
+          }
+        </div>
+      </div>
+    );
+  }
+}
+
+export default SearchInput;

@@ -111,10 +111,10 @@ class PerfilAgregar extends CustomComponent {
           <Column formGroup>
             <Input
               label={
-                <>
+                <label>
                   Descripción:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               placeholder="Ingrese la descripción."
               ref={this.refDescripcion}

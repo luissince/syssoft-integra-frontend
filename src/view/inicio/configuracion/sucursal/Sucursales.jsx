@@ -1,8 +1,4 @@
 import {
-  alertSuccess,
-  alertWarning,
-  alertDialog,
-  alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -33,6 +29,7 @@ import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 import Image from '../../../../components/Image';
 import { images } from '../../../../helper';
+import { alertKit } from 'alert-kit';
 
 class Sucursales extends CustomComponent {
   constructor(props) {
@@ -131,7 +128,7 @@ class Sucursales extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),)
       );
 
       this.setState({
@@ -167,35 +164,48 @@ class Sucursales extends CustomComponent {
     });
   };
 
-  handleBorrar = (idSucursal) => {
-    alertDialog(
-      'Sucursal',
-      '¿Estás seguro de eliminar el sucursal?',
-      async (accept) => {
-        if (accept) {
-          alertInfo('Sucursal', 'Procesando información...');
-
-          const response = await deleteSucursal(idSucursal);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Sucursal', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Sucursal', response.getMessage());
-          }
-        }
+  handleBorrar = async (idSucursal) => {
+    const accept = await alertKit.question({
+      title: 'Sucursal',
+      message: '¿Estás seguro de eliminar el sucursal?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({ message: 'Procesando información...' });
+
+      const response = await deleteSucursal(idSucursal);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Sucursal',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Sucursal',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message={'Cargando información de la tabla...'}
         />
       );
@@ -245,7 +255,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idSucursal)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -254,7 +264,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idSucursal)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -278,7 +288,7 @@ class Sucursales extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-              // disabled={!this.state.add}
+            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}

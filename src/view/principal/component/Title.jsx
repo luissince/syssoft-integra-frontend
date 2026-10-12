@@ -1,7 +1,4 @@
-import Button from '../../../components/Button';
-import Column from '../../../components/Column';
 import Image from '../../../components/Image';
-import Row from '../../../components/Row';
 import { images } from '../../../helper';
 import PropTypes from 'prop-types';
 
@@ -9,8 +6,7 @@ const Title = ({
   rutaImage,
   razonSocial,
   nombreEmpresa,
-  documento,
-  handleSignOut,
+  documento
 }) => {
   return (
     <div className="flex flex-col justify-center items-center mb-3">
@@ -28,12 +24,6 @@ const Title = ({
         <h5 className="text-dark">{nombreEmpresa}</h5>
         <h5 className="text-secondary">{documento}</h5>
       </div>
-
-      <div className="flex w-full  justify-end items-center">
-        <Button className="btn-danger" onClick={handleSignOut}>
-          <i className="fa fa-power-off"></i>
-        </Button>
-      </div>
     </div>
   );
 };
@@ -43,7 +33,6 @@ Title.propTypes = {
   razonSocial: PropTypes.string.isRequired,
   nombreEmpresa: PropTypes.string.isRequired,
   documento: PropTypes.string.isRequired,
-  handleSignOut: PropTypes.func.isRequired,
 };
 
 export default Title;

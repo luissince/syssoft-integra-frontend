@@ -13,6 +13,7 @@ import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import { images } from '../../../../../helper';
 import Image from '@/components/Image';
+import Button from '@/components/Button';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -30,6 +31,7 @@ class CustomModalStock extends Component {
       loading: true,
       message: 'Cargando datos...',
 
+      codigo: '',
       nombre: '',
       imagen: null,
       idInventario: '',
@@ -78,6 +80,7 @@ class CustomModalStock extends Component {
       this.abortController = null;
 
       this.setState({
+        codigo: producto.codigo,
         nombre: producto.producto,
         imagen: producto.imagen,
         stockMinimo: response.data.cantidadMinima,
@@ -218,6 +221,7 @@ class CustomModalStock extends Component {
       loading,
       message,
 
+      codigo,
       nombre,
       imagen,
       stockMinimo,
@@ -238,25 +242,32 @@ class CustomModalStock extends Component {
         onSubmit={this.handleOnSubmit}
         body={
           <>
-            <SpinnerView loading={loading} message={message} />
-
-            {/* Producto + Imagen */}
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              {nombre}
-            </h2>
-            <Image
-              default={images.noImage}
-              src={imagen}
-              alt={nombre}
-              width={100}
-              height={100}
-              className="object-contain rounded border mb-2"
+            <SpinnerView
+              loading={loading}
+              message={message}
             />
 
-            {/* Formulario Stock */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col md:flex-row items-center gap-3 mb-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Image
+                  default={images.noImage}
+                  src={imagen}
+                  alt={nombre}
+                  width={100}
+                  height={100}
+                  className="object-contain rounded"
+                />
+              </div>
+
+              <div className="flex flex-col text-center md:text-left">
+                <p className="text-sm">{codigo}</p>
+                <p className="text-base">{nombre}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="w-full">
+                <label className="block text-sm mb-2">
                   Stock Mínimo <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -270,8 +281,8 @@ class CustomModalStock extends Component {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="w-full">
+                <label className="block text-sm mb-2">
                   Stock Máximo <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -288,21 +299,19 @@ class CustomModalStock extends Component {
           </>
         }
         footer={
-          <>
-            <button
+          <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+            <Button
               type="submit"
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              <i className="fa fa-save mr-2"></i> Guardar
-            </button>
-            <button
-              type="button"
+              className="btn-primary w-full md:w-auto">
+              <i className="fa fa-save"></i> Guardar
+            </Button>
+            <Button
+              className="btn-danger w-full md:w-auto"
               onClick={async () => await this.refModal.current.handleOnClose()}
-              className="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
-              <i className="fa fa-close mr-2"></i> Cerrar
-            </button>
-          </>
+              <i className="fa fa-close"></i> Cerrar
+            </Button>
+          </div>
         }
       />
     );

@@ -1,10 +1,6 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertSuccess,
-  alertWarning,
   spinnerLoading,
-  alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -23,13 +19,14 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
  * @extends CustomComponent
  */
 class Medidas extends CustomComponent {
-  
+
   constructor(props) {
     super(props);
 
@@ -143,7 +140,7 @@ class Medidas extends CustomComponent {
       const data = response.data;
 
       const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(data.total) / this.state.filasPorPagina),
+        String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
       );
 
       this.setState({
@@ -181,34 +178,47 @@ class Medidas extends CustomComponent {
     });
   };
 
-  handleDelete = (id) => {
-    alertDialog(
-      'Medida',
-      '¿Estás seguro de eliminar la Medida?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idMedida: id,
-          };
-
-          alertInfo('Medida', 'Se esta procesando la petición...');
-
-          const response = await removeMedida(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Medida', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Medida', response.getMessage());
-          }
-        }
+  handleAnular = async (id) => {
+    const accept = await alertKit.question({
+      title: 'Medida',
+      message: '¿Estás seguro de eliminar la Medida?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idMedida: id,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await removeMedida(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Medida',
+          message: response.data,
+        }, async () => {
+          await this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Medida',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   generarBody() {
@@ -258,7 +268,7 @@ class Medidas extends CustomComponent {
           <td className="text-center">
             <Button
               className="btn-outline-danger btn-sm"
-              onClick={() => this.handleDelete(item.idMedida)}
+              onClick={() => this.handleAnular(item.idMedida)}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -305,10 +315,7 @@ class Medidas extends CustomComponent {
               <table className="table table-striped table-bordered rounded">
                 <thead>
                   <tr>
-                    <th width="5%" className="text-center">
-                      {' '}
-                      #{' '}
-                    </th>
+                    <th width="5%" className="text-center">#</th>
                     <th width="10%">Código</th>
                     <th width="25%">Nombre</th>
                     <th width="15%">Descripción</th>

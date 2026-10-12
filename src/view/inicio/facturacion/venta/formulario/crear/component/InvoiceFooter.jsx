@@ -4,7 +4,7 @@ import {
   formatCurrency,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
-import { SERVICIO } from '../../../../../../../model/types/tipo-tratamiento-producto';
+import { TIPO_TRATAMIENTO_PRODUCTO_NINGUNO } from '../../../../../../../model/types/tipo-tratamiento-producto';
 import Button from '../../../../../../../components/Button';
 
 const InvoiceFooter = (props) => {
@@ -18,7 +18,7 @@ const InvoiceFooter = (props) => {
 
   const subTotal = detalleVenta.reduce((accumulator, item) => {
     const cantidad =
-      item.idTipoTratamientoProducto === SERVICIO
+      item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
         ? item.cantidad
         : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
 
@@ -40,7 +40,7 @@ const InvoiceFooter = (props) => {
 
       if (impuesto) {
         const cantidad =
-          item.idTipoTratamientoProducto === SERVICIO
+          item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
             ? item.cantidad
             : item.inventarios.reduce(
                 (acc, current) => acc + current.cantidad,
@@ -84,7 +84,7 @@ const InvoiceFooter = (props) => {
 
   const total = detalleVenta.reduce((accumulator, item) => {
     const cantidad =
-      item.idTipoTratamientoProducto === SERVICIO
+      item.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_NINGUNO
         ? item.cantidad
         : item.inventarios.reduce((acc, current) => acc + current.cantidad, 0);
 

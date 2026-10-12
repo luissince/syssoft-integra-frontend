@@ -40,11 +40,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ) => {
     if (type === 'color') {
       return (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {label}
-          </label>
-          <div className="d-flex align-items-center">
+        <>        
+          {label && (
+            typeof label === "string"
+              ? <label>{label}</label>
+              : label
+          )}
+          <div className="flex items-center">
             <input
               type="color"
               className="h-10 w-10 border rounded"
@@ -52,14 +54,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               {...rest}
             />
           </div>
-        </div>
+        </>
       );
     }
 
     if (group) {
       return (
         <>
-          {label && <label>{label}</label>}
+          {label && (
+            typeof label === "string"
+              ? <label>{label}</label>
+              : label
+          )}
           <div className="input-group">
             {iconLeft && (
               <div className="input-group-prepend">
@@ -85,7 +91,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <>
-        {label && <label>{label}</label>}
+        {label && (
+          typeof label === "string"
+            ? <label>{label}</label>
+            : label
+        )}
         <input
           ref={ref}
           type={type}

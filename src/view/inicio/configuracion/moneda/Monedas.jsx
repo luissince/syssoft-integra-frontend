@@ -205,7 +205,7 @@ class Monedas extends CustomComponent {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="8"
+          colSpan={8}
           message="Cargando información de la tabla..."
         />
       );

@@ -1,7 +1,6 @@
 import ContainerWrapper from '../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import {
-  alertWarning,
   calculateTax,
   calculateTaxBruto,
   formatNumberWithZeros,
@@ -37,6 +36,7 @@ import PropTypes from 'prop-types';
 import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,25 +51,7 @@ class OrdenCompraDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idOrdenCompra: '',
-      fechaHora: '',
-
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
-
-      comprobante: '',
-      serieNumeracion: '',
-
-      estado: '',
-
-      observacion: '',
-      notas: '',
-
-      codiso: '',
-      total: 0,
-
+      cabecera: null,
       detalles: [],
     };
 
@@ -132,7 +114,10 @@ class OrdenCompraDetalle extends CustomComponent {
     if (response instanceof ErrorResponse) {
       if (response.getType() === CANCELED) return;
 
-      alertWarning('Orden de Compra', response.getMessage(), () => {
+      alertKit.warning({
+        title: 'Orden de Compra',
+        message: response.getMessage(),
+      },  () => {
         this.close();
       });
       return;

@@ -20,7 +20,7 @@ import {
   getUbigeo,
   comboTipoDocumento,
 } from '../../../../../network/rest/principal.network';
-import { getDni, getRuc } from '../../../../../network/rest/apisperu.network';
+import { getDni, getRuc } from '../../../../../network/rest/api-client';
 import { CANCELED } from '../../../../../model/types/types';
 import CustomComponent from '@/components/CustomComponent';
 import SearchInput from '../../../../../components/SearchInput';
@@ -31,15 +31,13 @@ import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
 import Select from '../../../../../components/Select';
 import Input from '../../../../../components/Input';
-import RadioButton from '../../../../../components/RadioButton';
 import CheckBox, { Switches } from '../../../../../components/Checks';
-import { RUC } from '../../../../../model/types/tipo-documento';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class PersonaEditar extends CustomComponent {
   constructor(props) {
@@ -213,7 +211,7 @@ class PersonaEditar extends CustomComponent {
     this.setState({ email: event.target.value });
   };
 
-  handleInputClave = () => {
+  handleInputClave = (event) => {
     this.setState({ clave: event.target.value });
   };
 
@@ -231,7 +229,7 @@ class PersonaEditar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número dni debe tener 8 caracteres.",
       }, () => {
-        this.refNumeroDocumento.current.focus();
+        this.refDocumento.current.focus();
       })
       return;
     }
@@ -241,33 +239,34 @@ class PersonaEditar extends CustomComponent {
       msgLoading: 'Consultando número de DNI...',
     });
 
-    const response = await getDni(this.state.documento);
+    const { success, data, message, type } = await getDni(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.dni),
-        informacion:
-          convertNullText(response.data.apellidoPaterno) +
-          ' ' +
-          convertNullText(response.data.apellidoMaterno) +
-          ' ' +
-          convertNullText(response.data.nombres),
-        loading: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Persona",
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.dni),
+      informacion:
+        convertNullText(data.apellidoPaterno) +
+        ' ' +
+        convertNullText(data.apellidoMaterno) +
+        ' ' +
+        convertNullText(data.nombres),
+      loading: false,
+    });
+
+
   };
 
   handleGetApiSunat = async () => {
@@ -276,7 +275,7 @@ class PersonaEditar extends CustomComponent {
         title: "Persona",
         message: "Para iniciar la busqueda en número ruc debe tener 11 caracteres.",
       }, () => {
-        this.refNumeroDocumento.current.focus();
+        this.refDocumento.current.focus();
       });
       return;
     }
@@ -286,29 +285,28 @@ class PersonaEditar extends CustomComponent {
       msgLoading: 'Consultando número de RUC...',
     });
 
-    const response = await getRuc(this.state.documento);
+    const { success, data, message, type } = await getRuc(this.state.documento);
 
-    if (response instanceof SuccessReponse) {
-      this.setState({
-        documento: convertNullText(response.data.ruc),
-        informacion: convertNullText(response.data.razonSocial),
-        direccion: convertNullText(response.data.direccion),
-        loading: false,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: "Persona",
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.setState({
           loading: false,
         });
       });
+      return;
     }
+
+    this.setState({
+      documento: convertNullText(data.ruc),
+      informacion: convertNullText(data.razonSocial),
+      direccion: convertNullText(data.direccion),
+      loading: false,
+    });
   };
 
   handleFilterUbigeo = async (text) => {
@@ -524,9 +522,9 @@ class PersonaEditar extends CustomComponent {
           <Column className="col-md-6 col-12" formGroup={true}>
             <Select
               label={
-                <>
+                <label>
                   Tipo Documento: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${idTipoDocumento ? '' : 'is-invalid'}`}
               value={idTipoDocumento}
@@ -548,9 +546,9 @@ class PersonaEditar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   N° de documento ({documento.length}):  <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${documento ? '' : 'is-invalid'}`}
               ref={this.refDocumento}
@@ -589,10 +587,10 @@ class PersonaEditar extends CustomComponent {
           <Column formGroup={true}>
             <Input
               label={
-                <>
+                <label>
                   {tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               className={`${informacion ? '' : 'is-invalid'}`}
               ref={this.refInformacion}

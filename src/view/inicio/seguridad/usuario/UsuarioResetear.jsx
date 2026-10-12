@@ -1,9 +1,5 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   isText,
 } from '../../../../helper/utils.helper';
@@ -18,6 +14,8 @@ import Row from '../../../../components/Row';
 import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Input from '../../../../components/Input';
+import { alertKit } from 'alert-kit';
+import { CANCELED } from '@/model/types/types';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -49,36 +47,58 @@ class UsuarioResetear extends CustomComponent {
     });
   };
 
-  handleGuardar() {
+  async handleGuardar() {
     if (isEmpty(this.state.resetClave)) {
-      alertWarning('Usuario', 'Ingrese la nueva clave.', () => {
+      alertKit.warning({
+        title: 'Usuario',
+        message: 'Ingrese la nueva clave.',
+      }, () => {
         this.refResetClave.current.focus();
       });
       return;
     }
 
-    alertDialog('Usuario', '¿Está seguro de continuar?', async (accept) => {
-      if (accept) {
-        const data = {
-          clave: this.state.resetClave,
-          idUsuario: this.state.idUsuario,
-        };
-
-        alertInfo('Usuario', 'Procesando información...');
-
-        const response = await resetUsuario(data);
-
-        if (response instanceof SuccessReponse) {
-          alertSuccess('Usuario', response.data, () => {
-            this.props.history.goBack();
-          });
-        }
-
-        if (response instanceof ErrorResponse) {
-          alertWarning('Usuario', response.getMessage());
-        }
-      }
+    const accept = await alertKit.question({
+      title: 'Usuario',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
     });
+
+    if (accept) {
+      const data = {
+        clave: this.state.resetClave,
+        idUsuario: this.state.idUsuario,
+      };
+
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await resetUsuario(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Usuario',
+          message: response.data,
+        }, () => {
+          this.props.history.goBack();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Usuario',
+          message: response.getMessage(),
+        });
+      }
+    }
   }
 
   render() {

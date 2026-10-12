@@ -31,9 +31,9 @@ import CustomComponent from '@/components/CustomComponent';
 import Button from '../../../../../../components/Button';
 import Input from '../../../../../../components/Input';
 import { listCotizacion } from '../../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../../model/class/response';
-import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
+import { cn } from '@/lib/utils';
+import { Check, CircleCheck, CircleX, Clock, ShoppingCart, X } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -42,6 +42,7 @@ import { CANCELED } from '../../../../../../model/types/types';
 class ModalCotizacion extends CustomComponent {
   constructor(props) {
     super(props);
+
     this.state = {
       loading: false,
       buscar: '',
@@ -56,7 +57,10 @@ class ModalCotizacion extends CustomComponent {
       fechaFinal: currentDate(),
     };
 
-    this.abortController = new AbortController();
+    this.initial = { ...this.state };
+
+    this.peticion = false;
+    this.abortController = null;
   }
 
   handleOnOpen = async () => {
@@ -76,8 +80,8 @@ class ModalCotizacion extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(1, text.trim());
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -87,7 +91,7 @@ class ModalCotizacion extends CustomComponent {
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false });
-    this.fillTable(2, '', this.state.fechaInicio, this.state.fechaFinal);
+    this.fillTable(2);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -97,22 +101,12 @@ class ModalCotizacion extends CustomComponent {
   };
 
   handlPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      case 2:
-        this.fillTable(2);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion) => {
+    this.abortController = new AbortController();
+
     this.setState({
       loading: true,
       lista: [],
@@ -121,43 +115,56 @@ class ModalCotizacion extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: this.state.buscar,
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idSucursal: this.props.idSucursal,
-      ligado: -1,
+      ligado: " ",
       estado: 1,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
-    const response = await listCotizacion(params, this.abortController.signal);
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(
-        Math.ceil(parseFloat(response.data.total) / this.state.filasPorPagina),
-      );
+    const { success, data, message, type } = await listCotizacion(params, this.abortController.signal);
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      });
-    }
+    if (!success) {
+      if (type === CANCELED) return;
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+      this.peticion = true;
+      this.abortController = null;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.peticion = true;
+    this.abortController = null;
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    });
   };
 
   handleOnHidden = () => {
-    this.setState({ lista: [] });
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
+    this.setState(this.initial);
+    this.peticion = false;
   };
 
   handleInputBuscar = (event) => {
@@ -165,25 +172,19 @@ class ModalCotizacion extends CustomComponent {
   };
 
   handleFechaInicio = (event) => {
-    this.setState(
-      {
-        fechaInicio: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaInicio: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   handleFechaFinal = (event) => {
-    this.setState(
-      {
-        fechaFinal: event.target.value,
-      },
-      () => {
-        this.handleSearchFecha();
-      },
-    );
+    this.setState({
+      fechaFinal: event.target.value,
+    }, () => {
+      this.handleSearchFecha();
+    });
   };
 
   generateBody = () => {
@@ -193,7 +194,7 @@ class ModalCotizacion extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="9"
+          colSpan={9}
           message="Cargando información de la tabla..."
         />
       );
@@ -210,14 +211,6 @@ class ModalCotizacion extends CustomComponent {
     }
 
     return lista.map((item, index) => {
-      const estado = (
-        <span
-          className={`${item.estado === 1 ? 'text-success' : 'text-danger'}`}
-        >
-          {item.estado === 1 ? 'ACTIVO' : 'ANULADO'}
-        </span>
-      );
-
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
@@ -236,16 +229,61 @@ class ModalCotizacion extends CustomComponent {
             <br />
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
           <TableCell className="text-center">
             <span
-              className={
-                item.ligado == 0
-                  ? 'badge badge-secondary'
-                  : 'badge badge-success'
-              }
+              className={cn(
+                "inline-flex items-center gap-1",
+                "font-medium",
+                item.estado === 1 && "text-green-700",
+                item.estado === 0 && "text-red-700",
+              )}
             >
-              {item.ligado}
+              {item.estado === 1 ? (
+                <>
+                  <CircleCheck className="w-4 h-4" />
+                  Activo
+                </>
+              ) : (
+                <>
+                  <CircleX className="w-4 h-4" />
+                  Anulado
+                </>
+              )}
+            </span>
+          </TableCell>
+          <TableCell className="text-center">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1",
+                "rounded-full",
+                "text-sm font-medium",
+                "px-2.5 py-0.5",
+
+                item.ligado === 0 && "bg-red-100 text-red-700",
+                item.ligado === 1 && "bg-blue-100 text-blue-700",
+                item.ligado === 2 && "bg-green-100 text-green-700",
+              )}
+            >
+              {item.ligado === 0 && (
+                <>
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  Sin venta
+                </>
+              )}
+
+              {item.ligado === 1 && (
+                <>
+                  <Clock className="w-3.5 h-3.5" />
+                  Falta ({item.cantidadCotizada - item.cantidadVendida})
+                </>
+              )}
+
+              {item.ligado === 2 && (
+                <>
+                  <CircleCheck className="w-3.5 h-3.5" />
+                  Completado
+                </>
+              )}
             </span>
           </TableCell>
           <TableCell className="text-center">
@@ -305,10 +343,10 @@ class ModalCotizacion extends CustomComponent {
                     <Input
                       group={true}
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-search"></i> Buscar por N° de
                           Cotización o Cliente:
-                        </>
+                        </label>
                       }
                       placeholder="Buscar..."
                       value={buscar}
@@ -331,9 +369,9 @@ class ModalCotizacion extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-calendar"></i> Fecha Inicio:
-                        </>
+                        </label>
                       }
                       type="date"
                       value={fechaInicio}
@@ -344,9 +382,9 @@ class ModalCotizacion extends CustomComponent {
                   <Column formGroup={true}>
                     <Input
                       label={
-                        <>
+                        <label>
                           <i className="fa fa-calendar"></i> Fecha Final:
-                        </>
+                        </label>
                       }
                       type="date"
                       value={fechaFinal}
@@ -361,20 +399,14 @@ class ModalCotizacion extends CustomComponent {
                       <Table className="table-bordered">
                         <TableHeader>
                           <TableRow>
-                            <TableHead width="5%" className="text-center">
-                              #
-                            </TableHead>
+                            <TableHead width="5%" className="text-center">#</TableHead>
                             <TableHead width="10%">Fecha</TableHead>
                             <TableHead width="15%">Comprobante</TableHead>
                             <TableHead width="15%">Cliente</TableHead>
-                            <TableHead width="5%">Estado</TableHead>
-                            <TableHead width="5%">Ligado</TableHead>
-                            <TableHead width="10%" className="text-center">
-                              Total
-                            </TableHead>
-                            <TableHead width="5%" className="text-center">
-                              Seleccionar
-                            </TableHead>
+                            <TableHead width="5%" className="text-center">Estado</TableHead>
+                            <TableHead width="10%" className="text-center">Ligado</TableHead>
+                            <TableHead width="10%" className="text-center">Total</TableHead>
+                            <TableHead width="5%" className="text-center">Seleccionar</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>{this.generateBody()}</TableBody>

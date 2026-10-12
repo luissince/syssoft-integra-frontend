@@ -65,7 +65,7 @@ const TabHead = forwardRef((props, ref) => {
   return (
     <li ref={ref} className="nav-item" role="presentation" {...rest}>
       <a
-        className={`nav-link ${isActive ? 'active' : ''} ${className}`}
+        className={`nav-link text-sm ${isActive ? 'active' : ''} ${className}`}
         id={`${id}-tab`}
         data-bs-toggle="tab"
         href={`#${id}`}

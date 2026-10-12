@@ -164,9 +164,9 @@ class MonedaEditar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Nombre: <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refTxtNombre}
               value={this.state.nombre}
@@ -181,10 +181,10 @@ class MonedaEditar extends CustomComponent {
             <Input
               group={true}
               label={
-                <>
+                <label>
                   Código ISO:{' '}
                   <i className="fa fa-asterisk text-danger small"></i>
-                </>
+                </label>
               }
               ref={this.refTxtCodIso}
               value={this.state.codIso}

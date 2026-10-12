@@ -318,7 +318,7 @@ class Catalogos extends CustomComponent {
     if (loading) {
       return (
         <SpinnerTable
-          colSpan="5"
+          colSpan={5}
           message="Cargando información de la tabla..."
         />
       );

@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import Button from '../../../../../../components/Button';
 import { images } from '../../../../../../helper';
 import {
-  alertWarning,
   imageBase64,
 } from '../../../../../../helper/utils.helper';
+import { alertKit } from 'alert-kit';
 
 class ItemImage extends React.Component {
   constructor(props) {
@@ -38,22 +38,23 @@ class ItemImage extends React.Component {
       const imageSend = await imageBase64(file);
 
       if (!imageSend) {
-        alertWarning(
-          'Producto',
-          'Error en subir la imagen',
-        );
+        alertKit.warning({
+          title: 'Producto',
+          message: 'Error en subir la imagen',
+        });
         continue;
       }
 
       if (imageSend.size > 500) {
-        alertWarning(
-          'Producto',
-          'La imagen ' +
-          file.name +
-          ' a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de ' +
-          imageSend.size +
-          ' KB',
-        );
+        alertKit.warning({
+          title: 'Producto',
+          message:
+            'La imagen ' +
+            file.name +
+            ' a subir tiene que ser menor a 500 KB, la imagen tiene un peso aproximado de ' +
+            imageSend.size +
+            ' KB',
+        });
         continue;
       }
 

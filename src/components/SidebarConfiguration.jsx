@@ -1,12 +1,11 @@
 import PropTypes from 'prop-types';
 import Select from './Select';
-import Row from './Row';
-import Column from './Column';
 import Button from './Button';
 import TextArea from './TextArea';
 import { Printer } from 'lucide-react';
 import { usePrivilegios } from '@/hooks/use-privilegios';
 import { CAMBIAR_DE_ALMACEN, CAMBIAR_IMPUESTO, FACTURACION, VENTAS } from '@/model/types/menu';
+import { FaAsterisk } from 'react-icons/fa';
 
 const SidebarConfiguration = (props) => {
 
@@ -26,21 +25,21 @@ const SidebarConfiguration = (props) => {
 
   const { refNota, nota, handleInputNota } = props;
 
-  const { refInstruccion, instruccion, handleInputInstruccion } = props;
-
   const { handleSaveOptions, handleCloseOptions } = props;
 
   return (
     <div id={idSidebarConfiguration} className="side-modal">
       <div className="side-modal_wrapper">
-        <div className="card h-100 border-0 rounded-0">
-          <div className="card-header">Configuración</div>
+        <div className="card h-full border-0 rounded-none">
+          <div className="card-header">
+            <h5>Configuración</h5>
+          </div>
           <Button contentClassName="close" onClick={handleCloseOptions}>
             <span>&times;</span>
           </Button>
 
-          <div className="card-body h-100 overflow-y-auto">
-            <Row>
+          <div className="card-body h-full overflow-y-auto">
+            {/* <Row>
               <Column formGroup={true}>
                 <label>
                   Impuesto: <i className="fa fa-asterisk text-danger small"></i>
@@ -60,108 +59,112 @@ const SidebarConfiguration = (props) => {
                   ))}
                 </Select>
               </Column>
-            </Row>
+            </Row> */}
 
-            <Row>
-              <Column formGroup={true}>
-                <label>
-                  Moneda: <i className="fa fa-asterisk text-danger small"></i>{' '}
-                </label>
+            <div className="flex flex-col mb-3 gap-3">
+              <Select
+                label={
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm">Impuesto:</span> <FaAsterisk className="text-danger" />
+                  </div>
+                }
+                title="Lista de Impuestos"
+                ref={refImpuesto}
+                value={idImpuesto}
+                onChange={handleSelectIdImpuesto}
+                disabled={!cambiarImpuesto}
+              >
+                <option value="">-- Impuesto --</option>
+                {impuestos.map((item, index) => (
+                  <option key={index} value={item.idImpuesto}>
+                    {item.nombre}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="flex flex-col mb-3 gap-3">
+              <Select
+                label={
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm">Moneda:</span> <FaAsterisk className="text-danger" />
+                  </div>
+                }
+                title="Lista de Monedas"
+                ref={refMoneda}
+                value={idMoneda}
+                onChange={handleSelectIdMoneda}
+              >
+                <option value="">-- Moneda --</option>
+                {monedas.map((item, index) => (
+                  <option key={index} value={item.idMoneda}>
+                    {item.nombre}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            {refAlmacen && (
+              <div className="flex flex-col mb-3 gap-3">
                 <Select
-                  title="Lista de Monedas"
-                  ref={refMoneda}
-                  value={idMoneda}
-                  onChange={handleSelectIdMoneda}
+                  label={
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">Almacen:</span> <FaAsterisk className="text-danger" />
+                    </div>
+                  }
+                  title="Lista de Almacenes"
+                  ref={refAlmacen}
+                  value={idAlmacen}
+                  onChange={handleSelectIdIdAlmacen}
+                  disabled={!cambiarAlmacen}
                 >
-                  <option value="">-- Moneda --</option>
-                  {monedas.map((item, index) => (
-                    <option key={index} value={item.idMoneda}>
+                  <option value="">-- Almacen --</option>
+                  {almacenes.map((item, index) => (
+                    <option key={index} value={item.idAlmacen}>
                       {item.nombre}
                     </option>
                   ))}
                 </Select>
-              </Column>
-            </Row>
-
-            {refAlmacen && (
-              <Row>
-                <Column formGroup={true}>
-                  <label>
-                    Almacen:{' '}
-                    <i className="fa fa-asterisk text-danger small"></i>{' '}
-                  </label>
-                  <Select
-                    title="Lista de Almacenes"
-                    ref={refAlmacen}
-                    value={idAlmacen}
-                    onChange={handleSelectIdIdAlmacen}
-                    disabled={!cambiarAlmacen}
-                  >
-                    <option value="">-- Almacen --</option>
-                    {almacenes.map((item, index) => (
-                      <option key={index} value={item.idAlmacen}>
-                        {item.nombre}
-                      </option>
-                    ))}
-                  </Select>
-                </Column>
-              </Row>
+              </div>
             )}
 
-            <Row>
-              <Column formGroup={true}>
-                <label>Observación (Visible internamente):</label>
-                <TextArea
-                  placeholder="Ingrese alguna observación."
-                  ref={refObservacion}
-                  value={observacion}
-                  onChange={handleInputObservacion}
-                />
-              </Column>
-            </Row>
-
-            <Row>
-              <Column formGroup={true}>
-                <label>
-                  <div className='flex items-center gap-2'>
-                    <span>Nota (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
-                  </div>
-                </label>
-                <TextArea
-                  placeholder="Ingrese alguna nota o información adicional."
-                  ref={refNota}
-                  value={nota}
-                  onChange={handleInputNota}
-                />
-              </Column>
-            </Row>
-
             {
-              refInstruccion && (
-                <Row>
-                  <Column formGroup={true}>
-                    <label>
-                      <div className='flex items-center gap-2'>
-                        <span> Instrucciones (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
-                      </div>
-                    </label>
-                    <TextArea
-                      placeholder="Ingrese las instrucciones de entrega."
-                      ref={refInstruccion}
-                      value={instruccion}
-                      onChange={handleInputInstruccion}
-                    />
-                  </Column>
-                </Row>
+              refObservacion && (
+                <div className="flex flex-col mb-3 gap-3">
+                  <TextArea
+                    label={
+                      <span className="text-sm">
+                        Observación (Visible internamente):
+                      </span>
+                    }
+                    placeholder="Ingrese alguna observación."
+                    ref={refObservacion}
+                    value={observacion ?? ''}
+                    onChange={handleInputObservacion}
+                  />
+                </div>
               )
             }
+
+            <div className="flex flex-col mb-3 gap-2">
+              <TextArea
+                label={
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm">Nota (Visible en los documentos impresos):</span> <Printer className='w-4 h-4' />
+                  </div>
+                }
+                placeholder="Ingrese alguna nota o información adicional."
+                ref={refNota}
+                value={nota ?? ''}
+                onChange={handleInputNota}
+              />
+            </div>
           </div>
 
           <div className="card-footer bg-white">
-            <div className="d-flex align-items-center justify-content-between">
+            <div className="flex items-center justify-between">
               <span className="d-block">
-                Campos obligatorios{' '}
-                <i className="fa fa-asterisk text-danger small"></i>
+                Campos obligatorios <i className="fa fa-asterisk text-danger small"></i>
               </span>
               <div>
                 <Button
@@ -207,17 +210,13 @@ SidebarConfiguration.propTypes = {
   idAlmacen: PropTypes.string,
   handleSelectIdIdAlmacen: PropTypes.func,
 
-  refObservacion: PropTypes.object.isRequired,
-  observacion: PropTypes.string.isRequired,
-  handleInputObservacion: PropTypes.func.isRequired,
+  refObservacion: PropTypes.object,
+  observacion: PropTypes.string,
+  handleInputObservacion: PropTypes.func,
 
   refNota: PropTypes.object.isRequired,
   nota: PropTypes.string.isRequired,
   handleInputNota: PropTypes.func.isRequired,
-
-  refInstruccion: PropTypes.object,
-  instruccion: PropTypes.string,
-  handleInputInstruccion: PropTypes.func,
 
   handleSaveOptions: PropTypes.func.isRequired,
   handleCloseOptions: PropTypes.func.isRequired,

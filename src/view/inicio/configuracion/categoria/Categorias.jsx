@@ -1,8 +1,4 @@
 import {
-  alertDialog,
-  alertSuccess,
-  alertWarning,
-  alertInfo,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -31,6 +27,7 @@ import Search from '../../../../components/Search';
 import { SpinnerTable } from '../../../../components/Spinner';
 import { images } from '../../../../helper';
 import Image from '../../../../components/Image';
+import { alertKit } from 'alert-kit';
 
 class Categorias extends CustomComponent {
   constructor(props) {
@@ -183,39 +180,52 @@ class Categorias extends CustomComponent {
     });
   };
 
-  handleDelete = (id) => {
-    alertDialog(
-      'Categoría',
-      '¿Estás seguro de eliminar la Categoría?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idCategoria: id,
-          };
-
-          alertInfo('Categoría', 'Se esta procesando la petición...');
-
-          const response = await removeCategoria(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Categoría', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Categoría', response.getMessage());
-          }
-        }
+  handleDelete = async (id) => {
+    const accept = await alertKit.question({
+      title: 'Categoría',
+      message: '¿Estás seguro de eliminar la Categoría?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idCategoria: id,
+      };
+
+      alertKit.loading({ message: 'Se esta procesando la petición...' });
+
+      const response = await removeCategoria(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Categoría',
+          message: response.data,
+        }, () => {
+          this.loadInit();
+        });        
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Categoría',
+          message: response.getMessage(),
+        });       
+      }
+    }
   };
 
   generateBody() {
     if (this.state.loading) {
       return (
         <SpinnerTable
-          colSpan="7"
+          colSpan={7}
           message="Cargando información de la tabla..."
         />
       );
@@ -258,7 +268,7 @@ class Categorias extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idCategoria)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -267,7 +277,7 @@ class Categorias extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleDelete(item.idCategoria)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>

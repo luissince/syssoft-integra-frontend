@@ -1,10 +1,8 @@
 import React from 'react';
 import {
-  getNumber,
   isEmpty,
   keyNumberFloat,
   rounded,
-  validateNumericInputs,
 } from '../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import ContainerWrapper from '../../../../../components/Container';
@@ -31,7 +29,7 @@ import Title from '../../../../../components/Title';
 import RadioButton from '../../../../../components/RadioButton';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
-import { SERVICIO } from '../../../../../model/types/tipo-producto';
+import { TIPO_PRODUCTO_SERVICIO } from '../../../../../model/types/tipo-producto';
 import {
   Table,
   TableBody,
@@ -43,6 +41,7 @@ import {
   TableTitle,
 } from '../../../../../components/Table';
 import { alertKit } from 'alert-kit';
+import { TIPO_TRASLADO_ENTRE_ALMACENES, TIPO_TRASLADO_ENTRE_SUCURSALES } from '@/model/types/tipo-traslado';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -304,7 +303,7 @@ class TrasladorCrear extends CustomComponent {
 
     const params = {
       idAlmacen:
-        this.state.idTipoTraslado === 'TT0001'
+        this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES
           ? this.state.idAlmacenOrigenInterno
           : this.state.idAlmacenOrigenExterno,
       filtrar: searchWord,
@@ -314,7 +313,7 @@ class TrasladorCrear extends CustomComponent {
 
     // Filtrar productos por tipoProducto !== "SERVICIO"
     const filteredProductos = productos.filter(
-      (item) => item.idTipoProducto !== SERVICIO,
+      (item) => item.idTipoProducto !== TIPO_PRODUCTO_SERVICIO,
     );
 
     this.setState({
@@ -432,7 +431,7 @@ class TrasladorCrear extends CustomComponent {
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0001' &&
+      this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES &&
       isEmpty(this.state.idAlmacenOrigenInterno)
     ) {
       alertKit.warning(
@@ -448,7 +447,7 @@ class TrasladorCrear extends CustomComponent {
     }
 
     if (
-      this.state.idTipoTraslado === 'TT0001' &&
+      this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES &&
       isEmpty(this.state.idAlmacenDestinoInterno)
     ) {
       alertKit.warning(
@@ -511,7 +510,7 @@ class TrasladorCrear extends CustomComponent {
       return;
     }
 
-    if (this.state.idTipoTraslado === 'TT0001') {
+    if (this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES) {
       this.setState({
         nombreMotivoAjuste:
           this.refIdMotivoTraslado.current.options[
@@ -595,29 +594,25 @@ class TrasladorCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   handleSave = async () => {
     if (isEmpty(this.state.detalles)) {
-      alertKit.warning(
-        {
-          title: 'Traslado',
-          message: 'Agregue productos en la lista para continuar.',
-        },
-        () => {
-          this.refValueProducto.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Traslado',
+        message: 'Agregue productos en la lista para continuar.',
+      }, () => {
+        this.refValueProducto.current.focus();
+      });
       return;
     }
 
-    const accept = await alertKit.question(
-      {
-        title: 'Traslado',
-        message: '¿Está seguro de continuar?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Traslado',
+      message: '¿Está seguro de continuar?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       const data = {
@@ -625,12 +620,12 @@ class TrasladorCrear extends CustomComponent {
         idMotivoTraslado: this.state.idMotivoTraslado,
         idSucursalOrigen: this.state.idSucursal,
         idAlmacenOrigen:
-          this.state.idTipoTraslado === 'TT0001'
+          this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES
             ? this.state.idAlmacenOrigenInterno
             : this.state.idAlmacenOrigenExterno,
         idSucursalDestino: this.state.idSucursalExterno,
         idAlmacenDestino:
-          this.state.idTipoTraslado === 'TT0001'
+          this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES
             ? this.state.idAlmacenDestinoInterno
             : this.state.idAlmacenDestinoExterno,
         observacion: this.state.observacion,
@@ -646,18 +641,15 @@ class TrasladorCrear extends CustomComponent {
       const response = await createTraslado(data);
 
       if (response instanceof SuccessReponse) {
-        alertKit.success(
-          {
-            title: 'Traslado',
-            message: response.data,
-          },
-          () => {
-            this.setState(this.initial, async () => {
-              await this.loadingData();
-              this.refIdTipoTraslado.current.focus();
-            });
-          },
-        );
+        alertKit.success({
+          title: 'Traslado',
+          message: response.data,
+        }, () => {
+          this.setState(this.initial, async () => {
+            await this.loadingData();
+            this.refIdTipoTraslado.current.focus();
+          });
+        });
       }
 
       if (response instanceof ErrorResponse) {
@@ -679,18 +671,17 @@ class TrasladorCrear extends CustomComponent {
   };
 
   handleClear = async () => {
-    const accept = await alertKit.question(
-      {
-        title: 'Traslado',
-        message:
-          '¿Está seguro de continuar, se va limpiar toda la información?',
-        acceptButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-        cancelButton: {
-          html: "<i class='fa fa-close'></i> Cancelar",
-        },
-      });
+    const accept = await alertKit.question({
+      title: 'Traslado',
+      message:
+        '¿Está seguro de continuar, se va limpiar toda la información?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
+      },
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
 
     if (accept) {
       this.setState(this.initial, async () => {
@@ -817,20 +808,20 @@ class TrasladorCrear extends CustomComponent {
 
                 <RadioButton
                   ref={this.refIdTipoTraslado}
-                  id={'TT0001'}
-                  value={'TT0001'}
+                  id={TIPO_TRASLADO_ENTRE_ALMACENES}
+                  value={TIPO_TRASLADO_ENTRE_ALMACENES}
                   name="ckTipoTraslado"
-                  checked={this.state.idTipoTraslado === 'TT0001'}
+                  checked={this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES}
                   onChange={this.handleOptionTipoTraslado}
                 >
                   Entre almacenes
                 </RadioButton>
 
                 <RadioButton
-                  id={'TT0002'}
-                  value={'TT0002'}
+                  id={TIPO_TRASLADO_ENTRE_SUCURSALES}
+                  value={TIPO_TRASLADO_ENTRE_SUCURSALES}
                   name="ckTipoTraslado"
-                  checked={this.state.idTipoTraslado === 'TT0002'}
+                  checked={this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_SUCURSALES}
                   onChange={this.handleOptionTipoTraslado}
                 >
                   Entre sucursales
@@ -859,7 +850,7 @@ class TrasladorCrear extends CustomComponent {
 
             {
               // Verificar si el tipo de ajuste es 'TT0001'
-              this.state.idTipoTraslado === 'TT0001' && (
+              this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES && (
                 <>
                   {/* Selección el almacen de origen */}
                   <Row>
@@ -913,7 +904,7 @@ class TrasladorCrear extends CustomComponent {
 
             {
               // Verificar si el tipo de ajuste es 'TT0002'
-              this.state.idTipoTraslado === 'TT0002' && (
+              this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_SUCURSALES && (
                 <>
                   <Row>
                     <Column formGroup={true}>
@@ -1021,14 +1012,14 @@ class TrasladorCrear extends CustomComponent {
                           Tipo de Traslado:
                         </TableHead>
                         <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                          {this.state.idTipoTraslado === 'TT0001' ? (
+                          {this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES ? (
                             <span>Entre almacenes</span>
                           ) : (
                             <span>Entre sucursales</span>
                           )}
                         </TableHead>
                       </TableRow>
-                      {this.state.idTipoTraslado === 'TT0001' && (
+                      {this.state.idTipoTraslado === TIPO_TRASLADO_ENTRE_ALMACENES && (
                         <>
                           <TableRow>
                             <TableHead className="table-secondary w-20 p-1 font-weight-normal ">
@@ -1105,13 +1096,7 @@ class TrasladorCrear extends CustomComponent {
                   data={this.state.productos}
                   handleClearInput={this.handleClearInputProducto}
                   handleFilter={this.handleFilterProducto}
-                  handleSelectItem={this.handleSelectItemProducto}
-                  // renderItem={(value) => (
-                  //   <>
-                  //     {value.codigo} / {value.nombre}  <small>({value.categoria})</small>
-                  //   </>
-                  // )}
-
+                  handleSelectItem={this.handleSelectItemProducto}                
                   renderItem={(value) => (
                     <div className="d-flex align-items-center">
                       <Image
@@ -1135,9 +1120,7 @@ class TrasladorCrear extends CustomComponent {
             <Row>
               <Column formGroup={true}>
                 <Input
-                  label={
-                    'Ingrese alguna descripción para saber el motivo del ajuste:'
-                  }
+                  label={"Ingrese alguna descripción para saber el motivo del traslado:"}
                   placeholder="Ingrese una observación"
                   value={this.state.observacion}
                   onChange={this.handleInputObservacion}

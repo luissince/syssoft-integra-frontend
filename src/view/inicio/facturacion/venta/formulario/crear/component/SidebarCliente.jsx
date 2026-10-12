@@ -68,11 +68,11 @@ const SidebarCliente = (props) => {
               <Column formGroup={true}>
                 <Select
                   label={
-                    <>
+                    <label>
                       {' '}
                       Tipo Documento:{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={refIdTipoDocumento}
                   value={idTipoDocumento}
@@ -97,11 +97,11 @@ const SidebarCliente = (props) => {
                   autoFocus={true}
                   group={true}
                   label={
-                    <>
+                    <label>
                       {' '}
                       N° de documento ({numeroDocumento.length}):{' '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   placeholder={tipoDocumento && tipoDocumento.longitud ? `Ingrese ${tipoDocumento.longitud} dígitos` : 'Ingrese número de documento'}
                   ref={refNumeroDocumento}
@@ -143,10 +143,10 @@ const SidebarCliente = (props) => {
               <Column formGroup={true}>
                 <Input
                   label={
-                    <>
+                    <label>
                       {tipoDocumento && tipoDocumento.tipoEntidad === JURIDICA ? 'Razón Social: ' : 'Apellidos y Nombres: '}
                       <i className="fa fa-asterisk text-danger small"></i>
-                    </>
+                    </label>
                   }
                   ref={refInformacion}
                   value={informacion}

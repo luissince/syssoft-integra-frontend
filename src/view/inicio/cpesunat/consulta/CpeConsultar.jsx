@@ -21,12 +21,13 @@ import Title from '../../../../components/Title';
 import Button from '../../../../components/Button';
 import Select from '../../../../components/Select';
 import { alertKit } from 'alert-kit';
+import CustomComponent from '@/components/CustomComponent';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
-class CpeElectronicos extends React.Component {
+class CpeElectronicos extends CustomComponent {
   /**
    *
    * Constructor
@@ -59,12 +60,6 @@ class CpeElectronicos extends React.Component {
     this.refCorrelativo = React.createRef();
   }
 
-  setStateAsync(state) {
-    return new Promise((resolve) => {
-      this.setState(state, resolve);
-    });
-  }
-
   componentDidMount() {
     this.loadData();
   }
@@ -85,7 +80,7 @@ class CpeElectronicos extends React.Component {
     }
   };
 
-  async onEventConsultarEstado() {
+  onEventConsultarEstado = async () => {
     if (isEmpty(this.state.ruc)) {
       alertKit.warning({
         title: 'Consultar Comprobante',
@@ -210,7 +205,7 @@ class CpeElectronicos extends React.Component {
     }
   }
 
-  async onEventConsultarCdr() {
+  onEventConsultarCdr = async () => {
     if (isEmpty(this.state.ruc)) {
       alertKit.warning({
         title: 'Consultar Comprobante',
@@ -344,7 +339,7 @@ class CpeElectronicos extends React.Component {
     }
   }
 
-  async onEventLimpiar() {
+  onEventLimpiar = async () => {
     await this.setStateAsync({
       tipo: '',
       serie: '',
@@ -414,13 +409,9 @@ class CpeElectronicos extends React.Component {
               <option value="07">07 - Nota de Crédito</option>
               <option value="08">08 - Nota de Débito</option>
               <option value="R1">R1 - Recibo por Honorarios</option>
-              <option value="R7">
-                R7 - Nota Crédito Recibo por Honorarios{' '}
-              </option>
+              <option value="R7">R7 - Nota Crédito Recibo por Honorarios</option>
               <option value="04">04 - Liquidación de Compra</option>
-              <option value="23">
-                23 - Póliza de Adjudicación Electrónica
-              </option>
+              <option value="23">23 - Póliza de Adjudicación Electrónica</option>
             </Select>
           </Column>
         </Row>
@@ -483,43 +474,36 @@ class CpeElectronicos extends React.Component {
           </Column>
         </Row>
 
-        <Row>
-          <Column className="col-md-6 col-sm-12" formGroup={true}>
-            <Button
-              className="btn-success"
-              onClick={() => this.onEventConsultarEstado()}
-            >
-              Consultar Estado
-            </Button>{' '}
-            <Button
-              className="btn-primary"
-              onClick={() => this.onEventConsultarCdr()}
-            >
-              Consultar CDR
-            </Button>{' '}
-            <Button
-              className="btn-danger"
-              onClick={() => this.onEventLimpiar()}
-            >
-              Limpiar
-            </Button>
-          </Column>
-          <div className="col-md-6 col-sm-12"></div>
-        </Row>
+        <div className="flex flex-col md:flex-row gap-3 mb-3">
+          <Button
+            className="btn-success"
+            onClick={this.onEventConsultarEstado}
+          >
+            Consultar Estado
+          </Button>
 
-        <Row>
-          <Column className="col-sm-12">
-            <div className="form-group">
-              <h6>Resultado</h6>
-            </div>
-          </Column>
-          <Column className="col-sm-12">
-            <label>Codigo: {this.state.codigo}</label>
-          </Column>
-          <Column className="col-sm-12">
-            <label>Respuesta: {this.state.respuesta}</label>
-          </Column>
-        </Row>
+          <Button
+            className="btn-primary"
+            onClick={this.onEventConsultarCdr}
+          >
+            Consultar CDR
+          </Button>
+
+          <Button
+            className="btn-danger"
+            onClick={this.onEventLimpiar}
+          >
+            Limpiar
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h6>Resultado</h6>
+
+          <p>Codigo: {this.state.codigo}</p>
+
+          <p>Respuesta: {this.state.respuesta}</p>
+        </div>
       </ContainerWrapper>
     );
   }
