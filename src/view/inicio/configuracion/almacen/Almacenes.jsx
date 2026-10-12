@@ -217,15 +217,14 @@ class Almacenes extends CustomComponent {
    * Esta es una función se encarga de borrar un almacen
    *
    * @param {string} idAlmacen - Id del almacen
-   * @returns {void}
+   * @returns {Promise<void>}
    *
    * @example
    * // Ejemplo de uso:
    * handleEliminar('AL0001');
    */
   handleEliminar = async (idAlmacen) => {
-    const accept = await alertKit.question(
-      {
+    const accept = await alertKit.question({
         title: 'Almacén',
         message:
           '¿Está seguro de que desea eliminar el almacen? Esta operación no se puede deshacer.',

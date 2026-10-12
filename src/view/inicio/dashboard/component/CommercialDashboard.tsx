@@ -7,24 +7,18 @@ import {
     FileText,
     ClipboardCheck,
     Users,
-    CalendarIcon,
-    Building2,
 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 import { comboSucursal, dashboardInit } from "@/network/rest/api-client";
 import { CANCELED } from "@/model/types/types";
 import { alertKit } from "alert-kit";
-import { currentDate, formatDate, isEmpty, formatCurrency, rounded } from "@/helper/utils.helper";
+import { isEmpty, formatCurrency, rounded, startOfMonth, endOfMonth } from "@/helper/utils.helper";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import SucursalInterface from "@/model/ts/interface/sucursal.interface";
 import DashboardInterface, { StatCardInterface } from "@/model/ts/interface/dashboard.interface";
 import ErrorResponse from "@/model/class/error-response";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { DatePicker } from "@/components/DatePicker";
 
 interface Props {
     token: {
@@ -42,8 +36,8 @@ const previousYear = currentYear - 1;
 
 const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
     const [dateRange, setDateRange] = useState({
-        start: currentDate(),
-        end: currentDate(),
+        start: startOfMonth(),
+        end: endOfMonth(),
     });
     const [branches, setBranches] = useState<SucursalInterface[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<string>(token.project.idSucursal || '');
@@ -72,8 +66,8 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
         setBranches(branchResponse.data);
 
         const params = {
-            fechaInicio: dateRange.start,
-            fechaFinal: dateRange.end,
+            fechaInicio: format(dateRange.start, "yyyy-MM-dd"),
+            fechaFinal: format(dateRange.end, "yyyy-MM-dd"),
             idSucursal: selectedBranch,
         };
 
@@ -102,14 +96,13 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
 
     const handleSelectStart = (selectedDate: Date) => {
         if (selectedDate) {
-            console.log(selectedDate, format(selectedDate, "yyyy-MM-dd"));
-            setDateRange((prev) => ({ ...prev, start: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, start: selectedDate }));
         }
     };
 
     const handleSelectEnd = (selectedDate: Date) => {
         if (selectedDate) {
-            setDateRange((prev) => ({ ...prev, end: format(selectedDate, "yyyy-MM-dd") }));
+            setDateRange((prev) => ({ ...prev, end: selectedDate }));
         }
     };
 
@@ -137,7 +130,7 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
     );
 
     const BranchPerformanceChart = () => (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="bg-white  rounded-lg shadow-sm border border-gray-100 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Rendimiento por Sucursal</h3>
             <div className="space-y-4">
                 {!isEmpty(dashboardData.branchPerformance) ? (
@@ -241,41 +234,19 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
             <div className="mb-8 bg-white flex items-center justify-between space-x-4">
                 <div className="flex items-center space-x-4">
                     <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start  focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.start ? formatDate(dateRange.start) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.start)}
-                                    onSelect={handleSelectStart}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <DatePicker
+                            value={dateRange.start}
+                            onChange={handleSelectStart}
+                            placeholder="Desde"
+                        />
                     </div>
 
                     <div className="space-y-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start  focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dateRange.end ? formatDate(dateRange.end) : "Desde"}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-white">
-                                <Calendar
-                                    mode="single"
-                                    selected={new Date(dateRange.end)}
-                                    onSelect={handleSelectEnd}
-                                    locale={es}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <DatePicker
+                            value={dateRange.end}
+                            onChange={handleSelectEnd}
+                            placeholder="Hasta"
+                        />
                     </div>
                 </div>
 
@@ -283,13 +254,7 @@ const CommercialDashboard: React.FC<Props> = ({ token, moneda }) => {
                     <select
                         value={selectedBranch}
                         onChange={(e) => setSelectedBranch(e.target.value)}
-                        className={cn(
-                            "w-full px-4 py-2",
-                            "rounded-lg",
-                            "border border-gray-300 text-sm",
-                            "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                            "hover:bg-accent hover:text-accent-foreground"
-                        )}
+                        className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         {
                             branches.map((branch, index) => (

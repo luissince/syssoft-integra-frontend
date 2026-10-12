@@ -10,9 +10,6 @@ import Compras from './compra/lista/Compras.jsx';
 import CompraCrear from './compra/crear/CompraCrear.jsx';
 import CompraDetalle from './compra/detalle/CompraDetalle.jsx';
 
-import CuentasPorPagar from './cuenta-pagar/lista/CuentasPorPagar.jsx';
-import CuentasPorPagarAmortizar from './cuenta-pagar/crear/CuentasPorPagarAmortizar.jsx';
-
 import OrdenCompras from './orden-compra/lista/OrdenCompra.jsx';
 import OrdenCompraCrear from './orden-compra/formularios/crear/OrdenCompraCrear.jsx';
 import OrdenCompraEditar from './orden-compra/formularios/editar/OrdenCompraEditar.jsx';
@@ -25,8 +22,6 @@ export {
   Compras,
   CompraCrear,
   CompraDetalle,
-  CuentasPorPagar,
-  CuentasPorPagarAmortizar,
   OrdenCompras,
   OrdenCompraCrear,
   OrdenCompraEditar,

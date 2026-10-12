@@ -51,25 +51,7 @@ class OrdenCompraDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idOrdenCompra: '',
-      fechaHora: '',
-
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
-
-      comprobante: '',
-      serieNumeracion: '',
-
-      estado: '',
-
-      observacion: '',
-      notas: '',
-
-      codiso: '',
-      total: 0,
-
+      cabecera: null,
       detalles: [],
     };
 

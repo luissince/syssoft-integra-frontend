@@ -1,9 +1,5 @@
 import React from 'react';
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
   formatTime,
 } from '../../../../../helper/utils.helper';
@@ -42,6 +38,7 @@ import {
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -284,33 +281,45 @@ class LogisticaAjuste extends CustomComponent {
     });
   };
 
-  handleCancelar = (idAjuste) => {
-    alertDialog(
-      'Ajuste',
-      '¿Estás seguro de anular el ajuste?',
-      async (acccept) => {
-        if (acccept) {
-          alertInfo('Ajuste', 'Procesando información...');
-
-          const params = {
-            idAjuste: idAjuste,
-            idUsuario: this.state.idUsuario,
-          };
-
-          const response = await cancelAjuste(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Ajuste', response.data, () => {
-              this.loadingInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            alertWarning('Ajuste', response.getMessage());
-          }
-        }
+  handleCancelar = async (idAjuste) => {
+    const accept = await alertKit.question({
+      title: 'Ajuste',
+      message: '¿Estás seguro de anular el ajuste?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      alertKit.loading({ message: 'Procesando información...' });
+
+      const params = {
+        idAjuste: idAjuste,
+        idUsuario: this.state.idUsuario,
+      };
+
+      const response = await cancelAjuste(params);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.success({
+          title: 'Ajuste',
+          message: response.data,
+        }, () => {
+          this.loadingInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        alertKit.warning({
+          title: 'Ajuste',
+          message: response.getMessage(),
+        });
+      }
+    }
+
   };
 
   generarBody = () => {

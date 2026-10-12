@@ -6,6 +6,7 @@ import {
   formatNumberWithZeros,
   isEmpty,
   formatCurrency,
+  currentDate,
 } from '../../../../../helper/utils.helper';
 import ErrorResponse from '../../../../../model/class/error-response';
 import SuccessReponse from '../../../../../model/class/response';
@@ -16,20 +17,7 @@ import {
 } from '../../../../../network/rest/principal.network';
 import { connect } from 'react-redux';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../components/Table';
-import { SpinnerTable } from '../../../../../components/Spinner';
 import PropTypes from 'prop-types';
-import Button from '../../../../../components/Button';
 import Search from '../../../../../components/Search';
 import {
   setListaCompraData,
@@ -38,7 +26,11 @@ import {
 import React from 'react';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
-import { Eye, Trash } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, Trash } from 'lucide-react';
+import { FORMA_PAGO_CREDITO } from '@/model/types/forma-pago';
+import { MdOutlineClosedCaptionDisabled } from 'react-icons/md';
+import { DatePicker } from '@/components/DatePicker';
+import { format } from 'date-fns';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -58,6 +50,9 @@ class Compras extends CustomComponent {
       lista: [],
       restart: false,
 
+      fechaInicio: new Date().toISOString(),
+      fechaFinal: new Date().toISOString(),
+
       buscar: '',
 
       opcion: 0,
@@ -67,6 +62,8 @@ class Compras extends CustomComponent {
       messageTable: 'Cargando información...',
 
       view: 'tabla',
+
+      credito: {},
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -165,6 +162,16 @@ class Compras extends CustomComponent {
     await this.setStateAsync({ opcion: 1 });
   };
 
+  async searchOpciones() {
+    if (this.state.loading) return;
+
+    if (this.state.fechaInicio > this.state.fechaFinal) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(2);
+    await this.setStateAsync({ opcion: 2 });
+  }
+
   paginacionContext = async (listid) => {
     await this.setStateAsync({ paginacion: listid, restart: false });
     this.onEventPaginacion();
@@ -185,6 +192,8 @@ class Compras extends CustomComponent {
       opcion: opcion,
       buscar: this.state.buscar,
       idSucursal: this.state.idSucursal,
+      fechaInicio: format(this.state.fechaInicio, "yyyy-MM-dd"),
+      fechaFinal: format(this.state.fechaFinal, "yyyy-MM-dd"),
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
@@ -234,6 +243,18 @@ class Compras extends CustomComponent {
 
   handleChangeView = (value) => {
     this.setState({ view: value }, () => this.updateReduxState());
+  };
+
+  handleInputFechaInico = (selectedDate) => {
+    this.setState({ fechaInicio: selectedDate }, () => {
+      this.searchOpciones();
+    });
+  };
+
+  handleInputFechaFinal = (selectedDate) => {
+    this.setState({ fechaFinal: selectedDate }, () => {
+      this.searchOpciones();
+    });
   };
 
   handleCrear = () => {
@@ -291,6 +312,15 @@ class Compras extends CustomComponent {
         })
       }
     }
+  };
+
+  handleShowCredit = (index) => {
+    this.setState((prevState) => ({
+      credito: {
+        ...prevState.credito,
+        [index]: !prevState.credito?.[index],
+      }
+    }));
   };
 
   /*
@@ -359,95 +389,136 @@ class Compras extends CustomComponent {
               </span>
             );
             return (
-              <div
-                key={index}
-                className={cn(
-                  "text-sm text-gray-900",
-                  view === "tabla"
-                    ? "grid grid-cols-[0.5fr_1fr_2.0fr_1.5fr_1.3fr_1.0fr_1.0fr_1.7fr] py-3 gap-x-3 items-center"
-                    : "flex flex-col h-full gap-3 rounded border p-3"
-                )}
-              >
-                <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
-                  {
-                    view === "tabla" && (
-                      <div className=" text-center hidden md:block">
-                        {item.id}
-                      </div>
-                    )
-                  }
-
-                  <div>
-                    <div>{item.fecha}</div>
-                    <div className="text-xs text-gray-500">{formatTime(item.hora)}</div>
-                  </div>
-
-                  <div>
-                    <div>{item.tipoDocumento} - {item.documento}</div>
-                    <div className="text-xs text-gray-500">{item.informacion}</div>
-                  </div>
-
-                  <div>
-                    <div>{item.comprobante}</div>
-                    <div className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</div>
-                  </div>
-
-                  <div>
-                    <div>{item.tipo}</div>
-                  </div>
-
-                  <div className={cn(
-                    "text-center",
-                    view === "tabla" ? "text-center" : "text-left"
-                  )}>
-                    {estado}
-                  </div>
-
-                  <div className="text-right">
-                    {formatCurrency(item.total, item.codiso)}
-                  </div>
-                </div>
-
+              <div key={index}>
                 <div
                   className={cn(
-                    "flex gap-2",
+                    "text-sm text-gray-900",
                     view === "tabla"
-                      ? "flex-col md:flex-row justify-center"
-                      : "flex-row justify-end"
+                      ? "grid grid-cols-[0.5fr_1fr_2.0fr_1.5fr_1.0fr_1.0fr_1.0fr_2.0fr] py-3 gap-x-3 items-center"
+                      : "flex flex-col h-full gap-3 rounded border p-3"
                   )}
                 >
-                  <button
-                    onClick={() => this.handleDetalle(item.idCompra)}
-                    className={cn(
-                      "inline-flex items-center justify-center gap-2",
-                      "px-3 py-2",
-                      "transition rounded",
-                      "bg-gray-100 text-gray-600 text-sm font-medium",
-                      "hover:bg-gray-300",
-                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                      "active:bg-blue-100 active:scale-[0.97]",
-                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                    )}
-                  >
-                    <Eye className="w-5 h-5 text-blue-500" />
-                  </button>
+                  <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
+                    {
+                      view === "tabla" && (
+                        <div className=" text-center hidden md:block">
+                          {item.id}
+                        </div>
+                      )
+                    }
 
-                  <button
-                    onClick={() => this.handleAnular(item.idCompra)}
+                    <div>
+                      <div>{item.fecha}</div>
+                      <div className="text-xs text-gray-500">{formatTime(item.hora)}</div>
+                    </div>
+
+                    <div>
+                      <div>{item.tipoDocumento} - {item.documento}</div>
+                      <div className="text-xs text-gray-500">{item.informacion}</div>
+                    </div>
+
+                    <div>
+                      <div>{item.comprobante}</div>
+                      <div className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</div>
+                    </div>
+
+                    <div>
+                      <div>{item.formaPago}</div>
+                    </div>
+
+                    <div className={cn(
+                      "text-center",
+                      view === "tabla" ? "text-center" : "text-left"
+                    )}>
+                      {estado}
+                    </div>
+
+                    <div className="text-right">
+                      {formatCurrency(item.total, item.codiso)}
+                    </div>
+                  </div>
+
+                  <div
                     className={cn(
-                      "inline-flex items-center justify-center gap-2",
-                      "px-3 py-2",
-                      "transition rounded",
-                      "bg-gray-100 text-gray-600 text-sm font-medium",
-                      "hover:bg-gray-300",
-                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                      "active:bg-blue-100 active:scale-[0.97]",
-                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      "flex gap-2",
+                      view === "tabla"
+                        ? "flex-col md:flex-row justify-center"
+                        : "flex-row justify-end"
                     )}
                   >
-                    <Trash className="w-5 h-5 text-red-500" />
-                  </button>
+                    <button
+                      onClick={() => this.handleDetalle(item.idCompra)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Eye className="w-5 h-5 text-blue-500" />
+                    </button>
+
+                    <button
+                      onClick={() => this.handleAnular(item.idCompra)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Trash className="w-5 h-5 text-red-500" />
+                    </button>
+
+                    <button
+                      onClick={() => this.handleShowCredit(index)}
+                      disabled={item.idFormaPago !== FORMA_PAGO_CREDITO}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      {
+                        item.idFormaPago === FORMA_PAGO_CREDITO ? (
+                          this.state.credito[index] ? (
+                            <ChevronUp className="h-5 w-5" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5" />
+                          )
+                        ) :
+                          <MdOutlineClosedCaptionDisabled className="h-5 w-5" />
+                      }
+                    </button>
+                  </div>
                 </div>
+
+                {item.idFormaPago === FORMA_PAGO_CREDITO && this.state.credito[index] && (
+                  <div className="w-full bg-gray-50">
+                    <div className="rounded p-3">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">
+                        Detalles del crédito
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <p>Pagado: {formatCurrency(item.pagado, item.codiso)}</p>
+                        <p>Restante: {formatCurrency(item.total - item.pagado, item.codiso)}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })
@@ -537,6 +608,26 @@ class Compras extends CustomComponent {
           </p>
         </div>
 
+        {/* Filtros de fechas, comprobante y estado */}
+        <div className="flex flex-col gap-y-4 mb-4">
+          {/* Filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Fecha de Inicio */}
+            <DatePicker
+              value={this.state.fechaInicio}
+              onChange={this.handleInputFechaInico}
+              placeholder="Desde"
+            />
+
+            {/* Fecha Final */}
+            <DatePicker
+              value={this.state.fechaFinal}
+              onChange={this.handleInputFechaFinal}
+              placeholder="Desde"
+            />
+          </div>
+        </div>
+
         {/* Barra de búsqueda */}
         <div className="w-full">
           <Search
@@ -561,7 +652,7 @@ class Compras extends CustomComponent {
             <div className={cn(
               "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
             )}>
-              <div className="grid grid-cols-[0.5fr_1fr_2.0fr_1.5fr_1.3fr_1.0fr_1.0fr_1.7fr] gap-x-3 py-3">
+              <div className="grid grid-cols-[0.5fr_1fr_2.0fr_1.5fr_1.0fr_1.0fr_1.0fr_2.0fr] gap-x-3 py-3">
                 <div className="text-center">#</div>
                 <div>Fecha y Hora</div>
                 <div>Cliente</div>

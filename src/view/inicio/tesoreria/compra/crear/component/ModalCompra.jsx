@@ -1,0 +1,413 @@
+import PropTypes from 'prop-types';
+import Row from '../../../../../../components/Row';
+import Column from '../../../../../../components/Column';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableResponsive,
+  TableRow,
+} from '../../../../../../components/Table';
+import Paginacion from '../../../../../../components/Paginacion';
+import CustomModal, {
+  CustomModalContentBody,
+  CustomModalContentFooter,
+  CustomModalContentHeader,
+  CustomModalContentOverflow,
+  CustomModalContentScroll,
+} from '../../../../../../components/CustomModal';
+import { SpinnerTable } from '../../../../../../components/Spinner';
+import {
+  formatNumberWithZeros,
+  formatTime,
+  isEmpty,
+  keyUpSearch,
+  formatCurrency,
+} from '../../../../../../helper/utils.helper';
+import CustomComponent from '@/components/CustomComponent';
+import { listCompra } from '../../../../../../network/rest/principal.network';
+import { CANCELED } from '../../../../../../model/types/types';
+import Input from '../../../../../../components/Input';
+import Button from '../../../../../../components/Button';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { DatePicker } from '@/components/DatePicker';
+import React from 'react';
+
+/**
+ * Componente que representa una funcionalidad específica.
+ * @extends CustomComponent
+ */
+class ModalCompra extends CustomComponent {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: false,
+
+      opcion: 0,
+
+      buscar: '',
+
+      lista: [],
+      restart: false,
+      paginacion: 0,
+      totalPaginacion: 0,
+      filasPorPagina: 10,
+
+      messageTable: 'Cargando información...',
+      fechaInicio: new Date().toISOString(),
+      fechaFinal: new Date().toISOString(),
+    };
+
+    this.initial = { ...this.state };
+
+    this.refBuscar = React.createRef();
+
+    this.peticion = false;
+    this.abortController = null;
+  }
+
+  loadInit = async () => {
+    if (this.state.loading) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: true });
+    this.fillTable(0);
+    await this.setStateAsync({ opcion: 0 });
+  };
+
+  handleOnOpen = async () => {
+    this.refBuscar.current.focus();
+
+    await this.loadInit();
+  };
+
+  handleSearchText = async (text) => {
+    if (this.state.loading) return;
+
+    if (text.trim().length === 0) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    this.fillTable(1);
+    await this.setStateAsync({ opcion: 1 });
+  };
+
+  handleSearchFecha = async () => {
+    if (this.state.loading) return;
+
+    if (this.state.fechaInicio > this.state.fechaFinal) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: false });
+    this.fillTable(2);
+    await this.setStateAsync({ opcion: 2 });
+  };
+
+  handlePaginacion = async (listid) => {
+    await this.setStateAsync({ paginacion: listid, restart: false });
+    this.handlPaginacion();
+  };
+
+  handlPaginacion = () => {
+    this.fillTable(this.state.opcion);
+  };
+
+  fillTable = async (opcion) => {
+    this.abortController = new AbortController();
+
+    this.setState({
+      loading: true,
+      lista: [],
+      messageTable: 'Cargando información...',
+    });
+
+    const params = {
+      opcion: opcion,
+      buscar: this.state.buscar,
+      idSucursal: this.props.idSucursal,
+      fechaInicio: format(this.state.fechaInicio, "yyyy-MM-dd"),
+      fechaFinal: format(this.state.fechaFinal, "yyyy-MM-dd"),
+      posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
+      filasPorPagina: this.state.filasPorPagina,
+    };
+
+    const { success, data, message, type } = await listCompra(params, this.abortController.signal);
+
+    if (!success) {
+      if (type === CANCELED) return;
+
+      this.peticion = true;
+      this.abortController = null;
+
+      this.setState({
+        loading: false,
+        lista: [],
+        totalPaginacion: 0,
+        messageTable: message,
+      });
+      return;
+    }
+
+    const totalPaginacion = parseInt(
+      String(Math.ceil(parseFloat(data.total) / this.state.filasPorPagina)),
+    );
+
+    this.peticion = true;
+    this.abortController = null;
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+    });
+  };
+
+  handleOnHidden = () => {
+    if (!this.peticion) {
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+    }
+
+    this.setState(this.initial);
+    this.peticion = false;
+  };
+
+  handleInputBuscar = (event) => {
+    this.setState({ buscar: event.target.value });
+  };
+
+  handleFechaInicio = (selectedDate) => {
+    this.setState({
+      fechaInicio: selectedDate,
+    }, () => {
+      this.handleSearchFecha();
+    });
+  };
+
+  handleFechaFinal = (selectedDate) => {
+    this.setState({
+      fechaFinal: selectedDate,
+    }, () => {
+      this.handleSearchFecha();
+    });
+  };
+
+  generateBody = () => {
+    const { loading, lista } = this.state;
+    const { handleSeleccionar } = this.props;
+
+    if (loading) {
+      return (
+        <SpinnerTable
+          colSpan={8}
+          message="Cargando información de la tabla..."
+        />
+      );
+    }
+
+    if (isEmpty(lista)) {
+      return (
+        <TableRow>
+          <TableCell className="text-center" colSpan="8">
+            ¡No hay datos registrados!
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return lista.map((item, index) => {
+      return (
+        <TableRow key={index}>
+          <TableCell className={`text-center`}>{item.id}</TableCell>
+          <TableCell>
+            {item.fecha}
+            <br />
+            {formatTime(item.hora)}
+          </TableCell>
+          <TableCell>
+            {item.documento}
+            <br />
+            {item.informacion}
+          </TableCell>
+          <TableCell>
+            {item.comprobante}
+            <br />
+            {item.serie}-{formatNumberWithZeros(item.numeracion)}
+          </TableCell>
+          <TableCell className="text-center">
+            <span className={cn(
+              "inline-flex items-center rounded-full",
+              "text-xs font-medium",
+              "px-2.5 py-0.5",
+              item.estado === 1 && "bg-green-100 text-green-800",
+              item.estado === 2 && "bg-yellow-100 text-yellow-800",
+              item.estado === 3 && "bg-red-100 text-red-800",
+            )}>
+              {item.estado === 1 && "PAGADO"}
+              {item.estado === 2 && "POR PAGAR"}
+              {item.estado === 3 && "ANULADO"}
+            </span>
+          </TableCell>
+          <TableCell className="text-center">
+            {formatCurrency(item.total, item.codiso)}{' '}
+          </TableCell>
+          <TableCell className="text-center">
+            <Button
+              className="btn-primary btn-sm"
+              title="Seleccionar"
+              onClick={async () => {
+                await this.props.refModal.current.handleOnClose();
+                handleSeleccionar(item.idCompra);
+              }}
+            >
+              <i className="fa fa-plus"></i>
+            </Button>
+          </TableCell>
+        </TableRow>
+      );
+    });
+  };
+
+  render() {
+    const {
+      loading,
+      buscar,
+      lista,
+      totalPaginacion,
+      paginacion,
+      restart,
+      fechaInicio,
+      fechaFinal,
+    } = this.state;
+
+    const { refModal, isOpen, handleClose } = this.props;
+
+    return (
+      <CustomModal
+        ref={refModal}
+        isOpen={isOpen}
+        onOpen={this.handleOnOpen}
+        onHidden={this.handleOnHidden}
+        onClose={handleClose}
+        contentLabel="Modal de Compra"
+        className={'modal-custom-lg h-[80%]'}
+      >
+        <CustomModalContentScroll>
+          <CustomModalContentHeader contentRef={refModal}>
+            Compras
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody className={'p-0'}>
+            <CustomModalContentOverflow>
+              <div className="p-3">
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+                  {/* Buscador: 50% */}
+                  <div className="md:col-span-2 flex flex-col gap-2">
+                    <span className="text-sm font-normal">
+                      <i className="fa fa-search"></i> Buscar por N° de Compra o Proveedor:
+                    </span>
+
+                    <Input
+                      ref={this.refBuscar}
+                      group={true}
+                      placeholder="Buscar..."
+                      value={buscar}
+                      onChange={this.handleInputBuscar}
+                      onKeyUp={(event) =>
+                        keyUpSearch(
+                          event,
+                          () => this.handleSearchText(buscar)
+                        )
+                      }
+                      buttonRight={
+                        <Button
+                          className="btn-outline-secondary"
+                          title="Recargar"
+                          onClick={this.loadInit}
+                        >
+                          <i className="bi bi-arrow-clockwise"></i>
+                        </Button>
+                      }
+                    />
+                  </div>
+
+                  {/* Fecha inicio: 25% */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-normal">
+                      <i className="fa fa-calendar"></i> Fecha Inicio:
+                    </span>
+
+                    <DatePicker
+                      value={fechaInicio}
+                      onChange={this.handleFechaInicio}
+                      placeholder="Desde"
+                    />
+                  </div>
+
+                  {/* Fecha final: 25% */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-normal">
+                      <i className="fa fa-calendar"></i> Fecha Final:
+                    </span>
+
+                    <DatePicker
+                      value={fechaFinal}
+                      onChange={this.handleFechaFinal}
+                      placeholder="Hasta"
+                    />
+                  </div>
+                </div>
+
+                <Row>
+                  <Column>
+                    <TableResponsive>
+                      <Table className="table-bordered">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead width="5%" className="text-center">#</TableHead>
+                            <TableHead width="10%">Fecha</TableHead>
+                            <TableHead width="15%">Proveedor</TableHead>
+                            <TableHead width="15%">Comprobante</TableHead>
+                            <TableHead width="5%" className="text-center">Estado</TableHead>
+                            <TableHead width="10%" className="text-center">Total</TableHead>
+                            <TableHead width="5%" className="text-center">Seleccionar</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>{this.generateBody()}</TableBody>
+                      </Table>
+                    </TableResponsive>
+                  </Column>
+                </Row>
+              </div>
+            </CustomModalContentOverflow>
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter className={'footer-cm-table'}>
+            <Paginacion
+              className="w-100"
+              loading={loading}
+              data={lista}
+              totalPaginacion={totalPaginacion}
+              paginacion={paginacion}
+              fillTable={this.handlePaginacion}
+              restart={restart}
+            />
+          </CustomModalContentFooter>
+        </CustomModalContentScroll>
+      </CustomModal>
+    );
+  }
+}
+
+ModalCompra.propTypes = {
+  refModal: PropTypes.object.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  idSucursal: PropTypes.string.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  handleSeleccionar: PropTypes.func.isRequired,
+};
+
+export default ModalCompra;

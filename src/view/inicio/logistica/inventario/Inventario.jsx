@@ -32,10 +32,8 @@ import {
   Barcode,
   Box,
   CheckCircle,
-  PackageOpen,
   PackagePlus,
   Plus,
-  RefreshCw,
 } from 'lucide-react';
 import Image from '../../../../components/Image';
 import { images } from '../../../../helper';
@@ -356,7 +354,7 @@ class Inventario extends CustomComponent {
     await this.refModalStock.current.loadDatos(producto);
   };
 
-  handleCloseStock = async () => {
+  handleCloseModalStock = async () => {
     this.setState({ isOpenStock: false });
   };
 
@@ -624,7 +622,7 @@ class Inventario extends CustomComponent {
           <CustomModalStock
             ref={this.refModalStock}
             isOpen={this.state.isOpenStock}
-            onClose={this.handleCloseStock}
+            onClose={this.handleCloseModalStock}
             handleSave={this.loadInit}
           />
         </Suspense>

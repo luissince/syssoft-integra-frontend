@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   isLoading: true,
+  isVisible: false,
   isSignOut: true,
   isSignIn: false,
   isConfig: true,
@@ -57,14 +58,12 @@ const principalSlice = createSlice({
 });
 
 export const {
-  initSession,
   restoreToken,
   signIn,
   signOut,
   projectActive,
   projectClose,
   config,
-  configSave,
-  updatePrincipal,
+  configSave
 } = principalSlice.actions;
 export default principalSlice.reducer;

@@ -5,6 +5,7 @@ import Button from './Button';
 import CustomModal, {
   CustomModalContentBody,
   CustomModalContentFooter,
+  CustomModalContentForm,
   CustomModalContentHeader,
   CustomModalForm,
 } from './CustomModal';
@@ -20,7 +21,9 @@ import { CANCELED } from '../model/types/types';
 import {
   convertNullText,
   currentDate,
+  formatCurrency,
   isEmpty,
+  isNumeric,
   keyNumberPhone,
   validateNumberWhatsApp,
 } from '../helper/utils.helper';
@@ -171,6 +174,8 @@ class ModalPreImpresion extends Component {
       message: '',
     };
 
+    this.initial = { ...this.state };
+
     this.peticion = false;
     this.abortController = null;
 
@@ -188,7 +193,8 @@ class ModalPreImpresion extends Component {
       }
     }
 
-    this.setState({ loading: false });
+    this.setState(this.initial);
+
     this.peticion = false;
     this.abortController = null;
   };
@@ -300,6 +306,8 @@ class ModalPersona extends Component {
       ubigeos: [],
     };
 
+    this.initial = { ...this.state };
+
     this.refModal = React.createRef();
     this.peticion = false;
     this.abortController = null;
@@ -350,22 +358,7 @@ class ModalPersona extends Component {
       }
     }
 
-    this.setState({
-      loading: true,
-      msgLoading: 'Cargando datos...',
-
-      idTipoDocumento: '',
-      documento: '',
-      informacion: '',
-      celular: '',
-      email: '',
-      direccion: '',
-      idUbigeo: '',
-
-      tiposDocumentos: [],
-
-      ubigeos: [],
-    });
+    this.setState(this.initial);
 
     this.peticion = false;
     this.abortController = null;
@@ -921,4 +914,262 @@ ModalSendWhatsApp.propTypes = {
   handleProcess: PropTypes.func.isRequired,
 };
 
-export { ModalImpresion, ModalPreImpresion, ModalPersona, ModalSendWhatsApp };
+/**
+ * Modal para pagar al credito.
+ */
+
+class ModalPago extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      monto: '',
+      total: 0,
+      pagado: 0,
+    };
+
+    this.initial = { ...this.state }; 
+
+    this.refModal = React.createRef();
+    this.refMonto = React.createRef();
+  }
+
+  handleOnOpen = () => {
+    const total = this.props.detalles.reduce(
+      (acc, detalle) =>
+        acc + Number(detalle.costo || detalle.precio || 0) * Number(detalle.cantidad || 0),
+      0
+    );
+
+    const pagado = this.props.transacciones
+      .flatMap(transaccion => transaccion.detalles || [])
+      .reduce(
+        (acc, detalle) => acc + Number(detalle.monto || 0),
+        0
+      );
+
+    this.setState({
+      total,
+      pagado,
+      monto: '',
+    });
+  };
+
+  handleOnHidden = () => {
+    this.setState(this.initial);
+  };
+
+  handleInputMonto = (event) => {
+    this.setState({
+      monto: event.target.value,
+    });
+  };
+
+  handleOnProcess = async () => {
+
+    const { monto, total, pagado } = this.state;
+
+    if (!isNumeric(monto)) {
+      alertKit.warning({
+        title: 'Pago',
+        message: 'Ingrese un monto válido.',
+      }, () => {
+        this.refMonto.current?.focus();
+      });
+
+      return;
+    }
+
+    const montoPago = Number(monto);
+    const saldo = total - pagado;
+
+    if (montoPago <= 0) {
+      alertKit.warning({
+        title: 'Pago',
+        message: 'El monto debe ser mayor a 0.',
+      }, () => {
+        this.refMonto.current?.focus();
+      });
+
+      return;
+    }
+
+    if (montoPago > saldo) {
+      alertKit.warning({
+        title: 'Pago',
+        message: `El monto no puede superar el saldo pendiente de ${formatCurrency(saldo, this.props.codiso)}.`,
+      }, () => {
+        this.refMonto.current?.focus();
+      });
+
+      return;
+    }
+
+    await this.refModal.current.handleOnClose();
+    this.props.onProcess(montoPago);
+  };
+
+  render() {
+
+    const {
+      title,
+      isOpen,
+      onClose,
+      codiso
+    } = this.props;
+
+    const {
+      monto,
+      total,
+      pagado,
+    } = this.state;
+
+    const montoPago = Number(monto || 0);
+    const saldo = Math.max(total - pagado, 0);
+    const saldoDespuesPago = Math.max(saldo - montoPago, 0);
+
+    return (
+      <CustomModal
+        ref={this.refModal}
+        isOpen={isOpen}
+        onOpen={this.handleOnOpen}
+        onClose={onClose}
+        onHidden={this.handleOnHidden}
+        contentLabel={title}
+      >
+
+        <CustomModalContentForm
+          onSubmit={this.handleOnProcess}
+        >
+          <CustomModalContentHeader
+            contentRef={this.refModal}
+            showClose={true}
+            isMoveable={true}
+          >
+            {title}
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody>
+
+            {/* RESUMEN */}
+            <div className="grid grid-cols-3 gap-3 mb-3">
+
+              <div className="rounded-lg bg-gray-50 border p-3">
+                <p className="text-xs text-gray-500">
+                  Total
+                </p>
+
+                <p className="text-lg font-semibold text-gray-800">
+                  {formatCurrency(total, codiso)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-green-50 border border-green-100 p-3">
+                <p className="text-xs text-green-600">
+                  Pagado
+                </p>
+
+                <p className="text-lg font-semibold text-green-700">
+                  {formatCurrency(pagado, codiso)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-red-50 border border-red-100 p-3">
+                <p className="text-xs text-red-600">
+                  Saldo
+                </p>
+
+                <p className="text-lg font-semibold text-red-700">
+                  {formatCurrency(saldo, codiso)}
+                </p>
+              </div>
+
+            </div>
+
+            {/* NUEVO PAGO */}
+            <div className="mb-3">
+              <Input
+                autoFocus={true}
+                label={
+                  <label>
+                    Nuevo pago: <i className="fa fa-asterisk text-danger small" />
+                  </label>
+                }
+                placeholder="0.00"
+                role="float"
+                ref={this.refMonto}
+                value={monto}
+                onChange={this.handleInputMonto}
+              />
+
+            </div>
+
+            {/* PREVISUALIZACIÓN */}
+            {montoPago > 0 && montoPago <= saldo && (
+              <div className="rounded-lg bg-blue-50 border border-blue-100 p-3">
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    Pago actual
+                  </span>
+
+                  <span className="font-medium">
+                    {formatCurrency(montoPago, codiso)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-gray-600">
+                    Saldo después del pago
+                  </span>
+
+                  <span className="font-semibold text-blue-700">
+                    {formatCurrency(saldoDespuesPago, codiso)}
+                  </span>
+                </div>
+
+              </div>
+            )}
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
+
+            <div className="w-full flex flex-col md:flex-row gap-3">
+
+              <Button
+                type="submit"
+                className="btn-primary w-full md:w-auto"
+                disabled={
+                  !isNumeric(monto) ||
+                  Number(monto) <= 0 ||
+                  Number(monto) > saldo
+                }
+              >
+                <i className="fa fa-save"></i>
+                Registrar pago
+              </Button>
+
+              <Button
+                type="button"
+                className="btn-danger w-full md:w-auto"
+                onClick={async () =>
+                  await this.refModal.current.handleOnClose()
+                }
+              >
+                <i className="fa fa-close"></i>
+                Cerrar
+              </Button>
+
+            </div>
+
+          </CustomModalContentFooter>
+
+        </CustomModalContentForm>
+
+      </CustomModal>
+    );
+  }
+}
+
+export { ModalImpresion, ModalPreImpresion, ModalPersona, ModalSendWhatsApp, ModalPago };

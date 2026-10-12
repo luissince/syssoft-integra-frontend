@@ -7,6 +7,7 @@ import DashboardInterface from '@/model/ts/interface/dashboard.interface';
 import axios from 'axios';
 import WebInterface from '@/model/ts/interface/web.interface';
 import { DniInterface, RucInterface } from '@/model/ts/interface/dniruc.interface';
+import PlazoInterface from '@/model/ts/interface/plazo.interface';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_APP_BACK_END,
@@ -81,6 +82,14 @@ export async function getRuc(documento: string, signal: AbortSignal = null): Pro
   return await Resolve.safe(
     apiClient.get(`/api/dniruc/ruc/${documento}`, {
       signal
+    }),
+  );
+}
+
+export async function comboPlazo(signal: AbortSignal): Promise<ResolveResponse<PlazoInterface[]>> {
+  return await Resolve.safe<PlazoInterface[]>(
+    apiClient.get("/api/plazo/combo", {
+      signal: signal,
     }),
   );
 }
