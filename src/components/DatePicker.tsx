@@ -9,8 +9,8 @@ import React from "react";
 import { MdDateRange } from "react-icons/md";
 
 interface DatePickerProps {
-    value?: string | null;
-    onChange: (date: string | null) => void;
+    value?: string | null | Date;
+    onChange: (date: string | null | Date) => void;
     placeholder?: string;
 }
 
