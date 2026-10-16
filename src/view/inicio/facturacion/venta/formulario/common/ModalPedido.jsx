@@ -90,7 +90,7 @@ class ModalPedido extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 1 });
   };
