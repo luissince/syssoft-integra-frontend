@@ -92,7 +92,7 @@ class ModalCotizacion extends CustomComponent {
 
     await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
-    await this.setStateAsync({ opcion: 1 });
+    await this.setStateAsync({ opcion: 2 });
   };
 
   handlePaginacion = async (listid) => {
@@ -119,7 +119,7 @@ class ModalCotizacion extends CustomComponent {
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idSucursal: this.props.idSucursal,
-      ligado: " ",
+      ligado: "",
       estado: 1,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,

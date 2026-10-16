@@ -123,65 +123,6 @@ class ModalProductos extends CustomComponent {
   };
 
   fillTable = async (opcion, buscar = '') => {
-    // this.setState({
-    //     loading: true,
-    //     show: false,
-    //     lista: [],
-    //     messageTable: 'Cargando información...',
-    // });
-
-    // this.index = 0;
-
-    // const searchParams = new URLSearchParams();
-    // searchParams.append("tipo", opcion);
-    // searchParams.append("filtrar", buscar);
-    // searchParams.append("idSucursal", this.props.idSucursal);
-    // searchParams.append("idAlmacen", this.props.idAlmacen);
-    // searchParams.append("posicionPagina", (this.state.paginacion - 1) * this.state.filasPorPagina);
-    // searchParams.append("filasPorPagina", this.state.filasPorPagina);
-
-    // this.eventSource = new EventSource(filtrarStreamProductoVenta(searchParams.toString()));
-
-    // this.eventSource.onopen = () => {
-    //     this.setState({
-    //         show: true,
-    //     });
-    // }
-
-    // this.eventSource.onmessage = (event) => {
-    //     const data = JSON.parse(event.data);
-    //     if (data === "__END__") {
-    //         this.setState({
-    //             loading: false,
-    //         });
-
-    //         this.eventSource.close()
-    //         return
-    //     }
-
-    //     if (typeof data === 'object') {
-    //         this.setState(prevState => ({
-    //             lista: [...prevState.lista, data],
-    //         }));
-    //     }
-
-    //     if (typeof data === 'number') {
-    //         const totalPaginacion = parseInt(
-    //             Math.ceil(parseFloat(data) / this.state.filasPorPagina),
-    //         );
-
-    //         this.setState({
-    //             totalPaginacion: totalPaginacion,
-    //         });
-    //     }
-    // };
-
-    // this.eventSource.onerror = () => {
-    //     this.setState({
-    //         loading: false,
-    //     });
-    // };
-
     this.index = 0;
 
     this.setState({
