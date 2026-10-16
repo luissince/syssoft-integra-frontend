@@ -259,7 +259,7 @@ class Ventas extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
@@ -343,7 +343,7 @@ class Ventas extends CustomComponent {
     this.props.history.push(`${this.props.location.pathname}/crear`);
   };
 
-  handleInputFechaInico = (event) => {
+  handleInputFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
     });
@@ -828,7 +828,7 @@ class Ventas extends CustomComponent {
             <input
               type="date"
               value={this.state.fechaInicio}
-              onChange={this.handleInputFechaInico}
+              onChange={this.handleInputFechaInicio}
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 

@@ -1,6 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
 import {
-  currentDate,
   formatNumberWithZeros,
   formatTime,
   isEmpty,
@@ -26,7 +25,9 @@ import {
 import React from 'react';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
-import { CircleCheck, CircleX, Clock, Eye, Pencil, ShoppingCart, Trash } from 'lucide-react';
+import { ChartNoAxesCombined, CircleCheck, CircleX, Clock, Clock8, Eye, FileText, Pencil, ShoppingCart, Trash } from 'lucide-react';
+import { DatePicker } from '@/components/DatePicker';
+import { format } from 'date-fns';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -45,8 +46,8 @@ class Cotizaciones extends CustomComponent {
       lista: [],
       restart: false,
 
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
+      fechaInicio: new Date().toISOString(),
+      fechaFinal: new Date().toISOString(),
       ligado: '',
       estado: '',
 
@@ -57,6 +58,8 @@ class Cotizaciones extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+
+      resumen: {},
 
       view: 'tabla',
 
@@ -163,7 +166,7 @@ class Cotizaciones extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
@@ -188,8 +191,8 @@ class Cotizaciones extends CustomComponent {
       opcion: opcion,
       buscar: this.state.buscar,
       idSucursal: this.state.idSucursal,
-      fechaInicio: this.state.fechaInicio,
-      fechaFinal: this.state.fechaFinal,
+      fechaInicio: format(this.state.fechaInicio, "yyyy-MM-dd"),
+      fechaFinal: format(this.state.fechaFinal, "yyyy-MM-dd"),
       ligado: this.state.ligado,
       estado: this.state.estado,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
@@ -218,6 +221,7 @@ class Cotizaciones extends CustomComponent {
       loading: false,
       lista: data.result,
       totalPaginacion: totalPaginacion,
+      resumen: data.resumen,
     }, () => {
       this.updateReduxState();
     });
@@ -263,14 +267,14 @@ class Cotizaciones extends CustomComponent {
     });
   };
 
-  handleInputFechaInico = (event) => {
-    this.setState({ fechaInicio: event.target.value }, async () => {
+  handleInputFechaInicio = (selectedDate) => {
+    this.setState({ fechaInicio: selectedDate }, async () => {
       await this.searchOpciones();
     });
   };
 
-  handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value }, async () => {
+  handleInputFechaFinal = (selectedDate) => {
+    this.setState({ fechaFinal: selectedDate }, async () => {
       await this.searchOpciones();
     });
   };
@@ -440,7 +444,7 @@ class Cotizaciones extends CustomComponent {
                 )}
               </span>
             );
-            
+
             return (
               <div
                 key={index}
@@ -559,7 +563,7 @@ class Cotizaciones extends CustomComponent {
   }
 
   render() {
-    const { view } = this.state;
+    const { view, resumen } = this.state;
 
     return (
       <ContainerWrapper>
@@ -645,21 +649,18 @@ class Cotizaciones extends CustomComponent {
           {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Fecha de Inicio */}
-            <input
-              type="date"
+            <DatePicker
               value={this.state.fechaInicio}
-              onChange={this.handleInputFechaInico}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={this.handleInputFechaInicio}
+              placeholder="Fecha Inicio"
             />
 
             {/* Fecha Final */}
-            <input
-              type="date"
+            <DatePicker
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Fecha Final"
             />
-
 
             {/* Ligado */}
             <select
@@ -680,7 +681,7 @@ class Cotizaciones extends CustomComponent {
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">- TODOS -</option>
-              <option value="1">COBRADO</option>
+              <option value="1">ACTIVO</option>
               <option value="0">ANULADO</option>
             </select>
           </div>
@@ -696,6 +697,47 @@ class Cotizaciones extends CustomComponent {
             placeholder="Buscar por código o nombre..."
             theme="modern"
           />
+        </div>
+
+        {/* Summary Cards */}
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="bg-white rounded border px-4 py-3">
+            <FileText className="h-6 w-6 text-gray-600" />
+            <p className="text-sm text-gray-500 mt-3">TOTAL COTIZACIONES</p>
+            <p className="text-3xl font-bold text-gray-600 mt-1">
+              {(resumen?.totalCotizaciones ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Documentos registrados</p>
+          </div>
+
+          <div className="bg-white rounded border px-4 py-3">
+            <Clock8 className="h-6 w-6 text-amber-600" />
+            <p className="text-sm text-gray-500 mt-3">SIN VENTAS</p>
+            <p className="text-3xl font-bold text-amber-600 mt-1">
+              {(resumen?.cotizacionesSinVenta ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Cotizaciones sin vender</p>
+          </div>
+
+          <div className="bg-white rounded border px-4 py-3">
+            <ChartNoAxesCombined className="h-6 w-6 text-blue-600" />
+            <p className="text-sm text-gray-500 mt-3">VENTAS PARCIALES</p>
+            <p className="text-3xl font-bold text-blue-600 mt-1">
+              {(resumen?.cotizacionesParciales ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Cotizaciones incompletas</p>
+          </div>
+
+          <div className="bg-white rounded border px-4 py-3">
+            <CircleCheck className="h-6 w-6 text-green-600" />
+            <p className="text-sm text-gray-500 mt-3">COMPLETADAS</p>
+            <p className="text-3xl font-bold text-green-600 mt-1">
+              {(resumen?.cotizacionesCompletadas ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Cotizaciones completadas</p>
+          </div>
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}

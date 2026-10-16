@@ -33,7 +33,7 @@ import Input from '../../../../../../components/Input';
 import { listCotizacion } from '../../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../../model/types/types';
 import { cn } from '@/lib/utils';
-import { Check, CircleCheck, CircleX, Clock, ShoppingCart, X } from 'lucide-react';
+import { CircleCheck, CircleX, Clock, ShoppingCart } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -90,7 +90,7 @@ class ModalCotizacion extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 1 });
   };
