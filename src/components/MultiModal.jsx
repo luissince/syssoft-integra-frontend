@@ -24,6 +24,7 @@ import {
   formatCurrency,
   isEmpty,
   isNumeric,
+  isText,
   keyNumberPhone,
   validateNumberWhatsApp,
 } from '../helper/utils.helper';
@@ -37,6 +38,7 @@ import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { Capacitor } from '@capacitor/core';
 import { BsWhatsapp } from 'react-icons/bs';
+import TextArea from './TextArea';
 
 /**
  * Modal para mostrar del impresión.
@@ -824,9 +826,18 @@ class ModalSendWhatsApp extends React.Component {
     super(props);
     this.state = {
       phone: '',
+      message: '',
+      type: 'text',
+      pdfType: '',
     };
 
+    this.initial = { ...this.state };
+
+    this.refModal = React.createRef();
+
     this.refPhone = React.createRef();
+    this.refMessage = React.createRef();
+    this.refPdfType = React.createRef();
   }
 
   handleOpen = async () => {
@@ -834,12 +845,34 @@ class ModalSendWhatsApp extends React.Component {
     this.setState({ phone: this.props.phone ?? '' });
   };
 
+  handleHidden = async () => {
+    this.setState(this.initial);
+  };
+
+  handleChangeType = (event) => {
+    this.setState({
+      type: event.target.value,
+    });
+  };
+
+  handleChangePdfType = (event) => {
+    this.setState({
+      pdfType: event.target.value,
+    });
+  };
+
   handleInputPhone = (event) => {
     this.setState({ phone: event.target.value });
   };
 
+  handleInputMessage = (event) => {
+    this.setState({ message: event.target.value });
+  };
+
   handleSendWhatsapp = async () => {
-    if (!validateNumberWhatsApp(this.state.phone)) {
+    const { phone, message, type, pdfType } = this.state;
+
+    if (!validateNumberWhatsApp(phone)) {
       alertKit.warning({
         title: 'WhatsApp',
         message: 'El número de teléfono no es válido.',
@@ -849,27 +882,54 @@ class ModalSendWhatsApp extends React.Component {
       return;
     }
 
-    this.props.handleProcess(this.state.phone, async () => {
-      await this.props.refModal.current.handleOnClose();
+    if (!isText(message)) {
+      alertKit.warning({
+        title: 'WhatsApp',
+        message: 'El mensaje no puede ser vacío.',
+      }, () => {
+        this.refMessage.current.focus();
+      });
+      return;
+    }
+
+    if (!isText(pdfType)) {
+      alertKit.warning({
+        title: 'WhatsApp',
+        message: 'El tipo de pdf no puede ser vacío.',
+      }, () => {
+        this.refPdfType.current.focus();
+      });
+      return;
+    }
+
+    const body = {
+      phone,
+      message,
+      type,
+      pdfType,
+    };
+
+    this.props.handleProcess(body, async () => {
+        await this.refModal.current.handleOnClose();
     });
   };
 
   render() {
-    const { refModal, isOpen, handleClose, handleHidden } = this.props;
+    const { isOpen, handleClose, documents } = this.props;
 
     return (
       <CustomModal
-        ref={refModal}
+        ref={this.refModal}
         isOpen={isOpen}
-        onOpen={this.handleOpen}
         onClose={handleClose}
-        onHidden={handleHidden}
+        onOpen={this.handleOpen}
+        onHidden={this.handleHidden}
         contentLabel={'Modal de Enviar Whatsapp'}
         shouldCloseOnOverlayClick={true}
         shouldCloseOnEsc={true}
       >
         <CustomModalContentHeader
-          contentRef={refModal}
+          contentRef={this.refModal}
           showClose={true}
           isMoveable={true}
         >
@@ -877,25 +937,84 @@ class ModalSendWhatsApp extends React.Component {
         </CustomModalContentHeader>
 
         <CustomModalContentBody>
-          <h5 className="mb-1">Enviar Mensaje WhatsApp</h5>
+          <h5 className="mb-3">Enviar Mensaje WhatsApp</h5>
 
           <div className="flex flex-col gap-3">
-            <Input
-              autoFocus
-              label={'Número de teléfono (con código de país)'}
-              placeholder={'Ej: +51966750883'}
-              ref={this.refPhone}
-              value={this.state.phone}
-              onChange={this.handleInputPhone}
-              onKeyDown={keyNumberPhone}
-            />
+            <div>
+              <label className="block text-sm mb-1">
+                Número de teléfono (con código de país)
+              </label>
+
+              <Input
+                autoFocus
+                placeholder="Ej: +51966750883"
+                ref={this.refPhone}
+                value={this.state.phone}
+                onChange={this.handleInputPhone}
+                onKeyDown={keyNumberPhone}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm  mb-1">
+                Tipo de envío
+              </label>
+
+              <Select
+                value={this.state.type}
+                onChange={this.handleChangeType}
+              >
+                <option value="text">Mensaje de texto</option>
+                <option value="pdf">Documento PDF</option>
+              </Select>
+            </div>
+
+            {this.state.type === 'pdf' && (
+              <div>
+                <label className="block text-sm mb-1">
+                  Tipo de documento
+                </label>
+
+                <Select
+                  ref={this.refPdfType}
+                  value={this.state.pdfType}
+                  onChange={this.handleChangePdfType}
+                >
+                  {
+                    !isEmpty(documents) && (
+                      documents.map((item, index) => (
+                        <option key={index} value={item.value}>{item.label}</option>
+                      ))
+                    )
+                  }
+                </Select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm mb-1">
+                {this.state.type === 'pdf' ? 'Mensaje del documento' : 'Mensaje'}
+              </label>
+
+              <TextArea
+                placeholder="Escribe tu mensaje aquí"
+                ref={this.refMessage}
+                value={this.state.message}
+                onChange={this.handleInputMessage}
+              />
+            </div>
 
             <Button
-              className="btn-dark"
+              className="btn-success"
               onClick={this.handleSendWhatsapp}
             >
-              <div className="flex items-center gap-3">
-                <BsWhatsapp /> <span>Enviar mensaje</span>
+              <div className="flex items-center justify-center gap-3">
+                <BsWhatsapp />
+                <span>
+                  {this.state.type === 'pdf'
+                    ? 'Enviar PDF por WhatsApp'
+                    : 'Enviar mensaje por WhatsApp'}
+                </span>
               </div>
             </Button>
           </div>
@@ -906,12 +1025,11 @@ class ModalSendWhatsApp extends React.Component {
 }
 
 ModalSendWhatsApp.propTypes = {
-  refModal: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
   phone: PropTypes.string,
-  handleHidden: PropTypes.func,
   handleClose: PropTypes.func.isRequired,
   handleProcess: PropTypes.func.isRequired,
+  documents: PropTypes.array,
 };
 
 /**
@@ -929,7 +1047,7 @@ class ModalPago extends React.Component {
       pagado: 0,
     };
 
-    this.initial = { ...this.state }; 
+    this.initial = { ...this.state };
 
     this.refModal = React.createRef();
     this.refMonto = React.createRef();

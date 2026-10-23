@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils';
 import { FORMA_PAGO_CREDITO } from '@/model/types/forma-pago';
 import { Plus, Printer } from 'lucide-react';
 import ModalTransaccion from '@/components/ModalTransaccion';
-import { ModalPago } from '@/components/MultiModal';
+import { ModalPago, ModalSendWhatsApp } from '@/components/MultiModal';
 import { connect } from 'react-redux';
 import { alertKit } from 'alert-kit';
 import { CANCELED } from '@/model/types/types';
@@ -189,6 +189,53 @@ class CompraDetalle extends CustomComponent {
       this.handleOpenModalTerminal();
     });
   }
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  };
+
+  handleProcessSendWhatsapp = async (
+    params,
+    callback,
+  ) => {
+    const payload = {
+      id: crypto.randomUUID(),
+      to: params.phone,
+      message: params.message,
+      type: params.type,
+    };
+
+    if (params.type === 'pdf') {
+      const { idCompra, cabecera } = this.state;
+
+      if (!cabecera) {
+        alertKit.warning({
+          title: 'Compra',
+          message: 'No se pudo enviar el documento.',
+        });
+        return;
+      }
+
+      payload.url = documentsPdfInvoicesCompra(idCompra, params.pdfType);
+
+      payload.filename =
+        `COMPRA ${cabecera.serie}-${cabecera.numeracion} - ${cabecera.informacion}.pdf`;
+
+      payload.caption = params.message;
+    }
+
+    this.props.sendWhatsAppAsync(payload);
+
+    await callback?.();
+  };
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
+  };
 
   //------------------------------------------------------------------------------------------
   // Funciones del modal terminal
@@ -631,7 +678,7 @@ class CompraDetalle extends CustomComponent {
   }
 
   render() {
-    const { loading, msgLoading, cabecera } = this.state;
+    const { loading, msgLoading, cabecera, isOpenSendWhatsapp } = this.state;
 
     return (
       <ContainerWrapper>
@@ -669,6 +716,31 @@ class CompraDetalle extends CustomComponent {
           onProcess={this.handleProcessModalPago}
         />
 
+        <ModalSendWhatsApp
+          isOpen={isOpenSendWhatsapp}
+          phone={cabecera && cabecera.celular || ""}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
+          documents={[
+            {
+              label: "- Seleccionar Formato -",
+              value: ""
+            },
+            {
+              label: "Formato A4",
+              value: "A4"
+            },
+            {
+              label: "Formato 80mm",
+              value: "80mm"
+            },
+            {
+              label: "Formato 58mm",
+              value: "58mm"
+            }
+          ]}
+        />
+
         {/* Acciones */}
         <div className="mb-6 flex flex-wrap gap-3">
           <button
@@ -704,6 +776,13 @@ class CompraDetalle extends CustomComponent {
               )
             )
           }
+
+          <button
+            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-green-500 flex items-center gap-2"
+            onClick={this.handleOpenSendWhatsapp}
+          >
+            <i className="fa fa-whatsapp"></i> Whatsapp
+          </button>
         </div>
 
         {/* Cabecera */}

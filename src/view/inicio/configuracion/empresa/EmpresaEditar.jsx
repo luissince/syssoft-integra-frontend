@@ -112,6 +112,8 @@ class EmpresaProceso extends CustomComponent {
       numeroWhatsapp: "",
       tituloWhatsapp: "",
       mensajeWhatsapp: "",
+      ycloudApiKey: "",
+
       informacion: "",
       acercaNosotros: "",
       politicasPrivacidad: "",
@@ -234,6 +236,8 @@ class EmpresaProceso extends CustomComponent {
         numeroWhatsapp: empresa.numeroWhatsapp ?? "",
         tituloWhatsapp: empresa.tituloWhatsapp ?? "",
         mensajeWhatsapp: empresa.mensajeWhatsapp ?? "",
+        ycloudApiKey: empresa.ycloudApiKey ?? "",
+
         informacion: empresa.informacion ?? "",
         acercaNosotros: empresa.acercaNosotros ?? "",
         politicasPrivacidad: empresa.politicasPrivacidad ?? "",
@@ -632,6 +636,8 @@ class EmpresaProceso extends CustomComponent {
       numeroWhatsapp: this.state.numeroWhatsapp.trim(),
       tituloWhatsapp: this.state.tituloWhatsapp.trim(),
       mensajeWhatsapp: this.state.mensajeWhatsapp.trim(),
+      ycloudApiKey: this.state.ycloudApiKey.trim(),
+
       informacion: this.state.informacion.trim(),
       acercaNosotros: this.state.acercaNosotros.trim(),
       politicasPrivacidad: this.state.politicasPrivacidad.trim(),
@@ -1165,6 +1171,17 @@ class EmpresaProceso extends CustomComponent {
                   value={this.state.mensajeWhatsapp}
                   onChange={(event) =>
                     this.setState({ mensajeWhatsapp: event.target.value })
+                  }
+                />
+              </div>
+
+              <div className="w-full">
+                <Input
+                  label={<label>Clave de Ycloud:</label>}
+                  placeholder="Clave de Ycloud que acompañará a la solicitud"
+                  value={this.state.ycloudApiKey}
+                  onChange={(event) =>
+                    this.setState({ ycloudApiKey: event.target.value })
                   }
                 />
               </div>
