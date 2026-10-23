@@ -30,6 +30,7 @@ import { ModalPago, ModalSendWhatsApp } from '@/components/MultiModal';
 import { connect } from 'react-redux';
 import { alertKit } from 'alert-kit';
 import { CANCELED } from '@/model/types/types';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -808,26 +809,23 @@ CompraDetalle.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string,
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
-/**
- *
- * Método encargado de traer la información de redux
- */
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal
   };
 };
 
-/**
- *
- * Método encargado de conectar con redux y exportar la clase
- */
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
 
 const ConnectedCompraDetalle = connect(
   mapStateToProps,
-  null,
+  mapDispatchToProps,
 )(CompraDetalle);
 
 export default ConnectedCompraDetalle;

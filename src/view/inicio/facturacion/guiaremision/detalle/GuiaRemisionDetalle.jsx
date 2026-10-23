@@ -19,7 +19,6 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import Row from '../../../../../components/Row';
 import Column from '../../../../../components/Column';
-import Button from '../../../../../components/Button';
 import {
   Table,
   TableBody,
@@ -36,6 +35,7 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { cn } from '@/lib/utils';
 import { alertKit } from 'alert-kit';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -597,12 +597,10 @@ GuiaRemisionDetalle.propTypes = {
       razonSocial: PropTypes.string,
     }),
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
-/**
- *
- * Método encargado de traer la información de redux
- */
+
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
@@ -610,13 +608,13 @@ const mapStateToProps = (state) => {
   };
 };
 
-/**
- *
- * Método encargado de conectar con redux y exportar la clase
- */
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
+
 const ConnectedGuiaRemisionDetalle = connect(
   mapStateToProps,
-  null,
+  mapDispatchToProps,
 )(GuiaRemisionDetalle);
 
 export default ConnectedGuiaRemisionDetalle;

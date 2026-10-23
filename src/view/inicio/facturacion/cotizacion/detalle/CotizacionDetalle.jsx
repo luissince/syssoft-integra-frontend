@@ -30,7 +30,6 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { cn } from '@/lib/utils';
 import { CircleCheck, CircleX } from 'lucide-react';
-import { sendDocumentWhatsapp, sendTextWhatsapp } from '@/network/rest/api-client';
 import { alertKit } from 'alert-kit';
 import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
@@ -710,10 +709,7 @@ CotizacionDetalle.propTypes = {
       email: PropTypes.string,
     }),
   }),
-};
-
-const mapDispatchToProps = {
-  sendWhatsAppAsync
+  sendWhatsAppAsync: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -721,6 +717,10 @@ const mapStateToProps = (state) => {
     token: state.principal,
     predeterminado: state.predeterminado,
   };
+};
+
+const mapDispatchToProps = {
+  sendWhatsAppAsync
 };
 
 const ConnectedCotizacionDetalle = connect(

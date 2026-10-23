@@ -34,6 +34,7 @@ import ModalPrinter from './component/ModalPrinter';
 import { cn } from '@/lib/utils';
 import ModalTransaccion from '@/components/ModalTransaccion';
 import { Plus } from 'lucide-react';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -850,6 +851,7 @@ VentaDetalle.propTypes = {
       email: PropTypes.string,
     }),
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -859,6 +861,10 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedVentaDetalle = connect(mapStateToProps, null)(VentaDetalle);
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
+
+const ConnectedVentaDetalle = connect(mapStateToProps, mapDispatchToProps)(VentaDetalle);
 
 export default ConnectedVentaDetalle;

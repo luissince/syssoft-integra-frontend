@@ -38,6 +38,8 @@ import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { alertKit } from 'alert-kit';
 import { ModalSendWhatsApp } from '@/components/MultiModal';
+import { connect } from 'react-redux';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -651,6 +653,24 @@ OrdenCompraDetalle.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string,
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
-export default OrdenCompraDetalle;
+
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
+
+const mapStateToProps = (state) => {
+  return {
+    predeterminado: state.predeterminado,
+  };
+};
+
+const ConnectedOrdenCompraDetalle = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(OrdenCompraDetalle);
+
+export default ConnectedOrdenCompraDetalle;
+
