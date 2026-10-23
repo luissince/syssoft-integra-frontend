@@ -892,7 +892,7 @@ class ModalSendWhatsApp extends React.Component {
       return;
     }
 
-    if (!isText(pdfType)) {
+    if (type === 'pdf' && !isText(pdfType)) {
       alertKit.warning({
         title: 'WhatsApp',
         message: 'El tipo de pdf no puede ser vacío.',
