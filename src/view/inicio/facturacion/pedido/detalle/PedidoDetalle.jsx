@@ -26,6 +26,8 @@ import { cn } from '@/lib/utils';
 import { ESTADO_PEDIDO, pedidoEstadoMap } from '@/model/types/pedido';
 import { TIPO_PEDIDO_ENTREGA_PROGRAMADA, TIPO_PEDIDO_ENVIO_DOMICILIO, TIPO_PEDIDO_ENVIO_POR_AGENCIA, TIPO_PEDIDO_RECOJO_LOCAL } from '@/model/types/tipo-pedido';
 import { ModalSendWhatsApp } from '@/components/MultiModal';
+import { connect } from 'react-redux';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -625,6 +627,23 @@ PedidoDetalle.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string,
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
-export default PedidoDetalle;
+const mapStateToProps = (state) => {
+  return {
+    token: state.principal,
+    predeterminado: state.predeterminado,
+  };
+};
+
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
+
+const ConnectedPedidoDetalle = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(PedidoDetalle);
+
+export default ConnectedPedidoDetalle;
