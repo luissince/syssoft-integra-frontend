@@ -188,14 +188,15 @@ const ProductTransactionPanel: React.FC<Props> = ({
                         >
                             {/* Columna 1: imagen y descripción */}
                             <div className="flex items-center">
-                                <Image
-                                    default={images.noImage}
-                                    src={item.imagen}
-                                    alt={item.nombre}
-                                    width={80}
-                                    height={80}
-                                    className="object-contain rounded"
-                                />
+                                <div className="max-w-20 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
+                                    <Image
+                                        default={images.noImage}
+                                        src={item.imagen}
+                                        alt={item.nombre}
+                                        overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                                    />
+                                </div>
+
                                 <div className="p-3 text-left">
                                     <p className="text-sm text-gray-500">{item.codigo}</p>
                                     <p className="text-base font-semibold break-words">

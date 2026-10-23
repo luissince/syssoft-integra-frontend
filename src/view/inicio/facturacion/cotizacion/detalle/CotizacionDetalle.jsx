@@ -279,7 +279,7 @@ class CotizacionDetalle extends CustomComponent {
 
             {
               label: 'Estado', value: () => {
-                return (                  
+                return (
                   <span
                     className={cn(
                       "inline-flex items-center gap-1",
@@ -364,13 +364,14 @@ class CotizacionDetalle extends CustomComponent {
                       <tr className="hover:bg-gray-50">
                         <td className="p-4">{item.id}</td>
                         <td className="p-4 text-center">
-                          <Image
-                            default={images.noImage}
-                            src={item.imagen}
-                            alt={item.producto}
-                            width={80}
-                            className="mx-auto rounded border border-gray-200"
-                          />
+                          <div className="max-w-24 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.producto}
+                              overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                            />
+                          </div>
                         </td>
                         <td className="p-4">
                           <p className="font-mono text-sm text-gray-500">{item.codigo}</p>
