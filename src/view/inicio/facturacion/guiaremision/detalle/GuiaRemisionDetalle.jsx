@@ -77,7 +77,8 @@ class GuiaRemisionDetalle extends CustomComponent {
       comprobanteRef: '',
       serieRef: '',
       numeracionRef: '',
-      cliente: '',
+      documentoCliente: '',
+      informacionCliente: '',
 
       detalles: [],
 
@@ -180,7 +181,8 @@ class GuiaRemisionDetalle extends CustomComponent {
       comprobanteRef,
       serieRef,
       numeracionRef,
-      cliente,
+      documentoCliente,
+      informacionCliente,
     } = guiaRemision.cabecera;
 
     this.setState({
@@ -209,7 +211,8 @@ class GuiaRemisionDetalle extends CustomComponent {
       comprobanteRef,
       serieRef,
       numeracionRef,
-      cliente,
+      documentoCliente,
+      informacionCliente,
 
       detalles: guiaRemision.detalles,
 
@@ -416,7 +419,7 @@ class GuiaRemisionDetalle extends CustomComponent {
                     Cliente
                   </TableHead>
                   <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.cliente}
+                    {this.state.documentoCliente} - {this.state.informacionCliente}
                   </TableHead>
                 </TableRow>
                 <TableRow>
