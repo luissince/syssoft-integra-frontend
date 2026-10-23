@@ -680,7 +680,7 @@ class Cotizaciones extends CustomComponent {
               onChange={this.handleSelectEstado}
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">- TODOS -</option>
+              <option value="">- ESTADO -</option>
               <option value="1">ACTIVO</option>
               <option value="0">ANULADO</option>
             </select>
@@ -699,9 +699,7 @@ class Cotizaciones extends CustomComponent {
           />
         </div>
 
-        {/* Summary Cards */}
-
-        {/* Summary Cards */}
+        {/* Resumen */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           <div className="bg-white rounded border px-4 py-3">
             <FileText className="h-6 w-6 text-gray-600" />
