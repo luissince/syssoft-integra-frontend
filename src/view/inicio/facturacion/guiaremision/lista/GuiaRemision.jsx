@@ -399,7 +399,7 @@ class GuiaRemision extends CustomComponent {
                 className={cn(
                   "text-sm text-gray-900",
                   view === "tabla"
-                    ? "grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_1.5fr] py-3 gap-x-3 items-center"
+                    ? "grid grid-cols-[0.5fr_0.7fr_1.2fr_1.2fr_0.7fr_1.0fr_1.0fr_0.5fr_1.5fr] py-3 gap-x-3 items-center"
                     : "flex flex-col h-full gap-3 rounded border p-3"
                 )}
               >
@@ -432,6 +432,10 @@ class GuiaRemision extends CustomComponent {
 
                   <div>
                     {item.motivoTraslado}
+                  </div>
+
+                  <div>
+                    {item.modalidadTraslado}
                   </div>
 
                   <div>
@@ -653,12 +657,13 @@ class GuiaRemision extends CustomComponent {
             <div className={cn(
               "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
             )}>
-              <div className="grid grid-cols-[0.5fr_1fr_1.5fr_1.5fr_1.0fr_1.0fr_0.5fr_1.5fr] gap-x-3 py-3">
+              <div className="grid grid-cols-[0.5fr_0.7fr_1.2fr_1.2fr_0.7fr_1.0fr_1.0fr_0.5fr_1.5fr] gap-x-3 py-3">
                 <div className="text-center">#</div>
                 <div>Fecha y Hora</div>
                 <div>Cliente</div>
                 <div>Comprobante</div>
                 <div>Motivo Traslado</div>
+                <div>Modalidad Traslado</div>
                 <div>Referencia</div>
                 <div className="text-center">Estado</div>
                 <div className="text-center"></div>
