@@ -25,6 +25,7 @@ import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
 import { ESTADO_PEDIDO, pedidoEstadoMap } from '@/model/types/pedido';
 import { TIPO_PEDIDO_ENTREGA_PROGRAMADA, TIPO_PEDIDO_ENVIO_DOMICILIO, TIPO_PEDIDO_ENVIO_POR_AGENCIA, TIPO_PEDIDO_RECOJO_LOCAL } from '@/model/types/tipo-pedido';
+import { ModalSendWhatsApp } from '@/components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -44,6 +45,8 @@ class PedidoDetalle extends CustomComponent {
       detalles: [],
       ventas: [],
       vendidos: [],
+
+      isOpenSendWhatsapp: false,
     };
 
     this.abortControllerView = new AbortController();
@@ -163,6 +166,57 @@ class PedidoDetalle extends CustomComponent {
       titleLoading: 'Cargando...',
     });
   };
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  };
+
+  handleProcessSendWhatsapp = async (
+    params,
+    callback,
+  ) => {
+    const payload = {
+      id: crypto.randomUUID(),
+      to: params.phone,
+      message: params.message,
+      type: params.type,
+    };
+
+    if (params.type === 'pdf') {
+      const { idPedido, cabecera } = this.state;
+
+      if (!cabecera) {
+        alertKit.warning({
+          title: 'Pedido',
+          message: 'No se pudo enviar el documento.',
+        });
+        return;
+      }
+
+      payload.url =
+        params.pdfType === 'list'
+          ? documentsPdfListsPedido(idPedido, 'A4')
+          : documentsPdfInvoicesPedido(idPedido, params.pdfType);
+
+      payload.filename =
+        `PEDIDO ${cabecera.serie}-${cabecera.numeracion} - ${cabecera.informacion}.pdf`;
+
+      payload.caption = params.message;
+    }
+
+    this.props.sendWhatsAppAsync(payload);
+
+    await callback?.();
+  };
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
+  };
+
 
   /*
   |--------------------------------------------------------------------------
@@ -469,7 +523,7 @@ class PedidoDetalle extends CustomComponent {
   }
 
   render() {
-    const { loading, msgLoading } = this.state;
+    const { loading, msgLoading, cabecera, isOpenSendWhatsapp } = this.state;
 
     return (
       <ContainerWrapper>
@@ -482,6 +536,35 @@ class PedidoDetalle extends CustomComponent {
           title="Pedido"
           subTitle="DETALLE"
           handleGoBack={() => this.close()}
+        />
+
+        <ModalSendWhatsApp
+          isOpen={isOpenSendWhatsapp}
+          phone={cabecera && cabecera.celular || ""}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
+          documents={[
+            {
+              label: "- Seleccionar Formato -",
+              value: ""
+            },
+            {
+              label: "Formato A4",
+              value: "A4"
+            },
+            {
+              label: "Formato 80mm",
+              value: "80mm"
+            },
+            {
+              label: "Formato 58mm",
+              value: "58mm"
+            },
+            {
+              label: "Formato Lista",
+              value: "list"
+            }
+          ]}
         />
 
         {/* Acciones */}
@@ -512,6 +595,13 @@ class PedidoDetalle extends CustomComponent {
             onClick={this.handlePrintList.bind(this, 'A4')}
           >
             <i className="fa fa-print"></i> Lista
+          </button>
+
+          <button
+            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-green-500 flex items-center gap-2"
+            onClick={this.handleOpenSendWhatsapp}
+          >
+            <i className="fa fa-whatsapp"></i> Whatsapp
           </button>
         </div>
 

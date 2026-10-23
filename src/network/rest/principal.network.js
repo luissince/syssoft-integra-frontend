@@ -1336,9 +1336,9 @@ export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
     }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
-export function documentsPdfListsOrdenCompra(idOrdenCompra) {
+export function documentsPdfListsOrdenCompra(idOrdenCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`;
+    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA ORDEN DE COMPRA
@@ -2512,7 +2512,10 @@ export async function enviarEmail(idComprobante, tipo) {
 }
 
 export function obtenerXmlSunat(idComprobante) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`;
+  return {
+    method: 'GET',
+    url: `/api/sunat/xml/${idComprobante}`,
+  }
 }
 
 export async function dashboardSunat(params, signal) {
