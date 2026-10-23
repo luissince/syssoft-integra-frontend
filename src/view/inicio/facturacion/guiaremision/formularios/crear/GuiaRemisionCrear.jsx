@@ -3,7 +3,6 @@ import ContainerWrapper from '../../../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
 import {
   currentDate,
-  keyNumberFloat,
   isEmpty,
   isNumeric,
 } from '../../../../../../helper/utils.helper';
@@ -31,30 +30,14 @@ import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../../model/types/types';
 import { GUIA_DE_REMISION } from '../../../../../../model/types/tipo-comprobante';
-import SearchInput from '../../../../../../components/SearchInput';
 import { SpinnerView } from '../../../../../../components/Spinner';
-import Row from '../../../../../../components/Row';
-import Column from '../../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-} from '../../../../../../components/Table';
 import Title from '../../../../../../components/Title';
 import Button from '../../../../../../components/Button';
-import Select from '../../../../../../components/Select';
-import Input from '../../../../../../components/Input';
-import RadioButton from '../../../../../../components/RadioButton';
 import { ModalImpresion } from '../../../../../../components/MultiModal';
 import { alertKit } from 'alert-kit';
 import pdfVisualizer from 'pdf-visualizer';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
 import { MODALIDAD_TRASLADO } from '@/model/types/modalidad-traslado';
-import { Badge } from '@/components/ui/badge';
 import Form from '../components/Form';
 
 /**
@@ -1085,7 +1068,9 @@ class GuiaRemisionCrear extends CustomComponent {
         fechaTraslado: this.state.fechaTraslado,
         idTipoPeso: this.state.idTipoPeso,
         peso: this.state.peso,
-        idVehiculo: this.state.vehiculo.idVehiculo,
+        idVehiculo:
+          this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PRIVADO ?
+            this.state.vehiculo.idVehiculo : null,
         idConductor:
           this.state.idModalidadTraslado === MODALIDAD_TRASLADO.TRANSPORTE_PUBLICO
             ? this.state.conductorPublico.idPersona
