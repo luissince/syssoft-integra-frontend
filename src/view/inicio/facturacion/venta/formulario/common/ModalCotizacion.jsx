@@ -45,7 +45,9 @@ class ModalCotizacion extends CustomComponent {
 
     this.state = {
       loading: false,
+
       buscar: '',
+      
       lista: [],
       restart: false,
       opcion: 0,
@@ -53,6 +55,7 @@ class ModalCotizacion extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
     };
