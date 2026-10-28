@@ -74,9 +74,9 @@ class CobroCrear extends CustomComponent {
       concepto: null,
       conceptos: [],
 
-      // Filtrar cliente
-      cliente: null,
-      clientes: [],
+      // Filtrar persona
+      persona: null,
+      personas: [],
 
       // Atributos libres
       codiso: '',
@@ -96,11 +96,10 @@ class CobroCrear extends CustomComponent {
     this.refMonto = React.createRef();
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
-    this.refObservacion = React.createRef();
 
-    // Filtrar cliente
-    this.refCliente = React.createRef();
-    this.refValueCliente = React.createRef();
+    // Filtrar persona
+    this.refPersona = React.createRef();
+    this.refValuePersona = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -180,18 +179,6 @@ class CobroCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarCliente(params) {
-    const response = await filtrarPersona(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -230,7 +217,7 @@ class CobroCrear extends CustomComponent {
 
   clearView = async () => {
     this.setState(this.initial, async () => {
-      await this.refCliente.current.restart();
+      await this.refPersona.current.restart();
       await this.refConcepto.current.restart();
       await this.loadData();
     });
@@ -303,55 +290,54 @@ class CobroCrear extends CustomComponent {
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState(
-      {
-        concepto: value,
-        conceptos: [],
-      },
-      () => {
-        this.refMonto.current.focus();
-      },
-    );
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Filtrar cliente
-  //------------------------------------------------------------------------------------------
-
-  handleClearInputCliente = () => {
     this.setState({
-      clientes: [],
-      cliente: null,
+      concepto: value,
+      conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
   };
 
-  handleFilterCliente = async (text) => {
+  //------------------------------------------------------------------------------------------
+  // Filtrar personas
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputPersona = () => {
+    this.setState({
+      personas: [],
+      persona: null,
+    });
+  };
+
+  handleFilterPersona = async (text) => {
     const searchWord = text;
-    this.setState({ cliente: null });
+    this.setState({ persona: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ clientes: [] });
+      this.setState({ personas: [] });
       return;
     }
 
     const params = {
-      opcion: 1,
+      opcion: 0,
       filter: searchWord,
-      cliente: true,
     };
 
-    const clientes = await this.fetchFiltrarCliente(params);
+    const response = await filtrarPersona(params);
 
-    this.setState({ clientes });
+    if (response instanceof SuccessReponse) {
+      this.setState({ personas: response.data });
+    }
+
   };
 
-  handleSelectItemCliente = (value) => {
-    this.refCliente.current.initialize(
+  handleSelectItemPersona = (value) => {
+    this.refPersona.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
     this.setState({
-      cliente: value,
-      clientes: [],
+      persona: value,
+      personas: [],
     });
   };
 
@@ -360,7 +346,7 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { concepto, idComprobante, monto, cliente, idMoneda } = this.state;
+    const { concepto, idComprobante, monto, persona, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
       alertKit.warning({
@@ -386,11 +372,11 @@ class CobroCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(cliente)) {
+    if (isEmpty(persona)) {
       alertKit.warning({
         title: "Ingreso",
-        message: "Seleccione un cliente.",
-      }, () => this.refValueCliente.current.focus());
+        message: "Seleccione una persona.",
+      }, () => this.refValuePersona.current.focus());
       return;
     }
 
@@ -441,7 +427,7 @@ class CobroCrear extends CustomComponent {
     callback = async function () { },
   ) => {
     const {
-      cliente,
+      persona,
       idUsuario,
       idMoneda,
       idSucursal,
@@ -467,7 +453,7 @@ class CobroCrear extends CustomComponent {
     if (accept) {
       const data = {
         idFormaPago: idFormaPago,
-        idPersona: cliente.idPersona,
+        idPersona: persona.idPersona,
         idUsuario: idUsuario,
         idMoneda: idMoneda,
         idSucursal: idSucursal,
@@ -654,14 +640,14 @@ class CobroCrear extends CustomComponent {
             formGroup={true}
           >
             <SearchInput
-              label={'Cliente:'}
-              ref={this.refCliente}
-              placeholder="Filtrar clientes..."
-              refValue={this.refValueCliente}
-              data={this.state.clientes}
-              handleClearInput={this.handleClearInputCliente}
-              handleFilter={this.handleFilterCliente}
-              handleSelectItem={this.handleSelectItemCliente}
+              label={'Persona:'}
+              ref={this.refPersona}
+              placeholder="Filtrar personas..."
+              refValue={this.refValuePersona}
+              data={this.state.personas}
+              handleClearInput={this.handleClearInputPersona}
+              handleFilter={this.handleFilterPersona}
+              handleSelectItem={this.handleSelectItemPersona}
               renderItem={(value) => (
                 <>{value.documento + ' - ' + value.informacion}</>
               )}
@@ -696,7 +682,6 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={'Observación:'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-              ref={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -710,7 +695,6 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
-              ref={this.refONota}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"

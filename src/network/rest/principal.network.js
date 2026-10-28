@@ -1137,7 +1137,7 @@ export async function listGuiaRemision(params, signal) {
 }
 
 export async function detailGuiaRemision(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/guiaremision/detail', {
       params: params,
       signal: signal,

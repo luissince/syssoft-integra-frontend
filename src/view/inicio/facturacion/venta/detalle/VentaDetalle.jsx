@@ -733,7 +733,7 @@ class VentaDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           isOpen={isOpenSendWhatsapp}
-          phone={cabecera && cabecera.celular || ""}
+          person={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
           documents={[

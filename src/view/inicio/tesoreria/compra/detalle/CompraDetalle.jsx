@@ -60,6 +60,9 @@ class CompraDetalle extends CustomComponent {
       isOpenModalPago: false,
       isOpenModalTerminal: false,
 
+      // Atributos del modal whatsapp
+      isOpenSendWhatsapp: false,
+
       // Id principales
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -719,7 +722,7 @@ class CompraDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           isOpen={isOpenSendWhatsapp}
-          phone={cabecera && cabecera.celular || ""}
+          person={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
           documents={[
