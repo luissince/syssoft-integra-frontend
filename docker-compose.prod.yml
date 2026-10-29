@@ -34,6 +34,16 @@ services:
     image: ${IMAGE_NAME}
     container_name: ${CONTAINER_NAME}
 
+  ayku-services:
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+
+  migaymasa-services:
+    <<: *frontend-service
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
+    
   # masa-y-miga-services:
   #   <<: *frontend-service
   #   image: ${IMAGE_NAME}
