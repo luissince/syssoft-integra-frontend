@@ -168,7 +168,7 @@ class Productos extends CustomComponent {
   async searchOpciones() {
     if (this.state.loading) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }

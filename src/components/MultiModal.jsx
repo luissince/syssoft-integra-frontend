@@ -5,6 +5,7 @@ import Button from './Button';
 import CustomModal, {
   CustomModalContentBody,
   CustomModalContentFooter,
+  CustomModalContentForm,
   CustomModalContentHeader,
   CustomModalForm,
 } from './CustomModal';
@@ -20,7 +21,10 @@ import { CANCELED } from '../model/types/types';
 import {
   convertNullText,
   currentDate,
+  formatCurrency,
   isEmpty,
+  isNumeric,
+  isText,
   keyNumberPhone,
   validateNumberWhatsApp,
 } from '../helper/utils.helper';
@@ -34,6 +38,7 @@ import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import { Capacitor } from '@capacitor/core';
 import { BsWhatsapp } from 'react-icons/bs';
+import TextArea from './TextArea';
 
 /**
  * Modal para mostrar del impresión.
@@ -171,6 +176,8 @@ class ModalPreImpresion extends Component {
       message: '',
     };
 
+    this.initial = { ...this.state };
+
     this.peticion = false;
     this.abortController = null;
 
@@ -188,7 +195,8 @@ class ModalPreImpresion extends Component {
       }
     }
 
-    this.setState({ loading: false });
+    this.setState(this.initial);
+
     this.peticion = false;
     this.abortController = null;
   };
@@ -300,6 +308,8 @@ class ModalPersona extends Component {
       ubigeos: [],
     };
 
+    this.initial = { ...this.state };
+
     this.refModal = React.createRef();
     this.peticion = false;
     this.abortController = null;
@@ -350,22 +360,7 @@ class ModalPersona extends Component {
       }
     }
 
-    this.setState({
-      loading: true,
-      msgLoading: 'Cargando datos...',
-
-      idTipoDocumento: '',
-      documento: '',
-      informacion: '',
-      celular: '',
-      email: '',
-      direccion: '',
-      idUbigeo: '',
-
-      tiposDocumentos: [],
-
-      ubigeos: [],
-    });
+    this.setState(this.initial);
 
     this.peticion = false;
     this.abortController = null;
@@ -830,23 +825,62 @@ class ModalSendWhatsApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      name: '',
       phone: '',
+      message: '',
+      type: 'text',
+      pdfType: '',
     };
 
+    this.initial = { ...this.state };
+
+    this.refModal = React.createRef();
+
     this.refPhone = React.createRef();
+    this.refMessage = React.createRef();
+    this.refPdfType = React.createRef();
   }
 
   handleOpen = async () => {
     this.refPhone.current.focus();
-    this.setState({ phone: this.props.phone ?? '' });
+    this.setState({
+      name: this.props.person?.informacion ?? '',
+      phone: this.props.person?.celular ?? ''
+    });
+  };
+
+  handleHidden = async () => {
+    this.setState(this.initial);
+  };
+
+  handleChangeType = (event) => {
+    this.setState({
+      type: event.target.value,
+    });
+  };
+
+  handleChangePdfType = (event) => {
+    this.setState({
+      pdfType: event.target.value,
+    });
+  };
+
+  handleInputNanme = (event) => {
+    this.setState({ name: event.target.value });
   };
 
   handleInputPhone = (event) => {
     this.setState({ phone: event.target.value });
   };
 
+  handleInputMessage = (event) => {
+    this.setState({ message: event.target.value });
+  };
+
   handleSendWhatsapp = async () => {
-    if (!validateNumberWhatsApp(this.state.phone)) {
+    const { name, phone, message, type, pdfType } = this.state;
+
+    if (!validateNumberWhatsApp(phone)) {
       alertKit.warning({
         title: 'WhatsApp',
         message: 'El número de teléfono no es válido.',
@@ -856,27 +890,55 @@ class ModalSendWhatsApp extends React.Component {
       return;
     }
 
-    this.props.handleProcess(this.state.phone, async () => {
-      await this.props.refModal.current.handleOnClose();
+    if (!isText(message)) {
+      alertKit.warning({
+        title: 'WhatsApp',
+        message: 'El mensaje no puede ser vacío.',
+      }, () => {
+        this.refMessage.current.focus();
+      });
+      return;
+    }
+
+    if (type === 'pdf' && !isText(pdfType)) {
+      alertKit.warning({
+        title: 'WhatsApp',
+        message: 'El tipo de pdf no puede ser vacío.',
+      }, () => {
+        this.refPdfType.current.focus();
+      });
+      return;
+    }
+
+    const body = {
+      name,
+      phone,
+      message,
+      type,
+      pdfType,
+    };
+
+    this.props.handleProcess(body, async () => {
+      await this.refModal.current.handleOnClose();
     });
   };
 
   render() {
-    const { refModal, isOpen, handleClose, handleHidden } = this.props;
+    const { isOpen, handleClose, documents } = this.props;
 
     return (
       <CustomModal
-        ref={refModal}
+        ref={this.refModal}
         isOpen={isOpen}
-        onOpen={this.handleOpen}
         onClose={handleClose}
-        onHidden={handleHidden}
+        onOpen={this.handleOpen}
+        onHidden={this.handleHidden}
         contentLabel={'Modal de Enviar Whatsapp'}
         shouldCloseOnOverlayClick={true}
         shouldCloseOnEsc={true}
       >
         <CustomModalContentHeader
-          contentRef={refModal}
+          contentRef={this.refModal}
           showClose={true}
           isMoveable={true}
         >
@@ -884,25 +946,97 @@ class ModalSendWhatsApp extends React.Component {
         </CustomModalContentHeader>
 
         <CustomModalContentBody>
-          <h5 className="mb-1">Enviar Mensaje WhatsApp</h5>
+          <h5 className="mb-3">Enviar Mensaje WhatsApp</h5>
 
           <div className="flex flex-col gap-3">
-            <Input
-              autoFocus
-              label={'Número de teléfono (con código de país)'}
-              placeholder={'Ej: +51966750883'}
-              ref={this.refPhone}
-              value={this.state.phone}
-              onChange={this.handleInputPhone}
-              onKeyDown={keyNumberPhone}
-            />
+            <div>
+              <label className="block text-sm mb-1">
+                Información
+              </label>
+
+              <Input
+                autoFocus
+                placeholder="Ej: Juan"
+                value={this.state.name}
+                onChange={this.handleInputNanme}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1">
+                Número de teléfono (con código de país)
+              </label>
+
+              <Input
+                autoFocus
+                placeholder="Ej: +51966750883"
+                ref={this.refPhone}
+                value={this.state.phone}
+                onChange={this.handleInputPhone}
+                onKeyDown={keyNumberPhone}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm  mb-1">
+                Tipo de envío
+              </label>
+
+              <Select
+                value={this.state.type}
+                onChange={this.handleChangeType}
+              >
+                <option value="text">Mensaje de texto</option>
+                <option value="pdf">Documento PDF</option>
+              </Select>
+            </div>
+
+            {this.state.type === 'pdf' && (
+              <div>
+                <label className="block text-sm mb-1">
+                  Tipo de documento
+                </label>
+
+                <Select
+                  ref={this.refPdfType}
+                  value={this.state.pdfType}
+                  onChange={this.handleChangePdfType}
+                >
+                  {
+                    !isEmpty(documents) && (
+                      documents.map((item, index) => (
+                        <option key={index} value={item.value}>{item.label}</option>
+                      ))
+                    )
+                  }
+                </Select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm mb-1">
+                {this.state.type === 'pdf' ? 'Mensaje del documento' : 'Mensaje'}
+              </label>
+
+              <TextArea
+                placeholder="Escribe tu mensaje aquí"
+                ref={this.refMessage}
+                value={this.state.message}
+                onChange={this.handleInputMessage}
+              />
+            </div>
 
             <Button
-              className="btn-dark"
+              className="btn-success"
               onClick={this.handleSendWhatsapp}
             >
-              <div className="flex items-center gap-3">
-                <BsWhatsapp /> <span>Enviar mensaje</span>
+              <div className="flex items-center justify-center gap-3">
+                <BsWhatsapp />
+                <span>
+                  {this.state.type === 'pdf'
+                    ? 'Enviar PDF por WhatsApp'
+                    : 'Enviar mensaje por WhatsApp'}
+                </span>
               </div>
             </Button>
           </div>
@@ -913,12 +1047,269 @@ class ModalSendWhatsApp extends React.Component {
 }
 
 ModalSendWhatsApp.propTypes = {
-  refModal: PropTypes.object,
   isOpen: PropTypes.bool.isRequired,
-  phone: PropTypes.string,
-  handleHidden: PropTypes.func,
+  person: PropTypes.object,
   handleClose: PropTypes.func.isRequired,
   handleProcess: PropTypes.func.isRequired,
+  documents: PropTypes.array,
 };
 
-export { ModalImpresion, ModalPreImpresion, ModalPersona, ModalSendWhatsApp };
+/**
+ * Modal para pagar al credito.
+ */
+
+class ModalPago extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      monto: '',
+      total: 0,
+      pagado: 0,
+    };
+
+    this.initial = { ...this.state };
+
+    this.refModal = React.createRef();
+    this.refMonto = React.createRef();
+  }
+
+  handleOnOpen = () => {
+    const total = this.props.detalles.reduce(
+      (acc, detalle) =>
+        acc + Number(detalle.costo || detalle.precio || 0) * Number(detalle.cantidad || 0),
+      0
+    );
+
+    const pagado = this.props.transacciones
+      .flatMap(transaccion => transaccion.detalles || [])
+      .reduce(
+        (acc, detalle) => acc + Number(detalle.monto || 0),
+        0
+      );
+
+    this.setState({
+      total,
+      pagado,
+      monto: '',
+    });
+  };
+
+  handleOnHidden = () => {
+    this.setState(this.initial);
+  };
+
+  handleInputMonto = (event) => {
+    this.setState({
+      monto: event.target.value,
+    });
+  };
+
+  handleOnProcess = async () => {
+
+    const { monto, total, pagado } = this.state;
+
+    if (!isNumeric(monto)) {
+      alertKit.warning({
+        title: 'Pago',
+        message: 'Ingrese un monto válido.',
+      }, () => {
+        this.refMonto.current?.focus();
+      });
+
+      return;
+    }
+
+    const montoPago = Number(monto);
+    const saldo = total - pagado;
+
+    if (montoPago <= 0) {
+      alertKit.warning({
+        title: 'Pago',
+        message: 'El monto debe ser mayor a 0.',
+      }, () => {
+        this.refMonto.current?.focus();
+      });
+
+      return;
+    }
+
+    if (montoPago > saldo) {
+      alertKit.warning({
+        title: 'Pago',
+        message: `El monto no puede superar el saldo pendiente de ${formatCurrency(saldo, this.props.codiso)}.`,
+      }, () => {
+        this.refMonto.current?.focus();
+      });
+
+      return;
+    }
+
+    await this.refModal.current.handleOnClose();
+    this.props.onProcess(montoPago);
+  };
+
+  render() {
+
+    const {
+      title,
+      isOpen,
+      onClose,
+      codiso
+    } = this.props;
+
+    const {
+      monto,
+      total,
+      pagado,
+    } = this.state;
+
+    const montoPago = Number(monto || 0);
+    const saldo = Math.max(total - pagado, 0);
+    const saldoDespuesPago = Math.max(saldo - montoPago, 0);
+
+    return (
+      <CustomModal
+        ref={this.refModal}
+        isOpen={isOpen}
+        onOpen={this.handleOnOpen}
+        onClose={onClose}
+        onHidden={this.handleOnHidden}
+        contentLabel={title}
+      >
+
+        <CustomModalContentForm
+          onSubmit={this.handleOnProcess}
+        >
+          <CustomModalContentHeader
+            contentRef={this.refModal}
+            showClose={true}
+            isMoveable={true}
+          >
+            {title}
+          </CustomModalContentHeader>
+
+          <CustomModalContentBody>
+
+            {/* RESUMEN */}
+            <div className="grid grid-cols-3 gap-3 mb-3">
+
+              <div className="rounded-lg bg-gray-50 border p-3">
+                <p className="text-xs text-gray-500">
+                  Total
+                </p>
+
+                <p className="text-lg font-semibold text-gray-800">
+                  {formatCurrency(total, codiso)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-green-50 border border-green-100 p-3">
+                <p className="text-xs text-green-600">
+                  Pagado
+                </p>
+
+                <p className="text-lg font-semibold text-green-700">
+                  {formatCurrency(pagado, codiso)}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-red-50 border border-red-100 p-3">
+                <p className="text-xs text-red-600">
+                  Saldo
+                </p>
+
+                <p className="text-lg font-semibold text-red-700">
+                  {formatCurrency(saldo, codiso)}
+                </p>
+              </div>
+
+            </div>
+
+            {/* NUEVO PAGO */}
+            <div className="mb-3">
+              <Input
+                autoFocus={true}
+                label={
+                  <label>
+                    Nuevo pago: <i className="fa fa-asterisk text-danger small" />
+                  </label>
+                }
+                placeholder="0.00"
+                role="float"
+                ref={this.refMonto}
+                value={monto}
+                onChange={this.handleInputMonto}
+              />
+
+            </div>
+
+            {/* PREVISUALIZACIÓN */}
+            {montoPago > 0 && montoPago <= saldo && (
+              <div className="rounded-lg bg-blue-50 border border-blue-100 p-3">
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    Pago actual
+                  </span>
+
+                  <span className="font-medium">
+                    {formatCurrency(montoPago, codiso)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-gray-600">
+                    Saldo después del pago
+                  </span>
+
+                  <span className="font-semibold text-blue-700">
+                    {formatCurrency(saldoDespuesPago, codiso)}
+                  </span>
+                </div>
+
+              </div>
+            )}
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
+
+            <div className="w-full flex flex-col md:flex-row gap-3">
+
+              <Button
+                type="submit"
+                className="btn-primary w-full md:w-auto"
+                disabled={
+                  !isNumeric(monto) ||
+                  Number(monto) <= 0 ||
+                  Number(monto) > saldo
+                }
+              >
+                <i className="fa fa-save"></i>
+                Registrar pago
+              </Button>
+
+              <Button
+                type="button"
+                className="btn-danger w-full md:w-auto"
+                onClick={async () =>
+                  await this.refModal.current.handleOnClose()
+                }
+              >
+                <i className="fa fa-close"></i>
+                Cerrar
+              </Button>
+
+            </div>
+
+          </CustomModalContentFooter>
+
+        </CustomModalContentForm>
+
+      </CustomModal>
+    );
+  }
+}
+
+export { ModalImpresion, ModalPreImpresion, ModalPersona, ModalSendWhatsApp, ModalPago };

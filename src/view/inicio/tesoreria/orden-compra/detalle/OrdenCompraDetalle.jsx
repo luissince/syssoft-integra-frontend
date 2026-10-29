@@ -37,6 +37,9 @@ import pdfVisualizer from 'pdf-visualizer';
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { alertKit } from 'alert-kit';
+import { ModalSendWhatsApp } from '@/components/MultiModal';
+import { connect } from 'react-redux';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -51,26 +54,11 @@ class OrdenCompraDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idOrdenCompra: '',
-      fechaHora: '',
-
-      proveedor: '',
-      telefono: '',
-      celular: '',
-      email: '',
-      direccion: '',
-
-      comprobante: '',
-      serieNumeracion: '',
-
-      estado: '',
-
-      observacion: '',
-      notas: '',
-
-      codiso: '',
-      total: 0,
-
+      cabecera: null,
       detalles: [],
+
+      // Atributos del modal whatsapp
+      isOpenSendWhatsapp: false,
     };
 
     this.abortControllerView = new AbortController();
@@ -135,7 +123,7 @@ class OrdenCompraDetalle extends CustomComponent {
       alertKit.warning({
         title: 'Orden de Compra',
         message: response.getMessage(),
-      },  () => {
+      }, () => {
         this.close();
       });
       return;
@@ -241,6 +229,57 @@ class OrdenCompraDetalle extends CustomComponent {
     });
   };
 
+
+  //------------------------------------------------------------------------------------------
+  // Modal de enviar WhatsApp
+  //------------------------------------------------------------------------------------------
+
+  handleOpenSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: true });
+  };
+
+  handleProcessSendWhatsapp = async (
+    params,
+    callback,
+  ) => {
+    const payload = {
+      id: crypto.randomUUID(),
+      to: params.phone,
+      message: params.message,
+      type: params.type,
+    };
+
+    if (params.type === 'pdf') {
+      const { idOrdenCompra, cabecera } = this.state;
+
+      if (!cabecera) {
+        alertKit.warning({
+          title: 'Compra',
+          message: 'No se pudo enviar el documento.',
+        });
+        return;
+      }
+
+      payload.url =
+        params.pdfType === 'list'
+          ? documentsPdfListsOrdenCompra(idOrdenCompra, 'A4')
+          : documentsPdfInvoicesOrdenCompra(idOrdenCompra, params.pdfType);
+
+      payload.filename =
+        `COMPRA ${cabecera.serie}-${cabecera.numeracion} - ${cabecera.informacion}.pdf`;
+
+      payload.caption = params.message;
+    }
+
+    this.props.sendWhatsAppAsync(payload);
+
+    await callback?.();
+  };
+
+  handleCloseSendWhatsapp = () => {
+    this.setState({ isOpenSendWhatsapp: false });
+  };
+
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -333,11 +372,13 @@ class OrdenCompraDetalle extends CustomComponent {
   }
 
   render() {
+    const { loading, msgLoading, cabecera, isOpenSendWhatsapp } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
         <Title
@@ -346,34 +387,71 @@ class OrdenCompraDetalle extends CustomComponent {
           handleGoBack={() => this.close()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> A4
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '80mm')}
-            >
-              <i className="fa fa-print"></i> 80MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintInvoices.bind(this, '58mm')}
-            >
-              <i className="fa fa-print"></i> 58MM
-            </Button>{' '}
-            <Button
-              className="btn-light"
-              onClick={this.handlePrintList.bind(this, 'A4')}
-            >
-              <i className="fa fa-print"></i> Lista
-            </Button>
-          </Column>
-        </Row>
+        <ModalSendWhatsApp
+          isOpen={isOpenSendWhatsapp}
+          person={cabecera}
+          handleClose={this.handleCloseSendWhatsapp}
+          handleProcess={this.handleProcessSendWhatsapp}
+          documents={[
+            {
+              label: "- Seleccionar Formato -",
+              value: ""
+            },
+            {
+              label: "Formato A4",
+              value: "A4"
+            },
+            {
+              label: "Formato 80mm",
+              value: "80mm"
+            },
+            {
+              label: "Formato 58mm",
+              value: "58mm"
+            },
+            {
+              label: "Formato Lista",
+              value: "list"
+            }
+          ]}
+        />
+
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> A4
+          </button>
+
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
+          >
+            <i className="fa fa-print"></i> 80MM
+          </button>
+
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
+
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+            onClick={this.handlePrintList.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> Lista
+          </button>
+
+          <button
+            className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-green-500 flex items-center gap-2"
+            onClick={this.handleOpenSendWhatsapp}
+          >
+            <i className="fa fa-whatsapp"></i> Whatsapp
+          </button>
+        </div>
 
         <Row>
           <Column
@@ -578,6 +656,24 @@ OrdenCompraDetalle.propTypes = {
   location: PropTypes.shape({
     search: PropTypes.string,
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
-export default OrdenCompraDetalle;
+
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
+
+const mapStateToProps = (state) => {
+  return {
+    predeterminado: state.predeterminado,
+  };
+};
+
+const ConnectedOrdenCompraDetalle = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(OrdenCompraDetalle);
+
+export default ConnectedOrdenCompraDetalle;
+

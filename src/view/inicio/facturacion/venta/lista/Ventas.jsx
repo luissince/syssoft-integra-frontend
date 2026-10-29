@@ -22,7 +22,8 @@ import SuccessReponse from '../../../../../model/class/response';
 import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import {
-  CONTADO,
+  FORMA_PAGO_CONTADO,
+  FORMA_PAGO_CREDITO,
 } from '../../../../../model/types/forma-pago';
 import Title from '../../../../../components/Title';
 import { SpinnerView } from '../../../../../components/Spinner';
@@ -45,7 +46,8 @@ import { alertKit } from 'alert-kit';
 import { Capacitor } from '@capacitor/core';
 import { cn } from '@/lib/utils';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
-import { Check, Eye, Trash, Truck } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Eye, Trash, Truck } from 'lucide-react';
+import { MdOutlineClosedCaptionDisabled } from 'react-icons/md';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -112,6 +114,8 @@ class Ventas extends CustomComponent {
       ),
 
       view: 'tabla',
+
+      credito: {},
 
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
@@ -255,7 +259,7 @@ class Ventas extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
@@ -339,7 +343,7 @@ class Ventas extends CustomComponent {
     this.props.history.push(`${this.props.location.pathname}/crear`);
   };
 
-  handleInputFechaInico = (event) => {
+  handleInputFechaInicio = (event) => {
     this.setState({ fechaInicio: event.target.value }, () => {
       this.searchOpciones();
     });
@@ -431,6 +435,15 @@ class Ventas extends CustomComponent {
       }
     }
   }
+
+  handleShowCredit = (index) => {
+    this.setState((prevState) => ({
+      credito: {
+        ...prevState.credito,
+        [index]: !prevState.credito?.[index],
+      }
+    }));
+  };
 
   //------------------------------------------------------------------------------------------
   // Procesos Elegir Interfaz
@@ -538,136 +551,179 @@ class Ventas extends CustomComponent {
               </span>
             );
 
-            const tipo = item.idFormaPago === CONTADO ? 'CONTADO' : 'CREDITO';
+            const tipo = item.idFormaPago === FORMA_PAGO_CONTADO ? 'CONTADO' : 'CREDITO';
 
             return (
-              <div
-                key={index}
-                className={cn(
-                  "text-sm text-gray-900",
-                  view === "tabla"
-                    ? "grid grid-cols-[0.5fr_1fr_2.0fr_1.5fr_1.3fr_1.0fr_1.0fr_1.8fr] py-3 gap-x-3 items-center"
-                    : "flex flex-col h-full gap-3 rounded border p-3"
-                )}
-              >
-                <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
-                  {
-                    view === "tabla" && (
-                      <div className=" text-center hidden md:block">
-                        {item.id}
-                      </div>
-                    )
-                  }
-
-                  <div>
-                    <div>{item.fecha}</div>
-                    <div className="text-xs text-gray-500">{formatTime(item.hora)}</div>
-                  </div>
-
-                  <div>
-                    <div>{item.tipoDocumento} - {item.documento}</div>
-                    <div className="text-xs text-gray-500">{item.informacion}</div>
-                  </div>
-
-                  <div>
-                    <div>{item.comprobante}</div>
-                    <div className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</div>
-                  </div>
-
-                  <div>
-                    {tipo}
-                  </div>
-
-                  <div className={cn(
-                    "text-center",
-                    view === "tabla" ? "text-center" : "text-left"
-                  )}>
-                    {estado}
-                  </div>
-
-                  <div className="text-right">
-                    {formatCurrency(item.total, item.codiso)}
-                  </div>
-                </div>
-
+              <div key={index}>
                 <div
                   className={cn(
-                    "flex gap-2",
+                    "text-sm text-gray-900",
                     view === "tabla"
-                      ? "flex-col md:flex-row justify-center"
-                      : "flex-row justify-end"
+                      ? "grid grid-cols-[0.5fr_1fr_2.0fr_1.3fr_1.0fr_1.0fr_1.0fr_2.3fr] py-3 gap-x-3 items-center"
+                      : "flex flex-col h-full gap-3 rounded border p-3"
                   )}
                 >
-                  <button
-                    onClick={() => this.handleDetalle(item.idVenta)}
-                    className={cn(
-                      "inline-flex items-center justify-center gap-2",
-                      "px-3 py-2",
-                      "transition rounded",
-                      "bg-gray-100 text-gray-600 text-sm font-medium",
-                      "hover:bg-gray-300",
-                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                      "active:bg-blue-100 active:scale-[0.97]",
-                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                    )}
-                  >
-                    <Eye className="w-5 h-5 text-blue-500" />
-                  </button>
+                  <div className={view === "tabla" ? "contents" : "flex-1 flex flex-col gap-3"}>
+                    {
+                      view === "tabla" && (
+                        <div className=" text-center hidden md:block">
+                          {item.id}
+                        </div>
+                      )
+                    }
 
-                  {
-                    item.guiaRemision === 1
-                      ? (
-                        <button
-                          className={cn(
-                            "inline-flex items-center justify-center gap-2",
-                            "px-3 py-2",
-                            "transition rounded",
-                            "bg-gray-100 text-gray-600 text-sm font-medium",
-                            "hover:bg-gray-300",
-                            "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                            "active:bg-blue-100 active:scale-[0.97]",
-                            "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                          )}
-                          title="Guía generada"
-                          disabled>
-                          <Check className="w-5 h-5 text-green-500" />
-                        </button>
-                      )
-                      :
-                      (
-                        <button
-                          onClick={() => this.handleGuiaRemision(item.idVenta)}
-                          className={cn(
-                            "inline-flex items-center justify-center gap-2",
-                            "px-3 py-2",
-                            "transition rounded",
-                            "bg-gray-100 text-gray-600 text-sm font-medium",
-                            "hover:bg-gray-300",
-                            "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                            "active:bg-blue-100 active:scale-[0.97]",
-                            "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                          )}
-                        >
-                          <Truck className="w-5 h-5 text-gray-600" />
-                        </button>
-                      )
-                  }
-                  <button
-                    onClick={() => this.handleAnular(item.idVenta)}
+                    <div>
+                      <div>{item.fecha}</div>
+                      <div className="text-xs text-gray-500">{formatTime(item.hora)}</div>
+                    </div>
+
+                    <div>
+                      <div>{item.tipoDocumento} - {item.documento}</div>
+                      <div className="text-xs text-gray-500">{item.informacion}</div>
+                    </div>
+
+                    <div>
+                      <div>{item.comprobante}</div>
+                      <div className="font-mono">{item.serie}-{formatNumberWithZeros(item.numeracion)}</div>
+                    </div>
+
+                    <div>
+                      {tipo}
+                    </div>
+
+                    <div className={cn(
+                      "text-center",
+                      view === "tabla" ? "text-center" : "text-left"
+                    )}>
+                      {estado}
+                    </div>
+
+                    <div className="text-right">
+                      {formatCurrency(item.total, item.codiso)}
+                    </div>
+                  </div>
+
+                  <div
                     className={cn(
-                      "inline-flex items-center justify-center gap-2",
-                      "px-3 py-2",
-                      "transition rounded",
-                      "bg-gray-100 text-gray-600 text-sm font-medium",
-                      "hover:bg-gray-300",
-                      "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
-                      "active:bg-blue-100 active:scale-[0.97]",
-                      "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      "flex gap-2",
+                      view === "tabla"
+                        ? "flex-col md:flex-row justify-center"
+                        : "flex-row justify-end"
                     )}
                   >
-                    <Trash className="w-5 h-5 text-red-500" />
-                  </button>
+                    <button
+                      onClick={() => this.handleDetalle(item.idVenta)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Eye className="w-5 h-5 text-blue-500" />
+                    </button>
+
+                    {
+                      item.guiaRemision === 1
+                        ? (
+                          <button
+                            className={cn(
+                              "inline-flex items-center justify-center gap-2",
+                              "px-3 py-2",
+                              "transition rounded",
+                              "bg-gray-100 text-gray-600 text-sm font-medium",
+                              "hover:bg-gray-300",
+                              "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                              "active:bg-blue-100 active:scale-[0.97]",
+                              "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                            )}
+                            title="Guía generada"
+                            disabled>
+                            <Check className="w-5 h-5 text-green-500" />
+                          </button>
+                        )
+                        :
+                        (
+                          <button
+                            onClick={() => this.handleGuiaRemision(item.idVenta)}
+                            className={cn(
+                              "inline-flex items-center justify-center gap-2",
+                              "px-3 py-2",
+                              "transition rounded",
+                              "bg-gray-100 text-gray-600 text-sm font-medium",
+                              "hover:bg-gray-300",
+                              "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                              "active:bg-blue-100 active:scale-[0.97]",
+                              "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                            )}
+                          >
+                            <Truck className="w-5 h-5 text-gray-600" />
+                          </button>
+                        )
+                    }
+
+
+                    <button
+                      onClick={() => this.handleShowCredit(index)}
+                      disabled={item.idFormaPago !== FORMA_PAGO_CREDITO}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      {
+                        item.idFormaPago === FORMA_PAGO_CREDITO ? (
+                          this.state.credito[index] ? (
+                            <ChevronUp className="h-5 w-5" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5" />
+                          )
+                        ) :
+                          <MdOutlineClosedCaptionDisabled className="h-5 w-5" />
+                      }
+                    </button>
+
+                    <button
+                      onClick={() => this.handleAnular(item.idVenta)}
+                      className={cn(
+                        "inline-flex items-center justify-center gap-2",
+                        "px-3 py-2",
+                        "transition rounded",
+                        "bg-gray-100 text-gray-600 text-sm font-medium",
+                        "hover:bg-gray-300",
+                        "focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2",
+                        "active:bg-blue-100 active:scale-[0.97]",
+                        "disabled:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <Trash className="w-5 h-5 text-red-500" />
+                    </button>
+                  </div>
                 </div>
+
+                {item.idFormaPago === FORMA_PAGO_CREDITO && this.state.credito[index] && (
+                  <div className="w-full bg-gray-50">
+                    <div className="rounded p-3">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">
+                        Detalles del crédito
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <p>Cobrado: {formatCurrency(item.cobrado, item.codiso)}</p>
+                        <p>Restante: {formatCurrency(item.total - item.cobrado, item.codiso)}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })
@@ -772,7 +828,7 @@ class Ventas extends CustomComponent {
             <input
               type="date"
               value={this.state.fechaInicio}
-              onChange={this.handleInputFechaInico}
+              onChange={this.handleInputFechaInicio}
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
@@ -836,7 +892,7 @@ class Ventas extends CustomComponent {
             <div className={cn(
               "bg-gray-100 font-medium text-xs text-gray-500 uppercase tracking-wider"
             )}>
-              <div className="grid grid-cols-[0.5fr_1fr_2.0fr_1.5fr_1.3fr_1.0fr_1.0fr_1.8fr] gap-x-3 py-3">
+              <div className="grid grid-cols-[0.5fr_1fr_2.0fr_1.3fr_1.0fr_1.0fr_1.0fr_2.3fr] gap-x-3 py-3">
                 <div className="text-center">#</div>
                 <div>Fecha y Hora</div>
                 <div>Cliente</div>

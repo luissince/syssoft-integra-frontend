@@ -45,7 +45,9 @@ class ModalPedido extends CustomComponent {
 
     this.state = {
       loading: false,
+
       buscar: '',
+
       lista: [],
       restart: false,
       opcion: 0,
@@ -53,6 +55,7 @@ class ModalPedido extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+      
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
     };
@@ -90,9 +93,9 @@ class ModalPedido extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
-    await this.setStateAsync({ opcion: 1 });
+    await this.setStateAsync({ opcion: 2 });
   };
 
   handlePaginacion = async (listid) => {

@@ -1,6 +1,5 @@
 import ContainerWrapper from '../../../../../components/Container';
 import {
-  currentDate,
   formatNumberWithZeros,
   formatTime,
   isEmpty,
@@ -26,8 +25,10 @@ import {
 import React from 'react';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
-import { CircleCheck, Clock, Eye, Pencil, ShoppingCart, Trash } from 'lucide-react';
+import { ChartNoAxesCombined, CircleCheck, Clock, Clock8, Eye, FileText, Pencil, ShoppingCart, Trash } from 'lucide-react';
 import { ESTADO_PEDIDO, pedidoEstadoMap } from '@/model/types/pedido';
+import { format } from 'date-fns';
+import { DatePicker } from '@/components/DatePicker';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -46,8 +47,8 @@ class Pedidos extends CustomComponent {
       lista: [],
       restart: false,
 
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
+      fechaInicio: new Date().toISOString(),
+      fechaFinal: new Date().toISOString(),
       ligado: '',
       estado: '',
 
@@ -58,6 +59,8 @@ class Pedidos extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+
+      resumen: {},
 
       view: 'tabla',
 
@@ -164,7 +167,7 @@ class Pedidos extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
@@ -189,8 +192,8 @@ class Pedidos extends CustomComponent {
       opcion: opcion,
       buscar: this.state.buscar,
       idSucursal: this.state.idSucursal,
-      fechaInicio: this.state.fechaInicio,
-      fechaFinal: this.state.fechaFinal,
+      fechaInicio: format(this.state.fechaInicio, "yyyy-MM-dd"),
+      fechaFinal: format(this.state.fechaFinal, "yyyy-MM-dd"),
       ligado: this.state.ligado,
       estado: this.state.estado,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
@@ -263,14 +266,14 @@ class Pedidos extends CustomComponent {
     });
   };
 
-  handleInputFechaInico = (event) => {
-    this.setState({ fechaInicio: event.target.value }, () => {
+  handleInputFechaInicio = (selectedDate) => {
+    this.setState({ fechaInicio: selectedDate }, () => {
       this.searchOpciones();
     });
   };
 
-  handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value }, () => {
+  handleInputFechaFinal = (selectedDate) => {
+    this.setState({ fechaFinal: selectedDate }, () => {
       this.searchOpciones();
     });
   };
@@ -421,7 +424,7 @@ class Pedidos extends CustomComponent {
                 {item.ligado === 1 && (
                   <>
                     <Clock className="w-3.5 h-3.5" />
-                    Falta ({item.cantidadCotizada - item.cantidadVendida})
+                    Falta ({item.cantidadPedido - item.cantidadVendida})
                   </>
                 )}
 
@@ -556,7 +559,7 @@ class Pedidos extends CustomComponent {
   }
 
   render() {
-    const { view } = this.state;
+    const { view, resumen } = this.state;
 
     return (
       <ContainerWrapper>
@@ -643,19 +646,17 @@ class Pedidos extends CustomComponent {
           {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Fecha de Inicio */}
-            <input
-              type="date"
+            <DatePicker
               value={this.state.fechaInicio}
-              onChange={this.handleInputFechaInico}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={this.handleInputFechaInicio}
+              placeholder="Fecha Inicio"
             />
 
             {/* Fecha Final */}
-            <input
-              type="date"
+            <DatePicker
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Fecha Final"
             />
 
             {/* Ligado */}
@@ -664,11 +665,11 @@ class Pedidos extends CustomComponent {
               onChange={this.handleSelectLigado}
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">- TODOS -</option>
-              <option value="1">LIGADO</option>
-              <option value="0">LIBRE</option>
+              <option value="">- LIGADO -</option>
+              <option value="0">SIN VENTA</option>
+              <option value="1">FALTANTES</option>
+              <option value="2">COMPLETADOS</option>
             </select>
-
 
             {/* Estado */}
             <select
@@ -676,7 +677,7 @@ class Pedidos extends CustomComponent {
               onChange={this.handleSelectEstado}
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">- TODOS -</option>
+              <option value="">- ESTADO -</option>
               <option value="pending">PENDIENTE</option>
               <option value="preparing">PREPARANDO</option>
               <option value="ready">LISTO</option>
@@ -696,6 +697,45 @@ class Pedidos extends CustomComponent {
             placeholder="Buscar por código o nombre..."
             theme="modern"
           />
+        </div>
+
+        {/* Resumen */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <div className="bg-white rounded border px-4 py-3">
+            <FileText className="h-6 w-6 text-gray-600" />
+            <p className="text-sm text-gray-500 mt-3">TOTAL PEDIDOS</p>
+            <p className="text-3xl font-bold text-gray-600 mt-1">
+              {(resumen?.totalPedidos ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Documentos registrados</p>
+          </div>
+
+          <div className="bg-white rounded border px-4 py-3">
+            <Clock8 className="h-6 w-6 text-amber-600" />
+            <p className="text-sm text-gray-500 mt-3">SIN VENTAS</p>
+            <p className="text-3xl font-bold text-amber-600 mt-1">
+              {(resumen?.pedidosSinVenta ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Pedidos sin vender</p>
+          </div>
+
+          <div className="bg-white rounded border px-4 py-3">
+            <ChartNoAxesCombined className="h-6 w-6 text-blue-600" />
+            <p className="text-sm text-gray-500 mt-3">VENTAS PARCIALES</p>
+            <p className="text-3xl font-bold text-blue-600 mt-1">
+              {(resumen?.pedidosParciales ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Pedidos incompletas</p>
+          </div>
+
+          <div className="bg-white rounded border px-4 py-3">
+            <CircleCheck className="h-6 w-6 text-green-600" />
+            <p className="text-sm text-gray-500 mt-3">COMPLETADAS</p>
+            <p className="text-3xl font-bold text-green-600 mt-1">
+              {(resumen?.pedidosCompletadas ?? 0).toLocaleString("es-PE")}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Pedidos completadas</p>
+          </div>
         </div>
 
         {/* Render condicional: Tabla o Cuadrícula */}

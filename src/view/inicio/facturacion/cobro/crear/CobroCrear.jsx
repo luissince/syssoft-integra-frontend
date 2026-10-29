@@ -31,9 +31,9 @@ import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import pdfVisualizer from 'pdf-visualizer';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -74,9 +74,9 @@ class CobroCrear extends CustomComponent {
       concepto: null,
       conceptos: [],
 
-      // Filtrar cliente
-      cliente: null,
-      clientes: [],
+      // Filtrar persona
+      persona: null,
+      personas: [],
 
       // Atributos libres
       codiso: '',
@@ -88,8 +88,6 @@ class CobroCrear extends CustomComponent {
 
     this.initial = { ...this.state };
 
-    this.alert = new SweetAlert();
-
     // Filtrar concepto
     this.refConcepto = React.createRef();
     this.refValueConcepto = React.createRef();
@@ -98,11 +96,10 @@ class CobroCrear extends CustomComponent {
     this.refMonto = React.createRef();
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
-    this.refObservacion = React.createRef();
 
-    // Filtrar cliente
-    this.refCliente = React.createRef();
-    this.refValueCliente = React.createRef();
+    // Filtrar persona
+    this.refPersona = React.createRef();
+    this.refValuePersona = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -182,18 +179,6 @@ class CobroCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarCliente(params) {
-    const response = await filtrarPersona(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -232,7 +217,7 @@ class CobroCrear extends CustomComponent {
 
   clearView = async () => {
     this.setState(this.initial, async () => {
-      await this.refCliente.current.restart();
+      await this.refPersona.current.restart();
       await this.refConcepto.current.restart();
       await this.loadData();
     });
@@ -305,55 +290,54 @@ class CobroCrear extends CustomComponent {
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState(
-      {
-        concepto: value,
-        conceptos: [],
-      },
-      () => {
-        this.refMonto.current.focus();
-      },
-    );
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Filtrar cliente
-  //------------------------------------------------------------------------------------------
-
-  handleClearInputCliente = () => {
     this.setState({
-      clientes: [],
-      cliente: null,
+      concepto: value,
+      conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
   };
 
-  handleFilterCliente = async (text) => {
+  //------------------------------------------------------------------------------------------
+  // Filtrar personas
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputPersona = () => {
+    this.setState({
+      personas: [],
+      persona: null,
+    });
+  };
+
+  handleFilterPersona = async (text) => {
     const searchWord = text;
-    this.setState({ cliente: null });
+    this.setState({ persona: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ clientes: [] });
+      this.setState({ personas: [] });
       return;
     }
 
     const params = {
-      opcion: 1,
+      opcion: 0,
       filter: searchWord,
-      cliente: true,
     };
 
-    const clientes = await this.fetchFiltrarCliente(params);
+    const response = await filtrarPersona(params);
 
-    this.setState({ clientes });
+    if (response instanceof SuccessReponse) {
+      this.setState({ personas: response.data });
+    }
+
   };
 
-  handleSelectItemCliente = (value) => {
-    this.refCliente.current.initialize(
+  handleSelectItemPersona = (value) => {
+    this.refPersona.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
     this.setState({
-      cliente: value,
-      clientes: [],
+      persona: value,
+      personas: [],
     });
   };
 
@@ -362,40 +346,45 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { concepto, idComprobante, monto, cliente, idMoneda } = this.state;
+    const { concepto, idComprobante, monto, persona, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Ingreso', 'Seleccione su concepto.', () =>
-        this.refValueConcepto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione su concepto.",
+      }, () => this.refValueConcepto.current.focus());
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Ingreso', 'Ingrese el monto.', () =>
-        this.refMonto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Ingrese el monto.",
+      }, () => this.refMonto.current.focus());
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Ingreso', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione su comprobante.",
+      }, () => this.refComprobante.current.focus());
       return;
     }
 
-    if (isEmpty(cliente)) {
-      this.alert.warning('Ingreso', 'Seleccione un cliente.', () =>
-        this.refValueCliente.current.focus(),
-      );
+    if (isEmpty(persona)) {
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione una persona.",
+      }, () => this.refValuePersona.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Ingreso', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Ingreso",
+        message: "Seleccione su moneda.",
+      }, () => this.refMoneda.current.focus());
       return;
     }
 
@@ -403,15 +392,20 @@ class CobroCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Ingreso',
-      '¿Está seguro de limpiar el Ingreso?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+    const accept = await alertKit.question({
+      title: "Ingreso",
+      message: "¿Está seguro de limpiar el Ingreso?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   handleCerrar = () => {
@@ -426,14 +420,14 @@ class CobroCrear extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
-      cliente,
+      persona,
       idUsuario,
       idMoneda,
       idSucursal,
@@ -444,45 +438,56 @@ class CobroCrear extends CustomComponent {
       monto,
     } = this.state;
 
-    this.alert.dialog(
-      'Ingreso',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idPersona: cliente.idPersona,
-            idUsuario: idUsuario,
-            idMoneda: idMoneda,
-            idSucursal: idSucursal,
-            idComprobante: idComprobante,
-            idConcepto: concepto.idConcepto,
-            monto: monto,
-            estado: 1,
-            observacion,
-            nota,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
-
-          await callback();
-          this.alert.information('Ingreso', 'Procesando información...');
-
-          const response = await createCobro(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idCobro);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Ingreso', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: "Ingreso",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idPersona: persona.idPersona,
+        idUsuario: idUsuario,
+        idMoneda: idMoneda,
+        idSucursal: idSucursal,
+        idComprobante: idComprobante,
+        idConcepto: concepto.idConcepto,
+        monto: monto,
+        estado: 1,
+        observacion,
+        nota,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback();
+      alertKit.loading({
+        message: 'Procesando información...',
+      });
+
+      const response = await createCobro(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idCobro);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Ingreso',
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {
@@ -501,7 +506,6 @@ class CobroCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-
     pdfVisualizer.printer({
       printable: documentsPdfInvoicesCobro(this.state.idCobro, size),
       type: 'pdf',
@@ -543,14 +547,14 @@ class CobroCrear extends CustomComponent {
           title={'Completar Ingreso'}
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
-          disabledCreditoFijo={true}
+          disabledCredito={true}
           codiso={this.state.codiso}
           importeTotal={
             isNumeric(this.state.monto) ? Number(this.state.monto) : 0
           }
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={null}
         />
 
         <ModalImpresion
@@ -636,15 +640,14 @@ class CobroCrear extends CustomComponent {
             formGroup={true}
           >
             <SearchInput
-              group={true}
-              label={'Cliente:'}
-              ref={this.refCliente}
-              placeholder="Filtrar clientes..."
-              refValue={this.refValueCliente}
-              data={this.state.clientes}
-              handleClearInput={this.handleClearInputCliente}
-              handleFilter={this.handleFilterCliente}
-              handleSelectItem={this.handleSelectItemCliente}
+              label={'Persona:'}
+              ref={this.refPersona}
+              placeholder="Filtrar personas..."
+              refValue={this.refValuePersona}
+              data={this.state.personas}
+              handleClearInput={this.handleClearInputPersona}
+              handleFilter={this.handleFilterPersona}
+              handleSelectItem={this.handleSelectItemPersona}
               renderItem={(value) => (
                 <>{value.documento + ' - ' + value.informacion}</>
               )}
@@ -679,7 +682,6 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={'Observación:'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-              ref={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -693,7 +695,6 @@ class CobroCrear extends CustomComponent {
               group={true}
               label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
-              ref={this.refONota}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"

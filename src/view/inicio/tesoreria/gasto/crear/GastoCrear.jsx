@@ -31,9 +31,9 @@ import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
-import SweetAlert from '../../../../../model/class/sweet-alert';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import pdfVisualizer from 'pdf-visualizer';
+import { alertKit } from 'alert-kit';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -74,9 +74,9 @@ class GastoCrear extends CustomComponent {
       concepto: null,
       conceptos: [],
 
-      // Filtrar proveedor
-      proveedor: null,
-      proveedores: [],
+      // Filtrar persona
+      persona: null,
+      personas: [],
 
       // Atributos libres
       codiso: '',
@@ -88,8 +88,6 @@ class GastoCrear extends CustomComponent {
 
     this.initial = { ...this.state };
 
-    this.alert = new SweetAlert();
-
     // Filtrar concepto
     this.refConcepto = React.createRef();
     this.refValueConcepto = React.createRef();
@@ -98,12 +96,10 @@ class GastoCrear extends CustomComponent {
     this.refMonto = React.createRef();
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
-    this.refObservacion = React.createRef();
-    this.refONota = React.createRef();
 
-    // Filtrar proveedor
-    this.refProveedor = React.createRef();
-    this.refValueProveedor = React.createRef();
+    // Filtrar persona
+    this.refPersona = React.createRef();
+    this.refValuePersona = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -183,18 +179,6 @@ class GastoCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarCliente(params) {
-    const response = await filtrarPersona(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -233,7 +217,7 @@ class GastoCrear extends CustomComponent {
 
   clearView = async () => {
     this.setState(this.initial, async () => {
-      await this.refProveedor.current.restart();
+      await this.refPersona.current.restart();
       await this.refConcepto.current.restart();
       await this.loadData();
     });
@@ -306,55 +290,53 @@ class GastoCrear extends CustomComponent {
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState(
-      {
-        concepto: value,
-        conceptos: [],
-      },
-      () => {
-        this.refMonto.current.focus();
-      },
-    );
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Filtrar proveedor
-  //------------------------------------------------------------------------------------------
-
-  handleClearInputProveedor = () => {
     this.setState({
-      proveedores: [],
-      proveedor: null,
+      concepto: value,
+      conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
   };
 
-  handleFilterProveedor = async (text) => {
+  //------------------------------------------------------------------------------------------
+  // Filtrar persona
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputPersona = () => {
+    this.setState({
+      personas: [],
+      persona: null,
+    });
+  };
+
+  handleFilterPersona = async (text) => {
     const searchWord = text;
-    this.setState({ proveedor: null });
+    this.setState({ persona: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ proveedores: [] });
+      this.setState({ personas: [] });
       return;
     }
 
     const params = {
-      opcion: 1,
+      opcion: 0,
       filter: searchWord,
-      proveedor: true,
     };
 
-    const proveedores = await this.fetchFiltrarCliente(params);
+    const response = await filtrarPersona(params);
 
-    this.setState({ proveedores });
+    if (response instanceof SuccessReponse) {
+      this.setState({ personas: response.data });
+    }
   };
 
-  handleSelectItemProveedor = (value) => {
-    this.refProveedor.current.initialize(
+  handleSelectItemPersona = (value) => {
+    this.refPersona.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
     this.setState({
-      proveedor: value,
-      proveedores: [],
+      persona: value,
+      personas: [],
     });
   };
 
@@ -363,40 +345,45 @@ class GastoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { concepto, idComprobante, monto, proveedor, idMoneda } = this.state;
+    const { concepto, idComprobante, monto, persona, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
-      this.alert.warning('Gasto', 'Seleccione su concepto.', () =>
-        this.refValueConcepto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione su concepto.",
+      }, () => this.refValueConcepto.current.focus());
       return;
     }
 
     if (!isNumeric(monto)) {
-      this.alert.warning('Gasto', 'Ingrese el monto.', () =>
-        this.refMonto.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Ingrese el monto.",
+      }, () => this.refMonto.current.focus());
       return;
     }
 
     if (!isText(idComprobante)) {
-      this.alert.warning('Gasto', 'Seleccione su comprobante.', () =>
-        this.refComprobante.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione su comprobante.",
+      }, () => this.refComprobante.current.focus());
       return;
     }
 
-    if (isEmpty(proveedor)) {
-      this.alert.warning('Gasto', 'Seleccione un proveedor.', () =>
-        this.refValueProveedor.current.focus(),
-      );
+    if (isEmpty(persona)) {
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione una persona.",
+      }, () => this.refValuePersona.current.focus());
       return;
     }
 
     if (!isText(idMoneda)) {
-      this.alert.warning('Gasto', 'Seleccione su moneda.', () =>
-        this.refMoneda.current.focus(),
-      );
+      alertKit.warning({
+        title: "Gasto",
+        message: "Seleccione su moneda.",
+      }, () => this.refMoneda.current.focus());
       return;
     }
 
@@ -404,15 +391,20 @@ class GastoCrear extends CustomComponent {
   };
 
   handleLimpiar = async () => {
-    this.alert.dialog(
-      'Gasto',
-      '¿Está seguro de limpiar el gasto?',
-      (accept) => {
-        if (accept) {
-          this.clearView();
-        }
+    const accept = await alertKit.question({
+      title: "Gasto",
+      message: "¿Está seguro de limpiar el gasto?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      this.clearView();
+    }
   };
 
   handleCerrar = () => {
@@ -427,14 +419,14 @@ class GastoCrear extends CustomComponent {
     this.setState({ isOpenTerminal: true });
   };
 
-  handleProcessContado = (
+  handleProcessContado = async (
     idFormaPago,
     metodoPagosLista,
     notaTransacion,
-    callback = async function () {},
+    callback = async function () { },
   ) => {
     const {
-      proveedor,
+      persona,
       idUsuario,
       idMoneda,
       idSucursal,
@@ -445,45 +437,56 @@ class GastoCrear extends CustomComponent {
       monto,
     } = this.state;
 
-    this.alert.dialog(
-      'Gasto',
-      '¿Estás seguro de continuar?',
-      async (accept) => {
-        if (accept) {
-          const data = {
-            idFormaPago: idFormaPago,
-            idPersona: proveedor.idPersona,
-            idUsuario: idUsuario,
-            idMoneda: idMoneda,
-            idSucursal: idSucursal,
-            idComprobante: idComprobante,
-            idConcepto: concepto.idConcepto,
-            monto: monto,
-            estado: 1,
-            observacion,
-            nota,
-            notaTransacion,
-            bancosAgregados: metodoPagosLista,
-          };
-
-          await callback();
-          this.alert.information('Gasto', 'Procesando información...');
-
-          const response = await createGasto(data);
-
-          if (response instanceof SuccessReponse) {
-            this.alert.close();
-            this.handleOpenImpresion(response.data.idGasto);
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            this.alert.warning('Gasto', response.getMessage());
-          }
-        }
+    const accept = await alertKit.question({
+      title: "Gasto",
+      message: "¿Estás seguro de continuar?",
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const data = {
+        idFormaPago: idFormaPago,
+        idPersona: persona.idPersona,
+        idUsuario: idUsuario,
+        idMoneda: idMoneda,
+        idSucursal: idSucursal,
+        idComprobante: idComprobante,
+        idConcepto: concepto.idConcepto,
+        monto: monto,
+        estado: 1,
+        observacion,
+        nota,
+        notaTransacion,
+        bancosAgregados: metodoPagosLista,
+      };
+
+      await callback();
+
+      alertKit.loading({
+        message: "Procesando información...",
+      });
+
+      const response = await createGasto(data);
+
+      if (response instanceof SuccessReponse) {
+        alertKit.close();
+        this.handleOpenImpresion(response.data.idGasto);
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: "Gasto",
+          message: response.getMessage(),
+        });
+      }
+    }
   };
 
   handleCloseModalTerminal = async () => {
@@ -502,7 +505,7 @@ class GastoCrear extends CustomComponent {
   };
 
   handlePrinterImpresion = (size) => {
-    pdfVisualizer.printer({ 
+    pdfVisualizer.printer({
       printable: documentsPdfInvoicesGasto(this.state.idGasto, size),
       type: 'pdf',
       showModal: true,
@@ -543,14 +546,12 @@ class GastoCrear extends CustomComponent {
           title={'Completar Gasto'}
           isOpen={this.state.isOpenTerminal}
           idSucursal={this.state.idSucursal}
-          disabledCreditoFijo={true}
+          disabledCredito={true}
           codiso={this.state.codiso}
-          importeTotal={
-            isNumeric(this.state.monto) ? Number(this.state.monto) : 0
-          }
+          importeTotal={isNumeric(this.state.monto) ? Number(this.state.monto) : 0}
           onClose={this.handleCloseModalTerminal}
           handleProcessContado={this.handleProcessContado}
-          handleProcessCredito={() => {}}
+          handleProcessCredito={null}
         />
 
         <ModalImpresion
@@ -636,15 +637,14 @@ class GastoCrear extends CustomComponent {
             formGroup={true}
           >
             <SearchInput
-              group={true}
-              label={'Proveedor:'}
-              ref={this.refProveedor}
-              placeholder="Filtrar proveedores..."
-              refValue={this.refValueProveedor}
-              data={this.state.proveedores}
-              handleClearInput={this.handleClearInputProveedor}
-              handleFilter={this.handleFilterProveedor}
-              handleSelectItem={this.handleSelectItemProveedor}
+              label={'Persona:'}
+              ref={this.refPersona}
+              placeholder="Filtrar persona..."
+              refValue={this.refValuePersona}
+              data={this.state.personas}
+              handleClearInput={this.handleClearInputPersona}
+              handleFilter={this.handleFilterPersona}
+              handleSelectItem={this.handleSelectItemPersona}
               renderItem={(value) => (
                 <>{value.documento + ' - ' + value.informacion}</>
               )}
@@ -679,7 +679,6 @@ class GastoCrear extends CustomComponent {
               group={true}
               label={'Observación (Visible en el sistema):'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-              ref={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -693,7 +692,6 @@ class GastoCrear extends CustomComponent {
               group={true}
               label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
-              ref={this.refONota}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"
@@ -735,7 +733,7 @@ GastoCrear.propTypes = {
 
 const mapStateToProps = (state) => {
   return {
-    token: state.principal,
+    token: state.principal
   };
 };
 

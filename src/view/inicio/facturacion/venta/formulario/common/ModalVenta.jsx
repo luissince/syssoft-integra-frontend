@@ -32,6 +32,7 @@ import { listVenta } from '../../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../../model/types/types';
 import Input from '../../../../../../components/Input';
 import Button from '../../../../../../components/Button';
+import { cn } from '@/lib/utils';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -211,17 +212,6 @@ class ModalVenta extends CustomComponent {
     }
 
     return lista.map((item, index) => {
-      const estado =
-        item.estado === 1 ? (
-          <span className="text-success">COBRADO</span>
-        ) : item.estado === 2 ? (
-          <span className="text-warning">POR COBRAR</span>
-        ) : item.estado === 3 ? (
-          <span className="text-danger">ANULADO</span>
-        ) : (
-          <span className="text-primary">POR LLEVAR</span>
-        );
-
       return (
         <TableRow key={index}>
           <TableCell className={`text-center`}>{item.id}</TableCell>
@@ -240,7 +230,22 @@ class ModalVenta extends CustomComponent {
             <br />
             {item.serie}-{formatNumberWithZeros(item.numeracion)}
           </TableCell>
-          <TableCell className="text-center">{estado}</TableCell>
+          <TableCell className="text-center">
+            <span className={cn(
+              "inline-flex items-center rounded-full",
+              "text-xs font-medium",
+              "px-2.5 py-0.5",
+              item.estado === 1 && "bg-green-100 text-green-800",
+              item.estado === 2 && "bg-yellow-100 text-yellow-800",
+              item.estado === 3 && "bg-red-100 text-red-800",
+              item.estado === 4 && "bg-blue-100 text-blue-800",
+            )}>
+              {item.estado === 1 && "COBRADO"}
+              {item.estado === 2 && "POR COBRAR"}
+              {item.estado === 3 && "ANULADO"}
+              {item.estado === 4 && "POR LLEVAR"}
+            </span>
+          </TableCell>
           <TableCell className="text-center">
             {formatCurrency(item.total, item.codiso)}{' '}
           </TableCell>
@@ -354,19 +359,13 @@ class ModalVenta extends CustomComponent {
                       <Table className="table-bordered">
                         <TableHeader>
                           <TableRow>
-                            <TableHead width="5%" className="text-center">
-                              #
-                            </TableHead>
+                            <TableHead width="5%" className="text-center">#</TableHead>
                             <TableHead width="10%">Fecha</TableHead>
-                            <TableHead width="15%">Comprobante</TableHead>
                             <TableHead width="15%">Cliente</TableHead>
-                            <TableHead width="5%">Estado</TableHead>
-                            <TableHead width="10%" className="text-center">
-                              Total
-                            </TableHead>
-                            <TableHead width="5%" className="text-center">
-                              Seleccionar
-                            </TableHead>
+                            <TableHead width="15%">Comprobante</TableHead>
+                            <TableHead width="5%" className="text-center">Estado</TableHead>
+                            <TableHead width="10%" className="text-center">Total</TableHead>
+                            <TableHead width="5%" className="text-center">Seleccionar</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>{this.generateBody()}</TableBody>

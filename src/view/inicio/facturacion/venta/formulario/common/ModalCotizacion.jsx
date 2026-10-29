@@ -33,7 +33,7 @@ import Input from '../../../../../../components/Input';
 import { listCotizacion } from '../../../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../../../model/types/types';
 import { cn } from '@/lib/utils';
-import { Check, CircleCheck, CircleX, Clock, ShoppingCart, X } from 'lucide-react';
+import { CircleCheck, CircleX, Clock, ShoppingCart } from 'lucide-react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -45,7 +45,9 @@ class ModalCotizacion extends CustomComponent {
 
     this.state = {
       loading: false,
+
       buscar: '',
+      
       lista: [],
       restart: false,
       opcion: 0,
@@ -53,6 +55,7 @@ class ModalCotizacion extends CustomComponent {
       totalPaginacion: 0,
       filasPorPagina: 10,
       messageTable: 'Cargando información...',
+
       fechaInicio: currentDate(),
       fechaFinal: currentDate(),
     };
@@ -90,9 +93,9 @@ class ModalCotizacion extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
-    await this.setStateAsync({ opcion: 1 });
+    await this.setStateAsync({ opcion: 2 });
   };
 
   handlePaginacion = async (listid) => {
@@ -119,7 +122,7 @@ class ModalCotizacion extends CustomComponent {
       fechaInicio: this.state.fechaInicio,
       fechaFinal: this.state.fechaFinal,
       idSucursal: this.props.idSucursal,
-      ligado: " ",
+      ligado: "",
       estado: 1,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,

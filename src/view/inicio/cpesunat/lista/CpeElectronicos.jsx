@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   formatTime,
-  currentDate,
   limitarCadena,
   isEmpty,
   formatNumberWithZeros,
@@ -51,6 +50,8 @@ import { Link } from 'react-router-dom';
 import DropdownActions from '../../../../components/DropdownActions';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { DatePicker } from '@/components/DatePicker';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -87,8 +88,8 @@ class CpeElectronicos extends CustomComponent {
       //   this.props.token.userToken.menus[7].submenu[0].privilegio[4].estado,
       // ),
 
-      fechaInicio: currentDate(),
-      fechaFinal: currentDate(),
+      fechaInicio: new Date().toISOString(),
+      fechaFinal: new Date().toISOString(),
       idComprobante: '',
       estado: '0',
 
@@ -159,26 +160,22 @@ class CpeElectronicos extends CustomComponent {
   */
 
   loadData = async () => {
-    if (
-      this.props.cpeSunatLista &&
-      this.props.cpeSunatLista.data &&
-      this.props.cpeSunatLista.paginacion
-    ) {
-      this.setState(this.props.cpeSunatLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.cpeSunatLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.cpeSunatLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.cpeSunatLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.cpeSunatLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.cpeSunatLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.cpeSunatLista.paginacion.messagePaginacion;
+    const cpeSunatLista = this.props.cpeSunatLista;
 
-      this.refSearch.current.initialize(this.props.cpeSunatLista.data.buscar);
+    if (
+      cpeSunatLista &&
+      cpeSunatLista.data &&
+      cpeSunatLista.paginacion
+    ) {
+      this.setState(cpeSunatLista.data);
+      this.refPaginacion.current.upperPageBound = cpeSunatLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = cpeSunatLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = cpeSunatLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = cpeSunatLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = cpeSunatLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = cpeSunatLista.paginacion.messagePaginacion;
+
+      this.refSearch.current.initialize(cpeSunatLista.data.buscar);
     } else {
       const [facturado, notaCredito, guiaRemision, sucursales] =
         await Promise.all([
@@ -194,18 +191,15 @@ class CpeElectronicos extends CustomComponent {
         (item) => item.idSucursal === this.props.token.project.idSucursal,
       );
 
-      this.setState(
-        {
-          idSucursal: sucursal.idSucursal,
-          comprobantes: comprobantes,
-          sucursales: sucursales,
-          initialLoad: false,
-        },
-        async () => {
-          this.loadInit();
-          this.updateReduxState();
-        },
-      );
+      this.setState({
+        idSucursal: sucursal.idSucursal,
+        comprobantes: comprobantes,
+        sucursales: sucursales,
+        initialLoad: false,
+      }, async () => {
+        this.loadInit();
+        this.updateReduxState();
+      });
     }
   };
 
@@ -271,7 +265,7 @@ class CpeElectronicos extends CustomComponent {
     if (text.trim().length === 0) return;
 
     await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
+    this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };
 
@@ -280,7 +274,7 @@ class CpeElectronicos extends CustomComponent {
 
     if (this.state.fechaInicio > this.state.fechaFinal) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false });
+    await this.setStateAsync({ paginacion: 1, restart: true });
     this.fillTable(2);
     await this.setStateAsync({ opcion: 2 });
   }
@@ -291,22 +285,10 @@ class CpeElectronicos extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      case 2:
-        this.fillTable(2);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion);
   };
 
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion) => {
     this.setState({
       loading: true,
       lista: [],
@@ -315,9 +297,9 @@ class CpeElectronicos extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar.trim(),
-      fechaInicio: this.state.fechaInicio,
-      fechaFinal: this.state.fechaFinal,
+      buscar: this.state.buscar,
+      fechaInicio: format(this.state.fechaInicio, "yyyy-MM-dd"),
+      fechaFinal: format(this.state.fechaFinal, "yyyy-MM-dd"),
       idComprobante: this.state.idComprobante,
       estado: this.state.estado,
       idSucursal: this.state.idSucursal,
@@ -376,14 +358,14 @@ class CpeElectronicos extends CustomComponent {
     this.setState({ view: value }, () => this.updateReduxState());
   };
 
-  handleInputFechaInicio = (event) => {
-    this.setState({ fechaInicio: event.target.value }, () => {
+  handleInputFechaInicio = (selectedDate) => {
+    this.setState({ fechaInicio: selectedDate }, () => {
       this.searchOpciones();
     });
   };
 
-  handleInputFechaFinal = (event) => {
-    this.setState({ fechaFinal: event.target.value }, () => {
+  handleInputFechaFinal = (selectedDate) => {
+    this.setState({ fechaFinal: selectedDate }, () => {
       this.searchOpciones();
     });
   };
@@ -654,8 +636,11 @@ class CpeElectronicos extends CustomComponent {
 
   handleDownloadXml = (idComprobante) => {
     const id = guId();
-    const url = obtenerXmlSunat(idComprobante);
-    this.props.downloadFileAsync({ id, url });
+    const request = obtenerXmlSunat(idComprobante);
+    this.props.downloadFileAsync({
+      id,
+      request,
+    });
   };
 
   handleSendEmail = async (idComprobante, tipo) => {
@@ -908,7 +893,7 @@ class CpeElectronicos extends CustomComponent {
                     </span>
                   </div>
 
-                  <div>
+                  <div className="text-center">
                     {this.renderEstado(item)}
                   </div>
 
@@ -1000,7 +985,7 @@ class CpeElectronicos extends CustomComponent {
         </div>
 
         {/* Leyenda de estados SUNAT */}
-        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded p-4">
           <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
             <img src={images.sunat} alt="SUNAT" className="w-6 h-6" />
             Estados SUNAT
@@ -1037,18 +1022,16 @@ class CpeElectronicos extends CustomComponent {
         <div className="flex flex-col gap-y-4 mb-4">
           {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <input
-              type="date"
+            <DatePicker
               value={this.state.fechaInicio}
               onChange={this.handleInputFechaInicio}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Fecha Inicio"
             />
 
-            <input
-              type="date"
+            <DatePicker
               value={this.state.fechaFinal}
               onChange={this.handleInputFechaFinal}
-              className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Fecha Final"
             />
 
             <select

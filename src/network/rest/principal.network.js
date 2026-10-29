@@ -554,7 +554,7 @@ export async function detailVenta(params, signal) {
   );
 }
 
-export async function detailOnlyVentaVenta(params, signal) {
+export async function forSaleVenta(params, signal) {
   return await Resolve.create(
     instancePrincipal.get('/api/factura/for-sale', {
       signal: signal,
@@ -571,27 +571,9 @@ export async function anularVenta(params) {
   );
 }
 
-export async function listAccountsReceivableVenta(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/factura/list/accounts/receivable', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
-
-export async function detailAccountsReceivableVenta(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/factura/detail/accounts/receivable', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
-
 export async function createAccountsReceivableVenta(data, signal) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/factura/create/accounts/receivable', data, {
+  return await Resolve.safe(
+    instancePrincipal.post('/api/factura/create/accounts-receivable', data, {
       signal: signal,
     }),
   );
@@ -599,7 +581,7 @@ export async function createAccountsReceivableVenta(data, signal) {
 
 export async function cancelAccountsReceivableVenta(params, signal) {
   return await Resolve.create(
-    instancePrincipal.delete('/api/factura/cancel/accounts/receivable', {
+    instancePrincipal.delete('/api/factura/cancel/accounts-receivable', {
       params: params,
       signal: signal,
     }),
@@ -634,21 +616,21 @@ export async function getDetailsShippingGuideVenta(idVenta, signal) {
 
 export function documentsPdfInvoicesVenta(idVenta, size, outputType = "pdf") {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/documents/pdf/invoices/${idVenta}/${size}/${outputType}`;
+    }/api/factura/pdf/document/${idVenta}/${size}/${outputType}`;
 }
 
-export function documentsPdfAccountReceivableVenta(idCuota, idVenta, size) {
+export function documentsPdfAccountReceivableVenta(idVenta, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/documents/pdf/account/receivable/${idCuota}/${idVenta}/${size}`;
+    }/api/factura/pdf/account-receivable/${idVenta}/${size}`;
 }
 
 export function documentsPdfReportsVenta() {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/documents/pdf/reports`;
+    }/api/factura/pdf/list`;
 }
 
 export function documentsExcelVenta() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/documents/excel`;
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/excel`;
 }
 
 // ------------------------------------------------------------------------
@@ -1058,7 +1040,7 @@ export async function listCompra(params, signal) {
 }
 
 export async function detailCompra(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/compra/detail', {
       params: params,
       signal: signal,
@@ -1083,27 +1065,19 @@ export async function cancelCompra(params, signal) {
   );
 }
 
-export async function listAccountsPayableCompra(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/compra/list/accounts/payable', {
+export async function forPurchaseCompra(params, signal) {
+  return await Resolve.safe(
+    instancePrincipal.get('/api/compra/for-purchase', {
       params: params,
       signal: signal,
     }),
   );
 }
 
-export async function detailAccountsPayableCompra(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/compra/detail/accounts/payable', {
-      signal: signal,
-      params: params,
-    }),
-  );
-}
 
 export async function createAccountsPayableCompra(data, signal) {
-  return await Resolve.create(
-    instancePrincipal.post('/api/compra/create/accounts/payable', data, {
+  return await Resolve.safe(
+    instancePrincipal.post('/api/compra/create/accounts-payable', data, {
       signal: signal,
     }),
   );
@@ -1111,7 +1085,7 @@ export async function createAccountsPayableCompra(data, signal) {
 
 export async function cancelAccountsPayableCompra(params, signal) {
   return await Resolve.create(
-    instancePrincipal.delete('/api/compra/cancel/accounts/payable', {
+    instancePrincipal.delete('/api/compra/cancel/accounts-payable', {
       params: params,
       signal: signal,
     }),
@@ -1129,21 +1103,20 @@ export async function dashboardCompra(params, signal) {
 
 export function documentsPdfInvoicesCompra(idCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/compra/documents/pdf/invoices/${idCompra}/${size}`;
+    }/api/compra/pdf/document/${idCompra}/${size}`;
 }
 
-export function documentsPdfAccountPayableCompra(idPlazo, idCompra, size) {
+export function documentsPdfAccountPayableCompra(idCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/compra/documents/pdf/account/payable/${idPlazo}/${idCompra}/${size}`;
+    }/api/compra/pdf/account-payable/${idCompra}/${size}`;
 }
 
 export function documentsPdfReportsCompra() {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/compra/documents/pdf/reports`;
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/pdf/reports`;
 }
 
 export function documentsExcelCompra() {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/documents/excel`;
+  return `${import.meta.env.VITE_APP_BACK_END}/api/compra/excel`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA COMPRA
@@ -1164,7 +1137,7 @@ export async function listGuiaRemision(params, signal) {
 }
 
 export async function detailGuiaRemision(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/guiaremision/detail', {
       params: params,
       signal: signal,
@@ -1279,7 +1252,7 @@ export async function anularCotizacion(params, signal) {
   );
 }
 
-export function documentsPdfInvoicesCotizacion(idCotizacion ,size) {
+export function documentsPdfInvoicesCotizacion(idCotizacion, size) {
   return `${import.meta.env.VITE_APP_BACK_END
     }/api/cotizacion/pdf/document/${idCotizacion}/${size}`;
 }
@@ -1363,9 +1336,9 @@ export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
     }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
-export function documentsPdfListsOrdenCompra(idOrdenCompra) {
+export function documentsPdfListsOrdenCompra(idOrdenCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`;
+    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA ORDEN DE COMPRA
@@ -1959,7 +1932,7 @@ export async function comboAtributoTipos(signal) {
 |--------------------------------------------------------------------------
 */
 export async function listBancos(params, signal = null) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/banco/list', {
       signal: signal,
       params: params,
@@ -2539,7 +2512,10 @@ export async function enviarEmail(idComprobante, tipo) {
 }
 
 export function obtenerXmlSunat(idComprobante) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`;
+  return {
+    method: 'GET',
+    url: `/api/sunat/xml/${idComprobante}`,
+  }
 }
 
 export async function dashboardSunat(params, signal) {
