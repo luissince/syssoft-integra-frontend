@@ -74,9 +74,9 @@ class GastoCrear extends CustomComponent {
       concepto: null,
       conceptos: [],
 
-      // Filtrar proveedor
-      proveedor: null,
-      proveedores: [],
+      // Filtrar persona
+      persona: null,
+      personas: [],
 
       // Atributos libres
       codiso: '',
@@ -96,12 +96,10 @@ class GastoCrear extends CustomComponent {
     this.refMonto = React.createRef();
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
-    this.refObservacion = React.createRef();
-    this.refONota = React.createRef();
 
-    // Filtrar proveedor
-    this.refProveedor = React.createRef();
-    this.refValueProveedor = React.createRef();
+    // Filtrar persona
+    this.refPersona = React.createRef();
+    this.refValuePersona = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -181,18 +179,6 @@ class GastoCrear extends CustomComponent {
     }
   }
 
-  async fetchFiltrarCliente(params) {
-    const response = await filtrarPersona(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -231,7 +217,7 @@ class GastoCrear extends CustomComponent {
 
   clearView = async () => {
     this.setState(this.initial, async () => {
-      await this.refProveedor.current.restart();
+      await this.refPersona.current.restart();
       await this.refConcepto.current.restart();
       await this.loadData();
     });
@@ -304,55 +290,53 @@ class GastoCrear extends CustomComponent {
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState(
-      {
-        concepto: value,
-        conceptos: [],
-      },
-      () => {
-        this.refMonto.current.focus();
-      },
-    );
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Filtrar proveedor
-  //------------------------------------------------------------------------------------------
-
-  handleClearInputProveedor = () => {
     this.setState({
-      proveedores: [],
-      proveedor: null,
+      concepto: value,
+      conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
   };
 
-  handleFilterProveedor = async (text) => {
+  //------------------------------------------------------------------------------------------
+  // Filtrar persona
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputPersona = () => {
+    this.setState({
+      personas: [],
+      persona: null,
+    });
+  };
+
+  handleFilterPersona = async (text) => {
     const searchWord = text;
-    this.setState({ proveedor: null });
+    this.setState({ persona: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ proveedores: [] });
+      this.setState({ personas: [] });
       return;
     }
 
     const params = {
-      opcion: 1,
+      opcion: 0,
       filter: searchWord,
-      proveedor: true,
     };
 
-    const proveedores = await this.fetchFiltrarCliente(params);
+    const response = await filtrarPersona(params);
 
-    this.setState({ proveedores });
+    if (response instanceof SuccessReponse) {
+      this.setState({ personas: response.data });
+    }
   };
 
-  handleSelectItemProveedor = (value) => {
-    this.refProveedor.current.initialize(
+  handleSelectItemPersona = (value) => {
+    this.refPersona.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
     this.setState({
-      proveedor: value,
-      proveedores: [],
+      persona: value,
+      personas: [],
     });
   };
 
@@ -361,7 +345,7 @@ class GastoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { concepto, idComprobante, monto, proveedor, idMoneda } = this.state;
+    const { concepto, idComprobante, monto, persona, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
       alertKit.warning({
@@ -387,11 +371,11 @@ class GastoCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(proveedor)) {
+    if (isEmpty(persona)) {
       alertKit.warning({
         title: "Gasto",
-        message: "Seleccione un proveedor.",
-      }, () => this.refValueProveedor.current.focus());
+        message: "Seleccione una persona.",
+      }, () => this.refValuePersona.current.focus());
       return;
     }
 
@@ -442,7 +426,7 @@ class GastoCrear extends CustomComponent {
     callback = async function () { },
   ) => {
     const {
-      proveedor,
+      persona,
       idUsuario,
       idMoneda,
       idSucursal,
@@ -467,7 +451,7 @@ class GastoCrear extends CustomComponent {
     if (accept) {
       const data = {
         idFormaPago: idFormaPago,
-        idPersona: proveedor.idPersona,
+        idPersona: persona.idPersona,
         idUsuario: idUsuario,
         idMoneda: idMoneda,
         idSucursal: idSucursal,
@@ -653,15 +637,14 @@ class GastoCrear extends CustomComponent {
             formGroup={true}
           >
             <SearchInput
-              group={true}
-              label={'Proveedor:'}
-              ref={this.refProveedor}
-              placeholder="Filtrar proveedores..."
-              refValue={this.refValueProveedor}
-              data={this.state.proveedores}
-              handleClearInput={this.handleClearInputProveedor}
-              handleFilter={this.handleFilterProveedor}
-              handleSelectItem={this.handleSelectItemProveedor}
+              label={'Persona:'}
+              ref={this.refPersona}
+              placeholder="Filtrar persona..."
+              refValue={this.refValuePersona}
+              data={this.state.personas}
+              handleClearInput={this.handleClearInputPersona}
+              handleFilter={this.handleFilterPersona}
+              handleSelectItem={this.handleSelectItemPersona}
               renderItem={(value) => (
                 <>{value.documento + ' - ' + value.informacion}</>
               )}
@@ -696,7 +679,6 @@ class GastoCrear extends CustomComponent {
               group={true}
               label={'Observación (Visible en el sistema):'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-              ref={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
@@ -710,7 +692,6 @@ class GastoCrear extends CustomComponent {
               group={true}
               label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
-              ref={this.refONota}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"

@@ -825,6 +825,7 @@ class ModalSendWhatsApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      name: '',
       phone: '',
       message: '',
       type: 'text',
@@ -842,7 +843,10 @@ class ModalSendWhatsApp extends React.Component {
 
   handleOpen = async () => {
     this.refPhone.current.focus();
-    this.setState({ phone: this.props.phone ?? '' });
+    this.setState({
+      name: this.props.person?.informacion ?? '',
+      phone: this.props.person?.celular ?? ''
+    });
   };
 
   handleHidden = async () => {
@@ -861,6 +865,10 @@ class ModalSendWhatsApp extends React.Component {
     });
   };
 
+  handleInputNanme = (event) => {
+    this.setState({ name: event.target.value });
+  };
+
   handleInputPhone = (event) => {
     this.setState({ phone: event.target.value });
   };
@@ -870,7 +878,7 @@ class ModalSendWhatsApp extends React.Component {
   };
 
   handleSendWhatsapp = async () => {
-    const { phone, message, type, pdfType } = this.state;
+    const { name, phone, message, type, pdfType } = this.state;
 
     if (!validateNumberWhatsApp(phone)) {
       alertKit.warning({
@@ -903,6 +911,7 @@ class ModalSendWhatsApp extends React.Component {
     }
 
     const body = {
+      name,
       phone,
       message,
       type,
@@ -910,7 +919,7 @@ class ModalSendWhatsApp extends React.Component {
     };
 
     this.props.handleProcess(body, async () => {
-        await this.refModal.current.handleOnClose();
+      await this.refModal.current.handleOnClose();
     });
   };
 
@@ -940,6 +949,19 @@ class ModalSendWhatsApp extends React.Component {
           <h5 className="mb-3">Enviar Mensaje WhatsApp</h5>
 
           <div className="flex flex-col gap-3">
+            <div>
+              <label className="block text-sm mb-1">
+                Información
+              </label>
+
+              <Input
+                autoFocus
+                placeholder="Ej: Juan"
+                value={this.state.name}
+                onChange={this.handleInputNanme}
+              />
+            </div>
+
             <div>
               <label className="block text-sm mb-1">
                 Número de teléfono (con código de país)
@@ -1026,7 +1048,7 @@ class ModalSendWhatsApp extends React.Component {
 
 ModalSendWhatsApp.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  phone: PropTypes.string,
+  person: PropTypes.object,
   handleClose: PropTypes.func.isRequired,
   handleProcess: PropTypes.func.isRequired,
   documents: PropTypes.array,

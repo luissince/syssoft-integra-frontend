@@ -542,7 +542,7 @@ class PedidoDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           isOpen={isOpenSendWhatsapp}
-          phone={cabecera && cabecera.celular || ""}
+          phone={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
           documents={[

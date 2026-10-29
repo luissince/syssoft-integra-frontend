@@ -11,24 +11,10 @@ import {
   detailGuiaRemision,
   getPdfGuiaRemision,
 } from '../../../../../network/rest/principal.network';
-import SuccessReponse from '../../../../../model/class/response';
-import ErrorResponse from '../../../../../model/class/error-response';
 import { CANCELED } from '../../../../../model/types/types';
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableResponsive,
-  TableRow,
-  TableTitle,
-} from '../../../../../components/Table';
 import pdfVisualizer from 'pdf-visualizer';
 import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 import Image from '../../../../../components/Image';
@@ -36,6 +22,8 @@ import { images } from '../../../../../helper';
 import { cn } from '@/lib/utils';
 import { alertKit } from 'alert-kit';
 import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
+import { CircleCheck, CircleX } from 'lucide-react';
+import React from 'react';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -53,33 +41,7 @@ class GuiaRemisionDetalle extends CustomComponent {
       msgLoading: 'Cargando datos...',
 
       idGuiaRemision: '',
-      fecha: '',
-      hora: '',
-      comprobante: '',
-      serie: '',
-      numeracion: '',
-      modalidadTraslado: '',
-      motivoTraslado: '',
-      fechaTraslado: '',
-      tipoPeso: '',
-      peso: '',
-      marca: '',
-      numeroPlaca: '',
-      documentoConductor: '',
-      informacionConductor: '',
-      licenciaConducir: '',
-      direccionPartida: '',
-      ubigeoPartida: '',
-      direccionLlegada: '',
-      ubigeoLlegada: '',
-      usuario: '',
-      estado: 0,
-      comprobanteRef: '',
-      serieRef: '',
-      numeracionRef: '',
-      documentoCliente: '',
-      informacionCliente: '',
-
+      cabecera: null,
       detalles: [],
 
       isOpenSendWhatsapp: false,
@@ -136,85 +98,27 @@ class GuiaRemisionDetalle extends CustomComponent {
       idGuiaRemision: id,
     };
 
-    const response = await detailGuiaRemision(
+    const { success, data, message, type } = await detailGuiaRemision(
       params,
       this.abortControllerView.signal,
     );
 
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       alertKit.warning({
         title: 'Guia de Remision',
-        message: response.getMessage(),
+        message: message,
       }, () => {
         this.close();
       });
       return;
     }
 
-    response instanceof SuccessReponse;
-    const guiaRemision = response.data;
-
-    const {
-      fecha,
-      hora,
-      comprobante,
-      serie,
-      numeracion,
-      modalidadTraslado,
-      motivoTraslado,
-      fechaTraslado,
-      tipoPeso,
-      peso,
-      marca,
-      numeroPlaca,
-      documentoConductor,
-      informacionConductor,
-      licenciaConducir,
-      direccionPartida,
-      ubigeoPartida,
-      direccionLlegada,
-      ubigeoLlegada,
-      usuario,
-      estado,
-      comprobanteRef,
-      serieRef,
-      numeracionRef,
-      documentoCliente,
-      informacionCliente,
-    } = guiaRemision.cabecera;
-
     this.setState({
       idGuiaRemision: id,
-      fecha,
-      hora,
-      comprobante,
-      serie,
-      numeracion,
-      modalidadTraslado,
-      motivoTraslado,
-      fechaTraslado,
-      tipoPeso,
-      peso,
-      marca,
-      numeroPlaca,
-      documentoConductor,
-      informacionConductor,
-      licenciaConducir,
-      direccionPartida,
-      ubigeoPartida,
-      direccionLlegada,
-      ubigeoLlegada,
-      usuario,
-      estado,
-      comprobanteRef,
-      serieRef,
-      numeracionRef,
-      documentoCliente,
-      informacionCliente,
-
-      detalles: guiaRemision.detalles,
+      cabecera: data.cabecera,
+      detalles: data.detalles,
 
       loading: false,
     });
@@ -316,12 +220,164 @@ class GuiaRemisionDetalle extends CustomComponent {
   |
   */
 
+  renderCabecera() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold text-gray-800">Cabecera</h2>
+        <div className="divide-y divide-gray-100">
+          {[
+            {
+              label: 'Fecha y Hora', value: () => {
+                return cabecera.fecha + ' ' + formatTime(cabecera.hora);
+              }
+            },
+            {
+              label: 'Comprobante', value: () => {
+                return cabecera.comprobante + '  ' + cabecera.serie + '-' + formatNumberWithZeros(cabecera.numeracion);
+              }
+            },
+            { label: 'Fecha Traslado', value: () => cabecera.fechaTraslado },
+            {
+              label: 'Cliente', value: () => {
+                return cabecera.documento + ' - ' + cabecera.informacion;
+              }
+            },
+            { label: 'Motivo Traslado', value: () => cabecera.motivoTraslado },
+            { label: 'Modalidad Traslado', value: () => cabecera.modalidadTraslado },
+
+            {
+              label: 'Peso (KGM o TNE)', value: () => {
+                return cabecera.tipoPeso + ' ' + cabecera.peso
+              }
+            },
+
+            {
+              label: 'Comprobante Asociado', value: () => {
+                return cabecera.comprobanteRef + ' ' + cabecera.serieRef + '-' + formatNumberWithZeros(cabecera.numeracionRef)
+              }
+            },
+
+            {
+              label: 'Conductor', value: () => {
+                return cabecera.documentoConductor + ' ' + cabecera.informacionConductor
+              }
+            },
+            { label: 'Número de Licencia', value: () => cabecera.licenciaConducir },
+            { label: 'Número de Placa', value: () => cabecera.numeroPlaca },
+            { label: 'Dirección de Partida', value: () => cabecera.direccionPartida },
+            { label: 'Dirección de Llegada', value: () => cabecera.direccionLlegada },
+
+            {
+              label: 'Estado', value: () => {
+                return (
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1",
+                      "font-medium",
+                      cabecera.estado === 1 && "text-green-700",
+                      cabecera.estado === 0 && "text-red-700",
+                    )}
+                  >
+                    {cabecera.estado === 1 ? (
+                      <>
+                        <CircleCheck className="w-4 h-4" />
+                        Activo
+                      </>
+                    ) : (
+                      <>
+                        <CircleX className="w-4 h-4" />
+                        Anulado
+                      </>
+                    )}
+                  </span>
+                );
+              }
+            },
+          ].map((item, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3">
+              <p>{item.label}</p>
+              <p className="md:col-span-3 font-bold">{item.value()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  renderDetalles() {
+    const { loading, cabecera, detalles } = this.state;
+
+    if (loading) return null;
+
+    return (
+      <div className="mb-8 bg-white overflow-hidden">
+        <h2 className="text-lg font-semibold mb-3">Detalles</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#111727] text-left text-white text-sm">
+              <tr>
+                <th className="p-4">#</th>
+                <th className="p-4">Imagen</th>
+                <th className="p-4">Producto</th>
+                <th className="p-4">Unid. Medida</th>
+                <th className="p-4">Cantidad</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {
+                detalles.map((item, index) => {
+                  return (
+                    <React.Fragment key={index}>
+                      <tr className="hover:bg-gray-50">
+                        <td className="p-4">{item.id}</td>
+                        <td className="p-4 text-center">
+                          <div className="max-w-24 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
+                            <Image
+                              default={images.noImage}
+                              src={item.imagen}
+                              alt={item.nombre}
+                              overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
+                            />
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="font-mono text-sm text-gray-500">
+                            {item.codigo}
+                          </p>
+                          <p className="text-black uppercase">
+                            {item.nombre}
+                          </p>
+                        </td>
+                        <td className="p-4 text-left">
+                          {item.medida}
+                        </td>
+                        <td className="p-4">
+                          {rounded(item.cantidad)}
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  );
+                })
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   render() {
+    const { loading, msgLoading, cabecera, isOpenSendWhatsapp } = this.state;
+
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
         <Title
@@ -331,8 +387,8 @@ class GuiaRemisionDetalle extends CustomComponent {
         />
 
         <ModalSendWhatsApp
-          isOpen={this.state.isOpenSendWhatsapp}
-          phone={this.state.celular}
+          isOpen={isOpenSendWhatsapp}
+          phone={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
           documents={[
@@ -385,194 +441,11 @@ class GuiaRemisionDetalle extends CustomComponent {
           </button>
         </div>
 
-        <Row>
-          <Column className="col-lg-6 col-md-12">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="table-secondary w-25 p-1 font-weight-normal ">
-                    Fecha
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.fecha} {formatTime(this.state.hora)}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Comprobante
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.serie}-
-                    {formatNumberWithZeros(this.state.numeracion)}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Fecha Traslado
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.fechaTraslado}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Cliente
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.documentoCliente} - {this.state.informacionCliente}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Motivo Traslado
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.motivoTraslado}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Modalidad Traslado
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.modalidadTraslado}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Peso (KGM o TNE)
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.tipoPeso} {this.state.peso}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Comprobante Asociado
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.comprobanteRef}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Serie y Numeración
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.serieRef}-
-                    {formatNumberWithZeros(this.state.numeracionRef)}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-            </Table>
-          </Column>
+        {/* Cabecera */}
+        {this.renderCabecera()}
 
-          <Column className="col-lg-6 col-md-12">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Conductor
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.documentoConductor},{' '}
-                    {this.state.informacionConductor}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Número de Licencia
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.licenciaConducir}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Número de Placa
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.numeroPlaca}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Dirección de Partida
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.direccionPartida}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Dirección de Llegada
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-65 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    {this.state.direccionLlegada}
-                  </TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="table-secondary w-35 p-1 font-weight-normal ">
-                    Estado:
-                  </TableHead>
-                  <TableHead className="table-light border-bottom w-75 pl-2 pr-2 pt-1 pb-1 font-weight-normal">
-                    <span className={cn(
-                      "inline-flex items-center rounded-full",
-                      "text-xs font-medium",
-                      "px-2.5 py-0.5",
-                      this.state.estado === 1 && "bg-green-100 text-green-800",
-                      this.state.estado === 3 && "bg-red-100 text-red-800",
-                    )}>
-                      {this.state.estado === 1 && "ACTIVO"}
-                      {this.state.estado === 3 && "ANULADO"}
-                    </span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-            </Table>
-          </Column>
-        </Row>
-
-        <Row>
-          <Column>
-            <TableResponsive>
-              <TableTitle>Detalles</TableTitle>
-              <Table className="table-light table-striped">
-                <TableHeader className="table-dark">
-                  <TableRow>
-                    <TableHead className="text-center">#</TableHead>
-                    <TableHead className="text-center">Imagen</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Unid. Medida</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {this.state.detalles.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="text-center">{++index}</TableCell>
-                      <TableCell className="text-center">
-                        <Image
-                          default={images.noImage}
-                          src={item.imagen}
-                          alt={item.nombre}
-                          width={100}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {item.codigo}
-                        <br />
-                        {item.nombre}
-                      </TableCell>
-                      <TableCell>{item.medida}</TableCell>
-                      <TableCell>{rounded(item.cantidad)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableResponsive>
-          </Column>
-        </Row>
+        {/* Detalles */}
+        {this.renderDetalles()}
       </ContainerWrapper>
     );
   }

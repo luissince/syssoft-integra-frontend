@@ -51,6 +51,7 @@ class CotizacionDetalle extends CustomComponent {
       ventas: [],
       vendidos: [],
 
+      // Atributos del modal whatsapp
       isOpenSendWhatsapp: false,
     };
 
@@ -188,6 +189,7 @@ class CotizacionDetalle extends CustomComponent {
     const payload = {
       id: crypto.randomUUID(),
       to: params.phone,
+      customerName: params.name,
       message: params.message,
       type: params.type,
     };
@@ -610,7 +612,7 @@ class CotizacionDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           isOpen={isOpenSendWhatsapp}
-          phone={cabecera && cabecera.celular || ""}
+          person={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
           documents={[

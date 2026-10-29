@@ -56,6 +56,9 @@ class OrdenCompraDetalle extends CustomComponent {
       idOrdenCompra: '',
       cabecera: null,
       detalles: [],
+
+      // Atributos del modal whatsapp
+      isOpenSendWhatsapp: false,
     };
 
     this.abortControllerView = new AbortController();
@@ -374,8 +377,8 @@ class OrdenCompraDetalle extends CustomComponent {
     return (
       <ContainerWrapper>
         <SpinnerView
-          loading={this.state.loading}
-          message={this.state.msgLoading}
+          loading={loading}
+          message={msgLoading}
         />
 
         <Title
@@ -386,7 +389,7 @@ class OrdenCompraDetalle extends CustomComponent {
 
         <ModalSendWhatsApp
           isOpen={isOpenSendWhatsapp}
-          phone={cabecera && cabecera.celular || ""}
+          person={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
           documents={[
