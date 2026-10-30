@@ -624,9 +624,8 @@ export function documentsPdfAccountReceivableVenta(idVenta, size) {
     }/api/factura/pdf/account-receivable/${idVenta}/${size}`;
 }
 
-export function documentsPdfReportsVenta() {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/pdf/list`;
+export function documentsPdfReportsVenta(size) {
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/pdf/list/${size}`;
 }
 
 export function documentsExcelVenta() {
