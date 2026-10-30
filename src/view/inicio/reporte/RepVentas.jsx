@@ -284,8 +284,15 @@ class RepVentas extends CustomComponent {
   };
 
   handleOpenPdf = async () => {
+    const params = {
+      fechaInicio: this.state.fechaInicial,
+      fechaFinal: this.state.fechaFinal,
+      idSucursal: '',
+      idUsuario: '',
+    }
+
     await pdfVisualizer.init({
-      url: documentsPdfReportsVenta('A4'),
+      url: documentsPdfReportsVenta('A4', params),
       title: 'Reporte de Ventas',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
