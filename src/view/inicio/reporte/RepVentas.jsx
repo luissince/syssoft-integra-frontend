@@ -89,7 +89,7 @@ class RepVentas extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       sucursales: [],
 
-      codIso: this.props.moneda.codiso ?? '',
+      codiso: this.props.moneda.codiso ?? '',
 
       totalVenta: 0,
       totalContado: 0,
@@ -131,7 +131,7 @@ class RepVentas extends CustomComponent {
     await this.loadingInit();
   }
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   /*
   |--------------------------------------------------------------------------
@@ -233,7 +233,7 @@ class RepVentas extends CustomComponent {
       totalAnulado: dashboard.data.anulado,
       totalCobrado: dashboard.data.cobrado,
       listaPorMeses: dashboard.data.listaPorMeses,
-      listaPorComprobante: !isEmpty(dashboard.data.listaPorComprobante) ? dashboard.data.listaPorComprobante.map((item)=>({
+      listaPorComprobante: !isEmpty(dashboard.data.listaPorComprobante) ? dashboard.data.listaPorComprobante.map((item) => ({
         ...item,
         total: Number(formatDecimal(item.total))
       })) : [],
@@ -285,7 +285,7 @@ class RepVentas extends CustomComponent {
 
   handleOpenPdf = async () => {
     await pdfVisualizer.init({
-      url: documentsPdfReportsVenta(),
+      url: documentsPdfReportsVenta('A4'),
       title: 'Reporte de Ventas',
       titlePageNumber: 'Página',
       titleLoading: 'Cargando...',
@@ -398,55 +398,37 @@ class RepVentas extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <Row>
-          <Column formGroup={true}>
-            {/* <Button
-              className="btn-outline-warning"
-              onClick={this.handleOpenPdf}>
-              <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
-            </Button>
-            {" "}
-            <Button
-              className="btn-outline-success"
-              onClick={this.handleDownloadExcel}>
-              <i className="bi bi-file-earmark-excel-fill"></i> Generar Excel
-            </Button>
-            {" "} */}
-            <Button className="btn-outline-light" onClick={this.loadingInit}>
-              <i className="bi bi-arrow-clockwise"></i> Recargar Vista
-            </Button>
-          </Column>
-        </Row>
+        <div className="flex flex-col md:flex-row gap-3 mb-3">
+          <Button
+            className="btn-outline-warning"
+            onClick={this.handleOpenPdf}>
+            <i className="bi bi-file-earmark-pdf-fill"></i> Generar Pdf
+          </Button>
+          <Button className="btn-outline-light" onClick={this.loadingInit}>
+            <i className="bi bi-arrow-clockwise"></i> Recargar Vista
+          </Button>
+        </div>
 
-        <Row>
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
+        <div className="flex flex-col md:flex-row gap-6 mb-3">
+          <div className="w-full">
             <Input
               label={'Fecha de Inicio:'}
               type="date"
               value={this.state.fechaInicial}
               onChange={this.handleDateFechaInicial}
             />
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div className="w-full">
             <Input
               label={'Fecha de Final:'}
               type="date"
               value={this.state.fechaFinal}
               onChange={this.handleDateFechaFinal}
             />
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div className="w-full">
             <Select
               label={'Sucursal:'}
               value={this.state.idSucursal}
@@ -459,12 +441,9 @@ class RepVentas extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-3 col-md-3 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div className="w-full">
             <Select
               label={'Usuario:'}
               value={this.state.idUsuario}
@@ -476,92 +455,80 @@ class RepVentas extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
+        </div>
 
-        <Row>
-          <Column
-            className="col-lg-3 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+        <div className="flex flex-col md:flex-row gap-6 mb-3">
+          <div className="w-full">
             <Card>
               <CardBody>
                 <CardTitle>Ventas Totales</CardTitle>
                 <CardText className={'text-success'}>
-                  {formatCurrency(this.state.totalVenta, this.state.codIso)}
+                  {formatCurrency(this.state.totalVenta, this.state.codiso)}
                 </CardText>
               </CardBody>
             </Card>
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-3 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div className="w-full">
             <Card>
               <CardBody>
                 <CardTitle>Al Contado</CardTitle>
                 <CardText className={'text-primary'}>
-                  {formatCurrency(this.state.totalContado, this.state.codIso)}
+                  {formatCurrency(this.state.totalContado, this.state.codiso)}
                 </CardText>
                 <p className="text-sm">
                   <Plus className="text-green-500 mr-1" width={16} />
                   Agregado{' '}
-                  {formatCurrency(this.state.totalCobrado, this.state.codIso)}
+                  {formatCurrency(this.state.totalCobrado, this.state.codiso)}
                 </p>
                 <p className="text-sm">
                   <EqualIcon className="text-green-500 mr-1" width={16} />
                   Total{' '}
                   {formatCurrency(
                     this.state.totalContado + this.state.totalCobrado,
-                    this.state.codIso,
+                    this.state.codiso,
                   )}
                 </p>
               </CardBody>
             </Card>
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-3 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div className="w-full">
             <Card>
               <CardBody>
                 <CardTitle>Al Crédito</CardTitle>
                 <CardText className={'text-warning'}>
-                  {formatCurrency(this.state.totalCredito, this.state.codIso)}
+                  {formatCurrency(this.state.totalCredito, this.state.codiso)}
                 </CardText>
                 <p className="text-sm">
                   <Minus className="text-green-500 mr-1" width={16} />
                   Cobrado{' '}
-                  {formatCurrency(this.state.totalCobrado, this.state.codIso)}
+                  {formatCurrency(this.state.totalCobrado, this.state.codiso)}
                 </p>
                 <p className="text-sm">
                   <EqualIcon className="text-green-500 mr-1" width={16} />
                   Restante{' '}
                   {formatCurrency(
                     this.state.totalCredito - this.state.totalCobrado,
-                    this.state.codIso,
+                    this.state.codiso,
                   )}
                 </p>
               </CardBody>
             </Card>
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-3 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div className="w-full">
             <Card>
               <CardBody>
                 <CardTitle>Anuladas</CardTitle>
                 <CardText className={'text-danger'}>
-                  {formatCurrency(this.state.totalAnulado, this.state.codIso)}
+                  {formatCurrency(this.state.totalAnulado, this.state.codiso)}
                 </CardText>
               </CardBody>
             </Card>
-          </Column>
-        </Row>
+          </div>
+        </div>
 
         <Row>
           <Column className="col-xl-6 col-lg-12" formGroup={true}>
