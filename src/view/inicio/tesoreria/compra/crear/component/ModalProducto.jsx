@@ -28,6 +28,8 @@ class ModalProducto extends Component {
       codigo: '',
       nombre: '',
       imagen: null,
+      idMedida: '',
+      medida: '',
       costo: '',
       cantidad: '',
       idTipoProducto: '',
@@ -50,6 +52,8 @@ class ModalProducto extends Component {
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
+        idMedida: producto.idMedida,
+        medida: producto.medida,
         idTipoProducto: producto.idTipoProducto,
 
         loading: false,
@@ -62,6 +66,8 @@ class ModalProducto extends Component {
         costo: producto.costo,
         nombre: producto.nombre,
         imagen: producto.imagen,
+        idMedida: producto.idMedida,
+        medida: producto.medida,
         idTipoProducto: producto.idTipoProducto,
 
         loading: false,
@@ -87,8 +93,16 @@ class ModalProducto extends Component {
   };
 
   handleOnSubmit = async () => {
-    const { idProducto, codigo, nombre, imagen, cantidad, costo } =
-      this.state;
+    const {
+      idProducto,
+      codigo,
+      nombre,
+      imagen,
+      cantidad,
+      costo,
+      idMedida,
+      medida
+    } = this.state;
 
     const { detalles, idImpuesto, impuestos } = this.props;
 
@@ -152,6 +166,9 @@ class ModalProducto extends Component {
         imagen: imagen,
         cantidad: Number(cantidad),
         costo: Number(costo),
+        idMedida: idMedida,
+        medida: medida,
+
         idImpuesto: impuesto.idImpuesto,
         nombreImpuesto: impuesto.nombre,
         porcentajeImpuesto: impuesto.porcentaje,
@@ -196,15 +213,13 @@ class ModalProducto extends Component {
               message={message}
             />
 
-            <div className="flex items-center gap-3 mb-3">
-              <div>
+            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-3">           
+              <div className="max-w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
                 <Image
                   default={images.noImage}
                   src={imagen}
                   alt={nombre}
-                  width={100}
-                  height={100}
-                  className="object-contain rounded"
+                  overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
                 />
               </div>
 
@@ -217,9 +232,9 @@ class ModalProducto extends Component {
             <div className="flex flex-col md:flex-row gap-3">
               <div className="w-full">
                 <Input
-                  label={'Costo:'}
-                  placeholder={'0.00'}
-                  role={'float'}
+                  label="Costo:"
+                  placeholder="0.00"
+                  role="float"
                   ref={this.refCosto}
                   value={costo}
                   onChange={this.handleInputCosto}
@@ -230,9 +245,9 @@ class ModalProducto extends Component {
               <div className="w-full">
                 <Input
                   autoFocus={true}
-                  label={'Cantidad:'}
-                  placeholder={'0.00'}
-                  role={'float'}
+                  label="Cantidad"
+                  placeholder="0.00"
+                  role="float"
                   ref={this.refCantidad}
                   value={cantidad}
                   onChange={this.handleInputCantidad}

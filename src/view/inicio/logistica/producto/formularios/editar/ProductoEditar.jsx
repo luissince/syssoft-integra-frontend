@@ -708,7 +708,6 @@ class ProductoEditar extends CustomComponent {
 
       const data = {
         idProducto: idProducto,
-        idTipoProducto: idTipoProducto,
         nombre: nombre,
         codigo: codigo,
         sku: sku,
