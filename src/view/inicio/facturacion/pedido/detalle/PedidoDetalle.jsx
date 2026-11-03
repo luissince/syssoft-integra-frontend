@@ -184,6 +184,7 @@ class PedidoDetalle extends CustomComponent {
     const payload = {
       id: crypto.randomUUID(),
       to: params.phone,
+      name: params.name,
       message: params.message,
       type: params.type,
     };
