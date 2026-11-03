@@ -248,17 +248,9 @@ export function documentsExcelPersonaProveedor() {
 |--------------------------------------------------------------------------
 */
 export async function listInventario(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/inventario/list', {
       params: params,
-      signal: signal,
-    }),
-  );
-}
-
-export async function summaryInventario(idAlmacen, signal) {
-  return await Resolve.create(
-    instancePrincipal.get(`/api/inventario/summary/${idAlmacen}`, {
       signal: signal,
     }),
   );

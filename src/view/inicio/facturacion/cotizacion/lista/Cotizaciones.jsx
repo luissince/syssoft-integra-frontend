@@ -156,7 +156,7 @@ class Cotizaciones extends CustomComponent {
 
     if (text.trim().length === 0) return;
 
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
     this.fillTable(1);
     await this.setStateAsync({ opcion: 1 });
   };

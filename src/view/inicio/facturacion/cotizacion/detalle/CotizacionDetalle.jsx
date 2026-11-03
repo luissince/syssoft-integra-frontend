@@ -189,7 +189,7 @@ class CotizacionDetalle extends CustomComponent {
     const payload = {
       id: crypto.randomUUID(),
       to: params.phone,
-      customerName: params.name,
+      name: params.name,
       message: params.message,
       type: params.type,
     };

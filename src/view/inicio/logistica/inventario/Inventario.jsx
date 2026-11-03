@@ -15,7 +15,6 @@ import {
   comboAlmacen,
   documentsPdfCodbarProducto,
   listInventario,
-  summaryInventario,
 } from '../../../../network/rest/principal.network';
 import { CANCELED } from '../../../../model/types/types';
 import { connect } from 'react-redux';
@@ -30,9 +29,10 @@ import pdfVisualizer from 'pdf-visualizer';
 import {
   AlertTriangle,
   Barcode,
-  Box,
-  CheckCircle,
+  Boxes,
+  PackageCheck,
   PackagePlus,
+  PackageX,
   Plus,
 } from 'lucide-react';
 import Image from '../../../../components/Image';
@@ -68,7 +68,7 @@ class Inventario extends CustomComponent {
       almacenes: [],
 
       // Nuevo filtro de estado
-      estadoFiltro: '',
+      estado: '',
 
       // Atributos principales de la tabla
       loading: false,
@@ -76,10 +76,11 @@ class Inventario extends CustomComponent {
       restart: false,
 
       resumen: {
-        totalProductos: 0,
-        totalStockCritico: 0,
-        totalStockExcedente: 0,
-        totalStockOptimo: 0,
+        totalInventarios: 0,
+        sinStock: 0,
+        stockBajo: 0,
+        stockNormal: 0,
+        stockAlto: 0,
       },
 
       buscar: '',
@@ -108,15 +109,6 @@ class Inventario extends CustomComponent {
     this.refModalStock = React.createRef();
 
     this.abortControllerTable = new AbortController();
-
-    // Opciones para el filtro de estado
-    this.estadosOptions = [
-      { value: '', label: 'Todos los estados' },
-      { value: "activo", label: "Stock Activo" },
-      { value: 'critico', label: 'Stock Crítico' },
-      { value: 'exceso', label: 'Stock Excedente' },
-      { value: 'optimo', label: 'Stock Óptimo' },
-    ];
   }
 
   /*
@@ -156,27 +148,19 @@ class Inventario extends CustomComponent {
   */
 
   async loadData() {
-    if (
-      this.props.inventarioLista &&
-      this.props.inventarioLista.data &&
-      this.props.inventarioLista.paginacion
-    ) {
-      this.setState(this.props.inventarioLista.data);
-      this.refPaginacion.current.upperPageBound =
-        this.props.inventarioLista.paginacion.upperPageBound;
-      this.refPaginacion.current.lowerPageBound =
-        this.props.inventarioLista.paginacion.lowerPageBound;
-      this.refPaginacion.current.isPrevBtnActive =
-        this.props.inventarioLista.paginacion.isPrevBtnActive;
-      this.refPaginacion.current.isNextBtnActive =
-        this.props.inventarioLista.paginacion.isNextBtnActive;
-      this.refPaginacion.current.pageBound =
-        this.props.inventarioLista.paginacion.pageBound;
-      this.refPaginacion.current.messagePaginacion =
-        this.props.inventarioLista.paginacion.messagePaginacion;
+    const inventarioLista = this.props.inventarioLista;
 
-      // this.refSearch.current.initialize(this.props.inventarioLista.data.buscar);
-      this.refSearch.current.value = this.props.inventarioLista.data.buscar;
+    if (inventarioLista && inventarioLista.data && inventarioLista.paginacion) {
+      this.setState(inventarioLista.data);
+      this.refPaginacion.current.upperPageBound = inventarioLista.paginacion.upperPageBound;
+      this.refPaginacion.current.lowerPageBound = inventarioLista.paginacion.lowerPageBound;
+      this.refPaginacion.current.isPrevBtnActive = inventarioLista.paginacion.isPrevBtnActive;
+      this.refPaginacion.current.isNextBtnActive = inventarioLista.paginacion.isNextBtnActive;
+      this.refPaginacion.current.pageBound = inventarioLista.paginacion.pageBound;
+      this.refPaginacion.current.messagePaginacion = inventarioLista.paginacion.messagePaginacion;
+
+      // this.refSearch.current.initialize(inventarioLista.data.buscar);
+      this.refSearch.current.value = inventarioLista.data.buscar;
     } else {
       const [almacenes] = await Promise.all([
         this.fetchComboAlmacen({ idSucursal: this.state.idSucursal }),
@@ -189,30 +173,12 @@ class Inventario extends CustomComponent {
         idAlmacen: almacenFilter ? almacenFilter.idAlmacen : '',
         initialLoad: false,
       }, async () => {
-        await this.loadingSummary();
         await this.loadInit();
         this.updateReduxState();
       },
       );
     }
   }
-
-  loadingSummary = async () => {
-    const response = await summaryInventario(
-      this.state.idAlmacen,
-      this.abortControllerTable.signal,
-    );
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return;
-    }
-
-    this.setState({
-      resumen: response.data,
-    });
-  };
 
   updateReduxState() {
     this.props.setListaInventarioData(this.state);
@@ -230,8 +196,18 @@ class Inventario extends CustomComponent {
     if (this.state.loading) return;
 
     await this.setStateAsync({ paginacion: 1, restart: true });
-    this.fillTable(0, '');
+    this.fillTable(0);
     await this.setStateAsync({ opcion: 0 });
+  };
+
+  searchText = async (text) => {
+    if (this.state.loading) return;
+
+    if (text.trim().length === 0) return;
+
+    await this.setStateAsync({ paginacion: 1, restart: true, buscar: text });
+    this.fillTable(1);
+    await this.setStateAsync({ opcion: 1 });
   };
 
   paginacionContext = async (listid) => {
@@ -240,29 +216,10 @@ class Inventario extends CustomComponent {
   };
 
   onEventPaginacion = () => {
-    switch (this.state.opcion) {
-      case 0:
-        this.fillTable(0);
-        break;
-      case 1:
-        this.fillTable(1, this.state.buscar);
-        break;
-      default:
-        this.fillTable(0);
-    }
+    this.fillTable(this.state.opcion)
   };
 
-  searchText = async (text) => {
-    if (this.state.loading) return;
-
-    if (text.trim().length === 0) return;
-
-    await this.setStateAsync({ paginacion: 1, restart: false, buscar: text });
-    this.fillTable(1, text.trim());
-    await this.setStateAsync({ opcion: 1 });
-  };
-
-  fillTable = async (opcion, buscar = '') => {
+  fillTable = async (opcion) => {
     this.setState({
       loading: true,
       lista: [],
@@ -271,41 +228,42 @@ class Inventario extends CustomComponent {
 
     const params = {
       opcion: opcion,
-      buscar: buscar,
+      buscar: this.state.buscar,
       idSucursal: this.state.idSucursal,
       idAlmacen: this.state.idAlmacen,
-      estado: this.state.estadoFiltro,
+      estado: this.state.estado,
       posicionPagina: (this.state.paginacion - 1) * this.state.filasPorPagina,
       filasPorPagina: this.state.filasPorPagina,
     };
 
-    const response = await listInventario(
+    const { success, data, message, type } = await listInventario(
       params,
       this.abortControllerTable.signal,
     );
 
-    if (response instanceof SuccessReponse) {
-      const totalPaginacion = parseInt(String(Math.ceil(Number(response.data.total) / this.state.filasPorPagina)));
 
-      this.setState({
-        loading: false,
-        lista: response.data.result,
-        totalPaginacion: totalPaginacion,
-      }, () => {
-        this.updateReduxState();
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
+    if (!success) {
+      if (type === CANCELED) return;
 
       this.setState({
         loading: false,
         lista: [],
         totalPaginacion: 0,
-        messageTable: response.getMessage(),
+        messageTable: message,
       });
+      return;
     }
+
+    const totalPaginacion = parseInt(String(Math.ceil(Number(data.total) / this.state.filasPorPagina)));
+
+    this.setState({
+      loading: false,
+      lista: data.result,
+      totalPaginacion: totalPaginacion,
+      resumen: data.resumen,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   async fetchComboAlmacen(params) {
@@ -368,7 +326,7 @@ class Inventario extends CustomComponent {
 
   // Nuevo handler para el filtro de estado
   handleSelectEstado = (event) => {
-    this.setState({ estadoFiltro: event.target.value }, () => this.loadInit());
+    this.setState({ estado: event.target.value }, () => this.loadInit());
   };
 
   handleOpenPrinterCodBar = async (idProducto) => {
@@ -397,24 +355,35 @@ class Inventario extends CustomComponent {
   */
 
   determinarEstadoInventario = (item) => {
-    const { cantidad, cantidadMinima, cantidadMaxima } = item;
-    if (cantidad < cantidadMinima || cantidad <= 0) {
+    const { estadoStock } = item;
+
+    if (estadoStock === 0) {
       return {
-        estado: 'Crítico',
-        clase: 'bg-red-600 text-white',
+        estado: 'Sin Stock',
+        nombre: 'Sin stock',
+        clase: 'bg-red-100 text-red-700',
         icono: AlertTriangle,
       };
-    } else if (cantidad > cantidadMaxima) {
+    } else if (estadoStock === 1) {
       return {
-        estado: 'Exceso',
-        clase: 'bg-blue-600 text-white',
+        estado: 'Stock Bajo',
+        nombre: 'Stock bajo',
+        clase: 'bg-orange-100 text-orange-700',
         icono: PackagePlus,
+      };
+    } else if (estadoStock === 2) {
+      return {
+        estado: 'Stock Normal',
+        nombre: 'Stock normal',
+        clase: 'bg-green-100 text-green-700',
+        icono: PackageCheck,
       };
     } else {
       return {
-        estado: 'Óptimo',
-        clase: 'bg-green-500 text-white',
-        icono: CheckCircle,
+        estado: 'Stock Alto',
+        nombre: 'Stock alto',
+        clase: 'bg-blue-100 text-blue-700',
+        icono: Boxes,
       };
     }
   };
@@ -539,7 +508,7 @@ class Inventario extends CustomComponent {
                     {formatCurrency(item.costo, this.state.codIso)}
                   </div>
 
-                  <div>
+                  <div className="text-center">
                     <span
                       className={cn(
                         "inline-flex items-center rounded-full",
@@ -708,15 +677,15 @@ class Inventario extends CustomComponent {
             </select>
 
             <select
-              value={this.state.estadoFiltro}
+              value={this.state.estado}
               onChange={this.handleSelectEstado}
               className="w-full px-4 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              {this.estadosOptions.map((option, index) => (
-                <option key={index} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              <option value="">- ESTADOS -</option>
+              <option value="0">SIN STOCK</option>
+              <option value="1">STOCK BAJO</option>
+              <option value="2">STOCK NORMAL</option>
+              <option value="3">STOCK ALTO</option>
             </select>
           </div>
         </div>
@@ -735,65 +704,70 @@ class Inventario extends CustomComponent {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+
+          {/* Sin Stock */}
           <div className="bg-white rounded border p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Box className="h-8 w-8 text-indigo-600" />
+                <PackageX className="h-8 w-8 text-red-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Total Productos
+                <p className="text-sm font-medium text-red-700">
+                  Sin Stock
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {rounded(this.state.resumen.totalProductos, 0)}
+                  {rounded(this.state.resumen.sinStock, 0)}
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Stock Bajo */}
           <div className="bg-white rounded border p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
+                <AlertTriangle className="h-8 w-8 text-orange-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Stock Crítico
+                <p className="text-sm font-medium text-orange-700">
+                  Stock Bajo
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {rounded(this.state.resumen.totalStockCritico, 0)}
+                  {rounded(this.state.resumen.stockBajo, 0)}
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Stock Normal */}
           <div className="bg-white rounded border p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <PackageCheck className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Stock Óptimo
+                <p className="text-sm font-medium text-green-700">
+                  Stock Normal
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {rounded(this.state.resumen.totalStockOptimo, 0)}
+                  {rounded(this.state.resumen.stockNormal, 0)}
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Stock Alto */}
           <div className="bg-white rounded border p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <PackagePlus className="h-8 w-8 text-blue-600" />
+                <Boxes className="h-8 w-8 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Stock Excedente
+                <p className="text-sm font-medium text-blue-700">
+                  Stock Alto
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {rounded(this.state.resumen.totalStockExcedente, 0)}
+                  {rounded(this.state.resumen.stockAlto, 0)}
                 </p>
               </div>
             </div>
