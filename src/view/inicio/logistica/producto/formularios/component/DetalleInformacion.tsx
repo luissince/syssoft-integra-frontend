@@ -187,6 +187,7 @@ const DetalleInformacion = ({
                             name="ckTipoProducto"
                             checked={idTipoProducto === item.value}
                             onChange={handleOptionTipoProducto}
+                            disabled
                         >
                             {item.label}
                         </RadioButton>

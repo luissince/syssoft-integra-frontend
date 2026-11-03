@@ -283,20 +283,17 @@ class ModalProducto extends Component {
               loading={loading}
               message={message}
             />
-
-            <div className="flex flex-col md:flex-row items-center gap-3 mb-3">
-              <div>
+            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-3">
+              <div className="max-w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
                 <Image
                   default={images.noImage}
                   src={imagen}
                   alt={descripcion}
-                  width={100}
-                  height={100}
-                  className="object-contain rounded"
+                  overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
                 />
               </div>
 
-              <div className="flex flex-col text-center md:text-left">
+              <div className="flex flex-col">
                 <p className="text-sm">{codigo}</p>
                 <p className="text-base">{descripcion}</p>
               </div>

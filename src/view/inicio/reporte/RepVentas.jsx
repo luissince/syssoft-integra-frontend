@@ -456,6 +456,7 @@ class RepVentas extends CustomComponent {
               value={this.state.idUsuario}
               onChange={this.handleSelectUsuario}
             >
+              <option key="">TODOS</option>
               {this.state.usuarios.map((item, index) => (
                 <option key={index} value={item.idUsuario}>
                   {item.nombres + ' ' + item.apellidos}
