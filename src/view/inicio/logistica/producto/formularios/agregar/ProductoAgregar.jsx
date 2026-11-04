@@ -768,6 +768,8 @@ class ProductoAgregar extends CustomComponent {
         <div className="flex flex-col md:flex-row gap-6">
           {/* Parte de los datos */}
           <DetalleInformacion
+            tipoProceso='nuevo'
+
             idTipoProducto={idTipoProducto}
             handleOptionTipoProducto={this.handleOptionTipoProducto}
 

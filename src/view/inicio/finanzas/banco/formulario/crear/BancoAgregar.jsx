@@ -23,10 +23,6 @@ import { alertKit } from 'alert-kit';
  */
 class BancoAgregar extends CustomComponent {
 
-  /**
-   * Inicializa un nuevo componente.
-   * @param {Object} props - Las propiedades pasadas al componente.
-   */
   constructor(props) {
     super(props);
     this.state = {
@@ -273,19 +269,19 @@ class BancoAgregar extends CustomComponent {
           handleChangeCci={(event) => this.setState({ cci: event.target.value })}
 
           vuelto={this.state.vuelto}
-          handleChangeVuelto={(event) => this.setState({ vuelto: event.target.value })}
+          handleChangeVuelto={(event) => this.setState({ vuelto: event.target.checked })}
 
           estado={this.state.estado}
-          handleChangeEstado={(event) => this.setState({ estado: event.target.value })}
+          handleChangeEstado={(event) => this.setState({ estado: event.target.checked })}
 
           preferido={this.state.preferido}
-          handleChangePrefereido={(event) => this.setState({ preferido: event.target.value })}
+          handleChangePrefereido={(event) => this.setState({ preferido: event.target.checked })}
 
           reporte={this.state.reporte}
-          handleChangeReporte={(event) => this.setState({ reporte: event.target.value })}
+          handleChangeReporte={(event) => this.setState({ reporte: event.target.checked })}
 
           compartir={this.state.compartir}
-          handleChangeCompartir={(event) => this.setState({ compartir: event.target.value })}
+          handleChangeCompartir={(event) => this.setState({ compartir: event.target.checked })}
 
           handleSave={this.handleGuardar}
           handleGoBack={() => this.props.history.goBack()}
