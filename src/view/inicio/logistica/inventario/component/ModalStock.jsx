@@ -14,6 +14,7 @@ import { CANCELED } from '../../../../../model/types/types';
 import { images } from '../../../../../helper';
 import Image from '@/components/Image';
 import Button from '@/components/Button';
+import { Input } from '@/components/ui/input';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -247,19 +248,17 @@ class CustomModalStock extends Component {
               message={message}
             />
 
-            <div className="flex flex-col md:flex-row items-center gap-3 mb-3">
-              <div>
+            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-3">
+              <div className="max-w-28 aspect-square relative flex items-center justify-center overflow-hidden border border-gray-200 rounded">
                 <Image
                   default={images.noImage}
                   src={imagen}
                   alt={nombre}
-                  width={100}
-                  height={100}
-                  className="object-contain rounded"
+                  overrideClass="max-w-full max-h-full w-auto h-auto object-contain block"
                 />
               </div>
 
-              <div className="flex flex-col text-center md:text-left">
+              <div className="flex flex-col">
                 <p className="text-sm">{codigo}</p>
                 <p className="text-base">{nombre}</p>
               </div>
@@ -270,14 +269,13 @@ class CustomModalStock extends Component {
                 <label className="block text-sm mb-2">
                   Stock Mínimo <span className="text-red-500">*</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   role="float"
                   placeholder="Ingrese..."
                   ref={this.refStockMinimo}
                   value={stockMinimo}
                   onChange={this.handleInputStockMinimo}
-                  className="w-full px-3 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -285,14 +283,13 @@ class CustomModalStock extends Component {
                 <label className="block text-sm mb-2">
                   Stock Máximo <span className="text-red-500">*</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   role="float"
                   placeholder="Ingrese..."
                   ref={this.refStockMaximo}
                   value={stockMaximo}
                   onChange={this.handleInputStockMaximo}
-                  className="w-full px-3 py-2 h-10 border border-gray-300 text-sm rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -302,11 +299,11 @@ class CustomModalStock extends Component {
           <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
             <Button
               type="submit"
-              className="btn-primary w-full md:w-auto">
+              className="btn-primary">
               <i className="fa fa-save"></i> Guardar
             </Button>
             <Button
-              className="btn-danger w-full md:w-auto"
+              className="btn-danger"
               onClick={async () => await this.refModal.current.handleOnClose()}
             >
               <i className="fa fa-close"></i> Cerrar

@@ -10,7 +10,7 @@ import ContainerWrapper from '../../../../../components/Container';
 import {
   createCobro,
   filtrarPersona,
-  filtrarCobroConcepto,
+  filtrarConcepto,
   comboComprobante,
   comboMoneda,
   documentsPdfInvoicesCobro,
@@ -24,8 +24,6 @@ import { COMPROBANTE_DE_INGRESO } from '../../../../../model/types/tipo-comproba
 import PropTypes from 'prop-types';
 import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
 import Button from '../../../../../components/Button';
 import Input from '../../../../../components/Input';
 import Select from '../../../../../components/Select';
@@ -34,6 +32,7 @@ import ModalTransaccion from '../../../../../components/ModalTransaccion';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import pdfVisualizer from 'pdf-visualizer';
 import { alertKit } from 'alert-kit';
+import { TIPO_CONCEPTO_INGRESO } from '@/model/types/tipo-concepto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -166,19 +165,6 @@ class CobroCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
-
-  async fetchFiltrarCobroConcepto(params) {
-    const response = await filtrarCobroConcepto(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -280,12 +266,15 @@ class CobroCrear extends CustomComponent {
     }
 
     const params = {
+      tipo: TIPO_CONCEPTO_INGRESO,
       filtrar: searchWord,
     };
 
-    const conceptos = await this.fetchFiltrarCobroConcepto(params);
+    const { success, data } = await filtrarConcepto(params);
 
-    this.setState({ conceptos });
+    if (success) {
+      this.setState({ conceptos: data });
+    }
   };
 
   handleSelectItemConcepto = (value) => {
@@ -573,35 +562,29 @@ class CobroCrear extends CustomComponent {
           handleGoBack={() => this.handleCerrar()}
         />
 
-        <Row>
-          {/* Filtrar */}
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <SearchInput
-              group={true}
-              label={'Concepto:'}
-              ref={this.refConcepto}
-              autoFocus={true}
-              placeholder="Filtrar conceptos..."
-              refValue={this.refValueConcepto}
-              data={this.state.conceptos}
-              handleClearInput={this.handleClearInputConcepto}
-              handleFilter={this.handleFilterConcepto}
-              handleSelectItem={this.handleSelectItemConcepto}
-              renderItem={(value) => <>{value.nombre}</>}
-              renderIconLeft={<i className="bi bi-list-ul"></i>}
-            />
-          </Column>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
 
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          {/* Concepto */}
+          <SearchInput
+            label="Concepto:"
+            ref={this.refConcepto}
+            autoFocus={true}
+            placeholder="Filtrar conceptos..."
+            refValue={this.refValueConcepto}
+            data={this.state.conceptos}
+            handleClearInput={this.handleClearInputConcepto}
+            handleFilter={this.handleFilterConcepto}
+            handleSelectItem={this.handleSelectItemConcepto}
+            renderItem={(value) => <>{value.nombre}</>}
+            renderIconLeft={<i className="bi bi-list-ul"></i>}
+            classNameContainer="relative group"
+          />
+
+          {/* Tipo de moneda */}
+          <div>
             <Select
               group={true}
-              label={'Tipo de Moneda:'}
+              label="Tipo de Moneda:"
               iconLeft={<i className="bi bi-cash"></i>}
               ref={this.refMoneda}
               value={this.state.idMoneda}
@@ -614,18 +597,13 @@ class CobroCrear extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          {/* Precio */}
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          {/* Monto */}
+          <div>
             <Input
               group={true}
-              label={'Monto:'}
+              label="Monto:"
               iconLeft={<i className="bi bi-cash-coin"></i>}
               ref={this.refMonto}
               value={this.state.monto}
@@ -633,34 +611,30 @@ class CobroCrear extends CustomComponent {
               placeholder="Ingrese el monto"
               onKeyDown={keyNumberFloat}
             />
-          </Column>
+          </div>
 
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <SearchInput
-              label={'Persona:'}
-              ref={this.refPersona}
-              placeholder="Filtrar personas..."
-              refValue={this.refValuePersona}
-              data={this.state.personas}
-              handleClearInput={this.handleClearInputPersona}
-              handleFilter={this.handleFilterPersona}
-              handleSelectItem={this.handleSelectItemPersona}
-              renderItem={(value) => (
-                <>{value.documento + ' - ' + value.informacion}</>
-              )}
-              renderIconLeft={<i className="bi bi-person-circle"></i>}
-            />
-          </Column>
-        </Row>
+          {/* Persona */}
+          <SearchInput
+            label="Persona:"
+            ref={this.refPersona}
+            placeholder="Filtrar personas..."
+            refValue={this.refValuePersona}
+            data={this.state.personas}
+            handleClearInput={this.handleClearInputPersona}
+            handleFilter={this.handleFilterPersona}
+            handleSelectItem={this.handleSelectItemPersona}
+            renderItem={(value) => (
+              <>{value.documento + ' - ' + value.informacion}</>
+            )}
+            renderIconLeft={<i className="bi bi-person-circle"></i>}
+            classNameContainer="relative group"
+          />
 
-        <Row>
-          <Column formGroup={true}>
+          {/* Comprobante */}
+          <div>
             <Select
               group={true}
-              label={'Comprobante:'}
+              label="Comprobante:"
               iconLeft={<i className="bi bi-receipt"></i>}
               ref={this.refComprobante}
               value={this.state.idComprobante}
@@ -673,48 +647,45 @@ class CobroCrear extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          {/* Observación */}
+          <div className="md:col-span-2">
             <TextArea
               group={true}
-              label={'Observación:'}
+              label="Observación:"
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
             />
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          {/* Nota */}
+          <div className="md:col-span-2">
             <TextArea
               group={true}
-              label={'Nota (Visible el los reportes):'}
+              label="Nota (Visible en los reportes):"
               iconLeft={<i className="bi bi-card-text"></i>}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"
             />
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button className="btn-outline-info" onClick={this.handleLimpiar}>
-              <i className="fa fa-trash"></i> Limpiar
-            </Button>{' '}
-            <Button className="btn-outline-danger" onClick={this.handleCerrar}>
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        </div>
+
+        <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button className="btn-outline-info" onClick={this.handleLimpiar}>
+            <i className="fa fa-trash"></i> Limpiar
+          </Button>
+          <Button className="btn-outline-danger" onClick={this.handleCerrar}>
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }

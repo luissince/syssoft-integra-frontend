@@ -12,7 +12,7 @@ import {
   comboMoneda,
   createGasto,
   documentsPdfInvoicesGasto,
-  filtrarGastoConcepto,
+  filtrarConcepto,
   filtrarPersona,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -25,8 +25,6 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import { COMPROBANTE_DE_SALIDA } from '../../../../../model/types/tipo-comprobante';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
 import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import Button from '../../../../../components/Button';
@@ -34,6 +32,7 @@ import Input from '../../../../../components/Input';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import pdfVisualizer from 'pdf-visualizer';
 import { alertKit } from 'alert-kit';
+import { TIPO_CONCEPTO_EGRESO } from '@/model/types/tipo-concepto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -167,18 +166,6 @@ class GastoCrear extends CustomComponent {
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
 
-  async fetchFiltrarGastoConcepto(params) {
-    const response = await filtrarGastoConcepto(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -280,12 +267,14 @@ class GastoCrear extends CustomComponent {
     }
 
     const params = {
+      tipo: TIPO_CONCEPTO_EGRESO,
       filtrar: searchWord,
     };
 
-    const conceptos = await this.fetchFiltrarGastoConcepto(params);
-
-    this.setState({ conceptos });
+    const { success, data } = await filtrarConcepto(params);
+    if (success) {
+      this.setState({ conceptos: data });
+    }
   };
 
   handleSelectItemConcepto = (value) => {
@@ -570,32 +559,23 @@ class GastoCrear extends CustomComponent {
           handleGoBack={() => this.handleCerrar()}
         />
 
-        <Row>
-          {/* Filtrar */}
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <SearchInput
-              group={true}
-              label={'Concepto:'}
-              ref={this.refConcepto}
-              autoFocus={true}
-              placeholder="Filtrar conceptos..."
-              refValue={this.refValueConcepto}
-              data={this.state.conceptos}
-              handleClearInput={this.handleClearInputConcepto}
-              handleFilter={this.handleFilterConcepto}
-              handleSelectItem={this.handleSelectItemConcepto}
-              renderItem={(value) => <>{value.nombre}</>}
-              renderIconLeft={<i className="bi bi-list-ul"></i>}
-            />
-          </Column>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+          <SearchInput
+            label={'Concepto:'}
+            ref={this.refConcepto}
+            autoFocus={true}
+            placeholder="Filtrar conceptos..."
+            refValue={this.refValueConcepto}
+            data={this.state.conceptos}
+            handleClearInput={this.handleClearInputConcepto}
+            handleFilter={this.handleFilterConcepto}
+            handleSelectItem={this.handleSelectItemConcepto}
+            renderItem={(value) => <>{value.nombre}</>}
+            renderIconLeft={<i className="bi bi-list-ul"></i>}
+            classNameContainer="relative group"
+          />
 
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div>
             <Select
               group={true}
               label={'Tipo de Moneda:'}
@@ -611,15 +591,9 @@ class GastoCrear extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          {/* Precio */}
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div>
             <Input
               group={true}
               label={'Monto:'}
@@ -630,31 +604,26 @@ class GastoCrear extends CustomComponent {
               placeholder="Ingrese el monto"
               onKeyDown={keyNumberFloat}
             />
-          </Column>
 
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <SearchInput
-              label={'Persona:'}
-              ref={this.refPersona}
-              placeholder="Filtrar persona..."
-              refValue={this.refValuePersona}
-              data={this.state.personas}
-              handleClearInput={this.handleClearInputPersona}
-              handleFilter={this.handleFilterPersona}
-              handleSelectItem={this.handleSelectItemPersona}
-              renderItem={(value) => (
-                <>{value.documento + ' - ' + value.informacion}</>
-              )}
-              renderIconLeft={<i className="bi bi-person-circle"></i>}
-            />
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          <SearchInput
+            label={'Persona:'}
+            ref={this.refPersona}
+            placeholder="Filtrar persona..."
+            refValue={this.refValuePersona}
+            data={this.state.personas}
+            handleClearInput={this.handleClearInputPersona}
+            handleFilter={this.handleFilterPersona}
+            handleSelectItem={this.handleSelectItemPersona}
+            renderItem={(value) => (
+              <>{value.documento + ' - ' + value.informacion}</>
+            )}
+            renderIconLeft={<i className="bi bi-person-circle"></i>}
+            classNameContainer="relative group"
+          />
+
+          <div>
             <Select
               group={true}
               label={'Comprobante:'}
@@ -670,11 +639,9 @@ class GastoCrear extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          <div className="md:col-span-2">
             <TextArea
               group={true}
               label={'Observación (Visible en el sistema):'}
@@ -683,11 +650,9 @@ class GastoCrear extends CustomComponent {
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
             />
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          <div className="md:col-span-2">
             <TextArea
               group={true}
               label={'Nota (Visible el los reportes):'}
@@ -696,22 +661,20 @@ class GastoCrear extends CustomComponent {
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"
             />
-          </Column>
-        </Row>
+          </div>
+        </div>
 
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button className="btn-outline-info" onClick={this.handleLimpiar}>
-              <i className="fa fa-trash"></i> Limpiar
-            </Button>{' '}
-            <Button className="btn-outline-danger" onClick={this.handleCerrar}>
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button className="btn-outline-info" onClick={this.handleLimpiar}>
+            <i className="fa fa-trash"></i> Limpiar
+          </Button>
+          <Button className="btn-outline-danger" onClick={this.handleCerrar}>
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }

@@ -1559,23 +1559,15 @@ export async function removeConcepto(params, signal = null) {
   );
 }
 
-export async function filtrarCobroConcepto(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/concepto/filtrar/cobro', {
+export async function filtrarConcepto(params, signal = null) {
+  return await Resolve.safe(
+    instancePrincipal.get('/api/concepto/filtrar', {
       params: params,
       signal: signal,
     }),
   );
 }
 
-export async function filtrarGastoConcepto(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/concepto/filtrar/gasto', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
 // ------------------------------------------------------------------------
 // FIN PARA CONCEPTO
 // ------------------------------------------------------------------------
