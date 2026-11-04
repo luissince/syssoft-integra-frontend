@@ -708,7 +708,6 @@ class ProductoEditar extends CustomComponent {
 
       const data = {
         idProducto: idProducto,
-        idTipoProducto: idTipoProducto,
         nombre: nombre,
         codigo: codigo,
         sku: sku,
@@ -832,6 +831,8 @@ class ProductoEditar extends CustomComponent {
         <div className="flex flex-col md:flex-row gap-3">
           {/* Parte de los datos */}
           <DetalleInformacion
+            tipoProceso='editar'
+
             idTipoProducto={idTipoProducto}
             handleOptionTipoProducto={this.handleOptionTipoProducto}
 

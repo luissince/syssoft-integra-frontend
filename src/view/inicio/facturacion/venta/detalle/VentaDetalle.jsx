@@ -34,6 +34,7 @@ import ModalPrinter from './component/ModalPrinter';
 import { cn } from '@/lib/utils';
 import ModalTransaccion from '@/components/ModalTransaccion';
 import { Plus } from 'lucide-react';
+import { sendWhatsAppAsync } from '@/redux/whatsapp.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -73,9 +74,6 @@ class VentaDetalle extends CustomComponent {
       idSucursal: this.props.token.project.idSucursal,
       idUsuario: this.props.token.userToken.idUsuario,
     };
-
-    // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsApp = React.createRef();
 
     // Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -199,47 +197,39 @@ class VentaDetalle extends CustomComponent {
   };
 
   handleProcessSendWhatsapp = async (
-    phone,
-    callback = async function () { },
+    params,
+    callback,
   ) => {
-    const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
-    const { email } = this.props.token.project;
-
-    const companyInfo = {
-      name: razonSocial,
-      website: paginaWeb,
-      email: email,
+    const payload = {
+      id: crypto.randomUUID(),
+      to: params.phone,
+      name: params.name,
+      message: params.message,
+      type: params.type,
     };
 
-    const documentUrl = documentsPdfInvoicesVenta(this.state.idVenta, 'A4');
+    if (params.type === 'pdf') {
+      const { idCotizacion, cabecera } = this.state;
 
-    // Crear mensaje con formato
-    const message = `
-    Hola! Somos *${companyInfo.name}*
-    
-    Le enviamos su comprobante de venta:
-    ${documentUrl}
-    
-    Para cualquier consulta, puede contactarnos:
-    ${companyInfo.website}
-    ${companyInfo.email}
+      if (!cabecera) {
+        alertKit.warning({
+          title: 'Venta',
+          message: 'No se pudo enviar el documento.',
+        });
+        return;
+      }
 
-    o escribiendo a nuestro whatsapp
-    
-    Gracias por su preferencia! :D`.trim();
+      payload.url = documentsPdfInvoicesVenta(idCotizacion, params.pdfType);
 
-    // Limpiar y formatear el número de teléfono
-    const cleanPhone = phone.replace(/\D/g, '');
+      payload.filename =
+        `VENTA ${cabecera.serie}-${cabecera.numeracion} - ${cabecera.informacion}.pdf`;
 
-    // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-      message,
-    )}`;
+      payload.caption = params.message;
+    }
 
-    await callback();
+    this.props.sendWhatsAppAsync(payload);
 
-    // Abrir en una nueva ventana
-    window.open(whatsappUrl, '_blank');
+    await callback?.();
   };
 
   handleCloseSendWhatsapp = () => {
@@ -743,11 +733,28 @@ class VentaDetalle extends CustomComponent {
         />
 
         <ModalSendWhatsApp
-          refModal={this.refModalSendWhatsApp}
           isOpen={isOpenSendWhatsapp}
-          phone={cabecera && cabecera.celular || ""}
+          person={cabecera}
           handleClose={this.handleCloseSendWhatsapp}
           handleProcess={this.handleProcessSendWhatsapp}
+          documents={[
+            {
+              label: "- Seleccionar Formato -",
+              value: ""
+            },
+            {
+              label: "Formato A4",
+              value: "A4"
+            },
+            {
+              label: "Formato 80mm",
+              value: "80mm"
+            },
+            {
+              label: "Formato 58mm",
+              value: "58mm"
+            },
+          ]}
         />
 
         <ModalPrinter
@@ -807,7 +814,7 @@ class VentaDetalle extends CustomComponent {
             className="px-4 py-2 bg-green-600 border border-gray-300 text-sm font-medium rounded-lg text-white hover:bg-green-500 flex items-center gap-2"
             onClick={this.handleOpenSendWhatsapp}
           >
-            <i className="fa fa-whatsapp"></i> WhatsApp
+            <i className="fa fa-whatsapp"></i> Whatsapp
           </button>
         </div>
 
@@ -845,6 +852,7 @@ VentaDetalle.propTypes = {
       email: PropTypes.string,
     }),
   }),
+  sendWhatsAppAsync: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
@@ -854,6 +862,10 @@ const mapStateToProps = (state) => {
   };
 };
 
-const ConnectedVentaDetalle = connect(mapStateToProps, null)(VentaDetalle);
+const mapDispatchToProps = {
+  sendWhatsAppAsync
+};
+
+const ConnectedVentaDetalle = connect(mapStateToProps, mapDispatchToProps)(VentaDetalle);
 
 export default ConnectedVentaDetalle;

@@ -3,7 +3,8 @@ import principalReduce from './principalSlice';
 import noticacionReducer from './noticacionSlice';
 import predeterminadoReducer from './predeterminadoSlice';
 import downloadReducer from './downloadSlice';
-import printerReducer from './printerSlice';
+import printerReducer from './printer.slice';
+import whatsappReducer from './whatsapp.slice';
 import { combineReducers } from '@reduxjs/toolkit';
 
 const reducer = combineReducers({
@@ -12,6 +13,7 @@ const reducer = combineReducers({
   principal: principalReduce,
   download: downloadReducer,
   printer: printerReducer,
+  whatsapp: whatsappReducer,
 });
 
 const store = configureStore({

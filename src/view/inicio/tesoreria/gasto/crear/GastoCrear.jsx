@@ -12,7 +12,7 @@ import {
   comboMoneda,
   createGasto,
   documentsPdfInvoicesGasto,
-  filtrarGastoConcepto,
+  filtrarConcepto,
   filtrarPersona,
 } from '../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../model/class/response';
@@ -25,8 +25,6 @@ import { SpinnerView } from '../../../../../components/Spinner';
 import Title from '../../../../../components/Title';
 import { COMPROBANTE_DE_SALIDA } from '../../../../../model/types/tipo-comprobante';
 import ModalTransaccion from '../../../../../components/ModalTransaccion';
-import Row from '../../../../../components/Row';
-import Column from '../../../../../components/Column';
 import Select from '../../../../../components/Select';
 import TextArea from '../../../../../components/TextArea';
 import Button from '../../../../../components/Button';
@@ -34,6 +32,7 @@ import Input from '../../../../../components/Input';
 import { ModalImpresion } from '../../../../../components/MultiModal';
 import pdfVisualizer from 'pdf-visualizer';
 import { alertKit } from 'alert-kit';
+import { TIPO_CONCEPTO_EGRESO } from '@/model/types/tipo-concepto';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -74,9 +73,9 @@ class GastoCrear extends CustomComponent {
       concepto: null,
       conceptos: [],
 
-      // Filtrar proveedor
-      proveedor: null,
-      proveedores: [],
+      // Filtrar persona
+      persona: null,
+      personas: [],
 
       // Atributos libres
       codiso: '',
@@ -96,12 +95,10 @@ class GastoCrear extends CustomComponent {
     this.refMonto = React.createRef();
     this.refComprobante = React.createRef();
     this.refMoneda = React.createRef();
-    this.refObservacion = React.createRef();
-    this.refONota = React.createRef();
 
-    // Filtrar proveedor
-    this.refProveedor = React.createRef();
-    this.refValueProveedor = React.createRef();
+    // Filtrar persona
+    this.refPersona = React.createRef();
+    this.refValuePersona = React.createRef();
 
     // Referencia para el modal impresión
     this.refModalImpresion = React.createRef();
@@ -169,30 +166,6 @@ class GastoCrear extends CustomComponent {
   // Peticiones HTTP
   //------------------------------------------------------------------------------------------
 
-  async fetchFiltrarGastoConcepto(params) {
-    const response = await filtrarGastoConcepto(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
-  async fetchFiltrarCliente(params) {
-    const response = await filtrarPersona(params);
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
-    }
-
-    if (response instanceof ErrorResponse) {
-      return [];
-    }
-  }
-
   async fetchComprobante(tipo) {
     const params = {
       tipo: tipo,
@@ -231,7 +204,7 @@ class GastoCrear extends CustomComponent {
 
   clearView = async () => {
     this.setState(this.initial, async () => {
-      await this.refProveedor.current.restart();
+      await this.refPersona.current.restart();
       await this.refConcepto.current.restart();
       await this.loadData();
     });
@@ -294,65 +267,65 @@ class GastoCrear extends CustomComponent {
     }
 
     const params = {
+      tipo: TIPO_CONCEPTO_EGRESO,
       filtrar: searchWord,
     };
 
-    const conceptos = await this.fetchFiltrarGastoConcepto(params);
-
-    this.setState({ conceptos });
+    const { success, data } = await filtrarConcepto(params);
+    if (success) {
+      this.setState({ conceptos: data });
+    }
   };
 
   handleSelectItemConcepto = (value) => {
     this.refConcepto.current.initialize(value.nombre);
-    this.setState(
-      {
-        concepto: value,
-        conceptos: [],
-      },
-      () => {
-        this.refMonto.current.focus();
-      },
-    );
-  };
-
-  //------------------------------------------------------------------------------------------
-  // Filtrar proveedor
-  //------------------------------------------------------------------------------------------
-
-  handleClearInputProveedor = () => {
     this.setState({
-      proveedores: [],
-      proveedor: null,
+      concepto: value,
+      conceptos: [],
+    }, () => {
+      this.refMonto.current.focus();
     });
   };
 
-  handleFilterProveedor = async (text) => {
+  //------------------------------------------------------------------------------------------
+  // Filtrar persona
+  //------------------------------------------------------------------------------------------
+
+  handleClearInputPersona = () => {
+    this.setState({
+      personas: [],
+      persona: null,
+    });
+  };
+
+  handleFilterPersona = async (text) => {
     const searchWord = text;
-    this.setState({ proveedor: null });
+    this.setState({ persona: null });
 
     if (isEmpty(searchWord)) {
-      this.setState({ proveedores: [] });
+      this.setState({ personas: [] });
       return;
     }
 
     const params = {
-      opcion: 1,
+      opcion: 0,
       filter: searchWord,
-      proveedor: true,
     };
 
-    const proveedores = await this.fetchFiltrarCliente(params);
+    const response = await filtrarPersona(params);
 
-    this.setState({ proveedores });
+    if (response instanceof SuccessReponse) {
+      this.setState({ personas: response.data });
+    }
   };
 
-  handleSelectItemProveedor = (value) => {
-    this.refProveedor.current.initialize(
+  handleSelectItemPersona = (value) => {
+    this.refPersona.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
     this.setState({
-      proveedor: value,
-      proveedores: [],
+      persona: value,
+      personas: [],
     });
   };
 
@@ -361,7 +334,7 @@ class GastoCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleGuardar = async () => {
-    const { concepto, idComprobante, monto, proveedor, idMoneda } = this.state;
+    const { concepto, idComprobante, monto, persona, idMoneda } = this.state;
 
     if (isEmpty(concepto)) {
       alertKit.warning({
@@ -387,11 +360,11 @@ class GastoCrear extends CustomComponent {
       return;
     }
 
-    if (isEmpty(proveedor)) {
+    if (isEmpty(persona)) {
       alertKit.warning({
         title: "Gasto",
-        message: "Seleccione un proveedor.",
-      }, () => this.refValueProveedor.current.focus());
+        message: "Seleccione una persona.",
+      }, () => this.refValuePersona.current.focus());
       return;
     }
 
@@ -442,7 +415,7 @@ class GastoCrear extends CustomComponent {
     callback = async function () { },
   ) => {
     const {
-      proveedor,
+      persona,
       idUsuario,
       idMoneda,
       idSucursal,
@@ -467,7 +440,7 @@ class GastoCrear extends CustomComponent {
     if (accept) {
       const data = {
         idFormaPago: idFormaPago,
-        idPersona: proveedor.idPersona,
+        idPersona: persona.idPersona,
         idUsuario: idUsuario,
         idMoneda: idMoneda,
         idSucursal: idSucursal,
@@ -586,32 +559,23 @@ class GastoCrear extends CustomComponent {
           handleGoBack={() => this.handleCerrar()}
         />
 
-        <Row>
-          {/* Filtrar */}
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <SearchInput
-              group={true}
-              label={'Concepto:'}
-              ref={this.refConcepto}
-              autoFocus={true}
-              placeholder="Filtrar conceptos..."
-              refValue={this.refValueConcepto}
-              data={this.state.conceptos}
-              handleClearInput={this.handleClearInputConcepto}
-              handleFilter={this.handleFilterConcepto}
-              handleSelectItem={this.handleSelectItemConcepto}
-              renderItem={(value) => <>{value.nombre}</>}
-              renderIconLeft={<i className="bi bi-list-ul"></i>}
-            />
-          </Column>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+          <SearchInput
+            label={'Concepto:'}
+            ref={this.refConcepto}
+            autoFocus={true}
+            placeholder="Filtrar conceptos..."
+            refValue={this.refValueConcepto}
+            data={this.state.conceptos}
+            handleClearInput={this.handleClearInputConcepto}
+            handleFilter={this.handleFilterConcepto}
+            handleSelectItem={this.handleSelectItemConcepto}
+            renderItem={(value) => <>{value.nombre}</>}
+            renderIconLeft={<i className="bi bi-list-ul"></i>}
+            classNameContainer="relative group"
+          />
 
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div>
             <Select
               group={true}
               label={'Tipo de Moneda:'}
@@ -627,15 +591,9 @@ class GastoCrear extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          {/* Precio */}
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
+          <div>
             <Input
               group={true}
               label={'Monto:'}
@@ -646,32 +604,26 @@ class GastoCrear extends CustomComponent {
               placeholder="Ingrese el monto"
               onKeyDown={keyNumberFloat}
             />
-          </Column>
 
-          <Column
-            className="col-lg-6 col-md-12 col-sm-12 col-12"
-            formGroup={true}
-          >
-            <SearchInput
-              group={true}
-              label={'Proveedor:'}
-              ref={this.refProveedor}
-              placeholder="Filtrar proveedores..."
-              refValue={this.refValueProveedor}
-              data={this.state.proveedores}
-              handleClearInput={this.handleClearInputProveedor}
-              handleFilter={this.handleFilterProveedor}
-              handleSelectItem={this.handleSelectItemProveedor}
-              renderItem={(value) => (
-                <>{value.documento + ' - ' + value.informacion}</>
-              )}
-              renderIconLeft={<i className="bi bi-person-circle"></i>}
-            />
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          <SearchInput
+            label={'Persona:'}
+            ref={this.refPersona}
+            placeholder="Filtrar persona..."
+            refValue={this.refValuePersona}
+            data={this.state.personas}
+            handleClearInput={this.handleClearInputPersona}
+            handleFilter={this.handleFilterPersona}
+            handleSelectItem={this.handleSelectItemPersona}
+            renderItem={(value) => (
+              <>{value.documento + ' - ' + value.informacion}</>
+            )}
+            renderIconLeft={<i className="bi bi-person-circle"></i>}
+            classNameContainer="relative group"
+          />
+
+          <div>
             <Select
               group={true}
               label={'Comprobante:'}
@@ -687,50 +639,42 @@ class GastoCrear extends CustomComponent {
                 </option>
               ))}
             </Select>
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          <div className="md:col-span-2">
             <TextArea
               group={true}
               label={'Observación (Visible en el sistema):'}
               iconLeft={<i className="bi bi-chat-dots-fill"></i>}
-              ref={this.refObservacion}
               value={this.state.observacion}
               onChange={this.handleInputObservacion}
               placeholder="Ingrese alguna observación"
             />
-          </Column>
-        </Row>
+          </div>
 
-        <Row>
-          <Column formGroup={true}>
+          <div className="md:col-span-2">
             <TextArea
               group={true}
               label={'Nota (Visible el los reportes):'}
               iconLeft={<i className="bi bi-card-text"></i>}
-              ref={this.refONota}
               value={this.state.nota}
               onChange={this.handleInputNota}
               placeholder="Ingrese alguna nota"
             />
-          </Column>
-        </Row>
+          </div>
+        </div>
 
-        <Row>
-          <Column formGroup={true}>
-            <Button className="btn-success" onClick={this.handleGuardar}>
-              <i className="fa fa-save"></i> Guardar
-            </Button>{' '}
-            <Button className="btn-outline-info" onClick={this.handleLimpiar}>
-              <i className="fa fa-trash"></i> Limpiar
-            </Button>{' '}
-            <Button className="btn-outline-danger" onClick={this.handleCerrar}>
-              <i className="fa fa-close"></i> Cerrar
-            </Button>
-          </Column>
-        </Row>
+        <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
+          <Button className="btn-success" onClick={this.handleGuardar}>
+            <i className="fa fa-save"></i> Guardar
+          </Button>
+          <Button className="btn-outline-info" onClick={this.handleLimpiar}>
+            <i className="fa fa-trash"></i> Limpiar
+          </Button>
+          <Button className="btn-outline-danger" onClick={this.handleCerrar}>
+            <i className="fa fa-close"></i> Cerrar
+          </Button>
+        </div>
       </ContainerWrapper>
     );
   }

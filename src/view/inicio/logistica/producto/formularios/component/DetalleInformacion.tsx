@@ -11,6 +11,8 @@ import ItemImage from "./ItemImagen";
 import { TIPO_ATRIBUTO_COLOR } from "@/model/types/tipo-atributo";
 
 interface Props {
+    tipoProceso: 'nuevo' | 'editar';
+
     idTipoProducto: string;
     handleOptionTipoProducto: (event: any) => void;
 
@@ -89,6 +91,8 @@ interface Props {
 }
 
 const DetalleInformacion = ({
+    tipoProceso,
+
     idTipoProducto,
     handleOptionTipoProducto,
 
@@ -187,6 +191,7 @@ const DetalleInformacion = ({
                             name="ckTipoProducto"
                             checked={idTipoProducto === item.value}
                             onChange={handleOptionTipoProducto}
+                            disabled={tipoProceso === 'editar'}
                         >
                             {item.label}
                         </RadioButton>

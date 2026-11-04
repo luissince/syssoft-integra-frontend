@@ -36,7 +36,7 @@ import { ModalSendWhatsApp } from '../../../../../components/MultiModal';
 
 /**
  * Componente que representa una funcionalidad específica.
- * @extends React.Component
+ * @extends CustomComponent
  */
 class CobroDetalle extends CustomComponent {
   /**
@@ -62,12 +62,7 @@ class CobroDetalle extends CustomComponent {
 
       detalles: [],
       transaccion: [],
-
-      isOpenSendWhatsapp: false,
     };
-
-    // Referencia para el modal enviar WhatsApp
-    this.refModalSendWhatsApp = React.createRef();
 
     // Anular las peticiones
     this.abortControllerView = new AbortController();
@@ -199,62 +194,6 @@ class CobroDetalle extends CustomComponent {
     });
   };
 
-  //------------------------------------------------------------------------------------------
-  // Modal de enviar WhatsApp
-  //------------------------------------------------------------------------------------------
-
-  handleOpenSendWhatsapp = () => {
-    this.setState({ isOpenSendWhatsapp: true });
-  };
-
-  handleProcessSendWhatsapp = async (
-    phone,
-    callback = async function () {},
-  ) => {
-    const { razonSocial, paginaWeb } = this.props.predeterminado.empresa;
-    const { email } = this.props.token.project;
-
-    const companyInfo = {
-      name: razonSocial,
-      website: paginaWeb,
-      email: email,
-    };
-
-    const documentUrl = documentsPdfInvoicesCobro(this.state.idCobro, 'A4');
-
-    // Crear mensaje con formato
-    const message = `
-    Hola! Somos *${companyInfo.name}*
-    
-    Le enviamos su comprobante de ingreso:
-    ${documentUrl}
-    
-    Para cualquier consulta, puede contactarnos:
-    ${companyInfo.website}
-    ${companyInfo.email}
-
-    o escribiendo a nuestro whatsapp
-    
-    Gracias por su preferencia! :D`.trim();
-
-    // Limpiar y formatear el número de teléfono
-    const cleanPhone = phone.replace(/\D/g, '');
-
-    // Crear la URL de WhatsApp
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-      message,
-    )}`;
-
-    await callback();
-
-    // Abrir en una nueva ventana
-    window.open(whatsappUrl, '_blank');
-  };
-
-  handleCloseSendWhatsapp = () => {
-    this.setState({ isOpenSendWhatsapp: false });
-  };
-
   /*
   |--------------------------------------------------------------------------
   | Método de renderización
@@ -370,14 +309,6 @@ class CobroDetalle extends CustomComponent {
           handleGoBack={() => this.props.history.goBack()}
         />
 
-        <ModalSendWhatsApp
-          refModal={this.refModalSendWhatsApp}
-          isOpen={this.state.isOpenSendWhatsapp}
-          phone={this.state.celular}
-          handleClose={this.handleCloseSendWhatsapp}
-          handleProcess={this.handleProcessSendWhatsapp}
-        />
-
         <Row>
           <Column formGroup={true}>
             <Button
@@ -398,9 +329,6 @@ class CobroDetalle extends CustomComponent {
             >
               <i className="fa fa-print"></i> 58MM
             </Button>{' '}
-            <Button className="btn-light" onClick={this.handleOpenSendWhatsapp}>
-              <i className="fa fa-whatsapp"></i> Whatsapp
-            </Button>
           </Column>
         </Row>
 

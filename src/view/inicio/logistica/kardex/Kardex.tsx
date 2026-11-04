@@ -237,8 +237,7 @@ class Kardex extends CustomComponent<Props, State> {
   async loadDataKardex(idProducto) {
     const params = {
       idProducto: idProducto,
-      idAlmacen: this.state.idAlmacen,
-      idSucursal: this.state.idSucursal,
+      idAlmacen: this.state.idAlmacen
     };
 
     this.setState({

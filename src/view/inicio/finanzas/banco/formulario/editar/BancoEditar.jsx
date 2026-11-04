@@ -25,10 +25,6 @@ import { alertKit } from 'alert-kit';
  */
 class BancoEditar extends CustomComponent {
 
-  /**
-   * Inicializa un nuevo componente.
-   * @param {Object} props - Las propiedades pasadas al componente.
-   */
   constructor(props) {
     super(props);
     this.state = {

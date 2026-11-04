@@ -7,7 +7,7 @@ import CustomModal, {
 import PrinterPlugin, { BluetoothDevice, Size, UsbDevice } from "@/model/ts/plugins/printer-escpos";
 import { documentsPdfInvoicesVenta } from "@/network/rest/principal.network";
 import { alertKit } from "alert-kit";
-import { addJob, printAsync } from "@/redux/printerSlice";
+import { addJob, printAsync } from "@/redux/printer.slice";
 import { useDispatch } from "react-redux";
 
 interface Props {

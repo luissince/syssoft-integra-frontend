@@ -4,7 +4,7 @@ import SuccessResponse from '@/model/class/response';
 import AlmacenInterface from '@/model/ts/interface/AlmacenInterface';
 import SucursalInterface from '@/model/ts/interface/sucursal.interface';
 import DashboardInterface from '@/model/ts/interface/dashboard.interface';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import WebInterface from '@/model/ts/interface/web.interface';
 import { DniInterface, RucInterface } from '@/model/ts/interface/dniruc.interface';
 import PlazoInterface from '@/model/ts/interface/plazo.interface';
@@ -28,6 +28,51 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE PROGRESO DE DESCARGA
+|--------------------------------------------------------------------------
+*/
+
+export async function downloadProgress(
+  request: AxiosRequestConfig,
+  signal: AbortSignal,
+  onProgress?: (progress: {
+    progress?: number;
+    received: number;
+    total: number;
+  }) => void
+) {
+
+  const response = await apiClient.request({
+    ...request,
+
+    signal,
+    responseType: 'blob',
+
+    onDownloadProgress: (event) => {
+      const total = event.total ?? 0;
+
+      onProgress?.({
+        progress: total
+          ? Math.round((event.loaded / total) * 100)
+          : undefined,
+        received: event.loaded,
+        total,
+      });
+    },
+  });
+
+  return response;
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
 export async function dashboardInit(params: Record<string, any>, signal: AbortSignal): Promise<SuccessResponse | ErrorResponse> {
   return await Resolve.create<DashboardInterface>(
     apiClient.get('/api/dashboard/init', {
@@ -37,6 +82,12 @@ export async function dashboardInit(params: Record<string, any>, signal: AbortSi
   );
 }
 
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE SUCURSAL
+|--------------------------------------------------------------------------
+*/
+
 export async function comboSucursal(signal: AbortSignal): Promise<ResolveResponse<SucursalInterface[]>> {
   return await Resolve.safe<SucursalInterface[]>(
     apiClient.get('/api/sucursal/combo', {
@@ -44,6 +95,12 @@ export async function comboSucursal(signal: AbortSignal): Promise<ResolveRespons
     }),
   );
 }
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE ALMACEN
+|--------------------------------------------------------------------------
+*/
 
 export async function comboAlmacen(params, signal: AbortSignal): Promise<ResolveResponse<AlmacenInterface[]>> {
   return await Resolve.safe(
@@ -53,6 +110,12 @@ export async function comboAlmacen(params, signal: AbortSignal): Promise<Resolve
     }),
   );
 }
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE WEB
+|--------------------------------------------------------------------------
+*/
 
 export async function processWeb(body, signal: AbortSignal): Promise<ResolveResponse<string>> {
   return await Resolve.safe(
@@ -70,6 +133,11 @@ export async function getIdWeb(signal: AbortSignal): Promise<ResolveResponse<Web
   );
 }
 
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE DNI/RUC
+|--------------------------------------------------------------------------
+*/
 export async function getDni(documento: string, signal: AbortSignal = null): Promise<ResolveResponse<DniInterface>> {
   return await Resolve.safe(
     apiClient.get(`/api/dniruc/dni/${documento}`, {
@@ -86,10 +154,37 @@ export async function getRuc(documento: string, signal: AbortSignal = null): Pro
   );
 }
 
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE PLAZO
+|--------------------------------------------------------------------------
+*/
 export async function comboPlazo(signal: AbortSignal): Promise<ResolveResponse<PlazoInterface[]>> {
   return await Resolve.safe<PlazoInterface[]>(
     apiClient.get("/api/plazo/combo", {
       signal: signal,
+    }),
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| ENDPOINTS DE WHATSAPP
+|--------------------------------------------------------------------------
+*/
+
+export async function sendTextWhatsapp(body: { to: string, message: string }, signal = null): Promise<ResolveResponse<string>> {
+  return await Resolve.safe(
+    apiClient.post("/api/ycloud/text", body, {
+      signal
+    }),
+  );
+}
+
+export async function sendDocumentWhatsapp(body: { to: string, url: string, filename: string, caption: string }, signal = null): Promise<ResolveResponse<string>> {
+  return await Resolve.safe(
+    apiClient.post("/api/ycloud/document", body, {
+      signal
     }),
   );
 }

@@ -248,17 +248,9 @@ export function documentsExcelPersonaProveedor() {
 |--------------------------------------------------------------------------
 */
 export async function listInventario(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/inventario/list', {
       params: params,
-      signal: signal,
-    }),
-  );
-}
-
-export async function summaryInventario(idAlmacen, signal) {
-  return await Resolve.create(
-    instancePrincipal.get(`/api/inventario/summary/${idAlmacen}`, {
       signal: signal,
     }),
   );
@@ -624,9 +616,10 @@ export function documentsPdfAccountReceivableVenta(idVenta, size) {
     }/api/factura/pdf/account-receivable/${idVenta}/${size}`;
 }
 
-export function documentsPdfReportsVenta() {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/pdf/list`;
+export function documentsPdfReportsVenta(size, params = {}) {
+  const query = new URLSearchParams(params).toString();
+
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/pdf/list/${size}?${query}`;
 }
 
 export function documentsExcelVenta() {
@@ -1137,7 +1130,7 @@ export async function listGuiaRemision(params, signal) {
 }
 
 export async function detailGuiaRemision(params, signal) {
-  return await Resolve.create(
+  return await Resolve.safe(
     instancePrincipal.get('/api/guiaremision/detail', {
       params: params,
       signal: signal,
@@ -1336,9 +1329,9 @@ export function documentsPdfInvoicesOrdenCompra(idOrdenCompra, size) {
     }/api/ordencompra/documents/pdf/invoices/${idOrdenCompra}/${size}`;
 }
 
-export function documentsPdfListsOrdenCompra(idOrdenCompra) {
+export function documentsPdfListsOrdenCompra(idOrdenCompra, size) {
   return `${import.meta.env.VITE_APP_BACK_END
-    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}`;
+    }/api/ordencompra/documents/pdf/lists/${idOrdenCompra}/${size}`;
 }
 // ------------------------------------------------------------------------
 // FIN PARA ORDEN DE COMPRA
@@ -1566,23 +1559,15 @@ export async function removeConcepto(params, signal = null) {
   );
 }
 
-export async function filtrarCobroConcepto(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/concepto/filtrar/cobro', {
+export async function filtrarConcepto(params, signal = null) {
+  return await Resolve.safe(
+    instancePrincipal.get('/api/concepto/filtrar', {
       params: params,
       signal: signal,
     }),
   );
 }
 
-export async function filtrarGastoConcepto(params, signal = null) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/concepto/filtrar/gasto', {
-      params: params,
-      signal: signal,
-    }),
-  );
-}
 // ------------------------------------------------------------------------
 // FIN PARA CONCEPTO
 // ------------------------------------------------------------------------
@@ -2512,7 +2497,10 @@ export async function enviarEmail(idComprobante, tipo) {
 }
 
 export function obtenerXmlSunat(idComprobante) {
-  return `${import.meta.env.VITE_APP_BACK_END}/api/sunat/xml/${idComprobante}`;
+  return {
+    method: 'GET',
+    url: `/api/sunat/xml/${idComprobante}`,
+  }
 }
 
 export async function dashboardSunat(params, signal) {
