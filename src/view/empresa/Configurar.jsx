@@ -4,7 +4,6 @@ import {
   imageBase64,
   keyNumberInteger,
   keyNumberPhone,
-  spinnerLoading,
   isText,
 } from '../../helper/utils.helper';
 import PropTypes from 'prop-types';
@@ -19,6 +18,7 @@ import CustomComponent from '@/components/CustomComponent';
 import { configSave } from '../../redux/principalSlice';
 import Button from '../../components/Button';
 import { alertKit } from 'alert-kit';
+import { SpinnerLoading } from '@/components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -236,7 +236,7 @@ class Configurar extends CustomComponent {
           </div>
         )}
 
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        {this.state.loading && SpinnerLoading(this.state.msgLoading)}
 
         <div className="py-5 text-center">
           <h3>Configuración Básica</h3>

@@ -2,17 +2,31 @@ import Button from '../../../../../../../components/Button';
 import { images } from '../../../../../../../helper';
 import PropTypes from 'prop-types';
 
+interface ButtonsOpcionesProps {
+  handleOpenProductos: () => void;
+  handleOpenPrecios: () => void;
+  handleOpenCantidad: () => void;
+  handleOpenDatos: () => void;
+  handleOpenPresentacion: () => void;
+  handleClearSale: () => void;
+  handleOpenPedido: () => void;
+  handleOpenVenta: () => void;
+  handleOpenCotizacion: () => void;
+  handleOpenOptions: () => void;
+}
+
 const ButtonsOpciones = ({
   handleOpenProductos,
   handleOpenPrecios,
   handleOpenCantidad,
   handleOpenDatos,
+  handleOpenPresentacion,
   handleClearSale,
   handleOpenPedido,
   handleOpenVenta,
   handleOpenCotizacion,
   handleOpenOptions,
-}) => {
+}: ButtonsOpcionesProps) => {
   return (
     <div className="w-100 btn-group btn-group-toggle overflow-auto">
       <Button className="btn-light" onClick={handleOpenProductos}>
@@ -40,6 +54,13 @@ const ButtonsOpciones = ({
         <div className='flex flex-col items-center gap-2'>
           <img className="mb-2" src={images.view} width={22} />
           <p className="p-0 m-0">Datos(F5)</p>
+        </div>
+      </Button>
+
+      <Button className="btn-light" onClick={handleOpenPresentacion}>
+        <div className='flex flex-col items-center gap-2'>
+          <img className="mb-2" src={images.moneda} width={22} />
+          <p className="p-0 m-0">Presentación(F6)</p>
         </div>
       </Button>
 
@@ -115,19 +136,6 @@ const ButtonsOpciones = ({
       </Button>
     </div>
   );
-};
-
-ButtonsOpciones.propTypes = {
-  handleOpenProductos: PropTypes.func,
-  handleOpenPrecios: PropTypes.func,
-  handleOpenCantidad: PropTypes.func,
-  handleOpenDatos: PropTypes.func,
-  handleOpenImpresion: PropTypes.func,
-  handleClearSale: PropTypes.func,
-  handleOpenPedido: PropTypes.func,
-  handleOpenVenta: PropTypes.func,
-  handleOpenCotizacion: PropTypes.func,
-  handleOpenOptions: PropTypes.func,
 };
 
 export default ButtonsOpciones;

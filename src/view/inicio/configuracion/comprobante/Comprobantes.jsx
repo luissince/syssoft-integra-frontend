@@ -1,8 +1,4 @@
 import {
-  alertDialog,
-  alertInfo,
-  alertSuccess,
-  alertWarning,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -31,6 +27,7 @@ import {
 import { SpinnerTable } from '../../../../components/Spinner';
 import Search from '../../../../components/Search';
 import Button from '../../../../components/Button';
+import { alertKit } from 'alert-kit';
 
 class Comprobantes extends CustomComponent {
   constructor(props) {
@@ -166,34 +163,45 @@ class Comprobantes extends CustomComponent {
     });
   };
 
-  handleBorrar(idComprobante) {
-    alertDialog(
-      'Comprobante',
-      '¿Estás seguro de eliminar el comprobante?',
-      async (accept) => {
-        if (accept) {
-          const params = {
-            idComprobante: idComprobante,
-          };
-
-          alertInfo('Comprobante', 'Procesando información...');
-
-          const response = await deleteComprobante(params);
-
-          if (response instanceof SuccessReponse) {
-            alertSuccess('Comprobante', response.data, () => {
-              this.loadInit();
-            });
-          }
-
-          if (response instanceof ErrorResponse) {
-            if (response.getType() === CANCELED) return;
-
-            alertWarning('Comprobante', response.getMessage());
-          }
-        }
+  handleBorrar = async (idComprobante) => {
+    const accept = await alertKit.question({
+      title: 'Comprobante',
+      message: '¿Estás seguro de eliminar el comprobante?',
+      acceptButton: {
+        html: "<i class='fa fa-check'></i> Aceptar",
       },
-    );
+      cancelButton: {
+        html: "<i class='fa fa-close'></i> Cancelar",
+      },
+    });
+
+    if (accept) {
+      const params = {
+        idComprobante: idComprobante,
+      };
+
+      alertKit.loading({message: 'Procesando información...'});
+
+      const response = await deleteComprobante(params);
+
+      if (response instanceof SuccessReponse) {       
+        alertKit.success({
+          title: 'Comprobante',
+          message: response.data,
+        },()=>{
+          this.loadInit();
+        });
+      }
+
+      if (response instanceof ErrorResponse) {
+        if (response.getType() === CANCELED) return;
+
+        alertKit.warning({
+          title: 'Comprobante',
+          message: response.getMessage(),
+        });      
+      }
+    }
   }
 
   generateBody() {
@@ -226,18 +234,16 @@ class Comprobantes extends CustomComponent {
           <TableCell>{item.numeracion}</TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.preferida === 1 ? 'badge-info' : 'badge-danger'
-              }`}
+              className={`badge ${item.preferida === 1 ? 'badge-info' : 'badge-danger'
+                }`}
             >
               {item.preferida === 1 ? 'Si' : 'No'}
             </div>
           </TableCell>
           <TableCell className="text-center">
             <div
-              className={`badge ${
-                item.estado === 1 ? 'badge-success' : 'badge-danger'
-              }`}
+              className={`badge ${item.estado === 1 ? 'badge-success' : 'badge-danger'
+                }`}
             >
               {item.estado === 1 ? 'ACTIVO' : 'INACTIVO'}
             </div>
@@ -246,7 +252,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-warning btn-sm"
               onClick={() => this.handleEditar(item.idComprobante)}
-              // disabled={!this.state.edit}
+            // disabled={!this.state.edit}
             >
               <i className="bi bi-pencil"></i>
             </Button>
@@ -255,7 +261,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-danger btn-sm"
               onClick={() => this.handleBorrar(item.idComprobante)}
-              // disabled={!this.state.remove}
+            // disabled={!this.state.remove}
             >
               <i className="bi bi-trash"></i>
             </Button>
@@ -279,7 +285,7 @@ class Comprobantes extends CustomComponent {
             <Button
               className="btn-outline-info"
               onClick={this.handleAgregar}
-              // disabled={!this.state.add}
+            // disabled={!this.state.add}
             >
               <i className="bi bi-file-plus"></i> Nuevo Registro
             </Button>{' '}

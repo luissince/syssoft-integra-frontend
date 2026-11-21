@@ -237,14 +237,14 @@ class ModalProductos extends CustomComponent {
   };
 
   handleOnClickTable = async (event) => {
-    const { rowIndex, children } = getRowCellIndex(event);
+    const row = getRowCellIndex(event);
 
-    if (rowIndex === -1) return;
+    if (!row) return;
 
-    const item = this.state.lista[rowIndex];
+    const item = this.state.lista[row.rowIndex];
     if (item) {
-      this.index = rowIndex;
-      this.updateSelection(children);
+      this.index = row.rowIndex;
+      this.updateSelection(row.children);
       this.props.handleSeleccionar(item);
       this.refInputBuscar.current.focus();
       this.refInputBuscar.current.select();

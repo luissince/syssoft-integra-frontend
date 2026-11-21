@@ -19,7 +19,6 @@ import {
   comboComprobante,
   comboMoneda,
   filtrarPersona,
-  obtenerListaPrecioProducto,
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
@@ -83,6 +82,7 @@ import ModalPedido from '../common/ModalPedido';
 import { JURIDICA } from '@/model/types/tipo-entidad';
 import pdfVisualizer from 'pdf-visualizer';
 import { alertKit } from 'alert-kit';
+import ModalPresentacion from './component/ModalPresentacion';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -146,6 +146,9 @@ class VentaCrearEscritorio extends CustomComponent {
 
       // Atributos del modal datos
       isOpenDatos: false,
+
+      // Atributos del modal presentación
+      isOpenPresentacion: false,
 
       // Atributos del modal configuración
       idImpuesto: '',
@@ -213,6 +216,9 @@ class VentaCrearEscritorio extends CustomComponent {
 
     // Referencia al modal agregar
     this.refModalDatos = React.createRef();
+
+    // Referencia al modal presentación
+    this.refModalPresentacion = React.createRef();
 
     // Atributos para el modal configuración
     this.idSidebarConfiguration = 'idSidebarConfiguration';
@@ -473,27 +479,6 @@ class VentaCrearEscritorio extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       return response.data.result;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchObtenerListaPrecio(id) {
-    const params = {
-      idProducto: id,
-    };
-
-    const response = await obtenerListaPrecioProducto(
-      params,
-      this.abortControllerView.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
     }
 
     if (response instanceof ErrorResponse) {
@@ -1475,6 +1460,42 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   //------------------------------------------------------------------------------------------
+  // Acciones del modal presentación
+  //------------------------------------------------------------------------------------------
+  handleOpenPresentacion = () => {
+    const item = this.state.detalleVenta[this.index];
+    if (item) {
+      this.setState({ isOpenPresentacion: true });
+      this.refModalPresentacion.current.loadDatos(item);
+    }
+  }
+
+  handleClosePresentacion = () => {
+    this.setState({ isOpenPresentacion: false }, () => {
+      this.updateReduxState();
+    });
+  }
+
+  handleSavePresentacion = (producto, presentacion) => {
+    const detalles = structuredClone(this.state.detalleVenta);
+
+    for (const item of detalles) {
+      if (item.idProducto === producto.idProducto) {
+        for (const inventario of item.inventarios) {
+          const inventarioProducto = producto.inventarios.find(
+            (inv) => inv.idInventario === inventario.idInventario
+          );
+          if (inventarioProducto) {
+            inventario.cantidad = presentacion.cantidad * presentacion.factor;
+          }
+        }
+      }
+    }
+
+    this.setState({ detalleVenta: detalles }, () => this.calculateTotal());
+  };
+
+  //------------------------------------------------------------------------------------------
   // Modal de cotización
   //------------------------------------------------------------------------------------------
 
@@ -2162,31 +2183,31 @@ class VentaCrearEscritorio extends CustomComponent {
   };
 
   handleOnClick = async (event) => {
-    const { rowIndex, children } = getRowCellIndex(event);
+    const row = getRowCellIndex(event);
 
-    if (rowIndex === -1) return;
+    if (!row) return;
 
-    this.index = rowIndex;
-    this.updateSelection(children);
+    this.index = row.rowIndex;
+    this.updateSelection(row.children);
   };
 
   handleOnDbClick = async (event) => {
-    const { rowIndex, cellIndex, children } = getRowCellIndex(event);
+    const row = getRowCellIndex(event);
 
-    if (rowIndex === -1) return;
+    if (!row) return;
 
-    this.index = rowIndex;
-    this.updateSelection(children);
+    this.index = row.rowIndex;
+    this.updateSelection(row.children);
 
-    if (cellIndex === 3) {
+    if (row.cellIndex === 3) {
       this.handleOpenCantidad();
     }
 
-    if (cellIndex === 4) {
+    if (row.cellIndex === 4) {
       this.handleOpenDatos();
     }
 
-    if (cellIndex === 5) {
+    if (row.cellIndex === 5) {
       this.handleOpenPrecios();
     }
   };
@@ -2422,12 +2443,20 @@ class VentaCrearEscritorio extends CustomComponent {
           handleSave={this.handleSaveDatos}
         />
 
+        <ModalPresentacion
+          ref={this.refModalPresentacion}
+          isOpen={this.state.isOpenPresentacion}
+          onClose={this.handleClosePresentacion}
+          handleSave={this.handleSavePresentacion}
+        />
+
         {/* Crear botone */}
         <ButtonsOpciones
           handleOpenProductos={this.handleOpenProductos}
           handleOpenPrecios={this.handleOpenPrecios}
           handleOpenCantidad={this.handleOpenCantidad}
           handleOpenDatos={this.handleOpenDatos}
+          handleOpenPresentacion={this.handleOpenPresentacion}
           handleClearSale={this.handleClearSale}
           handleOpenPedido={this.handleOpenPedido}
           handleOpenVenta={this.handleOpenVenta}
@@ -2436,15 +2465,11 @@ class VentaCrearEscritorio extends CustomComponent {
         />
 
         {/* Cuerpo princiapl */}
-        <div className="bg-white w-100 h-100 d-flex flex-column overflow-auto">
-          <div className="d-flex w-100 h-100 p-3">
+        <div className="bg-white w-full h-full flex flex-col overflow-auto">
+          <div className="flex w-full h-full p-3">
             {/* Lado izquierdo */}
             <div
-              className="w-100 d-flex flex-column position-relative mr-1 overflow-auto"
-              style={{
-                flex: '1 1 100%',
-                border: '1px solid #cbd5e1',
-              }}
+              className="flex-[1_1_100%] w-full flex flex-col relative mr-1 overflow-auto border border-solid border-[#cbd5e1]"
             >
               <div className="mb-3 pl-3 pt-3 pr-3 pb-0">
                 <div className="flex gap-2">
@@ -2467,9 +2492,9 @@ class VentaCrearEscritorio extends CustomComponent {
               </div>
 
               {isEmpty(this.state.detalleVenta) && (
-                <div className="h-100 pl-3 pr-3 pb-3">
+                <div className="h-full pl-3 pr-3 pb-3">
                   <div
-                    className="h-100 d-flex flex-column align-items-center justify-content-center text-center"
+                    className="h-full flex flex-col items-center justify-center text-center"
                     style={{
                       border: '1px solid #cbd5e1',
                     }}
@@ -2488,7 +2513,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
               {!isEmpty(this.state.detalleVenta) && (
                 <div
-                  className="h-100 overflow-auto pt-0 pr-3 pb-3 pl-3"
+                  className="h-full overflow-auto pt-0 pr-3 pb-3 pl-3"
                   onKeyDown={this.handleKeyDownTable}
                 >
                   <Table
@@ -2496,7 +2521,7 @@ class VentaCrearEscritorio extends CustomComponent {
                     tabIndex="0"
                     onClick={this.handleOnClick}
                     onDoubleClick={this.handleOnDbClick}
-                    className={'table table-bordered table-hover table-sticky'}
+                    className="table table-bordered table-hover table-sticky"
                   >
                     <TableHeader>
                       <TableRow>
@@ -2524,13 +2549,7 @@ class VentaCrearEscritorio extends CustomComponent {
 
             {/* Lado derecho */}
             <div
-              className="d-flex flex-column position-relative ml-1 overflow-auto"
-              style={{
-                flex: '0 0 40%',
-                width: '450px',
-                maxWidth: '450px',
-                border: '1px solid #cbd5e1',
-              }}
+              className="flex-[0_0_40%] max-w-[450px] border border-solid border-[#cbd5e1] flex flex-col relative ml-1 overflow-auto"
             >
               <SpinnerView
                 loading={this.state.loadingCliente}
@@ -2553,13 +2572,15 @@ class VentaCrearEscritorio extends CustomComponent {
               <div>
                 <Button
                   className={
-                    'btn-primary btn-lg w-100 d-flex align-items-center justify-content-between py-3 !rounded-none'
+                    'btn-primary btn-lg w-full !rounded-none'
                   }
                   onClick={this.handleOpenSale}
                 >
-                  <div>Cobrar (F1)</div>
-                  <div>
-                    {formatCurrency(this.state.importeTotal, this.state.codiso)}
+                  <div className="flex items-center justify-between py-3">
+                    <p className="text-lg">Cobrar (F1)</p>
+                    <p className="text-lg">
+                      {formatCurrency(this.state.importeTotal, this.state.codiso)}
+                    </p>
                   </div>
                 </Button>
               </div>
@@ -2729,10 +2750,10 @@ class VentaCrearEscritorio extends CustomComponent {
 
         {/* Crear mas instancias */}
         <div
-          className="bg-white w-100 d-flex position-relative"
+          className="bg-white w-full flex relative"
           style={{ borderTop: '1px solid #cbd5e1', flex: '1 1 3.5rem' }}
         >
-          <div className="px-3 d-flex justify-content-center align-items-center">
+          <div className="px-3 flex items-center justify-center">
             {this.state.cotizacion && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center">

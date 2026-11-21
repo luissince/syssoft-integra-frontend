@@ -22,7 +22,6 @@ import {
   comboSucursal,
   getPdfGuiaRemision,
   documentsPdfInvoicesVenta,
-  enviarEmail,
   facturarCpeSunat,
   guiaRemisionCpeSunat,
   listCpeSunat,
@@ -44,14 +43,14 @@ import {
   setListaCpeSunatPaginacion,
 } from '../../../../redux/predeterminadoSlice';
 import pdfVisualizer from 'pdf-visualizer';
-import { downloadFileAsync } from '../../../../redux/downloadSlice';
-import { toastKit, ToastStyle } from 'toast-kit';
+import { downloadFileAsync } from '@/redux/downloadSlice';
 import { Link } from 'react-router-dom';
 import DropdownActions from '../../../../components/DropdownActions';
 import { alertKit } from 'alert-kit';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { DatePicker } from '@/components/DatePicker';
+import { emailAsync } from '@/redux/email.slice';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -643,35 +642,133 @@ class CpeElectronicos extends CustomComponent {
     });
   };
 
-  handleSendEmail = async (idComprobante, tipo) => {
-    toastKit.info({
-      title: 'Enviando...',
-      message: 'Por favor espere...',
-      duration: 5000,
-      style: ToastStyle.light,
+  handleSendEmail = async (comprobante) => {
+
+    const { documento } = this.props.empresa;
+
+    if (isEmpty(comprobante.email)) {
+      alertKit.warning({
+        title: "Cpe Sunat",
+        message: "El email del cliente esta vació, debes agregar en contactos."
+      });
+      return;
+    }
+
+
+    const html = `
+<div style="margin:0;padding:24px 12px;background-color:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#334155;">
+  <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+
+    <div style="padding:25px 30px;background-color:#1e293b;color:#ffffff;">
+      <h2 style="margin:0;font-size:21px;font-weight:600;">
+        Comprobante Electrónico
+      </h2>
+      <p style="margin:8px 0 0;font-size:12px;color:#cbd5e1;">
+        DOCUMENTO ELECTRÓNICO
+      </p>
+    </div>
+
+    <div style="padding:30px;">
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">
+        Estimado cliente <strong>${comprobante.informacion}</strong>,
+      </p>
+
+      <p style="margin:0 0 25px;font-size:14px;line-height:1.7;color:#64748b;">
+        Le hacemos llegar la información de su comprobante electrónico.
+        A continuación, encontrará los datos correspondientes:
+      </p>
+
+      <div style="padding:22px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+
+        <p style="margin:0 0 8px;font-size:11px;font-weight:bold;color:#64748b;letter-spacing:1px;">
+          DETALLE DEL COMPROBANTE
+        </p>
+
+        <h2 style="margin:0 0 20px;font-size:24px;color:#0f172a;">
+          ${comprobante.serie} - ${comprobante.numeracion}
+        </h2>
+
+        <div style="border-top:1px solid #e2e8f0;padding-top:18px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td width="50%" valign="top" style="padding:0 10px 18px 0;">
+                <p style="margin:0 0 5px;font-size:11px;color:#64748b;">RUC DEL EMISOR</p>
+                <p style="margin:0;font-size:14px;font-weight:bold;color:#334155;">${documento}</p>
+              </td>
+              <td width="50%" valign="top" style="padding:0 0 18px 10px;">
+                <p style="margin:0 0 5px;font-size:11px;color:#64748b;">TIPO DE COMPROBANTE</p>
+                <p style="margin:0;font-size:14px;font-weight:bold;color:#334155;">${comprobante.comprobante}</p>
+              </td>
+            </tr>
+            <tr>
+              <td width="50%" valign="top" style="padding:0 10px 0 0;">
+                <p style="margin:0 0 5px;font-size:11px;color:#64748b;">RUC / DNI DEL CLIENTE</p>
+                <p style="margin:0;font-size:14px;font-weight:bold;color:#334155;">${comprobante.documento}</p>
+              </td>
+              <td width="50%" valign="top" style="padding:0 0 0 10px;">
+                <p style="margin:0 0 5px;font-size:11px;color:#64748b;">FECHA DE EMISIÓN</p>
+                <p style="margin:0;font-size:14px;font-weight:bold;color:#334155;">${comprobante.fecha}</p>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <p style="margin:25px 0;font-size:14px;line-height:1.7;color:#64748b;">
+        Los archivos PDF y XML del comprobante se encuentran adjuntos a este correo.
+      </p>
+
+      <p style="margin:0;font-size:14px;line-height:1.7;">
+        Saludos cordiales,<br/>
+        <strong>Equipo de Administración</strong>
+      </p>
+    </div>
+
+    <div style="padding:18px 30px;background-color:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+      <p style="margin:0;font-size:11px;color:#94a3b8;">
+        Correo electrónico automático · Comprobante Electrónico
+      </p>
+    </div>
+
+  </div>
+</div>
+`;
+
+    const payload = {
+      to: {
+        address: comprobante.email,
+        name: comprobante.informacion
+      },
+      subject: "Comprobante Electrónico",
+      html: html,
+      attachments: [
+        {
+          filename: comprobante.tipo === 'fac'
+            ? `VENTA ${comprobante.serie}-${comprobante.numeracion} - ${comprobante.informacion}.pdf`
+            : `GUIA DE REMISIÓN ${comprobante.serie}-${comprobante.numeracion} - ${comprobante.informacion}.pdf`,
+          href: comprobante.tipo === 'fac'
+            ? documentsPdfInvoicesVenta(comprobante.idComprobante, 'A4')
+            : getPdfGuiaRemision(comprobante.idComprobante, 'A4'),
+          contentType: 'application/pdf',
+        },
+        {
+          filename: comprobante.tipo === 'fac'
+            ? `VENTA ${comprobante.serie}-${comprobante.numeracion} - ${comprobante.informacion}.xml`
+            : `GUIA DE REMISIÓN ${comprobante.serie}-${comprobante.numeracion} - ${comprobante.informacion}.xml`,
+          href: obtenerXmlSunat(comprobante.idComprobante, false),
+          contentType: 'application/xml',
+        },
+      ],
+    }
+
+    const id = guId();
+
+    this.props.emailAsync({
+      id,
+      to: payload.to.address,
+      payload,
     });
-
-    const response = await enviarEmail(idComprobante, tipo);
-
-    if (response instanceof SuccessReponse) {
-      toastKit.success({
-        title: 'Excelente!',
-        message: response.data,
-        duration: 5000,
-        style: ToastStyle.light,
-      });
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      toastKit.warning({
-        title: 'Que mal!',
-        message: response.getMessage(),
-        duration: 5000,
-        style: ToastStyle.light,
-      });
-    }
   };
 
   /*
@@ -845,7 +942,7 @@ class CpeElectronicos extends CustomComponent {
                           image: images.email,
                           tooltip: 'Enviar por Email',
                           label: 'Email',
-                          onClick: () => this.handleSendEmail(item.idComprobante, item.tipo),
+                          onClick: () => this.handleSendEmail(item),
                         },
                         ...(item.tipo === 'fac' && item.anulacion !== 0
                           ? [
@@ -1157,11 +1254,13 @@ CpeElectronicos.propTypes = {
   history: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   location: PropTypes.object,
   downloadFileAsync: PropTypes.func,
+  emailAsync: PropTypes.func,
 };
 
 const mapStateToProps = (state) => {
   return {
     token: state.principal,
+    empresa: state.predeterminado.empresa,
     cpeSunatLista: state.predeterminado.cpeSunatLista,
   };
 };
@@ -1170,6 +1269,7 @@ const mapDispatchToProps = {
   setListaCpeSunatData,
   setListaCpeSunatPaginacion,
   downloadFileAsync,
+  emailAsync,
 };
 
 const ConnectedCpeElectronicos = connect(

@@ -3,7 +3,6 @@ import { CustomModalForm } from '../../../../../../../components/CustomModal';
 import Input from '../../../../../../../components/Input';
 import Row from '../../../../../../../components/Row';
 import {
-  alertWarning,
   focusOnFirstInvalidInput,
   handlePasteFloat,
   isNumeric,
@@ -12,6 +11,7 @@ import {
 import PropTypes from 'prop-types';
 import Button from '../../../../../../../components/Button';
 import Column from '../../../../../../../components/Column';
+import { alertKit } from 'alert-kit';
 
 class ModalCantidad extends Component {
   constructor(props) {
@@ -63,7 +63,10 @@ class ModalCantidad extends Component {
     const allValid = inventarios.every(isValidInventory);
 
     if (!allValid) {
-      alertWarning('Venta', 'Ingrese la cantidad de cada almacen.', () => {
+      alertKit.warning({
+        title: "Venta",
+        message: "Ingrese la cantidad de cada almacen."
+      }, () => {
         validateNumericInputs(this.refContenedor);
       });
       return;

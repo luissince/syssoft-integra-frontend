@@ -1,7 +1,6 @@
 import React from 'react';
 import axios from 'axios';
 import {
-  spinnerLoading,
   formatCurrency,
   formatTime,
   alertDialog,
@@ -15,6 +14,7 @@ import { connect } from 'react-redux';
 import Paginacion from '../../../../components/Paginacion';
 import ContainerWrapper from '../../../../components/Container';
 import CustomComponent from '@/components/CustomComponent';
+import { SpinnerLoading } from '@/components/Spinner';
 
 class NotaCredito extends CustomComponent {
   constructor(props) {
@@ -256,7 +256,7 @@ class NotaCredito extends CustomComponent {
                   {this.state.loading ? (
                     <tr>
                       <td className="text-center" colSpan="9">
-                        {spinnerLoading(
+                        {SpinnerLoading(
                           'Cargando información de la tabla...',
                           true,
                         )}

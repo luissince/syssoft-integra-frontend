@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
-import { CustomModalForm } from '../../../../../../../components/CustomModal';
+import CustomModal, { CustomModalContentBody, CustomModalContentFooter, CustomModalContentForm, CustomModalContentHeader, CustomModalForm } from '../../../../../../../components/CustomModal';
 import Input from '../../../../../../../components/Input';
-import Row from '../../../../../../../components/Row';
 import {
-  alertWarning,
   isEmpty,
 } from '../../../../../../../helper/utils.helper';
 import PropTypes from 'prop-types';
 import Button from '../../../../../../../components/Button';
-import Column from '../../../../../../../components/Column';
+import { alertKit } from 'alert-kit';
 
 class ModalDatos extends Component {
   constructor(props) {
@@ -46,13 +44,12 @@ class ModalDatos extends Component {
 
   handleOnSubmit = async () => {
     if (isEmpty(this.state.informacion)) {
-      alertWarning(
-        'Venta',
-        'Ingrese la nueva descripción del producto.',
-        () => {
-          this.refInformacion.current.focus();
-        },
-      );
+      alertKit.warning({
+        title: 'Venta',
+        message: 'Ingrese la nueva descripción del producto.',
+      }, () => {
+        this.refInformacion.current.focus();
+      });
       return;
     }
 
@@ -66,39 +63,32 @@ class ModalDatos extends Component {
     const { isOpen, onClose } = this.props;
 
     return (
-      <CustomModalForm
-        contentRef={this.refModal}
+      <CustomModal
+        ref={this.refModal}
         isOpen={isOpen}
         onOpen={this.handleOnOpen}
         onHidden={this.handleOnHidden}
         onClose={onClose}
         contentLabel="Modal Producto"
         titleHeader="Editar descripción Producto"
-        onSubmit={this.handleOnSubmit}
-        body={
-          <>
-            <Row>
-              <Column>
-                <h5>{producto && producto.nombreProducto}</h5>
-              </Column>
-            </Row>
+      >
+        <CustomModalContentForm onSubmit={this.handleOnSubmit}>
+          <CustomModalContentHeader contentRef={this.refModal}>
+            {producto && producto.nombreProducto}
+          </CustomModalContentHeader>
 
-            <Row>
-              <Column formGroup={true}>
-                <Input
-                  autoFocus={true}
-                  label={'Ingrese su nueva descripción:'}
-                  placeholder={'descripción'}
-                  ref={this.refInformacion}
-                  value={informacion}
-                  onChange={this.handleInputInformacion}
-                />
-              </Column>
-            </Row>
-          </>
-        }
-        footer={
-          <>
+          <CustomModalContentBody>
+            <Input
+              autoFocus={true}
+              ref={this.refInformacion}
+              label="Ingrese su nueva descripción:"
+              placeholder="descripción"
+              value={informacion}
+              onChange={this.handleInputInformacion}
+            />
+          </CustomModalContentBody>
+
+          <CustomModalContentFooter>
             <Button type="submit" className="btn-success">
               <i className="fa fa-save"></i> Guardar
             </Button>
@@ -108,9 +98,9 @@ class ModalDatos extends Component {
             >
               <i className="fa fa-close"></i> Cerrar
             </Button>
-          </>
-        }
-      />
+          </CustomModalContentFooter>
+        </CustomModalContentForm>
+      </CustomModal>
     );
   }
 }

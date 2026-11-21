@@ -5,6 +5,7 @@ import Input from './Input';
 import Button from './Button';
 import { cn } from '@/lib/utils';
 import { IoIosClose } from 'react-icons/io';
+import { Spinner } from './Spinner';
 
 type Props = {
   /** @type {import('tailwindcss').Config} */
@@ -29,12 +30,14 @@ type Props = {
 
   customButton?: React.ReactNode;
   theme?: 'classic' | 'modern';
+  isLoading?: boolean;
 }
 
 interface State {
   searchTerm: string;
   highlightedIndex: number;
   isDropdownActive: boolean;
+  isDebouncing: boolean;
 }
 
 /**
@@ -60,15 +63,16 @@ class SearchInput extends React.Component<Props, State> {
       searchTerm: '',
       highlightedIndex: -1,
       isDropdownActive: false,
+      isDebouncing: false,
     };
 
     this.refContentResult = React.createRef();
 
     this.debounceTime = this.props.debounceTime || 250;
-    this.debouncedSearch = this.debounce(
-      this.props.handleFilter,
-      this.debounceTime,
-    );
+    this.debouncedSearch = this.debounce(() => {
+      this.setState({ isDebouncing: false });
+      this.props.handleFilter(this.state.searchTerm);
+    }, this.debounceTime);
     this.selectItem = false;
   }
 
@@ -219,10 +223,12 @@ class SearchInput extends React.Component<Props, State> {
 
   handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = this.selectItem ? '' : event.target.value;
-    this.setState({ searchTerm: value });
+    this.setState({ searchTerm: value, isDebouncing: true });
+
     if (this.props.handleSetValue) {
       this.props.handleSetValue(value);
     }
+
     this.selectItem = false;
     this.debouncedSearch(value);
   };
@@ -268,6 +274,8 @@ class SearchInput extends React.Component<Props, State> {
 
     const { searchTerm, highlightedIndex } = this.state;
 
+    const isLoading = this.props.isLoading || this.state.isDebouncing;
+
     if (theme === 'classic') {
 
       return (
@@ -297,9 +305,15 @@ class SearchInput extends React.Component<Props, State> {
                     handleClearInput();
                     this.restart();
                   }}
-                  disabled={disabled}
+                  disabled={disabled || isLoading}
                 >
-                  {renderIconRight || <i className="fa fa-close"></i>}
+                  {isLoading ? (
+                    <span className="flex items-center px-2">
+                      <Spinner />
+                    </span>
+                  ) : (
+                    renderIconRight || <i className="fa fa-close"></i>
+                  )}
                 </Button>
               </>
             }
@@ -380,7 +394,6 @@ class SearchInput extends React.Component<Props, State> {
 
             {/* Contenedor botones */}
             <div className="absolute inset-y-0 right-0 flex h-full">
-
               {customButton && (
                 <div className="flex items-center px-2 border-l border-gray-300">
                   {customButton}
@@ -392,10 +405,16 @@ class SearchInput extends React.Component<Props, State> {
                   handleClearInput();
                   this.restart();
                 }}
-                disabled={disabled}
+                disabled={disabled || isLoading}
                 className="flex items-center justify-center px-2 h-full border-l border-gray-300 hover:bg-gray-100"
               >
-                <IoIosClose className="h-5 w-5 " />
+                {isLoading ? (
+                  <div className="flex items-center px-2 border-l border-gray-300">
+                    <Spinner />
+                  </div>
+                ) : (
+                  <IoIosClose className="h-5 w-5 " />
+                )}
               </button>
 
             </div>
