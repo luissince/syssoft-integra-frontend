@@ -66,6 +66,12 @@ interface Props {
     handleInputNombrePrecios: (event: any, id: any) => void;
     handleInputPrecioPrecios: (event: any, id: any) => void;
 
+    refPresentacion: any;
+    presentaciones: any[];
+    handleAddPresentacion: () => void;
+    handleChangePresentacion: (event: any, id: any, campo: string) => void;
+    handleRemovePresentacion: (id: any) => void;
+
     refDescripcionCorta: any;
     descripcionCorta: string;
     handleInputDescripcionCorta: (event: any) => void;
@@ -145,6 +151,12 @@ const DetalleInformacion = ({
     handleRemovePrecios,
     handleInputNombrePrecios,
     handleInputPrecioPrecios,
+
+    refPresentacion,
+    presentaciones,
+    handleAddPresentacion,
+    handleChangePresentacion,
+    handleRemovePresentacion,
 
     refDescripcionCorta,
     descripcionCorta,
@@ -520,6 +532,137 @@ const DetalleInformacion = ({
                 <div>
                     <Button className="text-success" onClick={handleAddPrecios}>
                         <i className="fa fa-plus-circle"></i> Agregar Lista de Precios
+                    </Button>
+                </div>
+            </div>
+
+            {/* Presentación */}
+            <div className="flex flex-col gap-3">
+                <h6 className="flex items-center gap-2">
+                    <span className="badge badge-primary">-</span> PRESENTACIÓN
+                </h6>
+
+                <p>
+                    Define las diferentes formas en las que puedes comprar,
+                    vender o manejar un producto. Cada presentación tiene
+                    una cantidad y un factor de conversión a la unidad base
+                    del inventario.
+                </p>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm">
+                    <strong>Ejemplos de presentaciones:</strong>
+
+                    <div className="mt-3 space-y-3">
+                        <div>
+                            <strong>1. Productos por unidades</strong>
+                            <ul className="list-disc list-inside ml-2 mt-1">
+                                <li>Caja de 12 unidades → factor 12</li>
+                                <li>Caja de 24 unidades → factor 24</li>
+                                <li>Caja de 48 unidades → factor 48</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <strong>2. Productos por peso (unidad base: gramos)</strong>
+                            <ul className="list-disc list-inside ml-2 mt-1">
+                                <li>Saco de 50 kg → factor 50,000</li>
+                                <li>Bolsa de 1 kg → factor 1,000</li>
+                                <li>Bolsa de 500 g → factor 500</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <strong>3. Productos por volumen (ml)</strong>
+                            <ul className="list-disc list-inside ml-2 mt-1">
+                                <li>Caja de 12 botellas de 1 L → 12,000</li>
+                                <li>Caja de 6 botellas de 1 L → 6,000</li>
+                                <li>Botella de 1 L → 1,000</li>
+                                <li>Botella de 500 ml → 500</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p className="text-sm text-gray-500">
+                    <strong>Importante:</strong> El factor indica cuántas
+                    unidades base contiene una presentación. La cantidad
+                    indica cuántas unidades de esa presentación se registran.
+                </p>
+
+                <div>
+                    {
+                        presentaciones.length !== 0 && (
+                            <div className="bg-white rounded border overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table ref={refPresentacion} className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">#</th>
+                                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Factor</th>
+                                                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Quitar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {
+                                                presentaciones.map((item, index) => {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td className="px-6 py-12 text-center">{item.id}</td>
+                                                            <td className="px-6 py-12 text-center">
+                                                                <Input
+                                                                    placeholder="Ingrese el nombre de la presentación..."
+                                                                    value={item.nombre}
+                                                                    onChange={(event) =>
+                                                                        handleChangePresentacion(event, item.id, "nombre")
+                                                                    }
+                                                                />
+                                                            </td>
+                                                            <td className="px-6 py-12 text-center">
+                                                                <Input
+                                                                    disabled
+                                                                    placeholder="1"
+                                                                    value={item.cantidad}
+                                                                    onChange={(event) =>
+                                                                        handleChangePresentacion(event, item.id, "cantidad")
+                                                                    }
+                                                                    onKeyDown={keyNumberFloat}
+                                                                />
+                                                            </td>
+                                                            <td className="px-6 py-12 text-center">
+                                                                <Input
+                                                                    placeholder="0"
+                                                                    value={item.factor}
+                                                                    onChange={(event) =>
+                                                                        handleChangePresentacion(event, item.id, "factor")
+                                                                    }
+                                                                    onKeyDown={keyNumberFloat}
+                                                                />
+                                                            </td>
+                                                            <td className="px-6 py-12 text-center">
+                                                                <Button
+                                                                    className="btn-danger"
+                                                                    onClick={() => handleRemovePresentacion(item.id)}
+                                                                >
+                                                                    <i className="fa fa-remove"></i>
+                                                                </Button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )
+                    }
+                </div>
+
+                <div>
+                    <Button className="text-success" onClick={handleAddPresentacion}>
+                        <i className="fa fa-plus-circle"></i> Agregar Lista de Presentación
                     </Button>
                 </div>
             </div>

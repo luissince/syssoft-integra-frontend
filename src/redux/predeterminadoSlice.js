@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
-  establecerPreferidoProducto,
+  setPreferidoProducto,
   filtrarProductoVenta,
 } from '../network/rest/principal.network';
 import SuccessReponse from '../model/class/response';
@@ -9,7 +9,7 @@ import SuccessReponse from '../model/class/response';
 export const starProduct = createAsyncThunk(
   'productos/starProduct',
   async (data) => {
-    await establecerPreferidoProducto({
+    await setPreferidoProducto({
       preferido: data.producto.preferido,
       idProducto: data.producto.idProducto,
     });

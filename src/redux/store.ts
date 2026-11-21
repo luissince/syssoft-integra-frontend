@@ -5,6 +5,7 @@ import predeterminadoReducer from './predeterminadoSlice';
 import downloadReducer from './downloadSlice';
 import printerReducer from './printer.slice';
 import whatsappReducer from './whatsapp.slice';
+import emailReducer from './email.slice';
 import { combineReducers } from '@reduxjs/toolkit';
 
 const reducer = combineReducers({
@@ -14,6 +15,7 @@ const reducer = combineReducers({
   download: downloadReducer,
   printer: printerReducer,
   whatsapp: whatsappReducer,
+  email: emailReducer,
 });
 
 const store = configureStore({

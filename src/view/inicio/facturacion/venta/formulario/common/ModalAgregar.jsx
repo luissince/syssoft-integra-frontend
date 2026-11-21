@@ -24,6 +24,8 @@ class ModalAgregar extends Component {
       producto: null,
     };
 
+    this.initial = {...this.state};
+
     this.refModal = React.createRef();
     this.refCantidad = React.createRef();
   }
@@ -39,12 +41,7 @@ class ModalAgregar extends Component {
   handleOpenModal = () => { };
 
   handleOnHiddenModal = async () => {
-    this.setState({
-      titulo: '',
-      subTitulo: '',
-      cantidad: '',
-      producto: null,
-    });
+    this.setState(this.initial);
   };
 
   handleInputCantidad = (event) => {

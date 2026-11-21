@@ -346,18 +346,25 @@ export async function filtrarAlmacenProducto(params) {
   );
 }
 
-export async function obtenerListaPrecioProducto(params, signal) {
-  return await Resolve.create(
-    instancePrincipal.get('/api/producto/lista/precios', {
-      params: params,
+export async function getListPrecioProducto(idProducto, signal = null) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/producto/list/precios/${idProducto}`, {
       signal: signal,
     }),
   );
 }
 
-export async function establecerPreferidoProducto(data) {
+export async function getListPresentacionProducto(idProducto, signal = null) {
+  return await Resolve.safe(
+    instancePrincipal.get(`/api/producto/list/presentaciones/${idProducto}`, {
+      signal: signal,
+    }),
+  );
+}
+
+export async function setPreferidoProducto(data) {
   return await Resolve.create(
-    instancePrincipal.put('/api/producto/establecer/preferido', data),
+    instancePrincipal.put('/api/producto/set/preferido', data),
   );
 }
 
@@ -605,15 +612,12 @@ export async function getDetailsShippingGuideVenta(idVenta, signal) {
   );
 }
 
-
 export function documentsPdfInvoicesVenta(idVenta, size, outputType = "pdf") {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/pdf/document/${idVenta}/${size}/${outputType}`;
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/pdf/document/${idVenta}/${size}/${outputType}`;
 }
 
 export function documentsPdfAccountReceivableVenta(idVenta, size) {
-  return `${import.meta.env.VITE_APP_BACK_END
-    }/api/factura/pdf/account-receivable/${idVenta}/${size}`;
+  return `${import.meta.env.VITE_APP_BACK_END}/api/factura/pdf/account-receivable/${idVenta}/${size}`;
 }
 
 export function documentsPdfReportsVenta(size, params = {}) {
@@ -2490,17 +2494,23 @@ export async function cdrCpeSunat(
   );
 }
 
-export async function enviarEmail(idComprobante, tipo) {
-  return await Resolve.create(
-    instancePrincipal.get(`/api/sunat/email/${idComprobante}/${tipo}`),
+export async function enviarEmailSunat(body) {
+  return await Resolve.safe(
+    instancePrincipal.post(`/api/sunat/email`, body),
   );
 }
 
-export function obtenerXmlSunat(idComprobante) {
+export function obtenerXmlSunat(idComprobante, config = true) {
+  const url = `/api/sunat/xml/${idComprobante}`;
+
+  if (!config) {
+    return `${import.meta.env.VITE_APP_BACK_END}${url}`;
+  }
+
   return {
     method: 'GET',
-    url: `/api/sunat/xml/${idComprobante}`,
-  }
+    url,
+  };
 }
 
 export async function dashboardSunat(params, signal) {

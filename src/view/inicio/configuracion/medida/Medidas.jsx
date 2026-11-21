@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  spinnerLoading,
   isEmpty,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -20,6 +19,7 @@ import Column from '../../../../components/Column';
 import Button from '../../../../components/Button';
 import Search from '../../../../components/Search';
 import { alertKit } from 'alert-kit';
+import { SpinnerLoading } from '@/components/Spinner';
 
 /**
  * Componente que representa una funcionalidad específica.
@@ -226,7 +226,7 @@ class Medidas extends CustomComponent {
       return (
         <tr>
           <td className="text-center" colSpan={7}>
-            {spinnerLoading('Cargando información de la tabla...', true)}
+            {SpinnerLoading('Cargando información de la tabla...', true)}
           </td>
         </tr>
       );

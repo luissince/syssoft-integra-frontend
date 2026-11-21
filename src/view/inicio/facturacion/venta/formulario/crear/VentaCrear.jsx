@@ -3,7 +3,6 @@ import {
   convertNullText,
   formatDecimal,
   isEmpty,
-  isNumeric,
   text,
 } from '../../../../../../helper/utils.helper';
 import { connect } from 'react-redux';
@@ -14,7 +13,6 @@ import {
   comboImpuesto,
   comboMoneda,
   filtrarPersona,
-  obtenerListaPrecioProducto,
   comboTipoDocumento,
   comboAlmacen,
   forSaleCotizacion,
@@ -22,7 +20,7 @@ import {
   createVenta,
   documentsPdfInvoicesVenta,
   forSalePedido,
-  filtrarProductoVenta,
+  filtrarProductoVenta
 } from '../../../../../../network/rest/principal.network';
 import SuccessReponse from '../../../../../../model/class/response';
 import ErrorResponse from '../../../../../../model/class/error-response';
@@ -102,6 +100,7 @@ class VentaCrear extends CustomComponent {
       // Atributos libres
       nombreComporbante: '',
       codiso: '',
+      productoSeleccionado: null,
 
       // Atributos del modal impresión
       isOpenImpresion: false,
@@ -139,9 +138,6 @@ class VentaCrear extends CustomComponent {
       numeroCelular: '',
       direccion: '',
       cacheCliente: null,
-
-      // Atributos del modal producto
-      loadingProducto: true,
 
       // Atributos del modal de impresión en mobil
       isOpenModalPrinter: false,
@@ -188,14 +184,6 @@ class VentaCrear extends CustomComponent {
     this.refAlmacen = React.createRef();
     this.refObservacion = React.createRef();
     this.refNota = React.createRef();
-
-    // Atributos para el modal producto
-    this.idSidebarProducto = 'idSidebarProducto';
-    this.producto = null;
-    this.refPrecioProducto = React.createRef();
-    this.refBonificacionProducto = React.createRef();
-    this.refDescripcionProducto = React.createRef();
-    this.listPrecioProducto = [];
 
     // Atributos para el modal cliente
     this.idSidebarCliente = 'idSidebarCliente';
@@ -423,27 +411,6 @@ class VentaCrear extends CustomComponent {
 
     if (response instanceof SuccessReponse) {
       return response.data.result;
-    }
-
-    if (response instanceof ErrorResponse) {
-      if (response.getType() === CANCELED) return;
-
-      return [];
-    }
-  }
-
-  async fetchObtenerListaPrecio(id) {
-    const params = {
-      idProducto: id,
-    };
-
-    const response = await obtenerListaPrecioProducto(
-      params,
-      this.abortControllerView.signal,
-    );
-
-    if (response instanceof SuccessReponse) {
-      return response.data;
     }
 
     if (response instanceof ErrorResponse) {
@@ -1570,19 +1537,6 @@ class VentaCrear extends CustomComponent {
     }
   };
 
-  handleEditProducto = async (producto) => {
-    const invoice = document.getElementById(this.idSidebarProducto);
-
-    invoice.classList.add('toggled');
-    const lista = await this.fetchObtenerListaPrecio(producto.idProducto);
-    this.producto = producto;
-    this.refPrecioProducto.current.value = producto.precio;
-    this.refBonificacionProducto.current.value = 0;
-    this.refDescripcionProducto.current.value = producto.nombreProducto;
-    this.listPrecioProducto = lista;
-    this.setState({ loadingProducto: false });
-  };
-
   handleRemoveProducto = (producto) => {
     const detalles = structuredClone(this.state.detalleVenta);
     const newDetalles = detalles.filter(
@@ -1591,81 +1545,51 @@ class VentaCrear extends CustomComponent {
     this.setState({ detalleVenta: newDetalles }, () => this.updateReduxState());
   };
 
-  handleCloseProducto = () => {
-    const invoice = document.getElementById(this.idSidebarProducto);
+  //------------------------------------------------------------------------------------------
+  // Sidebar producto
+  //------------------------------------------------------------------------------------------
 
-    if (this.state.loadingProducto) return;
-
-    invoice.classList.remove('toggled');
-    this.producto = null;
-    this.listPrecioProducto = [];
-    this.setState({ loadingProducto: true });
+  handleOpenSidebarProducto = async (producto) => {
+    this.setState({ productoSeleccionado: producto });
   };
 
-  handleSaveProducto = (event) => {
+  handleCloseSidebarProducto = () => {
+    this.setState({ productoSeleccionado: null });
+  };
+
+  handleSaveSidebarProducto = (event, data) => {
     event.stopPropagation();
 
-    const precioProducto = this.refPrecioProducto.current.value;
-    const descripcionProducto = this.refDescripcionProducto.current.value;
-    const productoActual = this.producto;
+    const newDetalles = this.state.detalleVenta.map((item) => {
+      if (item.idProducto !== data.producto.idProducto) {
+        return item;
+      }
 
-    if (!isNumeric(precioProducto) || Number(precioProducto) <= 0) {
-      alertKit.warning({
-        title: 'Venta',
-        message:
-          'El precio del producto tiene un valor no admitido o es menor o igual a 0.',
-        primaryButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-      }, () => {
-        this.refPrecioProducto.current.focus();
-      });
-      return;
-    }
+      const nuevoItem = {
+        ...item,
+        nombreProducto: data.descripcion,
+        precio: Number(data.precio),
+      };
 
-    if (isEmpty(descripcionProducto)) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'La descripción del producto no puede ser vacía.',
-        primaryButton: {
-          html: "<i class='fa fa-check'></i> Aceptar",
-        },
-      }, () => {
-        this.refDescripcionProducto.current.focus();
-      });
-      return;
-    }
+      // Si seleccionó una presentación, actualizamos sus inventarios.
+      if (data.presentacion) {
+        const cantidad =
+          Number(data.presentacion.cantidad) *
+          Number(data.presentacion.factor);
 
-    const producto = this.state.detalleVenta.find(
-      (item) => item.idProducto === productoActual.idProducto,
-    );
+        nuevoItem.inventarios = item.inventarios.map((inventario) => ({
+          ...inventario,
+          cantidad,
+        }));
+      }
 
-    if (
-      producto.precio !== Number(precioProducto) &&
-      producto.idTipoTratamientoProducto === TIPO_TRATAMIENTO_PRODUCTO_VALOR_MONETARIO
-    ) {
-      alertKit.warning({
-        title: 'Venta',
-        message: 'Los productos a granel no se puede cambia el precio.',
-      });
-      return;
-    }
+      return nuevoItem;
+    });
 
-    const detalles = structuredClone(this.state.detalleVenta);
-
-    const newDetalles = detalles.map((item) =>
-      item.idProducto === productoActual.idProducto
-        ? {
-          ...item,
-          nombreProducto: descripcionProducto,
-          precio: Number(precioProducto),
-        }
-        : item,
-    );
-
-    this.setState({ detalleVenta: newDetalles }, () => this.updateReduxState());
-
-    this.handleCloseProducto();
+    this.setState({ detalleVenta: newDetalles }, () => {
+      this.updateReduxState();
+      this.handleCloseSidebarProducto();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -1673,16 +1597,13 @@ class VentaCrear extends CustomComponent {
   //------------------------------------------------------------------------------------------
 
   handleClearInputCliente = () => {
-    this.setState(
-      {
-        clientes: [],
-        cliente: null,
-        nuevoCliente: null,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+    this.setState({
+      clientes: [],
+      cliente: null,
+      nuevoCliente: null,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   handleFilterCliente = async (text) => {
@@ -1711,15 +1632,13 @@ class VentaCrear extends CustomComponent {
     this.refCliente.current.initialize(
       value.documento + ' - ' + value.informacion,
     );
-    this.setState(
-      {
-        clientes: [],
-        cliente: value,
-      },
-      () => {
-        this.updateReduxState();
-      },
-    );
+
+    this.setState({
+      clientes: [],
+      cliente: value,
+    }, () => {
+      this.updateReduxState();
+    });
   };
 
   //------------------------------------------------------------------------------------------
@@ -2081,7 +2000,7 @@ class VentaCrear extends CustomComponent {
           impuestos={this.state.impuestos}
           handleMinusProducto={this.handleMinusProducto}
           handlePlusProducto={this.handlePlusProducto}
-          handleEditProducto={this.handleEditProducto}
+          handleEditProducto={this.handleOpenSidebarProducto}
           handleRemoveProducto={this.handleRemoveProducto}
           handleClearSale={this.handleClearSale}
           handleOpenSale={this.handleOpenSale}
@@ -2207,18 +2126,16 @@ class VentaCrear extends CustomComponent {
           handleClose={this.handleCloseCliente}
         />
 
-        <SidebarProducto
-          menus={this.props.token.userToken.menus}
-          idSidebar={this.idSidebarProducto}
-          loading={this.state.loadingProducto}
-          producto={this.producto}
-          refPrecio={this.refPrecioProducto}
-          refBonificacion={this.refBonificacionProducto}
-          refDescripcion={this.refDescripcionProducto}
-          listPrecio={this.listPrecioProducto}
-          handleSave={this.handleSaveProducto}
-          handleClose={this.handleCloseProducto}
-        />
+        {this.state.productoSeleccionado && (
+          <SidebarProducto
+            menus={this.props.token.userToken.menus}
+            producto={this.state.productoSeleccionado}
+            detalleVenta={this.state.detalleVenta}
+
+            handleSave={this.handleSaveSidebarProducto}
+            handleClose={this.handleCloseSidebarProducto}
+          />
+        )}
 
         <ModalAgregar
           ref={this.refModalAgregar}

@@ -8,6 +8,7 @@ import { removeJob } from '@/redux/printer.slice';
 import {
   removeWhatsAppMessage,
 } from '@/redux/whatsapp.slice';
+import { removeJob as removeEmailJob } from '@/redux/email.slice';
 import { cn } from '@/lib/utils';
 
 class FileDownloader extends React.Component {
@@ -27,15 +28,18 @@ class FileDownloader extends React.Component {
       download: currentDownload,
       printer: currentPrinter,
       whatsapp: currentWhatsApp,
+      email: currentEmail
     } = this.props;
 
     const currentDownloads = currentDownload.downloads || [];
     const currentJobs = currentPrinter.jobs || [];
     const currentMessages = currentWhatsApp.messages || [];
+    const currentEmails = currentEmail.jobs || [];
 
     const previousDownloads = prevProps.download.downloads || [];
     const previousJobs = prevProps.printer.jobs || [];
     const previousMessages = prevProps.whatsapp.messages || [];
+    const previousEmails = prevProps.email.jobs || [];
 
     // Detectar nuevos downloads o jobs
     const newDownloads = currentDownloads.filter(
@@ -50,11 +54,16 @@ class FileDownloader extends React.Component {
       (m) => !previousMessages.some((p) => p.id === m.id),
     );
 
+    const newEmails = currentEmails.filter(
+      (e) => !previousEmails.some((p) => p.id === e.id),
+    );
+
     // Si hay nuevos, mostrar el downloader
     if (
       newDownloads.length > 0 ||
       newJobs.length > 0 ||
-      newMessages.length > 0
+      newMessages.length > 0 ||
+      newEmails.length > 0
     ) {
       this.showDownloader();
     }
@@ -72,11 +81,12 @@ class FileDownloader extends React.Component {
   };
 
   hideDownloader = () => {
-    const { download, printer, whatsapp } = this.props;
+    const { download, printer, whatsapp, email } = this.props;
 
     const currentDownloads = download.downloads || [];
     const currentJobs = printer.jobs || [];
     const currentMessages = whatsapp.messages || [];
+    const currentEmails = email.jobs || [];
 
     // Verificar si todos los procesos terminaron
     const allDownloadsFinished =
@@ -98,11 +108,17 @@ class FileDownloader extends React.Component {
           message.status === 'success' || message.status === 'error',
       );
 
+    const allEmailsFinished =
+      currentEmails.length === 0 ||
+      currentEmails.every(
+        (item) => item.status === 'success' || item.status === 'error',
+      );
+
     const downloadElement = this.refDownload.current;
     if (!downloadElement) return;
 
     // Si ya no hay procesos activos
-    if (allDownloadsFinished && allJobsFinished && allMessagesFinished) {
+    if (allDownloadsFinished && allJobsFinished && allMessagesFinished && allEmailsFinished) {
       const handleAnimationEnd = () => {
         downloadElement.removeEventListener('animationend', handleAnimationEnd);
         downloadElement.style.display = 'none';
@@ -122,6 +138,11 @@ class FileDownloader extends React.Component {
         for (const message of currentMessages) {
           if (message.status === 'success' || message.status === 'error') {
             this.props.removeWhatsAppMessage(message.id);
+          }
+        }
+        for (const item of currentEmails) {
+          if (item.status === 'success' || item.status === 'error') {
+            this.props.removeEmailJob({ id: item.id });
           }
         }
       };
@@ -166,11 +187,12 @@ class FileDownloader extends React.Component {
   };
 
   render() {
-    const { download, printer, whatsapp } = this.props;
+    const { download, printer, whatsapp, email } = this.props;
 
     const downloads = download.downloads || [];
     const jobs = printer.jobs || [];
     const messages = whatsapp.messages || [];
+    const emails = email.jobs || [];
 
     if (!this.state.visible) return null;
 
@@ -179,13 +201,16 @@ class FileDownloader extends React.Component {
     const sortedMessages = [...messages].sort(
       (a, b) => b.timestamp - a.timestamp,
     );
+    const sortedEmails = [...emails].sort(
+      (a, b) => b.timestamp - a.timestamp,
+    );
 
     return (
       <div
         ref={this.refDownload}
         className={cn(
           "downloader bottom-[60px] md:bottom-0",
-          downloads.length === 0 && jobs.length === 0 && messages.length === 0 && 'hidden'
+          downloads.length === 0 && jobs.length === 0 && messages.length === 0 && emails.length === 0 && 'hidden'
         )}
       >
         <div className="card">
@@ -341,6 +366,47 @@ class FileDownloader extends React.Component {
                   </div>
                 </li>
               ))}
+
+              {/* CORREOS ELECTRÓNICOS */}
+              {sortedEmails.map((item) => (
+                <li
+                  className="list-group-item"
+                  key={`email-${item.id}`}
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="font-weight-bold text-truncate">
+                      <i className="fa fa-envelope-o mr-2" />
+                      Enviando correo a {item.to}
+                    </div>
+
+                    <div>
+                      {item.status === 'queued' && (
+                        <span className="text-muted">En cola...</span>
+                      )}
+
+                      {item.status === 'sending' && (
+                        <span className="text-info">Enviando...</span>
+                      )}
+
+                      {item.status === 'success' && (
+                        <span className="text-success">
+                          Enviado <i className="fa fa-check-circle-o" />
+                        </span>
+                      )}
+
+                      {item.status === 'error' && (
+                        <span className="text-danger">
+                          Error <i className="fa fa-times-circle-o" />
+                        </span>
+                      )}
+                    </div>
+
+                    {item.status === 'error' && item.message && (
+                      <small className="text-danger">{item.message}</small>
+                    )}
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -359,21 +425,27 @@ FileDownloader.propTypes = {
   whatsapp: PropTypes.shape({
     messages: PropTypes.array,
   }),
+  email: PropTypes.shape({
+    jobs: PropTypes.array,
+  }),
   removeDownload: PropTypes.func,
   removeJob: PropTypes.func,
   removeWhatsAppMessage: PropTypes.func,
+  removeEmailJob: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
   download: state.download,
   printer: state.printer,
   whatsapp: state.whatsapp,
+  email: state.email,
 });
 
 const mapDispatchToProps = {
   removeDownload,
   removeJob,
   removeWhatsAppMessage,
+  removeEmailJob,
 };
 
 const ConnectedFileDownloader = connect(

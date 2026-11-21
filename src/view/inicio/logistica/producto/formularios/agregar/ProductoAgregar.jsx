@@ -67,6 +67,7 @@ class ProductoAgregar extends CustomComponent {
       descripcionLarga: "",
 
       precios: [],
+      presentaciones: [],
       detalles: [],
       imagenes: [],
 
@@ -102,6 +103,7 @@ class ProductoAgregar extends CustomComponent {
     this.refCosto = React.createRef();
     this.refPrecio = React.createRef();
     this.refPrecios = React.createRef();
+    this.refPresentaciones = React.createRef();
     this.refDescripcionCorta = React.createRef();
     this.refDescripcionLarga = React.createRef();
     this.refDetalles = React.createRef();
@@ -368,6 +370,44 @@ class ProductoAgregar extends CustomComponent {
     this.setState({ precios });
   };
 
+  handleAddPresentacion = () => {
+    const data = {
+      id: this.state.presentaciones.length + 1,
+      nombre: '',
+      cantidad: '1',
+      factor: '',
+    };
+
+    this.setState((prevState) => ({
+      presentaciones: [...prevState.presentaciones, data],
+    }));
+  };
+
+  handleChangePresentacion = (event, id, campo) => {
+    const { value } = event.target;
+
+    this.setState((prevState) => ({
+      presentaciones: prevState.presentaciones.map((item) =>
+        item.id === id
+          ? {
+            ...item,
+            [campo]: value
+          }
+          : item
+      ),
+    }));
+  };
+
+  handleRemovePresentacion = (id) => {
+    const presentaciones = this.state.presentaciones
+      .filter((item) => item.id !== id)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1,
+      }));
+    this.setState({ presentaciones });
+  };
+
   handleInputDescripcionCorta = (event) => {
     this.setState({
       descripcionCorta: event.target.value,
@@ -547,6 +587,7 @@ class ProductoAgregar extends CustomComponent {
       precio,
       costo,
       precios,
+      presentaciones,
       descripcionCorta,
       descripcionLarga,
       detalles,
@@ -595,33 +636,50 @@ class ProductoAgregar extends CustomComponent {
         ref: this.refPrecio
       },
       {
-        value: parseFloat(this.state.precio) <= parseFloat(this.state.costo),
+        value: parseFloat(precio) <= parseFloat(costo),
         message: 'El costo no debe ser mayor o igual al precio.',
         ref: this.refCosto
       },
+
       {
-        value: this.state.precios.filter((item) => isEmpty(item.nombre)).length !== 0,
+        value: precios.filter((item) => isEmpty(item.nombre)).length !== 0,
         message: 'Hay precios sin nombre..',
         callback: () => {
           validateNumericInputs(this.refPrecios, 'string');
         }
       },
       {
-        value: this.state.precios.filter((item) => !isNumeric(item.precio)).length !== 0,
+        value: precios.filter((item) => !isNumeric(item.precio)).length !== 0,
         message: 'Hay precios sin valor.',
         callback: () => {
           validateNumericInputs(this.refPrecios);
         }
       },
+
       {
-        value: this.state.detalles.filter((item) => isEmpty(item.nombre)).length !== 0,
+        value: presentaciones.filter((item) => isEmpty(item.nombre)).length !== 0,
+        message: 'Hay presentaciones sin nombre.',
+        callback: () => {
+          validateNumericInputs(this.refPresentaciones, 'string');
+        }
+      },
+      {
+        value: presentaciones.filter((item) => !isNumeric(item.factor)).length !== 0,
+        message: 'Hay presentaciones sin factor.',
+        callback: () => {
+          validateNumericInputs(this.refPresentaciones);
+        }
+      },
+
+      {
+        value: detalles.filter((item) => isEmpty(item.nombre)).length !== 0,
         message: 'Hay detalle sin nombre..',
         callback: () => {
           validateNumericInputs(this.refDetalles, 'string');
         }
       },
       {
-        value: this.state.detalles.filter((item) => isEmpty(item.valor)).length !== 0,
+        value: detalles.filter((item) => isEmpty(item.valor)).length !== 0,
         message: 'Hay detalle sin valor.',
         callback: () => {
           validateNumericInputs(this.refDetalles);
@@ -661,6 +719,7 @@ class ProductoAgregar extends CustomComponent {
         preferido: preferido,
         estado: estado,
 
+        presentaciones: presentaciones,
         detalles: detalles,
         imagenes: imagenes,
 
@@ -737,6 +796,7 @@ class ProductoAgregar extends CustomComponent {
       imagenes,
 
       precios,
+      presentaciones,
       medidas,
       categorias,
       marcas,
@@ -822,6 +882,12 @@ class ProductoAgregar extends CustomComponent {
             handleRemovePrecios={this.handleRemovePrecios}
             handleInputNombrePrecios={this.handleInputNombrePrecios}
             handleInputPrecioPrecios={this.handleInputPrecioPrecios}
+
+            refPresentacion={this.refPresentaciones}
+            presentaciones={presentaciones}
+            handleAddPresentacion={this.handleAddPresentacion}
+            handleChangePresentacion={this.handleChangePresentacion}
+            handleRemovePresentacion={this.handleRemovePresentacion}
 
             refDescripcionCorta={this.refDescripcionCorta}
             descripcionCorta={descripcionCorta}

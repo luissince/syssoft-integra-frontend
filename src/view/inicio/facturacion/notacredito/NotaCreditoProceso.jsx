@@ -1,7 +1,6 @@
 import React from 'react';
 // import axios from 'axios';
 import {
-  spinnerLoading,
   formatCurrency,
   currentDate,
   calculateTaxBruto,
@@ -16,6 +15,7 @@ import {
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
 import Select from '../../../../components/Select';
+import { SpinnerLoading } from '@/components/Spinner';
 
 class NotaCreditoProceso extends React.Component {
   constructor(props) {
@@ -270,7 +270,7 @@ class NotaCreditoProceso extends React.Component {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        {this.state.loading && SpinnerLoading(this.state.msgLoading)}
 
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">

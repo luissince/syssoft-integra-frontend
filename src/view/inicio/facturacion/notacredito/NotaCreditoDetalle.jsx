@@ -6,10 +6,10 @@ import {
   calculateTaxBruto,
   calculateTax,
   formatTime,
-  spinnerLoading,
 } from '../../../../helper/utils.helper';
 import { connect } from 'react-redux';
 import ContainerWrapper from '../../../../components/Container';
+import { SpinnerLoading } from '@/components/Spinner';
 
 class NotaCreditoDetalle extends React.Component {
   constructor(props) {
@@ -148,7 +148,7 @@ class NotaCreditoDetalle extends React.Component {
   render() {
     return (
       <ContainerWrapper>
-        {this.state.loading && spinnerLoading(this.state.msgLoading)}
+        {this.state.loading && SpinnerLoading(this.state.msgLoading)}
 
         <div className="row">
           <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">

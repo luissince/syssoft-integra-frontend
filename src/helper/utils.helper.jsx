@@ -684,12 +684,14 @@ export function getRowCellIndex(event) {
   const target = event.target;
   const cell = target.closest('td, th');
   if (!cell) {
-    return -1;
+    return null;
   }
 
   const row = cell.parentElement;
   const tBody = row.closest('tbody');
-  if (!tBody) return -1;
+  if (!tBody) {
+    return null;
+  };
 
   const rowIndex = Array.prototype.indexOf.call(tBody.children, row);
   const cellIndex = Array.prototype.indexOf.call(row.children, cell);
@@ -792,38 +794,6 @@ export function clearModal(id, callback = function () { }) {
 
 export function getInstanceModal(id) {
   return bootstrap.Modal.getInstance(document.getElementById(id));
-}
-
-export function spinnerLoading(message = 'Cargando datos...', table = false) {
-  if (!table) {
-    return (
-      <div className="clearfix absolute-all bg-white">
-        <div className="d-flex flex-column justify-content-center align-items-center h-100">
-          <div>
-            <div className="spinner-grow text-danger" role="status"></div>
-            <div className="spinner-grow text-warning" role="status"></div>
-            <div className="spinner-grow text-info" role="status"></div>
-          </div>
-          <div>
-            <strong>{message}</strong>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="d-flex flex-column justify-content-center align-items-center h-100">
-      <div>
-        <div className="spinner-grow text-danger" role="status"></div>
-        <div className="spinner-grow text-warning" role="status"></div>
-        <div className="spinner-grow text-info" role="status"></div>
-      </div>
-      <div>
-        <strong>{message}</strong>
-      </div>
-    </div>
-  );
 }
 
 /**
