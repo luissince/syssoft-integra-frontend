@@ -36,7 +36,6 @@ import Input from './Input';
 import SearchInput from './SearchInput';
 import { alertKit } from 'alert-kit';
 import { JURIDICA } from '@/model/types/tipo-entidad';
-import { Capacitor } from '@capacitor/core';
 import { BsWhatsapp } from 'react-icons/bs';
 import TextArea from './TextArea';
 
@@ -104,41 +103,29 @@ const ModalImpresion = ({
           </Button>
         </div>
         <div className="d-flex justify-content-center align-items-center flex-wrap gap-2-5 mt-3">
-          {
-            Capacitor.isNativePlatform() ? (
-              <Button
-                className="btn-outline-secondary"
-                onClick={handlePrinterMobile}>
-                <i className="fa fa-print"></i> Imprimir
-              </Button>
-            ) : (
-              <>
-                {handlePrinterA4 && (
-                  <Button
-                    className="btn-outline-secondary"
-                    onClick={handlePrinterA4}>
-                    <i className="fa fa-print"></i> A4
-                  </Button>
-                )}{' '}
-                {handlePrinter80MM && (
-                  <Button
-                    className="btn-outline-secondary"
-                    onClick={handlePrinter80MM}
-                  >
-                    <i className="fa fa-print"></i> 80MM
-                  </Button>
-                )}{' '}
-                {handlePrinter58MM && (
-                  <Button
-                    className="btn-outline-secondary"
-                    onClick={handlePrinter58MM}
-                  >
-                    <i className="fa fa-print"></i> 58MM
-                  </Button>
-                )}
-              </>
-            )
-          }
+          {handlePrinterA4 && (
+            <Button
+              className="btn-outline-secondary"
+              onClick={handlePrinterA4}>
+              <i className="fa fa-print"></i> A4
+            </Button>
+          )}{' '}
+          {handlePrinter80MM && (
+            <Button
+              className="btn-outline-secondary"
+              onClick={handlePrinter80MM}
+            >
+              <i className="fa fa-print"></i> 80MM
+            </Button>
+          )}{' '}
+          {handlePrinter58MM && (
+            <Button
+              className="btn-outline-secondary"
+              onClick={handlePrinter58MM}
+            >
+              <i className="fa fa-print"></i> 58MM
+            </Button>
+          )}
         </div>
       </CustomModalContentBody>
     </CustomModal>

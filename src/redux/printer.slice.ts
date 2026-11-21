@@ -1,19 +1,21 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import PrinterPlugin, { PrinterConfig } from '@/model/ts/plugins/printer-escpos';
+import { PrinterConfig } from '@/model/ts/plugins/printer-escpos';
 
 
 export const printAsync = createAsyncThunk('printer/print', async (printerConfig: PrinterConfig, { dispatch, rejectWithValue }) => {
-  try {
-    const result = await PrinterPlugin.printTicket(printerConfig);
+  // try {
+  //   const result = await PrinterPlugin.printTicket(printerConfig);
 
-    if (!result.success) {
-      return rejectWithValue({ id: result.id, success: false, message: result.message ?? "Error desconocido" });
-    }
+  //   if (!result.success) {
+  //     return rejectWithValue({ id: result.id, success: false, message: result.message ?? "Error desconocido" });
+  //   }
 
-    return { id: result.id, success: true, message: result.message };
-  } catch (err) {
-    return rejectWithValue({ id: printerConfig.id, success: false, message: (err as Error).message });
-  }
+  //   return { id: result.id, success: true, message: result.message };
+  // } catch (err) {
+  //   return rejectWithValue({ id: printerConfig.id, success: false, message: (err as Error).message });
+  // }
+
+  return { id: 0, message: "" };
 });
 
 const printerSlice = createSlice({
