@@ -4,7 +4,7 @@ import CustomModal, {
     CustomModalContentFooter,
     CustomModalContentHeader
 } from "@/components/CustomModal";
-import PrinterPlugin, { BluetoothDevice, Size, UsbDevice } from "@/model/ts/plugins/printer-escpos";
+import { BluetoothDevice, Size, UsbDevice } from "@/model/ts/plugins/printer-escpos";
 import { documentsPdfInvoicesVenta } from "@/network/rest/principal.network";
 import { alertKit } from "alert-kit";
 import { addJob, printAsync } from "@/redux/printer.slice";
@@ -42,9 +42,9 @@ const ModalPrinter: React.FC<Props> = ({ isOpen, handleClose, idVenta }) => {
         try {
             alertKit.loading({ title: "Cargando impresoras..." });
 
-            const result = await PrinterPlugin.listPrinters();
-            setBluetooth(result.bluetooth.devices ?? []);
-            setUsb(result.usb.devices ?? []);
+            // const result = await PrinterPlugin.listPrinters();
+            // setBluetooth(result.bluetooth.devices ?? []);
+            // setUsb(result.usb.devices ?? []);
 
             alertKit.close();
         } catch (error) {
@@ -77,28 +77,28 @@ const ModalPrinter: React.FC<Props> = ({ isOpen, handleClose, idVenta }) => {
         device: BluetoothDevice | UsbDevice
     ) => {
         try {
-            const resultPermission = type === "BLUETOOTH"
-                ? await PrinterPlugin.requestBluetoothPermission()
-                : await PrinterPlugin.requestUsbPermission({
-                    vendorId: (device as UsbDevice).vendorId,
-                    productId: (device as UsbDevice).productId,
-                });
+            // const resultPermission = type === "BLUETOOTH"
+            //     ? await PrinterPlugin.requestBluetoothPermission()
+            //     : await PrinterPlugin.requestUsbPermission({
+            //         vendorId: (device as UsbDevice).vendorId,
+            //         productId: (device as UsbDevice).productId,
+            //     });
 
-            if (!resultPermission.success) {
-                return alertKit.warning({
-                    title: "Impresión",
-                    message: resultPermission.message,
-                });
-            }
+            // if (!resultPermission.success) {
+            //     return alertKit.warning({
+            //         title: "Impresión",
+            //         message: resultPermission.message,
+            //     });
+            // }
 
-            // Guardamos impresora seleccionada
-            setSelectedPrinter({
-                type,
-                address: type === "BLUETOOTH" ? (device as BluetoothDevice).address : "",
-                vendorId: type === "USB" ? (device as UsbDevice).vendorId : undefined,
-                productId: type === "USB" ? (device as UsbDevice).productId : undefined,
-                name: device.name || (device as UsbDevice).productName,
-            });
+            // // Guardamos impresora seleccionada
+            // setSelectedPrinter({
+            //     type,
+            //     address: type === "BLUETOOTH" ? (device as BluetoothDevice).address : "",
+            //     vendorId: type === "USB" ? (device as UsbDevice).vendorId : undefined,
+            //     productId: type === "USB" ? (device as UsbDevice).productId : undefined,
+            //     name: device.name || (device as UsbDevice).productName,
+            // });
         } catch (error) {
             alertKit.warning({
                 title: "Impresión",

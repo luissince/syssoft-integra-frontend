@@ -1,6 +1,6 @@
 # Dockerfile
 # Imagen base para compilar el proyecto
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # Imagen final para producción
-FROM node:18-alpine AS production 
+FROM node:20-alpine AS production 
 
 WORKDIR /app
 

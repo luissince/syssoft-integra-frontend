@@ -28,7 +28,6 @@ import { ModalPago, ModalSendWhatsApp } from '../../../../../components/MultiMod
 import Image from '../../../../../components/Image';
 import { images } from '../../../../../helper';
 import { alertKit } from 'alert-kit';
-import { Capacitor } from '@capacitor/core';
 import pdfVisualizer from 'pdf-visualizer';
 import ModalPrinter from './component/ModalPrinter';
 import { cn } from '@/lib/utils';
@@ -765,48 +764,35 @@ class VentaDetalle extends CustomComponent {
 
         {/* Acciones */}
         <div className="mb-6 flex flex-wrap gap-3">
-          {
-            Capacitor.isNativePlatform() ? (
-              <button
-                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
-                onClick={this.handleOpenModalPrinter}
-              >
-                <i className="fa fa-print"></i> Imprimir
-              </button>
-            ) : (
-              <>
-                <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
-                  onClick={this.handlePrintInvoices.bind(this, 'A4')}
-                >
-                  <i className="fa fa-print"></i> A4
-                </button>
-                <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
-                  onClick={this.handlePrintInvoices.bind(this, '80mm')}
-                >
-                  <i className="fa fa-print"></i> 80MM
-                </button>
-                <button
-                  className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
-                  onClick={this.handlePrintInvoices.bind(this, '58mm')}
-                >
-                  <i className="fa fa-print"></i> 58MM
-                </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, 'A4')}
+          >
+            <i className="fa fa-print"></i> A4
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '80mm')}
+          >
+            <i className="fa fa-print"></i> 80MM
+          </button>
+          <button
+            className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-500 flex items-center gap-2"
+            onClick={this.handlePrintInvoices.bind(this, '58mm')}
+          >
+            <i className="fa fa-print"></i> 58MM
+          </button>
 
-                {
-                  cabecera && (
-                    cabecera.idFormaPago === FORMA_PAGO_CREDITO && (
-                      <button
-                        className="px-4 py-2 bg-red-600 border border-red-300 text-sm font-medium rounded-lg text-white hover:bg-red-500 flex items-center gap-2"
-                        onClick={() => this.handleOpenModalPago()}
-                      >
-                        <Plus className="w-5 h-5" /> Agregar pago
-                      </button>
-                    )
-                  )
-                }
-              </>
+          {
+            cabecera && (
+              cabecera.idFormaPago === FORMA_PAGO_CREDITO && (
+                <button
+                  className="px-4 py-2 bg-red-600 border border-red-300 text-sm font-medium rounded-lg text-white hover:bg-red-500 flex items-center gap-2"
+                  onClick={() => this.handleOpenModalPago()}
+                >
+                  <Plus className="w-5 h-5" /> Agregar pago
+                </button>
+              )
             )
           }
 

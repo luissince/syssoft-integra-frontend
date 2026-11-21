@@ -1,5 +1,5 @@
 // src/model/ts/plugins/printer-escpos.ts
-import { registerPlugin } from '@capacitor/core';
+// import { registerPlugin } from '@capacitor/core';
 
 export enum Size {
   A4 = "A4",
@@ -70,6 +70,6 @@ export interface PrinterPlugin {
   ): Promise<void>;
 }
 
-const PrinterPlugin = registerPlugin<PrinterPlugin>('PrinterPlugin');
+// const PrinterPlugin = registerPlugin<PrinterPlugin>('PrinterPlugin');
 
-export default PrinterPlugin;
+// export default PrinterPlugin;

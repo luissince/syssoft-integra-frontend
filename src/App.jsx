@@ -7,55 +7,9 @@ import Inicio from './view/inicio/Inicio';
 import NotFoundInitial from './components/errors/NotFoundInitial';
 import { connect } from 'react-redux';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { useEffect } from 'react';
-import { Capacitor } from '@capacitor/core';
-import PrinterPlugin from './model/ts/plugins/printer-escpos';
-import { toastKit, ToastStyle } from 'toast-kit';
 
 const App = (props) => {
   const { token: { isLoading, isConfig } } = props;
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      StatusBar.setBackgroundColor({ color: '#ffffff' });
-      StatusBar.setStyle({ style: Style.Light });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listener = PrinterPlugin.addListener('onPrintJobUpdate', (event) => {        
-        // Notificación rápida
-        if (event.status === 'printing') {
-          toastKit.info({
-            title: 'En proceso...',
-            message: event.message,
-            duration: 5000,
-            style: ToastStyle.light,
-          });
-        } else if (event.status === 'success') {
-          toastKit.success({
-            title: 'Excelente!',
-            message: event.message,
-            duration: 5000,
-            style: ToastStyle.light,
-          });
-        } else if (event.status === 'error') {
-          toastKit.warning({
-            title: 'Que mal!',
-            message: event.message,
-            duration: 5000,
-            style: ToastStyle.light,
-          });
-        }
-      });
-
-      return () => {
-        listener.then(l => l.remove());
-      };
-    }
-  }, []);
 
   if (isLoading) {
     return <Loader />;

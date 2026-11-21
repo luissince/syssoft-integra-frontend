@@ -43,7 +43,6 @@ import {
   VISUALIZAR_DETALLE,
 } from '../../../../../model/types/menu';
 import { alertKit } from 'alert-kit';
-import { Capacitor } from '@capacitor/core';
 import { cn } from '@/lib/utils';
 import { MOTIVO_TRASLADO } from '@/model/types/motivo-traslado';
 import { Check, ChevronDown, ChevronUp, Eye, Trash, Truck } from 'lucide-react';
@@ -455,11 +454,6 @@ class Ventas extends CustomComponent {
         title: 'Venta',
         message: 'No tiene privilegios para crear ventas',
       });
-      return;
-    }
-
-    if (Capacitor.isNativePlatform()) {
-      this.props.history.push(`${this.props.location.pathname}/crear`);
       return;
     }
 
